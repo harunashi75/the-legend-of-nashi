@@ -1,0 +1,148 @@
+// État d'une partie : l'objet game regroupe ce qui appartient au monde et aux héros.
+// Phase 2 de la conception du coopératif : l'état est un objet passé aux fonctions, plus des variables éparses.
+// game.hero est le héros de l'hôte. Les invités rejoindront game plus tard, chacun avec le même format de héros.
+// Métiers d'un héros neuf : pêche et cuisine au niveau 1, bourriche (poissons) et garde-manger (repas) vides.
+function canaanFreshProf() {
+  return { fishing: { level: 1, exp: 0 }, cooking: { level: 1, exp: 0 }, hunting: { level: 1, exp: 0 }, fish: {}, meat: {}, meals: {}, codex: {} };
+}
+const game = {
+  // solo, host (salon ouvert à des invités) ou guest (connecté au monde d'un hôte, sans simulation locale).
+  mode: 'solo',
+  hero: {
+    // Position, PV, mana, or : l'objet P de canaan-game-core y est rattaché à sa création.
+    player: null,
+    // Niveau du personnage (1 à 60) et expérience vers le niveau suivant (progression.js).
+    level: 1,
+    exp: 0,
+    // Inventaire et équipement de départ.
+    inventory: [
+      { id: 'sword1', name: 'Épée de recrue', slot: 'weapon', level: 1, rarity: 'Commun' },
+      { id: 'armor1', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }
+    ],
+    equipment: {
+      weapon: null,
+      armor: null,
+      helm: null,
+      boots: null,
+      shoulders: null,
+      gloves: null,
+      neck: null,
+      ring: null,
+      artifact: null
+    },
+    // Compteur de victimes.
+    kills: 0,
+    // Intention du joueur pour le prochain pas : direction voulue (-1 à 1), attaque de base maintenue
+    // ('quick', 'heavy' ou null) et point visé. L'interface la remplit (clavier, tactile, souris) ;
+    // un invité l'enverra par le réseau.
+    intent: { dx: 0, dy: 0, attack: null, skill: null, aimX: 0, aimY: 0 },
+    // Classe (Druide, Paladin, Assassin, Élémentaliste) et talents équipés (5 au plus, selon le niveau).
+    classe: { id: null, talents: [] },
+    // Quêtes et histoire (shared/rules/quests.js : sanitizeQuests).
+    quetes: { active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null },
+    // Rubis : nombre d'exemplaires possédés par identifiant et six emplacements.
+    rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
+    // Records de l'Arène des Épreuves.
+    arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
+    // Métiers : pêche et cuisine (niveaux, poissons, repas).
+    prof: canaanFreshProf()
+  },
+  // Monde de l'aventure : carte, entités simulées, coffres, boss de monde et instance en cours.
+  // Les particules et les textes flottants n'en font pas partie : ce sont des effets d'affichage.
+  world: {
+    // Grille de tuiles et décor affichés ; canaan-game-core crée l'océan initial, canaan-world-generation l'île.
+    tiles: [],
+    decor: [],
+    // Carte extérieure, gardée pendant une instance pour y revenir.
+    overworld: null,
+    overdecor: null,
+    monsters: [],
+    projectiles: [],
+    drops: [],
+    npcs: [],
+    // Coffres présents dans la zone courante, et coffres secrets déjà ouverts (sauvegardés).
+    chests: [],
+    openedChests: [],
+    // Fin de réapparition de chaque boss de monde (sauvegardé).
+    worldBossTimers: {},
+    // Donjon, raid ou Arène en cours (null dans le monde extérieur) et position de retour.
+    instance: null,
+    returnPos: null,
+    clock: 0
+  }
+};
+// Héros présents dans l'aventure : l'hôte d'abord, puis les invités présents (3 au plus).
+game.heroes = [game.hero];
+// Invités enregistrés dans l'aventure (présents ou non), par identifiant : 6 au plus (canaan-group).
+game.guests = {};
+// Crée un héros au format de game.hero : équipement vide, sac vide, aucun talent ni Rubis.
+// Ses PV maximum viennent de son équipement ; il n'est ajouté à game.heroes que par l'appelant.
+function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
+  const hero = {
+    name,
+    player: { x, y, vx: 0, vy: 0, hp: 1, mhp: 1, mp: CANAAN_BASE_MANA, mmp: CANAAN_BASE_MANA, gold: 0, face: 1, anim: 0, atk: 0, dead: false },
+    level: 1,
+    exp: 0,
+    inventory: [],
+    equipment: { weapon: null, weapon2: null, armor: null, helm: null, boots: null, shoulders: null, gloves: null, neck: null, ring: null, artifact: null, ...equipment },
+    // Niveau du sac d'un allié : 0 = 10 places, jusqu'à 9 = 100 places (comme l'hôte, mêmes prix).
+    bagLevel: 0,
+    kills: 0,
+    intent: { dx: 0, dy: 0, attack: null, skill: null, aimX: x, aimY: y },
+    classe: { id: null, talents: [] },
+    quetes: { active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null },
+    rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
+    arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
+    prof: canaanFreshProf()
+  };
+  hero.player.mhp = hero.player.hp = characterStats(hero).maxHp;
+  return hero;
+}
+// Capacité du sac d'un héros : celle de l'hôte suit ses agrandissements (BAG_LIMIT) ; un allié commence comme lui
+// à 10 places et s'agrandit de 10 par achat.
+function canaanBagLevel(hero) {
+  const level = Math.floor(Number(hero.bagLevel));
+  return Math.max(0, Math.min(9, Number.isFinite(level) ? level : 0));
+}
+function canaanBagLimit(hero) {
+  return hero === game.hero ? BAG_LIMIT : 10 + canaanBagLevel(hero) * 10;
+}
+// Message de butin : à l'écran pour l'hôte, dans le chat pour un allié.
+// Un invité en ligne reçoit aussi le message sur son écran (game.view.remote, branché par canaan-net).
+function canaanLootNotice(hero, message) {
+  if (hero === game.hero) return game.view.notify(message);
+  game.view.chat('Butin', hero.name + ' — ' + message);
+  if (hero.peer) game.view.remote?.(hero, message);
+}
+// Relais d'affichage : ce que la simulation veut montrer (messages, chat). Sans interface, rien n'est affiché
+// et la simulation n'accède jamais à l'écran ; canaan-game-core y branche ses fonctions d'affichage.
+game.view = { notify() {}, chat() {}, remote() {}, fx() {} };
+// Raccourcis transitoires : les anciens noms globaux lisent et remplacent les champs de game.
+// Ils disparaîtront quand plus aucun ancien script ni test ne les utilisera.
+const CANAAN_LEGACY_NAMES = Object.freeze({
+  inventory: ['hero', 'inventory'],
+  equipment: ['hero', 'equipment'],
+  kills: ['hero', 'kills'],
+  world: ['world', 'tiles'],
+  decor: ['world', 'decor'],
+  overworld: ['world', 'overworld'],
+  overdecor: ['world', 'overdecor'],
+  monsters: ['world', 'monsters'],
+  projectiles: ['world', 'projectiles'],
+  drops: ['world', 'drops'],
+  npcs: ['world', 'npcs'],
+  chests: ['world', 'chests'],
+  openedChests: ['world', 'openedChests'],
+  worldBossTimers: ['world', 'worldBossTimers'],
+  instanceState: ['world', 'instance'],
+  returnPos: ['world', 'returnPos'],
+  worldClock: ['world', 'clock']
+});
+for (const [name, [part, key]] of Object.entries(CANAAN_LEGACY_NAMES))
+  Object.defineProperty(globalThis, name, {
+    get: () => game[part][key],
+    set: value => {
+      game[part][key] = value;
+    },
+    configurable: true
+  });

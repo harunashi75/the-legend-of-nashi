@@ -1,0 +1,228 @@
+/* Métiers (touche P) : pêche, cuisine et repas. */
+#window .prof-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  width: min(820px, calc(100vw - 48px));
+  box-sizing: border-box;
+}
+#window .prof-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#window .prof-tabs button.on {
+  background: linear-gradient(180deg, #8a6420, #5a3e12);
+  border-color: #f6dc98;
+  color: #fff4d0;
+}
+#window .prof-panel h3 {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: #f6dc98;
+}
+#window .prof-level {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  color: #f6dc98;
+}
+#window .prof-level span {
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .prof-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(232, 184, 80, 0.4);
+  overflow: hidden;
+}
+#window .prof-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #4fa8d8, #8fe3ae);
+}
+#window .prof-qualities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+#window .prof-q {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.35;
+}
+#window .prof-q.on {
+  opacity: 1;
+}
+#window .prof-q small {
+  font-weight: 400;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .prof-help,
+#window .prof-empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .prof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+#window .prof-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 170, 90, 0.3);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .prof-item span {
+  font-weight: 600;
+}
+#window .prof-item small {
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .prof-item b {
+  color: #f6dc98;
+}
+#window .prof-recipes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+#window .prof-recipe {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 170, 90, 0.3);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .prof-recipe h4 {
+  margin: 0;
+  color: #f6dc98;
+}
+#window .prof-recipe p {
+  margin: 0;
+  font-size: 12px;
+  color: #e8d9b8;
+}
+#window .prof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+#window .prof-actions button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+#window .prof-active {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #8fe3ae;
+  background: rgba(30, 60, 40, 0.35);
+}
+#window .prof-active p {
+  margin: 0;
+  color: #d8f8e0;
+  font-size: 13px;
+}
+/* Repas en cours, sous le panneau du héros. */
+#foodBuff {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #b8f0c8;
+}
+/* Collection : poissons pêchés et gibier chassé. */
+#window .prof-codex {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 6px;
+}
+#window .prof-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 170, 90, 0.35);
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+  color: #f6dc98;
+  font: inherit;
+  cursor: pointer;
+}
+#window .prof-card.on {
+  border-color: #f6dc98;
+  box-shadow: 0 0 0 1px #f6dc98;
+}
+#window .prof-card.unknown {
+  cursor: default;
+  opacity: 0.75;
+}
+#window .prof-card b {
+  font-size: 13px;
+}
+#window .prof-card small {
+  font-size: 11px;
+  color: var(--rpg-muted, #b8a483);
+  line-height: 1.3;
+}
+#window .prof-ico {
+  display: block;
+  width: 66px;
+  height: 36px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+#window .prof-ico.dark {
+  filter: brightness(0) opacity(0.45);
+}
+#window .prof-ico.big {
+  width: 132px;
+  height: 72px;
+  flex: none;
+}
+#window .prof-codex-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f6dc98;
+  background: rgba(40, 28, 14, 0.6);
+}
+#window .prof-codex-detail > div {
+  flex: 1;
+  min-width: 200px;
+}
+#window .prof-codex-detail h4 {
+  margin: 0 0 4px;
+  color: #f6dc98;
+  font-size: 16px;
+}
+#window .prof-codex-detail p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e8d9b8;
+}
+#window .prof-codex-detail .prof-codex-stats {
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}

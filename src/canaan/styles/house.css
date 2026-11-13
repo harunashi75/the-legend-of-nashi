@@ -1,0 +1,96 @@
+/* Mode décoration de la maison (touche H) : barre du catalogue en bas de l'écran. */
+#housingBar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(920px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 2px solid var(--rpg-gold, #e8b850);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(42, 28, 18, 0.96), rgba(16, 10, 6, 0.97));
+  box-shadow: 0 0 0 2px #0c0805, 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: #e8d9b8;
+  font: 13px system-ui, sans-serif;
+}
+#housingBar .house-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+#housingBar .house-head b {
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-size: 15px;
+  color: #f6dc98;
+}
+#housingBar .house-head span,
+#housingBar .house-count {
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}
+#housingBar .house-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+#housingBar button {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(232, 184, 80, 0.45);
+  background: linear-gradient(180deg, #3a2a1c, #22170e);
+  color: #e8d9b8;
+  font: 600 12px system-ui, sans-serif;
+  cursor: pointer;
+}
+#housingBar button.on {
+  background: linear-gradient(180deg, #8a6420, #5a3e12);
+  border-color: #f6dc98;
+  color: #fff4d0;
+}
+#housingBar button.house-tool.on {
+  background: linear-gradient(180deg, #8a3a2a, #561e14);
+  border-color: #ffb39a;
+}
+#housingBar .house-items {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+#housingBar .house-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  width: 92px;
+  padding: 5px;
+}
+#housingBar .house-item img {
+  width: 64px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+#housingBar .house-item span {
+  font-size: 11px;
+  text-align: center;
+}
+#housingBar .house-items::-webkit-scrollbar {
+  height: 8px;
+}
+#housingBar .house-items::-webkit-scrollbar-track {
+  background: #120c08;
+  border-radius: 4px;
+}
+#housingBar .house-items::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6a4a28, #3e2a16);
+  border: 1px solid var(--rpg-gold-dark, #8a6420);
+  border-radius: 4px;
+}

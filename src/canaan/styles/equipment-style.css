@@ -1,0 +1,191 @@
+#gearHoverTooltip {
+  position: fixed;
+  z-index: 110;
+  display: none;
+  pointer-events: none;
+  width: min(355px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid #a38bd6;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #10192e, #16112b);
+  box-shadow: 0 12px 44px #000d;
+  color: #eee8fa;
+  font-size: 12px;
+}
+#gearHoverTooltip .tooltip-name {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+#gearHoverTooltip .tooltip-sub {
+  color: #b8b2d1;
+}
+#gearHoverTooltip .gear-compare {
+  margin-top: 7px;
+  padding-top: 9px;
+  border-top: 1px solid #504769;
+}
+#gearHoverTooltip .gear-compare-head {
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+#gearHoverTooltip .gear-compare-stat {
+  display: grid;
+  grid-template-columns: 1fr 85px 70px;
+  gap: 5px;
+  padding: 3px 0;
+  border-bottom: 1px solid #ffffff12;
+}
+#gearHoverTooltip .gear-compare-stat b {
+  text-align: right;
+}
+#gearHoverTooltip .gear-good {
+  color: #65e5a2;
+}
+#gearHoverTooltip .gear-bad {
+  color: #ff8a91;
+}
+#gearHoverTooltip .gear-neutral {
+  color: #bfc0d5;
+}
+#window .map-instance-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 600px) minmax(220px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+#window .map-instance-list {
+  background: #111b30;
+  padding: 12px;
+  border: 1px solid #4d577a;
+  border-radius: 12px;
+}
+#window .map-instance-list h3 {
+  color: #f2d99b;
+  margin-bottom: 8px;
+}
+@media (max-width: 800px) {
+  #window .map-instance-layout {
+    grid-template-columns: 1fr;
+  }
+}
+#window.rpg-modern {
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#window .equip-square {
+  overflow: visible;
+}
+#gearHoverTooltip {
+  overflow-y: auto;
+  max-height: calc(100vh - 30px);
+}
+#window .stats52 {
+  margin: 14px 0;
+  padding: 15px;
+  background: #101e30;
+  border: 1px solid #6089a4;
+  border-radius: 13px;
+}
+#window .stats52 h3 {
+  color: #f1d69b;
+  margin-bottom: 8px;
+}
+#window .stats52 .stat52 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 85px 95px;
+  gap: 8px;
+  padding: 8px 5px;
+  border-bottom: 1px solid #ffffff18;
+  font-size: 12px;
+}
+#window .stats52 .stat52 b,
+#window .stats52 .stat52 em {
+  text-align: right;
+}
+#window .stats52 .stat52 em {
+  font-style: normal;
+  color: #81e9c1;
+}
+#window .stats52 small {
+  color: #aebed0;
+  line-height: 1.7;
+}
+#window .stats52 .stat52.header {
+  font-weight: bold;
+  color: #a6bad1;
+}
+#gearHoverTooltip .stat52-points,
+#window .stat52-points {
+  margin: 7px 0;
+  color: #b2f1dc;
+}
+#gearHoverTooltip .artifact56 {
+  border: 1px solid #bc9c66;
+  border-radius: 10px;
+  background: linear-gradient(130deg, #34263b, #182638);
+  padding: 11px;
+  margin-top: 10px;
+  color: #f9e1ae;
+  font-size: 12px;
+  line-height: 1.6;
+}
+#gearHoverTooltip .artifact56 b {
+  color: #ffe5a0;
+}
+#window .artifact56-compare {
+  border: 1px solid #826b9c;
+  border-radius: 9px;
+  padding: 10px;
+  margin-top: 8px;
+  background: #1a2036;
+  font-size: 12px;
+  line-height: 1.6;
+}
+#window .bag-sale-wrap {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+#window .bag-sale-wrap > .bag-cell {
+  width: 100%;
+  height: 100%;
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-left: 9px;
+  padding-right: 9px;
+  padding-top: 30px;
+}
+#window#window .bag-sale {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 5;
+  background: #912e3a;
+  border: 1px solid #f39ba5;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 7px;
+  margin: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#window#window .bag-sale:hover {
+  background: #c83e4d;
+}
+#window#window .bag-sale:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#window .bag-sale-wrap .weapon-reserve {
+  bottom: 5px;
+  right: 5px;
+}

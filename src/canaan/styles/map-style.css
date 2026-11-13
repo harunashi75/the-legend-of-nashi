@@ -1,0 +1,105 @@
+#window:has(#bigMap) {
+  width: min(1050px, 97vw);
+  max-height: 92vh;
+}
+#window .map-instance-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 680px) minmax(230px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+#window #bigMap {
+  width: 100%;
+  max-width: 680px;
+  cursor: grab;
+  touch-action: none;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  display: block;
+  background: #145c9a;
+  border: 3px solid #927b53;
+  border-radius: 9px;
+}
+#window .map-instance-list {
+  max-height: 65vh;
+  overflow: auto;
+}
+@media (max-width: 800px) {
+  #window .map-instance-layout {
+    grid-template-columns: 1fr;
+  }
+}
+#window .island-section {
+  margin: 9px 0 15px;
+  padding: 10px 12px;
+  background: #14283a;
+  border: 1px solid #536d8d;
+  border-radius: 10px;
+}
+#window .island-section h4 {
+  color: #f3dca8;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+#window .island-section .entry {
+  padding: 5px 0;
+  border: 0;
+  font-size: 12px;
+}
+#window .island-section .muted {
+  font-size: 11px;
+}
+#window .map-instance-list {
+  max-height: 70vh;
+}
+#window .entry .map-raid {
+  color: #d6a6ff;
+}
+#window .entry .map-dungeon {
+  color: #ff8d93;
+}
+#window .entry .map-ilvl {
+  color: #f5dc9a;
+}
+/* Portail à difficultés : une carte par mode, côte à côte, empilées sur écran étroit. */
+#window .raid-modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+#window .raid-mode {
+  border: 1px solid #8b78c4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #241c3d;
+}
+#window .raid-mode h3 {
+  color: #f5cf78;
+  margin: 0 0 8px;
+}
+#window .raid-mode p {
+  margin: 6px 0;
+}
+#window .raid-mode.locked {
+  border-color: #52476d;
+}
+#window #bigMap.dragging {
+  cursor: grabbing;
+}
+/* Outils de la carte : zoom, centrer, vue d'ensemble. */
+#window .map-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+#window .map-tools button {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+#window .map-tools .map-hint {
+  font-size: 11px;
+  margin-left: auto;
+}

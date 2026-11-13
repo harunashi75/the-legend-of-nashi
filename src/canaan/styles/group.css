@@ -1,0 +1,202 @@
+/* Panneau Groupe : compagnons enregistrés dans l'aventure. */
+#window .group-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  max-width: 760px;
+}
+#window .group-note,
+#window .group-empty {
+  margin: 0;
+  color: var(--rpg-muted, #b8a483);
+  font-size: 13px;
+  line-height: 1.45;
+}
+#window .group-message {
+  margin: 0;
+  color: #ffd36d;
+}
+#window .group-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+#window .group-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 170, 90, 0.3);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .group-card.here {
+  border-color: #8fe3ae;
+}
+#window .group-card.confirm {
+  border-color: #c4553a;
+}
+#window .group-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+#window .group-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+}
+#window .group-meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: #e8d9b8;
+}
+#window .group-warning {
+  margin: 0;
+  font-size: 13px;
+  color: #ffc7b0;
+}
+#window .group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+#window .group-actions button,
+#window .group-new button {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+#window .group-actions button.group-danger {
+  border-color: #ffb39a;
+  color: #ffd4c4;
+}
+#window .group-new {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+#window .group-new label {
+  color: var(--rpg-muted, #b8a483);
+  font-size: 13px;
+}
+#window .group-new input {
+  flex: 1 1 180px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(232, 184, 80, 0.6);
+  background: #120c07;
+  color: #fff4d0;
+  font: 14px var(--rpg-serif, Georgia, serif);
+}
+#window .group-online {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(126, 200, 255, 0.45);
+  background: rgba(20, 40, 56, 0.35);
+}
+#window .group-online.open {
+  border-color: #7ec8ff;
+}
+#window .group-online input {
+  flex: 1 1 200px;
+  padding: 6px 9px;
+  border-radius: 4px;
+  border: 1px solid rgba(126, 200, 255, 0.5);
+  background: #0c141a;
+  color: #dff2ff;
+}
+#window .group-online label {
+  color: #a9c8dc;
+  font-size: 13px;
+}
+#window .group-code {
+  margin: 0;
+  width: 100%;
+  color: #dff2ff;
+  font-size: 15px;
+}
+#window .group-code b {
+  font-family: ui-monospace, monospace;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: #ffd36d;
+}
+/* Jouer sur Internet : bouton principal, lien du relais et réglages Pinggy. */
+#window .group-online-web,
+#window .group-online-lan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+#window .group-online-web {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(126, 200, 255, 0.25);
+}
+#window .group-online .group-primary {
+  font-size: 15px;
+  padding: 8px 16px;
+}
+#window .group-link {
+  margin: 0;
+  width: 100%;
+  color: #dff2ff;
+  word-break: break-all;
+}
+#window .group-link b {
+  color: #ffd36d;
+  user-select: all;
+}
+#window .group-warn {
+  color: #ffb0a0;
+}
+#window .group-pinggy {
+  width: 100%;
+  color: #a9c8dc;
+  font-size: 13px;
+}
+#window .group-pinggy[open] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+#window .group-pinggy summary {
+  cursor: pointer;
+  width: 100%;
+}
+#window .group-pinggy select {
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #0c141a;
+  color: #dff2ff;
+  border: 1px solid rgba(126, 200, 255, 0.5);
+}
+#window .group-online code {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #0c141a;
+  color: #ffd36d;
+  user-select: all;
+}
+/* Chaque ligne d'information du salon sur sa propre ligne (commandes du pare-feu, état). */
+#window .group-online > .group-meta {
+  width: 100%;
+  margin: 0;
+}

@@ -1,0 +1,344 @@
+{
+  "modules": [
+    {
+      "kind": "style",
+      "id": "canaan-interface-style",
+      "file": "styles/interface-style.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-panels-style",
+      "file": "styles/panels-style.css"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-runtime-config",
+      "file": "scripts/runtime-config.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-game-state",
+      "file": "scripts/game-state.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-coasts",
+      "file": "scripts/world-coasts.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-settlements",
+      "file": "scripts/world-settlements.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-game-core",
+      "file": "scripts/game-core.js"
+    },
+    {
+      "kind": "module",
+      "id": "canaan-modules",
+      "file": "bridge.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-entities",
+      "file": "scripts/world-entities.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-generation",
+      "file": "scripts/world-generation.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-sprite-kit",
+      "file": "scripts/sprite-kit.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-dungeons",
+      "file": "scripts/dungeons.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-interface-foundation",
+      "file": "scripts/interface-foundation.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-pixel-art",
+      "file": "scripts/pixel-art.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-look",
+      "file": "scripts/world-look.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-progression-economy",
+      "file": "scripts/progression-economy.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-preferences",
+      "file": "scripts/preferences.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-audio-layout",
+      "file": "scripts/audio-layout.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-audio",
+      "file": "scripts/audio.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-settings",
+      "file": "scripts/settings.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-item-rules",
+      "file": "scripts/item-rules.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-weapon-state",
+      "file": "scripts/weapon-state.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-portals",
+      "file": "scripts/portals.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-monster-scaling",
+      "file": "scripts/monster-scaling.js"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-equipment-style",
+      "file": "styles/equipment-style.css"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-weapon-actions",
+      "file": "scripts/weapon-actions.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-stats",
+      "file": "scripts/stats.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-progression",
+      "file": "scripts/progression.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-artifacts",
+      "file": "scripts/artifacts.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-equipment",
+      "file": "scripts/equipment.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-weapon-names",
+      "file": "scripts/weapon-names.js"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-map-style",
+      "file": "styles/map-style.css"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-map",
+      "file": "scripts/world-map.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-map-panel",
+      "file": "scripts/map-panel.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-economy",
+      "file": "scripts/economy.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-inventory-capacity",
+      "file": "scripts/inventory-capacity.js"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-class-style",
+      "file": "styles/class-style.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-quest-style",
+      "file": "styles/quest-style.css"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-class-talents",
+      "file": "scripts/class-talents.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-merchants",
+      "file": "scripts/merchants.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-life",
+      "file": "scripts/life.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-sea-life",
+      "file": "scripts/sea-life.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-professions",
+      "file": "scripts/professions.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-house",
+      "file": "scripts/house.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-quests",
+      "file": "scripts/quests.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-camp-life",
+      "file": "scripts/camp-life.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-pipeline",
+      "file": "scripts/pipeline.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-combat",
+      "file": "scripts/combat.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-boss-mechanics",
+      "file": "scripts/boss-mechanics.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-rubis",
+      "file": "scripts/rubis.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-arena",
+      "file": "scripts/arena.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-group",
+      "file": "scripts/group.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-net",
+      "file": "scripts/net.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-trade",
+      "file": "scripts/trade.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ui",
+      "file": "scripts/ui.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-gear-engine",
+      "file": "scripts/gear-engine.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-persistence",
+      "file": "scripts/persistence.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-slot-menu",
+      "file": "scripts/slot-menu.js"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-touch-controls",
+      "file": "styles/touch-controls.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-rubis-style",
+      "file": "styles/rubis-arena.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-slot-menu-style",
+      "file": "styles/slot-menu.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-group-style",
+      "file": "styles/group.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-trade-style",
+      "file": "styles/trade.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-professions-style",
+      "file": "styles/professions.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-house-style",
+      "file": "styles/house.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-rpg-theme",
+      "file": "styles/rpg-theme.css"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-controls",
+      "file": "scripts/controls.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-bootstrap",
+      "file": "scripts/bootstrap.js"
+    }
+  ]
+}

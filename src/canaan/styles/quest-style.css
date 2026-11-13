@@ -1,0 +1,185 @@
+/* Quêtes : dialogues des PNJ, journal (touche L) et suivi de la quête à l'écran. */
+#window:has(.quest-dialog) {
+  width: min(640px, 96vw);
+}
+#window:has(.quest-journal) {
+  width: min(900px, 97vw);
+}
+#window .quest-dialog,
+#window .quest-journal {
+  color: #f0e2c4;
+  font-family: var(--rpg-serif);
+}
+#window .quest-dialog h2,
+#window .quest-journal h2 {
+  color: var(--rpg-gold-light);
+}
+#window .quest-dialog h2 {
+  padding-left: 46px;
+}
+#window .quest-dialog h2 small {
+  color: #c9b48a;
+  font-size: 14px;
+  font-weight: normal;
+}
+#window .quest-text {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 10px 0;
+  font-style: italic;
+}
+#window .quest-note {
+  font-size: 13px;
+  color: #c9b48a;
+  margin: 6px 0;
+}
+#window .quest-lumi {
+  font-size: 13px;
+  color: #bfe8ff;
+}
+#window .quest-reward {
+  color: #ffd76a;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+#window .quest-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+#window .quest-card {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid #6a4e2a;
+  border-left: 3px solid #b8a070;
+  background: linear-gradient(180deg, rgba(48, 34, 22, 0.88), rgba(20, 13, 8, 0.92));
+  font-size: 13px;
+  line-height: 1.5;
+}
+#window .quest-card.main {
+  border-left-color: #ffd76a;
+}
+#window .quest-card.done {
+  opacity: 0.85;
+  border-left-color: #6edbb6;
+}
+#window .quest-card b {
+  color: #ffe9b0;
+}
+#window .quest-card .quest-level {
+  float: right;
+  color: #c9b48a;
+  font-size: 12px;
+}
+#window .quest-card ul {
+  margin: 6px 0 0;
+  padding-left: 4px;
+  list-style: none;
+}
+#window .quest-card li.done {
+  color: #8fe3ae;
+}
+#window .quest-card li.current {
+  color: #fff2cb;
+  font-weight: bold;
+}
+#window .quest-memory {
+  color: #bfe8ff;
+  font-style: italic;
+}
+#window .quest-track {
+  margin: -4px 0 10px;
+  font-size: 11px;
+}
+#window .quest-track.on {
+  border-color: var(--rpg-gold);
+}
+#window .quest-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+#window .quest-tabs button.on {
+  border-color: var(--rpg-gold);
+  color: var(--rpg-gold-light);
+}
+#window .quest-body {
+  max-height: 64vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+#window .quest-intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e8d8b8;
+}
+#window .quest-stars {
+  color: #ffd76a;
+  font-size: 15px;
+}
+#window .quest-map {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border: 1px dashed #8a6a3a;
+  font-size: 13px;
+}
+#window .quest-map ul {
+  margin: 4px 0 0;
+  padding-left: 6px;
+  list-style: none;
+}
+#window .quest-chapter {
+  color: #ffd76a;
+  margin: 16px 0 4px;
+  font-size: 16px;
+}
+#window .quest-chapter small {
+  color: #c9b48a;
+  font-size: 12px;
+  font-weight: normal;
+}
+#window .quest-done-line {
+  color: #8fe3ae;
+  margin: 4px 0;
+  font-size: 13px;
+}
+/* Suivi de la quête : sous la mini-carte. */
+#questTracker {
+  position: fixed;
+  right: 18px;
+  top: 240px;
+  width: 230px;
+  padding: 8px 10px;
+  background: linear-gradient(180deg, rgba(48, 34, 22, 0.88), rgba(20, 13, 8, 0.9));
+  border: 1px solid #8a6a3a;
+  border-radius: 5px;
+  color: #f0e2c4;
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  z-index: 5;
+}
+#questTracker b {
+  display: block;
+  color: #ffe9b0;
+  font-size: 13px;
+}
+#questTracker span {
+  display: block;
+}
+#questTracker em {
+  display: block;
+  color: #ffd76a;
+  font-style: normal;
+  margin-top: 3px;
+}
+#questTracker em i {
+  display: inline-block;
+  font-style: normal;
+}
+#housingBar .house-item.locked {
+  opacity: 0.55;
+}

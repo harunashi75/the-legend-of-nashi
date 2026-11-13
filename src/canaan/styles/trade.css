@@ -1,0 +1,137 @@
+/* Fenêtre d'échange entre joueurs (touche J). */
+#window .trade-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  width: min(760px, calc(100vw - 48px));
+  box-sizing: border-box;
+}
+#window .trade-note {
+  margin: 0;
+  color: #ffd36d;
+}
+#window .trade-empty,
+#window .trade-hint {
+  margin: 0;
+  color: var(--rpg-muted, #b8a483);
+  font-size: 13px;
+  line-height: 1.45;
+}
+#window .trade-ask {
+  margin: 0;
+  font-size: 16px;
+  color: #f6dc98;
+}
+#window .trade-partners,
+#window .trade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#window .trade-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+#window .trade-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 170, 90, 0.35);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .trade-side.ready {
+  border-color: #8fe3ae;
+  box-shadow: 0 0 0 1px rgba(143, 227, 174, 0.35);
+}
+#window .trade-side h3,
+#window .trade-bag-title {
+  margin: 0;
+  font-size: 15px;
+  color: #f6dc98;
+}
+#window .trade-ok {
+  font-size: 12px;
+  color: #8fe3ae;
+}
+#window .trade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#window .trade-list li,
+#window .trade-bag button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+#window .trade-item {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+#window .trade-ilvl {
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .trade-x {
+  padding: 2px 8px;
+}
+#window .trade-gold {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+#window .trade-gold label {
+  width: 100%;
+  font-size: 12px;
+  color: var(--rpg-muted, #b8a483);
+}
+#window .trade-gold input {
+  width: 120px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(232, 184, 80, 0.6);
+  background: #120c07;
+  color: #fff4d0;
+}
+#window .trade-gold-them {
+  margin: auto 0 0;
+  color: #f6dc98;
+}
+#window .trade-bag {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+#window .trade-bag button {
+  text-align: left;
+}
+#window button.trade-primary {
+  background: linear-gradient(180deg, #3f8a52, #24563a);
+  border-color: #8fe3ae;
+}
+#window button.trade-danger {
+  background: linear-gradient(180deg, #8a3a2a, #561e14);
+  border-color: #ffb39a;
+}
+@media (max-width: 640px) {
+  #window .trade-columns {
+    grid-template-columns: 1fr;
+  }
+}

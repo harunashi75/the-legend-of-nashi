@@ -1,0 +1,209 @@
+// Protocole du coopératif : messages entre l'hôte, le relais et les invités, et leur vérification.
+// Module partagé pur (shared/net) : aucun réseau ici ; le relais (Node) et le jeu (navigateur) l'utilisent.
+// Les invités envoient des intentions ; l'hôte vérifie, simule et renvoie l'état du monde (10 fois par seconde).
+
+import { encodeLook } from '../data/looks.js';
+
+// Taille maximale d'un message (octets) et nombre maximal de messages par seconde et par connexion.
+export const MESSAGE_LIMIT = 64 * 1024;
+export const RATE_LIMIT = 60;
+export const ROOM_GUESTS = 3;
+// Codes de salon : 6 caractères, sans les signes faciles à confondre (0/O, 1/I/L).
+export const ROOM_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+export const ROOM_CODE = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/;
+export const DEFAULT_RELAY = 'ws://localhost:8787';
+// Objets au plus dans une offre d'échange.
+export const TRADE_ITEMS = 12;
+
+export function makeRoomCode(rng) {
+  let code = '';
+  for (let i = 0; i < 6; i++) code += ROOM_ALPHABET[Math.floor(rng() * ROOM_ALPHABET.length)];
+  return code;
+}
+export function normalizeRoomCode(text) {
+  const code = String(text ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+  return ROOM_CODE.test(code) ? code : null;
+}
+// Adresse du relais saisie ou collée par un joueur : ws:// ou wss://, avec un nom d'hôte et un port facultatif.
+// Un lien https:// (Pinggy…) devient wss://, http:// devient ws:// ; sans préfixe, wss:// pour une adresse
+// sans port (tunnel HTTPS) et ws:// avec un port. Renvoie null si l'adresse n'est pas lisible.
+export function normalizeRelayUrl(text) {
+  let s = String(text ?? '').trim();
+  if (!s) return null;
+  s = s.replace(/^https:\/\//i, 'wss://').replace(/^http:\/\//i, 'ws://').replace(/^tcp:\/\//i, 'ws://');
+  if (!/^wss?:\/\//i.test(s)) s = (/:\d{2,5}(\/|$)/.test(s) ? 'ws://' : 'wss://') + s;
+  const m = /^(wss?):\/\/([a-z0-9.-]+|\[[0-9a-f:]+\])(?::(\d{2,5}))?\/?$/i.exec(s);
+  if (!m || (m[3] && (+m[3] < 1 || +m[3] > 65535))) return null;
+  return m[1].toLowerCase() + '://' + m[2].toLowerCase() + (m[3] ? ':' + m[3] : '');
+}
+// Invitation à partager : adresse du relais et code du salon, dans un texte lisible.
+export function makeInvitation(relay, code) {
+  return 'Rejoins ma partie Canaan Online ! Relais : ' + relay + ' · Code : ' + code;
+}
+// Invitation collée par un invité (ou n'importe quel texte) : relais et code retrouvés si présents.
+export function parseInvitation(text) {
+  const s = String(text ?? '');
+  const relay = /\b((?:wss?|https?):\/\/[^\s·,;]+)/i.exec(s),
+    code = /code\s*:?\s*([A-Za-z0-9]{6})\b/i.exec(s);
+  return { relay: relay ? normalizeRelayUrl(relay[1]) : null, code: code ? normalizeRoomCode(code[1]) : null };
+}
+// Identifiant d'un invité : créé une fois par son application, puis gardé dans sa configuration.
+export const GUEST_ID = /^[a-zA-Z][\w-]{5,63}$/;
+// Toujours tester un identifiant avec isGuestId : RegExp.test convertirait undefined en texte « undefined ».
+export function isGuestId(id) {
+  return typeof id === 'string' && GUEST_ID.test(id);
+}
+export function makeGuestId(rng) {
+  let id = 'g-';
+  for (let i = 0; i < 16; i++) id += '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(rng() * 36)];
+  return id;
+}
+
+// Lit un message reçu : JSON objet avec un type connu, taille limitée ; null sinon.
+const TYPES = new Set(['host', 'room', 'join', 'accept', 'refuse', 'intent', 'action', 'state', 'me', 'notice', 'left', 'closed', 'kick', 'chat', 'error']);
+// Messages qu'un invité a le droit d'envoyer (le relais les transmet à l'hôte, les autres sont ignorés).
+export const GUEST_TYPES = Object.freeze(['intent', 'action', 'chat']);
+export function parseMessage(text) {
+  if (typeof text !== 'string' || text.length > MESSAGE_LIMIT) return null;
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  return data && typeof data === 'object' && !Array.isArray(data) && TYPES.has(data.t) ? data : null;
+}
+
+const finite = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+// Intention d'un invité, vérifiée par l'hôte : direction (-1, 0 ou 1), attaque de base, compétence 0 à 3, point visé,
+// roulade (direction en -1..1) et numéro de séquence (pour que l'invité corrige sa position prédite).
+// L'invité n'envoie jamais de statistiques, d'or, d'objets ni de Rubis : seulement ce qu'il veut faire.
+export function sanitizeIntent(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const d = r.dodge && typeof r.dodge === 'object' ? r.dodge : null;
+  return {
+    dx: clamp(Math.sign(finite(r.dx)), -1, 1),
+    dy: clamp(Math.sign(finite(r.dy)), -1, 1),
+    attack: r.attack === 'quick' || r.attack === 'heavy' ? r.attack : null,
+    skill: Number.isInteger(r.skill) && r.skill >= 0 && r.skill <= 3 ? r.skill : null,
+    aimX: clamp(finite(r.aimX), -1e6, 1e6),
+    aimY: clamp(finite(r.aimY), -1e6, 1e6),
+    dodge: d ? { dx: clamp(finite(d.dx), -1, 1), dy: clamp(finite(d.dy), -1, 1) } : null,
+    seq: Number.isInteger(r.seq) && r.seq >= 0 && r.seq < 2 ** 31 ? r.seq : null
+  };
+}
+// Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
+const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
+export function sanitizeAction(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
+  if (r.op === 'equip' || r.op === 'reserve') return id ? { op: r.op, id } : null;
+  if (r.op === 'unequip') return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
+  if (r.op === 'switch') return { op: 'switch' };
+  // Classe, talents et Rubis : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
+  const word = v => (typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null);
+  if (r.op === 'class-choose') return word(r.cls) ? { op: r.op, cls: r.cls } : null;
+  if (r.op === 'talent-equip' || r.op === 'talent-unequip')
+    return Number.isInteger(r.talent) && r.talent >= 0 && r.talent <= 9 ? { op: r.op, talent: r.talent } : null;
+  if (r.op === 'class-special') return { op: r.op };
+  // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
+  const questId = v => (Number.isInteger(v) && v >= 0 && v <= 30 ? v : null);
+  if (r.op === 'quest-accept' || r.op === 'quest-turnin' || r.op === 'quest-track') return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
+  if (r.op === 'quest-choice') return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7 ? { op: r.op, q: r.q, choice: r.choice } : null;
+  if (r.op === 'quest-act')
+    return typeof r.site === 'string' && /^(q\d{1,2}|camp)$/.test(r.site) && typeof r.obj === 'string' && /^[a-z0-9_]{1,24}$/.test(r.obj) ? { op: r.op, site: r.site, obj: r.obj } : null;
+  if (r.op === 'rubis-equip') return word(r.rubis) ? { op: r.op, rubis: r.rubis } : null;
+  // Marchand : l'hôte vérifie la présence d'un marchand, l'or et l'objet.
+  if (r.op === 'sell') return id ? { op: r.op, id } : null;
+  if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest') return { op: r.op };
+  if (r.op === 'rubis-unequip') return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
+  // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
+  // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;
+  // l'hôte vérifie la place et le catalogue.
+  if (r.op === 'house-door') return { op: 'house-door' };
+  const cell = v => Number.isInteger(v) && v >= 0 && v <= 20;
+  const turn = Number.isInteger(r.r) && r.r >= 0 && r.r <= 3 ? r.r : 0;
+  if (r.op === 'house-place') return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y) ? { op: 'house-place', k: r.k, x: r.x, y: r.y, r: turn } : null;
+  if (r.op === 'house-remove' || r.op === 'house-rotate') return cell(r.x) && cell(r.y) ? { op: r.op, x: r.x, y: r.y } : null;
+  if (r.op === 'fish') return { op: 'fish' };
+  if (r.op === 'hunt') return typeof r.game === 'string' && /^[a-z]{2,16}$/.test(r.game) ? { op: 'hunt', game: r.game } : null;
+  const recipe = typeof r.recipe === 'string' && /^[a-z]{2,16}$/.test(r.recipe) ? r.recipe : null,
+    quality = Number.isInteger(r.quality) && r.quality >= 0 && r.quality <= 7 ? r.quality : null;
+  if (r.op === 'cook') return recipe && quality !== null && Number.isInteger(r.count) && r.count >= 1 && r.count <= 20 ? { op: 'cook', recipe, quality, count: r.count } : null;
+  if (r.op === 'eat') return recipe && quality !== null ? { op: 'eat', recipe, quality } : null;
+  // Échange entre joueurs : l'hôte vérifie ensuite le partenaire, les objets du sac, l'or et la place.
+  if (r.op === 'trade-request') return r.to === 'host' || isGuestId(r.to) ? { op: r.op, to: r.to } : null;
+  if (r.op === 'trade-answer' || r.op === 'trade-ready') return typeof r.yes === 'boolean' ? { op: r.op, yes: r.yes } : null;
+  if (r.op === 'trade-cancel') return { op: r.op };
+  if (r.op === 'trade-offer') {
+    const items = Array.isArray(r.items) ? r.items : null;
+    if (!items || items.length > TRADE_ITEMS || !items.every(x => typeof x === 'string' && x.length > 0 && x.length <= 96)) return null;
+    return Number.isInteger(r.gold) && r.gold >= 0 && r.gold <= 1e12 ? { op: r.op, items: [...items], gold: r.gold } : null;
+  }
+  return null;
+}
+// Pseudo d'un invité : sans caractère de contrôle ni chevron, 24 caractères au plus.
+export function cleanPseudo(text) {
+  const pseudo = String(text ?? '')
+    .replace(/[\u0000-\u001f<>]/g, '')
+    .trim()
+    .slice(0, 24);
+  return pseudo || 'Invité';
+}
+// Message de chat : 200 caractères au plus.
+export function cleanChat(text) {
+  return String(text ?? '')
+    .replace(/[\u0000-\u001f]/g, ' ')
+    .trim()
+    .slice(0, 200);
+}
+
+// Instantané envoyé par l'hôte : héros, monstres, butins au sol et projectiles, avec des nombres arrondis.
+const round = v => Math.round(finite(v));
+export function heroSnapshot(id, hero) {
+  const p = hero.player;
+  return {
+    id,
+    name: hero.name || 'Hôte',
+    color: hero.color || '#8068db',
+    // Apparence compacte (shared/data/looks.js), lue par decodeLook.
+    look: encodeLook(hero.look),
+    x: round(p.x),
+    y: round(p.y),
+    vx: Math.round(finite(p.vx) * 10) / 10,
+    vy: Math.round(finite(p.vy) * 10) / 10,
+    hp: Math.ceil(finite(p.hp)),
+    mhp: round(p.mhp),
+    mp: Math.floor(finite(p.mp)),
+    mmp: round(p.mmp),
+    gold: Math.floor(finite(p.gold)),
+    dead: !!p.dead,
+    face: finite(p.face, 1),
+    atk: Math.round(finite(p.atk) * 100) / 100,
+    kills: Math.floor(finite(hero.kills)),
+    // Forme féline (Druide), Voile d'ombre (Assassin) et bouclier de talent : dessinés chez chacun.
+    form: p.form === 'feral' ? 1 : 0,
+    veil: p.veiled ? 1 : 0,
+    shield: p.shielded ? 1 : 0
+  };
+}
+const MONSTER_LOOK = ['look', 'pal', 'scale', 'mobColor', 'lookOpts'];
+export function monsterSnapshot(m) {
+  const out = {
+    k: m.netId,
+    t: m.t,
+    x: round(m.x),
+    y: round(m.y),
+    hp: Math.ceil(finite(m.hp)),
+    mhp: round(m.mhp),
+    r: round(m.r),
+    cd: Math.round(finite(m.cd) * 10) / 10
+  };
+  for (const key of ['boss', 'worldBoss', 'elite', 'arenaBoss', 'hidden']) if (m[key]) out[key] = true;
+  for (const key of MONSTER_LOOK) if (m[key] !== undefined) out[key] = m[key];
+  if (Number.isFinite(m.facingAngle)) out.facingAngle = Math.round(m.facingAngle * 100) / 100;
+  return out;
+}

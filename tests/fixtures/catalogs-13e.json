@@ -1,0 +1,806 @@
+{
+ "instances": [
+  {
+   "name": "La Cave des Terriers Abandonnés",
+   "biome": 0,
+   "x": 89,
+   "y": 264,
+   "boss": "Gardien des Os",
+   "bosses": [
+    "Gardien des Os"
+   ],
+   "color": "#a3c7ff",
+   "level": 7,
+   "mobLevel": 9,
+   "rarity": "Rare",
+   "dropLevel": 10
+  },
+  {
+   "name": "La Mine Oubliée du Mithril",
+   "biome": 1,
+   "x": 88,
+   "y": 130,
+   "boss": "Golem de Mithril",
+   "bosses": [
+    "Golem de Mithril"
+   ],
+   "color": "#67d8ee",
+   "level": 13,
+   "mobLevel": 15,
+   "rarity": "Rare",
+   "dropLevel": 16
+  },
+  {
+   "name": "Le Sanctuaire de l’Éclipse",
+   "biome": 1,
+   "x": 151,
+   "y": 115,
+   "boss": "Oracle de l’Éclipse",
+   "bosses": [
+    "Oracle de l’Éclipse"
+   ],
+   "color": "#ff9955",
+   "level": 18,
+   "mobLevel": 20,
+   "rarity": "Épique",
+   "dropLevel": 21
+  },
+  {
+   "name": "La Citadelle des Pénitents",
+   "biome": 2,
+   "x": 231,
+   "y": 76,
+   "boss": "Le Grand Inquisiteur",
+   "bosses": [
+    "Le Grand Inquisiteur"
+   ],
+   "color": "#b79cff",
+   "level": 25,
+   "mobLevel": 27,
+   "rarity": "Épique",
+   "dropLevel": 28
+  },
+  {
+   "name": "La Forge d’Écaille-Ardente",
+   "biome": 3,
+   "x": 312,
+   "y": 130,
+   "boss": "Pyrrhax, Wyrm d’Écaille-Ardente",
+   "bosses": [
+    "Pyrrhax, Wyrm d’Écaille-Ardente"
+   ],
+   "color": "#6bdfa2",
+   "level": 32,
+   "mobLevel": 34,
+   "rarity": "Épique",
+   "dropLevel": 35
+  },
+  {
+   "name": "La Fosse d’Expiation",
+   "biome": 3,
+   "x": 298,
+   "y": 197,
+   "boss": "Le Bourreau de l’Expiation",
+   "bosses": [
+    "Le Bourreau de l’Expiation"
+   ],
+   "color": "#e88aff",
+   "level": 37,
+   "mobLevel": 39,
+   "rarity": "Épique",
+   "dropLevel": 40
+  },
+  {
+   "name": "Le Bastion du Roi Sanglant",
+   "biome": 4,
+   "x": 312,
+   "y": 270,
+   "boss": "Le Roi Sanglant",
+   "bosses": [
+    "Sire Écorcheur",
+    "La Comtesse Écarlate",
+    "Le Roi Sanglant"
+   ],
+   "color": "#ffd36d",
+   "raid": true,
+   "level": 44,
+   "mobLevel": 46,
+   "rarity": "Héroïque",
+   "dropLevel": 47
+  },
+  {
+   "name": "L’Aiguille du Continuum",
+   "biome": 4,
+   "x": 249,
+   "y": 285,
+   "boss": "Le Dévoreur Stellaire",
+   "bosses": [
+    "Le Gardien des Rouages",
+    "La Tisseuse du Temps",
+    "Le Dévoreur Stellaire"
+   ],
+   "color": "#ff7fa7",
+   "raid": true,
+   "level": 49,
+   "mobLevel": 51,
+   "rarity": "Héroïque",
+   "dropLevel": 52
+  },
+  {
+   "name": "Le Thronos du Séraphin Divin",
+   "biome": 5,
+   "x": 196,
+   "y": 332,
+   "boss": "Le Séraphin Divin",
+   "bosses": [
+    "L’Archonte Radieux",
+    "La Sentinelle Auréolée",
+    "Le Séraphin Divin"
+   ],
+   "color": "#c4a0ff",
+   "raid": true,
+   "level": 54,
+   "mobLevel": 56,
+   "rarity": "Légendaire",
+   "dropLevel": 57
+  },
+  {
+   "name": "Le Jugement de Célestia",
+   "subtitle": "Raid 4 · Raid final",
+   "biome": 5,
+   "x": 153,
+   "y": 288,
+   "boss": "L’Avatar du Jugement",
+   "bosses": [
+    "Le Héraut de Célestia",
+    "La Balance Éternelle",
+    "L’Avatar du Jugement"
+   ],
+   "color": "#fff0a8",
+   "raid": true,
+   "level": 58,
+   "mobLevel": 60,
+   "difficulties": {
+    "normal": {
+     "label": "Normal",
+     "icon": "⚔️",
+     "level": 58,
+     "mobLevel": 60,
+     "rarity": "Mythique",
+     "dropLevel": 60,
+     "hp": 1,
+     "damage": 1
+    },
+    "heroic": {
+     "label": "Héroïque",
+     "icon": "🔥",
+     "level": 60,
+     "mobLevel": 60,
+     "rarity": "Céleste",
+     "dropLevel": 60,
+     "hp": 1.65,
+     "damage": 1.4
+    }
+   }
+  }
+ ],
+ "rarities": [
+  {
+   "name": "Commun",
+   "color": "#aeb4c0",
+   "mult": 1
+  },
+  {
+   "name": "Peu commun",
+   "color": "#53d986",
+   "mult": 1.1
+  },
+  {
+   "name": "Rare",
+   "color": "#58a8ff",
+   "mult": 1.2
+  },
+  {
+   "name": "Épique",
+   "color": "#bc80ff",
+   "mult": 1.3
+  },
+  {
+   "name": "Héroïque",
+   "color": "#ffdc65",
+   "mult": 1.4
+  },
+  {
+   "name": "Légendaire",
+   "color": "#ff983d",
+   "mult": 1.5
+  },
+  {
+   "name": "Mythique",
+   "color": "#45e1db",
+   "mult": 1.7
+  },
+  {
+   "name": "Céleste",
+   "color": "#ff4deb",
+   "mult": 1.85
+  }
+ ],
+ "weapons": {
+  "sword": {
+   "name": "Épée",
+   "icon": "⚔️"
+  },
+  "dualsword": {
+   "name": "Épées doubles",
+   "icon": "⚔️"
+  },
+  "axe": {
+   "name": "Hache",
+   "icon": "🪓"
+  },
+  "mace": {
+   "name": "Masse",
+   "icon": "🔨"
+  },
+  "spear": {
+   "name": "Lance",
+   "icon": "🔱"
+  },
+  "dualdagger": {
+   "name": "Dagues doubles",
+   "icon": "🗡️"
+  },
+  "bow": {
+   "name": "Arc",
+   "icon": "🏹"
+  },
+  "shield": {
+   "name": "Égide sacrée",
+   "icon": "🛡️"
+  },
+  "staff": {
+   "name": "Bâton arcanique",
+   "icon": "🪄"
+  }
+ },
+ "craft": [
+  "sword",
+  "dualsword",
+  "axe",
+  "mace",
+  "spear",
+  "dualdagger",
+  "bow",
+  "shield",
+  "staff"
+ ],
+ "spells": {
+  "sword": [
+   [
+    "🗡️",
+    "Frappe précise",
+    "Coup frontal rapide · 120 %",
+    3,
+    8
+   ],
+   [
+    "🌀",
+    "Tourbillon",
+    "Zone circulaire · 85 %",
+    7,
+    14
+   ],
+   [
+    "🛡️",
+    "Parade",
+    "Réduit les dégâts reçus de 40 % pendant 2 s",
+    12,
+    14
+   ],
+   [
+    "💚",
+    "Riposte héroïque",
+    "220 % (280 % après parade) · vol de vie 15 % des dégâts réels",
+    12,
+    23
+   ]
+  ],
+  "dualsword": [
+   [
+    "⚡",
+    "Rafale de lames",
+    "4 coups rapides · 45 % chacun",
+    6,
+    13
+   ],
+   [
+    "🌪️",
+    "Danse des lames",
+    "3 frappes circulaires · 55 % chacune",
+    9,
+    20
+   ],
+   [
+    "🔥",
+    "Élan offensif",
+    "Vitesse d’attaque +20 %, défense -10 %, 5 s",
+    14,
+    16
+   ],
+   [
+    "💥",
+    "Assaut final",
+    "6 frappes · 45 %, dernier coup renforcé en combo",
+    13,
+    26
+   ]
+  ],
+  "axe": [
+   [
+    "🪓",
+    "Frappe écrasante",
+    "Coup frontal · 170 %",
+    5,
+    12
+   ],
+   [
+    "🌋",
+    "Fendoir",
+    "Cône de 120° · 125 %",
+    8,
+    17
+   ],
+   [
+    "🔥",
+    "Rage du berserker",
+    "Dégâts +20 %, défense -15 %, 6 s",
+    16,
+    18
+   ],
+   [
+    "💀",
+    "Exécution",
+    "240 %, ou 320 % sous 30 % PV",
+    14,
+    26
+   ]
+  ],
+  "mace": [
+   [
+    "🔨",
+    "Coup fracassant",
+    "130 % · bris d’armure 10 %, 6 s",
+    6,
+    13
+   ],
+   [
+    "💢",
+    "Onde de choc",
+    "Zone · 90 % et ralentissement 25 %, 3 s",
+    10,
+    19
+   ],
+   [
+    "✋",
+    "Coup d’interruption",
+    "100 % · interrompt ou affaiblit un boss",
+    11,
+    17
+   ],
+   [
+    "💥",
+    "Briseur de rempart",
+    "210 %, ou 260 % contre armure brisée",
+    14,
+    25
+   ]
+  ],
+  "spear": [
+   [
+    "🔱",
+    "Estoc perforant",
+    "Ligne traversante · 135 %",
+    5,
+    12
+   ],
+   [
+    "🌙",
+    "Balayage du lancier",
+    "Arc de 180° · 95 % et repoussement",
+    8,
+    17
+   ],
+   [
+    "💨",
+    "Charge du lancier",
+    "Bond en avant et dégâts sur la trajectoire · 115 %",
+    11,
+    19
+   ],
+   [
+    "🎯",
+    "Percée parfaite",
+    "220 %, ou 275 % à portée optimale",
+    13,
+    25
+   ]
+  ],
+  "dualdagger": [
+   [
+    "🩸",
+    "Entaille rapide",
+    "2 frappes · 65 %, saignement 5 s",
+    5,
+    11
+   ],
+   [
+    "🌀",
+    "Lames tournoyantes",
+    "Zone · 90 % et prolonge les saignements",
+    8,
+    16
+   ],
+   [
+    "💨",
+    "Pas de l’ombre",
+    "Esquive directionnelle, prochain coup +25 %",
+    11,
+    15
+   ],
+   [
+    "🩸",
+    "Mille coupures",
+    "5 frappes · 45 %, consume les saignements",
+    13,
+    24
+   ]
+  ],
+  "bow": [
+   [
+    "🏹",
+    "Tir chargé",
+    "Projectile · 100–190 % selon charge",
+    4,
+    11
+   ],
+   [
+    "🌧️",
+    "Pluie de flèches",
+    "4 impacts en zone · 40 % chacun",
+    11,
+    21
+   ],
+   [
+    "🕸️",
+    "Tir entravant",
+    "80 % · ralentit, ou marque un boss",
+    9,
+    15
+   ],
+   [
+    "💨",
+    "Repli tactique",
+    "Bond arrière et tir · 110 %, accélère le prochain tir",
+    11,
+    17
+   ]
+  ],
+  "shield": [
+   [
+    "🌀",
+    "Tempête d’égide",
+    "Tourbillon de bouclier · 4 frappes de zone à 40 %",
+    9,
+    18
+   ],
+   [
+    "☀️",
+    "Sol consacré",
+    "Zone sacrée 6 s : dégâts sur la durée et soins périodiques",
+    17,
+    26
+   ],
+   [
+    "🛡️",
+    "Lancer du rempart",
+    "Bouclier projeté en ligne droite · 155 % et retour visuel",
+    7,
+    15
+   ],
+   [
+    "✨",
+    "Serment du gardien",
+    "Réduit les dégâts reçus de 35 % pendant 5 s et soigne 12 % des PV max",
+    23,
+    28
+   ]
+  ],
+  "staff": [
+   [
+    "🔮",
+    "Projectile arcanique",
+    "120 % magique · +1 charge",
+    3,
+    11
+   ],
+   [
+    "💠",
+    "Onde magique",
+    "Zone · 100 % magique · +1 charge si touche",
+    8,
+    19
+   ],
+   [
+    "✨",
+    "Concentration",
+    "Prochain sort +30 % · +1 charge",
+    12,
+    14
+   ],
+   [
+    "🌌",
+    "Surcharge arcanique",
+    "170 % +55 % par charge consommée (max 3)",
+    13,
+    27
+   ]
+  ]
+ },
+ "fullBag": [
+  [
+   1,
+   "normal",
+   "Commun",
+   13
+  ],
+  [
+   10,
+   "normal",
+   "Commun",
+   76
+  ],
+  [
+   60,
+   "normal",
+   "Commun",
+   426
+  ],
+  [
+   15,
+   "world",
+   "Rare",
+   133
+  ],
+  [
+   47,
+   "tier",
+   "Héroïque",
+   469
+  ],
+  [
+   60,
+   "tier",
+   "Céleste",
+   788
+  ]
+ ],
+ "loot": [
+  [
+   1,
+   "normal",
+   "Commun",
+   {
+    "level": 1,
+    "rarity": "Commun"
+   }
+  ],
+  [
+   10,
+   "normal",
+   "Peu commun",
+   {
+    "level": 10,
+    "rarity": "Peu commun"
+   }
+  ],
+  [
+   60,
+   "normal",
+   "Commun",
+   {
+    "level": 60,
+    "rarity": "Commun"
+   }
+  ],
+  [
+   15,
+   "world",
+   "Rare",
+   {
+    "level": 15,
+    "rarity": "Rare"
+   }
+  ],
+  [
+   47,
+   "tier",
+   "Héroïque",
+   {
+    "level": 47,
+    "rarity": "Héroïque"
+   }
+  ],
+  [
+   60,
+   "tier",
+   "Céleste",
+   {
+    "level": 60,
+    "rarity": "Céleste"
+   }
+  ]
+ ],
+ "sales": [
+  [
+   "Commun",
+   1,
+   13
+  ],
+  [
+   "Commun",
+   10,
+   76
+  ],
+  [
+   "Commun",
+   30,
+   216
+  ],
+  [
+   "Commun",
+   60,
+   426
+  ],
+  [
+   "Peu commun",
+   1,
+   14
+  ],
+  [
+   "Peu commun",
+   10,
+   84
+  ],
+  [
+   "Peu commun",
+   30,
+   238
+  ],
+  [
+   "Peu commun",
+   60,
+   469
+  ],
+  [
+   "Rare",
+   1,
+   16
+  ],
+  [
+   "Rare",
+   10,
+   91
+  ],
+  [
+   "Rare",
+   30,
+   259
+  ],
+  [
+   "Rare",
+   60,
+   511
+  ],
+  [
+   "Épique",
+   1,
+   17
+  ],
+  [
+   "Épique",
+   10,
+   99
+  ],
+  [
+   "Épique",
+   30,
+   281
+  ],
+  [
+   "Épique",
+   60,
+   554
+  ],
+  [
+   "Héroïque",
+   1,
+   18
+  ],
+  [
+   "Héroïque",
+   10,
+   106
+  ],
+  [
+   "Héroïque",
+   30,
+   302
+  ],
+  [
+   "Héroïque",
+   60,
+   596
+  ],
+  [
+   "Légendaire",
+   1,
+   20
+  ],
+  [
+   "Légendaire",
+   10,
+   114
+  ],
+  [
+   "Légendaire",
+   30,
+   324
+  ],
+  [
+   "Légendaire",
+   60,
+   639
+  ],
+  [
+   "Mythique",
+   1,
+   22
+  ],
+  [
+   "Mythique",
+   10,
+   129
+  ],
+  [
+   "Mythique",
+   30,
+   367
+  ],
+  [
+   "Mythique",
+   60,
+   724
+  ],
+  [
+   "Céleste",
+   1,
+   24
+  ],
+  [
+   "Céleste",
+   10,
+   141
+  ],
+  [
+   "Céleste",
+   30,
+   400
+  ],
+  [
+   "Céleste",
+   60,
+   788
+  ]
+ ]
+}

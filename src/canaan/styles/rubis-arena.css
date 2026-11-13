@@ -1,0 +1,340 @@
+/* Rubis (fiche du personnage) et Arène des Épreuves (portail, records, récompense finale). */
+
+/* Colonne gauche de la fiche : le personnage, puis les Rubis dans l'espace libre en dessous. */
+#window .character-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+#window .rubis-paper {
+  padding: 12px 14px 14px;
+}
+#window .rubis-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#window .rubis-head h3 {
+  margin: 0;
+  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: 17px;
+  letter-spacing: 0.5px;
+}
+#window .rubis-head span {
+  color: var(--rpg-muted, #b8a483);
+  font-size: 12px;
+}
+
+/* Gemme : facette taillée selon la famille, dégradé lumineux et reflet. */
+.rubis-gem {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.rubis-gem.big {
+  width: 44px;
+  height: 44px;
+}
+.rubis-gem i {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 32% 26%,
+    #ffffff 0 7%,
+    var(--gem-l) 18%,
+    var(--gem) 55%,
+    var(--gem-d) 100%
+  );
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6));
+}
+.rubis-gem i::after {
+  content: '';
+  position: absolute;
+  inset: 18% 46% 52% 20%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: skewX(-18deg);
+}
+.rubis-gem.fam0 i {
+  clip-path: polygon(50% 0, 95% 40%, 50% 100%, 5% 40%);
+}
+.rubis-gem.fam1 i {
+  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%);
+}
+.rubis-gem.fam2 i {
+  border-radius: 50%;
+}
+.rubis-gem.fam3 i {
+  clip-path: polygon(50% 0, 100% 32%, 85% 100%, 15% 100%, 0 32%);
+}
+.rubis-gem.fam4 i {
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.rubis-gem.fam5 i {
+  clip-path: polygon(50% 0, 63% 33%, 100% 38%, 72% 62%, 80% 100%, 50% 80%, 20% 100%, 28% 62%, 0 38%, 37% 33%);
+}
+.rubis-gem b {
+  position: relative;
+  font-size: 13px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8));
+}
+.rubis-gem.big b {
+  font-size: 18px;
+}
+
+/* Six emplacements universels. */
+#window .rubis-slots {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+#window .rubis-slot {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 84px;
+  padding: 7px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 170, 90, 0.35);
+  background: radial-gradient(circle at 50% 38%, rgba(255, 220, 160, 0.08), rgba(0, 0, 0, 0.35) 70%), #1a120c;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+  color: var(--rpg-ink, #f3e6c8);
+}
+#window button.rubis-slot {
+  cursor: pointer;
+  font: inherit;
+}
+#window button.rubis-slot:hover {
+  border-color: #ff9c86;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.7),
+    0 0 10px rgba(255, 120, 90, 0.35);
+}
+#window .rubis-slot em {
+  font-style: normal;
+  font-size: 10.5px;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--rpg-muted, #b8a483);
+  overflow-wrap: anywhere;
+}
+#window .rubis-slot.filled em {
+  color: var(--rpg-gold-light, #f6dc98);
+}
+#window .rubis-socket {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px dashed rgba(212, 170, 90, 0.45);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.6), rgba(60, 40, 20, 0.3));
+}
+#window .rubis-lock {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #ffcf9a;
+}
+
+/* Collection : six familles de huit Rubis. */
+#window .rubis-collection {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(212, 170, 90, 0.22);
+}
+#window .rubis-family {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+#window .rubis-family-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+#window .rubis-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+#window .rubis-cell {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 170, 90, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: #6a5a48;
+  font: 700 14px var(--rpg-serif, Georgia, serif);
+}
+#window button.rubis-cell {
+  cursor: pointer;
+  box-shadow: none;
+  text-shadow: none;
+}
+#window button.rubis-cell:hover {
+  border-color: var(--rpg-gold, #d4aa5a);
+  background: rgba(212, 170, 90, 0.12);
+}
+#window .rubis-cell.worn {
+  border-color: #8fe3ae;
+  box-shadow:
+    0 0 0 1px rgba(143, 227, 174, 0.4),
+    inset 0 0 8px rgba(143, 227, 174, 0.25);
+}
+#window .rubis-cell sup {
+  position: absolute;
+  right: 2px;
+  top: 1px;
+  font:
+    700 9px system-ui,
+    sans-serif;
+  color: var(--rpg-gold-light, #f6dc98);
+}
+#window .rubis-cell.unknown {
+  border-style: dashed;
+}
+
+/* Infobulle d'un Rubis. */
+.rubis-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.rubis-tip-desc {
+  max-width: 280px;
+  line-height: 1.35;
+  margin: 4px 0;
+}
+.rubis-unknown {
+  color: #b8a483;
+}
+.rubis-tip-note {
+  font-size: 11.5px;
+  color: #b8a483;
+  margin-top: 4px;
+}
+
+/* Portail de l'Arène : records, règles et douze épreuves. */
+#window .arena-motto {
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-style: italic;
+  color: var(--rpg-gold-light, #f6dc98);
+}
+#window .arena-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  text-align: left;
+}
+#window .arena-board,
+#window .arena-bosses {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 170, 90, 0.3);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .arena-board h3,
+#window .arena-bosses h3 {
+  margin: 0 0 8px;
+  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: 15px;
+}
+#window .arena-board h3 + .arena-record {
+  border-top: 0;
+}
+#window .arena-record + h3 {
+  margin-top: 14px;
+}
+#window .arena-record {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-top: 1px solid rgba(212, 170, 90, 0.15);
+}
+#window .arena-record b {
+  color: #ffd36d;
+}
+#window .arena-rules {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+#window .arena-tier {
+  margin: 8px 0 3px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffb347;
+}
+#window .arena-boss {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 13px;
+}
+#window .arena-boss span {
+  color: var(--rpg-muted, #b8a483);
+  text-align: right;
+}
+#window .arena-boss.done b {
+  color: #8fe3ae;
+}
+#window .arena-boss em {
+  font-style: normal;
+  color: #8fe3ae;
+}
+#window .arena-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+#window .arena-choice-note {
+  margin-top: 12px;
+  color: #ffd36d;
+}
+#window .arena-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-height: 240px;
+  overflow: auto;
+}
+@media (max-width: 760px) {
+  #window .arena-layout {
+    grid-template-columns: 1fr;
+  }
+  #window .rubis-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  #window .rubis-family {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+}

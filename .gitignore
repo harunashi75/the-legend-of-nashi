@@ -1,0 +1,23 @@
+# Dépendances
+node_modules/
+
+# Fichiers compilés et distributions
+dist/
+release/
+out/
+*.log
+
+# Sauvegardes et informations locales
+saves/
+*.bak
+.env
+.env.*
+!.env.example
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
