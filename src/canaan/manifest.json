@@ -12,6 +12,16 @@
     },
     {
       "kind": "script",
+      "id": "canaan-icon-art",
+      "file": "scripts/icon-art.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-icons",
+      "file": "scripts/icons.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-runtime-config",
       "file": "scripts/runtime-config.js"
     },
@@ -104,6 +114,16 @@
       "kind": "script",
       "id": "canaan-item-rules",
       "file": "scripts/item-rules.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-skill-icons",
+      "file": "scripts/skill-icons.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-weapon-look",
+      "file": "scripts/weapon-look.js"
     },
     {
       "kind": "script",
@@ -212,6 +232,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-gathering",
+      "file": "scripts/gathering.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-professions",
       "file": "scripts/professions.js"
     },
@@ -252,6 +277,21 @@
     },
     {
       "kind": "script",
+      "id": "canaan-bag",
+      "file": "scripts/bag.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-shop",
+      "file": "scripts/shop.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-bank",
+      "file": "scripts/bank.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-arena",
       "file": "scripts/arena.js"
     },
@@ -279,6 +319,16 @@
       "kind": "script",
       "id": "canaan-gear-engine",
       "file": "scripts/gear-engine.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-underground",
+      "file": "scripts/underground.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-achievements",
+      "file": "scripts/achievements.js"
     },
     {
       "kind": "script",

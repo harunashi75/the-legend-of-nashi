@@ -38,6 +38,7 @@
       tempest: 0,
       tempestReady: 0,
       arcane: 0,
+      umbra: false,
       relentless: new WeakMap(),
       // Recharges par allié : Bénédiction forestière et Gardien divin.
       blessing: new WeakMap(),
@@ -204,7 +205,7 @@
       next = refreshDot(old, total / seconds, t + seconds);
     if (old) Object.assign(old, next);
     else list.push({ kind, by: me(), element, dps: next.dps, until: next.until, tick: t + 1 });
-    float(m.x, m.y - 50, { thorns: '🌿', poison: '☠️', bleed: '🩸', burn: '🔥' }[kind] || '✦', elementColor(element));
+    float(m.x, m.y - 50, { thorns: '🌿', sap: '🌱', poison: '☠️', bleed: '🩸', burn: '🔥' }[kind] || '✦', elementColor(element));
   }
   const hasDot = (m, kinds, hero = me()) => (m._clsDots || []).some(d => d.by === hero && d.until > now() && kinds.includes(d.kind));
   // Ralentissement d'un héros : le plus fort en cours, jamais cumulé.
@@ -218,7 +219,7 @@
   }
   const slowedBy = (m, element, hero = me()) => m._clsSlow && m._clsSlow.until > now() && m._clsSlow.by === hero && m._clsSlow.element === element;
   // Fureur sauvage : poisons, ronces ou ralentissement de nature du Druide.
-  const natureMarked = m => hasDot(m, ['thorns', 'poison']) || slowedBy(m, 'nature');
+  const natureMarked = m => hasDot(m, ['thorns', 'sap', 'poison']) || slowedBy(m, 'nature');
   // Dégâts d'un effet (sur la durée, éclair, explosion) : ne redéclenchent pas les talents (aucune récursion).
   function effectHit(m, amount, element) {
     if (!alive(m)) return 0;
@@ -255,9 +256,15 @@
   window.CANAAN_CLASS_CAST = forHero(function (type, i) {
     const offensive = isOffensiveSkill(type, i),
       t = now(),
-      context = { magic: type === 'staff', multiplier: 1, skill: true, offensive, element: skillElement(classe().id, i) };
+      context = { magic: type === 'staff', multiplier: 1, skill: true, offensive, slot: i, element: skillElement(classe().id, i) };
     if (!offensive) return context;
     w.arcane++;
+    // Empreinte de l'Assassin : une compétence utilitaire renforce la prochaine compétence offensive.
+    if (w.umbra) {
+      w.umbra = false;
+      context.multiplier *= 1.25;
+      float(HP.x, HP.y - 74, '🌑 EMBUSCADE +25 %', '#c48cff');
+    }
     if (w.shadowPending) {
       w.shadowPending = false;
       context.multiplier *= 1.3;
@@ -288,6 +295,55 @@
     }
     return context;
   }, 2);
+  // Empreintes de classe après une compétence : bouclier (Paladin), soins (Druide), embuscade (Assassin),
+  // décharge élémentaire (Élémentaliste). Les effets sur les coups sont dans after().
+  window.CANAAN_CLASS_AFTER_CAST = forHero(function (type, i) {
+    const id = classe().id;
+    if (!id) return;
+    const offensive = isOffensiveSkill(type, i),
+      group = game.heroes.filter(h => !h.player.dead && !h.away && (h === me() || near(h.player, HP, 6)));
+    if (offensive) {
+      if (id === 'paladin') giveShield(me(), HP.mhp * 0.05, 4, '☀️ Bouclier');
+      return;
+    }
+    if (id === 'druide')
+      for (const h of group) {
+        const n = applyHeal(h.player.mhp * 0.08, false, h, me(), true);
+        if (n > 0) float(h.player.x, h.player.y - 40, '+' + Math.round(n) + ' PV', '#7ee36a');
+      }
+    if (id === 'paladin') for (const h of group) giveShield(h, h.player.mhp * 0.1, 5, '☀️ Bouclier');
+    if (id === 'assassin') {
+      w.umbra = true;
+      float(HP.x, HP.y - 74, '🌑 Embuscade prête', '#c48cff');
+    }
+    if (id === 'elementaliste') {
+      const el = skillElement(id, i);
+      blast(HP.x, HP.y, 2.5, characterStats(me()).attack, el);
+    }
+  }, 2);
+  // Texte de l'empreinte de classe d'une compétence d'arme, pour l'info-bulle.
+  function skillRider(type, i, hero = game.hero) {
+    const id = classe(hero).id,
+      offensive = isOffensiveSkill(type, i);
+    if (!id) return 'Sans classe : choisis une classe au camp pour ajouter un effet à cette compétence.';
+    const el = ELEMENTS[skillElement(id, i)];
+    if (id === 'druide')
+      return offensive
+        ? '🌿 Druide : empoisonne les cibles (25 % des dégâts infligés, en plus, sur 4 s) et soigne ton groupe proche de 5 % des dégâts.'
+        : '🌿 Druide : soigne aussi toi et tes alliés à 6 cases de 8 % de leurs PV max.';
+    if (id === 'paladin')
+      return offensive
+        ? '☀️ Paladin : te donne un bouclier de 5 % de tes PV max pendant 4 s.'
+        : '☀️ Paladin : toi et tes alliés à 6 cases gagnez un bouclier de 10 % des PV max pendant 5 s.';
+    if (id === 'assassin')
+      return offensive
+        ? '🌑 Assassin : +12 % de dégâts' + (i === 3 ? ', et encore +30 % contre une cible sous 50 % de ses PV.' : '.')
+        : '🌑 Assassin : ta prochaine compétence offensive fait +25 % de dégâts (Embuscade).';
+    if (!offensive) return el.icon + ' ' + el.name + ' : libère une décharge autour de toi (100 % de l’Attaque, rayon 2,5 cases).';
+    if (el.name === 'Feu') return '🔥 Feu : brûle les cibles (30 % des dégâts infligés, en plus, sur 4 s).';
+    if (el.name === 'Glace') return '❄️ Glace : ralentit les cibles de 30 % pendant 2,5 s.';
+    return '⚡ Foudre : chaque coup rebondit sur 2 ennemis proches (35 % des dégâts).';
+  }
   // Attaques de base plus rapides en forme féline (verrou × 0,8).
   window.CANAAN_CLASS_BASIC_LOCK = forHero(() => (feral() ? 0.8 : 1), 0);
   // Avant un coup d'un héros : multiplicateurs de dégâts.
@@ -307,6 +363,8 @@
     }
     if (on('assassin', 'predator') && game.world.monsters.filter(o => alive(o) && near(o, HP, 5)).length === 1) mult *= 1.12;
     if (on('elementaliste', 'deepFreeze') && slowedBy(m, 'ice')) mult *= 1.15;
+    // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
+    if (options.skill && options.offensive && isClass('assassin')) mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
     return { damage: damage * mult, base: damage, options };
   }
   // Après un coup : déclencheurs (effets sur la durée, éclairs, ralentissements, soins), d'après les dégâts réels.
@@ -340,8 +398,10 @@
       // Assassin
       if (basic && on('assassin', 'poison') && roll() < 0.2) dot(m, 'poison', 5, dealt * 0.35, 'shadow');
       if (crit && on('assassin', 'hemorrhage')) dot(m, 'bleed', 4, dealt * 0.3, 'shadow');
-      // Élémentaliste : glace (passif), brûlure, gel.
-      if (skill && options.element === 'ice' && isClass('elementaliste')) slow(m, 0.2, 2, 'ice');
+      // Empreintes de classe sur les compétences offensives : sève (Druide), feu et glace (Élémentaliste).
+      if (skill && isClass('druide')) dot(m, 'sap', 4, dealt * 0.25, 'nature');
+      if (skill && options.element === 'fire' && isClass('elementaliste')) dot(m, 'burn', 4, dealt * 0.3, 'fire');
+      if (skill && options.element === 'ice' && isClass('elementaliste')) slow(m, 0.3, 2.5, 'ice');
       if (skill && on('elementaliste', 'flames') && roll() < 0.2) dot(m, 'burn', 5, dealt * 0.35, 'fire');
       if (skill && on('elementaliste', 'iceHeart') && roll() < 0.2) slow(m, 0.3, 3, 'ice');
     }
@@ -358,6 +418,17 @@
       if (crit && on('elementaliste', 'overload') && roll() < 0.2) {
         CANAAN_SKILLS.fx('beam', m.x, m.y - 90, Math.PI / 2, 90, 6, '#f4f07a', 0.25);
         effectHit(m, dealt * 0.4, 'lightning');
+      }
+      // Empreinte de foudre : chaque coup rebondit sur 2 ennemis proches.
+      if (skill && options.element === 'lightning' && isClass('elementaliste')) {
+        const others = game.world.monsters
+          .filter(o => o !== m && alive(o) && near(o, m, 4))
+          .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))
+          .slice(0, 2);
+        for (const o of others) {
+          CANAAN_SKILLS.fx('beam', m.x, m.y, Math.atan2(o.y - m.y, o.x - m.x), Math.hypot(o.x - m.x, o.y - m.y), 5, '#f4f07a', 0.25);
+          effectHit(o, dealt * 0.35, 'lightning');
+        }
       }
       if (skill && on('elementaliste', 'chain') && roll() < 0.15) {
         const others = game.world.monsters
@@ -415,6 +486,12 @@
     HP.veiled = false;
   }
   // Lance le sort spécial de la classe d'un héros (l'hôte par défaut). Renvoie true s'il a eu lieu.
+  // Sort spécial lancé (compté pour les succès).
+  const castTracked = hero => {
+    const done = castSpecial(hero);
+    if (done) canaanAchieve(hero, 'special');
+    return done;
+  };
   const castSpecial = forHero(function () {
     const c = def(),
       t = now();
@@ -483,7 +560,7 @@
       return false;
     }
     if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'class-special' });
-    return castSpecial(game.hero);
+    return castTracked(game.hero);
   }
   // Temps de recharge restant du sort spécial (affichage ; l'invité le reçoit de l'hôte).
   let guestSpecial = 0;
@@ -778,14 +855,13 @@
       el.style.setProperty('--skill-element', element.color);
       el.classList.add('elemental');
       el.insertAdjacentHTML('beforeend', '<span class="skill-elem" aria-hidden="true">' + element.icon + '</span>');
-      el.title += ' · ' + element.name + ' (' + c.name + ')';
     });
     if (!c) return;
     const el = document.createElement('div');
     el.className = 'skill special';
     el.id = 'specialSkill';
-    el.title = c.special.name + ' — ' + c.special.desc + ' (Mana ' + c.special.mana + ')';
-    el.innerHTML = c.special.icon + '<span class="skill-label">' + escape(c.special.name) + '</span><div class="key">F</div><div class="cd" style="display:none"></div>';
+    el.dataset.tooltipSkill = 'special';
+    el.innerHTML = (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) + '<span class="skill-label">' + escape(c.special.name) + '</span><div class="key">F</div><div class="cd" style="display:none"></div>';
     el.style.setProperty('--skill-element', c.color);
     bar.appendChild(el);
   }
@@ -814,7 +890,7 @@
     choose: chooseClass,
     equip: equipTalent,
     unequip: unequipTalent,
-    special: castSpecial,
+    special: hero => castTracked(hero),
     onLevel,
     autoTalents,
     within,
@@ -824,6 +900,7 @@
     setGuestSpecial: v => (guestSpecial = Math.max(0, Number(v) || 0)),
     setClasse,
     decorateSkillBar,
+    skillRider,
     promptClass,
     giveShield,
     audit: (hero = game.hero) => ({

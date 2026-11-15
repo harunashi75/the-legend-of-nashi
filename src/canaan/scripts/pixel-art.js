@@ -640,21 +640,27 @@
   }
   // body : le héros dessiné (l'hôte par défaut), pour son orientation et sa marche ; look : son apparence.
   // body.form === 'feral' : panthère du Druide ; body.veiled : Voile d'ombre (presque invisible).
-  function drawPixelHero(c, x, y, color, phase, player, body = P, look = body === P ? game.hero?.look : null) {
+  // hero : le héros dessiné (arme équipée et visée) ; l'hôte par défaut. L'arme est dessinée à part, dans sa main,
+  // par canaan-weapon-look (derrière le corps quand il vise vers le haut).
+  function drawPixelHero(c, x, y, color, phase, player, body = P, look = body === P ? game.hero?.look : null, hero = body === P ? game.hero : null) {
     const dx = body.vx || 0,
       dy = body.vy || 0;
-    const face = Math.abs(dx) > Math.abs(dy) ? (dx >= 0 ? 1 : 3) : dy < 0 ? 2 : 0;
     const moving = Math.abs(dx) + Math.abs(dy) > 0.1;
+    // Le héros regarde sa mire à l'arrêt et pendant une attaque ; sinon, la direction de sa marche.
+    const aiming = hero && ((body.atk || 0) > 0 || !moving);
+    const face = aiming ? CANAAN_WEAPON_LOOK.faceFromAim(CANAAN_WEAPON_LOOK.aimOf(hero, body)) : Math.abs(dx) > Math.abs(dy) ? (dx >= 0 ? 1 : 3) : dy < 0 ? 2 : 0;
     // Pas plus doux : environ neuf images par seconde (anim avance de 0,25 par pas de simulation).
     const frame = moving ? Math.floor(Math.abs(phase) * 0.6) % 4 : 0;
     const feral = body.form === 'feral';
-    const spr = feral ? canaanFeralSprite(face, frame) : canaanHeroSprite(look, face, frame);
+    const spr = feral ? canaanFeralSprite(face, frame) : canaanHeroSprite(look, face, frame, hero ? { tool: 'none' } : {});
     const bob = moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
     // Le minotaure est un peu plus grand.
     const scale = !feral && look?.race === 'minotaure' ? 1.1 : 1.0;
     c.save();
     if (body.veiled) c.globalAlpha *= 0.3;
+    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'back');
     c.drawImage(spr, Math.round(x - 26 * scale), Math.round(y + 18 - 60 * scale + bob), Math.round(52 * scale), Math.round(64 * scale));
+    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'front');
     c.restore();
   }
   // Ponts en planches hors des instances (les routes sont des tuiles texturées de canaan-world-look), dans le style

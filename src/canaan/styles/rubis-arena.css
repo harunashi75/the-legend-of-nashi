@@ -21,12 +21,12 @@
   margin: 0;
   font-family: var(--rpg-serif, Georgia, serif);
   color: var(--rpg-gold-light, #f6dc98);
-  font-size: 17px;
+  font-size: calc(17px * var(--font-scale));
   letter-spacing: 0.5px;
 }
 #window .rubis-head span {
   color: var(--rpg-muted, #b8a483);
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 
 /* Gemme : facette taillée selon la famille, dégradé lumineux et reflet. */
@@ -81,12 +81,12 @@
 }
 .rubis-gem b {
   position: relative;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   line-height: 1;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8));
 }
 .rubis-gem.big b {
-  font-size: 18px;
+  font-size: calc(18px * var(--font-scale));
 }
 
 /* Six emplacements universels. */
@@ -124,7 +124,7 @@
 }
 #window .rubis-slot em {
   font-style: normal;
-  font-size: 10.5px;
+  font-size: calc(10.5px * var(--font-scale));
   line-height: 1.15;
   text-align: center;
   color: var(--rpg-muted, #b8a483);
@@ -142,7 +142,7 @@
 }
 #window .rubis-lock {
   margin: 10px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #ffcf9a;
 }
 
@@ -161,7 +161,7 @@
   gap: 8px;
 }
 #window .rubis-family-name {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--font-scale));
   font-weight: 700;
   white-space: nowrap;
 }
@@ -183,7 +183,7 @@
   border: 1px solid rgba(212, 170, 90, 0.2);
   background: rgba(0, 0, 0, 0.3);
   color: #6a5a48;
-  font: 700 14px var(--rpg-serif, Georgia, serif);
+  font: 700 calc(14px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
 }
 #window button.rubis-cell {
   cursor: pointer;
@@ -205,7 +205,7 @@
   right: 2px;
   top: 1px;
   font:
-    700 9px system-ui,
+    700 calc(9px * var(--font-scale)) system-ui,
     sans-serif;
   color: var(--rpg-gold-light, #f6dc98);
 }
@@ -229,7 +229,7 @@
   color: #b8a483;
 }
 .rubis-tip-note {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--font-scale));
   color: #b8a483;
   margin-top: 4px;
 }
@@ -258,7 +258,7 @@
   margin: 0 0 8px;
   font-family: var(--rpg-serif, Georgia, serif);
   color: var(--rpg-gold-light, #f6dc98);
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
 }
 #window .arena-board h3 + .arena-record {
   border-top: 0;
@@ -279,12 +279,12 @@
 #window .arena-rules {
   margin: 0;
   padding-left: 18px;
-  font-size: 12.5px;
+  font-size: calc(12.5px * var(--font-scale));
   line-height: 1.45;
 }
 #window .arena-tier {
   margin: 8px 0 3px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #ffb347;
@@ -294,7 +294,7 @@
   grid-template-columns: 24px minmax(0, 1fr) 18px;
   gap: 6px;
   padding: 3px 0;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .arena-boss span {
   color: var(--rpg-muted, #b8a483);

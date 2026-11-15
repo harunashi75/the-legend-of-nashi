@@ -19,6 +19,20 @@
       }
     },
     {
+      name: 'armes et icônes',
+      exports: {
+        CANAAN_ICONS: 'object',
+        CANAAN_ICON_ART: 'object',
+        CANAAN_BAG: 'object',
+        CANAAN_SHOP: 'object',
+        CANAAN_BANK: 'object',
+        CANAAN_GATHER: 'object',
+        CANAAN_WEAPON_LOOK: 'object',
+        CANAAN_SKILL_ICONS: 'object',
+        canaanDrawProjectile: 'function'
+      }
+    },
+    {
       name: 'rendu du monde',
       exports: {
         drawWorldTile: 'function',
@@ -270,6 +284,35 @@
       exports: { 'CANAAN_HOUSE.drawTile': 'function', 'CANAAN_HOUSE.draw': 'function', 'CANAAN_HOUSE.interact': 'function', 'CANAAN_HOUSE.click': 'function', 'CANAAN_HOUSE.layout': 'function', 'CANAAN_HOUSE.load': 'function', toggleHousing: 'function' }
     },
     {
+      name: 'tréfonds',
+      exports: {
+        'CANAAN_UNDER.setLayer': 'function',
+        'CANAAN_UNDER.drawGround': 'function',
+        'CANAAN_UNDER.draw': 'function',
+        'CANAAN_UNDER.drawSurface': 'function',
+        'CANAAN_UNDER.spawn': 'function',
+        'CANAAN_UNDER.spawnBosses': 'function',
+        'CANAAN_UNDER.blocked': 'function',
+        'CANAAN_UNDER.ambience': 'function',
+        'CANAAN_UNDER.markers': 'function',
+        'CANAAN_UNDER.use': 'function'
+      }
+    },
+    {
+      name: 'succès',
+      exports: {
+        'CANAAN_ACHIEVEMENTS.event': 'function',
+        'CANAAN_ACHIEVEMENTS.sanitize': 'function',
+        'CANAAN_ACHIEVEMENTS.export': 'function',
+        'CANAAN_ACHIEVEMENTS.netView': 'function',
+        'CANAAN_ACHIEVEMENTS.applyRemote': 'function',
+        'CANAAN_ACHIEVEMENTS.handle': 'function',
+        'CANAAN_ACHIEVEMENTS.draw': 'function',
+        'CanaanStages.achievements.after': 'function',
+        toggleAchievements: 'function'
+      }
+    },
+    {
       name: 'quêtes',
       exports: {
         'CANAAN_QUESTS.interact': 'function',
@@ -392,17 +435,8 @@
           check(module.name, path, () => readExport(path), type);
       }
       for (const [module, path, read, type] of CANAAN_REQUIRED_BINDINGS) check(module, path, read, type);
-      // Les noms officiels forment une table complète de huit raretés × neuf familles.
-      const rarities = [
-        'Commun',
-        'Peu commun',
-        'Rare',
-        'Épique',
-        'Héroïque',
-        'Légendaire',
-        'Mythique',
-        'Céleste'
-      ];
+      // Les noms officiels forment une table complète de six raretés × neuf familles.
+      const rarities = ['Commun', 'Peu commun', 'Rare', 'Épique', 'Légendaire', 'Mythique'];
       const weapons = ['sword', 'dualsword', 'axe', 'mace', 'spear', 'dualdagger', 'bow', 'staff', 'shield'];
       if (window.WEAPON_NAMES && typeof window.WEAPON_NAMES === 'object') {
         for (const rarity of rarities)
@@ -469,7 +503,7 @@
         gearCore: !!window.CANAAN_GEAR,
         lootCore: !!window.CANAAN_LOOT,
         gearEngine: !!window.CANAAN_GEAR_ENGINE && !!window.CANAAN_GEAR_ENGINE.normalize,
-        weaponNames: !!window.WEAPON_NAMES && !!window.WEAPON_NAMES.Céleste,
+        weaponNames: !!window.WEAPON_NAMES && !!window.WEAPON_NAMES.Mythique,
         uiFreeze: !!window.CANAAN_UI && !!window.CANAAN_UI.gearStat,
         lootSave: !!window.CANAAN_PERSISTENCE.requestSave
       };
@@ -481,7 +515,7 @@
       };
     }
   });
-  document.title = 'CANAAN ONLINE V' + CANAAN_VERSION;
+  document.title = 'THE LEGEND OF NASHI V' + CANAAN_VERSION;
   const canaanBootstrapVersionLabel = document.querySelector('#title p');
   if (canaanBootstrapVersionLabel)
     canaanBootstrapVersionLabel.textContent = 'LEGENDS OF THE SHATTERED DAWN · V' + CANAAN_VERSION;

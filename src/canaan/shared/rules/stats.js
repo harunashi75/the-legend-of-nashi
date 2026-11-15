@@ -49,10 +49,19 @@ export function validSecondaries(sec) {
   const keys = Object.keys(sec);
   return keys.length === 2 && keys.every(k => SECONDARY_KEYS.includes(k) && Number.isInteger(sec[k]) && sec[k] > 0);
 }
-// Toutes les statistiques d'un objet : principales calculées, secondaires enregistrées.
+// Enchantement d'un objet (enchanteur) : une statistique secondaire de plus, ou null.
+export function itemEnchant(item) {
+  const e = item?.ench;
+  return e && SECONDARY_KEYS.includes(e.stat) && Number.isInteger(e.value) && e.value > 0 ? { stat: e.stat, value: e.value } : null;
+}
+// Toutes les statistiques d'un objet : principales calculées, secondaires enregistrées, plus l'enchantement
+// (ajouté aux secondaires ; à part dans enchant pour l'info-bulle).
 export function itemStats(item) {
-  if (!item || !SLOT_PROFILE[item.slot]) return { primary: {}, secondary: {} };
-  return { primary: itemPrimary(item), secondary: validSecondaries(item.sec) ? { ...item.sec } : {} };
+  if (!item || !SLOT_PROFILE[item.slot]) return { primary: {}, secondary: {}, enchant: null };
+  const secondary = validSecondaries(item.sec) ? { ...item.sec } : {},
+    enchant = itemEnchant(item);
+  if (enchant) secondary[enchant.stat] = (secondary[enchant.stat] || 0) + enchant.value;
+  return { primary: itemPrimary(item), secondary, enchant };
 }
 // Points nécessaires pour 1 % d'effet, selon le niveau du héros : un même équipement compte moins en montant.
 export function pointsPerPercent(level) {
@@ -114,8 +123,9 @@ export function mobHealth(level, elite = false, typeHp = 100) {
 export function mobDamage(level) {
   return 6 + 1.5 * clampLevel(level);
 }
-// Boss : [PV, dégâts] par rapport à un monstre du même niveau (donjons et raids renforcés : ils restaient trop faciles).
-const BOSS = Object.freeze({ dungeon: [2.9, 1.3], raid: [3.4, 1.22], world: [4, 1.5] });
+// Boss : [PV, dégâts] par rapport à un monstre du même niveau. Un boss doit durer bien plus longtemps qu'un
+// monstre de son instance (≈ 45 s seul) et frapper nettement plus fort.
+const BOSS = Object.freeze({ dungeon: [12, 1.9], raid: [14, 2.1], world: [8, 1.8] });
 export function bossHealth(level, kind) {
   return Math.round(mobHealth(level) * (BOSS[kind] || BOSS.dungeon)[0]);
 }

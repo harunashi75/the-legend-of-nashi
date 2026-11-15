@@ -46,7 +46,8 @@ export function resolveOutgoing(value, stats, target, rng, armorFactor = 1, crit
 export function heroPower(attack) {
   return Math.max(8, Math.round(18 + (attack - 18) * 0.75 + attack * 0.25));
 }
-// Puissance magique d'un héros (bâton) : moins d'attaque, plus d'intelligence.
+// Puissance magique d'un héros (bâton) : la même que la Puissance d'attaque (l'Intelligence n'existe plus sur
+// les objets ; elle s'ajoute si un effet en donne). Le bâton n'est plus 40 % plus faible que les autres armes.
 export function heroMagicPower(attack, intellect = 0) {
-  return Math.max(8, Math.round(18 + (attack - 18) * 0.55 + intellect * 0.85));
+  return Math.max(8, Math.round(heroPower(attack) + Math.max(0, intellect) * 0.85));
 }

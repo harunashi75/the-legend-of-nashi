@@ -312,7 +312,7 @@
           p = clampArena(TP.x + Math.cos(a) * d, TP.y + Math.sin(a) * d);
         tele('circle', { x: p.x, y: p.y, r: 90 }, 1.3 + k * 0.12, COLORS.phys, () => {
           flash(p.x, p.y, 90, '#c8a878');
-          strikeWhere(p => hitCircle(p, p.x, p.y, 90), 2);
+          strikeWhere(q => hitCircle(q, p.x, p.y, 90), 2);
         });
       }
     },
@@ -327,7 +327,7 @@
           tele('circle', { x: p.x, y: p.y, r: 100 }, 1.1, COLORS.phys, () => {
             flash(p.x, p.y, 100, '#c8a878');
             shake = 9;
-            strikeWhere(p => hitCircle(p, p.x, p.y, 100), 2.4);
+            strikeWhere(q => hitCircle(q, p.x, p.y, 100), 2.4);
           });
         });
     },
@@ -340,7 +340,7 @@
         const p = k === 0 ? clampArena(TP.x, TP.y) : randomSpot();
         tele('circle', { x: p.x, y: p.y, r }, 1.5 + k * 0.08, o.magic ? b.def.color : COLORS.phys, () => {
           flash(p.x, p.y, r, o.magic ? b.def.color : '#c8a878', 0.35, !!o.magic);
-          strikeWhere(p => hitCircle(p, p.x, p.y, r), 2.2, { magic: !!o.magic });
+          strikeWhere(q => hitCircle(q, p.x, p.y, r), 2.2, { magic: !!o.magic });
         });
       }
     },
@@ -353,7 +353,7 @@
           p = clampArena(TP.x + (k ? Math.cos(a) * 140 : 0), TP.y + (k ? Math.sin(a) * 140 : 0));
         tele('circle', { x: p.x, y: p.y, r: 110 }, 1.2, COLORS.poison, () => {
           flash(p.x, p.y, 110, COLORS.poison);
-          strikeWhere(p => hitCircle(p, p.x, p.y, 110), 1.4, { magic: true });
+          strikeWhere(q => hitCircle(q, p.x, p.y, 110), 1.4, { magic: true });
           run.hazards.push({
             x: p.x,
             y: p.y,
@@ -477,7 +477,7 @@
           const p = { x: TP.x, y: TP.y };
           tele('circle', { x: p.x, y: p.y, r: 70 }, 0.8, COLORS.storm, () => {
             flash(p.x, p.y, 70, COLORS.storm, 0.3, true);
-            strikeWhere(p => hitCircle(p, p.x, p.y, 70), 2, { magic: true });
+            strikeWhere(q => hitCircle(q, p.x, p.y, 70), 2, { magic: true });
           });
         });
     },
@@ -606,7 +606,7 @@
         const p = k < 2 ? clampArena(TP.x + (k ? 120 : 0), TP.y) : randomSpot();
         tele('circle', { x: p.x, y: p.y, r: 110, crystal: true }, 2, COLORS.crystal, () => {
           flash(p.x, p.y, 110, '#e0c0ff');
-          strikeWhere(p => hitCircle(p, p.x, p.y, 110), 2.4, { magic: true });
+          strikeWhere(q => hitCircle(q, p.x, p.y, 110), 2.4, { magic: true });
         });
       }
     },
@@ -647,7 +647,7 @@
         tele('circle', { x: p.x, y: p.y, r: 105, meteor: true }, 1.6 + k * 0.15, COLORS.fire, () => {
           flash(p.x, p.y, 105, COLORS.fire);
           shake = 8;
-          strikeWhere(p => hitCircle(p, p.x, p.y, 105), 2.6, { magic: true });
+          strikeWhere(q => hitCircle(q, p.x, p.y, 105), 2.6, { magic: true });
           run.hazards.push({
             x: p.x,
             y: p.y,
@@ -852,6 +852,11 @@
       for (const hero of group) {
         const rec = records(hero);
         rec.completed = true;
+        // Butin de prestige du dernier boss : 5 % de chances d'un objet Légendaire du niveau du héros.
+        if (prestigeRoll('arenaFinal')) {
+          const item = giveGear(clampLevel(hero.level), 'arena', 'Légendaire', hero);
+          if (item) chat('Arène', '🌟 ' + (hero.name || 'Le héros') + ' remporte un objet LÉGENDAIRE : ' + gearDisplayName(item) + ' !');
+        }
         if (CANAAN_RUBIS.missing(hero).length) {
           // L'hôte choisit son Rubis final ; un allié reçoit un Rubis qui lui manque.
           if (hero === game.hero) {

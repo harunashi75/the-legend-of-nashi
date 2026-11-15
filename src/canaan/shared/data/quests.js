@@ -635,7 +635,7 @@ export const QUESTS = deepFreeze([
     level: 47,
     summary: 'Une machine des anciens dort sous le désert : trois anneaux qui représentent les sanctuaires.',
     steps: [{ k: 'puzzle', text: 'Synchroniser les trois anneaux (tourner un anneau entraîne le suivant)' }],
-    reward: { gold: 460, flags: ['star5'], item: 'Héroïque', text: 'Cinquième étoile et la salle du trésor (équipement Héroïque)' },
+    reward: { gold: 460, flags: ['star5'], item: 'Épique', text: 'Cinquième étoile et la salle du trésor (équipement Épique)' },
     talk: {
       offer: [
         'Trois anneaux, six symboles chacun. Quand ils sont alignés, la machine montre comment réveiller le Cœur.',

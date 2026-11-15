@@ -97,7 +97,8 @@
   // ---------------------------------------------------------------- Image de fond
   // Peinte d'un coup, rapidement (couleurs précalculées, écriture directe des pixels), puis gardée :
   // sur l'île, refaite seulement si l'île change ; en donjon, quand une herse s'ouvre.
-  let island = null,
+  let under = null,
+    island = null,
     houses = [],
     gates = -1,
     box = null,
@@ -119,6 +120,13 @@
       stale = gateCount() !== gates;
     }
     if (!stale) return base;
+    // Les Tréfonds : leur image est peinte une fois et gardée.
+    if (!inst && game.world.layer === 'under') {
+      under ||= paintUnder();
+      base = under;
+      baseFor = key;
+      return base;
+    }
     // L'île est gardée à part : au retour d'un donjon, elle resert telle quelle.
     if (!inst && island && island.key === key && island.bridges === BRIDGE_TILES.size && !force) {
       base = island.image;
@@ -316,6 +324,36 @@
     });
     return cv;
   }
+  // Tréfonds : sols et chemins de chaque biome, eau et boue, roche soulignée le long des galeries.
+  function paintUnder() {
+    const cv = newCanvas(),
+      tiles = game.world.underworld,
+      U = CANAAN_UNDER.T,
+      wet = t => t === U.RIVER || t === U.LAKE || t === U.CHASM,
+      open = t => t !== undefined && (!SOLID.includes(t) || wet(t));
+    pixels(cv, (px, w) => {
+      const rock = shades('#0a0808', 1, 1),
+        edge = shades('#4a4038', 0.85, 1.15),
+        cols = new Map();
+      for (let y = 0; y < MAPH; y++)
+        for (let x = 0; x < MAPW; x++) {
+          const t = tiles[y][x],
+            X = x * PX,
+            Y = y * PX;
+          if (!open(t)) {
+            let rim = false;
+            for (let i = 0; i < 4 && !rim; i++) rim = open(tiles[y + DY4[i]]?.[x + DX4[i]]);
+            fillTile(px, w, X, Y, rim ? edge : rock);
+            continue;
+          }
+          const hex = CANAAN_UNDER.mapColor(t, x, y);
+          let sh = cols.get(hex);
+          if (!sh) cols.set(hex, (sh = shades(hex, 0.9, 1.08)));
+          fillTile(px, w, X, Y, sh);
+        }
+    });
+    return cv;
+  }
   // Cadre d'une instance : les cases praticables et leurs abords.
   function instanceBox() {
     let x0 = MAPW,
@@ -424,6 +462,16 @@
         c.lineTo(6, -2);
         c.fill();
         R(-1, 1, 3, 4, '#4a2a18');
+        break;
+      case 'stairs':
+        // Entrée des Tréfonds : trou cerclé de pierre et échelle.
+        R(-8, -6, 16, 12, '#22160e');
+        R(-7, -5, 14, 10, '#8a8a8e');
+        R(-5, -3, 10, 6, '#050404');
+        R(-3, -9, 2, 12, '#c8b890');
+        R(2, -9, 2, 12, '#c8b890');
+        R(-3, -6, 7, 1, '#c8b890');
+        R(-3, -2, 7, 1, '#c8b890');
         break;
       case 'ruins':
         for (const dx of [-6, 2]) {
@@ -597,8 +645,31 @@
         if (m.hp <= 0 || m.hidden) continue;
         put(m.boss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, m.boss && names ? m.t : null);
       }
+    } else if (game.world.layer === 'under') {
+      // Tréfonds : forteresse, entrées, portails des donjons, repaires des boss, marchand ; monstres sur la mini-carte.
+      for (const mk of CANAAN_UNDER.markers()) {
+        const at = put(mk.kind, mk.x, mk.y, {}, mk.name);
+        if (at && mk.i !== undefined && view.place === mk.i && !v.mini) {
+          c.strokeStyle = '#ffffff';
+          c.lineWidth = 3;
+          c.beginPath();
+          c.arc(at[0], at[1], 15 + Math.sin(time * 0.15) * 2, 0, Math.PI * 2);
+          c.stroke();
+        }
+      }
+      for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
+      if (v.mini)
+        for (const m of game.world.monsters) if (m.hp > 0) put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
+      if (!v.mini && v.scale <= 3)
+        CANAAN_UNDER.BIOMES.forEach(b => {
+          const a = (b.angle * Math.PI) / 180,
+            [sx, sy] = S(200 + Math.cos(a) * 80, 200 + Math.sin(a) * 80);
+          label(c, b.name, sx, sy, 13, '#fff4d2');
+        });
     } else {
       for (const p of PIXEL_PLACES) put(p.type === 'camp' ? 'refuge' : p.type, p.x, p.y, {}, p.name);
+      // Entrées des Tréfonds.
+      for (const e of CANAAN_UNDER.ENTRANCES) put('stairs', e.x, e.y, {}, e.name);
       for (const b of houses) if (b.id === 'maison') put('home', b.x + b.w / 2, b.y + b.h / 2, {}, 'Ta maison');
       if (!v.mini && v.scale >= 8)
         for (const b of houses) if (b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y)) label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
@@ -659,7 +730,7 @@
       }
     }
     // Noms des biomes sur la vue d'ensemble de l'île, par-dessus les repères.
-    if (!game.world.instance && !v.mini && v.scale <= 3)
+    if (!game.world.instance && game.world.layer !== 'under' && !v.mini && v.scale <= 3)
       for (const z of ZONES) {
         const [sx, sy] = S(z.x, z.y);
         label(c, z.name, sx, sy, 13, '#fff4d2');
@@ -683,7 +754,7 @@
         span = Math.max(b.x1 - b.x0, b.y1 - b.y0);
       return { cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2, scale: BIG / span };
     }
-    return { cx: 200, cy: 200, scale: BIG / 360 };
+    return { cx: 200, cy: 200, scale: BIG / (game.world.layer === 'under' ? 330 : 360) };
   }
   function currentView() {
     const fit = fitView();
@@ -712,7 +783,7 @@
       y0 = v.cy - BIG / v.scale / 2;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, BIG, BIG);
-    c.fillStyle = game.world.instance ? '#08080e' : '#1d5f96';
+    c.fillStyle = game.world.instance || game.world.layer === 'under' ? '#08080e' : '#1d5f96';
     c.fillRect(0, 0, BIG, BIG);
     c.imageSmoothingEnabled = v.scale < PX;
     c.drawImage(b, x0 * PX, y0 * PX, (BIG / v.scale) * PX, (BIG / v.scale) * PX, 0, 0, BIG, BIG);
@@ -834,7 +905,7 @@
     c.beginPath();
     c.arc(S / 2, S / 2, S / 2 - 2, 0, Math.PI * 2);
     c.clip();
-    c.fillStyle = game.world.instance ? '#08080e' : '#1d5f96';
+    c.fillStyle = game.world.instance || game.world.layer === 'under' ? '#08080e' : '#1d5f96';
     c.fillRect(0, 0, S, S);
     c.imageSmoothingEnabled = scale < PX;
     c.drawImage(b, x0 * PX, y0 * PX, span * PX, span * PX, 0, 0, S, S);

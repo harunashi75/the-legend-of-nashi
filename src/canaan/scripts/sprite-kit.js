@@ -520,6 +520,23 @@
   }
   // Apparence des créatures du monde, d'après leur nom ; palettes : [principale, sombre, claire, accent, yeux].
   const WORLD_LOOKS = [
+    // Créatures des Tréfonds (sous l'île) : avant les noms plus courts qu'elles contiennent (Squelette, Spectre…).
+    [/Ver des boues/, 'horror', ['#8a6440', '#5a3e26', '#b08a5e', '#e0c080', '#ffcf40']],
+    [/Taupe-garou/, 'quad', ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a'], { heavy: true }],
+    [/Scarabée foreur/, 'scorpion', ['#3a5a6a', '#20343e', '#6a8a9a', '#c8a040', '#ff6a3a']],
+    [/Gobelin des mines/, 'imp', ['#8aa05a', '#5a6e34', '#b0c880', '#6a5a4a', '#ffd23f'], { nowings: true }],
+    [/Sentinelle de pierre/, 'golem', ['#8a8478', '#5a564e', '#b8b2a4', '#7ad0ff', '#e0f8ff']],
+    [/Spectre minier/, 'spirit', ['#7ab8e0', '#3a6a90', '#d0ecff', '#ffd36d', '#ffffff']],
+    [/Squelette nain/, 'skeleton', ['#d8ccb0', '#8a8068', '#f8f0d8', '#7a5a3a', '#7fd0ff']],
+    [/Gargouille/, 'imp', ['#6a6e7a', '#3e424c', '#9aa0ac', '#c84a4a', '#ff6a4a']],
+    [/Goule/, 'brute', ['#a8b49a', '#6a7a5e', '#d0dcc0', '#4a3a2a', '#ff4a4a'], { bare: true }],
+    [/Âme errante/, 'spirit', ['#9ae8c0', '#4aa880', '#e0fff0', '#ffffff', '#ffffff']],
+    [/Chevalier des tombes/, 'knight', ['#5a5e6e', '#34384a', '#8a8ea0', '#6ad0a0', '#7affc0']],
+    [/Corbeau des tombes/, 'flyer', ['#3a3448', '#1e1a2a', '#6a6080', '#c8c060', '#7affc0'], { raven: true }],
+    [/Myconide/, 'golem', ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], { leafy: true }],
+    [/Limace des fanges/, 'slime', ['#6a7a3a', '#3e4a20', '#9aaa5a', '#c8e060', '#1a2010']],
+    [/Mille-pattes/, 'scorpion', ['#9a4a2a', '#5a2a16', '#c87a4a', '#f0c040', '#ffef60']],
+    [/Moustique des fanges/, 'flyer', ['#5a6a4a', '#34402a', '#8a9a6a', '#c84a4a', '#ff4a4a']],
     [/Slime/, 'slime', ['#5edc7a', '#2e8a48', '#a8f5b8', '#ffffff', '#1a3020']],
     [/Loup/, 'quad', ['#8c7a68', '#5a4a3c', '#b8a690', '#e8dcc8', '#ffcf40']],
     [/Molosse/, 'quad', ['#a83a24', '#5a1a10', '#e0603a', '#ffd36b', '#fff0a0'], { mane: true }],
@@ -593,6 +610,11 @@
       pal: [col, shade(col, 0.6), shade(col, 1.3), '#e0c060', '#ffffff'],
       lookOpts: {}
     });
+  }
+  // Image d'une créature au repos (bestiaire du panneau des succès) : même apparence qu'en jeu.
+  function actorPortrait(m) {
+    resolveLook(m);
+    return actor(m.look, m.pal, m.lookOpts || {});
   }
   // Dessine n'importe quel monstre : normal, élite, boss mondial ou boss d'instance.
   function drawCanaanActor(c, m) {
@@ -682,7 +704,8 @@
       walk = m._walking,
       atk = Math.min(1, (time - (m._atk ?? -99)) / 16),
       lunge = atk < 1 ? Math.sin(atk * Math.PI) : 0,
-      toward = Math.atan2(P.y - m.y, P.x - m.x),
+      // Élan de l'attaque vers le héros visé (pas vers un héros caché par le Voile d'ombre).
+      toward = m.targetHero ? Math.atan2(m.targetHero.player.y - m.y, m.targetHero.player.x - m.x) : m.facingAngle || 0,
       reach = lunge * 9 * (scale / 1.5),
       ox = Math.cos(toward) * reach,
       oy = Math.sin(toward) * reach * 0.6,
@@ -998,6 +1021,7 @@
     canaanOutline,
     canaanPolish,
     canaanActorSprite: actor,
+    canaanActorPortrait: actorPortrait,
     drawCanaanActor,
     canaanLight,
     resetCanaanLights,

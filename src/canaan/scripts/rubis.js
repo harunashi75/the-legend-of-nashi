@@ -372,6 +372,7 @@
         if (has('phenix') && !rt.phoenixUsed) {
           rt.phoenixUsed = true;
           HP.hp = Math.max(1, Math.round(HP.mhp * 0.2));
+          canaanAchieve(cur, 'phoenix');
           float(HP.x, HP.y - 64, '🌅 PHÉNIX', '#ffb347');
           burst(HP.x, HP.y, '#ffb347', 30);
           // Repousse les ennemis proches ; les boss ne reculent que d'un pas.
@@ -403,7 +404,7 @@
       if (!has('explorateur') || game.world.instance) return [];
       const x = HP.x / TS,
         y = HP.y / TS;
-      return hiddenChestSpots.filter(c => !game.world.openedChests.includes(c.id) && Math.hypot(c.x - x, c.y - y) <= 12);
+      return canaanSecretChests().filter(c => !game.world.openedChests.includes(c.id) && Math.hypot(c.x - x, c.y - y) <= 12);
     },
     // Nouvelle vague de l'Arène : un nouveau combat commence.
     newCombat() {
@@ -593,7 +594,7 @@
           '<em>' +
           esc(r.name) +
           '</em></button>'
-        : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em>Emplacement ' +
+        : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rubis">Libre · ' +
           (k + 1) +
           '</em></div>';
     }
@@ -601,41 +602,15 @@
     if (!lock.ok) html += '<p class="rubis-lock">🔒 ' + esc(lock.why) + '</p>';
     else if (!discovered())
       html += '<p class="rubis-lock">⚔️ Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
-    html += '<div class="rubis-collection">';
-    FAMILIES.forEach((f, fi) => {
-      html +=
-        '<div class="rubis-family"><span class="rubis-family-name" style="color:' +
-        f.light +
-        '">' +
-        f.icon +
-        ' ' +
-        esc(f.short) +
-        '</span><div class="rubis-row">';
-      for (const r of RUBIS.filter(x => x.family === fi)) {
-        const n = ownedCount(r.id),
-          worn = gems().equipped.includes(r.id);
-        html += n
-          ? '<button type="button" class="rubis-cell gems().owned' +
-            (worn ? ' worn' : '') +
-            '" data-action="toggleRubis" data-rubis="' +
-            r.id +
-            '" data-tooltip-rubis="' +
-            r.id +
-            '" aria-label="' +
-            esc(r.name) +
-            '">' +
-            gem(r) +
-            (n > 1 ? '<sup>×' + n + '</sup>' : '') +
-            '</button>'
-          : '<span class="rubis-cell unknown" data-tooltip-rubis="' + r.id + '">?</span>';
-      }
-      html += '</div></div>';
-    });
-    return html + '</div></div>';
+    // Les Rubis possédés sont des objets du sac (I) : un clic sur l'un d'eux l'équipe ici.
+    html += '<p class="rubis-lock">⟦menu_inventory⟧ Tes Rubis sont dans ton sac (I) : clique sur un Rubis pour l’équiper ; clique sur un emplacement pour le retirer.</p>';
+    return html + '</div>';
   }
   function refreshPanel() {
     recomputeStats();
-    if (currentGearPanel === 'character' && modalOpen()) renderCharacter();
+    const panel = document.getElementById('window')?.dataset.canaanPanel;
+    if (modalOpen() && panel === 'character') renderCharacter();
+    else if (modalOpen() && panel === 'inventory') renderInventory();
     saveGame();
   }
   // Équiper ou retirer un Rubis pour un héros (l'hôte, ou un invité en ligne à sa demande).

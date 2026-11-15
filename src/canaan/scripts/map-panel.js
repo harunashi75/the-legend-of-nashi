@@ -60,6 +60,12 @@
       CANAAN_MAP.open();
       return;
     }
+    // Les Tréfonds : leurs quatre biomes, donjons et boss.
+    if (canaanUnder()) {
+      showPanel(CANAAN_UNDER.mapPanel());
+      CANAAN_MAP.open();
+      return;
+    }
     const regions = ZONES.map((z, i) => {
       const lines = instances
         .map((d, j) => ({ d, j }))

@@ -39,15 +39,15 @@
 #window .island-section h4 {
   color: #f3dca8;
   margin-bottom: 5px;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .island-section .entry {
   padding: 5px 0;
   border: 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #window .island-section .muted {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
 }
 #window .map-instance-list {
   max-height: 70vh;
@@ -97,9 +97,9 @@
 }
 #window .map-tools button {
   padding: 4px 10px;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .map-tools .map-hint {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   margin-left: auto;
 }

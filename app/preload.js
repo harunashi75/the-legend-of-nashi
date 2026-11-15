@@ -25,9 +25,9 @@ contextBridge.exposeInMainWorld(
       relaunch: () => ipcRenderer.send('display:relaunch'),
       onChange: callback => ipcRenderer.on('display:changed', (_event, state) => callback(state))
     }),
-    // Jouer sur Internet : relais local + tunnel Pinggy, état reçu à chaque changement.
+    // Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local, état reçu à chaque changement.
     hosting: Object.freeze({
-      start: options => ipcRenderer.invoke('net:host-start', options),
+      startTailscale: () => ipcRenderer.invoke('net:host-tailscale'),
       startLan: () => ipcRenderer.invoke('net:host-lan'),
       stop: () => ipcRenderer.invoke('net:host-stop'),
       status: () => ipcRenderer.invoke('net:host-status'),

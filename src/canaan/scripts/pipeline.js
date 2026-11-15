@@ -17,15 +17,25 @@ const CANAAN_PIPELINE = Object.freeze({
     'arena',
     'professions',
     'quests',
-    'bossMechanics'
+    'bossMechanics',
+    'achievements'
   ]),
   draw: Object.freeze(['drawWeaponEffects', 'drawClassEffects', 'drawQuests', 'drawBossMechanics', 'drawDodge', 'drawArenaHud'])
 });
 // Un pas de simulation complet (cœur et étapes), sans lire les entrées ni toucher à l'écran.
 // Le monde continue tant qu'un héros du groupe est debout (Arène : l'hôte à terre attend d'être relevé).
 const canaanAnyoneStanding = () => game.heroes.some(hero => !hero.player.dead);
+// Tout le groupe à terre : la simulation s'arrête, mais l'hôte ramène toujours le groupe au camp
+// (sinon, l'hôte tombé en premier dans l'Arène attendait un allié qui ne pouvait plus le relever).
+function canaanGroupWiped() {
+  if (game.mode === 'guest' || canaanRespawnPending) return;
+  canaanHostRespawn(
+    game.world.instance?.arena ? '⚔️ Tout le groupe est à terre… Tentative terminée.' : 'Tout le groupe est tombé… Résurrection au camp.'
+  );
+}
 function simulateStep() {
   // Aucune simulation hors partie, en pause, ou quand tout le groupe est à terre.
+  if (started && !paused && !canaanAnyoneStanding()) canaanGroupWiped();
   if (!started || paused || !canaanAnyoneStanding()) return;
   const stages = CANAAN_PIPELINE.update.map(name => CanaanStages[name]),
     states = [];
@@ -35,6 +45,7 @@ function simulateStep() {
 }
 // Pas de jeu : les entrées du joueur deviennent l'intention du héros, puis la simulation avance.
 function runUpdatePipeline() {
+  if (started && !paused && !canaanAnyoneStanding()) canaanGroupWiped();
   if (!started || paused || !canaanAnyoneStanding()) return;
   readInput();
   simulateStep();

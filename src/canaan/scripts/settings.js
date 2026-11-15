@@ -9,6 +9,9 @@
   const desktop = window.canaanDesktop?.display || null;
   const FPS_CAPS = [0, 30, 60, 90, 120, 144, 165, 240];
   const TOGGLES = ['shake', 'glow', 'particles', 'damage', 'fps'];
+  // Taille des textes (polices des menus, barres, info-bulles et textes du jeu ; l'interface garde sa taille).
+  const TEXT_SCALES = [1, 1.1, 1.25, 1.4, 1.6];
+  let textScale = 1.25;
   const prefs = () => CANAAN_PREFERENCES.read('settings', {});
   let shown = false,
     state = null;
@@ -26,11 +29,14 @@
     const p = prefs();
     for (const k of TOGGLES) if (typeof p[k] === 'boolean') canaanDisplay[k] = p[k];
     if (FPS_CAPS.includes(p.fpsCap)) canaanDisplay.fpsCap = p.fpsCap;
+    if (TEXT_SCALES.includes(p.textScale)) textScale = p.textScale;
+    canaanSetTextScale(textScale);
   }
   function save() {
     const out = {};
     for (const k of TOGGLES) out[k] = canaanDisplay[k];
     out.fpsCap = canaanDisplay.fpsCap;
+    out.textScale = textScale;
     CANAAN_PREFERENCES.write('settings', out);
   }
   function refresh() {
@@ -38,6 +44,7 @@
     setText('setFullscreen', onOff(full), full);
     setText('setResolution', state ? state.width + ' × ' + state.height + (full ? ' (plein écran)' : '') : '—');
     setText('setZoom', state ? Math.round(state.zoom * 100) + ' %' : '—');
+    setText('setTextScale', Math.round(textScale * 100) + ' %');
     setText('setVsync', state ? onOff(state.vsync, '✓ Activée', 'Désactivée') : '—', state?.vsync);
     const restart = $('setRestartRow');
     if (restart) restart.hidden = !state || state.vsync === state.vsyncActive;
@@ -102,6 +109,13 @@
     if (key === 'fpscap') {
       const i = FPS_CAPS.indexOf(canaanDisplay.fpsCap);
       canaanDisplay.fpsCap = FPS_CAPS[(i + dir + FPS_CAPS.length) % FPS_CAPS.length];
+      save();
+      return refresh();
+    }
+    if (key === 'textscale') {
+      const i = TEXT_SCALES.indexOf(textScale);
+      textScale = TEXT_SCALES[Math.max(0, Math.min(TEXT_SCALES.length - 1, (i < 0 ? 2 : i) + dir))];
+      canaanSetTextScale(textScale);
       save();
       return refresh();
     }

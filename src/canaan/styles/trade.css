@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  width: min(760px, calc(100vw - 48px));
+  width: 100%;
   box-sizing: border-box;
 }
 #window .trade-note {
@@ -15,12 +15,12 @@
 #window .trade-hint {
   margin: 0;
   color: var(--rpg-muted, #b8a483);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   line-height: 1.45;
 }
 #window .trade-ask {
   margin: 0;
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   color: #f6dc98;
 }
 #window .trade-partners,
@@ -51,11 +51,11 @@
 #window .trade-side h3,
 #window .trade-bag-title {
   margin: 0;
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   color: #f6dc98;
 }
 #window .trade-ok {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #8fe3ae;
 }
 #window .trade-list {
@@ -82,7 +82,7 @@
   font-weight: 600;
 }
 #window .trade-ilvl {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--rpg-muted, #b8a483);
 }
 #window .trade-x {
@@ -97,7 +97,7 @@
 }
 #window .trade-gold label {
   width: 100%;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--rpg-muted, #b8a483);
 }
 #window .trade-gold input {

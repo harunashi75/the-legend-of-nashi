@@ -148,6 +148,7 @@
         exp: Math.max(0, Math.floor(hero.exp || 0)),
         inventory: hero.inventory,
         equipment: hero.equipment,
+        bank: CANAAN_BANK.export(hero),
         bagLevel: canaanBagLevel(hero),
         // Version du niveau de sac : sans elle, un niveau 3 venait du départ à 40 places (ancienne règle).
         bagVersion: 2,
@@ -155,6 +156,7 @@
         rubis: { owned: { ...hero.rubis.owned }, equipped: [...hero.rubis.equipped] },
         arena: { ...hero.arena },
         prof: CANAAN_PROF.sanitize(hero.prof),
+        succes: CANAAN_ACHIEVEMENTS.export(hero),
         quetes: sanitizeQuests(hero.quetes)
       };
     }
@@ -174,8 +176,10 @@
       hero.color = /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : COLORS[Object.keys(game.guests).length % COLORS.length];
       hero.look = sanitizeLook(d.look);
       hero.prof = CANAAN_PROF.sanitize(d.prof);
+      hero.succes = CANAAN_ACHIEVEMENTS.sanitize(d.succes);
       hero.quetes = sanitizeQuests(d.quetes);
       hero.inventory = Array.isArray(d.inventory) ? d.inventory.filter(validItem) : [];
+      hero.bank = CANAAN_BANK.sanitize(d.bank);
       for (const slot of Object.keys(hero.equipment)) {
         const it = d.equipment?.[slot];
         hero.equipment[slot] = validItem(it) && it.slot === (slot === 'weapon2' ? 'weapon' : slot) ? it : null;
@@ -341,7 +345,7 @@
       c.ellipse(p.x, p.y + 17, 17, 6, 0, 0, Math.PI * 2);
       c.fill();
       c.globalAlpha = faded ? 0.45 : 1;
-      drawPixelHero(c, p.x, p.y, hero.color, p.anim, false, p, hero.look);
+      drawPixelHero(c, p.x, p.y, hero.color, p.anim, false, p, hero.look, hero);
       c.textAlign = 'center';
       c.font = 'bold 12px Palatino Linotype, Georgia, serif';
       c.lineWidth = 3;
@@ -392,52 +396,52 @@
     );
   }
   // Salon en ligne : ouvrir à ses amis (code à donner), ou fermer.
-  // Salon : sur Internet (tunnel Pinggy ouvert par l'application de bureau) ou sur un relais choisi (réseau local).
+  // Salon : sur Tailscale ou sur le réseau local (relais lancé par l'application de bureau), ou sur un relais choisi.
   function online() {
     const st = CANAAN_NET.state(),
       web = st.internet || {},
       me = CANAAN_NET.settings();
+    const firewallHelp = (commands, port, kind) =>
+      commands.length
+        ? '<p class="group-meta group-warn">🧱 Pare-feu actif sur ce PC : il peut bloquer ton invité. Une seule fois, dans un terminal :</p>' +
+          commands.map(c => '<p class="group-meta"><code>' + esc(c) + '</code></p>').join('')
+        : kind === 'lan'
+          ? '<p class="group-meta">Si ton invité n’arrive pas à se connecter : autorise ce port dans ton pare-feu' +
+            (web.platform === 'win32' ? ' (Windows le propose à la première ouverture : accepte « réseaux privés »).' : ' (Ubuntu : <code>sudo ufw allow ' + esc(port) + '/tcp</code>).') +
+            '</p>'
+          : '';
     if (st.mode === 'host') {
-      const viaInternet = web.state !== 'off' && web.local && st.relay === web.local;
+      const hosted = web.state === 'online' && web.local && st.relay === web.local,
+        port = hosted && web.relay ? web.relay.split(':').pop() : '';
       let link = '';
-      if (viaInternet && web.kind === 'lan')
+      if (hosted && web.kind === 'lan')
         link =
           '<p class="group-link">🏠 Adresse sur ton réseau : <b>' + esc(web.relay) + '</b></p>' +
           (web.addresses.length > 1 ? '<p class="group-meta">Autres adresses de ce PC : ' + web.addresses.slice(1).map(esc).join(' · ') + '</p>' : '') +
-          (web.firewall.length
-            ? '<p class="group-meta group-warn">🧱 Pare-feu actif sur ce PC : il bloque ton invité tant que le port n’est pas ouvert. Une seule fois, dans un terminal :</p>' +
-              web.firewall.map(c => '<p class="group-meta"><code>' + esc(c) + '</code></p>').join('')
-            : '<p class="group-meta">Si ton invité n’arrive pas à se connecter : autorise ce port dans ton pare-feu' +
-              (web.platform === 'win32' ? ' (Windows le propose à la première ouverture : accepte « réseaux privés »).' : ' (Ubuntu : <code>sudo ufw allow ' + esc(web.relay.split(':').pop()) + '/tcp</code>).') +
-              '</p>');
-      else if (viaInternet) {
-        const minutes = web.expiresAt ? Math.max(0, Math.ceil((web.expiresAt - Date.now()) / 60000)) : null;
+          firewallHelp(web.firewall, port, 'lan');
+      else if (hosted && web.kind === 'tailscale')
         link =
-          web.state === 'online'
-            ? '<p class="group-link">🌍 Lien du relais : <b>' + esc(web.relay) + '</b></p>' +
-              (web.free ? '<p class="group-meta">Pinggy gratuit : le tunnel se ferme dans ' + minutes + ' min, puis le lien change.</p>' : '')
-            : '<p class="group-meta group-warn">🌍 ' + esc(web.message || 'Tunnel fermé.') + '</p>' +
-              '<button type="button" data-action="groupOpenInternet">🔁 Rouvrir le tunnel</button>';
-      } else link = '<p class="group-meta">Relais ' + esc(st.relay) + '</p>';
+          '<p class="group-link">🌍 Adresse Tailscale : <b>' + esc(web.relay) + '</b></p>' +
+          (web.addresses.length ? '<p class="group-meta">Ou par son nom : ' + web.addresses.map(esc).join(' · ') + '</p>' : '') +
+          '<p class="group-meta">Ton ami doit avoir Tailscale lancé et être dans ton réseau Tailscale (tu l’invites depuis la console Tailscale, ou tu partages cette machine avec lui).</p>' +
+          firewallHelp(web.firewall, port, 'tailscale');
+      else link = '<p class="group-meta">Relais ' + esc(st.relay) + '</p>';
       return (
         '<div class="group-online open"><p class="group-code">Code du salon : <b>' + esc(st.code || '…') + '</b></p>' + link +
         '<p class="group-meta">' + esc(st.status) + ' · ' + st.peers + ' invité(s) en ligne</p>' +
         (st.code ? '<button type="button" data-action="groupCopyInvitation">📋 Copier l’invitation</button>' : '') +
-        '<button type="button" data-action="' + (viaInternet ? 'groupCloseInternet' : 'groupCloseRoom') + '">Fermer le salon</button></div>'
+        '<button type="button" data-action="' + (hosted ? 'groupCloseInternet' : 'groupCloseRoom') + '">Fermer le salon</button></div>'
       );
     }
-    const internet = st.canHostOnline
-      ? '<div class="group-online-web"><button type="button" class="group-primary" data-action="groupOpenInternet"' + (web.state === 'starting' ? ' disabled' : '') + '>🌍 Jouer sur Internet</button>' +
+    const hosting = st.canHostOnline
+      ? '<div class="group-online-web"><button type="button" class="group-primary" data-action="groupOpenTailscale"' + (web.state === 'starting' ? ' disabled' : '') + '>🌍 Jouer avec Tailscale</button>' +
         '<button type="button" data-action="groupOpenLan"' + (web.state === 'starting' ? ' disabled' : '') + '>🏠 Jouer en réseau local</button>' +
-        '<p class="group-meta">🌍 Un ami loin : ton jeu ouvre un tunnel Pinggy et te donne un lien. 🏠 Quelqu’un chez toi : le jeu ouvre le relais sur ton réseau, sans Internet. Dans les deux cas, copie l’invitation et envoie-la.</p>' +
-        '<details class="group-pinggy"><summary>Compte Pinggy (facultatif)</summary>' +
-        '<label for="pinggyToken">Jeton, ou commande copiée du tableau de bord Pinggy</label><input id="pinggyToken" type="password" autocomplete="off" placeholder="ssh -p 443 -R0:localhost:80 … JETON@free.pinggy.io" value="' + esc(me.pinggyToken) + '">' +
-        (me.pinggyToken ? '<p class="group-meta">Serveur : ' + esc(me.pinggyHost || 'free.pinggy.io') + '</p>' : '') +
-        '<label for="pinggyMode">Tunnel</label><select id="pinggyMode"><option value="http"' + (me.pinggyMode === 'http' ? ' selected' : '') + '>HTTPS (wss://, conseillé)</option><option value="tcp"' + (me.pinggyMode === 'tcp' ? ' selected' : '') + '>TCP (ws://)</option></select>' +
-        '<button type="button" data-action="groupSavePinggy">Enregistrer</button></details></div>'
+        '<p class="group-meta">🌍 Un ami loin : installez tous les deux Tailscale (gratuit), mettez-vous dans le même réseau Tailscale, puis ouvre le salon ici. 🏠 Quelqu’un chez toi : le relais s’ouvre sur ton réseau, sans Internet. Dans les deux cas, copie l’invitation et envoie-la.</p>' +
+        (web.state === 'error' && web.message ? '<p class="group-meta group-warn">' + esc(web.message) + '</p>' : '') +
+        '</div>'
       : '';
     return (
-      '<div class="group-online">' + internet +
+      '<div class="group-online">' + hosting +
       '<div class="group-online-lan"><label for="groupRelay">' + (st.canHostOnline ? 'Ou un relais déjà lancé (serveur, npm run relay)' : 'Relais') + '</label><input id="groupRelay" type="text" autocomplete="off" value="' + esc(me.relay) + '">' +
       '<button type="button" data-action="groupOpenRoom">🌐 Ouvrir à mes amis</button></div>' +
       (st.status ? '<p class="group-meta">' + esc(st.status) + '</p>' : '') + '</div>'
@@ -509,8 +513,8 @@
         CANAAN_NET.openRoom(input && input.value.trim() ? input.value.trim() : CANAAN_NET.settings().relay);
         render();
       },
-      async openInternet() {
-        await CANAAN_NET.openInternet();
+      async openTailscale() {
+        await CANAAN_NET.openTailscale();
         if (modalOpen() && document.querySelector('#window .group-panel')) render();
       },
       async openLan() {
@@ -522,13 +526,6 @@
         if (modalOpen() && document.querySelector('#window .group-panel')) render();
       },
       copyInvitation: () => CANAAN_NET.copyInvitation(),
-      savePinggy() {
-        const value = id => document.getElementById(id)?.value || '';
-        ui.message = CANAAN_NET.setPinggy({ token: value('pinggyToken'), mode: value('pinggyMode') })
-          ? 'Compte Pinggy enregistré.'
-          : 'Jeton Pinggy non reconnu : colle le jeton seul, ou toute la commande « ssh … @free.pinggy.io » du tableau de bord.';
-        render();
-      },
       closeRoom() {
         CANAAN_NET.closeRoom();
         render();

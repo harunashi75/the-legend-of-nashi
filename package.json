@@ -1,9 +1,9 @@
 {
-  "name": "canaan-online",
-  "productName": "Canaan Online",
+  "name": "the-legend-of-nashi",
+  "productName": "The Legend of Nashi",
   "version": "1.9.0",
   "private": true,
-  "description": "Canaan Online — application de bureau (Electron).",
+  "description": "The Legend of Nashi — application de bureau (Electron).",
   "main": "app/main.js",
   "scripts": {
     "build": "python3 tools/build_canaan.py",

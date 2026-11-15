@@ -25,16 +25,8 @@
       if (!el) continue;
       const v = saved[id];
       if (v) {
-        el.style.setProperty(
-          'left',
-          Math.max(0, Math.min(innerWidth - el.offsetWidth, v.x)) + 'px',
-          'important'
-        );
-        el.style.setProperty(
-          'top',
-          Math.max(0, Math.min(innerHeight - el.offsetHeight, v.y)) + 'px',
-          'important'
-        );
+        el.style.setProperty('left', Math.max(0, Math.min(innerWidth - el.offsetWidth, v.x)) + 'px', 'important');
+        el.style.setProperty('top', Math.max(0, Math.min(innerHeight - el.offsetHeight, v.y)) + 'px', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('bottom', 'auto', 'important');
         el.style.setProperty('transform', 'none', 'important');

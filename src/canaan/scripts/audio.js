@@ -395,7 +395,13 @@
     village: { root: 67, mode: 'major', bpm: 100, prog: [0, 3, 4, 0], lead: 'flute', arp: 'guitar', pad: 'warm', perc: 'frame-light', bass: true },
     donjon: { root: 48, mode: 'harmonic', bpm: 66, prog: [0, 5, 3, 4], lead: 'strings', arp: 'low', pad: 'dark', perc: 'taiko-slow', drone: true },
     raid: { root: 50, mode: 'harmonic', bpm: 100, prog: [0, 5, 6, 4], lead: 'brass', arp: 'ostinato', pad: 'choir', perc: 'taiko', bass: true },
-    arene: { root: 52, mode: 'phrygian', bpm: 124, prog: [0, 1, 0, 6], lead: 'brass', arp: 'ostinato', pad: 'choir', perc: 'battle', bass: true }
+    arene: { root: 52, mode: 'phrygian', bpm: 124, prog: [0, 1, 0, 6], lead: 'brass', arp: 'ostinato', pad: 'choir', perc: 'battle', bass: true },
+    // Les Tréfonds : un caractère par biome, et la forteresse naine.
+    galeries: { root: 45, mode: 'dorian', bpm: 62, prog: [0, 6, 3, 4], lead: 'oud', arp: 'low', pad: 'dark', perc: 'taiko-slow', drone: true },
+    ombral: { root: 50, mode: 'aeolian', bpm: 58, prog: [0, 5, 3, 6], lead: 'bell', arp: 'harp', pad: 'choir', perc: null, drone: true },
+    necropole: { root: 46, mode: 'phrygian', bpm: 50, prog: [0, 1, 0, 6], lead: 'strings', arp: null, pad: 'dark', perc: null, drone: true },
+    fangeval: { root: 53, mode: 'lydian', bpm: 60, prog: [0, 1, 4, 0], lead: 'bell', arp: 'harp', pad: 'shimmer', perc: 'shaker', drone: true },
+    durgrim: { root: 55, mode: 'dorian', bpm: 96, prog: [0, 3, 4, 0], lead: 'brass', arp: 'guitar', pad: 'warm', perc: 'frame-light', bass: true }
   };
   const BIOME_THEMES = ['plaines', 'foret', 'marais', 'automne', 'desert', 'enchantee'];
   // Sections de la pièce (8 × 4 mesures) : qui joue dans chacune.
@@ -589,6 +595,7 @@
     const inst = game.world.instance;
     if (inst?.arena) return 'arene';
     if (inst) return (instances[inst.index]?.raid ? 'raid:' : 'donjon:') + inst.index;
+    if (canaanUnder()) return CANAAN_UNDER.themeKey();
     if (canaanInHouse(P.x / TS, P.y / TS)) return 'maison';
     const x = P.x / TS,
       y = P.y / TS;
@@ -620,7 +627,7 @@
   function survey() {
     if (time - near.at < 20) return near;
     near.at = time;
-    if (game.world.instance) {
+    if (game.world.instance || canaanUnder()) {
       near.water = near.sea = near.trees = 0;
       return near;
     }
@@ -655,11 +662,12 @@
   function updateAmbience() {
     const t = ac.currentTime,
       inst = game.world.instance;
-    if (inst) {
+    // Les Tréfonds sonnent comme une caverne : gouttes, grondements lointains, peu de vent.
+    if (inst || canaanUnder()) {
       amb.wind.g.gain.setTargetAtTime(0.05, t, 0.5);
       amb.leaves.g.gain.setTargetAtTime(0, t, 0.5);
       amb.water.g.gain.setTargetAtTime(0, t, 0.5);
-      amb.rumble.g.gain.setTargetAtTime(instances[inst.index]?.raid || inst.arena ? 0.5 : 0.32, t, 1);
+      amb.rumble.g.gain.setTargetAtTime(inst && (instances[inst.index]?.raid || inst.arena) ? 0.5 : 0.32, t, 1);
       // Gouttes d'eau, chaînes lointaines, grondements.
       if (t - lastAmbient > 0.25) {
         lastAmbient = t;
@@ -1002,7 +1010,7 @@
   // Pas : le son dépend du sol sous les pieds.
   function footstep(x, y) {
     const t = ac.currentTime,
-      tile = game.world.instance ? 'stone' : (() => {
+      tile = game.world.instance || canaanUnder() ? 'stone' : (() => {
         const v = game.world.tiles[Math.floor(y / TS)]?.[Math.floor(x / TS)];
         return v === 15 || v === 18 ? 'water' : v === 3 ? 'sand' : v === 4 ? 'stone' : v === 2 || v === 16 ? 'dirt' : 'grass';
       })();
@@ -1092,7 +1100,7 @@
     },
     effect(shape, x, y, c) {
       if (!ac || !settings.on || !started || paused) return;
-      if (shape === 'arc') return;
+      if (shape === 'arc' || shape === 'spark') return;
       spellSound(shape, x, y, c);
     },
     cue(name) {

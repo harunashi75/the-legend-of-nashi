@@ -5,19 +5,19 @@ import { deepFreeze } from '../freeze.js';
 export const MAX_LEVEL = 60;
 // Trois statistiques principales, données par chaque équipement classique (pas l'artéfact).
 export const PRIMARY_STATS = deepFreeze({
-  attack: { icon: '⚔️', name: 'Attaque', desc: 'Augmente les dégâts des attaques et compétences offensives.' },
-  defense: { icon: '🛡️', name: 'Défense', desc: 'Réduit les dégâts reçus.' },
-  vitality: { icon: '❤️', name: 'Vitalité', desc: 'Augmente les PV maximum.' }
+  attack: { icon: '⟦st_attack⟧', name: 'Attaque', desc: 'Augmente les dégâts des attaques et compétences offensives.' },
+  defense: { icon: '⟦st_defense⟧', name: 'Défense', desc: 'Réduit les dégâts reçus.' },
+  vitality: { icon: '⟦st_vitality⟧', name: 'Vitalité', desc: 'Augmente les PV maximum.' }
 });
 export const PRIMARY_KEYS = Object.freeze(Object.keys(PRIMARY_STATS));
 // Six statistiques secondaires : deux différentes par équipement, tirées au hasard.
 export const SECONDARY_STATS = deepFreeze({
-  power: { icon: '💥', name: 'Puissance', desc: 'Augmente tous les dégâts infligés.' },
-  crit: { icon: '🎯', name: 'Critique', desc: 'Augmente les chances de coup critique.' },
-  haste: { icon: '⚡', name: 'Célérité', desc: 'Augmente la vitesse d’attaque et réduit les temps de recharge.' },
-  mastery: { icon: '✨', name: 'Maîtrise', desc: 'Augmente les dégâts des compétences offensives.' },
-  healing: { icon: '💚', name: 'Soin', desc: 'Augmente les soins effectués.' },
-  resist: { icon: '🔰', name: 'Résistance', desc: 'Réduit les dégâts reçus.' }
+  power: { icon: '⟦st_power⟧', name: 'Puissance', desc: 'Augmente tous les dégâts infligés.' },
+  crit: { icon: '⟦st_crit⟧', name: 'Critique', desc: 'Augmente les chances de coup critique.' },
+  haste: { icon: '⟦st_haste⟧', name: 'Célérité', desc: 'Augmente la vitesse d’attaque et réduit les temps de recharge.' },
+  mastery: { icon: '⟦st_mastery⟧', name: 'Maîtrise', desc: 'Augmente les dégâts des compétences offensives.' },
+  healing: { icon: '⟦st_healing⟧', name: 'Soin', desc: 'Augmente les soins effectués.' },
+  resist: { icon: '⟦st_resist⟧', name: 'Résistance', desc: 'Réduit les dégâts reçus.' }
 });
 export const SECONDARY_KEYS = Object.freeze(Object.keys(SECONDARY_STATS));
 // Force d'une qualité à niveau égal : une meilleure qualité donne plus de points principaux et secondaires.
@@ -26,10 +26,8 @@ export const QUALITY_FACTOR = Object.freeze({
   'Peu commun': 1.12,
   Rare: 1.27,
   Épique: 1.45,
-  Héroïque: 1.65,
   Légendaire: 1.87,
-  Mythique: 2.1,
-  Céleste: 2.35
+  Mythique: 2.1
 });
 // Part de chaque statistique principale selon l'emplacement [Attaque, Défense, Vitalité].
 export const SLOT_PROFILE = deepFreeze({

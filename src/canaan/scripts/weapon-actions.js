@@ -63,7 +63,7 @@
         : heroPower(stats().attack),
     magPower = () =>
       isHost()
-        ? Math.max(8, Math.round(18 + attackBonus() * 0.55 + (stats().intellect || 0) * 0.85))
+        ? Math.max(8, Math.round(power() + Math.max(0, stats().intellect || 0) * 0.85))
         : heroMagicPower(stats().attack, stats().intellect || 0);
   function effect(shape, x, y, a, r, w, c, d = 0.3) {
     vfx.push({ shape, x, y, a, r, w, c, life: d, max: d });
@@ -108,17 +108,26 @@
   function healActor(amount) {
     return canaanApplyHeal(amount, false, actor);
   }
+  // Postures du lanceur qui renforcent ses coups : Rage (+25 %), Élan (+15 %) et Pas de l'ombre (+60 %, prochain
+  // coup). La Concentration (+40 %) est prise par la compétence offensive lancée (castSkill) : tous ses coups,
+  // même différés, en profitent ; les attaques de base ne la consomment pas.
+  function stanceMult(st, basic) {
+    return (st.berserk > 0 ? 1.25 : 1) * (st.flurry > 0 ? 1.15 : 1) * (st.shadow > 0 ? 1.6 : 1) * (!basic && castContext.focus ? 1.4 : 1);
+  }
+  function spendStance() {
+    S.shadow = 0;
+  }
   function dmg(m, mult, mag = false) {
     if (!m || m.hp <= 0) return 0;
-    const before = m.hp;
-    const extra = (S.berserk > 0 ? 1.2 : 1) * (S.shadow > 0 ? 1.25 : 1) * (S.focus > 0 ? 1.3 : 1);
-    strike(m, Math.round((mag ? magPower() : power()) * mult * extra), {
+    const before = m.hp,
+      basic = !!castContext.basic;
+    strike(m, Math.round((mag ? magPower() : power()) * mult * stanceMult(S, basic)), {
       ...castContext,
       magic: mag || castContext.magic
     });
-    S.shadow = 0;
-    S.focus = 0;
+    spendStance();
     const done = Math.max(0, before - Math.max(0, m.hp));
+    if (done > 0) spark(m.x, m.y - 14, fxColor());
     return done;
   }
   function withCastContext(context, fn) {
@@ -226,17 +235,15 @@
       y: AP.y,
       vx: Math.cos(a) * speed,
       vy: Math.sin(a) * speed,
-      dmg: Math.round(
-        (opts.mag ? magPower() : power()) * mult * (S.focus > 0 ? 1.3 : 1) * (S.shadow > 0 ? 1.25 : 1)
-      ),
+      dmg: Math.round((opts.mag ? magPower() : power()) * mult * stanceMult(S, !!castContext.basic)),
       life: opts.life || 48,
       c,
+      kind: opts.mag ? 'orb' : 'arrow',
       homing: false,
       owner: isHost() ? undefined : actor,
       combatContext: { ...castContext, magic: !!opts.mag || castContext.magic }
     });
-    S.focus = 0;
-    S.shadow = 0;
+    spendStance();
     beam(AP.x, AP.y, a, 65, 7, c);
   }
   // Postures du héros touché (l'hôte par défaut) : parade, rage, élan et serment du gardien.
@@ -271,13 +278,13 @@
           const owner = game.heroes.includes(z.owner) ? z.owner : game.hero;
           for (const m of game.world.monsters.slice())
             if (m.hp > 0 && Math.hypot(m.x - z.x, m.y - z.y) < z.r + (m.r || 0))
-              withActor(owner, () => withCastContext(z.context, () => dmg(m, 0.32, true)));
+              withActor(owner, () => withCastContext(z.context, () => dmg(m, 0.6, true)));
           // Le sol consacré soigne chaque héros du groupe qui s'y tient.
           for (const hero of game.heroes) {
             const p = hero.player;
             if (p.dead || Math.hypot(p.x - z.x, p.y - z.y) >= z.r) continue;
             // Soigné par le lanceur de la zone (ses bonus de soins et ses talents de soutien).
-            const h = canaanApplyHeal(Math.max(1, p.mhp * 0.025), false, hero, owner, true);
+            const h = canaanApplyHeal(Math.max(1, p.mhp * 0.03), false, hero, owner, true);
             if (h > 0) float(p.x, p.y - 39, '+' + h + ' PV', '#9fffc7');
           }
         }
@@ -319,6 +326,122 @@
       ageEffects(dt);
     }
   };
+  // ---------------------------------------------------------------- Rendu des effets
+  // t va de 1 (naissance) à 0 (fin). Tous les effets sont orientés : rien ne fait le tour du héros sauf les zones.
+  function drawEffect(c, e) {
+    const t = Math.max(0, e.life / e.max),
+      age = 1 - t;
+    c.save();
+    c.lineCap = 'round';
+    if (e.shape === 'arc') {
+      // Taille : la zone touchée en voile léger, puis un croissant qui balaie le cône et s'efface.
+      const a0 = e.a - e.w / 2,
+        sweep = Math.min(1, age / 0.45),
+        a1 = a0 + e.w * sweep,
+        r = e.r;
+      c.globalAlpha = 0.14 * t;
+      c.fillStyle = e.c;
+      c.beginPath();
+      c.moveTo(e.x, e.y);
+      c.arc(e.x, e.y, r, a0, e.a + e.w / 2);
+      c.closePath();
+      c.fill();
+      const g = c.createRadialGradient(e.x, e.y, r * 0.45, e.x, e.y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0)');
+      g.addColorStop(0.7, e.c);
+      g.addColorStop(1, '#ffffff');
+      c.globalAlpha = 0.85 * t;
+      c.fillStyle = g;
+      c.shadowColor = e.c;
+      c.shadowBlur = 16;
+      c.beginPath();
+      c.arc(e.x, e.y, r, a0, a1);
+      c.arc(e.x, e.y, r * (0.62 + 0.18 * age), a1, a0, true);
+      c.closePath();
+      c.fill();
+      c.globalAlpha = t;
+      c.strokeStyle = '#ffffff';
+      c.lineWidth = 2.5 * t + 0.5;
+      c.beginPath();
+      c.arc(e.x, e.y, r, a0 + (a1 - a0) * 0.3, a1);
+      c.stroke();
+    } else if (e.shape === 'ring') {
+      // Onde : anneau qui s'élargit, voile intérieur, éclats sur le pourtour.
+      const r = e.r * (0.3 + 0.7 * Math.sqrt(age));
+      const g = c.createRadialGradient(e.x, e.y, r * 0.2, e.x, e.y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0)');
+      g.addColorStop(1, e.c);
+      c.globalAlpha = 0.28 * t;
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(e.x, e.y, r, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 0.9 * t;
+      c.strokeStyle = e.c;
+      c.shadowColor = e.c;
+      c.shadowBlur = 14;
+      c.lineWidth = 2 + 6 * t;
+      c.beginPath();
+      c.arc(e.x, e.y, r, 0, Math.PI * 2);
+      c.stroke();
+      c.strokeStyle = '#ffffff';
+      c.lineWidth = 1.5;
+      for (let k = 0; k < 10; k++) {
+        const a = (k / 10) * Math.PI * 2 + e.r * 0.01;
+        c.beginPath();
+        c.moveTo(e.x + Math.cos(a) * r * 0.92, e.y + Math.sin(a) * r * 0.92);
+        c.lineTo(e.x + Math.cos(a) * r * 1.08, e.y + Math.sin(a) * r * 1.08);
+        c.stroke();
+      }
+    } else if (e.shape === 'beam') {
+      // Rayon effilé : cœur blanc, gaine colorée, pointe lumineuse.
+      c.translate(e.x, e.y);
+      c.rotate(e.a);
+      const w = Math.max(2, e.w) * (0.4 + 0.6 * t);
+      c.globalAlpha = 0.7 * t;
+      c.fillStyle = e.c;
+      c.shadowColor = e.c;
+      c.shadowBlur = 18;
+      c.beginPath();
+      c.moveTo(0, -w / 2);
+      c.lineTo(e.r * 0.85, -w / 2);
+      c.lineTo(e.r, 0);
+      c.lineTo(e.r * 0.85, w / 2);
+      c.lineTo(0, w / 2);
+      c.closePath();
+      c.fill();
+      c.globalAlpha = t;
+      c.fillStyle = '#ffffff';
+      c.fillRect(0, -w / 6, e.r * 0.9, w / 3);
+    } else if (e.shape === 'spark') {
+      // Impact : étoile de traits qui jaillit du point touché.
+      c.globalAlpha = t;
+      c.strokeStyle = e.c;
+      c.shadowColor = e.c;
+      c.shadowBlur = 10;
+      c.lineWidth = 2.5;
+      const r = e.r * (0.5 + age);
+      for (let k = 0; k < 6; k++) {
+        const a = e.a + (k / 6) * Math.PI * 2;
+        c.beginPath();
+        c.moveTo(e.x + Math.cos(a) * r * 0.35, e.y + Math.sin(a) * r * 0.35);
+        c.lineTo(e.x + Math.cos(a) * r, e.y + Math.sin(a) * r);
+        c.stroke();
+      }
+      c.fillStyle = '#ffffff';
+      c.beginPath();
+      c.arc(e.x, e.y, 4 * t, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
+  }
+  // Étincelle d'impact sur un monstre touché (sans son), montrée aussi aux invités.
+  function spark(x, y, c) {
+    const a = Math.round(Math.random() * 100) / 100;
+    vfx.push({ shape: 'spark', x, y, a, r: 18, w: 0, c, life: 0.22, max: 0.22 });
+    if (vfx.length > 180) vfx.shift();
+    game.view.fx?.('v', ['spark', Math.round(x), Math.round(y), a, 18, 0, c, 0.22]);
+  }
   // Étape de rendu : visée et effets des armes, dessinés après le monde.
   window.CanaanStages.drawWeaponEffects = function () {
     if (!started) return;
@@ -357,6 +480,27 @@
     ctx.beginPath();
     ctx.arc(tx, ty, 8, 0, Math.PI * 2);
     ctx.stroke();
+    // Charges arcaniques du bâton : trois pastilles sous le héros.
+    if (type === 'staff') {
+      const st = canaanStanceOf(),
+        n = st.arcane | 0;
+      ctx.save();
+      for (let k = 0; k < 3; k++) {
+        const x = P.x - 14 + k * 14,
+          y = P.y + 30;
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = k < n ? (n >= 3 ? '#ffd76a' : '#c79bff') : '#1b1630';
+        ctx.strokeStyle = k < n ? '#fff2ff' : '#6d5ca8';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#b38aff';
+        ctx.shadowBlur = k < n ? 8 : 0;
+        ctx.beginPath();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
     for (const z of holyZones) {
       ctx.save();
       ctx.globalAlpha = 0.17 + 0.05 * Math.sin(time * 0.12);
@@ -372,37 +516,7 @@
       ctx.stroke();
       ctx.restore();
     }
-    for (const e of vfx) {
-      const t = e.life / e.max;
-      ctx.globalAlpha = Math.max(0, t) * 0.75;
-      ctx.strokeStyle = e.c;
-      ctx.fillStyle = e.c;
-      ctx.lineWidth = 3 + 5 * (1 - t);
-      ctx.shadowColor = e.c;
-      ctx.shadowBlur = 12;
-      if (e.shape === 'arc') {
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r * (0.8 + 0.2 * (1 - t)), e.a - e.w / 2, e.a + e.w / 2);
-        ctx.stroke();
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(e.x, e.y);
-        ctx.arc(e.x, e.y, e.r, e.a - e.w / 2, e.a + e.w / 2);
-        ctx.closePath();
-        ctx.stroke();
-      } else if (e.shape === 'ring') {
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r * (0.35 + 0.65 * (1 - t)), 0, Math.PI * 2);
-        ctx.stroke();
-      } else if (e.shape === 'beam') {
-        ctx.save();
-        ctx.translate(e.x, e.y);
-        ctx.rotate(e.a);
-        ctx.fillRect(0, (-e.w * t) / 2, e.r, e.w * t);
-        ctx.restore();
-      }
-      ctx.shadowBlur = 0;
-    }
+    for (const e of vfx) drawEffect(ctx, e);
     ctx.restore();
   };
   function spend(i) {
@@ -443,8 +557,8 @@
   // Attaque de base : gratuite (aucun mana), clic gauche rapide et clic droit lourd.
   // Maintenir le bouton enchaîne les attaques ; un verrou commun empêche de cumuler les deux.
   const BASIC = Object.freeze({
-    quick: { mult: 0.4, lock: 0.6 },
-    heavy: { mult: 0.9, lock: 1.4 }
+    quick: { mult: 0.75, lock: 0.55 },
+    heavy: { mult: 1.6, lock: 1.15 }
   });
   const basicHeld = { left: false, right: false };
   let basicLock = 0,
@@ -477,7 +591,7 @@
       col = color[type],
       m = spec.mult;
     // Célérité (et forme féline) : attaques de base plus rapides.
-    basicLock = spec.lock * (1 - Math.min(60, characterStats().haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK();
+    basicLock = spec.lock * (1 - Math.min(60, characterStats().haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK() * (S.flurry > 0 ? 0.7 : 1);
     castContext = { magic: false, basic: true };
     switch (type) {
       case 'bow':
@@ -549,9 +663,11 @@
     const spec = heavy ? BASIC.heavy : BASIC.quick,
       a = Math.atan2(hero.intent.aimY - p.y, hero.intent.aimX - p.x),
       st = characterStats(hero),
-      base = Math.round((type === 'staff' ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) * spec.mult),
+      stance = skillStateOf(hero),
+      base = Math.round((type === 'staff' ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) * spec.mult * stanceMult(stance, true)),
       context = { magic: type === 'staff', basic: true };
-    p.basicLock = spec.lock * (1 - Math.min(60, st.haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK(hero);
+    stance.shadow = 0;
+    p.basicLock = spec.lock * (1 - Math.min(60, st.haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK(hero) * (stance.flurry > 0 ? 0.7 : 1);
     p.atk = 0.28;
     if (type === 'bow' || type === 'staff') {
       const speed = type === 'bow' ? (heavy ? 15 : 13) : heavy ? 10 : 12;
@@ -563,6 +679,7 @@
         dmg: base,
         life: 48,
         c: color[type],
+        kind: type === 'bow' ? 'arrow' : 'orb',
         homing: false,
         owner: hero,
         combatContext: context
@@ -642,7 +759,19 @@
     });
   }
   // Les 36 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
+  // Les valeurs suivent le catalogue (shared/data/equipment.js) : la puissance affichée est celle infligée.
   function castSkill(type, i) {
+    const focus = S.focus > 0 && isOffensiveSkill(type, i);
+    castContext = { ...castContext, focus };
+    if (focus) {
+      S.focus = 0;
+      float(AP.x, AP.y - 58, '✨ CONCENTRATION +40 %', '#d6aaff');
+    }
+    runSkill(type, i);
+    window.CANAAN_CLASS_AFTER_CAST(type, i, actor);
+    canaanAchieve(actor, 'skill', type);
+  }
+  function runSkill(type, i) {
     const a = aim();
     const col = ELEMENTS[castContext.element]?.color || color[type];
     const rep = (n, interval, fn) => {
@@ -650,17 +779,20 @@
     };
     switch (type) {
       case 'sword':
-        if (i === 0) cone(125, Math.PI / 2, 1.2);
-        if (i === 1) circle(132, 0.85);
+        if (i === 0) cone(125, Math.PI / 2, 2.6);
+        if (i === 1) circle(132, 1.8);
         if (i === 2) {
-          S.guard = 2;
-          S.parryReady = 3;
+          S.guard = 2.5;
+          S.parryReady = 4;
           ring(75, '#a5dfff');
           float(AP.x, AP.y - 42, 'PARADE', '#a5dfff');
         }
         if (i === 3) {
-          const total = cone(145, Math.PI / 2, S.parryReady > 0 ? 2.8 : 2.2);
-          lifesteal(total);
+          const boosted = S.parryReady > 0,
+            total = cone(145, Math.PI / 2, boosted ? 6 : 4.5);
+          if (boosted) float(AP.x, AP.y - 60, 'RIPOSTE !', '#a5dfff');
+          const n = healActor(total * 0.2);
+          if (n > 0) float(AP.x, AP.y - 43, '+' + n + ' PV', '#77ffa9');
           S.parryReady = 0;
           splash(AP.x, AP.y, 90, '#73ffa8');
         }
@@ -668,94 +800,117 @@
       case 'dualsword':
         if (i === 0) {
           S.combo = 4;
-          rep(4, 0.1, () => cone(135, Math.PI / 3, 0.45));
+          rep(4, 0.1, () => cone(135, Math.PI / 3, 0.75));
         }
         if (i === 1) {
           S.combo = 4;
-          rep(3, 0.15, () => circle(125, 0.55));
+          rep(3, 0.15, () => circle(125, 0.7));
         }
         if (i === 2) {
-          S.flurry = 5;
+          S.flurry = 6;
           ring(110, col);
-          float(AP.x, AP.y - 42, 'ÉLAN +20 %', '#ffd79e');
+          float(AP.x, AP.y - 42, 'ÉLAN : VITESSE +30 %', '#ffd79e');
         }
         if (i === 3) {
           const boosted = S.combo > 0;
-          rep(6, 0.11, j => cone(145, Math.PI / 2, 0.45 * (boosted && j === 5 ? 1.2 : 1)));
+          rep(6, 0.11, j => cone(145, Math.PI / 2, 0.8 * (boosted && j === 5 ? 2 : 1)));
+          if (boosted) float(AP.x, AP.y - 60, 'COMBO !', '#ffd79e');
           S.combo = 0;
         }
         break;
       case 'axe':
-        if (i === 0) cone(140, Math.PI / 2, 1.7);
-        if (i === 1) cone(165, (Math.PI * 2) / 3, 1.25);
+        if (i === 0) cone(140, Math.PI / 2, 3.2);
+        if (i === 1) cone(165, (Math.PI * 2) / 3, 2.2);
         if (i === 2) {
-          S.berserk = 6;
+          S.berserk = 8;
           ring(100, col);
-          float(AP.x, AP.y - 42, 'BERSERKER', '#ffb078');
+          float(AP.x, AP.y - 42, 'BERSERKER +25 %', '#ffb078');
         }
         if (i === 3) {
-          const m = targets(145, a, Math.PI / 2)[0];
-          cone(145, Math.PI / 2, m && m.hp / m.mhp < 0.3 ? 3.2 : 2.4);
+          arc(145, a, Math.PI / 2, fxColor());
+          // Chaque cible blessée (sous 30 %) prend le coup renforcé.
+          for (const m of targets(145, a, Math.PI / 2)) {
+            const low = m.hp / m.mhp < 0.3;
+            dmg(m, low ? 7.5 : 5);
+            if (low) float(m.x, m.y - 60, '💀', '#ffb078');
+          }
         }
         break;
       case 'mace':
-        if (i === 0) cone(135, Math.PI / 2, 1.3, m => debuff(m, 'armor', 6));
-        if (i === 1) circle(145, 0.9, m => debuff(m, 'slow', 3));
+        if (i === 0) cone(135, Math.PI / 2, 2.6, m => debuff(m, 'armor', 6));
+        if (i === 1) circle(145, 1.8, m => debuff(m, 'slow', 3));
         if (i === 2)
-          cone(145, Math.PI / 2, 1, m => {
+          cone(145, Math.PI / 2, 2, m => {
             if (m.boss || m.worldBoss) debuff(m, 'weak', 4);
             else {
-              m.cd = Math.max(m.cd, 1.4);
-              applyEffect(m, 'stun', 0.65);
+              m.cd = Math.max(m.cd, 1.5);
+              applyEffect(m, 'stun', 1.5);
             }
           });
         if (i === 3) {
-          const marked = targets(145, a, Math.PI / 2).some(m => m.v1746_armor > 0);
-          cone(145, Math.PI / 2, marked ? 2.6 : 2.1);
+          arc(145, a, Math.PI / 2, fxColor());
+          for (const m of targets(145, a, Math.PI / 2)) dmg(m, m.v1746_armor > 0 ? 6 : 4.6);
         }
         break;
       case 'spear':
-        if (i === 0) linear(230, 25, 1.35);
+        if (i === 0) linear(230, 25, 2.7);
         if (i === 1)
-          cone(175, Math.PI, 0.95, m => {
+          cone(175, Math.PI, 1.9, m => {
             if (!m.boss && !m.worldBoss) pushAway(m, 42);
           });
         if (i === 2) {
           const p = dash(180, a);
           beam(p.x, p.y, a, 180, 30, col);
-          linear(205, 34, 1.15, null, a);
+          // Tout ce qui se trouve sur la trajectoire et devant le point d'arrivée, touché une seule fois.
+          const hitOnce = new Set();
+          for (const m of game.world.monsters.slice()) {
+            const dx = m.x - p.x,
+              dy = m.y - p.y,
+              t = dx * Math.cos(a) + dy * Math.sin(a),
+              cross = Math.abs(dx * Math.sin(a) - dy * Math.cos(a));
+            if (m.hp > 0 && t >= -20 && t <= Math.hypot(AP.x - p.x, AP.y - p.y) + 120 + (m.r || 0) && cross <= 40 + (m.r || 0)) hitOnce.add(m);
+          }
+          for (const m of hitOnce) dmg(m, 2.4);
         }
         if (i === 3) {
-          const m = targets(220, a, Math.PI / 3)[0];
-          const d = m ? Math.hypot(m.x - AP.x, m.y - AP.y) : 0;
-          cone(220, Math.PI / 3, d >= 115 && d <= 205 ? 2.75 : 2.2);
+          arc(220, a, Math.PI / 3, fxColor());
+          for (const m of targets(220, a, Math.PI / 3)) {
+            const d = Math.hypot(m.x - AP.x, m.y - AP.y),
+              ideal = d >= 3 * TS && d <= 5.2 * TS;
+            dmg(m, ideal ? 6 : 4.6);
+            if (ideal) float(m.x, m.y - 60, '🎯', '#9ce6d5');
+          }
         }
         break;
       case 'dualdagger':
         if (i === 0) {
           rep(2, 0.11, j =>
-            cone(110, Math.PI / 2, 0.65, m => {
-              if (j === 1) debuff(m, 'bleed', 5, Math.max(2, Math.round(power() * 0.2)));
+            cone(110, Math.PI / 2, 1.2, m => {
+              if (j === 1) debuff(m, 'bleed', 5, Math.max(2, Math.round(power() * 0.35)));
             })
           );
         }
         if (i === 1)
-          circle(115, 0.9, m => {
-            if (m.v1746_bleed > 0) m.v1746_bleed += 2;
+          circle(115, 1.8, m => {
+            if (m.v1746_bleed > 0) m.v1746_bleed += 3;
           });
         if (i === 2) {
           dash(130, a + Math.PI);
-          S.shadow = 3;
+          S.shadow = 4;
           ring(65, col);
+          float(AP.x, AP.y - 42, 'PROCHAIN COUP +60 %', '#e5a7ff');
         }
         if (i === 3) {
           rep(5, 0.1, () =>
-            cone(115, Math.PI / 2, 0.45, m => {
-              if (m.v1746_bleed > 0) {
-                const remaining = m.v1746_bleed;
-                const bleed = m.v1746_bleedPower || 2;
+            cone(115, Math.PI / 2, 0.85, m => {
+              if (m.v1746_bleed > 0 && m.hp > 0) {
+                const remaining = m.v1746_bleed,
+                  bleed = m.v1746_bleedPower || 2,
+                  by = m.v1746_bleedBy;
                 m.v1746_bleed = 0;
-                hit(m, Math.round(remaining * bleed));
+                const burst = Math.round(remaining * bleed * 1.5);
+                if (by && by !== game.hero && game.heroes.includes(by)) canaanHeroStrike(m, burst, by);
+                else hit(m, burst);
                 splash(m.x, m.y, 40, '#f68abb');
               }
             })
@@ -764,21 +919,21 @@
         break;
       case 'bow':
         if (i === 0) {
-          const mult = S.fastBow > 0 ? 1.9 : 1.55;
-          projectile(a, mult, col);
+          const boosted = S.fastBow > 0;
+          projectile(a, boosted ? 3.6 : 2.8, col, { speed: 15 });
           S.fastBow = 0;
         }
         if (i === 1) {
           const { x, y } = groundTarget();
           effect('ring', x, y, 0, 115, 0, col, 0.9);
-          rep(4, 0.65, () => {
+          rep(4, 0.5, () => {
             splash(x, y, 115, col);
             for (const m of game.world.monsters.slice())
-              if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < 115 + (m.r || 0)) dmg(m, 0.4);
+              if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < 115 + (m.r || 0)) dmg(m, 0.9);
           });
         }
         if (i === 2) {
-          projectile(a, 0.8, col);
+          projectile(a, 2, col, { speed: 14 });
           for (const m of targets(350, a, 0.2)) {
             if (m.boss || m.worldBoss) debuff(m, 'mark', 4);
             else debuff(m, 'slow', 4);
@@ -786,14 +941,15 @@
         }
         if (i === 3) {
           dash(115, a + Math.PI);
-          projectile(a, 1.1, col);
+          projectile(a, 2.4, col, { speed: 14 });
           S.fastBow = 5;
+          float(AP.x, AP.y - 42, 'TIR PUISSANT RENFORCÉ', '#a7e8a0');
         }
         break;
       case 'shield':
         if (i === 0) {
           rep(4, 0.14, j => {
-            circle(135, 0.4);
+            circle(135, 0.65);
             arc(135, a + (j * Math.PI) / 2, Math.PI * 0.8, '#ffe4a2');
           });
         }
@@ -804,15 +960,15 @@
           float(AP.x, AP.y - 48, 'SOL CONSACRÉ', '#ffe4a2');
         }
         if (i === 2) {
-          linear(340, 23, 1.55);
+          linear(340, 23, 2.9);
           beam(AP.x, AP.y, a, 340, 20, '#ffe4a2');
           later(0.24, () =>
             beam(AP.x + Math.cos(a) * 310, AP.y + Math.sin(a) * 310, a + Math.PI, 310, 16, '#fff0b7')
           );
         }
         if (i === 3) {
-          S.shieldGuard = 5;
-          const h = healActor(AP.mhp * 0.12);
+          S.shieldGuard = 6;
+          const h = healActor(AP.mhp * 0.15);
           if (h > 0) float(AP.x, AP.y - 40, '+' + h + ' PV', '#aaffd0');
           ring(110, '#ffe4a2');
           float(AP.x, AP.y - 65, 'SERMENT DU GARDIEN', '#ffe4a2');
@@ -820,31 +976,41 @@
         break;
       case 'staff':
         if (i === 0) {
-          projectile(a, 1.2, col, { mag: true });
-          S.arcane = Math.min(3, S.arcane + 1);
+          projectile(a, 2.2, col, { mag: true });
+          gainCharge();
         }
         if (i === 1) {
-          const count = game.world.monsters.filter(m => m.hp > 0 && Math.hypot(m.x - AP.x, m.y - AP.y) < 150).length;
-          circle(150, 1, null);
-          if (count) S.arcane = Math.min(3, S.arcane + 1);
+          if (circle(150, 1.9) > 0) gainCharge();
         }
         if (i === 2) {
           S.focus = 8;
-          S.arcane = Math.min(3, S.arcane + 1);
+          gainCharge();
           ring(100, col);
-          float(AP.x, AP.y - 44, 'CONCENTRATION', '#d6aaff');
+          float(AP.x, AP.y - 44, 'CONCENTRATION +40 %', '#d6aaff');
         }
         if (i === 3) {
-          const mult = 1.7 + 0.55 * S.arcane;
+          const charges = S.arcane,
+            mult = 3.2 + 1.4 * charges;
           S.arcane = 0;
           const { x, y } = groundTarget();
           effect('ring', x, y, 0, 135, 0, col, 0.6);
           splash(x, y, 135, col);
+          if (charges) float(x, y - 60, '🌌 ×' + charges + ' CHARGE' + (charges > 1 ? 'S' : ''), '#d6aaff');
           for (const m of game.world.monsters.slice())
             if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < 135 + (m.r || 0)) dmg(m, mult, true);
         }
         break;
     }
+  }
+  // Charge arcanique du bâton (3 au maximum), annoncée au-dessus du héros.
+  function gainCharge() {
+    const before = S.arcane;
+    S.arcane = Math.min(3, S.arcane + 1);
+    if (S.arcane > before) float(AP.x, AP.y - 72, '🔮 Charge ' + S.arcane + '/3', '#d6aaff');
+  }
+  // Puissance (Attaque ou magie) d'un héros, pour les dégâts estimés des info-bulles.
+  function powerOf(hero, magic) {
+    return withActor(hero, () => (magic ? magPower() : power()));
   }
   Object.assign(window, {
     useSkill,
@@ -852,7 +1018,7 @@
     canaanHoldBasicAttack: holdBasicAttack,
     canaanHeroBasicAttack: heroBasicAttack,
     canaanHeroUseSkill: heroUseSkill,
-    CANAAN_SKILLS: Object.freeze({ ready: skillReady, spec: skillSpec, state: skillStateOf, remoteEffect, ageEffects, fx: effect }),
+    CANAAN_SKILLS: Object.freeze({ ready: skillReady, spec: skillSpec, state: skillStateOf, remoteEffect, ageEffects, fx: effect, power: powerOf }),
     CANAAN_BASIC_ATTACK: Object.freeze({
       spec: BASIC,
       lock: () => basicLock,

@@ -46,17 +46,6 @@ export const WEAPON_NAMES = {
     'shield': "Mur de l'éclipse",
     'dualsword': 'Épées jumelles du crépuscule'
   },
-  'Héroïque': {
-    'sword': "Éclat d'aurore",
-    'axe': 'Fureur des bastions',
-    'staff': 'Bâton du cataclysme',
-    'mace': 'Châtiment du titan',
-    'spear': 'Lance de la forteresse',
-    'dualdagger': 'Rosaces de la justice',
-    'bow': "Arc de l'aigle doré",
-    'shield': 'Rempart du bastion',
-    'dualsword': 'Duels de la vaillance'
-  },
   'Légendaire': {
     'sword': "Lame de l'étincelle",
     'axe': 'Dévoreuses de chair',
@@ -78,17 +67,6 @@ export const WEAPON_NAMES = {
     'bow': 'Arc des constellations',
     'shield': 'Barrière de singularité',
     'dualsword': 'Lames stellaires doubles'
-  },
-  'Céleste': {
-    'sword': 'Épée de la genèse',
-    'axe': "Haches de l'empyrée",
-    'staff': 'Sceptre du jugement divin',
-    'mace': 'Masse du firmament',
-    'spear': "Javelot de l'empyrée",
-    'dualdagger': "Jumeaux de l'aube",
-    'bow': 'Arc du zénith divin',
-    'shield': 'Bouclier du firmament sacré',
-    'dualsword': 'Épées jumelles de la genèse'
   }
 };
 export const GEAR_NAMES = {
@@ -156,22 +134,6 @@ export const GEAR_NAMES = {
     'ring': 'Sceau du souverain',
     'artifact': ['Talisman du vide', "Sceau d'ombre", "Sablier de l'éclipse"]
   },
-  'Héroïque': {
-    'weapon': {
-      'sword': "Éclat d'aurore",
-      'dualaxe': 'Fureur des bastions',
-      'staff': 'Bâton du cataclysme',
-      'mace': 'Châtiment du titan'
-    },
-    'helm': 'Couronne de vaillance',
-    'shoulders': 'Épaulières du bastion',
-    'armor': 'Harnois du protecteur',
-    'gloves': 'Gants du champion',
-    'boots': 'Bottes de lumière',
-    'neck': "Pendentif du soleil d'or",
-    'ring': 'Sceau du champion',
-    'artifact': ['Relique du cataclysme', 'Éclat du bastion', 'Flambeau du champion']
-  },
   'Légendaire': {
     'weapon': {
       'sword': "Lame de l'étincelle",
@@ -203,37 +165,21 @@ export const GEAR_NAMES = {
     'neck': "Pendentif de l'éternité",
     'ring': 'Anneau de la singularité',
     'artifact': ['Orbe du néant', 'Chronomètre astral', 'Prisme de singularité']
-  },
-  'Céleste': {
-    'weapon': {
-      'sword': 'Épée de la genèse',
-      'dualaxe': "Haches de l'empyrée",
-      'staff': 'Sceptre du jugement divin',
-      'mace': 'Masse du firmament'
-    },
-    'helm': 'Halo du transcendant',
-    'shoulders': "Spallières d'empyrée",
-    'armor': 'Cuirasse de l’aube',
-    'gloves': 'Gants du séraphin',
-    'boots': 'Bottes de la voie lactée',
-    'neck': 'Larmes de la déesse',
-    'ring': "Anneau d'absolu",
-    'artifact': ['Cœur de la grâce divine', 'Relique du firmament', 'Plume de séraphin']
   }
 };
 // Passifs des trois artéfacts.
 export const ARTIFACT_BUFFS = [
-  { name: 'Ardeur', icon: '🔥', description: 'Augmente les dégâts et les soins', stat: 'attack', percent: 6 },
+  { name: 'Ardeur', icon: '⟦art_ardeur⟧', description: 'Augmente les dégâts et les soins', stat: 'attack', percent: 6 },
   {
     name: 'Bastion',
-    icon: '🛡️',
+    icon: '⟦art_bastion⟧',
     description: 'Augmente les points de vie et l’armure',
     stat: 'defense',
     percent: 8
   },
   {
     name: 'Instinct',
-    icon: '🎯',
+    icon: '⟦art_instinct⟧',
     description: 'Augmente les chances de critique et la vitesse de déplacement',
     stat: 'crit',
     percent: 7

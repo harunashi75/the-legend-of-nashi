@@ -144,11 +144,14 @@ window.CANAAN_PERSISTENCE = {
       kills: hero.kills,
       inventory: hero.inventory,
       equipment: hero.equipment,
+      bank: CANAAN_BANK.export(hero),
       bagLevel: window.CANAAN_BAG_STATE.export(),
       classe: window.CANAAN_CLASS_STATE.export(),
       rubis: window.CANAAN_RUBIS_STATE.export(),
       arena: window.CANAAN_ARENA_STATE.export(),
       prof: CANAAN_PROF.sanitize(hero.prof),
+      // Succès et bestiaire.
+      succes: CANAAN_ACHIEVEMENTS.export(hero),
       // Quêtes : actives, terminées, secrets débloqués, décorations et choix narratifs.
       quetes: sanitizeQuests(hero.quetes)
     };
@@ -164,7 +167,8 @@ window.CANAAN_PERSISTENCE = {
       updated: Date.now(),
       // Résumé affiché par le menu des aventures sans recharger tout le héros.
       resume: { level: clampLevel(game.hero.level), gold: P.gold, classe: game.hero.classe.id },
-      monde: { openedChests: game.world.openedChests, worldBossTimers: game.world.worldBossTimers, maison: CANAAN_HOUSE.layout(), quetes: CANAAN_QUESTS.exportWorld() },
+      // couche : l'île ou les Tréfonds (en instance, celle d'où l'on est entré : on y reprend devant le portail).
+      monde: { openedChests: game.world.openedChests, worldBossTimers: game.world.worldBossTimers, maison: CANAAN_HOUSE.layout(), quetes: CANAAN_QUESTS.exportWorld(), couche: (game.world.instance ? game.world.returnLayer : game.world.layer) === 'under' ? 'under' : 'surface' },
       // Invités : position du groupe comme l'hôte (entrée de l'instance, ou camp après une chute de l'hôte).
       heros: { hote: this.heroSnapshot(position), invites: CANAAN_GROUP.exportGuests(() => position) }
     };
@@ -322,6 +326,7 @@ window.CANAAN_PERSISTENCE = {
     // Toujours interpréter les coordonnées sauvegardées dans le monde extérieur.
     game.world.instance = null;
     game.world.returnPos = null;
+    game.world.layer = 'surface';
     game.world.tiles = game.world.overworld;
     game.world.decor = game.world.overdecor;
     game.world.chests = [];
@@ -332,9 +337,12 @@ window.CANAAN_PERSISTENCE = {
     CANAAN_QUESTS.importWorld(monde.quetes);
     P.x = Number.isFinite(p.x) ? p.x : CANAAN_SPAWN.x;
     P.y = Number.isFinite(p.y) ? p.y : CANAAN_SPAWN.y;
+    // Partie sauvegardée dans les Tréfonds : on y reprend (à la forteresse si la place n'est plus praticable).
+    if (monde.couche === 'under') CANAAN_UNDER.setLayer('under');
+    const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_SPAWN;
     if (P.x < 0 || P.y < 0 || P.x / TS >= MAPW || P.y / TS >= MAPH || !canWalk(P.x, P.y)) {
-      P.x = CANAAN_SPAWN.x;
-      P.y = CANAAN_SPAWN.y;
+      P.x = home.x;
+      P.y = home.y;
     }
     P.gold = nonnegative(p.gold);
     game.hero.kills = nonnegative(h.kills);
@@ -342,6 +350,7 @@ window.CANAAN_PERSISTENCE = {
     game.hero.look = sanitizeLook(h.look);
     // Métiers (les aventures d'avant les métiers commencent au niveau 1).
     game.hero.prof = CANAAN_PROF.sanitize(h.prof);
+    game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);
     game.hero.quetes = sanitizeQuests(h.quetes);
     const validItem = it =>
       it &&
@@ -352,6 +361,7 @@ window.CANAAN_PERSISTENCE = {
       Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
       Number(it.level ?? it.ilvl ?? 1) > 0;
     game.hero.inventory = Array.isArray(h.inventory) ? h.inventory.filter(validItem) : [];
+    game.hero.bank = CANAAN_BANK.sanitize(h.bank);
     game.hero.equipment = Object.fromEntries(
       Object.keys(gearSlots).map(slot => {
         const it = h.equipment?.[slot];

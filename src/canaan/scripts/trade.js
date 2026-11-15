@@ -50,15 +50,27 @@
     hero.tradeNote = 'Échange ouvert avec ' + nameOf(s.a) + '.';
     return true;
   }
-  // Objets du sac désignés par leurs identifiants (un même identifiant peut désigner plusieurs objets).
+  // Objets proposés : un équipement par son identifiant, ou une pile du sac par son repère (fish:gardon:2*30,
+  // rubis:phenix:0*1…). Renvoie [{ gear }] ou [{ stack }], ou null si le héros ne les a plus.
   function resolve(hero, ids) {
     const used = new Set(),
+      taken = new Map(),
       out = [];
     for (const id of ids) {
+      if (CANAAN_BAG.isToken(id)) {
+        const p = CANAAN_BAG.parse(id);
+        if (!p) return null;
+        const key = p.kind + ':' + p.id + ':' + p.q,
+          n = (taken.get(key) || 0) + p.n;
+        if (n > CANAAN_BAG.count(hero, p.kind, p.id, p.q)) return null;
+        taken.set(key, n);
+        out.push({ stack: p, id });
+        continue;
+      }
       const it = hero.inventory.find(x => x && x.id === id && !used.has(x));
       if (!it) return null;
       used.add(it);
-      out.push(it);
+      out.push({ gear: it, id });
     }
     return out;
   }
@@ -98,21 +110,32 @@
     };
     if (!ga || !gb) return fail('Un objet proposé n’est plus dans le sac : échange suspendu.');
     if (oa.gold > Math.floor(s.a.player.gold) || ob.gold > Math.floor(s.b.player.gold)) return fail('Or insuffisant : échange suspendu.');
-    for (const [hero, give, get] of [
-      [s.a, ga, gb],
-      [s.b, gb, ga]
-    ])
-      if (hero.inventory.length - give.length + get.length > canaanBagLimit(hero)) return fail('Sac trop plein pour ' + nameOf(hero) + ' : échange suspendu.');
-    for (const [from, to, give] of [
-      [s.a, s.b, ga],
-      [s.b, s.a, gb]
-    ]) {
-      from.inventory = from.inventory.filter(it => !give.includes(it));
-      to.inventory.push(...give);
+    // Les objets et les piles changent de main ; si un sac déborde, tout revient comme avant.
+    const move = (from, to, give) => {
+      const gear = give.filter(x => x.gear).map(x => x.gear);
+      from.inventory = from.inventory.filter(it => !gear.includes(it));
+      to.inventory.push(...gear);
+      for (const { stack: p } of give.filter(x => x.stack)) {
+        CANAAN_BAG.remove(from, p.kind, p.id, p.q, p.n);
+        CANAAN_BAG.add(to, p.kind, p.id, p.q, p.n);
+      }
+    };
+    move(s.a, s.b, ga);
+    move(s.b, s.a, gb);
+    const full = [s.a, s.b].find(hero => canaanBagUsed(hero) > canaanBagLimit(hero));
+    if (full) {
+      move(s.b, s.a, ga);
+      move(s.a, s.b, gb);
+      return fail('Sac trop plein pour ' + nameOf(full) + ' : échange suspendu.');
     }
     s.a.player.gold += ob.gold - oa.gold;
     s.b.player.gold += oa.gold - ob.gold;
-    for (const hero of [s.a, s.b]) hero.netBag = null;
+    for (const hero of [s.a, s.b]) canaanAchieve(hero, 'trade');
+    for (const hero of [s.a, s.b]) {
+      hero.netBag = null;
+      if (hero === game.hero) recomputeStats();
+      else recomputeHeroStats(hero);
+    }
     const summary = (o, g) => (g.length ? g.length + ' objet' + (g.length > 1 ? 's' : '') : '') + (g.length && o.gold ? ' et ' : '') + (o.gold ? o.gold + ' or' : '') || 'rien';
     close(s, 'Échange réussi : ' + nameOf(s.a) + ' donne ' + summary(oa, ga) + ', ' + nameOf(s.b) + ' donne ' + summary(ob, gb) + '.');
     chat('Échange', nameOf(s.a) + ' ⇄ ' + nameOf(s.b) + ' : échange conclu.');
@@ -138,7 +161,8 @@
     }
   }
   // Vue d'un joueur : partenaires possibles, demande reçue ou envoyée, offres et validations.
-  const itemView = it => ({ id: it.id, name: gearDisplayName(it), rarity: it.rarity, level: itemLevel(it), slot: it.slot });
+  // Vue d'un objet proposé : un équipement (avec ce qu'il faut pour l'info-bulle) ou une pile.
+  const itemView = x => (x.stack ? { token: x.id } : { ...x.gear, name: gearDisplayName(x.gear) });
   function view(hero) {
     const s = sessionOf(hero),
       out = { note: hero.tradeNote || '' };
@@ -185,35 +209,57 @@
       '</div>'
     );
   }
-  const itemLine = (it, extra = '') =>
-    '<span class="trade-item" style="color:' + rarityInfo(it).color + '">' + esc(it.name) + '</span><span class="trade-ilvl">Niv. ' + itemLevel(it) + '</span>' + extra;
-  function openTrade(v) {
-    const bag = game.hero.inventory || [],
-      offered = resolve({ inventory: bag }, v.mine.items) || [],
-      left = bag.map((it, i) => [it, i]).filter(([it]) => it && it.id && !offered.includes(it));
-    const gold = ui.gold === null ? v.mine.gold : ui.gold;
+  // Case d'un objet (équipement ou pile) ; attrs : action au clic.
+  function tile(x, attrs) {
+    if (x.token) {
+      const p = CANAAN_BAG.parse(x.token);
+      return p ? '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, attrs) + '</div>' : '';
+    }
+    const rarity = rarityInfo(x),
+      icon = weaponIcon(x) || itemIcon[x.slot];
     return (
-      '<div class="trade-columns">' +
-      '<section class="trade-side' + (v.mine.ready ? ' ready' : '') + '"><h3>Ton offre ' + (v.mine.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '</h3>' +
-      (offered.length
-        ? '<ul class="trade-list">' +
-          offered
-            .map((it, k) => '<li>' + itemLine({ ...it, name: gearDisplayName(it) }, '<button type="button" class="trade-x" data-action="tradeRemove" data-index="' + k + '" aria-label="Retirer">✕</button>') + '</li>')
-            .join('') +
-          '</ul>'
-        : '<p class="trade-empty">Aucun objet.</p>') +
+      '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' + canaanPrestige(x) + ' style="border-color:' + rarity.color + ';--rarity:' + rarity.color + '" data-tooltip-trade="' + esc(x.id) + '" ' + attrs + '>' +
+      '<span class="bag-icon">' + icon + '</span><span class="bag-name">' + esc(x.name || gearDisplayName(x)) + '</span><span class="bag-ilvl">' + itemLevel(x) + '</span></button></div>'
+    );
+  }
+  // Ce qui reste dans le sac une fois l'offre retirée : équipements non proposés et piles diminuées.
+  function bagLeft(mine) {
+    const hero = game.hero,
+      offered = resolve(hero, mine.items) || [],
+      gear = hero.inventory.filter(it => it && it.id && !offered.some(x => x.gear === it)),
+      minus = new Map();
+    for (const { stack: p } of offered.filter(x => x.stack)) minus.set(p.kind + ':' + p.id + ':' + p.q, (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0) + p.n);
+    const stacks = [];
+    for (const p of CANAAN_BAG.piles(hero)) {
+      let n = p.n - (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0);
+      for (; n > 0; n -= CANAAN_BAG.STACK) stacks.push({ ...p, n: Math.min(CANAAN_BAG.STACK, n) });
+    }
+    return { gear, stacks, offered };
+  }
+  function openTrade(v) {
+    const { gear, stacks, offered } = bagLeft(v.mine),
+      full = offered.length >= TRADE_ITEMS,
+      gold = ui.gold === null ? v.mine.gold : ui.gold,
+      grid = list => '<div class="modern-bag trade-grid">' + (list.length ? list.join('') : '<p class="trade-empty">Aucun objet.</p>') + '</div>';
+    const mineTiles = offered.map((x, k) => tile(x.stack ? { token: x.id } : x.gear, 'data-action="tradeRemove" data-index="' + k + '" title="Retirer de l’offre"')),
+      theirTiles = v.theirs.items.map(x => tile(x, 'title="Proposé par ' + esc(v.with) + '"')),
+      bagTiles = [
+        ...gear.map(it => tile(it, 'data-action="tradeAddId" data-id="' + esc(it.id) + '"' + (full ? ' disabled' : '') + ' title="Proposer"')),
+        ...stacks.map(p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="tradeAddId" data-id="' + esc(CANAAN_BAG.token(p)) + '"' + (full ? ' disabled' : '') + ' title="Proposer"') + '</div>')
+      ];
+    return (
+      '<div class="trade-columns shop-columns">' +
+      '<section class="shop-side trade-offers">' +
+      '<div class="trade-side' + (v.mine.ready ? ' ready' : '') + '"><h3>Ton offre ' + (v.mine.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '<small> · ' + offered.length + ' / ' + TRADE_ITEMS + '</small></h3>' + grid(mineTiles) +
       '<div class="trade-gold"><label for="tradeGold">💰 Or (tu as ' + Math.floor(P.gold) + ')</label><input id="tradeGold" type="number" min="0" step="1" value="' + Number(gold) + '">' +
-      '<button type="button" data-action="tradeGold">Proposer</button></div></section>' +
-      '<section class="trade-side' + (v.theirs.ready ? ' ready' : '') + '"><h3>Offre de ' + esc(v.with) + ' ' + (v.theirs.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '</h3>' +
-      (v.theirs.items.length ? '<ul class="trade-list">' + v.theirs.items.map(it => '<li>' + itemLine(it) + '</li>').join('') + '</ul>' : '<p class="trade-empty">Aucun objet.</p>') +
-      '<p class="trade-gold-them">💰 ' + Number(v.theirs.gold) + ' or</p></section></div>' +
+      '<button type="button" data-action="tradeGold">Proposer</button></div></div>' +
+      '<div class="trade-side' + (v.theirs.ready ? ' ready' : '') + '"><h3>Offre de ' + esc(v.with) + ' ' + (v.theirs.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '</h3>' + grid(theirTiles) +
+      '<p class="trade-gold-them">💰 ' + Number(v.theirs.gold) + ' or</p></div>' +
       '<div class="trade-actions"><button type="button" class="' + (v.mine.ready ? '' : 'trade-primary') + '" data-action="tradeReady">' + (v.mine.ready ? 'Ne plus valider' : '✅ Valider l’échange') + '</button>' +
       '<button type="button" class="trade-danger" data-action="tradeCancel">Annuler</button></div>' +
-      '<p class="trade-hint">L’échange se fait quand vous avez validé tous les deux. Changer une offre annule les validations.</p>' +
-      '<h3 class="trade-bag-title">Ton sac · clique un objet pour le proposer (' + offered.length + ' / ' + TRADE_ITEMS + ')</h3>' +
-      (left.length
-        ? '<div class="trade-bag">' + left.map(([it, i]) => '<button type="button" data-action="tradeAdd" data-index="' + i + '"' + (offered.length >= TRADE_ITEMS ? ' disabled' : '') + '>' + itemLine({ ...it, name: gearDisplayName(it) }) + '</button>').join('') + '</div>'
-        : '<p class="trade-empty">Rien d’autre dans ton sac (les objets portés ne s’échangent pas).</p>')
+      '<p class="trade-hint">L’échange se fait quand vous avez validé tous les deux. Changer une offre annule les validations.</p></section>' +
+      '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · clique un objet pour le proposer</h3>' +
+      '<p class="muted">Les objets portés ne s’échangent pas. Une pile se propose entière (100 au plus).</p>' + grid(bagTiles) + '</section></div>'
     );
   }
   function body(v) {
@@ -234,7 +280,7 @@
     const open = modalOpen() && document.querySelector('#window .trade-panel');
     if (!open) return;
     const v = myView();
-    shown = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + Math.floor(P.gold);
+    shown = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + CANAAN_BAG.tiles(game.hero).length + '|' + Math.floor(P.gold);
     showPanel(
       '<div class="rpg-head"><h2>🤝 Échange</h2></div><div class="rpg-paper trade-panel">' +
         (v.note ? '<p class="trade-note" role="status">' + esc(v.note) + '</p>' : '') +
@@ -259,7 +305,7 @@
     if (!guest()) check();
     if (!modalOpen() || !document.querySelector('#window .trade-panel')) return;
     const v = myView(),
-      now = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + Math.floor(P.gold);
+      now = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + CANAAN_BAG.tiles(game.hero).length + '|' + Math.floor(P.gold);
     if (now !== shown && document.activeElement?.id !== 'tradeGold') render();
   }, 250);
   // Demande reçue : prévenir même fenêtre fermée (chez un invité, la note arrive avec sa vue).
@@ -285,10 +331,14 @@
       return mine ? act({ op: 'trade-ready', yes: !mine.ready }) : false;
     },
     add(index) {
-      const mine = currentMine(),
-        it = game.hero.inventory?.[index];
-      if (!mine || !it?.id || mine.items.length >= TRADE_ITEMS) return false;
-      return act({ op: 'trade-offer', items: [...mine.items, it.id], gold: mine.gold });
+      const it = game.hero.inventory?.[index];
+      return it?.id ? actions.addId(it.id) : false;
+    },
+    // Proposer un équipement (identifiant) ou une pile du sac (repère).
+    addId(id) {
+      const mine = currentMine();
+      if (!mine || typeof id !== 'string' || !id || mine.items.length >= TRADE_ITEMS) return false;
+      return act({ op: 'trade-offer', items: [...mine.items, id], gold: mine.gold });
     },
     remove(k) {
       const mine = currentMine();
@@ -311,6 +361,15 @@
     handle,
     view,
     check,
+    // Info-bulle d'un équipement proposé (le sien ou celui de l'autre joueur).
+    showTooltip(id, event) {
+      const v = myView(),
+        item = game.hero.inventory.find(it => it && it.id === id) || v.theirs?.items?.find(x => x.id === id && !x.token);
+      if (!item) return hideGearTooltip();
+      gearTooltip.innerHTML = window.CANAAN_STATS_VIEW.tooltip(item) + (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      gearTooltip.style.display = 'block';
+      moveGearTooltip(event);
+    },
     // Vue reçue de l'hôte par un invité (message privé).
     applyRemote(v) {
       if (v && typeof v === 'object') remote = v;

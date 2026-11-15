@@ -8,17 +8,17 @@ export const TALENT_SLOT_LEVELS = Object.freeze([1, 10, 20, 30, 40]);
 export const TALENTS_PER_CLASS = 10;
 // Éléments des dégâts : couleur des effets et icône sur les compétences.
 export const ELEMENTS = deepFreeze({
-  nature: { name: 'Nature', icon: '🌿', color: '#7ee36a' },
-  holy: { name: 'Sacré', icon: '☀️', color: '#ffd76a' },
-  shadow: { name: 'Ombre', icon: '🌑', color: '#c48cff' },
-  fire: { name: 'Feu', icon: '🔥', color: '#ff8a3d' },
-  ice: { name: 'Glace', icon: '❄️', color: '#8fdcff' },
-  lightning: { name: 'Foudre', icon: '⚡', color: '#f4f07a' }
+  nature: { name: 'Nature', icon: '⟦el_nature⟧', color: '#7ee36a' },
+  holy: { name: 'Sacré', icon: '⟦el_holy⟧', color: '#ffd76a' },
+  shadow: { name: 'Ombre', icon: '⟦el_shadow⟧', color: '#c48cff' },
+  fire: { name: 'Feu', icon: '⟦el_fire⟧', color: '#ff8a3d' },
+  ice: { name: 'Glace', icon: '⟦el_ice⟧', color: '#8fdcff' },
+  lightning: { name: 'Foudre', icon: '⟦el_lightning⟧', color: '#f4f07a' }
 });
 export const CLASSES = deepFreeze([
   {
     id: 'druide',
-    icon: '🌿',
+    icon: '⟦cls_druide⟧',
     name: 'Druide',
     style: 'Polyvalence, soins, poison et régénération',
     spec: 'Nature, poison, régénération et soutien',
@@ -27,7 +27,7 @@ export const CLASSES = deepFreeze([
     elements: ['nature', 'nature', 'nature', 'nature'],
     passive: {
       name: 'Sève vitale',
-      desc: 'Tes compétences d’armes frappent avec la nature. Tes compétences offensives te soignent, toi et tes alliés à moins de 6 cases, de 5 % des dégâts infligés.'
+      desc: 'Tes compétences d’armes frappent avec la nature : elles empoisonnent (25 % des dégâts en plus sur 4 s) et soignent ton groupe proche de 5 % des dégâts. Tes compétences utilitaires soignent ton groupe proche de 8 % des PV max.'
     },
     special: {
       id: 'feral',
@@ -52,7 +52,7 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'paladin',
-    icon: '🛡️',
+    icon: '⟦cls_paladin⟧',
     name: 'Paladin',
     style: 'Défense, protection des alliés et dégâts sacrés',
     spec: 'Protection, boucliers, soins et lumière sacrée',
@@ -60,7 +60,7 @@ export const CLASSES = deepFreeze([
     elements: ['holy', 'holy', 'holy', 'holy'],
     passive: {
       name: 'Lumière sacrée',
-      desc: 'Tes compétences d’armes frappent avec la lumière. Tes soins soignent aussi tes alliés à moins de 6 cases, à 50 %.'
+      desc: 'Tes compétences d’armes frappent avec la lumière : chaque compétence offensive te donne un bouclier de 5 % des PV max, chaque compétence utilitaire un bouclier de 10 % à ton groupe proche. Tes soins soignent aussi tes alliés à moins de 6 cases, à 50 %.'
     },
     special: {
       id: 'divine',
@@ -85,7 +85,7 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'assassin',
-    icon: '🗡️',
+    icon: '⟦cls_assassin⟧',
     name: 'Assassin',
     style: 'Dégâts critiques, saignements et mobilité',
     spec: 'Critiques, saignements, mobilité et exécution',
@@ -93,13 +93,13 @@ export const CLASSES = deepFreeze([
     elements: ['shadow', 'shadow', 'shadow', 'shadow'],
     passive: {
       name: 'Pas de l’ombre',
-      desc: 'Tes compétences d’armes frappent avec l’ombre. +5 % de vitesse de déplacement et +10 % de dégâts critiques.'
+      desc: 'Tes compétences d’armes frappent avec l’ombre : +12 % de dégâts, +30 % de plus pour la compétence 4 contre une cible sous 50 % de PV ; une compétence utilitaire renforce la suivante de 25 %. +5 % de vitesse de déplacement et +10 % de dégâts critiques.'
     },
     special: {
       id: 'veil',
       icon: '🌑',
       name: 'Voile d’ombre',
-      desc: 'Invisible pendant 4 secondes : les monstres t’ignorent et tu gagnes +30 % de vitesse. Ta prochaine compétence offensive inflige +40 % de dégâts et met fin au voile.',
+      desc: 'Invisible pendant 4 secondes : les monstres t’ignorent (pas les boss ni les boss mondiaux) et tu gagnes +30 % de vitesse. Ta prochaine compétence offensive inflige +40 % de dégâts et met fin au voile.',
       mana: 20,
       cooldown: 30
     },
@@ -118,7 +118,7 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'elementaliste',
-    icon: '🔥',
+    icon: '⟦cls_elementaliste⟧',
     name: 'Élémentaliste',
     style: 'Magie élémentaire, contrôle et dégâts de zone',
     spec: 'Feu, glace, foudre et dégâts de zone',
@@ -127,7 +127,7 @@ export const CLASSES = deepFreeze([
     elements: ['fire', 'ice', 'lightning', 'fire'],
     passive: {
       name: 'Maîtrise des éléments',
-      desc: 'Tes compétences d’armes deviennent élémentaires : 1 et 4 de feu, 2 de glace, 3 de foudre. Tes compétences de glace ralentissent la cible de 20 % pendant 2 secondes.'
+      desc: 'Tes compétences d’armes deviennent élémentaires : 1 et 4 de feu (brûlure de 30 % des dégâts sur 4 s), 2 de glace (ralentit de 30 % pendant 2,5 s), 3 de foudre (rebondit sur 2 ennemis à 35 %). Une compétence utilitaire libère une décharge autour de toi.'
     },
     special: {
       id: 'avatar',

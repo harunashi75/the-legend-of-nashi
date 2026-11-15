@@ -94,7 +94,7 @@ body {
   background: linear-gradient(180deg, #b48cf0, #6a3ab0 70%, #45207a);
 }
 .bar.exp span {
-  font-size: 9px;
+  font-size: calc(9px * var(--font-scale));
   line-height: 9px;
 }
 /* Fiche du personnage : niveau, XP et deux tableaux de statistiques (points seulement). */
@@ -106,7 +106,7 @@ body {
   margin-bottom: 4px;
   color: var(--rpg-gold-light);
   font-family: var(--rpg-serif);
-  font-size: 18px;
+  font-size: calc(18px * var(--font-scale));
 }
 #window .char-level .bar.exp {
   height: 14px;
@@ -120,7 +120,7 @@ body {
   position: absolute;
   inset: 0;
   text-align: center;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   line-height: 14px;
 }
 #window .stat-table {
@@ -146,7 +146,7 @@ body {
 }
 #window .stat-table .stat-desc {
   margin-top: 2px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   font-style: italic;
   color: #b9a47e;
 }
@@ -165,7 +165,7 @@ body {
 .tooltip-req {
   margin-top: 6px;
   color: #c9b48a;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 .tooltip-req.too-high,
 .bag-ilvl.too-high {
@@ -432,7 +432,7 @@ body {
 }
 #title h1 {
   font-family: var(--rpg-serif);
-  font-size: 68px;
+  font-size: calc(68px * var(--font-scale));
   letter-spacing: 10px;
   background: linear-gradient(180deg, #fff2c0 0%, #e8b850 45%, #8a5a1e 100%);
   -webkit-background-clip: text;
@@ -572,4 +572,370 @@ body {
 }
 #settingsCard .settings-hint {
   color: var(--rpg-muted);
+}
+
+/* ===== Sac (I) et personnage (C) : objets en petites cases carrées =====
+   L'icône remplit la case, la bordure et le fond prennent la couleur de la qualité ; le nom et les statistiques
+   sont dans l'info-bulle au survol. Coin en haut à droite : vendre ; en haut à gauche : Arme 2 ; en bas : niveau. */
+#window#window .modern-bag {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 68px);
+  gap: 8px;
+  justify-content: start;
+}
+#window#window .bag-sale-wrap {
+  position: relative;
+  width: 68px;
+  height: 68px;
+}
+#window#window .bag-sale-wrap > .bag-cell,
+#window#window .bag-cell {
+  width: 68px;
+  height: 68px;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--rarity, #3a2c20) 32%, #2a1e14), #140e09 78%);
+}
+#window#window .bag-cell .bag-icon {
+  line-height: 1;
+}
+/* L'icône garde la taille de la case (elle ne suit pas la taille des textes). */
+#window#window .bag-cell .bag-icon svg.ico {
+  width: 40px;
+  height: 40px;
+  vertical-align: 0;
+}
+#window#window .bag-cell .bag-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#window#window .bag-cell.empty {
+  border-style: dashed;
+  opacity: 0.55;
+}
+#window#window .bag-cell.empty .bag-icon {
+  font-size: calc(22px * var(--font-scale));
+}
+#window#window .bag-cell .bag-ilvl {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #0d0906d9;
+  font-size: calc(10px * var(--font-scale));
+  line-height: 1.35;
+}
+#window#window .bag-sale,
+#window#window .bag-sale-wrap .weapon-reserve {
+  position: absolute;
+  top: -6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: calc(11px * var(--font-scale));
+  line-height: 1;
+}
+#window#window .bag-sale {
+  right: -6px;
+  left: auto;
+}
+#window#window .bag-sale-wrap .weapon-reserve {
+  left: -6px;
+  right: auto;
+  bottom: auto;
+  font-weight: 800;
+}
+#window#window .character-doll {
+  align-items: center;
+}
+#window#window .doll-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#window#window .equip-square {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--rarity, transparent) 32%, #2a1e14), #140e09 78%);
+}
+#window#window .equip-square .eq-icon {
+  line-height: 1;
+}
+#window#window .equip-square .eq-icon svg.ico {
+  width: 40px;
+  height: 40px;
+  vertical-align: 0;
+}
+#window#window .equip-square.empty .eq-icon {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+#window#window .equip-square .eq-label,
+#window#window .equip-square .eq-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#window#window .equip-square.active-weapon {
+  box-shadow: 0 0 0 2px #45e1db66, 0 0 12px #45e1db55;
+}
+/* Noms des Rubis sous leur emplacement : coupés entre les mots seulement. */
+#window .rubis-slot em {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* ===== Sac pleine largeur, fiche centrée, boutique et échange en deux colonnes ===== */
+/* Les cases remplissent toute la largeur de la fenêtre (autant de colonnes que possible), en restant carrées. */
+#window#window .modern-bag {
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  justify-content: stretch;
+}
+#window#window .modern-bag .bag-sale-wrap {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+#window#window .modern-bag .bag-sale-wrap > .bag-cell,
+#window#window .modern-bag .bag-cell {
+  width: 100%;
+  height: 100%;
+}
+#window#window .bag-cell .stack-count {
+  color: #fff4d8;
+  font-weight: 800;
+}
+/* Fiche du personnage : le héros au centre, les deux colonnes de cases à égale distance. */
+#window#window .character-doll {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: center;
+  column-gap: clamp(18px, 4vw, 48px);
+}
+#window#window .doll-column {
+  align-items: center;
+  width: auto;
+  overflow: visible;
+}
+#window#window .doll-center {
+  width: 190px;
+}
+/* Boutique et échange : deux fenêtres côte à côte (marchandise ou échange à gauche, sac à droite). */
+#window#window .shop-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+#window#window .shop-side {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #6a5232;
+  border-radius: 10px;
+  background: #1a120cc0;
+}
+#window#window .shop-side h3 {
+  margin: 0 0 6px;
+}
+#window#window .shop-stock {
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  row-gap: 22px;
+  margin-bottom: 18px;
+}
+#window#window .shop-item {
+  position: relative;
+  aspect-ratio: 1;
+}
+#window#window .shop-item .bag-cell {
+  width: 100%;
+  height: 100%;
+}
+#window#window .shop-price {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -19px;
+  text-align: center;
+  color: #ffd98a;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+  white-space: nowrap;
+}
+#window#window .shop-price.poor {
+  color: #e07a7a;
+}
+#window#window .trade-offers .trade-side {
+  margin-bottom: 12px;
+}
+#window#window .trade-grid {
+  min-height: 62px;
+}
+@media (max-width: 900px) {
+  #window#window .shop-columns {
+    grid-template-columns: 1fr;
+  }
+}
+#window#window .trade-grid .trade-empty {
+  grid-column: 1 / -1;
+  margin: 6px 0;
+}
+/* Banque : jusqu'à 500 cases, la grille défile dans sa fenêtre. */
+#window#window .bank-grid {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px 4px 6px 0;
+}
+/* Enchantements : troisième secondaire dans l'info-bulle, marque sur la case, enchantement choisi. */
+#gearHoverTooltip .stat-line.enchant {
+  color: #d9a8ff;
+}
+#gearHoverTooltip .stat-line.enchant small {
+  color: #a88ad0;
+}
+#window#window .bag-cell .ench-mark {
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  font-size: calc(11px * var(--font-scale));
+  filter: drop-shadow(0 0 3px #c890ff);
+}
+#window#window .ench-pick .bag-sale-wrap.picked .bag-cell {
+  box-shadow: 0 0 0 3px #d9a8ff, 0 0 14px #c890ff;
+}
+#window#window .ench-pick,
+#window#window .ench-targets {
+  margin-bottom: 10px;
+}
+/* Recette d'enchantement verrouillée (niveau trop bas) : grisée, la raison bien visible. */
+#window#window .prof-recipe.locked {
+  opacity: 0.72;
+}
+#window#window .prof-recipe h4 small {
+  color: #b8a888;
+  font-weight: 600;
+}
+
+/* ===== Prestige : Légendaire et Mythique brillent, une vague de lumière passe dans le fond de la case ===== */
+#window#window [data-prestige] {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Vague : un dégradé qui ondule lentement derrière l'icône. */
+#window#window [data-prestige]::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 30% 70%, var(--glow-a) 0%, transparent 45%),
+    radial-gradient(ellipse at 70% 30%, var(--glow-b) 0%, transparent 45%),
+    repeating-linear-gradient(115deg, transparent 0 14px, var(--wave) 14px 20px, transparent 20px 34px);
+  animation: prestige-wave 5s ease-in-out infinite alternate;
+  opacity: 0.85;
+}
+/* Reflet : un éclat de lumière qui traverse la case de temps en temps. */
+#window#window [data-prestige]::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -60%;
+  width: 40%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg);
+  animation: prestige-shine 3.2s ease-in-out infinite;
+}
+#window#window [data-prestige="legendaire"] {
+  --glow-a: #ff983d88;
+  --glow-b: #ffd76a77;
+  --wave: #ffb35a2a;
+  animation: prestige-pulse-leg 2.4s ease-in-out infinite;
+}
+#window#window [data-prestige="mythique"] {
+  --glow-a: #45e1db88;
+  --glow-b: #c890ff77;
+  --wave: #7af0ff2a;
+  animation: prestige-pulse-myth 2.4s ease-in-out infinite;
+}
+#window#window [data-prestige] .bag-icon,
+#window#window [data-prestige] .eq-icon {
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 4px var(--glow-b));
+}
+#window#window [data-prestige] .bag-ilvl {
+  z-index: 3;
+}
+@keyframes prestige-wave {
+  0% {
+    transform: translate(-6%, 4%) rotate(0deg);
+  }
+  100% {
+    transform: translate(6%, -4%) rotate(8deg);
+  }
+}
+@keyframes prestige-shine {
+  0%,
+  55% {
+    left: -60%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+@keyframes prestige-pulse-leg {
+  0%,
+  100% {
+    box-shadow: 0 0 6px #ff983d88, inset 0 0 8px #ff983d55;
+  }
+  50% {
+    box-shadow: 0 0 16px #ffb35acc, inset 0 0 14px #ffd76a88;
+  }
+}
+@keyframes prestige-pulse-myth {
+  0%,
+  100% {
+    box-shadow: 0 0 6px #45e1db88, inset 0 0 8px #45e1db55;
+  }
+  50% {
+    box-shadow: 0 0 18px #7af0ffcc, inset 0 0 14px #c890ff88;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #window#window [data-prestige],
+  #window#window [data-prestige]::before,
+  #window#window [data-prestige]::after {
+    animation: none;
+  }
 }

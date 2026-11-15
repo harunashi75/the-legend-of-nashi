@@ -4,6 +4,7 @@
 import {
   ACTIVE_GEAR_SLOTS,
   GEAR_RARITIES,
+  LEGACY_RARITY,
   JEWEL_ICON,
   JEWEL_SLOTS,
   RARITY_WEIGHTS,
@@ -12,7 +13,8 @@ import {
 
 // Qualité d'un objet ; une qualité absente ou inconnue vaut Commun.
 export function rarityInfo(item) {
-  return GEAR_RARITIES.find(r => r.name === item?.rarity) || GEAR_RARITIES[0];
+  const name = LEGACY_RARITY[item?.rarity] || item?.rarity;
+  return GEAR_RARITIES.find(r => r.name === name) || GEAR_RARITIES[0];
 }
 // Tirage libre d'une qualité ; rng renvoie un nombre dans [0, 1[.
 export function rollRarity(rng) {

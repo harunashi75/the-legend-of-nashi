@@ -27,21 +27,26 @@
     );
   }
   function bagCell(item, index, merchant) {
-    if (!item)
-      return '<div class="bag-cell empty"><span class="bag-icon">＋</span><span class="bag-name">Vide</span></div>';
+    if (!item) return '<div class="bag-sale-wrap"><div class="bag-cell empty" title="Emplacement vide"><span class="bag-icon">＋</span><span class="bag-name">Vide</span></div></div>';
     const rarity = rarityInfo(item),
       icon = weaponIcon(item) || itemIcon[item.slot] || '💎';
     return (
       '<div class="bag-sale-wrap">' +
       '<button type="button" class="bag-cell' +
       (item.slot === 'weapon' ? ' weapon-cell' : '') +
-      '" style="border-color:' +
+      '"' +
+      canaanPrestige(item) +
+      ' style="border-color:' +
+      rarity.color +
+      ';--rarity:' +
       rarity.color +
       '" data-tooltip-index="' +
       index +
       '" data-action="equipBagIndex" data-index="' +
       index +
-      '" title="Cliquer pour équiper">' +
+      '" title="' +
+      safeGearText(gearDisplayName(item)) +
+      ' · cliquer pour équiper">' +
       '<span class="bag-icon">' +
       icon +
       '</span><span class="bag-name" style="color:' +
@@ -50,7 +55,7 @@
       safeGearText(gearDisplayName(item)) +
       '</span><span class="bag-ilvl' +
       (itemLevel(item) > clampLevel(game.hero.level) ? ' too-high' : '') +
-      '">Niv. ' +
+      '">' +
       itemLevel(item) +
       '</span></button>' +
       '<button type="button" class="bag-sale" data-item-id="' +
@@ -68,11 +73,11 @@
       ) +
       '" ' +
       (!merchant ? 'disabled' : '') +
-      '>Vendre</button>' +
+      '>🪙</button>' +
       (item.slot === 'weapon'
         ? '<button type="button" class="weapon-reserve" data-action="equipReserve" data-index="' +
           index +
-          '" title="Équiper cette arme dans le deuxième emplacement">Arme 2</button>'
+          '" title="Équiper cette arme dans le deuxième emplacement (Arme 2)">2</button>'
         : '') +
       '</div>'
     );
@@ -82,12 +87,16 @@
     game.hero.inventory.forEach(item => window.CANAAN_GEAR.normalize(item));
     currentGearPanel = 'inventory';
     hideGearTooltip();
+    // Équipement d'abord, puis les piles (Rubis, poissons, viandes, repas), puis les cases libres.
     const merchant = nearMerchant(),
-      cells = Array.from({ length: BAG_LIMIT }, (_, i) => bagCell(game.hero.inventory[i], i, merchant)).join('');
+      gear = game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
+      stacks = CANAAN_BAG.tiles(game.hero).map(p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"') + '</div>'),
+      empty = Math.max(0, BAG_LIMIT - gear.length - stacks.length),
+      cells = gear.join('') + stacks.join('') + Array.from({ length: empty }, () => bagCell(null)).join('');
     modernPanel(
-      rpgHeader('🎒 Sac — ' + game.hero.inventory.length + '/' + BAG_LIMIT + ' emplacements') +
+      rpgHeader('🎒 Sac — ' + canaanBagUsed(game.hero) + '/' + BAG_LIMIT + ' emplacements') +
         '<div class="modern-body">' +
-        '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper. ' +
+        '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un Rubis s’équipe, un repas se mange). ' +
         (merchant
           ? '💰 Marchand proche : vente disponible.'
           : '💰 Pour vendre, rends-toi chez un marchand et appuie sur E.') +
@@ -111,8 +120,13 @@
     return (
       '<div class="equip-square' +
       (slot === 'weapon' ? ' active-weapon' : '') +
-      '" style="border-color:' +
+      (item ? '' : ' empty') +
+      '"' +
+      canaanPrestige(item) +
+      ' style="border-color:' +
       (rarity ? rarity.color : '#5e7180') +
+      ';--rarity:' +
+      (rarity ? rarity.color : 'transparent') +
       '" data-tooltip-slot="' +
       slot +
       '" data-action="' +
@@ -120,11 +134,11 @@
       '" data-slot="' +
       slot +
       '" title="' +
-      (slot === 'weapon2'
-        ? 'Arme de réserve · Q pour changer'
-        : item
-          ? 'Survoler pour voir les statistiques · Cliquer pour retirer'
-          : 'Emplacement libre') +
+      safeGearText(
+        CANAAN_ICONS.strip(gearSlots[slot]) +
+          ' — ' +
+          (item ? gearDisplayName(item) + (slot === 'weapon2' ? ' · Q pour changer' : ' · cliquer pour retirer') : 'emplacement libre')
+      ) +
       '">' +
       '<span class="eq-icon">' +
       icon +
@@ -210,7 +224,7 @@
       gearStat: !!window.gearStat
     })
   });
-  Object.assign(window, { renderInventory, renderCharacter, charSlot, showGearTooltip, showEquippedTooltip });
+  Object.assign(window, { renderInventory, renderCharacter, charSlot, showGearTooltip, showEquippedTooltip, bagUpgradeHTML });
 })();
 // Aperçu direct, utilisé une fois par rendu de la fiche personnage.
 function drawCharacterPreview() {

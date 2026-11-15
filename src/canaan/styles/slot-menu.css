@@ -42,7 +42,7 @@
 }
 #slotMenu .slot-number {
   font-family: var(--rpg-serif, Georgia, serif);
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--rpg-muted, #b8a483);
@@ -50,7 +50,7 @@
 #slotMenu .slot-card h3 {
   margin: 0;
   font-family: var(--rpg-serif, Georgia, serif);
-  font-size: 21px;
+  font-size: calc(21px * var(--font-scale));
   color: var(--rpg-gold-light, #f6dc98);
   overflow-wrap: anywhere;
 }
@@ -60,13 +60,13 @@
 #title #slotMenu p.slot-message {
   margin: 0;
   font-family: system-ui, sans-serif;
-  font-size: 13.5px;
+  font-size: calc(13.5px * var(--font-scale));
   line-height: 1.4;
   letter-spacing: 0;
   color: #e8d9b8;
 }
 #title #slotMenu p.slot-date {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--rpg-muted, #b8a483);
 }
 #title #slotMenu p.slot-warning {
@@ -85,7 +85,7 @@
 #title #slotMenu button {
   margin: 0;
   padding: 9px 14px;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
   letter-spacing: 1px;
   border-radius: 4px;
   cursor: pointer;
@@ -106,10 +106,10 @@
   border: 1px solid rgba(232, 184, 80, 0.35);
   box-shadow: none;
   color: var(--rpg-muted, #b8a483);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #slotMenu .slot-label {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--rpg-muted, #b8a483);
 }
 #slotMenu .slot-input {
@@ -120,7 +120,7 @@
   border: 1px solid rgba(232, 184, 80, 0.6);
   background: #120c07;
   color: #fff4d0;
-  font: 15px var(--rpg-serif, Georgia, serif);
+  font: calc(15px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
 }
 #slotMenu .slot-input:focus {
   outline: 2px solid var(--rpg-gold-light, #f6dc98);
@@ -160,7 +160,7 @@
   color: #dff2ff;
 }
 #slotMenu .slot-join label {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #a9c8dc;
 }
 
@@ -180,7 +180,7 @@
 #slotMenu .look-creator h3 {
   margin: 0 0 12px;
   font-family: var(--rpg-serif, Georgia, serif);
-  font-size: 22px;
+  font-size: calc(22px * var(--font-scale));
   color: var(--rpg-gold-light, #f6dc98);
 }
 #slotMenu .look-body {
@@ -215,7 +215,7 @@
 #title #slotMenu p.look-summary,
 #title #slotMenu p.look-note {
   margin: 0;
-  font: 13px system-ui, sans-serif;
+  font: calc(13px * var(--font-scale)) system-ui, sans-serif;
   letter-spacing: 0;
   color: #e8d9b8;
   text-align: center;
@@ -223,7 +223,7 @@
 #title #slotMenu p.look-note {
   margin-top: 6px;
   text-align: left;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--rpg-muted, #b8a483);
 }
 #slotMenu .look-fields {
@@ -239,7 +239,7 @@
   align-items: center;
 }
 #slotMenu .look-title {
-  font: 600 13px system-ui, sans-serif;
+  font: 600 calc(13px * var(--font-scale)) system-ui, sans-serif;
   color: var(--rpg-muted, #b8a483);
 }
 #slotMenu .look-options {
@@ -249,7 +249,7 @@
 }
 #title #slotMenu button.look-choice {
   padding: 6px 11px;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   letter-spacing: 0;
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   border: 1px solid rgba(232, 184, 80, 0.4);

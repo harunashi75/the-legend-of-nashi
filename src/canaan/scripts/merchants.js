@@ -118,10 +118,12 @@
   }
   function drawCanaanMerchant(c, n) {
     const key = n.village || CANAAN_CAMP.name,
-      idx = Math.max(
-        0,
-        villages.findIndex(v => v.name === key)
-      ),
+      idx = Number.isInteger(n.sprite)
+        ? n.sprite
+        : Math.max(
+            0,
+            villages.findIndex(v => v.name === key)
+          ),
       // Clignement d'yeux toutes les quelques secondes.
       blink = (time + Math.round(n.x)) % 260 < 8;
     const id = idx + (blink ? ':b' : '');

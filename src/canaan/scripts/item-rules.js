@@ -14,7 +14,7 @@ let playerStun = 0,
   bossStunImmunity = 0;
 
 // weapon est toujours l'arme active; weapon2 reste équipée mais ne fournit aucun bonus.
-gearSlots.weapon = '⚔️ Arme 1 · active';
-gearSlots.weapon2 = '🔁 Arme 2 · réserve';
-itemIcon.weapon2 = '🔁';
+gearSlots.weapon = '⟦slot_weapon⟧ Arme 1 · active';
+gearSlots.weapon2 = '⟦w_dualsword⟧ Arme 2 · réserve';
+itemIcon.weapon2 = '⟦w_dualsword⟧';
 if (!Object.prototype.hasOwnProperty.call(game.hero.equipment, 'weapon2')) game.hero.equipment.weapon2 = null;

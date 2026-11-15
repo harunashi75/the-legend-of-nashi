@@ -12,7 +12,7 @@
 }
 #window .classes h2 small {
   color: #c9b48a;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
   font-weight: normal;
 }
 #window .class-grid {
@@ -30,7 +30,7 @@
   flex-direction: column;
 }
 #window .class-card .class-icon {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-scale));
   text-align: center;
 }
 #window .class-card h3 {
@@ -42,11 +42,11 @@
   text-align: center;
   font-style: italic;
   color: #c9b48a;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   min-height: 30px;
 }
 #window .class-card .class-line {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--font-scale));
   line-height: 1.5;
   margin: 6px 0;
 }
@@ -64,7 +64,7 @@
 }
 #window .class-box {
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   line-height: 1.5;
 }
 #window .class-box b {
@@ -86,21 +86,21 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 18px;
+  font-size: calc(18px * var(--font-scale));
 }
 #window .talent-slot span {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   color: #c9b48a;
 }
 #window .talent-slot.locked {
   opacity: 0.55;
 }
 #window .talent-slot.filled b {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #ffe9b0;
 }
 #window .class-foot {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   line-height: 1.6;
   color: #d8c7a2;
   margin: 8px 0;
@@ -124,7 +124,7 @@
   border: 1px solid #6a4e2a;
 }
 #window .talent-num {
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   color: var(--class-color);
   font-weight: bold;
   width: 20px;
@@ -132,18 +132,18 @@
 }
 #window .talent-desc {
   flex: 1;
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--font-scale));
   line-height: 1.5;
 }
 #window .talent-desc b {
   display: block;
   color: #f6dfb0;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .talent-row button {
   margin: 0;
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
 }
 #window .class-change,
 #window .class-back {
@@ -173,7 +173,7 @@
   position: absolute;
   top: 1px;
   left: 2px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   filter: drop-shadow(0 0 2px #000);
 }
 #skills .skill.special {
@@ -195,4 +195,83 @@
   50% {
     box-shadow: 0 0 14px 3px rgba(255, 215, 106, 0.85);
   }
+}
+/* Badges de la barre : posture en cours, bonus prêt, charges arcaniques du bâton. */
+#skills .skill .skill-badge {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 0 5px;
+  border: 1px solid #8b7bd8;
+  border-radius: 8px;
+  background: #1b1630f0;
+  color: #f1eaff;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  line-height: 15px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#skills .skill.skill-boosted {
+  box-shadow: 0 0 14px #ffd76a, inset 0 0 10px #ffd76a66;
+}
+#skills .skill.skill-boosted .skill-badge {
+  border-color: #ffd76a;
+  color: #ffe9a8;
+}
+/* Info-bulle d'une compétence. */
+#gearHoverTooltip .skill-tip-desc {
+  margin-top: 8px;
+  line-height: 1.45;
+}
+#gearHoverTooltip .skill-tip-dmg {
+  margin-top: 7px;
+  color: #ffd38a;
+  font-weight: 700;
+}
+#gearHoverTooltip .skill-tip-meta {
+  margin-top: 5px;
+  color: #9fc4ff;
+}
+#gearHoverTooltip .skill-tip-class {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #504769;
+  color: #c8f0b8;
+  line-height: 1.4;
+}
+#gearHoverTooltip .skill-tip-state {
+  margin-top: 6px;
+  color: #e3c8ff;
+}
+/* Icônes SVG des compétences (canaan-skill-icons). */
+#skills .skill .skill-svg {
+  width: 82%;
+  height: 82%;
+  filter: drop-shadow(0 1px 1px #000c);
+  pointer-events: none;
+}
+#skills .skill.special .skill-svg {
+  width: 76%;
+  height: 76%;
+}
+#gearHoverTooltip .skill-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#gearHoverTooltip .skill-tip-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid #6c5a9a;
+  border-radius: 7px;
+  background: radial-gradient(circle at 40% 30%, #3a2c20, #120c08 75%);
+}
+#gearHoverTooltip .skill-tip-icon .skill-svg {
+  width: 100%;
+  height: 100%;
 }

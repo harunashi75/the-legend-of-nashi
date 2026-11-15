@@ -50,8 +50,12 @@ function game() {
     // Doubles explicites des modules non chargés dans les tests unitaires.
     CANAAN_ARTIFACT_STATS: s => s, CANAAN_ARTIFACT_PASSIVE: () => null,
     CANAAN_SOUND: {floatText() {}, effect() {}, cue() {}},
+    // Succès (achievements.js, testé à part) : événements ignorés.
+    canaanAchieve() {}, CANAAN_ACHIEVEMENTS: {draw() {}},
+    // Tréfonds (underground.js, testé à part) : l'île seulement.
+    canaanUnder: () => false, canaanHere: o => o?.layer !== 'under',
     CANAAN_PROF: {damageMult: () => 1, armorMult: () => 1, speedMult: () => 1, sanitize: p => p || {fishing: {level: 1, exp: 0}, cooking: {level: 1, exp: 0}, hunting: {level: 1, exp: 0}, fish: {}, meat: {}, meals: {}, codex: {}}},
-    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, bossMechanics: {}},
+    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, bossMechanics: {}, achievements: {}},
     document: {activeElement: null, createElement: element, getElementById: () => ({style: {display:'none'}})},
     skEl: element(), chatInput: {}, performance: {now: () => 100000},
     // Niveau des monstres (monster-scaling.js, non chargé ici) : celui qu'ils portent, 1 sinon.
@@ -73,6 +77,7 @@ function game() {
   g.game.hero.level = 10;g.game.hero.exp = 0;
   vm.createContext(g);
   vm.runInContext(script('canaan-modules'),g);
+  vm.runInContext(script('canaan-skill-icons'), g);
   vm.runInContext(section('function currentWeaponType()', "// Étape du pipeline : effets des sorts d'armes sur les monstres."), g);
   vm.runInContext(section("// Étape du pipeline : effets des sorts d'armes sur les monstres.", "// Fin des effets d'armes. Les PV des monstres viennent de leur niveau (monster-scaling.js)."), g);
   vm.runInContext(script('canaan-weapon-actions'), g);
@@ -123,14 +128,14 @@ test('Soin partagé : bonus appliqués une fois, plafond PV et mort respectés',
 });
 test('Épée : riposte avec vol de vie sur une cible survivante', () => {
   const g=game();g.monsters.push({hp:1000,mhp:1000,x:50,y:0,g:1,r:14});
-  g.useSkill(3);assert.ok(g.P.hp>20);assert.equal(g.P.mp,977);
+  g.useSkill(3);assert.ok(g.P.hp>20);assert.equal(g.P.mp,978);
 });
 test('Bouclier : soin immédiat et soin périodique du sol consacré', () => {
   const g=game();g.equipment.weapon.weaponType='shield';
-  g.useSkill(3);assert.equal(g.P.hp,32);
+  g.useSkill(3);assert.equal(g.P.hp,35);
   g.useSkill(1);
   for(let i=0;i<12;i++)g.runUpdatePipeline();
-  assert.ok(g.P.hp>32);
+  assert.ok(g.P.hp>35);
 });
 test('Le moteur de combat utilise également le soin et ses bonus', () => {
   const g=game();modifiers(g,0,20,.1);
@@ -143,7 +148,7 @@ test('Récupération : vrai verrou réduit, pas de double réduction, nouvelle u
   const mp=g.P.mp;g.useSkill(2);assert.equal(g.P.mp,mp);
   for(let i=0;i<505;i++)g.runUpdatePipeline();
   assert.equal(g.weaponCooldowns['sword:2'],0);
-  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-14);
+  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-12);
 });
 test('Recharge conservée après changement de famille d’arme et retour', () => {
   const g=game();modifiers(g,30);g.useSkill(2);
@@ -175,7 +180,7 @@ test('Statistiques d’un objet : trois principales selon niveau et qualité, de
 });
 test('Artefacts sans statistiques ; statistiques du héros recalculées quand l’équipement change',()=>{
   const g=game(),a=g.CANAAN_STATS_PREPARE({id:'a',slot:'artifact',level:30,sec:{crit:9,power:9}});
-  assert.equal(a.sec,undefined);assert.equal(JSON.stringify(g.itemStats(a)),'{"primary":{},"secondary":{}}');
+  assert.equal(a.sec,undefined);assert.equal(JSON.stringify(g.itemStats(a)),'{"primary":{},"secondary":{},"enchant":null}');
   const armor={id:'armor',slot:'armor',level:5,rarity:'Commun'};g.equipment.armor=armor;const before=g.characterStats().primary.defense;
   armor.level=10;const after=g.characterStats().primary.defense;
   assert.ok(after>before);assert.equal(after,g.itemStats(armor).primary.defense+g.itemStats(g.equipment.weapon).primary.defense);
@@ -206,6 +211,12 @@ function storageGame() {
   g.CANAAN_GROUP={importGuests:d=>{g.savedGuests=d&&typeof d==='object'?d:{}},exportGuests:()=>g.savedGuests||{}};
   // Monde des quêtes : conservé tel quel (le vrai module est testé à part).
   g.CANAAN_QUESTS={exportWorld:()=>g.savedQuests||{flags:{},solved:{}},importWorld:d=>{g.savedQuests=d}};
+  // Banque : conservée telle quelle (le vrai module est testé à part).
+  g.CANAAN_BANK={export:h=>h.bank||{items:[],stacks:{}},sanitize:b=>b&&Array.isArray(b.items)?b:{items:[],stacks:{}}};
+  // Succès : carnet conservé tel quel (le vrai module est testé à part).
+  g.CANAAN_ACHIEVEMENTS={export:h=>h.succes||{},sanitize:v=>v&&typeof v==='object'?v:{}};
+  // Tréfonds : l'île seulement (le vrai module est testé à part).
+  g.canaanUnder=()=>false;g.canaanHere=o=>o?.layer!=='under';g.CANAAN_UNDER={setLayer(){},spawnPoint:()=>g.CANAAN_SPAWN};
   vm.runInContext(section('function recomputeStats() {','\nfunction recordKill'),g);
   vm.runInContext(script('canaan-persistence'),g);
   g.db=db;g.scheduled=scheduled;
@@ -295,12 +306,14 @@ test('Druide : ronces, poison et racines non cumulables, Fureur sauvage, régén
   const m=mob(100000);g.monsters=[m];
   const before=m.hp;g.CANAAN_COMBAT.attack(m,100,skillHit('nature'));const dealt=before-m.hp;
   const dots=m._clsDots.filter(d=>d.by===g.game.hero);
-  same(dots.map(d=>d.kind).sort(),['poison','thorns']);
+  same(dots.map(d=>d.kind).sort(),['poison','sap','thorns']);
   assert.ok(Math.abs(dots.find(d=>d.kind==='thorns').dps-dealt*.3/5)<1e-9);
+  // Empreinte du Druide : toute compétence offensive empoisonne de 25 % des dégâts sur 4 s.
+  assert.ok(Math.abs(dots.find(d=>d.kind==='sap').dps-dealt*.25/4)<1e-9);
   assert.ok(Math.abs(dots.find(d=>d.kind==='poison').dps-dealt*.4/6)<1e-9,'le coup critique empoisonne');
   assert.equal(m._clsSlow.pct,.3);assert.equal(m._clsSlow.element,'nature');
   // Une deuxième application ne s'empile pas : un seul effet par type, la plus forte valeur.
-  g.CANAAN_COMBAT.attack(m,10,skillHit('nature'));assert.equal(m._clsDots.length,2);
+  g.CANAAN_COMBAT.attack(m,10,skillHit('nature'));assert.equal(m._clsDots.length,3);
   assert.ok(Math.abs(m._clsDots.find(d=>d.kind==='thorns').dps-dealt*.3/5)<1e-9);
   // Fureur sauvage : +12 % contre une cible marquée par la nature.
   const marked=g.CANAAN_CLASS_ATTACK.before(m,100,{}).damage,clean=g.CANAAN_CLASS_ATTACK.before(mob(100),100,{}).damage;
@@ -334,7 +347,7 @@ test('Druide : Forme féline (F), bonus, attaques de base plus rapides et soins 
   assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),1);
   // Basic lock réel de l'arme.
   g.advance(91);g.CANAAN_CLASS.special();g.canaanBasicAttack(false);
-  assert.ok(Math.abs(g.CANAAN_BASIC_ATTACK.lock()-.6*.8*(1-Math.min(60,g.characterStats().haste)/100))<1e-9);
+  assert.ok(Math.abs(g.CANAAN_BASIC_ATTACK.lock()-.55*.8*(1-Math.min(60,g.characterStats().haste)/100))<1e-9);
   // Sans mana, pas de transformation.
   const h=game();h.setClass('druide',[]);h.P.mp=5;assert.equal(h.CANAAN_CLASS.special(),false);assert.equal(h.P.form,null);
 });
@@ -392,12 +405,12 @@ test('Assassin : Précision, Exécuteur, Assaut implacable, Hémorragie, Ombre m
 });
 test('Élémentaliste : glace, Gel profond, Concentration arcanique, Tempête, Explosion ardente et Barrière de givre',()=>{
   const g=game();g.setClass('elementaliste',[7,8,9,4,5]);g.TS=48;predictable(g,.99);
-  // Compétence de glace : ralentit de 20 % pendant 2 s ; Gel profond : +15 % contre une cible gelée.
+  // Compétence de glace : ralentit de 30 % pendant 2,5 s ; Gel profond : +15 % contre une cible gelée.
   const m=mob(1e6);g.monsters=[m];g.CANAAN_COMBAT.attack(m,100,skillHit('ice'));
-  assert.equal(m._clsSlow.pct,.2);assert.equal(m._clsSlow.element,'ice');
+  assert.equal(m._clsSlow.pct,.3);assert.equal(m._clsSlow.element,'ice');
   assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(m,100,{}).damage-115)<1e-9);
-  g.update=()=>{m.x+=4};const x=m.x;g.advance(1);assert.ok(Math.abs(m.x-x-3.2)<1e-9,'ralentissement de 20 %');
-  g.advance(121);const y=m.x;g.advance(1);assert.equal(m.x-y,4);g.update=()=>{};
+  g.update=()=>{m.x+=4};const x=m.x;g.advance(1);assert.ok(Math.abs(m.x-x-2.8)<1e-9,'ralentissement de 30 %');
+  g.advance(151);const y=m.x;g.advance(1);assert.equal(m.x-y,4);g.update=()=>{};
   // Concentration arcanique : chaque 3e compétence offensive coûte moitié prix.
   const costs=[];for(let i=0;i<6;i++){costs.push(g.CANAAN_CLASS_MANA_COST('staff',0,10));g.CANAAN_CLASS_CAST('staff',0)}
   same(costs,[10,10,5,10,10,5]);assert.equal(g.CANAAN_CLASS_MANA_COST('staff',2,10),10);
@@ -522,7 +535,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   g.testMerchant=run('nearMerchant');
   run('nearMerchant=function(){return false}');
   assert.equal(g.sellInventoryCell(0,run('String(inventory[0].id)')),false);
-  run('nearMerchant=function(){return true};inventory.push({id:"confirm-sale",name:"Rare",slot:"armor",ilvl:120,rarity:"Héroïque"})');
+  run('nearMerchant=function(){return true};inventory.push({id:"confirm-sale",name:"Rare",slot:"armor",ilvl:120,rarity:"Légendaire"})');
   g.confirm=()=>false;
   assert.equal(g.sellInventoryCell(run('inventory.length-1'),'confirm-sale'),false);assert.equal(counters.saves,savesBefore);
   g.confirm=()=>true;
@@ -569,7 +582,7 @@ test('Objets : normalisation unique, butin de chaque instance à son niveau, anc
   assert.equal(run('typeof rebalanceItem'), 'undefined');assert.equal(run('typeof rebalanceAllGear'),'undefined');
   g.Math=Object.create(Math);
   // Tous les coffres d’instance sont garantis, même avec le pire tirage, au niveau de récompense de l'instance.
-  const cases=[[0,'Rare',10],[1,'Rare',16],[2,'Épique',21],[3,'Épique',28],[4,'Épique',35],[5,'Épique',40],[6,'Héroïque',47],[7,'Héroïque',52],[8,'Légendaire',57],[9,'Mythique',60]];
+  const cases=[[0,'Rare',10],[1,'Rare',16],[2,'Rare',21],[3,'Rare',28],[4,'Rare',35],[5,'Rare',40],[6,'Épique',47],[7,'Épique',52],[8,'Épique',57],[9,'Épique',60]];
   for(const [index,rarity,level] of cases){
     run('inventory=[]');let first=true;
     g.Math.random=()=>{if(first){first=false;return .999}return .2};
@@ -597,16 +610,16 @@ test('Objets : normalisation unique, butin de chaque instance à son niveau, anc
   assert.equal(JSON.stringify(run('inventory[0].sec')),kept);
   // La vérification centrale agrège aussi les exports présents avec un type incorrect.
   const originalDeflect=g.CANAAN_CLASS_ON_DODGE,originalBagExport=g.CANAAN_BAG_STATE.export;
-  const originalName=g.WEAPON_NAMES.Céleste.bow;
-  g.CANAAN_CLASS_ON_DODGE=null;g.CANAAN_BAG_STATE.export='invalid';g.WEAPON_NAMES.Céleste.bow='';
+  const originalName=g.WEAPON_NAMES.Mythique.bow;
+  g.CANAAN_CLASS_ON_DODGE=null;g.CANAAN_BAG_STATE.export='invalid';g.WEAPON_NAMES.Mythique.bow='';
   assert.throws(()=>g.CANAAN_BOOTSTRAP.validate(),error=>{
     assert.ok(error.message.includes('CANAAN_CLASS_ON_DODGE'));
     assert.ok(error.message.includes('CANAAN_BAG_STATE.export'));
-    assert.ok(error.message.includes('WEAPON_NAMES.Céleste.bow'));
+    assert.ok(error.message.includes('WEAPON_NAMES.Mythique.bow'));
     return true;
   });
   g.CANAAN_CLASS_ON_DODGE=originalDeflect;g.CANAAN_BAG_STATE.export=originalBagExport;
-  g.WEAPON_NAMES.Céleste.bow=originalName;assert.equal(g.CANAAN_BOOTSTRAP.validate(),true);
+  g.WEAPON_NAMES.Mythique.bow=originalName;assert.equal(g.CANAAN_BOOTSTRAP.validate(),true);
   assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -860,7 +873,8 @@ test('Carte M zoomable et mini-carte qui suit le héros, sur l’île comme en d
  // Marche plus douce : environ neuf images par seconde (quatre images par pas de 6,7 unités d'anim).
  const frames=[];g.__frames=frames;
  // Une seconde de marche (60 pas, anim +0,25 à chaque pas) : on compte les changements de sprite dessiné.
- run('{const c={save(){},restore(){},drawImage(img){__frames.push(img)},globalAlpha:1};for(let i=0;i<60;i++){P.vx=3;P.vy=0;drawPixelHero(c,P.x,P.y,"#fff",i*0.25,true)}}');
+ // Seul le corps compte (dessiné à sa taille) ; l'arme tenue est dessinée à part, tournée.
+ run('{const c={save(){},restore(){},translate(){},rotate(){},scale(){},beginPath(){},arc(){},fill(){},stroke(){},closePath(){},moveTo(){},lineTo(){},createRadialGradient:()=>({addColorStop(){}}),drawImage(img,...a){if(a.length===4)__frames.push(img)},globalAlpha:1};for(let i=0;i<60;i++){P.vx=3;P.vy=0;drawPixelHero(c,P.x,P.y,"#fff",i*0.25,true)}}');
  const changes=frames.filter((f,i)=>i&&f!==frames[i-1]).length;
  assert.ok(changes>=6&&changes<=10,'changements d’image en une seconde : '+changes);
  assert.equal(errors.length,0,errors.join('\n'));
@@ -954,8 +968,8 @@ test('Nettoyage : systèmes morts absents et progression par équipement conserv
  assert.equal(scripts.some(m=>m[1].includes('canaan-save-migrations')),false);
  assert.equal(run("[...villages,...instances].some(d=>Object.hasOwn(d,'lvl'))"),false);
  // Progression : niveau requis, niveau des ennemis et récompense garantie (qualité, niveau) de chaque instance.
- assert.equal(run("instances.flatMap(d=>d.difficulties?Object.values(d.difficulties).map(m=>m.level+' '+m.mobLevel+' '+m.rarity+' '+m.dropLevel):[d.level+' '+d.mobLevel+' '+d.rarity+' '+d.dropLevel]).join()"),
-  '7 9 Rare 10,13 15 Rare 16,18 20 Épique 21,25 27 Épique 28,32 34 Épique 35,37 39 Épique 40,44 46 Héroïque 47,49 51 Héroïque 52,54 56 Légendaire 57,58 60 Mythique 60,60 60 Céleste 60');
+ assert.equal(run("instances.filter(d=>!d.under).flatMap(d=>d.difficulties?Object.values(d.difficulties).map(m=>m.level+' '+m.mobLevel+' '+m.rarity+' '+m.dropLevel):[d.level+' '+d.mobLevel+' '+d.rarity+' '+d.dropLevel]).join()"),
+  '7 9 Rare 10,13 15 Rare 16,18 20 Rare 21,25 27 Rare 28,32 34 Rare 35,37 39 Rare 40,44 46 Épique 47,49 51 Épique 52,54 56 Épique 57,58 60 Épique 60,60 60 Épique 60');
  assert.equal(run("JSON.stringify(instances).includes('ilvl')||JSON.stringify(instances).includes('Ilvl')"),false,'plus d’iLvl');
  assert.ok(run("instances.every(d=>!Object.hasOwn(d,'loot'))"));
  // Un objet de niveau 20 normalisé conserve son niveau, son nom et ses secondaires.
@@ -1049,7 +1063,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  assert.doesNotMatch(source,/const\s+\w+\s*=\s*(?:window\.)?CanaanStages\.\w+\s*;/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','bossMechanics']);
+ assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','bossMechanics','achievements']);
  // Les vraies étapes tournent sur une partie chargée.
  run('started=true;paused=false;P.dead=false');
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline();updateWorld()');
@@ -1063,7 +1077,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  run('runUpdatePipeline();runDrawPipeline()');
  assert.deepEqual(calls,['before:rubis','before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
   'after:weaponEffects=weaponEffects','after:mobScaling','after:weaponVfx=weaponVfx','after:facing','after:classes=classes',
-  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:bossMechanics','draw','drawWeaponEffects']);
+  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
  for(const state of ['paused=true','paused=false;P.dead=true','P.dead=false;started=false']){
   calls.length=0;run(state+';runUpdatePipeline()');assert.deepEqual(calls,[],state);
  }
@@ -1156,11 +1170,11 @@ test('Version 1.9.0 : fonctions partagées définies une fois dans leur module, 
   assert.doesNotMatch(source,new RegExp('(?:^|[^.\\w])'+name+'\\s*=[^=>]'),name+' réassigné');
   assert.doesNotMatch(bindings,new RegExp("'"+name+"'"),name+' encore dans les liaisons requises');
  }
- assert.match(source,/<title>CANAAN ONLINE V1\.9\.0<\/title>/);
+ assert.match(source,/<title>THE LEGEND OF NASHI V1\.9\.0<\/title>/);
  assert.doesNotMatch(source,/Statistiques Ratings52|STATS RATINGS52/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.equal(g.document.title,'CANAAN ONLINE V1.9.0');
+ assert.equal(g.document.title,'THE LEGEND OF NASHI V1.9.0');
  for(const names of Object.values(owners))for(const name of names)assert.equal(run('typeof '+name),'function',name);
 });
 
@@ -1253,7 +1267,7 @@ test('Raid 4 : Jugement de Célestia, choix Normal ou Héroïque, puissance et b
  const portal=lv=>{run('game.hero.level='+lv+';openPortal({instance:9})');return g.document.getElementById('window').innerHTML};
  let html=portal(58);
  assert.match(html,/data-difficulty="normal" >/);assert.match(html,/data-difficulty="heroic" disabled>/);
- assert.match(html,/Mythique — niveau 60/);assert.match(html,/Céleste — niveau 60/);assert.match(html,/\+65 % PV et \+40 % dégâts calculés/);
+ assert.match(html,/Épique — niveau 58 à 60/);assert.match(html,/1 % Mythique/);assert.match(html,/5 % Légendaire/);assert.match(html,/\+65 % PV et \+40 % dégâts calculés/);
  assert.match(portal(50),/data-difficulty="normal" disabled>/);
  assert.match(portal(60),/data-difficulty="heroic" >/);
  // Carte M : la plage de niveaux de chaque biome (1–10, 10–20 … 50–60).
@@ -1280,11 +1294,36 @@ test('Raid 4 : Jugement de Célestia, choix Normal ou Héroïque, puissance et b
  assert.ok(Math.abs(heroic.add-normal.add*1.65)<=1,normal.add+' / '+heroic.add);
  assert.ok(Math.abs(heroic.hit-normal.hit*1.4)<=1,normal.hit+' / '+heroic.hit);
  assert.equal(normal.addName,'Juge céleste');
- assert.deepEqual(normal.loot,['Mythique',60]);assert.deepEqual(heroic.loot,['Céleste',60]);
+ assert.equal(normal.loot[0],'Épique');assert.equal(heroic.loot[0],'Épique');
  // Hors du raid, aucune difficulté ne s’applique.
  assert.equal(run('instanceDifficulty()'),null);
  // Bouton du portail : data-difficulty validé par la délégation d’actions.
  assert.throws(()=>run("dispatchCanaanAction({dataset:{action:'enterInstance',instance:'9',difficulty:'<b>'}})"),/Argument d’action invalide/);
+});
+
+test('Butin de prestige : niveaux requis à butin, Légendaire et Mythique seulement au Raid 4 Héroïque et à l’arène, cases brillantes',()=>{
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ assert.equal(run('GEAR_RARITIES.map(r=>r.name).join()'),'Commun,Peu commun,Rare,Épique,Légendaire,Mythique');
+ // La Cave (niveau requis 7, butin 10) donne du Rare du niveau 7 au niveau 10.
+ const levels=new Set();
+ for(let i=0;i<120;i++){run('inventory=[];dropTierGear(0)');const it=run('inventory[0]');assert.equal(it.rarity,'Rare');levels.add(it.level)}
+ assert.deepEqual([...levels].sort((a,b)=>a-b),[7,8,9,10]);
+ // Sources : donjons Rare, raids Épique ; seul le Raid 4 Héroïque a une chance de prestige.
+ const inst=JSON.parse(run('JSON.stringify(instances)'));
+ assert.ok(inst.slice(0,6).every(d=>d.rarity==='Rare'));assert.ok(inst.slice(6,9).every(d=>d.rarity==='Épique'));
+ assert.equal(inst[9].difficulties.normal.rarity,'Épique');assert.equal(inst[9].difficulties.normal.prestige,undefined);
+ assert.equal(inst[9].difficulties.heroic.prestige,'raidHeroic');
+ const roll=(kind,x)=>run('Math.random=()=>'+x+';prestigeRoll('+JSON.stringify(kind)+')');
+ assert.equal(roll('raidHeroic',.005),'Mythique');assert.equal(roll('raidHeroic',.03),'Légendaire');assert.equal(roll('raidHeroic',.5),null);
+ assert.equal(roll('arenaFinal',.03),'Légendaire');assert.equal(roll('arenaFinal',.5),null);assert.equal(roll(undefined,0),null);
+ // Le hasard seul ne donne jamais de Légendaire ni de Mythique.
+ for(const x of [0,.5,.97,.99999])assert.ok(!['Légendaire','Mythique'].includes(run('Math.random=()=>'+x+';rarityRoll(1).name')));
+ // Les anciennes qualités Héroïque et Céleste deviennent Épique et Mythique.
+ assert.equal(run('rarityInfo({rarity:"Héroïque"}).name'),'Épique');assert.equal(run('rarityInfo({rarity:"Céleste"}).name'),'Mythique');
+ // Cases du sac et du personnage : effet brillant et vague pour Légendaire et Mythique.
+ assert.equal(run('canaanPrestige({rarity:"Légendaire"})'),' data-prestige="legendaire"');assert.equal(run('canaanPrestige({rarity:"Mythique"})'),' data-prestige="mythique"');
+ assert.equal(run('canaanPrestige({rarity:"Épique"})'),'');assert.match(source,/\[data-prestige\][^{]*::before/);assert.match(source,/@keyframes prestige-wave/);
+ run('inventory=[];giveGear(30,"tier","Mythique");renderInventory()');assert.match(g.document.getElementById('window').innerHTML,/data-prestige="mythique"/);
 });
 
 test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet garanti, plus de matériaux',()=>{
@@ -1294,10 +1333,10 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  const mob='recordKill({x:P.x,y:P.y,t:"Loup",hp:0,level:7})',elite='recordKill({x:P.x,y:P.y,t:"Loup",hp:0,elite:true,level:12})';
  const boss='recordKill({x:P.x,y:P.y,t:"Fenrir",hp:0,worldBoss:true,worldBossId:"fenrir"})';
  const chest='{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot);P.x=at.x*TS;P.y=at.y*TS;openNearbyChest()}';
- // Chaque objet a le niveau de sa source : mob normal Commun, élite Peu commun, boss mondial Rare (+1 000 à 1 500 or).
+ // Chaque objet a le niveau de sa source : mob normal et élite Commun, boss mondial Rare (+1 000 à 1 500 or).
  let r=reward(mob,0);assert.deepEqual(r.items,[['Commun',7]]);assert.equal(r.hero.includes('materials'),false);
  r=reward(mob,.999);assert.deepEqual(r.items,[['Commun',7]]);
- r=reward(elite,.5);assert.deepEqual(r.items,[['Peu commun',12]]);
+ r=reward(elite,.5);assert.deepEqual(r.items,[['Commun',12]]);
  r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=1000&&r.gold<=1500,String(r.gold));
  // Coffre secret : Commun du niveau de sa zone (milieu de la plage) et 40 or.
  const chestLevel=run('(()=>{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot),[lo,hi]=ZONE_LEVELS[canaanZoneIndexAt(at.x,at.y)];return Math.round((lo+hi)/2)})()');
@@ -1422,11 +1461,11 @@ test('Qualité Unique et types d’armure absents du jeu et du butin',()=>{
  assert.doesNotMatch(source.slice(0,source.indexOf('<script')),/armorType|Unique/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.equal(run('GEAR_RARITIES.map(r=>r.name).join()'),'Commun,Peu commun,Rare,Épique,Héroïque,Légendaire,Mythique,Céleste');
+ assert.equal(run('GEAR_RARITIES.map(r=>r.name).join()'),'Commun,Peu commun,Rare,Épique,Légendaire,Mythique');
  assert.equal(run("Object.hasOwn(QUALITY_FACTOR,'Unique')||Object.hasOwn(WEAPON_NAMES,'Unique')||Object.hasOwn(GEAR_NAMES,'Unique')"),false);
- // Tirage : les huit qualités gardent les probabilités d’avant (l’ancien tirage Unique donnait déjà Héroïque).
+ // Tirage au hasard : jamais de Légendaire ni de Mythique (réservés au Raid 4 Héroïque et à l’arène).
  const roll=x=>run('Math.random=()=>'+x+';rarityRoll(1).name');
- assert.equal(roll(0.9905),'Héroïque');assert.equal(roll(0.9979),'Légendaire');assert.equal(roll(0.99985),'Mythique');assert.equal(roll(0.99999),'Céleste');
+ assert.equal(roll(0),'Commun');assert.equal(roll(0.9),'Rare');assert.equal(roll(0.9905),'Épique');assert.equal(roll(0.99999),'Épique');
  // Un objet trouvé ou normalisé ne reçoit aucun type d’armure.
  run('inventory=[];Math.random=()=>.5');
  for(const slot of ['helm','armor','ring'])assert.equal(run('Object.hasOwn(CANAAN_GEAR.normalize({id:"n-'+slot+'",slot:"'+slot+'",rarity:"Rare",ilvl:30}),"armorType")'),false,slot);
@@ -1463,15 +1502,15 @@ test('Île unique : six biomes, un seul camp sûr, route continue et lieux acces
  assert.equal(run('ZONES.map(z=>z.name).join()'),'Plaines verdoyantes,Forêt ancienne,Marais brumeux,Forêt automnale,Désert oublié,Forêt enchantée');
  // Un seul camp, une seule zone sûre, un seul marchand ; le héros y apparaît.
  assert.equal(run('villages.length'),1);assert.equal(run('villages[0].name'),'Camp de l’Aurore');
- assert.equal(run("npcs.filter(n=>n.type==='shop').length"),1);
- assert.equal(run("npcs.filter(n=>n.type==='shop').every(n=>isSafe(n.x/TS,n.y/TS))"),true);
+ assert.equal(run("npcs.filter(n=>n.type==='shop'&&!n.layer).length"),1);
+ assert.equal(run("npcs.filter(n=>n.type==='shop'&&!n.layer).every(n=>isSafe(n.x/TS,n.y/TS))"),true);
  assert.equal(run('canWalk(CANAAN_SPAWN.x,CANAAN_SPAWN.y)&&isSafe(CANAAN_SPAWN.x/TS,CANAAN_SPAWN.y/TS)'),true);
  assert.equal(run('regionAt(villages[0].x,villages[0].y).name'),'Plaines verdoyantes');
  run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y');assert.equal(run('currentZoneName()'),'Camp de l’Aurore');
  // Tout est accessible à pied depuis le camp ; chaque lieu est dans son biome.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_WORLD_AUDIT().unreachable)')),[]);
- assert.equal(run('instances.every(d=>ZONES.indexOf(regionAt(d.x,d.y))===d.biome)'),true);
- assert.equal(run('instances.map(d=>d.biome).join()'),'0,1,1,2,3,3,4,4,5,5');
+ assert.equal(run('instances.filter(d=>!d.under).every(d=>ZONES.indexOf(regionAt(d.x,d.y))===d.biome)'),true);
+ assert.equal(run('instances.map(d=>d.biome).join()'),'0,1,1,2,3,3,4,4,5,5,6,7,8,9');
  assert.equal(run('WORLD_BOSSES.every(b=>ZONES.indexOf(regionAt(b.x,b.y))===b.biome&&!isSafe(b.x,b.y))'),true);
  assert.equal(run("npcs.filter(n=>n.type==='portal').every(n=>n.x===instances[n.instance].x*TS&&n.y===instances[n.instance].y*TS)"),true);
  // 65 coffres secrets distincts sur la terre ferme ; la Forêt ancienne en cache le plus.
@@ -1483,7 +1522,7 @@ test('Île unique : six biomes, un seul camp sûr, route continue et lieux acces
  const roads=run(`(()=>{const v=villages[0],seen=new Set(),q=[[v.x,v.y]];seen.add(v.y*MAPW+v.x);
   for(let h=0;h<q.length;h++){const [x,y]=q[h];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy,k=yy*MAPW+xx;
    if(seen.has(k)||overworld[yy][xx]!==2)continue;seen.add(k);q.push([xx,yy])}}
-  return instances.filter(d=>seen.has(d.y*MAPW+d.x)).length})()`);
+  return instances.filter(d=>!d.under&&seen.has(d.y*MAPW+d.x)).length})()`);
  assert.equal(roads,10);
  // Crête : impossible de passer des Plaines à la Forêt enchantée sans traverser les autres biomes.
  const crossed=run(`(()=>{const v=villages[0],seen=new Uint8Array(MAPW*MAPH),q=[v.y*MAPW+v.x];seen[q[0]]=1;let e=0;
@@ -1508,9 +1547,10 @@ test('Donjons et raids : thème fidèle au nom, un boss par donjon, trois par ra
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
  // Chaque instance a son thème, ses boss et un plan entièrement accessible, herses levées.
  const audits=JSON.parse(run('JSON.stringify(instances.map((d,i)=>CANAAN_DUNGEON_AUDIT(i)))'));
- assert.equal(new Set(audits.map(a=>a.theme)).size,10);
- assert.deepEqual(audits.map(a=>a.bosses),[1,1,1,1,1,1,3,3,3,3]);
- assert.deepEqual(audits.map(a=>a.gates),[0,0,0,0,0,0,2,2,2,2]);
+ // Dix instances sur l'île, quatre donjons dans les Tréfonds.
+ assert.equal(new Set(audits.map(a=>a.theme)).size,14);
+ assert.deepEqual(audits.map(a=>a.bosses),[1,1,1,1,1,1,3,3,3,3,1,1,1,1]);
+ assert.deepEqual(audits.map(a=>a.gates),[0,0,0,0,0,0,2,2,2,2,0,0,0,0]);
  for(const a of audits){assert.equal(a.reachable,true,a.theme);assert.equal(a.sealed,true,a.theme);assert.ok(a.props>20,a.theme)}
  assert.equal(run('instances.every(d=>d.bosses.length===(d.raid?3:1)&&d.bosses[d.bosses.length-1]===d.boss)'),true);
  assert.equal(run("instances[1].boss"),'Golem de Mithril');
@@ -1624,7 +1664,10 @@ test('Rubis : 48 effets en six familles, six emplacements, collection, verrous e
  run('renderCharacter()');const html=g.document.getElementById('window').innerHTML;
  assert.match(html,/class="character-left"[\s\S]*rubis-paper/);
  assert.equal((html.match(/class="rubis-slot /g)||[]).length,6);
- assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
+ // Les Rubis possédés sont des objets du sac (piles), plus une grille de collection sur la fiche.
+ assert.equal((html.match(/class="rubis-cell /g)||[]).length,0);
+ assert.equal(run('CANAAN_BAG.tiles(game.hero).filter(p=>p.kind==="rubis").length'),run('48-game.hero.rubis.equipped.filter(Boolean).length'));
+ run('renderInventory()');assert.ok((g.document.getElementById('window').innerHTML.match(/data-tooltip-stack="rubis:/g)||[]).length>=40,'les Rubis dans le sac');
  run("showRubisTooltip('tempete',{clientX:0,clientY:0})");
  assert.match(g.gearTooltip?.innerHTML||run('gearTooltip.innerHTML'),/Tempête[\s\S]*15 %/);
  // Sauvegarde : Rubis et records de l'Arène dans l'instantané.
@@ -1717,7 +1760,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  const gate=()=>run('arenaLayout().gate.map(([x,y])=>world[y][x]).join()');
  assert.equal(gate(),'19,19,19,19,19');
  // PV fixes, indépendants de l'iLvl du héros.
- assert.equal(run('CANAAN_ARENA.run().boss.mhp'),8500);run('game.hero.level=60;scaleBossHp(CANAAN_ARENA.run().boss)');assert.equal(run('CANAAN_ARENA.run().boss.mhp'),8500);
+ assert.equal(run('CANAAN_ARENA.run().boss.mhp'),15000);run('game.hero.level=60;scaleBossHp(CANAAN_ARENA.run().boss)');assert.equal(run('CANAAN_ARENA.run().boss.mhp'),15000);
  // Pas d'abandon pendant le combat.
  run('{const e=instanceEntrance;globalThis.saved={x:P.x,y:P.y};P.x=e.x;P.y=e.y;CANAAN_ARENA.interact();P.x=saved.x;P.y=saved.y}');assert.equal(run('!!instanceState'),true);
  // Chaque mouvement se joue sans erreur sur le boss de la vague.
@@ -1738,7 +1781,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  assert.equal(run('instanceState'),null);assert.equal(run('world'),run('overworld'));assert.equal(run('CANAAN_RUBIS.discovered()'),1);
  // Vague 12 : la victoire donne la récompense finale, un Rubis au choix parmi les manquants.
  run('enterArena();{const r=CANAAN_ARENA.run(),L=arenaLayout();P.x=L.x;P.y=L.y+L.r*0.3;r.wave=12;r.phase="countdown";r.timer=0}');tick(2);
- assert.equal(run('CANAAN_ARENA.run().boss.mhp'),42500);assert.equal(run('CANAAN_ARENA.run().boss.def.phases.length'),3);
+ assert.equal(run('CANAAN_ARENA.run().boss.mhp'),75000);assert.equal(run('CANAAN_ARENA.run().boss.def.phases.length'),3);
  assert.equal(run('CANAAN_ARENA.tempo(1)'),1);assert.ok(Math.abs(run('CANAAN_ARENA.tempo(12)')-0.758)<1e-9);
  run('{const b=CANAAN_ARENA.run().boss;b.shieldHp=0;b.parryUntil=0;b.immuneUntil=0;hit(b,1e9)}');
  assert.equal(run('CANAAN_ARENA.state().completed'),true);assert.equal(run('CANAAN_ARENA.state().pendingChoice'),true);
@@ -1756,7 +1799,7 @@ test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintie
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
- // Secondaires fixées sans Célérité : les verrous gardent leur durée de base (0,6 s et 1,4 s).
+ // Secondaires fixées sans Célérité : les verrous gardent leur durée de base (0,55 s et 1,15 s).
  run('equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"sword",rarity:"Commun",sec:{power:1,crit:1}};refreshWeaponBar()');
  run('monsters.length=0;monsters.push({x:P.x+60,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"});mouseWorldX=P.x+60;mouseWorldY=P.y;P.mp=0');
  // Sans mana : l'attaque de base frappe quand même, et ne consomme rien.
@@ -1765,7 +1808,7 @@ test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintie
  assert.equal(run('canaanBasicAttack(false)'),false);assert.equal(run('canaanBasicAttack(true)'),false);
  for(let i=0;i<37;i++)run('time++;runUpdatePipeline()');
  const before=run('monsters[0].hp');assert.equal(run('canaanBasicAttack(true)'),true);
- const heavy=before-run('monsters[0].hp');assert.ok(Math.abs(run('CANAAN_BASIC_ATTACK.lock()')-1.4)<1e-9);
+ const heavy=before-run('monsters[0].hp');assert.ok(Math.abs(run('CANAAN_BASIC_ATTACK.lock()')-1.15)<1e-9);
  // Maintien du clic gauche : enchaîne les attaques toutes les 0,6 s.
  for(let i=0;i<90;i++)run('time++;runUpdatePipeline()');
  run('canaanHoldBasicAttack(0,true)');const held=run('monsters[0].hp');
@@ -1875,7 +1918,7 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  // Bancs de poissons : en mer, dans les lacs et les lacs scintillants, jamais dans l'eau peu profonde du marais.
  const kinds=run('[...new Set(CANAAN_PROF.spots().map(s=>s.kind))].sort().join()');assert.equal(kinds,'glow,lake,sea');
  assert.ok(run('CANAAN_PROF.spots().length')>=25);
- assert.ok(run('CANAAN_PROF.spots().every(s=>[0,18].includes(game.world.overworld[s.ty][s.tx]))'));
+ assert.ok(run('CANAAN_PROF.spots().every(s=>s.layer==="under"?game.world.underworld[s.ty][s.tx]===CANAAN_UNDER.T.LAKE:[0,18].includes(game.world.overworld[s.ty][s.tx]))'));
  assert.ok(run('CANAAN_PROF.spots().filter(s=>s.kind==="sea").every(s=>s.table.some(([k])=>k==="thon"))'));
  // Pêcher : loin d'un banc, rien ; sur la rive, la ligne part, ça mord, E ferre.
  run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y');assert.equal(run('CANAAN_PROF.fish(game.hero)'),false);
@@ -1885,16 +1928,16 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  const catchOne=()=>{run('CANAAN_PROF.fish(game.hero)');run('game.hero.fishing.bite=time');run('time++;CanaanStages.professions.after()');assert.equal(run('game.hero.fishing.state'),'bite');return run('CANAAN_PROF.fish(game.hero)')};
  for(let i=0;i<12;i++)assert.equal(catchOne(),true);
  // Niveau 1 : seulement des poissons Commun (gris), et de l'expérience gagnée.
- assert.ok(run('Object.keys(game.hero.prof.fish).every(k=>k.endsWith(":0")&&/^(saumon|thon|espadon):/.test(k))'),run('JSON.stringify(game.hero.prof.fish)'));
+ assert.ok(run('Object.keys(game.hero.prof.fish).every(k=>k.endsWith(":0")&&/^(saumon|thon|espadon|merou|raie):/.test(k))'),run('JSON.stringify(game.hero.prof.fish)'));
  assert.ok(run('game.hero.prof.fishing.level')>=2,'niveau gagné');
  // Le poisson s'échappe si on ne ferre pas à temps ; bouger remonte la ligne.
  run('CANAAN_PROF.fish(game.hero);game.hero.fishing.bite=time');for(let i=0;i<80;i++)run('time++;CanaanStages.professions.after()');assert.equal(run('game.hero.fishing'),null);
  run('CANAAN_PROF.fish(game.hero);P.x+=40;time++;CanaanStages.professions.after()');assert.equal(run('game.hero.fishing'),null);
- // Niveau 20 : qualités jusqu'à Héroïque, jamais au-delà.
+ // Niveau 20 : qualités jusqu'à Épique, jamais au-delà.
  run('P.x-=40;game.hero.prof.fishing.level=20;game.hero.prof.fish={}');
  for(let i=0;i<60;i++)catchOne();
  const qs=JSON.parse(run('JSON.stringify([...new Set(Object.keys(game.hero.prof.fish).map(k=>+k.split(":")[1]))].sort())'));
- assert.ok(qs.every(q=>q<=4)&&qs.includes(4),JSON.stringify(qs));
+ assert.ok(qs.every(q=>q<=3)&&qs.includes(3),JSON.stringify(qs));
  // Cuisine : il faut une cuisinière (La Marmite dorée) ; la qualité du repas est plafonnée par le niveau de cuisine.
  run('game.hero.prof.fish={"gardon:4":3,"truite:2":2,"carpe:0":1,"saumon:3":1,"thon:1":1}');
  assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,1)'),false,'loin du feu');
@@ -1902,31 +1945,34 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  run('P.x=(CANAAN_ROOMS[2].x+4.5)*TS;P.y=(CANAAN_ROOMS[2].y+3.6)*TS');assert.equal(run('CANAAN_PROF.nearFire(P.x,P.y)'),true,'devant la cuisinière de La Marmite dorée');
  assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,1)'),true);
  assert.equal(run('game.hero.prof.meals["soupe:0"]'),1,'cuisine niveau 1 : repas Commun');
- run('game.hero.prof.cooking.level=15');assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,20)'),true);
- assert.equal(run('game.hero.prof.meals["soupe:3"]'),2,'niveau 15 : jusqu’à Épique');assert.equal(run('game.hero.prof.fish["gardon:4"]'),undefined);
+ run('game.hero.prof.cooking.level=20');assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,20)'),true);
+ assert.equal(run('game.hero.prof.meals["soupe:3"]'),2,'niveau 20 : jusqu’à Épique');assert.equal(run('game.hero.prof.fish["gardon:4"]'),undefined);
  for(const [r,q] of [['grillade',2],['mijote',0],['fume',3],['ragout',1]])assert.equal(run(`CANAAN_PROF.cook(game.hero,"${r}",${q},1)`),true,r);
  assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,1)'),false,'plus de gardon');
  // Repas : PV et mana tout de suite (délai partagé), soins sur la durée, bonus de dégâts et de protection.
  run('P.mhp=1000;P.hp=100;P.mmp=500;P.mp=0');
- assert.equal(run('CANAAN_PROF.eat(game.hero,"soupe",3)'),true);assert.equal(run('P.hp'),100+Math.round((100+30)*2));
+ assert.equal(run('CANAAN_PROF.eat(game.hero,"soupe",3)'),true);assert.equal(run('P.hp'),100+Math.round((100+30)*2.3));
  assert.equal(run('CANAAN_PROF.eat(game.hero,"grillade",2)'),false,'délai des repas rapides');
- run('time+=20*60');assert.equal(run('CANAAN_PROF.eat(game.hero,"grillade",2)'),true);assert.equal(run('P.mp'),Math.round((100+25)*1.6));
+ run('time+=20*60');assert.equal(run('CANAAN_PROF.eat(game.hero,"grillade",2)'),true);assert.equal(run('P.mp'),Math.round((100+25)*1.75));
  run('P.hp=100');assert.equal(run('CANAAN_PROF.eat(game.hero,"mijote",0)'),true);
  for(let i=0;i<6*60;i++)run('time++;CanaanStages.professions.after()');
  assert.equal(run('P.hp'),100+5*Math.round(20+6),'cinq secondes de soins');
- assert.equal(run('CANAAN_PROF.eat(game.hero,"fume",3)'),true);assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1.1);
+ assert.equal(run('CANAAN_PROF.eat(game.hero,"fume",3)'),true);assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1.12);
  assert.equal(run('CANAAN_PROF.eat(game.hero,"ragout",1)'),true,'un nouveau bonus remplace l’ancien');
- assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1);assert.equal(run('CANAAN_PROF.armorMult(game.hero)'),0.94);
+ assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1);assert.equal(run('CANAAN_PROF.armorMult(game.hero)'),0.93);
  for(let i=0;i<61*60;i++)run('time++;CanaanStages.professions.after()');assert.equal(run('CANAAN_PROF.armorMult(game.hero)'),1,'bonus terminé');
  // Sauvegarde : niveaux, bourriche et garde-manger gardés et vérifiés.
  assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.prof;
  assert.ok(saved.fishing.level>=20);assert.ok(saved.cooking.level>=15);assert.ok(saved.fish['truite:2']>=1||saved.meals['grillade:2']===undefined);
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fishing:{level:99,exp:-5},cooking:{level:"x"},fish:{"requin:3":2,"thon:9":1,"thon:2":3.7,"__proto__:1":1},meals:{"soupe:1":2}}))')),
-  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},codex:{}});
+  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},mining:{level:1,exp:0},herbalism:{level:1,exp:0},enchanting:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},ore:{},herb:{},ench:{},codex:{},qv:2});
+ // Ancienne sauvegarde à huit qualités : Héroïque devient Épique, Céleste devient Mythique (une seule fois).
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fish:{"thon:4":1,"carpe:7":2}}).fish)')),{'thon:3':1,'carpe:5':2});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({qv:2,fish:{"thon:4":1}}).fish)')),{'thon:4':1});
  // Fenêtre P : trois onglets.
  run('toggleProfessions()');const html=()=>g.document.getElementById('window').innerHTML;
- assert.match(html(),/Bourriche/);run('CANAAN_PROF.actions.tab("cuisine")');assert.match(html(),/Soupe de gardon/);run('CANAAN_PROF.actions.tab("repas")');assert.match(html(),/Manger|garde-manger/);
+ assert.match(html(),/Tes poissons sont des objets de ton sac/);assert.doesNotMatch(html(),/Bourriche/);run('CANAAN_PROF.actions.tab("cuisine")');assert.match(html(),/Soupe de gardon/);run('CANAAN_PROF.actions.tab("repas")');assert.match(html(),/Manger|garde-manger/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -1951,23 +1997,23 @@ test('Chasse et collections : gibier abattu à l’arme, viande et qualités, ca
  assert.equal(run('CANAAN_PROF.hunt(game.hero,"dragon")'),false);
  run('game.hero.huntCd=0;game.hero.prof.hunting.level=25');
  for(let i=0;i<40;i++)run('time+=41;CANAAN_PROF.hunt(game.hero,"lapin")');
- const qs=JSON.parse(run('JSON.stringify([...new Set(Object.keys(game.hero.prof.meat).map(k=>+k.split(":")[1]))])'));assert.ok(qs.every(q=>q<=5)&&qs.includes(5),JSON.stringify(qs));
+ const qs=JSON.parse(run('JSON.stringify([...new Set(Object.keys(game.hero.prof.meat).map(k=>+k.split(":")[1]))])'));assert.ok(qs.every(q=>q<=3)&&qs.includes(3),JSON.stringify(qs));
  // Recettes de gibier : la viande se cuisine près d'une cuisinière.
  run('P.x=(CANAAN_ROOMS[2].x+4.5)*TS;P.y=(CANAAN_ROOMS[2].y+3.6)*TS;game.hero.prof.cooking.level=40;game.hero.prof.meat={"venaison:3":1,"lievre:2":1}');
  assert.equal(run('CANAAN_PROF.cook(game.hero,"roti",3,1)&&CANAAN_PROF.cook(game.hero,"civet",2,1)'),true);
  run('P.mhp=1000;P.hp=100;P.mmp=500;P.mp=0');assert.equal(run('CANAAN_PROF.eat(game.hero,"civet",2)'),true);
- assert.equal(run('P.hp'),100+Math.round((60+20)*1.6));assert.equal(run('P.mp'),Math.round((60+15)*1.6));
- assert.equal(run('CANAAN_PROF.eat(game.hero,"roti",3)'),true);assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1.06);assert.equal(run('CANAAN_PROF.armorMult(game.hero)'),0.94);
+ assert.equal(run('P.hp'),100+Math.round((60+20)*1.75));assert.equal(run('P.mp'),Math.round((60+15)*1.75));
+ assert.equal(run('CANAAN_PROF.eat(game.hero,"roti",3)'),true);assert.equal(run('CANAAN_PROF.damageMult(game.hero)'),1.07);assert.equal(run('CANAAN_PROF.armorMult(game.hero)'),0.93);
  // Collection des poissons : une prise découvre l'espèce.
  run('{const s=CANAAN_PROF.spots().find(s=>s.kind==="sea");for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const x=(s.tx+dx+.5)*TS,y=(s.ty+dy+.5)*TS;if(canWalk(x,y)){P.x=x;P.y=y;break}}}');
  run('CANAAN_PROF.fish(game.hero);game.hero.fishing.bite=time;time++;CanaanStages.professions.after();CANAAN_PROF.fish(game.hero)');
- assert.equal(run('["saumon","thon","espadon"].filter(k=>game.hero.prof.codex[k]).length'),1);
+ assert.equal(run('["saumon","thon","espadon","merou","raie"].filter(k=>game.hero.prof.codex[k]).length'),1);
  // Fenêtre : collection (découverts et silhouettes), bio d'une espèce, carnet de chasse.
  run('toggleProfessions()');const html=()=>g.document.getElementById('window').innerHTML;
- assert.match(html(),/Collection · 1 \/ 9 espèces découvertes/);assert.match(html(),/\?\?\?/);
- const fishId=run('["saumon","thon","espadon"].find(k=>game.hero.prof.codex[k])');
+ assert.match(html(),/Collection · 1 \/ 18 espèces découvertes/);assert.match(html(),/\?\?\?/);
+ const fishId=run('["saumon","thon","espadon","merou","raie"].find(k=>game.hero.prof.codex[k])');
  run('CANAAN_PROF.actions.codex("'+fishId+'")');assert.match(html(),new RegExp(run('CANAAN_PROF.FISH["'+fishId+'"].bio').slice(0,30).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
- run('CANAAN_PROF.actions.tab("chasse")');assert.match(html(),/Collection · 1 \/ 5 espèces découvertes/);assert.match(html(),/Gibecière/);
+ run('CANAAN_PROF.actions.tab("chasse")');assert.match(html(),/Collection · 1 \/ 12 espèces découvertes/);assert.match(html(),/Ta viande est un objet de ton sac/);assert.doesNotMatch(html(),/Gibecière/);
  // Sauvegarde : carnet, viandes et niveau de chasse gardés.
  assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.prof;
@@ -1980,12 +2026,12 @@ test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habita
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;game.world.monsters=[];CANAAN_LIFE.update()');
  const zoneOf=`(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS)))`;
- const kinds=JSON.parse(run('JSON.stringify(ZONES.map((z,i)=>[...new Set(CANAAN_LIFE.animals().filter(a=>a.kind!=="poule"&&!a.farm&&'+zoneOf+'(a)===i).map(a=>a.kind))].sort()))'));
+ const kinds=JSON.parse(run('JSON.stringify(ZONES.map((z,i)=>[...new Set(CANAAN_LIFE.animals().filter(a=>a.kind!=="poule"&&!a.farm&&!a.layer&&'+zoneOf+'(a)===i).map(a=>a.kind))].sort()))'));
  // Chaque biome a ses espèces, et seulement les siennes (les bêtes de la ferme du camp sont à part).
- assert.deepEqual(kinds,[['cerf','lapin','mouton','renard'],['cerf','ecureuil','lapin','renard'],['grenouille','heron','tortue'],['cerf','ecureuil','herisson','renard'],['chameau','fennec','lezard'],['cerf','ecureuil','lapin']]);
+ assert.deepEqual(kinds,[['cerf','lapin','mouton','renard'],['cerf','ecureuil','faisan','lapin','renard'],['canard','grenouille','heron','tortue'],['cerf','ecureuil','faisan','herisson','renard'],['chameau','chevre','fennec','lezard'],['cerf','ecureuil','lapin']]);
  assert.ok(run('CANAAN_LIFE.animals().length')>350);assert.ok(run('CANAAN_LIFE.fliers().length')>150);
  assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.opts.glow).every(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS))===5)'),'cerfs et lapins lumineux de la Forêt enchantée');
- assert.ok(run('CANAAN_LIFE.animals().every(a=>canWalk(a.x,a.y))'),'tous sur un sol praticable');
+ assert.ok(run('CANAAN_LIFE.animals().filter(a=>!a.layer).every(a=>canWalk(a.x,a.y))'),'tous sur un sol praticable');
  // Ils se promènent : près du héros, les bêtes bougent au fil du temps et restent près de chez elles.
  // (près d'un troupeau de moutons et de son voisinage)
  run('{const a=CANAAN_LIFE.animals().find(x=>x.kind==="mouton");P.x=a.hx+500;P.y=a.hy;camX=P.x-W/2;camY=P.y-H/2;globalThis.__deer=CANAAN_LIFE.animals().find(x=>x.kind==="cerf");globalThis.__start=CANAAN_LIFE.animals().map(x=>[x.x,x.y])}');
@@ -2139,7 +2185,7 @@ test('Catalogues partagés gelés : donjons copiés pour chaque partie, monstres
  // Chaque partie reçoit sa propre liste de donjons, modifiable par la génération de l'île.
  const a=world.createInstances(),b=world.createInstances();
  a[0].x=42;a[9].difficulties.normal.hp=9;assert.equal(b[0].x,0);assert.equal(world.INSTANCE_DEFS[9].difficulties.normal.hp,1);
- assert.equal(Object.isFrozen(a[0]),false);assert.equal(a.length,10);assert.equal(world.WORLD_BOSS_DEFS.length,8);assert.equal(world.MOB_TYPES.length,31);
+ assert.equal(Object.isFrozen(a[0]),false);assert.equal(a.length,14);assert.equal(world.WORLD_BOSS_DEFS.length,8);assert.equal(world.MOB_TYPES.length,47);
  assert.equal(world.BOSS_RESPAWN_MS,180000);assert.equal(economy.BAG_PRICES.length,9);assert.equal(classes.CLASSES.length,4);assert.deepEqual(classes.TALENT_SLOT_LEVELS,[1,10,20,30,40]);
  assert.equal(stats.PRIMARY_KEYS.length,3);assert.equal(stats.SECONDARY_KEYS.length,6);assert.equal(stats.MAX_LEVEL,60);
  assert.deepEqual(stats.ZONE_LEVELS.map(z=>z.join('-')),['1-10','10-20','20-30','30-40','40-50','50-60']);assert.equal(rules.xpToNext(60),0);
@@ -2157,7 +2203,7 @@ test('Règles partagées dans Node : objets, statistiques, niveaux, XP, économi
  assert.equal(items.rarityInfo({rarity:'Inconnue'}).name,'Commun');
  assert.deepEqual([items.itemLevel({level:0}),items.itemLevel({level:45}),items.itemLevel({level:99}),items.itemLevel(null)],[1,45,60,0]);
  const seq=values=>{let i=0;return()=>values[i++]};
- assert.equal(items.rollRarity(()=>0).name,'Commun');assert.equal(items.rollRarity(()=>0.9905).name,'Héroïque');assert.equal(items.rollRarity(()=>0.99999).name,'Céleste');
+ assert.equal(items.rollRarity(()=>0).name,'Commun');assert.equal(items.rollRarity(()=>0.9905).name,'Épique');assert.equal(items.rollRarity(()=>0.99999).name,'Épique');
  const w={slot:'weapon',weaponType:'fronde'};items.ensureWeaponType(w);assert.equal(w.weaponType,'sword');
  assert.equal(items.gearDisplayName({slot:'helm',name:'Heaume',upgrade:2}),'Heaume');
  for(const gone of ['upgradeLevel','upgradeCost','upgradable','tierIlvl','averageIlvlOf','effectiveIlvl'])assert.equal(gone in items,false,gone);
@@ -2270,6 +2316,8 @@ test('Simulation sans écran : intention du héros, monstres, projectiles et but
  run('game.world.projectiles=[{x:P.x,y:P.y,vx:6,vy:0,dmg:40,life:60,c:"#fff",combatContext:{magic:false}}]');
  const messages=[];g.__messages=messages;
  run('game.view={notify:m=>__messages.push(m),chat:()=>{}}');
+ // Succès coupés : leurs récompenses en or fausseraient le compte (ils sont testés à part).
+ run('CanaanStages.achievements={after(){}}');
  const x0=run('P.x'),gold0=run('P.gold'),hp0=run('P.hp');
  // Plus aucun écran : tout accès au document échoue.
  const screen=g.document;g.document=new Proxy({},{get(_t,key){throw new Error('accès à l’écran pendant la simulation : document.'+String(key))}});
@@ -2353,7 +2401,7 @@ test('Attaques des alliés : épée, lance et arc frappent selon leur intention,
  // Recharge propre à chaque allié : pas plus d'une attaque rapide toutes les 0,6 s.
  run('h_Lame.player.basicLock=0;canaanHeroBasicAttack(h_Lame,false)');assert.equal(run('canaanHeroBasicAttack(h_Lame,false)'),false);
  // La Célérité de l'allié raccourcit ce délai.
- assert.ok(Math.abs(run('h_Lame.player.basicLock')-0.6*(1-Math.min(60,run('characterStats(h_Lame).haste'))/100))<1e-9);
+ assert.ok(Math.abs(run('h_Lame.player.basicLock')-0.55*(1-Math.min(60,run('characterStats(h_Lame).haste'))/100))<1e-9);
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -2370,7 +2418,7 @@ test('Règle partagée des coups infligés : Puissance, écart de niveau, armure
  // Boss de monde : 15 % d'armure, réduite par le Rubis Briseur.
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99).damage,85);
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99,0.92).damage,86);
- assert.equal(c.heroPower(18),23);assert.equal(c.heroPower(100),105);assert.equal(c.heroMagicPower(18),18);assert.equal(c.heroPower(0),8);
+ assert.equal(c.heroPower(18),23);assert.equal(c.heroPower(100),105);assert.equal(c.heroMagicPower(18),23);assert.equal(c.heroMagicPower(100),c.heroPower(100));assert.equal(c.heroPower(0),8);
 });
 
 test('Butin individuel : objets et or de chaque victime vont au héros qui l’a obtenue',()=>{
@@ -2426,7 +2474,7 @@ test('Groupe en instance : entrée et sortie ensemble, allié à terre relevé, 
  // Coffre de boss : un objet garanti et une bourse d'or pour chaque héros, quel que soit celui qui l'ouvre.
  run('globalThis.__gold0=game.heroes.map(h=>h.player.gold);game.world.monsters=[];game.world.instance.cleared=true;spawnRewardChest();const c=game.world.chests[0];game.heroes[1].player.x=c.x*TS;game.heroes[1].player.y=c.y*TS');
  assert.equal(run('openNearbyChest(game.heroes[1])'),true);assert.equal(run('openNearbyChest(game.heroes[1])'),false,'une seule ouverture');
- assert.ok(run('game.heroes.every(h=>h.inventory.some(i=>i.origin==="donjon"&&i.rarity==="Rare"&&i.level===10)&&h.player.gold-__gold0[game.heroes.indexOf(h)]>=60)'));
+ assert.ok(run('game.heroes.every(h=>h.inventory.some(i=>i.origin==="donjon"&&i.rarity==="Rare"&&i.level>=7&&i.level<=10)&&h.player.gold-__gold0[game.heroes.indexOf(h)]>=60)'));
  run('leaveInstance()');assert.equal(run('game.world.instance'),null);
  assert.ok(run('game.heroes.every(h=>Math.hypot(h.player.x-game.world.returnPos.x,h.player.y-game.world.returnPos.y)<3*TS)'),'tout le groupe ressort');
  assert.equal(errors.length,0,errors.join('\n'));
@@ -2440,7 +2488,7 @@ test('Jalon de la phase 2 : quatre héros finissent un donjon puis un raid, sans
   assert.deepEqual(r.phases.filter(p=>p!=='coffre'),['combat','sortie']);assert.equal(run('canaanGroupBot.state.done'),true);
   assert.equal(run('game.world.instance'),null,'le groupe est ressorti');assert.ok(r.seconds<150,'terminé en '+r.seconds+' s');
   assert.ok(r.heroes.every(h=>!h.dead),'personne n’est tombé');
-  assert.ok(r.heroes.every(h=>h.relics.length===1&&h.relics[0]==='Rare 10'&&h.purse>=60),'un objet garanti et une bourse d’or pour chacun');
+  assert.ok(r.heroes.every(h=>h.relics.length===1&&/^Rare (7|8|9|10)$/.test(h.relics[0])&&h.purse>=60),'un objet garanti et une bourse d’or pour chacun');
   assert.ok(r.heroes.reduce((n,h)=>n+h.kills,0)>=r.foes,'tous les ennemis, le boss et ses renforts sont abattus');
   assert.ok(r.heroes.slice(1).some(h=>h.kills>0),'les alliés participent');
   assert.equal(errors.length,0,errors.join('\n'));}
@@ -2451,7 +2499,7 @@ test('Jalon de la phase 2 : quatre héros finissent un donjon puis un raid, sans
   run('const C=[["paladin",[1,2,7,9,6]],["druide",[1,3,7,8,0]],["elementaliste",[0,3,7,1,5]],["assassin",[1,3,4,5,8]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
   const r=playInstance(run,6,400);
   assert.equal(run('canaanGroupBot.state.done'),true);assert.equal(run('game.world.instance'),null);
-  assert.ok(r.heroes.every(h=>!h.dead&&h.relics.length===1&&h.relics[0]==='Héroïque 47'&&h.purse>=150),JSON.stringify(r.heroes));
+  assert.ok(r.heroes.every(h=>!h.dead&&h.relics.length===1&&/^Épique 4[4-7]$/.test(h.relics[0])&&h.purse>=150),JSON.stringify(r.heroes));
   assert.equal(errors.length,0,errors.join('\n'));}
 });
 
@@ -2563,7 +2611,7 @@ test('Compétences pour tous les héros : les 36 compétences d’un allié, son
  // Recharges de l'allié : elles décroissent, puis la compétence revient.
  run('game.heroes.splice(1);globalThis.ally=canaanCreateHero({name:"Lame",x:spot.x,y:spot.y,equipment:{weapon:{id:"w2",slot:"weapon",level:28,rarity:"Épique",weaponType:"sword"}}});ally.level=28;game.heroes.push(ally);ally.player.mp=300');
  run('canaanHeroUseSkill(ally,0)');assert.equal(run('CANAAN_SKILLS.ready(ally,0)'),false);
- for(let t=0;t<60*3+5;t++)run('time++;simulateStep()');assert.equal(run('CANAAN_SKILLS.ready(ally,0)'),true);
+ for(let t=0;t<60*4+5;t++)run('time++;simulateStep()');assert.equal(run('CANAAN_SKILLS.ready(ally,0)'),true);
  // Parade de l'allié : elle protège l'allié, pas l'hôte.
  run('canaanHeroUseSkill(ally,2)');assert.ok(run('CANAAN_SKILLS.state(ally).guard')>0);assert.equal(run('CANAAN_SKILLS.state(game.hero).guard'),0);
  assert.equal(run('CANAAN_WEAPON_DEFENSE(null,100,ally)'),60);assert.equal(run('CANAAN_WEAPON_DEFENSE(null,100)'),100);
@@ -2778,8 +2826,11 @@ test('Métiers en ligne : l’invitée pêche, cuisine et mange chez l’hôte, 
   // Cuisine près d'une cuisinière, puis repas : tout se décide chez l'hôte.
   host.run(`${G}.prof.fish={"gardon:0":2};${G}.netBag=null;${G}.player.x=(CANAAN_ROOMS[2].x+4.5)*TS;${G}.player.y=(CANAAN_ROOMS[2].y+3.6)*TS;${G}.player.hp=10;${G}.player.mhp=1000`);
   await step(4);guest.run('CANAAN_PROF.actions.cook("soupe",0,2)');await step(8);
+  // Préparer deux repas prend 6,5 s : l'invitée voit son travail en cours, puis les repas arrivent.
+  assert.equal(guest.run('CANAAN_PROF.myLive().work?.kind'),'cook','l’invitée cuisine (animation et barre)');
+  await step(6.5*60);
   assert.equal(guest.run('game.hero.prof.meals["soupe:0"]'),2);
-  guest.run('CANAAN_PROF.actions.eat("soupe",0)');await step(8);
+  host.run(G+'.player.hp=10');guest.run('CANAAN_PROF.actions.eat("soupe",0)');await step(8);
   {const hp=host.run(G+'.player.hp');assert.ok(hp>=140&&hp<160,String(hp));}
   assert.equal(guest.run('game.hero.prof.meals["soupe:0"]'),1);
   for(const side of [host,guest])assert.equal(side.errors.length,0,side.errors.join('\n'));
@@ -2989,6 +3040,8 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
  for(const side of [host,guest]){side.g.WebSocket=WebSocket;side.g.Event=Event;assert.equal(side.errors.length,0,side.errors.join('\n'))}
  try{
   host.run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view.notify=()=>{};game.view.chat=()=>{}');
+  // Succès coupés : leurs récompenses en or fausseraient les comptes de l’invité (ils sont testés à part).
+  host.run('CanaanStages.achievements={after(){}}');
   host.run('{let s=null;for(let y=60;y<340&&!s;y++)for(let x=60;x<340;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-8;a<=8&&ok;a++)for(let b=-4;b<=8&&ok;b++)ok=canWalk((x+a+.5)*TS,(y+b+.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}P.x=(s.x+.5)*TS;P.y=(s.y+.5)*TS}');
   host.run('CANAAN_NET.openRoom("'+url+'")');
   for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
@@ -3300,6 +3353,8 @@ test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le b
   host.run('CANAAN_ARENA.playMove("slam")');await step(6);
   assert.equal(guest.run('CANAAN_ARENA.run().fx.some(fx=>fx.shape==="circle")'),true,'annonce au sol visible chez l’invité');
   await step(80);
+  // Esquive possible (petite chance de base) : une seconde frappe, au même endroit.
+  if(host.run(G+'.player.hp')>=hp0){host.run('{const b=CANAAN_ARENA.run().boss;'+G+'.player.x=b.x+40;'+G+'.player.y=b.y+50}');host.run('CANAAN_ARENA.playMove("slam")');await step(86)}
   assert.ok(host.run(G+'.player.hp')<hp0,'la zone touche aussi l’invité');
   // Victoire : un Rubis pour l'invité, annoncé chez lui et rangé dans sa collection.
   const owned0=guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)');
@@ -3406,7 +3461,7 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
    const remote='game.heroes.filter(h=>h.peer)';
    host.run('globalThis.__kept=new Map('+remote+'.map(h=>[h,{...h.intent}]))');
    const st=host.run('canaanGroupBot.step()');if(st.done||host.run('P.dead'))break;
-   const wanted=JSON.parse(host.run('JSON.stringify(Object.fromEntries('+remote+'.map(h=>[h.id,{dx:h.intent.dx,dy:h.intent.dy,attack:h.intent.attack,aimX:h.intent.aimX,aimY:h.intent.aimY}])))'));
+   const wanted=JSON.parse(host.run('JSON.stringify(Object.fromEntries('+remote+'.map(h=>[h.id,{dx:h.intent.dx,dy:h.intent.dy,attack:h.intent.attack,skill:h.intent.skill??null,aimX:h.intent.aimX,aimY:h.intent.aimY}])))'));
    host.run('for(const [h,i] of __kept)Object.assign(h.intent,i)');
    ids.forEach((id,k)=>{if(wanted[id])guests[k].run('Object.assign(game.hero.intent,'+JSON.stringify(wanted[id])+')')});
    await tick();
@@ -3435,113 +3490,82 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });
 
-test('Adresses du relais et invitations : liens Pinggy, préfixes oubliés, invitation collée',async()=>{
+test('Adresses du relais et invitations : adresses Tailscale et locales, préfixes oubliés, invitation collée',async()=>{
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
- assert.equal(n.normalizeRelayUrl('https://rnwgr-1-2.a.free.pinggy.link'),'wss://rnwgr-1-2.a.free.pinggy.link');
- assert.equal(n.normalizeRelayUrl(' rnwgr.a.free.pinggy.link/ '),'wss://rnwgr.a.free.pinggy.link','sans préfixe ni port : tunnel HTTPS');
- assert.equal(n.normalizeRelayUrl('tcp://abc.a.free.pinggy.link:41235'),'ws://abc.a.free.pinggy.link:41235');
+ assert.equal(n.normalizeRelayUrl('100.120.239.59:8787'),'ws://100.120.239.59:8787','adresse Tailscale avec port');
+ assert.equal(n.normalizeRelayUrl('ws://mon-pc.tail55b3f7.ts.net:8787'),'ws://mon-pc.tail55b3f7.ts.net:8787','nom MagicDNS');
+ assert.equal(n.normalizeRelayUrl('https://relais.example.com'),'wss://relais.example.com');
  assert.equal(n.normalizeRelayUrl('192.168.1.20:8787'),'ws://192.168.1.20:8787','adresse locale avec port');
  assert.equal(n.normalizeRelayUrl('ws://localhost:8787'),'ws://localhost:8787');
  for(const bad of ['', 'ftp://x', 'ws://exa mple.com', 'ws://host:99999', 'javascript:alert(1)'])assert.equal(n.normalizeRelayUrl(bad),null,bad);
- const inv=n.makeInvitation('wss://abc.a.free.pinggy.link','K7P2QX');
- assert.deepEqual(n.parseInvitation(inv),{relay:'wss://abc.a.free.pinggy.link',code:'K7P2QX'});
- assert.deepEqual(n.parseInvitation('salut ! https://abc.a.free.pinggy.link code: k7p2qx'),{relay:'wss://abc.a.free.pinggy.link',code:'K7P2QX'});
+ const inv=n.makeInvitation('ws://100.120.239.59:8787','K7P2QX');
+ assert.deepEqual(n.parseInvitation(inv),{relay:'ws://100.120.239.59:8787',code:'K7P2QX'});
+ assert.deepEqual(n.parseInvitation('salut ! 100.120.239.59:8787 code: k7p2qx'),{relay:'ws://100.120.239.59:8787',code:'K7P2QX'});
  assert.deepEqual(n.parseInvitation('rien ici'),{relay:null,code:null});
 });
 
-test('Hébergement sur Internet (application de bureau) : relais local, tunnel Pinggy par ssh, lien lu, fermeture et erreurs',async()=>{
- const os=require('node:os');
- const {createHosting,parsePinggy,sshArguments}=require('../app/hosting.js');
- // Lecture de la sortie de Pinggy.
- assert.deepEqual(parsePinggy('You are not authenticated.\nYour tunnel will expire in 60 minutes.\nhttp://ab-1.a.free.pinggy.link\nhttps://ab-1.a.free.pinggy.link\n'),{relay:'wss://ab-1.a.free.pinggy.link',free:true});
- assert.equal(parsePinggy('tcp://cd-2.a.free.pinggy.link:40123').relay,'ws://cd-2.a.free.pinggy.link:40123');
- assert.equal(parsePinggy('Connecting…').relay,undefined);
- // Le lien publicitaire de Pinggy (tableau de bord) n'est jamais pris pour le relais, même s'il vient en premier.
- assert.equal(parsePinggy('Your tunnel will expire in 60 minutes. Upgrade to Pinggy Pro to get unrestricted tunnels. https://dashboard.pinggy.io\n').relay,undefined);
- assert.equal(parsePinggy('Upgrade: https://dashboard.pinggy.io\nhttps://rnqzd-24-50-1-2.a.free.pinggy.link\n').relay,'wss://rnqzd-24-50-1-2.a.free.pinggy.link');
- assert.equal(parsePinggy('https://abc.a.pinggy.online').relay,'wss://abc.a.pinggy.online');
- // Arguments ssh : port 443, relais local, utilisateur selon le jeton et le type de tunnel.
- const args=sshArguments({port:5555,knownHosts:'/tmp/k'});
- assert.equal(args.at(-1),'free.pinggy.io');assert.ok(args.join(' ').includes('-R 0:127.0.0.1:5555'));assert.ok(args.join(' ').includes('-p 443'));
- assert.equal(sshArguments({port:1,token:'tok_EN-1',mode:'tcp',knownHosts:'k'}).at(-1),'tok_EN-1+tcp@free.pinggy.io');
- assert.equal(sshArguments({port:1,mode:'tcp',knownHosts:'k'}).at(-1),'tcp@free.pinggy.io');
- assert.equal(sshArguments({port:1,token:'abcd',knownHosts:'k',host:'pro.pinggy.io'}).at(-1),'abcd@pro.pinggy.io','serveur choisi');
- assert.equal(sshArguments({port:1,knownHosts:'k',host:'evil.example.com'}).at(-1),'free.pinggy.io','serveur hors Pinggy refusé');
- const pq="Warning: Permanently added '[free.pinggy.io]:443' (RSA) to the list of known hosts.\r\n** WARNING: connection is not using a post-quantum key exchange algorithm.\r\n** The server may need to be upgraded. See https://openssh.com/pq.html\r\n";
- assert.equal(parsePinggy(pq).relay,undefined,'avertissement de ssh ignoré');
- assert.equal(parsePinggy(pq+'You can access local server via following URL(s):\r\nhttp://abc-1-2.a.free.pinggy.link\r\nhttps://abc-1-2.a.free.pinggy.link\r\n').relay,'wss://abc-1-2.a.free.pinggy.link','adresse lue après l’avertissement');
- const {isPinggyTunnel}=require('../app/hosting.js');
- for(const u of ['wss://flyna-45-44-218-12.free.pinggy.net','wss://zaede-45-44-218-12.run.pinggy-free.link/','ws://abc.a.pinggy.link:4242','wss://x.pinggy.online'])assert.ok(isPinggyTunnel(u),u);
- for(const u of ['https://dashboard.pinggy.io','ws://192.168.1.5:8787','wss://openssh.com','wss://notpinggyx.com','pas une adresse'])assert.ok(!isPinggyTunnel(u),u);
- const {parsePinggyLogin}=require('../app/hosting.js');
- assert.deepEqual(parsePinggyLogin('ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 bXW7b0i7JRM@free.pinggy.io'),{token:'bXW7b0i7JRM',host:'free.pinggy.io'},'commande du tableau de bord');
- assert.deepEqual(parsePinggyLogin('abcd+tcp@pro.pinggy.io'),{token:'abcd',host:'pro.pinggy.io'});
- assert.deepEqual(parsePinggyLogin('abcd_1'),{token:'abcd_1',host:''});
- assert.equal(parsePinggyLogin('n’importe quoi !'),null);
- // Faux client ssh : il vérifie ses arguments, répond comme Pinggy, puis se ferme quand on le lui demande.
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'canaan-pinggy-'));
- const fake=path.join(dir,'ssh');
- fs.writeFileSync(fake,'#!'+process.execPath+'\nconst a=process.argv.slice(2).join(" ");\nif(!/-R 0:127\\.0\\.0\\.1:\\d+/.test(a)){console.error("mauvais arguments");process.exit(2)}\nconsole.log("You are not authenticated.");console.log("Your tunnel will expire in 60 minutes. Upgrade to Pinggy Pro to get unrestricted tunnels. https://dashboard.pinggy.io");\nconsole.log("http://zz-9.a.free.pinggy.link");console.log("https://zz-9.a.free.pinggy.link");\nprocess.on("SIGTERM",()=>process.exit(0));if(process.env.FAKE_EXIT)setTimeout(()=>process.exit(1),300);else setInterval(()=>{},1000);\n',{mode:0o755});
+test('Hébergement (application de bureau) : relais sur l’adresse Tailscale, Tailscale absent ou arrêté, réseau local, sans Pinggy',async()=>{
+ const H=require('../app/hosting.js');
+ // Plage Tailscale 100.64.0.0/10 seulement.
+ for(const ip of ['100.64.0.1','100.120.239.59','100.127.255.254'])assert.ok(H.isTailscaleIp(ip),ip);
+ for(const ip of ['100.63.0.1','100.128.0.1','10.0.0.5','192.168.1.2','pas une ip'])assert.ok(!H.isTailscaleIp(ip),ip);
+ // Lecture de l'adresse : l'interface tailscale0, et le nom MagicDNS donné par « tailscale status --json ».
+ const ifs={lo:[{family:'IPv4',address:'127.0.0.1',internal:true}],wlan:[{family:'IPv4',address:'192.168.1.25',internal:false}],tailscale0:[{family:'IPv4',address:'100.120.239.59',internal:false}]};
+ const running=()=>JSON.stringify({BackendState:'Running',Self:{DNSName:'mon-pc.tail55b3f7.ts.net.',TailscaleIPs:['100.120.239.59','fd7a::1']}});
+ assert.deepEqual(H.tailscaleInfo({interfaces:ifs,run:running,commands:['tailscale']}),{ip:'100.120.239.59',name:'mon-pc.tail55b3f7.ts.net'});
+ // Sans interface visible, l'adresse vient du statut.
+ assert.equal(H.tailscaleInfo({interfaces:{},run:running,commands:['tailscale']}).ip,'100.120.239.59');
+ // Pas installé, arrêté, en attente de connexion : un message clair, aucune adresse.
+ const enoent=()=>{const e=new Error('absent');e.code='ENOENT';throw e};
+ assert.match(H.tailscaleInfo({interfaces:{},run:enoent,commands:['tailscale']}).why,/pas installé/);
+ const stopped=()=>{const e=new Error('exit 1');e.stdout=JSON.stringify({BackendState:'Stopped'});throw e};
+ assert.match(H.tailscaleInfo({interfaces:{},run:stopped,commands:['tailscale']}).why,/arrêté/);
+ assert.match(H.tailscaleInfo({interfaces:{},run:()=>JSON.stringify({BackendState:'NeedsLogin'}),commands:['tailscale']}).why,/connectes/);
+ // Les adresses Tailscale ne sont pas proposées comme adresses du réseau local.
+ assert.deepEqual(H.lanAddresses(ifs),['192.168.1.25']);
+ assert.deepEqual(H.tailscaleFirewallCommands(['firewalld','ufw'],8787),['sudo firewall-cmd --permanent --zone=trusted --add-interface=tailscale0 && sudo firewall-cmd --reload','sudo ufw allow in on tailscale0 to any port 8787 proto tcp']);
+ // Le relais écoute sur l'adresse Tailscale (ici 127.0.0.1 à sa place) et l'hôte s'y branche lui aussi.
  const statuses=[];
- const hosting=createHosting({dataDir:dir,sshPath:fake,onStatus:s=>statuses.push(s)});
+ let info={ip:'127.0.0.1',name:'mon-pc.tail55b3f7.ts.net'};
+ const hosting=H.createHosting({tailscale:()=>info,firewalls:()=>['ufw'],onStatus:s=>statuses.push(s)});
  try{
-  const st=await hosting.start();
-  assert.equal(st.state,'online');assert.equal(st.relay,'wss://zz-9.a.free.pinggy.link');assert.equal(st.free,true);
-  assert.ok(st.expiresAt>Date.now()+59*60000,'limite gratuite de 60 minutes');assert.match(st.local,/^ws:\/\/127\.0\.0\.1:\d+$/);
-  // Le relais local fonctionne : un salon s'y ouvre (c'est lui que le tunnel expose).
+  const st=await hosting.startTailscale();
+  assert.equal(st.state,'online');assert.equal(st.kind,'tailscale');assert.match(st.relay,/^ws:\/\/127\.0\.0\.1:878\d$/);assert.equal(st.local,st.relay);
+  assert.deepEqual(st.addresses,['ws://mon-pc.tail55b3f7.ts.net:'+st.relay.split(':').pop()]);
+  assert.match(st.firewall[0],/tailscale0/);
   const code=await new Promise((resolve,reject)=>{const ws=new WebSocket(st.local);ws.onopen=()=>ws.send(JSON.stringify({t:'host'}));ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='room'){ws.close();resolve(m.code)}};ws.onerror=reject});
   assert.match(code,/^[A-Z2-9]{6}$/);
-  // Rouvrir garde le même relais local (donc le même salon).
-  const again=await hosting.start();assert.equal(again.local,st.local);
-  // Tunnel fermé par Pinggy (60 minutes) : l'état le dit, avec la marche à suivre.
-  process.env.FAKE_EXIT='1';await hosting.start();delete process.env.FAKE_EXIT;
-  for(let i=0;i<50&&hosting.status().state!=='closed';i++)await new Promise(r=>setTimeout(r,20));
-  assert.equal(hosting.status().state,'closed');assert.match(hosting.status().message,/60 minutes/);
-  // Réseau local : adresses privées en premier, relais ouvert au réseau, port de repli si 8787 est pris.
-  const {lanAddresses,LAN_PORTS}=require('../app/hosting.js');
-  assert.deepEqual(lanAddresses({lo:[{family:'IPv4',address:'127.0.0.1',internal:true}],docker:[{family:'IPv4',address:'172.17.0.1',internal:false}],wlan:[{family:'IPv4',address:'192.168.1.25',internal:false},{family:'IPv6',address:'fe80::1',internal:false}]}),['192.168.1.25','172.17.0.1']);
-  const blocker=require('node:net').createServer();const busy=await new Promise(r=>blocker.once('error',()=>r(false)).listen(LAN_PORTS[0],'0.0.0.0',()=>r(true)));
+  // Tailscale arrêté : erreur claire, le relais est fermé.
+  info={ip:null,why:'Tailscale est arrêté : ouvre Tailscale et active la connexion (« Connect »).'};
+  const off=await hosting.startTailscale();assert.equal(off.state,'error');assert.match(off.message,/arrêté/);
+  await assert.rejects(()=>new Promise((resolve,reject)=>{const ws=new WebSocket(st.local);ws.onopen=()=>{ws.close();resolve()};ws.onerror=reject}));
+  // Réseau local : relais ouvert au réseau, port de repli si 8787 est pris.
+  const blocker=require('node:net').createServer();const busy=await new Promise(r=>blocker.once('error',()=>r(false)).listen(H.LAN_PORTS[0],'0.0.0.0',()=>r(true)));
   try{
    const lan=await hosting.startLan();
    if(lan.state==='online'){
     assert.equal(lan.kind,'lan');assert.match(lan.relay,/^ws:\/\/[\d.]+:\d+$/);
-    if(busy)assert.equal(+lan.relay.split(':').pop(),LAN_PORTS[1],'port de repli quand 8787 est pris');
-    // Le relais répond par l'adresse du réseau local (pas seulement 127.0.0.1).
+    if(busy)assert.equal(+lan.relay.split(':').pop(),H.LAN_PORTS[1],'port de repli quand 8787 est pris');
     const code2=await new Promise((resolve,reject)=>{const ws=new WebSocket(lan.relay);ws.onopen=()=>ws.send(JSON.stringify({t:'host'}));ws.onmessage=e=>{ws.close();resolve(JSON.parse(e.data).code)};ws.onerror=reject});
     assert.match(code2,/^[A-Z2-9]{6}$/);
    }else assert.match(lan.message,/réseau local/,'sans réseau : message clair');
   }finally{blocker.close()}
-  // Retour à Internet : le relais repasse sur 127.0.0.1 pour le tunnel.
-  const back=await hosting.start();assert.equal(back.kind,'internet');assert.match(back.local,/^ws:\/\/127\.0\.0\.1:/);
-  // Pinggy n'affiche l'adresse qu'avec un terminal : second essai en ssh -tt, codes de couleur compris.
-  const ttyOnly=path.join(dir,'ssh-tty');
-  fs.writeFileSync(ttyOnly,'#!'+process.execPath+'\nconsole.log("You are not authenticated. https://dashboard.pinggy.io");\nif(process.argv.includes("-tt"))process.stdout.write("\\x1b[2J\\x1b[32mhttps://tt-7.a.free.pinggy.link\\x1b[0m\\r\\n");\nprocess.on("SIGTERM",()=>process.exit(0));setInterval(()=>{},1000);\n',{mode:0o755});
-  const viaTty=createHosting({dataDir:dir,sshPath:ttyOnly,waits:[300,2000]});
-  const t=await viaTty.start();assert.equal(t.state,'online');assert.equal(t.relay,'wss://tt-7.a.free.pinggy.link');await viaTty.stop();
-  // Aucune adresse dans la réponse : l'erreur montre ce que Pinggy a dit, et la réponse complète est gardée.
-  const silent=path.join(dir,'ssh-silent');
-  fs.writeFileSync(silent,'#!'+process.execPath+'\nconsole.log("Bienvenue sur Pinggy. Upgrade https://dashboard.pinggy.io");\nprocess.on("SIGTERM",()=>process.exit(0));setInterval(()=>{},1000);\n',{mode:0o755});
-  const quiet=createHosting({dataDir:dir,sshPath:silent,waits:[200,200]});
-  const q=await quiet.start();assert.equal(q.state,'error');assert.match(q.message,/sans donner d’adresse de tunnel : « Bienvenue sur Pinggy/);
-  assert.ok(fs.readFileSync(path.join(dir,'pinggy-derniere-reponse.txt'),'utf8').includes('Bienvenue sur Pinggy'),'réponse gardée dans un fichier');await quiet.stop();
-  // Jeton invalide refusé ; ssh absent : message clair.
-  await assert.rejects(()=>hosting.start({token:'a b'}),/Jeton/);
-  const missing=createHosting({dataDir:dir,sshPath:path.join(dir,'introuvable')});
-  const err=await missing.start();assert.equal(err.state,'error');assert.match(err.message,/ssh introuvable/);await missing.stop();
- }finally{await hosting.stop();fs.rmSync(dir,{recursive:true,force:true})}
+ }finally{await hosting.stop()}
  assert.equal(statuses.at(-1).state,'off');
+ // Plus aucune trace de Pinggy ni de tunnel ssh dans l'application ni dans le jeu.
+ for(const f of ['app/hosting.js','app/main.js','app/preload.js'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'..',f),'utf8'),/pinggy|ssh/i,f);
+ assert.doesNotMatch(source.replace(/Anciens réglages Pinggy[^\n]*\n[^\n]*/,''),/pinggy/i);
 });
 
-test('Jouer sur Internet dans le jeu : l’hôte ouvre le tunnel, copie l’invitation ; l’invité la colle et rejoint',async()=>{
+test('Jouer avec Tailscale dans le jeu : l’hôte ouvre le salon, copie l’invitation ; l’invité la colle et rejoint',async()=>{
  const {createRelay}=require('../relay/server.cjs');
  const relay=createRelay({port:0,host:'127.0.0.1',rate:2000});await relay.ready;const local='ws://127.0.0.1:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
- // Pont de l'application de bureau simulé : le « tunnel » donne un lien public ; le relais est local.
+ // Pont de l'application de bureau simulé : le relais « Tailscale » est le relais local du test.
  const host=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){
   if(part[1].includes('canaan-runtime-config'))run('{const db=new Map();window.canaanDesktop={list:()=>[],read:k=>db.get(k)??null,write:(k,t)=>{db.set(k,t)},backup(){},backupText(){},remove:k=>{db.delete(k)},openFolder(){}}}');
-  if(part[1].includes('id="canaan-net"'))run('window.canaanDesktop.hosting={calls:[],copied:[],start(o){this.calls.push(o);return Promise.resolve({state:"online",local:"'+local+'",relay:"wss://zz-9.a.free.pinggy.link",free:true,expiresAt:Date.now()+3600000})},stop(){this.stopped=true;return Promise.resolve(true)},status(){return Promise.resolve({})},onStatus(cb){this.emit=cb},copy(t){this.copied.push(t)}}');
+  if(part[1].includes('id="canaan-net"'))run('window.canaanDesktop.hosting={copied:[],next:{state:"online",kind:"tailscale",local:"'+local+'",relay:"'+local+'",addresses:["ws://mon-pc.tail55b3f7.ts.net:'+relay.port+'"],firewall:["sudo ufw allow in on tailscale0 to any port '+relay.port+' proto tcp"]},startTailscale(){this.tailscale=(this.tailscale||0)+1;return Promise.resolve(this.next)},stop(){this.stopped=true;return Promise.resolve(true)},status(){return Promise.resolve({})},onStatus(cb){this.emit=cb},copy(t){this.copied.push(t)}}');
  }});
- // Le faux document des tests ignore les écouteurs : celui du menu des aventures est gardé pour l'appeler.
  const guest=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){
   if(part[1].includes('canaan-runtime-config'))run('0');
   if(part[1].includes('id="canaan-slot-menu"'))run('{const m=document.getElementById("slotMenu");m.__l={};m.addEventListener=(t,f)=>{(m.__l[t]??=[]).push(f)}}');
@@ -3550,42 +3574,43 @@ test('Jouer sur Internet dans le jeu : l’hôte ouvre le tunnel, copie l’invi
  try{
   host.run('started=true;paused=false;P.dead=false;game.view.notify=()=>{};game.view.chat=()=>{}');
   assert.equal(host.run('CANAAN_NET.state().canHostOnline'),true);
-  host.run('CANAAN_NET.setPinggy({token:"mon_jeton-1",mode:"http"})');
-  await host.run('CANAAN_NET.openInternet()');
+  // Le panneau propose Tailscale et le réseau local, sans aucun réglage Pinggy.
+  host.run('toggleGroup()');const before=host.run('document.getElementById("window").innerHTML');
+  assert.ok(before.includes('data-action="groupOpenTailscale"')&&before.includes('data-action="groupOpenLan"'));assert.doesNotMatch(before,/pinggy/i);
+  host.run('closePanels()');
+  await host.run('CANAAN_NET.openTailscale()');
   for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code');
-  assert.equal(host.run('JSON.stringify(canaanDesktop.hosting.calls[0])'),JSON.stringify({token:'mon_jeton-1',mode:'http',host:''}),'abonnement transmis');
-  assert.equal(host.run('CANAAN_NET.setPinggy({token:"ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no bXW7b0i7JRM@free.pinggy.io",mode:"http"})'),true,'commande du tableau de bord acceptée');
-  assert.equal(host.run('CANAAN_NET.debug && CANAAN_PREFERENCES.read("network",{}).pinggyToken'),'bXW7b0i7JRM','jeton lu dans la commande');
-  host.run('CANAAN_NET.setPinggy({token:"mon_jeton-1",mode:"http"})');
-  assert.equal(host.run('CANAAN_NET.state().relay'),local,'salon ouvert sur le relais local');
-  assert.equal(host.run('CANAAN_NET.settings().relay'),'ws://localhost:8787','le relais préféré ne devient pas l’adresse locale');
-  // Le panneau Groupe montre le lien et le code ; l'invitation est copiée.
+  assert.equal(host.run('canaanDesktop.hosting.tailscale'),1);assert.equal(host.run('CANAAN_NET.state().relay'),local,'salon ouvert sur le relais Tailscale');
+  // Le panneau montre l'adresse, le nom MagicDNS, le code, l'aide Tailscale et le pare-feu ; l'invitation est copiée.
   host.run('toggleGroup()');const panel=host.run('document.getElementById("window").innerHTML');
-  assert.ok(panel.includes('wss://zz-9.a.free.pinggy.link')&&panel.includes(code)&&panel.includes('groupCopyInvitation'),'lien, code et bouton copier');
+  for(const t of [local,'mon-pc.tail55b3f7.ts.net',code,'groupCopyInvitation','réseau Tailscale','tailscale0'])assert.ok(panel.includes(t),t);
   host.run('CANAAN_NET.copyInvitation()');const invitation=host.run('canaanDesktop.hosting.copied[0]');
-  assert.equal(invitation,'Rejoins ma partie Canaan Online ! Relais : wss://zz-9.a.free.pinggy.link · Code : '+code);
-  // L'invité colle l'invitation : relais et code se remplissent ; il rejoint (ici par le relais local, le tunnel étant simulé).
+  assert.equal(invitation,'Rejoins ma partie The Legend of Nashi ! Relais : '+local+' · Code : '+code);
+  // L'invité colle l'invitation : relais et code se remplissent ; il rejoint.
   guest.run('CANAAN_SLOT_MENU.render();CANAAN_SLOT_MENU.joinForm()');
   guest.run('{const i=document.getElementById("joinInvite");i.value='+JSON.stringify(invitation)+';for(const f of document.getElementById("slotMenu").__l.input)f({target:i})}');
-  assert.equal(guest.run('document.getElementById("joinRelay").value'),'wss://zz-9.a.free.pinggy.link');assert.equal(guest.run('document.getElementById("joinCode").value'),code);
-  guest.run('CANAAN_NET.joinRoom({relay:"'+local+'",code:document.getElementById("joinCode").value,pseudo:"Lina"})');
+  assert.equal(guest.run('document.getElementById("joinRelay").value'),local);assert.equal(guest.run('document.getElementById("joinCode").value'),code);
+  guest.run('CANAAN_NET.joinRoom({relay:document.getElementById("joinRelay").value,code:document.getElementById("joinCode").value,pseudo:"Lina"})');
   for(let i=0;i<60&&guest.run('game.mode')!=='guest';i++)await wait(10);
   assert.equal(guest.run('game.mode'),'guest');assert.equal(host.run('game.heroes.length'),2);
-  // Tunnel fermé (60 minutes) : message, bouton pour rouvrir ; le salon reste ouvert sur le relais local.
-  host.run('canaanDesktop.hosting.emit({state:"closed",local:"'+local+'",relay:null,free:true,message:"Tunnel Pinggy fermé (limite de 60 minutes en gratuit). Rouvre-le : le lien change."})');
-  assert.equal(host.run('CANAAN_NET.state().internet.state'),'closed');assert.equal(host.run('game.mode'),'host');
-  host.run('closePanels();toggleGroup()');assert.ok(host.run('document.getElementById("window").innerHTML').includes('Rouvrir le tunnel'),'bouton pour rouvrir');
-  await host.run('CANAAN_NET.openInternet()');assert.equal(host.run('CANAAN_NET.state().code'),code,'même salon après réouverture');
   await host.run('CANAAN_NET.closeInternet()');assert.equal(host.run('canaanDesktop.hosting.stopped'),true);
+  // Tailscale arrêté : le message s'affiche dans le panneau, aucun salon ne s'ouvre.
+  host.run('canaanDesktop.hosting.next={state:"error",kind:"tailscale",message:"Tailscale est arrêté : ouvre Tailscale et active la connexion (« Connect »)."}');
+  for(let i=0;i<50&&host.run('game.mode')!=='solo';i++)await wait(10);
+  assert.equal(await host.run('CANAAN_NET.openTailscale()'),false);assert.equal(host.run('game.mode'),'solo','aucun salon');assert.equal(host.run('CANAAN_NET.debug.socket'),null);
+  host.run('closePanels();toggleGroup()');assert.ok(host.run('document.getElementById("window").innerHTML').includes('Tailscale est arrêté'));
   // Réseau local : même parcours, l'invitation donne l'adresse de ce PC sur le réseau, avec l'aide pour le pare-feu.
   host.run('canaanDesktop.hosting.startLan=()=>Promise.resolve({state:"online",kind:"lan",local:"'+local+'",relay:"ws://192.168.1.25:'+relay.port+'",addresses:["ws://192.168.1.25:'+relay.port+'","ws://10.0.0.7:'+relay.port+'"]})');
   await host.run('CANAAN_NET.openLan()');for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   assert.equal(host.run('CANAAN_NET.state().relay'),local);
   host.run('closePanels();toggleGroup()');const lanPanel=host.run('document.getElementById("window").innerHTML');
   assert.ok(lanPanel.includes('ws://192.168.1.25:'+relay.port)&&lanPanel.includes('10.0.0.7')&&lanPanel.includes('sudo ufw allow '+relay.port+'/tcp'),'adresse locale et aide pare-feu');
-  assert.equal(host.run('CANAAN_NET.invitation()'),'Rejoins ma partie Canaan Online ! Relais : ws://192.168.1.25:'+relay.port+' · Code : '+host.run('CANAAN_NET.state().code'));
+  assert.equal(host.run('CANAAN_NET.invitation()'),'Rejoins ma partie The Legend of Nashi ! Relais : ws://192.168.1.25:'+relay.port+' · Code : '+host.run('CANAAN_NET.state().code'));
   await host.run('CANAAN_NET.closeInternet()');
+  // Anciens réglages Pinggy d'une préférence enregistrée : retirés.
+  host.run('CANAAN_PREFERENCES.write("network",{...CANAAN_PREFERENCES.read("network",{}),pinggyToken:"abcd",pinggyMode:"tcp"});CANAAN_NET.settings()');
+  assert.equal(host.run('"pinggyToken" in CANAAN_PREFERENCES.read("network",{})'),false);
   assert.equal(host.errors.length+guest.errors.length,0,host.errors.concat(guest.errors).join('\n'));
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });
@@ -3854,13 +3879,428 @@ test('Donjons et raids : moins d’XP, plus coriaces, et des boss qui annoncent 
  // Onde de choc : un cercle annoncé, puis des dégâts à qui y reste ; une roulade (invulnérable) l'évite.
  run('boss.mech={wave:0,rain:1e9,adds:0};time++;CanaanStages.bossMechanics.after()');
  assert.equal(run('CANAAN_BOSS_MECHANICS.zones().length'),1);
- run('const z=CANAAN_BOSS_MECHANICS.zones()[0];P.x=z.x;P.y=z.y;globalThis.hp0=P.hp;boss.mech.wave=1e9;for(let i=0;i<100;i++){time++;CanaanStages.bossMechanics.after()}');
+ run('const z=CANAAN_BOSS_MECHANICS.zones()[0];P.x=z.x;P.y=z.y;globalThis.hp0=P.hp;boss.mech.wave=1e9;const rnd0=Math.random;Math.random=()=>0.5;for(let i=0;i<100;i++){time++;CanaanStages.bossMechanics.after()}Math.random=rnd0');
  assert.ok(run('P.hp<hp0'),'resté dans le cercle : touché');assert.equal(run('CANAAN_BOSS_MECHANICS.zones().length'),0);
- // Renforts à 50 % de PV, puis rage sous 25 % (dégâts ×1,15).
+ // Renforts à 66 % de PV (et 33 %), puis rage sous 25 % (dégâts ×1,25).
  const raw=run('CANAAN_ENEMY_RAW_DAMAGE(boss)');
  run('boss.hp=boss.mhp*0.45;time++;CanaanStages.bossMechanics.after()');assert.equal(run('game.world.monsters.filter(m=>m.summoned).length'),2);
  run('boss.hp=boss.mhp*0.2;time++;CanaanStages.bossMechanics.after()');assert.equal(run('boss.enraged'),true);
- assert.ok(Math.abs(run('CANAAN_ENEMY_RAW_DAMAGE(boss)')-raw*1.15)<1e-6);
+ assert.ok(Math.abs(run('CANAAN_ENEMY_RAW_DAMAGE(boss)')-raw*1.25)<1e-6);
  // Dans une instance, les monstres ordinaires rapportent 60 % de leur XP.
  run('leaveInstance()');assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Arène : tout le groupe à terre (l’hôte tombé en premier) revient au camp, chacun relevé',()=>{
+ for(const order of ['hostFirst','guestFirst']){
+  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+  run('started=true;paused=false;P.dead=false;globalThis.__t=[];setTimeout=f=>{__t.push(f);return 1};toast=()=>{};game.view.chat=()=>{}');
+  run('game.hero.level=20;{const h=canaanCreateHero({name:"Lina",x:P.x,y:P.y});h.level=20;game.heroes.push(h);globalThis.lina=h}');
+  assert.equal(run('enterArena()'),true);
+  run('{const L=arenaLayout();game.heroes.forEach((h,k)=>{h.player.x=L.x+(k-1)*30;h.player.y=L.y+60})}');
+  for(let i=0;i<10;i++)run('time++;simulateStep()');run('CANAAN_ARENA.run().timer=0');for(let i=0;i<5;i++)run('time++;simulateStep()');
+  assert.equal(run('CANAAN_ARENA.run().phase'),'fight');
+  const host='P.hp=1;CANAAN_COMBAT.hurt(1e9,CANAAN_ARENA.run().boss);updateWorld()',ally='CANAAN_COMBAT.hurt(1e9,CANAAN_ARENA.run().boss,lina)';
+  for(const s of order==='hostFirst'?[host,ally]:[ally,host]){run(s);for(let i=0;i<20;i++)run('time++;runUpdatePipeline()')}
+  assert.equal(run('P.dead&&lina.player.dead'),true);
+  assert.equal(run('__t.length'),1,order+' : un seul retour au camp programmé');
+  run('__t.splice(0).forEach(f=>f())');
+  assert.equal(run('game.world.instance'),null,order+' : le colisée est quitté');
+  assert.equal(run('P.dead||lina.player.dead'),false,order+' : tout le monde est relevé');
+  assert.ok(run('Math.hypot(P.x-CANAAN_SPAWN.x,P.y-CANAAN_SPAWN.y)<1&&Math.hypot(lina.player.x-P.x,lina.player.y-P.y)<3*TS'),order+' : au camp');
+  assert.equal(errors.length,0,errors.join('\n'));
+ }
+});
+
+test('Arène : les cercles au sol ne touchent que les héros qui sont dedans',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;P.dead=false;toast=()=>{};game.view.chat=()=>{};Math.random=()=>0.5;canaanRegenRates=()=>({mana:0,health:0})');
+ run('game.hero.level=30;{const h=canaanCreateHero({name:"Lina",x:P.x,y:P.y});h.level=30;game.heroes.push(h);globalThis.lina=h}');
+ assert.equal(run('enterArena()'),true);
+ run('{const L=arenaLayout();game.heroes.forEach((h,k)=>{h.player.x=L.x+(k-1)*30;h.player.y=L.y+60})}');
+ for(let i=0;i<10;i++)run('time++;simulateStep()');run('CANAAN_ARENA.run().timer=0');for(let i=0;i<5;i++)run('time++;simulateStep()');
+ run('const b=CANAAN_ARENA.run().boss;b.cd=b.moveClock=b.autoClock=b.busy=1e9;for(const h of game.heroes){h.player.mhp=h.player.hp=1e6}');
+ // Chaque attaque à cercles autour du héros visé : l'hôte est visé, l'alliée est dans le colisée à 700 px de lui.
+ // Avant la correction, chaque cercle touchait tous les héros, où qu'ils soient.
+ const spot='{const L=arenaLayout();P.x=L.x+300;P.y=L.y;lina.player.x=L.x-400;lina.player.y=L.y;CANAAN_ARENA.run().boss.target=game.hero}';
+ for(const move of ['quake','rocks','poison','lightning','meteors']){
+  run('CANAAN_ARENA.run().fx.length=0;CANAAN_ARENA.run().hazards.length=0;CANAAN_ARENA.run().dots.length=0;'+spot);
+  run('time++;simulateStep();'+spot+';globalThis.lina0=lina.player.hp;globalThis.host0=P.hp;CANAAN_ARENA.playMove("'+move+'")');
+  for(let i=0;i<200;i++)run('time++;'+spot+';simulateStep()');
+  assert.equal(run('lina.player.hp'),run('lina0'),move+' : l’alliée hors des cercles n’est pas touchée');
+  assert.ok(run('P.hp')<run('host0'),move+' : l’hôte, dans les cercles, est touché');
+ }
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Compétences : attaques de base renforcées, info-bulles claires, charges du bâton visibles, postures utiles',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;P.dead=false;game.world.instance=null;toast=()=>{};game.view.chat=()=>{};Math.random=()=>0.5');
+ const gear=w=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"g'+k+'",slot:"'+k+'",level:30,rarity:"Rare",weaponType:"'+w+'",sec:{power:1,crit:1}}').join(',')+'}';
+ run('game.hero.level=30;game.hero.equipment={...game.hero.equipment,...'+gear('sword')+'};recomputeStats();refreshWeaponBar()');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BASIC_ATTACK.spec)')),{quick:{mult:0.75,lock:0.55},heavy:{mult:1.6,lock:1.15}});
+ // Le bâton a la même puissance que les autres armes (plus d'Intelligence).
+ assert.equal(run('CANAAN_SKILLS.power(game.hero,true)'),run('CANAAN_SKILLS.power(game.hero,false)'));
+ // Info-bulle : explication, dégâts estimés avec la puissance actuelle, recharge, mana, effet de classe.
+ const tip=run('canaanSkillTooltip(0)'),power=run('CANAAN_SKILLS.power(game.hero,false)');
+ assert.ok(tip.includes('Un coup puissant devant toi')&&tip.includes('≈ '+Math.round(power*2.6)+' dégâts')&&tip.includes('Recharge 4 s')&&tip.includes('Mana 8'),tip);
+ assert.ok(tip.includes('Sans classe'),'sans classe : invitation à en choisir une');
+ for(const [id,word] of [['druide','empoisonne'],['paladin','bouclier'],['assassin','+12 %'],['elementaliste','brûle']]){
+  run('game.hero.classe={id:"'+id+'",talents:[]}');assert.ok(run('canaanSkillTooltip(0)').includes(word),id);
+ }
+ assert.ok(run('canaanSkillTooltip(2)').includes('décharge'),'utilitaire de l’Élémentaliste');
+ assert.ok(run('canaanSkillTooltip("special")').includes('Avatar élémentaire'));
+ assert.ok(run('SKILLS.every(s=>s.el.dataset.tooltipSkill!==undefined)'),'survol des cases');
+ // Chaque catalogue de compétence a sa puissance et son explication.
+ assert.ok(run('Object.values(WEAPON_DEFINITIONS).every(w=>w.role&&w.sp.every(s=>s.length===7&&typeof s[5]==="number"&&s[6].length>20))'));
+ // Bâton : les charges s'affichent (badge de la compétence 4) et la Surcharge les consomme.
+ run('game.hero.classe={id:null,talents:[]};game.hero.equipment={...game.hero.equipment,...'+gear('staff')+'};recomputeStats();refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+100;mouseWorldY=P.y');
+ const cast=i=>run('for(const k in weaponCooldowns)weaponCooldowns[k]=0;P.mp=P.mmp;useSkill('+i+')');
+ cast(0);cast(0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),2);
+ run('canaanUpdateSkillBadges()');assert.equal(run('SKILLS[3].el.querySelector(".skill-badge").textContent'),'🔮 2/3');
+ assert.ok(run('canaanSkillTooltip(3)').includes('Charges arcaniques : <b>2 / 3</b>'));
+ // Concentration : une attaque de base ne la gaspille pas, la compétence suivante la consomme.
+ cast(2);assert.ok(run('CANAAN_SKILLS.state(game.hero).focus')>0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),3);
+ run('canaanBasicAttack(false)');assert.ok(run('CANAAN_SKILLS.state(game.hero).focus')>0,'pas consommée par l’attaque de base');
+ run('game.world.monsters=[{t:"Cible",x:P.x+100,y:P.y,hp:1e7,mhp:1e7,r:14,cd:1e9,g:0,level:30,_levelHp:true}]');
+ cast(3);assert.equal(run('CANAAN_SKILLS.state(game.hero).focus'),0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),0);
+ const surge=run('1e7-game.world.monsters[0].hp');assert.ok(surge>power*7.4*1.2,'Surcharge à 3 charges et Concentration : '+surge);
+ // Élan offensif (épées doubles) : les attaques de base sont vraiment plus rapides.
+ run('game.hero.equipment={...game.hero.equipment,...'+gear('dualsword')+'};recomputeStats();refreshWeaponBar()');
+ run('for(let i=0;i<120;i++){time++;simulateStep()}canaanBasicAttack(false)');const slow=run('CANAAN_BASIC_ATTACK.lock()');
+ cast(2);run('for(let i=0;i<70;i++){time++;simulateStep()}canaanBasicAttack(false)');
+ assert.ok(Math.abs(run('CANAAN_BASIC_ATTACK.lock()')/slow-0.7)<1e-9,'verrou ×0,7 pendant l’Élan');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Donjons et raids : boss bien plus robustes qu’une élite, élites plus robustes qu’un monstre',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ run('started=true;paused=false;P.dead=false;game.view.chat=()=>{};toast=()=>{}');
+ run('game.hero.level=28;enterInstance(3)');
+ const r=JSON.parse(run('(()=>{for(let i=0;i<3;i++)simulateStep();const ms=game.world.monsters,b=ms.find(m=>m.boss);scaleBossHp(b);const t=ms.find(m=>!m.boss);const e={...t,elite:true,_levelHp:false,hp:1,mhp:1};canaanSetupMob(e);return JSON.stringify({trash:t.mhp,elite:e.mhp,boss:b.mhp})})()'));
+ assert.ok(r.elite<r.trash*1.8,'élite : '+JSON.stringify(r));
+ assert.ok(r.boss>r.elite*5,'boss : '+JSON.stringify(r));
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 40 sorts',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ // Le cercle autour du héros à chaque attaque n'existe plus.
+ assert.doesNotMatch(script('canaan-game-core'),/ctx\.arc\(P\.x, P\.y, 65/);
+ // Icônes : une par compétence (9 armes × 4) et par sort de classe, en SVG.
+ const audit=JSON.parse(run('JSON.stringify(CANAAN_SKILL_ICONS.audit())'));
+ assert.equal(audit.weapons,9);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','divine','feral','veil']);
+ assert.equal(run('Object.keys(WEAPON_DEFINITIONS).every(t=>[0,1,2,3].every(i=>CANAAN_SKILL_ICONS.weapon(t,i).startsWith("<svg")))'),true);
+ assert.equal(run('CLASSES.every(c=>CANAAN_SKILL_ICONS.special(c.special.id).startsWith("<svg"))'),true);
+ run('started=true;paused=false;refreshWeaponBar()');assert.ok(run('SKILLS[0].el.innerHTML').startsWith('<svg'),'la barre affiche l’icône SVG');
+ // Arme tenue : chaque famille se dessine au repos et à chaque instant de son attaque, derrière ou devant le corps.
+ run('globalThis.__drawn=0;const c=new Proxy({},{get:(o,k)=>k==="drawImage"?()=>__drawn++:k==="createRadialGradient"?()=>({addColorStop(){}}):()=>{} ,set:()=>true});globalThis.__c=c');
+ for(const type of run('JSON.stringify(Object.keys(WEAPON_DEFINITIONS))')&&JSON.parse(run('JSON.stringify(Object.keys(WEAPON_DEFINITIONS))'))){
+  run('game.hero.equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"'+type+'"};__drawn=0;P.atk=0;for(const l of ["back","front"])CANAAN_WEAPON_LOOK.draw(__c,game.hero,P,P.x,P.y,l)');
+  assert.ok(run('__drawn')>=1,type+' au repos');
+  for(const atk of [0.28,0.2,0.1,0.02]){run('__drawn=0;P.atk='+atk+';for(const l of ["back","front"])CANAAN_WEAPON_LOOK.draw(__c,game.hero,P,P.x,P.y,l)');assert.ok(run('__drawn')>=1,type+' en attaque '+atk)}
+ }
+ run('P.atk=0');
+ // Le héros se tourne vers sa mire : à droite, à gauche, vers le haut, vers le bas.
+ assert.deepEqual([0,Math.PI,-Math.PI/2,Math.PI/2].map(a=>run('CANAAN_WEAPON_LOOK.faceFromAim('+a+')')),[1,3,2,0]);
+ // Projectiles : flèche orientée pour l'arc, orbe pour le bâton.
+ run('equipment.weapon={id:"b",slot:"weapon",level:1,weaponType:"bow"};refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+200;mouseWorldY=P.y;game.world.projectiles.length=0;useSkill(0)');
+ assert.equal(run('game.world.projectiles.at(-1).kind'),'arrow');
+ run('canaanDrawProjectile(ctx,game.world.projectiles.at(-1));canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"orb"})');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Icônes SVG du jeu et nouveau nom : chaque émoji a son icône, l’interface et le canevas les dessinent, The Legend of Nashi',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const audit=JSON.parse(run('JSON.stringify(CANAAN_ICONS.audit())'));assert.deepEqual(audit.missing,[]);assert.ok(audit.emojis>=160);
+ // Tous les émojis des sources du jeu ont leur icône (sauf les symboles typographiques gardés en texte).
+ const keep=new Set([...'✦✓✔✕★☆☾♪♫➤🜁']);const missing=new Set();
+ const walk=d=>{for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory())walk(p);else if(/\.(js|html|css)$/.test(f.name)&&f.name!=='icons.js')for(const m of fs.readFileSync(p,'utf8').matchAll(/[\u{1F300}-\u{1FAFF}☀-➿⏩-⏺⭐❤❗❓⬇]/gu)){if(!keep.has(m[0])&&!run('CANAAN_ICONS.nameOf('+JSON.stringify(m[0])+')'))missing.add(m[0])}}};
+ walk(path.join(__dirname,'..','src','canaan'));assert.deepEqual([...missing],[],'émojis sans icône');
+ // Interface : un texte avec émoji devient du HTML avec une icône SVG ; une info-bulle native perd l'émoji.
+ assert.match(run('CANAAN_ICONS.html("🎒 Inventaire")'),/^<svg class="ico" viewBox="0 0 24 24"[^>]*>.*<\/svg> Inventaire$/);
+ assert.equal(run('CANAAN_ICONS.strip("⚙️ Paramètres du jeu")'),'Paramètres du jeu');
+ assert.equal(run('CANAAN_ICONS.html("Sans émoji")'),'Sans émoji');
+ // Nouveau nom du jeu (le dossier et le fichier autonome gardent le leur).
+ assert.match(source,/<h1>THE LEGEND OF NASHI<\/h1>/);assert.doesNotMatch(source,/Canaan Online|CANAAN ONLINE/);
+ const pkg=JSON.parse(fs.readFileSync(path.join(__dirname,'..','package.json'),'utf8'));assert.equal(pkg.productName,'The Legend of Nashi');
+ const main=fs.readFileSync(path.join(__dirname,'..','app','main.js'),'utf8');
+ assert.match(main,/title: 'The Legend of Nashi'/);assert.match(main,/function adoptOldData\(\)[\s\S]*'Canaan Online'[\s\S]*cpSync/,'les anciennes sauvegardes sont reprises');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Icônes illustrées, taille des textes et cases carrées : chaque objet a sa vraie icône, polices plus grandes et réglables',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ // Chaque repère ⟦nom⟧ des sources mène à une illustration.
+ const art=new Set(JSON.parse(run('JSON.stringify(Object.keys(CANAAN_ICON_ART))')));const miss=new Set();
+ const walk=d=>{for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory())walk(p);else if(/\.(js|html)$/.test(f.name)&&f.name!=='icon-art.js')for(const m of fs.readFileSync(p,'utf8').matchAll(/⟦([a-z0-9_]+)⟧/g))if(!art.has(m[1]))miss.add(m[1])}};
+ walk(path.join(__dirname,'..','src','canaan'));assert.deepEqual([...miss],[]);
+ // Les objets ont leur propre icône : un Rubis, un emplacement, une statistique, une classe, un poisson, une difficulté.
+ assert.equal(run('RUBIS_CATALOG.every(r=>r.icon==="⟦rubis_"+r.id+"⟧")'),true,'chaque Rubis a son illustration');
+ assert.equal(run('Object.entries(itemIcon).every(([k,v])=>v==="⟦slot_"+k+"⟧"||k==="weapon2")'),true,'emplacements d’équipement');
+ assert.equal(run('Object.entries(WEAPON_DEFINITIONS).every(([k,w])=>w.icon==="⟦w_"+k+"⟧")'),true,'familles d’armes');
+ assert.equal(run('CLASSES.every(c=>c.icon==="⟦cls_"+c.id+"⟧")'),true);
+ assert.match(run('CANAAN_ICONS.html("⟦rubis_phenix⟧ Phénix")'),/^<svg class="ico art" viewBox="0 0 32 32"/);
+ assert.equal(run('CANAAN_ICONS.html("⟦inconnu⟧X")'),'X','un repère inconnu ne s’affiche pas');
+ assert.equal(run('CANAAN_ICONS.strip("⟦slot_helm⟧ Tête")'),'Tête');
+ // Taille des textes : seules les polices grandissent (125 % par défaut, de 100 % à 160 %), l'interface n'est pas zoomée.
+ const css=fs.readdirSync(path.join(__dirname,'..','src','canaan','styles')).map(f=>fs.readFileSync(path.join(__dirname,'..','src','canaan','styles',f),'utf8')).join('\n');
+ assert.doesNotMatch(css,/\bzoom:/,'pas de zoom de l’interface');
+ assert.match(css,/--font-scale: 1\.25;/);
+ assert.deepEqual([...css.matchAll(/font-size:\s*([^;]+);/g)].map(m=>m[1]).filter(v=>/px/.test(v)&&!/--font-scale/.test(v)),[],'chaque police en pixels suit le réglage');
+ run('started=true;openSettings()');assert.equal(run('canaanTextScale()'),1.25);
+ run('settingsStep("textscale",1)');assert.equal(run('canaanTextScale()'),1.4);assert.equal(run('CANAAN_PREFERENCES.read("settings",{}).textScale'),1.4);
+ for(let i=0;i<6;i++)run('settingsStep("textscale",-1)');assert.equal(run('canaanTextScale()'),1);
+ // Sac et personnage : objets en cases carrées, nom dans l'info-bulle.
+ run('renderInventory()');assert.match(run('document.getElementById("window").innerHTML'),/class="bag-sale"[^>]*>🪙<\/button>/);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, poissons, viandes et repas sont des objets du sac',async()=>{
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'shop-buy',index:3,gold:9}),{op:'shop-buy',index:3});assert.equal(n.sanitizeAction({op:'shop-buy',index:99}),null);
+ assert.deepEqual(n.sanitizeAction({op:'sell-stack',token:'fish:gardon:2*30'}),{op:'sell-stack',token:'fish:gardon:2*30'});assert.equal(n.sanitizeAction({op:'sell-stack',token:'gold:x:1*5'}),null);
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;game.hero.level=20;P.gold=10000;game.hero.inventory=[];updateCapacity();toast=()=>{}');
+ // Piles de 100 au plus par case, et elles prennent de la place.
+ run('const h=game.hero;h.prof.fish["gardon:1"]=230;h.prof.meat["lievre:0"]=5;h.prof.meals["soupe:1"]=2;h.rubis.owned.phenix=2;h.rubis.equipped=["phenix",null,null,null,null,null]');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero).map(p=>CANAAN_BAG.token(p)))')),['rubis:phenix:0*1','fish:gardon:1*100','fish:gardon:1*100','fish:gardon:1*30','meat:lievre:0*5','meal:soupe:1*2']);
+ assert.equal(run('canaanBagUsed(game.hero)'),6,'un Rubis équipé n’est plus dans le sac');
+ // Sac plein : un poisson qui demande une nouvelle case est refusé ; un de plus dans une pile entamée passe.
+ run('game.hero.bagLimit=10;BAG_LIMIT=6');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
+ assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);
+ // Le sac (I) montre l'équipement puis les piles ; un repas se mange d'un clic.
+ run('BAG_LIMIT=40;renderInventory()');const inv=run('document.getElementById("window").innerHTML');
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,6);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);
+ // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.
+ run('const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+30;openShop(m)');
+ assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),16);
+ assert.ok(run('CANAAN_SHOP.stock(game.hero).every(i=>i.rarity==="Peu commun"&&i.level===20)'));
+ assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.weaponType||i.slot))])')).length,16);
+ const panel=run('document.getElementById("window").innerHTML');assert.match(panel,/class="shop-panel shop-columns"/);assert.match(panel,/shop-side bag-side/);
+ const want=run('CANAAN_SHOP.stock(game.hero)[2].slot'),gold0=run('P.gold');
+ assert.equal(run('CANAAN_SHOP.buy(game.hero,2)'),true);assert.equal(run('game.hero.inventory.at(-1).slot'),want);assert.equal(run('P.gold'),gold0-run('shopPriceAt(20)'));
+ assert.equal(run('CANAAN_SHOP.stock(game.hero)[2].slot'),want,'remplacé par un objet du même genre');
+ // Vendre une pile.
+ const g1=run('P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);
+ assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),130);assert.equal(run('P.gold'),g1+100*run('CANAAN_BAG.unitPrice({kind:"fish",q:1})'));
+ assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),false,'pas plus que ce qu’on a (30)');
+ // Échange : une pile change de main avec l'équipement ; un sac trop plein annule tout.
+ run('game.mode="host";globalThis.ami=canaanCreateHero({name:"Ami",x:P.x,y:P.y});ami.id="g-ami";ami.peer="p1";ami.local=false;game.heroes.push(ami)');
+ run('CANAAN_TRADE.handle(game.hero,{op:"trade-request",to:"g-ami"});CANAAN_TRADE.handle(ami,{op:"trade-answer",yes:true})');
+ assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
+ assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*6"],gold:0})'),false,'pas plus que la pile');
+ assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
+ run('CANAAN_TRADE.handle(game.hero,{op:"trade-ready",yes:true});CANAAN_TRADE.handle(ami,{op:"trade-ready",yes:true})');
+ assert.equal(run('CANAAN_BAG.count(ami,"meat","lievre",0)'),5);assert.equal(run('CANAAN_BAG.count(ami,"fish","gardon",1)'),30);
+ assert.equal(run('CANAAN_BAG.count(game.hero,"meat","lievre",0)'),0);assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),0);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, sauvegarder ; invisible sauf pour les boss',async()=>{
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'bank-deposit',ref:'fish:gardon:1*30'}),{op:'bank-deposit',ref:'fish:gardon:1*30'});assert.equal(n.sanitizeAction({op:'bank-withdraw',ref:''}),null);
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;toast=()=>{};game.hero.level=20;game.hero.inventory=[];giveGear(20,"normal","Rare");game.hero.prof.fish["gardon:1"]=150');
+ assert.equal(run('CANAAN_BANK.CAPACITY'),500);assert.equal(run('game.world.npcs.filter(n=>n.type==="bank"&&!n.layer).length'),1,'un banquier au camp');
+ const id=run('game.hero.inventory[0].id');
+ assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),false,'loin du banquier');
+ run('const b=game.world.npcs.find(n=>n.type==="bank");P.x=b.x;P.y=b.y+30');
+ assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),true);assert.equal(run('game.hero.inventory.length'),0);
+ assert.equal(run('CANAAN_BANK.deposit(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),50);
+ assert.equal(run('CANAAN_BANK.used(game.hero)'),2);
+ assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*101")'),false);assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*40")'),true);
+ assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),90);assert.equal(run('CANAAN_BANK.of(game.hero).stacks["fish:gardon:1"]'),60);
+ // Sac plein : on ne reprend pas.
+ run('BAG_LIMIT=1;game.hero.bagLimit=1');assert.equal(run('CANAAN_BANK.withdraw(game.hero,'+JSON.stringify(id)+')'),false);run('BAG_LIMIT=40;game.hero.bagLimit=40');
+ assert.equal(run('CANAAN_BANK.withdraw(game.hero,'+JSON.stringify(id)+')'),true);assert.equal(run('game.hero.inventory.length'),1);
+ // Banque pleine : 500 cases au plus.
+ run('CANAAN_BANK.of(game.hero).stacks["meat:lievre:0"]=49900');assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),false,'banque pleine');run('delete CANAAN_BANK.of(game.hero).stacks["meat:lievre:0"]');
+ // Sauvegarde et vérification au chargement.
+ const snap=JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.snapshot().heros.hote.bank)'));assert.deepEqual(snap.stacks,{'fish:gardon:1':60});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.sanitize({items:[{slot:"x"}],stacks:{"fish:gardon:1":5,"or:x:1":3,"meat:lievre:0":-2}}))')),{items:[],stacks:{'fish:gardon:1':5}});
+ run('CANAAN_BANK.open()');assert.match(run('document.getElementById("window").innerHTML'),/class="bank-panel shop-columns"[\s\S]*data-action="bankWithdraw"[\s\S]*data-action="bankDeposit"/);
+ // Voile d'ombre : les monstres ne voient plus l'Assassin (ni ne se tournent vers lui) ; les boss si.
+ run('closePanels();game.hero.classe={id:"assassin",talents:[]};P.mp=300;P.x=150*TS;P.y=150*TS;game.world.instance=null');
+ run('game.world.monsters=[{t:"Loup",x:P.x+150,y:P.y,hp:500,mhp:500,r:14,cd:0,g:0,level:20,_levelHp:true},{t:"Boss",boss:true,x:P.x-150,y:P.y,hp:5000,mhp:5000,r:20,cd:0,g:0,level:20},{t:"Titan",worldBoss:true,x:P.x,y:P.y+160,hp:5000,mhp:5000,r:20,cd:0,g:0,level:20}]');
+ assert.equal(run('CANAAN_CLASS.special()'),true);assert.equal(run('P.veiled'),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(game.world.monsters.map(m=>!!nearestHero(m)))')),[false,true,true]);
+ const x0=run('game.world.monsters[0].x');run('game.world.monsters.splice(1)');for(let i=0;i<120;i++)run('time++;simulateStep()');
+ assert.equal(run('game.world.monsters[0].x'),x0,'le loup ne bouge pas vers le héros invisible');assert.equal(run('game.world.monsters[0].targetHero'),null);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Minage, cueillette et enchanteur : filons et herbes dans chaque biome, enchantement en troisième secondaire ; nouveaux poissons et gibier',async()=>{
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'gather',node:12}),{op:'gather',node:12});
+ assert.deepEqual(n.sanitizeAction({op:'enchant-craft',stat:'crit',tier:2,count:3}),{op:'enchant-craft',stat:'crit',tier:2,count:3});assert.equal(n.sanitizeAction({op:'enchant-craft',stat:'crit',tier:9,count:1}),null);
+ assert.deepEqual(n.sanitizeAction({op:'enchant-apply',token:'ench:crit:2*1',ref:'helm'}),{op:'enchant-apply',token:'ench:crit:2*1',ref:'helm'});
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;toast=()=>{};game.hero.level=30;game.hero.inventory=[];BAG_LIMIT=40;game.hero.bagLimit=40');
+ // Un minerai et une herbe par biome, partout sur l'île, jamais sur une route, au camp ou dans un bâtiment.
+ const zones=JSON.parse(run('JSON.stringify([...new Set(CANAAN_GATHER.nodes().map(n=>n.kind+":"+n.id+":"+n.zone))].sort())'));
+ for(let z=0;z<6;z++){assert.ok(zones.some(k=>k.startsWith('ore:')&&k.endsWith(':'+z)),'minerai du biome '+z);assert.ok(zones.some(k=>k.startsWith('herb:')&&k.endsWith(':'+z)),'herbe du biome '+z)}
+ assert.ok(run('CANAAN_GATHER.nodes().filter(n=>!n.layer).every(n=>tileAt(n.tx,n.ty)!==2&&!isSafe(n.tx,n.ty)&&!canaanRoomAt(n.tx,n.ty)&&canWalk(n.x,n.y))'));
+ // Récolter : le minerai va dans le sac, le filon s'épuise 90 s pour ce héros.
+ run('globalThis.ni=CANAAN_GATHER.nodes().findIndex(x=>x.kind==="ore");const nd=CANAAN_GATHER.nodes()[ni];P.x=nd.x;P.y=nd.y+20');
+ assert.equal(run('CANAAN_GATHER.gather(game.hero,ni)'),true);assert.equal(run('CANAAN_GATHER.gather(game.hero,ni)'),false);
+ assert.ok(run('CANAAN_BAG.tiles(game.hero).some(p=>p.kind==="ore")'));assert.ok(run('game.hero.prof.mining.exp')>0);
+ run('time+=90*60+1');assert.equal(run('CANAAN_GATHER.depleted(game.hero).length'),0,'le filon s’est reformé');
+ // Enchanteur : 3 minerais d'un métal → un enchantement ; rang verrouillé par le niveau.
+ run('game.hero.prof.ore={"fer:1":7};game.hero.prof.enchanting.level=12');
+ assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),false,'loin de la forge');
+ run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y+30}');
+ assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),2);assert.equal(run('game.hero.prof.ore["fer:1"]'),1);
+ assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",4,1)'),false,'pas de pépites d’or');
+ // Niveaux requis : cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25.
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_GATHER.ENCH_LEVEL)')),[1,5,10,15,20,25]);
+ run('game.hero.prof.ore["mithril:0"]=3;game.hero.prof.enchanting.level=24');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 25');
+ run('game.hero.prof.enchanting.level=25');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),true);
+ run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Enchanteur niveau 10 requis pour le fer \(tu es niveau 1\)/);
+ run('closePanels();game.hero.prof.enchanting.level=12');
+ // Poser : l'objet porté gagne une troisième secondaire, comptée dans les statistiques du héros.
+ run('giveGear(30,"normal","Rare");const it=game.hero.inventory.at(-1);globalThis.slot=it.slot;equipItem(it.id)');
+ const before=run('characterStats().secondary.haste');
+ assert.equal(run('CANAAN_GATHER.apply(game.hero,"ench:haste:2*1",slot)'),true);
+ const ench=JSON.parse(run('JSON.stringify(game.hero.equipment[slot].ench)'));assert.equal(ench.stat,'haste');assert.equal(ench.value,run('CANAAN_GATHER.value(game.hero.equipment[slot],2,game.hero)'));assert.ok(ench.value>run('CANAAN_GATHER.value(game.hero.equipment[slot],2)'),'bonus du niveau d’enchanteur');
+ assert.equal(run('Object.keys(itemStats(game.hero.equipment[slot]).secondary).length>=2&&itemStats(game.hero.equipment[slot]).enchant.stat==="haste"'),true);
+ assert.equal(run('characterStats().secondary.haste'),before+ench.value);
+ assert.match(run('CANAAN_STATS_VIEW.tooltip(game.hero.equipment[slot])'),/enchantement/);
+ // Enchantement invalide retiré au chargement.
+ assert.equal(run('JSON.stringify(CANAAN_GATHER.cleanItem({slot:"helm",ench:{stat:"or",value:5,tier:1}}).ench)'),undefined);
+ // Nouveaux poissons, gibier et infusions, avec leurs recettes.
+ assert.ok(['perche','brochet','anguille','merou','raie'].every(f=>run('!!CANAAN_PROF.FISH["'+f+'"]&&!!CANAAN_PROF.RECIPES[CANAAN_PROF.FISH["'+f+'"].recipe]')));
+ assert.ok(['faisan','canard','chevre','lezard'].every(k=>run('!!CANAAN_PROF.GAME["'+k+'"]&&CANAAN_PROF.huntable("'+k+'",false)')));
+ assert.ok(run('Object.keys(CANAAN_GATHER.HERBS).every(h=>Object.values(CANAAN_PROF.RECIPES).some(r=>r.fish===h))'),'chaque herbe a son infusion');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Travaux minutés : miner et cueillir 5 s, forger 10 s à la forge du camp, cuisiner à la cuisinière ; bouger interrompt',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;toast=()=>{};game.hero.level=30;game.hero.inventory=[];BAG_LIMIT=40;game.hero.bagLimit=40;game.world.monsters=[]');
+ assert.ok(run('!!CANAAN_CAMP_LIFE.forge()'),'une forge au camp');assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_CAMP_LIFE.audit().missing)')),[]);
+ // Miner : rien avant 5 s, le minerai à la fin ; l'animation est visible (outil, avancement).
+ run('globalThis.ni=CANAAN_GATHER.nodes().findIndex(x=>x.kind==="ore");{const nd=CANAAN_GATHER.nodes()[ni];P.x=nd.x;P.y=nd.y+20}');
+ assert.equal(run('CANAAN_GATHER.handle(game.hero,{op:"gather",node:ni})'),true);assert.equal(run('CANAAN_GATHER.workOf(game.hero).kind'),'mine');
+ for(let i=0;i<4.8*60;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_BAG.tiles(game.hero).length'),0,'pas avant 5 s');
+ assert.ok(run('CANAAN_GATHER.workView(game.hero).p')>0.9);
+ for(let i=0;i<20;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_BAG.tiles(game.hero).filter(p=>p.kind==="ore").length'),1);assert.equal(run('CANAAN_GATHER.workView(game.hero)'),null);
+ // Cueillir puis bouger : interrompu, rien de récolté.
+ run('globalThis.hi=CANAAN_GATHER.nodes().findIndex(x=>x.kind==="herb");{const nd=CANAAN_GATHER.nodes()[hi];P.x=nd.x;P.y=nd.y+20}');
+ assert.equal(run('CANAAN_GATHER.handle(game.hero,{op:"gather",node:hi})'),true);for(let i=0;i<60;i++)run('time++;simulateStep()');
+ run('P.x+=40');for(let i=0;i<300;i++)run('time++;simulateStep()');
+ assert.equal(run('CANAAN_GATHER.workView(game.hero)'),null);assert.equal(run('CANAAN_BAG.tiles(game.hero).filter(p=>p.kind==="herb").length'),0);
+ // Forger : seulement à la forge, 10 s pour un enchantement.
+ run('game.hero.prof.ore={"cuivre:0":3}');assert.equal(run('CANAAN_GATHER.handle(game.hero,{op:"enchant-craft",stat:"power",tier:0,count:1})'),false);
+ run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y+30}');assert.equal(run('CANAAN_GATHER.handle(game.hero,{op:"enchant-craft",stat:"power",tier:0,count:1})'),true);
+ assert.equal(run('(game.hero.work.until-game.hero.work.start)/60'),10);
+ for(let i=0;i<9.9*60;i++)run('time++;simulateStep()');assert.equal(run('game.hero.prof.ench["power:0"]'),undefined);
+ for(let i=0;i<10;i++)run('time++;simulateStep()');assert.equal(run('game.hero.prof.ench["power:0"]'),1);
+ // Cuisiner : à la cuisinière, le temps de préparer.
+ run('P.x=(CANAAN_ROOMS[2].x+4.5)*TS;P.y=(CANAAN_ROOMS[2].y+3.6)*TS;game.hero.prof.fish={"gardon:0":1}');
+ assert.equal(run('CANAAN_PROF.handle(game.hero,{op:"cook",recipe:"soupe",quality:0,count:1})'),true);assert.equal(run('CANAAN_GATHER.workOf(game.hero).kind'),'cook');
+ for(let i=0;i<6*60+2;i++)run('time++;simulateStep()');assert.equal(run('game.hero.prof.meals["soupe:0"]'),1);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’hôte, récompenses une fois, titres, collections, sauvegarde et réseau',async()=>{
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'ach-title',id:'c3'}),{op:'ach-title',id:'c3'});assert.equal(n.sanitizeAction({op:'ach-title',id:'<b>'}),null);
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ // Cent succès, vingt par catégorie, identifiants uniques, chacun avec sa récompense ; touche Y et bouton du menu.
+ const list=JSON.parse(run('JSON.stringify(CANAAN_ACHIEVEMENTS.LIST.map(a=>({id:a.id,cat:a.cat,r:CANAAN_ACHIEVEMENTS.rewardText(a.reward)})))'));
+ assert.equal(list.length,100);assert.equal(new Set(list.map(a=>a.id)).size,100);assert.ok(list.every(a=>a.r));
+ for(const c of ['combat','explore','eco','magic','defi'])assert.equal(list.filter(a=>a.cat===c).length,20,c);
+ assert.match(source,/data-action="toggleAchievements"[^>]*>.*?menu-shortcut">Y</);assert.match(source,/k === 'y'/);
+ // Bestiaire : monstres du monde, créatures des instances, boss mondiaux, boss d'instance et de l'Arène.
+ assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[31,16,27,12,22,12]');
+ assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Loup"})'),'m:Loup');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"x",worldBoss:true,worldBossId:"fenrir"})'),'w:fenrir');
+ assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Le Roi Sanglant",boss:true})'),'b:Le Roi Sanglant');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Clone",arenaClone:true})'),null);
+ run('started=true;paused=false;game.hero.level=5;game.hero.kills=0;P.gold=0;game.hero.inventory=[];game.hero.equipment.weapon={id:"w",slot:"weapon",level:5,rarity:"Commun",weaponType:"bow"};toast=()=>{}');
+ // Exploits : victoire (espèce, élite, arme), coup (plus gros coup, critiques), roulade, minerai.
+ run('canaanAchieve(game.hero,"hit",globalThis.__m={t:"Loup",elite:true,x:P.x,y:P.y},1234,true);canaanAchieve(game.hero,"kill",__m);canaanAchieve(game.hero,"dodge");canaanAchieve(game.hero,"gather","ore","or",2)');
+ const st=()=>JSON.parse(run('JSON.stringify(game.hero.succes)'));
+ let s=st();assert.deepEqual(s.best['m:Loup'],[1,1,1]);assert.equal(s.s.kills,1);assert.equal(s.s.elites,1);assert.equal(s.s.w_bow,1);
+ assert.equal(s.s.maxHit,1234);assert.equal(s.s.crits,1);assert.equal(s.s.dodges,1);assert.equal(s.s.ores,2);assert.equal(s.s.oreOr,1);
+ // Déblocage au relevé de l'hôte (chaque seconde) : récompense donnée une seule fois.
+ for(let i=0;i<60;i++)run('CanaanStages.achievements.after()');
+ s=st();for(const id of ['c1','c8','p8'])assert.ok(s.done[id],id);assert.ok(!s.done.c2);
+ assert.ok(run('P.gold')>=50+500+400,String(run('P.gold')));
+ // L'or des récompenses compte comme de l'or gagné (Premier pécule) ; ensuite, plus rien ne bouge.
+ for(let i=0;i<180;i++)run('CanaanStages.achievements.after()');
+ const gold=run('P.gold');for(let i=0;i<180;i++)run('CanaanStages.achievements.after()');assert.equal(run('P.gold'),gold,'pas de double récompense');
+ // Ancienne aventure : ses victoires déjà faites comptent (hero.kills).
+ run('game.hero.kills=150');for(let i=0;i<60;i++)run('CanaanStages.achievements.after()');assert.ok(st().done.c2);assert.equal(run('CANAAN_BAG.count(game.hero,"meal","soupe",1)'),5);
+ // Boss d'instance : la victoire compte pour tout le groupe de l'instance.
+ run('globalThis.ally=CANAAN_GROUP.create("Ami");CANAAN_GROUP.join(ally.id);game.world.instance={index:6,group:2};canaanAchieve(game.hero,"kill",{t:"Le Roi Sanglant",boss:true,x:P.x,y:P.y});game.world.instance=null');
+ assert.equal(run('ally.succes.best["b:Le Roi Sanglant"][1]'),1);assert.equal(run('game.hero.succes.best["b:Le Roi Sanglant"][1]'),1);
+ // Découverte : une créature croisée de près entre au bestiaire.
+ run('game.world.monsters=[{t:"Golem",x:P.x+100,y:P.y,hp:10,mhp:10}];CANAAN_ACHIEVEMENTS.sample(game.hero)');assert.deepEqual(st().best['m:Golem'],[1,0,0]);
+ // Titres : seulement ceux des succès débloqués ; affiché au-dessus du héros.
+ assert.equal(run('CANAAN_ACHIEVEMENTS.setTitle(game.hero,"c3")'),false);
+ run('game.hero.kills=1000');for(let i=0;i<60;i++)run('CanaanStages.achievements.after()');
+ assert.equal(run('CANAAN_ACHIEVEMENTS.setTitle(game.hero,"c3")'),true);assert.equal(run('CANAAN_ACHIEVEMENTS.titleOf(game.hero)'),'Le Pourfendeur');
+ // Sauvegarde : carnet vérifié (succès, espèces et titre inconnus retirés) et rechargé.
+ const clean=JSON.parse(run('JSON.stringify(CANAAN_ACHIEVEMENTS.sanitize({done:{c1:5,zz:1},s:{kills:"9",bad:-1,"x y":3},sets:{biomes:[0,0,1],evil:[1]},best:{"m:Loup":[1,"4",2],"m:Dragon":[1,1,1]},title:"c4"}))'));
+ assert.deepEqual(clean,{done:{c1:5},s:{kills:9},sets:{biomes:[0,1]},best:{'m:Loup':[1,4,2]},title:''});
+ run('saveGame()');const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.succes;
+ assert.ok(saved.done.c3);assert.equal(saved.title,'c3');assert.equal(saved.best['m:Golem'][0],1);
+ // Réseau : carnet envoyé à l'invité au plus toutes les 3 s, sauf déblocage.
+ assert.ok(run('CANAAN_ACHIEVEMENTS.netView(ally)'));assert.equal(run('CANAAN_ACHIEVEMENTS.netView(ally)'),undefined);
+ assert.equal(run('CANAAN_ACHIEVEMENTS.handle(ally,{op:"ach-title",id:"c3"})'),false,'pas débloqué par l’allié');
+ // Panneau : succès, bestiaire (silhouettes « ??? » pour l'inconnu) et titres.
+ run('toggleAchievements()');let html=run('document.getElementById("window").innerHTML');assert.match(html,/ach-panel/);assert.match(html,/Le Pourfendeur|Fléau des ténèbres/);
+ run('CANAAN_ACHIEVEMENTS.actions.tab("bestiaire")');html=run('document.getElementById("window").innerHTML');assert.match(html,/beast-card killed/);assert.match(html,/\?\?\?/);assert.match(html,/Fenrir|Pas encore croisée/);
+ run('CANAAN_ACHIEVEMENTS.actions.tab("titres")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Les Tréfonds : monde souterrain sous l’île, quatre biomes, forteresse naine, entrées, créatures à ton niveau, donjons sans niveau requis, sauvegarde et réseau',()=>{
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ // Carte : tout est accessible depuis la forteresse ; quatre biomes, six entrées, quatre donjons et quatre boss.
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_UNDER.audit().unreachable)')),[]);
+ assert.equal(run('CANAAN_UNDER.BIOMES.map(b=>b.name).join()'),'Galeries d’Argile,Cité Engloutie de Khaz-Ombral,Nécropole des Oubliés,Fangeval, le Marais Fongique');
+ assert.equal(run('CANAAN_UNDER.ENTRANCES.length'),6);assert.equal(run('instances.filter(d=>d.under&&d.scaled&&d.level===1).length'),4);
+ assert.equal(run('CANAAN_UNDER.BOSSES.length'),4);assert.equal(run('MOB_TYPES.filter(t=>t.under!==undefined).length'),16);
+ // Entrées : à la surface, sur la terre ferme accessible depuis le camp, et ouvertes juste dessous.
+ assert.equal(run('{const T=CANAAN_WORLD_TOOLS,r=T.reachableFrom(villages[0].x,villages[0].y);CANAAN_UNDER.ENTRANCES.every(e=>r[e.y*MAPW+e.x]===1&&!SOLID.includes(game.world.overworld[e.y][e.x])&&!SOLID.includes(game.world.underworld[e.y][e.x]))}'),true);
+ // Bâtiments abandonnés, cimetières, nains, gisements, bancs, faune et coffres.
+ assert.ok(run('CANAAN_UNDER.structures().length')>=25);assert.ok(run('CANAAN_UNDER.dwarves().length')>=10);
+ assert.ok(run('CANAAN_UNDER.nodes().length')>100);assert.ok(run('CANAAN_UNDER.spots().length')>10);assert.ok(run('CANAAN_UNDER.fauna().ground.length')>50);
+ assert.equal(run('game.world.underdecor.flat().filter(d=>d==="tomb"||d==="cross").length>20&&game.world.underdecor.flat().includes("deadtree")'),true);
+ // Descente : tout le groupe passe dans les Tréfonds ; créatures du biome au niveau du héros, boss mondiaux à son niveau.
+ run('started=true;paused=false;game.hero.level=33;recomputeStats();P.hp=P.mhp;const e=CANAAN_UNDER.ENTRANCES[0];P.x=(e.x+.5)*TS;P.y=(e.y+1.5)*TS;interact()');
+ assert.equal(run('game.world.layer'),'under');assert.equal(run('game.world.tiles===game.world.underworld'),true);assert.equal(run('canWalk(P.x,P.y)'),true);
+ const mobs=JSON.parse(run('JSON.stringify(game.world.monsters.filter(m=>!m.worldBoss).map(m=>[MOB_TYPES.find(t=>t.name===m.t)?.under,m.level]))'));
+ assert.ok(mobs.length>5&&mobs.every(([u,l])=>u!==undefined&&l>=32&&l<=34),JSON.stringify(mobs));
+ assert.equal(run('game.world.monsters.filter(m=>m.worldBoss&&m.level===33&&m.worldBossId.startsWith("u_")).length'),4);
+ assert.equal(run('CANAAN_UNDER.BIOMES.some(b=>b.name===currentZoneName())'),true);
+ // Rien de la surface ici : ni ses gisements, ni ses animaux, ni ses coffres.
+ assert.equal(run('CANAAN_GATHER.nodes().filter(n=>!n.layer).every(n=>!canaanHere(n))&&CANAAN_LIFE.animals().filter(a=>a.layer==="under").every(a=>canaanHere(a))&&canaanSecretChests()===CANAAN_UNDER.chests()'),true);
+ // Forteresse de Durgrim : zone sûre, marchand et banquière nains, forge et âtre pour les métiers, nains qui parlent.
+ run('{const f=CANAAN_UNDER.spawnPoint();P.x=f.x;P.y=f.y}');assert.equal(run('isSafe(P.x/TS,P.y/TS)&&currentZoneName()==="Forteresse de Durgrim"'),true);
+ run('{const n=game.world.npcs.find(n=>n.type==="shop"&&n.dwarf);P.x=n.x;P.y=n.y+40}');assert.equal(run('nearMerchant()'),true);
+ run('{const n=game.world.npcs.find(n=>n.type==="bank"&&n.dwarf);P.x=n.x;P.y=n.y+40}');assert.equal(run('CANAAN_BANK.nearBanker()'),true);
+ run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y}');assert.equal(run('CANAAN_GATHER.nearForge(game.hero)'),true);
+ run('{const d=game.world.npcs.find(n=>n.type==="dwarf"&&n.dwarf.role==="roi");P.x=d.x;P.y=d.y+40;closePanels();interact();globalThis.__king=d}');assert.match(run('__king.dwarf.bubble.text'),/Durgrim/);
+ // Gisement des Tréfonds : minerai rare, qui se vend plus cher.
+ const node=run('CANAAN_GATHER.nodes().findIndex(n=>n.layer==="under"&&n.kind==="ore"&&CANAAN_GATHER.ORES[n.id].rare)');assert.ok(node>=0);
+ run('{const n=CANAAN_GATHER.nodes()['+node+'];P.x=n.x;P.y=n.y+30;game.hero.inventory=[];CANAAN_GATHER.gather(game.hero,'+node+')}');
+ assert.ok(run('Object.keys(game.hero.prof.ore).some(k=>CANAAN_GATHER.ORES[k.split(":")[0]].rare)'));
+ assert.ok(run('CANAAN_BAG.unitPrice({kind:"ore",id:"geode",q:0,n:1})')>run('CANAAN_BAG.unitPrice({kind:"ore",id:"fer",q:0,n:1})'));
+ // Donjon des Tréfonds : aucun niveau requis, ennemis au niveau du groupe, butin du niveau du héros (Peu commun ou Rare).
+ run('game.hero.level=17;recomputeStats()');const i=run('instances.findIndex(d=>d.under)');
+ run('enterInstance('+i+')');assert.equal(run('game.world.instance.scaledLevel'),17);assert.equal(run('canaanMobLevel(game.world.monsters.find(m=>m.boss))'),18);
+ const loot=new Set();for(let k=0;k<40;k++){run('game.hero.inventory=[];dropTierGear('+i+')');const it=run('game.hero.inventory[0]');assert.equal(it.level,17);loot.add(it.rarity)}
+ assert.deepEqual([...loot].sort(),['Peu commun','Rare']);
+ run('leaveInstance()');assert.equal(run('game.world.layer+":"+(game.world.tiles===game.world.underworld)'),'under:true');
+ // Sauvegarde : on reprend dans les Tréfonds.
+ run('{const f=CANAAN_UNDER.spawnPoint();P.x=f.x;P.y=f.y;saveGame()}');
+ assert.equal(JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).monde.couche,'under');
+ run('CANAAN_UNDER.setLayer("surface");CANAAN_PERSISTENCE.load()');assert.equal(run('game.world.layer'),'under');assert.equal(run('canWalk(P.x,P.y)'),true);
+ // Réseau : l'hôte annonce la couche ; un invité bascule sur les Tréfonds générés à l'identique.
+ assert.equal(run('CANAAN_NET.snapshot?CANAAN_NET.snapshot().map.layer:"under"'),'under');
+ // Remontée : par n'importe quelle entrée, retour sur l'île.
+ run('{const e=CANAAN_UNDER.ENTRANCES[3];P.x=(e.x+.5)*TS;P.y=(e.y+1.5)*TS;closePanels();interact()}');
+ assert.equal(run('game.world.layer'),'surface');assert.equal(run('game.world.tiles===game.world.overworld&&canWalk(P.x,P.y)'),true);
+ assert.equal(errors.length,0,errors.join('\n'));
 });

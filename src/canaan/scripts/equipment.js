@@ -58,7 +58,7 @@
     const item = hero.equipment[slot];
     if (!item) return false;
     if (hero === game.hero) updateCapacity();
-    if (hero.inventory.length >= canaanBagLimit(hero)) {
+    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       canaanLootNotice(hero, '🎒 Sac plein ! Vends un objet au marchand.');
       return false;
     }
@@ -139,7 +139,7 @@
       return false;
     }
     if (
-      rarityInfo(item).mult >= rarityInfo({ rarity: 'Héroïque' }).mult &&
+      rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult &&
       !confirm(
         'Vendre ' +
           gearDisplayName(item) +

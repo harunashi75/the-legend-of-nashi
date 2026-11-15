@@ -1,4 +1,4 @@
-# CANAAN Online
+# The Legend of Nashi
 
 Les sources modifiables sont dans `src/canaan/` : JavaScript par système dans `scripts/`, CSS dans `styles/`, structure HTML dans `template.html`. `manifest.json` répertorie les modules dans leur ordre d’exécution, identique à celui du template.
 
@@ -102,7 +102,16 @@ Le garde, un villageois, un enfant et un voyageur restent dehors, autour du feu 
 
 ## Métiers : pêche et cuisine (touche P)
 
-`scripts/professions.js`. Deux métiers, niveaux 1 à 40 ; chaque qualité (les mêmes que l'équipement) se débloque à un niveau : Commun 1, Peu commun 5, Rare 10, Épique 15, Héroïque 20, Légendaire 25, Mythique 30, Céleste 35.
+**Minage, cueillette et enchanteur** (`gathering.js`, `CANAAN_GATHER`) : trois métiers de plus, avec leur niveau (1 à 40) et leurs qualités comme la pêche.
+- **Minage** : des filons (rochers aux éclats colorés) sur toute l’île, un métal par biome : cuivre (Plaines), étain (Forêt ancienne), fer (Marais), argent (Forêt automnale), or (Désert), mithril (Forêt enchantée). E près d’un filon : 1 à 3 minerais.
+- **Cueillette** : une herbe par biome (menthe sauvage, sauge des bois, mousse des brumes, ortie rousse, aloès des sables, lys étoilé), cuisinée en infusions (onglet Cuisine).
+- **Travaux minutés** : miner et cueillir prennent 5 s (outil en main, coups réguliers, éclats de roche ou feuilles, barre d’avancement ; le filon tremble et se fissure peu à peu). Fabriquer un enchantement prend 10 s à la **forge du Camp de l’Aurore** (fourneau et enclume, à l’est du feu de camp ; 2 s de plus par enchantement en série) et ne se fait nulle part ailleurs. Cuisiner prend 6 s près d’une cuisinière (La Marmite dorée, un refuge ou sa maison). Bouger interrompt le travail. L’hôte mène les travaux (`hero.work`) ; un invité voit le sien (avec sa pêche en cours) et ceux des autres (`act` dans l’état des héros).
+- Un gisement récolté se reforme au bout de 90 s pour ce héros (chacun récolte les siens) ; il apparaît vide en attendant. Positions identiques chez chacun, jamais sur une route, au camp, dans un bâtiment ou sur un lieu de quête.
+- **Enchanteur** : 3 minerais d’un même métal donnent un enchantement d’une statistique secondaire au choix (Puissance, Critique, Célérité, Maîtrise, Soin, Résistance). Le métal fixe sa force (16 % à 40 % de la base de l’objet, comme une secondaire) ; chaque métal demande un niveau d’enchanteur (cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25), et le niveau d’enchanteur de celui qui pose l’enchantement le renforce aussi de 1 % par niveau (jusqu’à +40 %). Chaque recette indique clairement ce qui manque (niveau, minerais, forge). Posé sur une pièce d’équipement (sauf un artefact), il lui ajoute cette statistique en **troisième secondaire** (`item.ench`, compté dans les statistiques et affiché dans l’info-bulle) ; un nouvel enchantement remplace l’ancien. Un clic sur un enchantement du sac ouvre l’onglet Enchantement pour choisir la pièce.
+- Minerais, herbes et enchantements sont des objets du sac et de la banque (piles de 100). Actions de l’invité : `gather`, `enchant-craft`, `enchant-apply`.
+- **Nouveaux poissons** : perche, brochet, anguille, mérou, raie ; **nouveau gibier** : faisan, canard colvert, chèvre des sables, lézard des dunes ; chacun avec sa recette.
+
+`scripts/professions.js`. Deux métiers, niveaux 1 à 40 ; chaque qualité (les mêmes que l'équipement) se débloque à un niveau : Commun 1, Peu commun 6, Rare 12, Épique 20, Légendaire 28, Mythique 35 (les anciennes sauvegardes à huit qualités sont converties une fois : Héroïque → Épique, Céleste → Mythique).
 
 - **Pêche** : dans l'eau profonde seulement (mer, lacs, lacs scintillants ; pas l'eau peu profonde du marais), près d'un banc de poissons (remous, petits poissons qui sautent). **E** lance la ligne ; quand ça mord ❗, **E** ferre (sinon le poisson s'échappe ; bouger remonte la ligne). Espèces : mer (saumon, thon, espadon), lacs selon le biome (gardon, carpe, truite), oasis (silure), lacs scintillants (poisson-lune astral). La qualité dépend du niveau de pêche.
 - **Cuisine** : près d'une cuisinière, d'une marmite ou d'une cheminée : à La Marmite dorée (Camp de l'Aurore), dans les refuges, ou dans sa maison si on y en a posé une. Un poisson donne un repas de sa recette ; qualité du repas = celle du poisson, plafonnée par le niveau de cuisine.
@@ -176,11 +185,10 @@ npm run relay    # relais sur ws://localhost:8787 (variable PORT pour changer de
 - Le protocole est dans `src/canaan/shared/net/messages.js`, partagé par le relais et le jeu ; le client est `scripts/net.js` (`canaan-net`).
 - **Place réservée** (phase 6) : si la connexion d’un invité tombe, son héros reste dans le groupe pendant 2 minutes, immobile et protégé : aucun monstre ne le vise, aucun coup ne le blesse, il ne compte pas dans l’Arène. Il apparaît en transparence avec « ⏳ » ; le panneau Groupe montre le temps restant. L’application de l’invité retient le dernier code de salon : il rouvre le jeu, clique sur « Rejoindre », et reprend son héros là où il était. Si l’ancienne connexion n’est pas encore fermée chez l’hôte (le relais met jusqu’à 30 s à s’en rendre compte), la nouvelle la remplace. Sans retour dans les 2 minutes, le héros quitte le groupe ; il reste enregistré dans l’aventure.
 - **Jalon de la phase 6** : un hôte et trois invités en ligne finissent le donjon 1 ensemble, chacun avec sa relique dans son propre sac et sa bourse d’or. Chaque invité envoie lui-même ses intentions par le relais. L’hôte envoie environ 17 Ko/s à quatre joueurs (état du monde et trois messages privés, 10 fois par seconde).
-- **Jouer sur Internet avec Pinggy** (application de bureau) : dans le panneau 👥 Groupe, **🌍 Jouer sur Internet**. L’application lance le relais chez l’hôte (`app/hosting.js`, sur `127.0.0.1` seulement : invisible depuis le réseau) et ouvre un tunnel Pinggy avec le client `ssh` du système (déjà présent sur Windows 10/11, Linux et macOS : rien à installer). Le panneau affiche le **lien du relais** (`wss://…pinggy.link`) et le **code du salon** ; **📋 Copier l’invitation** met les deux dans le presse-papiers. L’invité colle l’invitation dans « Invitation reçue » sur l’écran titre : le relais et le code se remplissent tout seuls. Une adresse collée sans `wss://` ou en `https://` est corrigée (`normalizeRelayUrl`).
-  - **Pinggy gratuit** : le tunnel se ferme au bout de 60 minutes et le lien change. Le panneau affiche le temps restant puis **🔁 Rouvrir le tunnel** : le salon et son code restent les mêmes (le relais local continue), seul le lien change ; les invités ont 2 minutes de place réservée pour revenir avec le nouveau lien.
-  - **Pinggy Pro** : dans « Abonnement Pinggy (facultatif) », colle ton jeton : l’adresse devient fixe et le tunnel n’expire plus. Le type de tunnel est HTTPS (`wss://`, conseillé) ou TCP (`ws://…:port`) si un réseau bloque le premier.
-  - En quittant l’application, le tunnel et le relais s’arrêtent. Sans réponse de Pinggy en 25 s, ou si `ssh` est introuvable, le panneau l’explique.
-- **Jouer en réseau local** (application de bureau) : **🏠 Jouer en réseau local** dans le même panneau, pour quelqu’un chez toi, sans Internet ni Pinggy. L’application ouvre le relais aux appareils de la maison (port 8787, ou 8788 à 8791 s’il est pris), trouve l’adresse de ce PC sur le réseau (`ws://192.168.x.x:8787`, adresses privées en premier) et l’affiche avec le code ; l’invitation se copie et se colle comme pour Pinggy. Si l’invité n’arrive pas à se connecter, le panneau rappelle d’autoriser le port dans le pare-feu (Windows le propose à la première ouverture ; Ubuntu : `sudo ufw allow 8787/tcp`).
+- **Jouer avec Tailscale** (application de bureau, ami loin) : installez tous les deux [Tailscale](https://tailscale.com/download) (gratuit), connectez-vous, et mettez-vous dans le même réseau Tailscale (l’hôte invite son ami depuis la console Tailscale, ou partage sa machine avec lui). Dans le panneau 👥 Groupe, **🌍 Jouer avec Tailscale** : l’application lance le relais chez l’hôte (`app/hosting.js`) sur son **adresse Tailscale seulement** (`ws://100.x.y.z:8787`, port 8788 à 8791 si pris) : invisible depuis Internet et depuis le réseau de la maison. Le panneau affiche l’adresse, le nom MagicDNS (`…ts.net`) et le **code du salon** ; **📋 Copier l’invitation** met les deux dans le presse-papiers, l’invité la colle dans « Invitation reçue » sur l’écran titre. Pas de tunnel, pas de limite de temps, l’adresse ne change pas.
+  - Si Tailscale n’est pas installé, arrêté ou pas connecté, le panneau le dit. Sous Linux, si un pare-feu est actif, le panneau donne la commande à lancer une fois (firewalld : `sudo firewall-cmd --permanent --zone=trusted --add-interface=tailscale0 && sudo firewall-cmd --reload` ; ufw : `sudo ufw allow in on tailscale0 to any port 8787 proto tcp`).
+  - « Relais injoignable » chez l’invité avec une adresse Tailscale : son Tailscale doit être lancé et connecté, et il doit voir la machine de l’hôte dans sa liste Tailscale.
+- **Jouer en réseau local** (application de bureau) : **🏠 Jouer en réseau local** dans le même panneau, pour quelqu’un chez toi, sans Internet ni Tailscale. L’application ouvre le relais aux appareils de la maison (port 8787, ou 8788 à 8791 s’il est pris), trouve l’adresse de ce PC sur le réseau (`ws://192.168.x.x:8787`, adresses privées en premier) et l’affiche avec le code ; l’invitation se copie et se colle comme pour Tailscale. Si l’invité n’arrive pas à se connecter, le panneau rappelle d’autoriser le port dans le pare-feu (Windows le propose à la première ouverture ; Ubuntu : `sudo ufw allow 8787/tcp`).
   - Pour un relais permanent (par exemple sur un serveur), `npm run relay` reste disponible ; tout le monde met alors son adresse dans « Relais ».
 
 ## Groupe (phase 3 du coopératif)
@@ -196,7 +204,7 @@ Le panneau **👥 Groupe** (touche **G**, ou le bouton du menu) gère les héros
 
 ## Application de bureau
 
-Canaan Online s’installe comme une application de bureau avec Electron (`app/`). La fenêtre affiche le même HTML assemblé que la version de test ; il n’y a plus besoin de navigateur.
+The Legend of Nashi s’installe comme une application de bureau avec Electron (`app/`). La fenêtre affiche le même HTML assemblé que la version de test ; il n’y a plus besoin de navigateur.
 
 ```sh
 npm install      # une seule fois : installe Electron (version épinglée dans package.json)
@@ -207,7 +215,7 @@ npm run app      # ouvre la fenêtre sans réassembler
 - `app/main.js` crée la fenêtre et charge le HTML dont le nom suit la version de `runtime-config.js`. F11 bascule en plein écran ; F12 ouvre les outils de développement, hors version installée.
 - La fenêtre est isolée : pas d’accès à Node.js pour le jeu, aucune navigation ni nouvelle fenêtre, aucune autorisation (caméra, micro…).
 - `tools/run_app.cjs` lance Electron en retirant `ELECTRON_RUN_AS_NODE`, que certains terminaux (celui de VS Code, par exemple) définissent et qui ferait démarrer Electron comme un simple Node.
-- Les données de l’application sont dans `~/.config/Canaan Online` sous Linux (dossier de données propre à chaque utilisateur).
+- Les données de l’application sont dans `~/.config/The Legend of Nashi` sous Linux (dossier de données propre à chaque utilisateur). Au premier lancement, les sauvegardes et réglages de l’ancien dossier `~/.config/Canaan Online` y sont copiés (l’ancien dossier n’est pas modifié).
 - **Trois aventures** (slots) sur l’écran titre : Continuer, Nouvelle aventure (avec un nom) ou Supprimer, avec une confirmation qui liste les héros invités perdus. Dans l’application, chaque aventure est un fichier `saves/slot-1.json` à `slot-3.json` du dossier de données, avec un bouton « Ouvrir le dossier des sauvegardes ». Le build HTML garde les mêmes trois slots dans le stockage du navigateur. Détails dans [docs/SAVES.md](docs/SAVES.md).
 
 ## Le monde : une île, six biomes
@@ -283,6 +291,8 @@ Chaque instance a son propre décor, construit par `dungeons.js` (`canaan-dungeo
 Les boss d’instance ont des sprites en grand format, une aura et une barre de vie en haut de l’écran, avec la progression du raid (« Boss 2/3 ») et la difficulté. L’obscurité dépend du thème : torches, braseros, cristaux et lave éclairent les salles, et le héros porte sa propre lumière. Les cases d’instance sont 19 (herse), 20 (sol), 21 (chemin : tapis, rails, runes ou grille) et 22 (danger infranchissable : lave, gouffre, eau, sang, vide ou nuages). Les noms des boss sont dans `instances[].bosses` ; `boss` reste le boss final. `CANAAN_DUNGEON_AUDIT(i)` vérifie qu’une instance est entièrement accessible une fois les herses levées, et qu’aucun boss suivant n’est accessible tant que la première herse est fermée.
 
 
+**Robustesse des instances** : un monstre de donjon ou de raid a 25 % de PV de plus que dehors et frappe 50 % plus fort ; une élite d’instance a 1,6× les PV d’un monstre (×2,4 dehors). Un boss a 12× (donjon) ou 14× (raid) les PV d’un monstre de son niveau et frappe 1,9× (donjon) ou 2,1× (raid) plus fort : seul, un boss dure environ 45 s. Mécaniques (`boss-mechanics.js`) : onde de choc sous un héros toutes les 7 s (5 s en raid), pluie d’éclats sur chaque héros proche toutes les 13 s (9 s en raid), renforts à 66 % et à 33 % de PV (2 monstres, 3 en raid), rage sous 25 % (+25 % de dégâts, frappes plus rapides). Seuls les héros dans un cercle au moment de l’explosion sont touchés.
+
 **Difficulté selon le nombre de joueurs (phase 6)** : à l’entrée d’un donjon ou d’un raid, le nombre de héros du groupe (1 à 4, compagnons locaux compris) est retenu dans `instance.group`. Les PV des ennemis et des boss et les dégâts des ennemis suivent la même table que l’Arène (`canaanGroupScale()` : PV ×1 / ×1,7 / ×2,4 / ×3,1, dégâts ×1 / ×1 / ×1,05 / ×1,1), en plus de la difficulté choisie. Le monde ouvert ne change pas.
 ## Arène des Épreuves et Rubis
 
@@ -311,7 +321,7 @@ Une tentative enchaîne 12 vagues, avec un boss par vague :
 | 11 | Nihil, l’Avatar du Néant | Téléportations, échos qui tirent, spirale d’orbes, flaques du Néant ; phase 2 |
 | 12 | Aurelion, le Souverain des Épreuves | Trois phases : l’épée, la magie céleste, puis les deux combinées |
 
-Le boss de référence a 8 500 PV et un coup de base de 62, multipliés par vague selon le document de conception (PV ×1 à ×5, dégâts ×1 à ×2,5 : `CANAAN_ARENA.hpMult` et `dmgMult`). Leur cadence s’accélère aussi de vague en vague : l’intervalle entre deux attaques est multiplié par `CANAAN_ARENA.tempo(vague)`, de ×1 à ×0,76 à la vague 12 ; les annonces au sol gardent leur durée. Les dégâts directs passent par la défense, la Déviation et les Rubis ; les saignements, brûlures et sols dangereux ne sont réduits que par la Défense. La vague 12 donne en plus un Rubis au choix parmi ceux qui manquent ; si la collection est complète, 2 500 or. Les records sont sauvegardés : meilleure vague, tentatives, arène terminée, dernier boss vaincu.
+Le boss de référence a 15 000 PV (relevés avec les nouvelles attaques de base et compétences) et un coup de base de 62, multipliés par vague selon le document de conception (PV ×1 à ×5, dégâts ×1 à ×2,5 : `CANAAN_ARENA.hpMult` et `dmgMult`). Leur cadence s’accélère aussi de vague en vague : l’intervalle entre deux attaques est multiplié par `CANAAN_ARENA.tempo(vague)`, de ×1 à ×0,76 à la vague 12 ; les annonces au sol gardent leur durée. Les dégâts directs passent par la défense, la Déviation et les Rubis ; les saignements, brûlures et sols dangereux ne sont réduits que par la Défense. La vague 12 donne en plus un Rubis au choix parmi ceux qui manquent ; si la collection est complète, 2 500 or. Les records sont sauvegardés : meilleure vague, tentatives, arène terminée, dernier boss vaincu.
 
 **Arène à plusieurs (phase 6)** : tout le groupe entre avec l’hôte, et chaque héros compte sa tentative. Le boss s’adapte au nombre de héros dans le colisée à son arrivée (`ARENA_GROUP`, `CANAAN_ARENA.run().group`) :
 
@@ -350,6 +360,47 @@ Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île
 - **Lieux** : posés après la génération de l’île (`CANAAN_WORLD_TOOLS`), dans leur zone, loin des portails, boss et coffres, sans couper les routes ; une île régénérée les reçoit à l’identique. Socles, haies et nénuphars passent par `canaanQuestWalk` (praticable, bloqué ou règle normale).
 - **Sauvegarde** : `quetes` pour chaque héros (hôte et invités), `monde.quetes` pour le monde (voir docs/SAVES.md).
 
+## Les Tréfonds de Canaan (monde souterrain)
+
+`scripts/underground.js` (`CANAAN_UNDER`) : une seconde carte **sous toute l’île**, aux mêmes coordonnées (`game.world.underworld` / `underdecor`, couche `game.world.layer` : `'surface'` ou `'under'`), générée de façon déterministe chez chacun après l’île. Graphismes faits avec les pinceaux des donjons (`CANAAN_TILE_KIT` : sols, parois, objets) ; obscurité, lumières et particules propres à chaque biome.
+
+- **Quatre biomes** en couronne : **Galeries d’Argile** (terre battue, rivières de boue, racines, cabanes et puits de mine abandonnés), **Cité Engloutie de Khaz-Ombral** (rues dallées, maisons et tours naines effondrées, statues, lacs noirs), **Nécropole des Oubliés** (cimetières clôturés, tombes, croix, arbres morts, mausolées, cryptes, brume verte), **Fangeval, le Marais Fongique** (boue, champignons géants luisants, spores, lacs troubles). Tuiles 40 à 49 (43 rivière de boue, 44 paroi, 48 lac, 49 gouffre sont solides) ; ponts de planches sur l’eau.
+- **Forteresse de Durgrim** (zone sûre, au centre, sous le massif) : nains des cavernes — le roi Thrain, Borin le marchand, Gimra la banquière, Hilda la forgeronne (la forge sert aux enchantements), Dorn le tavernier (l’âtre sert à cuisiner), gardes, mineurs, ancienne, enfant, et un éclaireur au cœur de chaque biome. Touche E : parler (bulle), commercer, banque. On s’y relève après une chute dans les Tréfonds.
+- **Six entrées** à la surface (une par biome de l’île, près de la route ; marquées sur les cartes) : touche E pour descendre ou remonter, tout le groupe ensemble (l’hôte décide).
+- **Créatures** : 16 nouvelles (4 par biome, dont insectes : scarabée foreur, mille-pattes, moustique), élites (7 %), au **niveau du héros**. **Boss mondiaux** : Gorgrath (Galeries), le Gardien d’Argent (Cité), Morvane la Reine-Liche (Nécropole), Sporemère (Fangeval), au niveau du groupe, chacun dans son repaire (butin Rare comme les autres boss mondiaux).
+- **Faune** chassable (taupe, salamandre, crapaud) et insectes d’ambiance (lucioles, chauves-souris, mouches, spores). **Métiers** : minerais rares (fer noir, quartz, obsidienne, géode : vendus 3 à 5 fois plus cher, pas d’enchantement) et métaux de l’île ; herbes (racine de pierre, lichen, pavot funèbre, champignon luisant) ; poissons des lacs (aveugle, lanterne, murène, silure fangeux) ; dix nouvelles recettes. 16 coffres secrets (objet Commun du niveau du héros).
+- **Quatre donjons** (instances 10 à 13, `under` et `scaled`) : la Mine Effondrée de Durgrim, les Halls Engloutis de Khaz-Ombral, la Crypte des Mille Tombes, les Tréfonds Fongiques. **Aucun niveau requis** ; ennemis au niveau du héros le plus fort du groupe (`instance.scaledLevel`) ; coffre : objet **Peu commun**, ou **Rare** une fois sur trois environ (`PRESTIGE_DROPS.underground`), du niveau de chaque héros. On ressort dans les Tréfonds (`returnLayer`).
+- **Sauvegarde** : `monde.couche` ; **réseau** : `map.layer` dans l’état de l’hôte, l’invité bascule sur la même carte. Carte M et mini-carte dédiées ; musique et sons de caverne par biome.
+
+## Succès et collections (touche Y)
+
+`scripts/achievements.js` (`CANAAN_ACHIEVEMENTS`) : **cent succès** en cinq catégories de vingt (Combat & armes, Exploration & aventure, Économie & métiers, Magie, Rubis & progression, Défis & Arène), adaptés au jeu à partir d’une liste d’idées : victoires (1 à 10 000, élites, chaque famille d’arme), plus gros coup et critiques, roulades, compétences et sort de classe, Rubis Phénix, boss mondial en moins de 30 s ; distance à pied (une case = 1 m), six régions, coffres secrets, portails, régions trop fortes, chutes, boss mondiaux découverts, quêtes et fin de l’histoire ; or gagné, sac de 100 places, ventes, banque, minage, cueillette, recettes, repas Mythique, collection des poissons, chasse, enchantements, échange ; niveaux 10/30/60, Rubis (collection, six de la même famille), classe et ses cinq talents, quatre classes jouées, objets Légendaire et Mythique, panoplies Épique et Mythique ; Arène (première tentative, vague 6, victoire), Raid 4 Héroïque, boss d’instance précis, Avatar du Jugement en moins de 3 min, donjon seul sans tomber, PV sous 5 % à la mort d’un boss, instance en moins de 5 min, tous les donjons et raids, 1 000 000 de dégâts subis, bestiaire complet, 99 succès, puis **La Légende de Nashi** (tous).
+
+- **Récompenses** (une seule fois) : or, part d’un niveau d’XP, objet Rare ou Épique du niveau du héros (jamais Légendaire ni Mythique : ils restent réservés au Raid 4 Héroïque et à l’Arène), Rubis qui manque, repas ou matériaux dans le sac, et **titres**. Chaque succès vaut des points (5 à 100).
+- **Titres** (onglet Titres) : un titre débloqué se choisit et s’affiche entre guillemets au-dessus du personnage, pour tout le groupe ; la Légende de Nashi donne aussi une **aura dorée**.
+- **Bestiaire** (onglet Bestiaire) : 89 créatures, avec leur vrai sprite (`canaanActorPortrait`) : les 31 monstres du monde, les 20 créatures des donjons et raids, les 8 boss mondiaux, les 18 boss de donjon et de raid, les 12 boss de l’Arène. Une créature croisée de près est **découverte** ; vaincue, elle montre le nombre de victoires (et d’élites). Une inconnue reste une silhouette « ??? ».
+- **Bandeau doré** à chaque succès débloqué (un récapitulatif quand une ancienne aventure en débloque beaucoup d’un coup : ses victoires, niveaux, quêtes, Rubis, objets et métiers comptent tout de suite).
+- **Règles** : l’hôte compte tout (événements `canaanAchieve(hero, type, …)` posés dans les combats, les métiers, les coffres, les ventes, l’échange, et un relevé chaque seconde dans l’étape `achievements` du pipeline). Une victoire sur un boss compte pour tout le groupe de l’instance (ou les héros tout près dehors). Le carnet de chaque héros (`hero.succes` : `done`, `s`, `sets`, `best`, `title`) est vérifié et sauvegardé avec lui (invités compris) ; un invité reçoit le sien dans son message privé (`ach`, au plus toutes les 3 s sauf déblocage), voit les titres des autres (`ttl`, `aur`) et choisit le sien (action `ach-title`).
+
+## Attaques et compétences d’armes
+
+- **Attaques de base** : clic gauche rapide (75 % de la Puissance, toutes les 0,55 s) et clic droit lourd (160 %, toutes les 1,15 s), sans mana. La Puissance magique du bâton est la même que la Puissance d’attaque.
+- **Compétences** (`shared/data/equipment.js`, `scripts/weapon-actions.js`) : chacune a dans le catalogue sa recharge, son mana, sa puissance (dégâts totaux sur une cible, en multiple de la Puissance) et une explication. Une compétence fait environ 2 à 3 fois une attaque de base pour la première, 4,5 à 6 fois pour la quatrième ; les postures servent vraiment : Élan offensif (attaques de base 30 % plus rapides, +15 %), Rage du berserker (+25 %, attaques de base comprises), Pas de l’ombre (prochain coup +60 %), Concentration (prochaine compétence offensive +40 %, jamais gaspillée par une attaque de base).
+- **Info-bulle** (survol d’une case, `canaanSkillTooltip`) : ce que fait la compétence, les dégâts estimés avec ta Puissance actuelle, recharge et mana, l’empreinte de ta classe et l’état en cours. La case du sort spécial (F) a aussi la sienne.
+- **Badges de la barre** (`canaanUpdateSkillBadges`) : une posture affiche ses secondes restantes, un bonus prêt fait briller la compétence qui en profite (Riposte après Parade, Assaut final en combo, Tir puissant après un Repli). Les **charges arcaniques** du bâton (0 à 3) sont affichées sur la Surcharge et par trois pastilles sous le héros ; un invité reçoit ses postures et charges de l’hôte.
+
+- **Armes en main** (`weapon-look.js`, `CANAAN_WEAPON_LOOK`) : chaque héros porte sa vraie arme, dessinée en pixels et tournée vers sa mire, derrière le corps quand il vise vers le haut. Animations d’attaque : taille en arc avec traînée (épée, hache, masse), double taille croisée (épées doubles), estocs alternés (dagues), recul puis estoc (lance), corde tirée avec flèche encochée puis relâchée (arc), coup de bouclier (égide), poussée et éclat de l’orbe (bâton). Le héros regarde sa mire à l’arrêt et pendant une attaque. L’hôte envoie l’arme et la visée de chacun (`wpn`, `aim`) : chaque joueur voit les armes des autres. Il n’y a plus de cercle autour du héros à chaque attaque : seule la direction visée compte.
+- **Effets** : la taille balaie le cône réellement touché (croissant lumineux sur un voile léger), les zones s’élargissent en onde, les rayons sont effilés avec un cœur blanc, chaque coup qui porte fait jaillir une étincelle sur la cible. Les flèches volent orientées avec leur empennage ; les sorts du bâton sont des orbes avec un sillage.
+- **Icônes** (`skill-icons.js`, `CANAAN_SKILL_ICONS`) : les 36 compétences et les 4 sorts de classe ont chacun leur icône SVG dessinée en code, dans la barre et dans l’info-bulle.
+- **Icônes illustrées** (`icon-art.js`, `CANAAN_ICON_ART`, 122 icônes en 32 × 32) : chaque objet a une icône dessinée pour ce qu’il représente : emplacements d’équipement (casque, épaulières, plastron, gantelet, bottes, collier, bague, artéfact), familles d’armes, statistiques, les 48 Rubis (Phénix, Miroir, Éclipse, Vampire…) et leurs six familles, classes et éléments, passifs d’artéfact, difficultés, poissons, viandes, métiers et boutons des menus. Les données y renvoient par un repère `⟦nom⟧` (par exemple `icon: '⟦rubis_phenix⟧'`), remplacé à l’affichage comme les émojis.
+- **Taille des textes** (Paramètres → Affichage, 100 % à 160 %, 125 % par défaut) : seules les polices grandissent. Chaque taille de police en pixels des styles passe par `--font-scale` (ainsi que le texte de base et celui des boutons) ; sur le canevas du jeu, les textes dessinés (noms, chiffres, bulles) grandissent aussi. Les panneaux, les barres et la vue du monde gardent leur taille.
+- **Sac (I) et personnage (C)** : chaque objet est une petite case carrée (icône, bordure et fond de la couleur de sa qualité, niveau dans le coin) ; les cases remplissent toute la largeur de la fenêtre. Son nom et ses statistiques sont dans l’info-bulle. Sur la fiche, le héros est au centre, entre les deux colonnes d’emplacements.
+- **Sac unifié** (`bag.js`, `CANAAN_BAG`) : tout ce qu’on possède est un objet du sac. En plus de l’équipement, les Rubis non équipés, les poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent de la place (`canaanBagUsed`). Un clic sur un Rubis l’équipe, sur un repas le mange. Leurs quantités restent rangées où le jeu les utilise (`hero.rubis.owned`, `hero.prof.fish / meat / meals`) : sauvegardes et état des invités inchangés. Sac plein : un poisson est relâché, la viande n’est pas ramassée, la cuisine s’arrête. Une pile se désigne par un repère `genre:id:qualité*nombre` (`fish:gardon:2*30`). La fiche (C) ne montre plus que les six emplacements de Rubis ; le panneau P n’a plus de bourriche ni de gibecière.
+- **Banque** (`bank.js`, `CANAAN_BANK`) : 500 places par joueur, chez le Banquier Orvin (échoppe de Lira, Camp de l’Aurore, touche E). Deux fenêtres côte à côte : la banque à gauche, le sac à droite ; un clic dépose un objet ou une pile, un clic sur la banque le reprend (s’il y a la place dans le sac). Équipements et piles (Rubis, poissons, viandes, repas ; 100 par case) sont rangés dans `hero.bank` et sauvegardés avec chaque héros, invités compris ; au chargement, la banque est vérifiée comme le sac. Un invité reçoit sa banque près du banquier (actions `bank-deposit`, `bank-withdraw`).
+- **Boutique** (`shop.js`, `CANAAN_SHOP`, touche E près du marchand) : deux fenêtres côte à côte. À gauche, la marchandise : un objet Peu commun du niveau du héros pour chaque emplacement et chaque famille d’arme (16), à choisir ; un objet acheté est remplacé par un autre du même genre, et la marchandise est refaite au changement de niveau. À droite, le sac : un clic vend l’équipement ou la pile (poissons, viandes, repas, Rubis en double). L’hôte garde la marchandise de chaque héros et envoie la sienne à un invité près d’un marchand (actions `shop-buy`, `sell-stack`).
+- **Échange entre joueurs** (J) : même principe, l’échange à gauche (ton offre, celle de l’autre, or, validation) et ton sac à droite ; un clic propose un objet ou une pile entière. Si un sac déborde à la conclusion, l’échange est annulé et tout revient comme avant.
+- **Icônes de tout le jeu** (`icons.js`, `CANAAN_ICONS`, chargé en premier) : chaque émoji utilisé par le jeu (environ 170 : menus, panneaux, messages, objets, Rubis, quêtes, métiers, carte, textes flottants…) a son icône SVG dessinée en code, dans le même style. Les sources gardent les émojis comme repères ; à l’affichage, un observateur du document les remplace par leur icône (`svg.ico`, plus grande quand elle est seule dans sa case), retire l’émoji des info-bulles natives et des listes déroulantes, et sur le canevas `fillText` dessine l’icône à la place de l’émoji. Les symboles typographiques (✓ ✕ ★ ♪ flèches) restent du texte.
+
 ## Classes et talents
 
 Le système des huit voies est remplacé par **quatre classes** (`shared/data/classes.js`, `scripts/class-talents.js`, panneau **T**) : 🌿 Druide (nature, poison, régénération, soutien), 🛡️ Paladin (protection, boucliers, soins, lumière sacrée), 🗡️ Assassin (critiques, saignements, mobilité, exécution) et 🔥 Élémentaliste (feu, glace, foudre, zones).
@@ -357,11 +408,16 @@ Le système des huit voies est remplacé par **quatre classes** (`shared/data/cl
 - **Choix** : à la création de l’aventure (ligne « Classe »). Une aventure d’avant les classes, un invité ou un ancien compagnon en choisit une en arrivant (message et bouton T qui brille ; les compagnons locaux reçoivent une classe au hasard et des talents conseillés). Changer de classe est **gratuit au Camp de l’Aurore** (hors instance) ; les talents sont alors retirés.
 - **Talents** : 10 talents exclusifs par classe, un seul rang, surtout passifs ou déclenchés automatiquement. On en équipe **5 au plus** : un emplacement aux niveaux 1, 10, 20, 30 et 40. Les changements sont gratuits, hors combat. Les effets identiques ne se cumulent pas (un seul effet sur la durée par type et par héros, la plus forte valeur ; un seul bouclier, le plus fort ; ralentissements au plus fort ; Aura protectrice non cumulable).
 - **Compétences d’armes** : toutes les armes restent utilisables par toutes les classes. Leurs compétences prennent l’**élément de la classe** (couleurs, icône sur la barre, info-bulle) : nature, sacré, ombre, ou feu (1 et 4), glace (2) et foudre (3) pour l’Élémentaliste. Les postures et ruées (Parade, Élan, Rage, Pas de l’ombre, Concentration, Serment) ne comptent pas comme compétences offensives.
-- **Passifs de classe** : Sève vitale (Druide : 5 % des dégâts des compétences offensives rendus à lui et aux alliés à moins de 6 cases), Lumière sacrée (Paladin : ses soins sur lui-même soignent aussi les alliés proches à 50 %), Pas de l’ombre (Assassin : +5 % de vitesse, +10 % de dégâts critiques), Maîtrise des éléments (Élémentaliste : la glace ralentit de 20 % pendant 2 s).
+- **Empreintes de classe sur les compétences d’armes** (`CANAAN_CLASS_AFTER_CAST`, `CANAAN_CLASS.skillRider` pour le texte de l’info-bulle) : chaque compétence gagne un effet selon la classe.
+  - 🌿 Druide : les compétences offensives empoisonnent (25 % des dégâts en plus sur 4 s) ; les utilitaires soignent le héros et ses alliés à 6 cases de 8 % de leurs PV max.
+  - ☀️ Paladin : chaque compétence offensive donne un bouclier de 5 % des PV max (4 s) ; chaque utilitaire, un bouclier de 10 % au groupe proche (5 s).
+  - 🌑 Assassin : compétences offensives +12 %, et la compétence 4 encore +30 % contre une cible sous 50 % de PV ; une utilitaire renforce la compétence offensive suivante de 25 % (Embuscade).
+  - 🔥 Élémentaliste : feu (1 et 4) brûle (30 % des dégâts sur 4 s), glace (2) ralentit de 30 % pendant 2,5 s, foudre (3) rebondit sur 2 ennemis proches (35 %) ; une utilitaire libère une décharge autour du héros (100 % de l’Attaque, 2,5 cases).
+- **Passifs de classe** : Sève vitale (Druide : 5 % des dégâts des compétences offensives rendus à lui et aux alliés à moins de 6 cases), Lumière sacrée (Paladin : ses soins sur lui-même soignent aussi les alliés proches à 50 %), Pas de l’ombre (Assassin : +5 % de vitesse, +10 % de dégâts critiques), Maîtrise des éléments (Élémentaliste : voir les empreintes).
 - **Sort spécial (touche F)**, une case ronde au bout de la barre de compétences :
   - 🐆 **Forme féline** (Druide, 15 mana, F pour entrer ou sortir) : panthère de la forêt, +15 % de dégâts, +20 % de vitesse, +8 de critique, attaques de base 20 % plus rapides ; en échange, plus de Sève vitale et des soins réduits de 30 %.
   - ✨ **Lumière divine** (Paladin, 25 mana, 45 s) : soigne lui et ses alliés à moins de 6 cases de 20 % de leurs PV max et réduit leurs dégâts reçus de 20 % pendant 6 s.
-  - 🌑 **Voile d’ombre** (Assassin, 20 mana, 30 s) : invisible 4 s (les monstres l’ignorent), +30 % de vitesse ; la compétence offensive suivante fait +40 % et lève le voile.
+  - 🌑 **Voile d’ombre** (Assassin, 20 mana, 30 s) : invisible 4 s (les monstres l’ignorent et ne se tournent plus vers lui ; les boss et boss mondiaux le voient encore), +30 % de vitesse ; la compétence offensive suivante fait +40 % et lève le voile.
   - 🌋 **Avatar élémentaire** (Élémentaliste, 30 mana, 60 s) : +20 % de dégâts et compétences 30 % moins chères pendant 10 s.
 - **Soins entre héros** : `canaanApplyHeal(n, périodique, cible, soigneur)` ; les bonus de soins effectués viennent du soigneur, ceux reçus de la cible. Soigner un allié déclenche Bénédiction forestière, Gardien divin (boucliers, recharge par allié) et Symbiose.
 - **Points d’accroche** : `CANAAN_CLASS_STATS`, `CANAAN_CLASS_ATTACK.before/after` (dégâts réellement infligés dans `after`), `CANAAN_CLASS_DEFENSE` (boucliers), `CANAAN_CLASS_CAST` (élément, compteurs de Consécration, Tempête, Ombre meurtrière), `CANAAN_CLASS_MANA_COST`, `CANAAN_CLASS_ON_DODGE`, `CANAAN_CLASS_ON_CRIT_TAKEN`, `CANAAN_CLASS_FATAL` (Intervention divine), étape `classes` du pipeline et rendu `drawClassEffects`.
@@ -410,10 +466,10 @@ Il n’y a plus d’iLvl ni de Ratings52 : la puissance vient du **niveau du per
 | Peu commun | ×1,12 |
 | Rare | ×1,27 |
 | Épique | ×1,45 |
-| Héroïque | ×1,65 |
 | Légendaire | ×1,87 |
 | Mythique | ×2,1 |
-| Céleste | ×2,35 |
+
+Il y a six qualités ; Héroïque et Céleste n’existent plus (un ancien objet Héroïque devient Épique, un Céleste devient Mythique). **Légendaire et Mythique sont des objets de prestige** : jamais tirés au hasard, ils ne tombent qu’au Raid 4 en Héroïque (5 % Légendaire, 1 % Mythique, à la place de l’Épique garanti) et au dernier boss de l’arène (5 % de chances d’un Légendaire à son niveau pour chaque héros, `PRESTIGE_DROPS`, `prestigeRoll`). Dans le sac (I), le personnage (C), la boutique, la banque et l’échange, leur case brille (lueur pulsée orange ou cyan-violet, reflet qui passe) avec une vague colorée dans le fond (`canaanPrestige`, `[data-prestige]` dans `rpg-theme.css` ; immobile si le système demande moins d’animations).
 
 Exemple : une épée légendaire de niveau 45 donne +196 Attaque, +122 Défense, +147 Vitalité et deux secondaires entre +29 et +79.
 
@@ -444,21 +500,21 @@ La fiche du personnage (touche C) montre le niveau, la barre d’XP et deux tabl
 | 5. Désert oublié | 40–50 | Ifrit (45), Séraphin Déchu (50) |
 | 6. Forêt enchantée | 50–60 | Chronos (60) |
 
-Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (`mobLevel` ; ses boss sont un niveau au-dessus, deux en raid) et sa récompense garantie (`rarity`, `dropLevel`) : le coffre du boss donne toujours cet objet à chaque héros, sauf si son sac est plein.
+Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (`mobLevel` ; ses boss sont un niveau au-dessus, deux en raid) et sa récompense garantie (`rarity`, `dropLevel`) : le coffre du boss donne toujours cet objet à chaque héros, sauf si son sac est plein. Son niveau est tiré entre le niveau requis et le niveau de butin (Cave : 7 à 10), pour pouvoir porter tout de suite ce qu’on y gagne. Sources : mobs et coffres secrets Commun, marchand Peu commun, boss mondiaux et donjons Rare, raids Épique.
 
 | Instance | Zone | Niveau requis | Ennemis | Récompense |
 | --- | --- | --- | --- | --- |
-| La Cave des Terriers Abandonnés | Plaines | 7 | 9 | Rare 10 |
-| La Mine Oubliée du Mithril | Forêt ancienne | 13 | 15 | Rare 16 |
-| Le Sanctuaire de l’Éclipse | Forêt ancienne | 18 | 20 | Épique 21 |
-| La Citadelle des Pénitents | Marais | 25 | 27 | Épique 28 |
-| La Forge d’Écaille-Ardente | Automne | 32 | 34 | Épique 35 |
-| La Fosse d’Expiation | Automne | 37 | 39 | Épique 40 |
-| Raid : Le Bastion du Roi Sanglant | Désert | 44 | 46 | Héroïque 47 |
-| Raid : L’Aiguille du Continuum | Désert | 49 | 51 | Héroïque 52 |
-| Raid : Le Thronos du Séraphin Divin | Forêt enchantée | 54 | 56 | Légendaire 57 |
-| Raid : Le Jugement de Célestia — Normal | Forêt enchantée | 58 | 60 | Mythique 60 |
-| Raid : Le Jugement de Célestia — Héroïque | Forêt enchantée | 60 | 60 | Céleste 60 |
+| La Cave des Terriers Abandonnés | Plaines | 7 | 9 | Rare 7–10 |
+| La Mine Oubliée du Mithril | Forêt ancienne | 13 | 15 | Rare 13–16 |
+| Le Sanctuaire de l’Éclipse | Forêt ancienne | 18 | 20 | Rare 18–21 |
+| La Citadelle des Pénitents | Marais | 25 | 27 | Rare 25–28 |
+| La Forge d’Écaille-Ardente | Automne | 32 | 34 | Rare 32–35 |
+| La Fosse d’Expiation | Automne | 37 | 39 | Rare 37–40 |
+| Raid : Le Bastion du Roi Sanglant | Désert | 44 | 46 | Épique 44–47 |
+| Raid : L’Aiguille du Continuum | Désert | 49 | 51 | Épique 49–52 |
+| Raid : Le Thronos du Séraphin Divin | Forêt enchantée | 54 | 56 | Épique 54–57 |
+| Raid : Le Jugement de Célestia — Normal | Forêt enchantée | 58 | 60 | Épique 58–60 |
+| Raid : Le Jugement de Célestia — Héroïque | Forêt enchantée | 60 | 60 | Épique 60 (5 % Légendaire, 1 % Mythique) |
 
 **Anciennes aventures** : au chargement, l’iLvl de chaque objet devient un niveau (iLvl × 60 ÷ 190), ses anciens points Ratings52 disparaissent et deux secondaires sont tirées. Le héros commence au niveau de sa meilleure pièce portée, pour garder son équipement.
 
@@ -469,7 +525,7 @@ Hors instance, les récompenses sont décrites une seule fois dans `SOURCE_REWAR
 | Source | Objet garanti | En plus |
 | --- | --- | --- |
 | Mob normal | Commun, au niveau du monstre (Peu commun une fois sur sept avec le Rubis Prospecteur) | — |
-| Mob élite | Peu commun, au niveau du monstre | — |
+| Mob élite | Commun, au niveau du monstre | — |
 | Mob d’instance | Aucun | — |
 | Boss mondial | Rare, au niveau du boss | 1000–1500 or |
 | Coffre secret | Commun, au niveau de sa zone (milieu de la plage) | 40 or |

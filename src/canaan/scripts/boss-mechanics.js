@@ -1,8 +1,9 @@
 // Mécaniques des boss de donjon et de raid (l'Arène a les siennes) :
 // - Onde de choc : un cercle rouge annoncé sous un héros, puis de gros dégâts à qui reste dedans (rouler en sort).
-// - Renforts : à 50 % de PV, le boss appelle deux monstres de l'instance.
-// - Pluie d'éclats (raids) : un petit cercle annoncé sur chaque héros proche.
-// - Rage : sous 25 % de PV, il frappe plus fort et plus vite.
+// - Renforts : à 66 % et à 33 % de PV, le boss appelle des monstres de l'instance (2, ou 3 en raid).
+// - Pluie d'éclats : un petit cercle annoncé sur chaque héros proche (toutes les 9 s en raid, 13 s en donjon).
+// - Rage : sous 25 % de PV, il frappe 25 % plus fort et plus vite.
+// Seuls les héros DANS un cercle au moment de l'explosion sont touchés.
 // L'hôte décide ; les cercles sont montrés aux invités par les effets de combat (game.view.fx).
 (() => {
   'use strict';
@@ -53,27 +54,28 @@
   }
   function step(m) {
     const raid = instances[game.world.instance.index].raid,
-      s = (m.mech ??= { wave: now() + (raid ? 360 : 480), rain: now() + 600, adds: 0 }),
+      s = (m.mech ??= { wave: now() + (raid ? 300 : 360), rain: now() + (raid ? 480 : 600), adds: 0 }),
       ratio = m.hp / m.mhp,
       targets = game.heroes.filter(h => alive(h) && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 12 * T);
     if (!targets.length) return;
-    // Onde de choc sous le héros visé (le plus proche), toutes les 8 s (6 s en raid).
+    // Onde de choc sous un héros au hasard, toutes les 7 s (5 s en raid).
     if (now() >= s.wave) {
-      s.wave = now() + (raid ? 360 : 540);
+      s.wave = now() + (raid ? 300 : 420);
       const h = targets[Math.floor(Math.random() * targets.length)];
       warn(m, h.player.x, h.player.y, (raid ? 2.4 : 2) * T, 96, raid ? 2.2 : 1.6);
       float(m.x, m.y - 70, '⚠️ Onde de choc !', '#ff8a6a');
     }
-    // Pluie d'éclats des raids : un cercle sur chaque héros proche, toutes les 11 s.
-    if (raid && now() >= s.rain) {
-      s.rain = now() + 780;
-      for (const h of targets) warn(m, h.player.x + (Math.random() - 0.5) * 40, h.player.y + (Math.random() - 0.5) * 40, 1.3 * T, 80, 1.1);
+    // Pluie d'éclats : un cercle sur chaque héros proche, toutes les 9 s en raid (13 s en donjon).
+    if (now() >= s.rain) {
+      s.rain = now() + (raid ? 540 : 780);
+      for (const h of targets) warn(m, h.player.x + (Math.random() - 0.5) * 40, h.player.y + (Math.random() - 0.5) * 40, 1.3 * T, 80, raid ? 1.3 : 1.1);
+      float(m.x, m.y - 70, '⚠️ Pluie d’éclats !', '#ff8a6a');
     }
-    // Renforts : une vague à 50 % de PV.
-    const step = ratio < 0.5 ? 1 : 0;
+    // Renforts : une vague à 66 % de PV, une autre à 33 %.
+    const step = ratio < 0.33 ? 2 : ratio < 0.66 ? 1 : 0;
     if (step > s.adds) {
       s.adds = step;
-      summon(m, 2);
+      summon(m, raid ? 3 : 2);
     }
     // Rage sous 25 % : frappe plus fort (stats.js) et plus vite.
     if (ratio < 0.25 && !m.enraged) {

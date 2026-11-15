@@ -4,12 +4,14 @@ const villages = [{ name: CANAAN_CAMP.name, x: CANAAN_CAMP.x, y: CANAAN_CAMP.y, 
 // Donjons et raids : biome d'accueil ; la position est fixée par la génération de l'île.
 const instances = createInstances();
 function isSafe(x, y) {
+  // Tréfonds : la Forteresse naine de Durgrim est le seul lieu sûr.
+  if (canaanUnder()) return CANAAN_UNDER.safe(x, y);
   return villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y);
 }
 // Chaque instance a son portail ; canaan-world-generation le place sur l'île.
 for (let i = 0; i < instances.length; i++) {
   const d = instances[i];
-  game.world.npcs.push({ x: d.x * TS, y: d.y * TS, name: d.name, color: d.color, type: 'portal', instance: i });
+  game.world.npcs.push({ x: d.x * TS, y: d.y * TS, name: d.name, color: d.color, type: 'portal', instance: i, layer: d.under ? 'under' : undefined });
 }
 // Arène des Épreuves : portail unique près du camp, ouvert à tous ; position fixée par la génération de l'île.
 const CANAAN_ARENA_NAME = 'L’Arène des Épreuves';
@@ -18,15 +20,15 @@ game.world.npcs.push({ x: 0, y: 0, name: CANAAN_ARENA_NAME, color: '#ffb347', ty
 
 // Inventaire et équipement de départ : game.hero (canaan-game-state).
 const gearSlots = {
-  helm: '👑 Tête',
-  shoulders: '🦾 Épaules',
-  armor: '🛡️ Armure',
-  gloves: '🧤 Gants',
-  boots: '🥾 Bottes',
-  neck: '📿 Collier',
-  ring: '💍 Bague',
-  artifact: '🔮 Artefact',
-  weapon: '⚔️ Arme'
+  helm: '⟦slot_helm⟧ Tête',
+  shoulders: '⟦slot_shoulders⟧ Épaules',
+  armor: '⟦slot_armor⟧ Armure',
+  gloves: '⟦slot_gloves⟧ Gants',
+  boots: '⟦slot_boots⟧ Bottes',
+  neck: '⟦slot_neck⟧ Collier',
+  ring: '⟦slot_ring⟧ Bague',
+  artifact: '⟦slot_artifact⟧ Artefact',
+  weapon: '⟦slot_weapon⟧ Arme'
 };
 
 function attackBonus() {
@@ -56,6 +58,7 @@ function recomputeHeroStats(hero = game.hero) {
 }
 // Récompenses d'une élimination pour le héros qui l'a obtenue (l'hôte par défaut) : butin individuel.
 function recordKill(m, hero = game.hero) {
+  canaanAchieve(hero, 'kill', m);
   if (m.worldBoss) onWorldBossKilled(m, hero);
   // Rubis de fin de combat de l'hôte (Carnage, Faucheur, Récupération).
   CANAAN_RUBIS.onKill(m, hero);
@@ -174,6 +177,7 @@ function sellItemFor(hero, id) {
   if (i < 0) return false;
   const value = gearSellValue(hero.inventory[i]);
   hero.player.gold += value;
+  canaanAchieve(hero, 'sell', value);
   hero.inventory.splice(i, 1);
   if (hero !== game.hero) heroNotice(hero, '💰 +' + value + ' or');
   return true;
@@ -189,6 +193,7 @@ function sellCommonFor(hero) {
   if (!sold.length) return false;
   const value = sold.reduce((n, i) => n + gearSellValue(i), 0);
   hero.player.gold += value;
+  canaanAchieve(hero, 'sell', value);
   hero.inventory = hero.inventory.filter(i => !bulk(i));
   if (hero !== game.hero) heroNotice(hero, '💰 ' + sold.length + ' objets communs vendus : +' + value + ' or');
   return true;
@@ -198,7 +203,8 @@ function sellBagIndex(i) {
   if (!item) return;
   if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'sell', id: String(item.id) });
   if (!sellItemFor(game.hero, item.id)) return;
-  renderInventory();
+  if (CANAAN_SHOP.isOpen()) CANAAN_SHOP.render();
+  else renderInventory();
   saveGame();
 }
 function sellAllCommon() {
@@ -211,7 +217,8 @@ function sellAllCommon() {
     return;
   }
   sellCommonFor(game.hero);
-  renderInventory();
+  if (CANAAN_SHOP.isOpen()) CANAAN_SHOP.render();
+  else renderInventory();
   saveGame();
 }
 function equipBagIndex(index) {
@@ -274,6 +281,10 @@ function enterInstance(i, difficulty = null) {
     bossesDown: 0,
     group: Math.max(1, Math.min(4, game.heroes.length))
   };
+  // Donjon des Tréfonds : ennemis au niveau du héros le plus fort du groupe.
+  if (d.scaled) game.world.instance.scaledLevel = Math.max(...game.heroes.map(h => clampLevel(h.level)));
+  // Couche d'où l'on vient (l'île ou les Tréfonds) : on y ressort.
+  game.world.returnLayer = game.world.layer || 'surface';
   game.world.tiles = makeDungeon(i);
   game.world.decor = Array.from({ length: MAPH }, () => Array(MAPW).fill(null));
   // Tout le groupe entre ensemble.
@@ -291,8 +302,11 @@ function leaveInstance() {
   if (game.world.instance?.arena) CANAAN_ARENA.onLeave();
   game.world.chests = [];
   game.world.instance = null;
-  game.world.tiles = game.world.overworld;
-  game.world.decor = game.world.overdecor;
+  // Retour sur la couche d'où l'on est entré : l'île, ou les Tréfonds.
+  const under = game.world.returnLayer === 'under';
+  game.world.layer = under ? 'under' : 'surface';
+  game.world.tiles = under ? game.world.underworld : game.world.overworld;
+  game.world.decor = under ? game.world.underdecor : game.world.overdecor;
   // Tout le groupe ressort ensemble, devant le portail.
   if (game.world.returnPos) placeGroup(game.world.returnPos.x, game.world.returnPos.y);
   game.world.monsters = [];
@@ -300,7 +314,7 @@ function leaveInstance() {
   spawnMonsters(12);
   spawnWorldBosses();
   closePanels();
-  toast('Retour au monde de Canaan');
+  toast(game.world.layer === 'under' ? 'Retour dans les Tréfonds' : 'Retour au monde de Canaan');
   saveGame();
   CanaanStages.restartMusic();
 }
@@ -437,8 +451,8 @@ function drawBiomeDecor(c, d, x, y, tx, ty) {
 }
 
 function drawWorldFeatures(c) {
-  // En instance, le titre et la sortie sont dessinés par canaan-dungeons.
-  if (game.world.instance) return;
+  // En instance, le titre et la sortie sont dessinés par canaan-dungeons ; les Tréfonds, par underground.js.
+  if (game.world.instance || canaanUnder()) return;
   const path = (pts, w, color) => {
     c.beginPath();
     pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])));
@@ -701,6 +715,8 @@ function drawWorldFeatures(c) {
     let d = instances[i],
       x = d.x * TS,
       y = d.y * TS;
+    // Les portails des Tréfonds sont dessinés sous l'île (underground.js).
+    if (d.under) continue;
     if (x < camX - 180 || x > camX + W + 180 || y < camY - 180 || y > camY + H + 180) continue;
     c.save();
     drawDungeonEntrance(c, i, x, y);
@@ -734,6 +750,8 @@ function findBossSpot(b) {
   return { x: cx, y: cy };
 }
 function spawnWorldBosses() {
+  // Tréfonds : leurs propres boss mondiaux, au niveau du groupe (underground.js).
+  if (canaanUnder()) return CANAAN_UNDER.spawnBosses();
   if (!game.world.instance)
     for (const b of WORLD_BOSSES) {
       if ((game.world.worldBossTimers[b.id] || 0) > Date.now() || game.world.monsters.some(m => m.worldBossId === b.id)) continue;
@@ -762,6 +780,10 @@ function updateWorldBosses() {
 
 // Coffres secrets : identifiants stables pour la sauvegarde, emplacements fixés par la génération de l'île.
 const hiddenChestSpots = Array.from({ length: 65 }, (_, i) => ({ id: 'hidden_' + i, x: 0, y: 0 }));
+// Coffres secrets de la couche affichée : ceux de l'île, ou ceux des Tréfonds (underground.js).
+function canaanSecretChests() {
+  return game.world.layer === 'under' ? CANAAN_UNDER.chests() : hiddenChestSpots;
+}
 function chestPosition(ch) {
   if (ch.instance) return ch;
   for (let r = 0; r < 18; r++)
@@ -784,7 +806,7 @@ function spawnRewardChest() {
 function nearbyChest(p) {
   const list = game.world.instance
     ? game.world.chests.filter(c => !c.opened)
-    : hiddenChestSpots.filter(c => !game.world.openedChests.includes(c.id)).map(chestPosition);
+    : canaanSecretChests().filter(c => !game.world.openedChests.includes(c.id)).map(chestPosition);
   return list.find(c => Math.hypot(p.x / TS - c.x, p.y / TS - c.y) < 2) || null;
 }
 function openNearbyChest(hero = game.hero) {
@@ -798,6 +820,7 @@ function openNearbyChest(hero = game.hero) {
     const index = game.world.instance.index;
     for (const member of game.heroes) {
       awardBossLoot('dungeon', index, member);
+      canaanAchieve(member, 'clear', index);
       // Instance terminée : grosse récompense d'XP pour chacun.
       CANAAN_PROGRESSION.clearInstanceXp(index, member);
       const gold = instances[index].raid ? 150 + Math.floor(Math.random() * 101) : 60 + Math.floor(Math.random() * 41);
@@ -806,10 +829,11 @@ function openNearbyChest(hero = game.hero) {
     }
   } else {
     game.world.openedChests.push(c.id);
+    canaanAchieve(hero, 'chest');
     p.gold += 40;
-    // Objet au niveau de la zone du coffre (le milieu de sa plage).
+    // Objet au niveau de la zone du coffre (le milieu de sa plage) ; dans les Tréfonds, au niveau du héros.
     const [lo, hi] = ZONE_LEVELS[canaanZoneIndexAt(c.x, c.y)];
-    grantSourceReward('secretChest', hero, Math.round((lo + hi) / 2));
+    grantSourceReward('secretChest', hero, c.layer === 'under' ? clampLevel(hero.level) : Math.round((lo + hi) / 2));
     canaanLootNotice(hero, '🎁 Coffre secret : équipement gris + 40 or !');
   }
   saveGame();
@@ -818,7 +842,7 @@ function openNearbyChest(hero = game.hero) {
 function drawChests() {
   let list = game.world.instance
     ? game.world.chests
-    : hiddenChestSpots
+    : canaanSecretChests()
         .filter(c => !game.world.openedChests.includes(c.id))
         .map(chestPosition)
         .filter(c => Math.abs(c.x * TS - P.x) < W && Math.abs(c.y * TS - P.y) < H);

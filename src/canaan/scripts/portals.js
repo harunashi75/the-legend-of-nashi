@@ -1,4 +1,13 @@
 // Portails des donjons et raids : niveau requis, niveau des ennemis, butin garanti et choix de la difficulté.
+// Niveau de l'objet gagné : du niveau requis au niveau de butin (« 7 à 10 »).
+function dropRange(d) {
+  return d.level < d.dropLevel ? d.level + ' à ' + d.dropLevel : String(d.dropLevel);
+}
+// Chances d'objet de prestige (Légendaire, Mythique) d'un mode de difficulté.
+function prestigeText(kind) {
+  const list = PRESTIGE_DROPS[kind] || [];
+  return list.map(([name, chance]) => '<br><b style="color:' + rarityInfo({ rarity: name }).color + '">' + Math.round(chance * 100) + ' % ' + name + '</b>').join('');
+}
 // Une carte de difficulté : conditions, butin garanti et puissance des ennemis.
 function difficultyCard(index, key, mode, lv) {
   const allowed = lv >= mode.level,
@@ -27,8 +36,10 @@ function difficultyCard(index, key, mode, lv) {
     '">' +
     rarity.name +
     ' — niveau ' +
-    mode.dropLevel +
-    '</b><br><small>100 % garanti</small></p><p class="muted">' +
+    dropRange(mode) +
+    '</b><br><small>100 % garanti' +
+    prestigeText(mode.prestige) +
+    '</small></p><p class="muted">' +
     power +
     '</p><button data-action="enterInstance" data-instance="' +
     index +
@@ -72,6 +83,27 @@ function openPortal(n) {
     );
     return;
   }
+  if (d.scaled) {
+    const common = rarityInfo({ rarity: d.rarity }),
+      rare = rarityInfo({ rarity: 'Rare' });
+    showPanel(
+      title +
+        '<p>DONJON DES TRÉFONDS · <b>Aucun niveau requis</b> · Ennemis à ton niveau (<b>' +
+        lv +
+        '</b>)</p><p>Boss : ' +
+        safeGearText(d.boss) +
+        ' · Récompense de ton niveau : <b style="color:' +
+        common.color +
+        '">Peu commun</b> ou <b style="color:' +
+        rare.color +
+        '">Rare</b> (' +
+        Math.round((PRESTIGE_DROPS[d.prestige]?.[0]?.[1] || 0) * 100) +
+        ' %) · 100 % garanti</p><button data-action="enterInstance" data-instance="' +
+        n.instance +
+        '">⚔️ Entrer</button>'
+    );
+    return;
+  }
   const allowed = lv >= d.level,
     rarity = rarityInfo({ rarity: d.rarity });
   showPanel(
@@ -92,7 +124,7 @@ function openPortal(n) {
       '">' +
       rarity.name +
       ' — niveau ' +
-      d.dropLevel +
+      dropRange(d) +
       '</b> · 100 % garanti</p><button data-action="enterInstance" data-instance="' +
       n.instance +
       '" ' +

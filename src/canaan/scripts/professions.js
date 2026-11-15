@@ -10,10 +10,12 @@
   'use strict';
   // ---------------------------------------------------------------- Données
   const MAX_LEVEL = 40;
-  // Niveau requis pour chaque qualité (Commun, Peu commun, Rare, Épique, Héroïque, Légendaire, Mythique, Céleste).
-  const QUALITY_LEVEL = [1, 5, 10, 15, 20, 25, 30, 35];
-  const QUALITY_MULT = [1, 1.25, 1.6, 2, 2.6, 3.3, 4.2, 5.4];
-  const BUFF_PCT = [5, 6, 8, 10, 12, 14, 17, 20];
+  // Niveau requis pour chaque qualité (Commun, Peu commun, Rare, Épique, Légendaire, Mythique).
+  const QUALITY_LEVEL = [1, 6, 12, 20, 28, 35];
+  const QUALITY_MULT = [1, 1.3, 1.75, 2.3, 3.2, 4.5];
+  const BUFF_PCT = [5, 7, 9, 12, 15, 19];
+  // Anciennes qualités (huit, avec Héroïque et Céleste) converties une seule fois vers les six actuelles.
+  const OLD_QUALITY = [0, 1, 2, 3, 3, 4, 5, 5];
   const qualityName = q => GEAR_RARITIES[q]?.name || 'Commun';
   const qualityColor = q => GEAR_RARITIES[q]?.color || '#aeb4c0';
   // Poissons : nom, icône, recette, couleurs du dessin de la collection, où le trouver et petite bio.
@@ -21,7 +23,7 @@
     // Poisson doré : seulement par la quête « Le poisson du vieux pêcheur » (aucun banc).
     dore: {
       name: 'Poisson doré',
-      icon: '🐠',
+      icon: '⟦fish_dore⟧',
       recipe: 'dore',
       colors: ['#f0c030', '#b88410', '#fff0a0'],
       where: 'L’étang d’Éloi (quête « Le poisson du vieux pêcheur »)',
@@ -29,7 +31,7 @@
     },
     gardon: {
       name: 'Gardon',
-      icon: '🐟',
+      icon: '⟦fish_gardon⟧',
       recipe: 'soupe',
       colors: ['#c8ccd0', '#8a9098', '#eef2f4'],
       where: 'Lacs des Plaines et de la Forêt ancienne',
@@ -37,7 +39,7 @@
     },
     truite: {
       name: 'Truite',
-      icon: '🐟',
+      icon: '⟦fish_truite⟧',
       recipe: 'grillade',
       colors: ['#8a9a6a', '#5a6a42', '#d8c8a0'],
       where: 'Lacs des forêts et lacs scintillants',
@@ -45,7 +47,7 @@
     },
     carpe: {
       name: 'Carpe',
-      icon: '🐠',
+      icon: '⟦fish_carpe⟧',
       recipe: 'mijote',
       colors: ['#c8a040', '#8a6a20', '#f0d080'],
       where: 'Lacs des Plaines, du Marais et de la Forêt automnale',
@@ -53,7 +55,7 @@
     },
     silure: {
       name: 'Silure des oasis',
-      icon: '🐡',
+      icon: '⟦fish_silure⟧',
       recipe: 'epices',
       colors: ['#6a5a4a', '#3e3228', '#a8987a'],
       where: 'Oasis du Désert oublié',
@@ -61,7 +63,7 @@
     },
     saumon: {
       name: 'Saumon',
-      icon: '🐟',
+      icon: '⟦fish_saumon⟧',
       recipe: 'fume',
       colors: ['#e8908a', '#a85a5a', '#f8d0c8'],
       where: 'En mer, tout autour de l’île',
@@ -69,7 +71,7 @@
     },
     thon: {
       name: 'Thon',
-      icon: '🐟',
+      icon: '⟦fish_thon⟧',
       recipe: 'ragout',
       colors: ['#3a5a8a', '#22385a', '#c8d8e8'],
       where: 'En mer, tout autour de l’île',
@@ -77,19 +79,92 @@
     },
     espadon: {
       name: 'Espadon',
-      icon: '🐬',
+      icon: '⟦fish_espadon⟧',
       recipe: 'brochette',
       colors: ['#4a6a9a', '#2a4268', '#d8e4f0'],
       where: 'En mer (rare)',
       bio: 'Le seigneur des vagues, armé d’une épée naturelle. Les pêcheurs le surnomment « le chevalier des mers ».'
     },
+    perche: {
+      name: 'Perche',
+      icon: '⟦fish_perche⟧',
+      recipe: 'meuniere',
+      colors: ['#9ab05a', '#5a6a2a', '#e8d890'],
+      where: 'Lacs des Plaines verdoyantes',
+      bio: 'Rayée de vert et de noir, la nageoire hérissée : elle chasse en bande au bord des roseaux.'
+    },
+    brochet: {
+      name: 'Brochet',
+      icon: '⟦fish_brochet⟧',
+      recipe: 'quenelles',
+      colors: ['#6a8a5a', '#3a5a32', '#d0d8a0'],
+      where: 'Lacs de la Forêt ancienne et de la Forêt automnale',
+      bio: 'Le loup des lacs : il guette, immobile, puis jaillit comme une flèche. Gare à ses dents !'
+    },
+    anguille: {
+      name: 'Anguille',
+      icon: '⟦fish_anguille⟧',
+      recipe: 'fumee',
+      colors: ['#5a5a3a', '#32321e', '#a8a070'],
+      where: 'Lacs du Marais brumeux',
+      bio: 'Glissante comme la brume, elle se faufile dans la vase. On dit qu’elle traverse les prés les nuits de pluie.'
+    },
+    merou: {
+      name: 'Mérou',
+      icon: '⟦fish_merou⟧',
+      recipe: 'merou',
+      colors: ['#a86a4a', '#6a3e28', '#e8c0a0'],
+      where: 'En mer, tout autour de l’île',
+      bio: 'Gros, placide et curieux, il vient regarder les pêcheurs de ses yeux ronds avant de mordre.'
+    },
+    raie: {
+      name: 'Raie',
+      icon: '⟦fish_raie⟧',
+      recipe: 'raie',
+      colors: ['#7a8aa0', '#4a5a70', '#d8e0ea'],
+      where: 'En mer (rare)',
+      bio: 'Elle vole sous les vagues comme un grand oiseau plat. Les marins disent qu’elle porte chance.'
+    },
     lune: {
       name: 'Poisson-lune astral',
-      icon: '🌙',
+      icon: '⟦fish_lune⟧',
       recipe: 'astral',
       colors: ['#c8b0ff', '#8a6ad8', '#fff0ff'],
       where: 'Lacs scintillants de la Forêt enchantée',
       bio: 'Il brille doucement sous la surface. Certains pensent qu’il est tombé du ciel le jour où l’Aube s’est brisée.'
+    },
+    // Poissons des lacs souterrains (les Tréfonds).
+    aveugle: {
+      name: 'Poisson aveugle',
+      icon: '⟦fish_aveugle⟧',
+      recipe: 'papillote',
+      colors: ['#e8d8d0', '#b0a098', '#fff8f4'],
+      where: 'Lacs noirs des Galeries d’Argile et de la Nécropole (Tréfonds)',
+      bio: 'Pâle comme la craie et sans yeux, il se repère aux remous. Les nains disent qu’il entend battre le cœur des pêcheurs.'
+    },
+    lanterne: {
+      name: 'Poisson-lanterne',
+      icon: '⟦fish_lanterne⟧',
+      recipe: 'lanterne',
+      colors: ['#3a4a6a', '#1e2a40', '#ffe070'],
+      where: 'Lacs de Khaz-Ombral et de Fangeval (Tréfonds)',
+      bio: 'Une petite lumière pend au bout de sa nageoire. Dans le noir des Tréfonds, c’est lui qui trouve les pêcheurs.'
+    },
+    murene: {
+      name: 'Murène des grottes',
+      icon: '⟦fish_murene⟧',
+      recipe: 'murene',
+      colors: ['#5a6a3a', '#34401e', '#c8d080'],
+      where: 'Lacs souterrains (Tréfonds)',
+      bio: 'Elle se cache entre les roches immergées et mord tout ce qui passe. Même les nains la pêchent avec des gants.'
+    },
+    fangeux: {
+      name: 'Silure fangeux',
+      icon: '⟦fish_fangeux⟧',
+      recipe: 'fangeux',
+      colors: ['#5a5034', '#3a3420', '#a89a6a'],
+      where: 'Lacs troubles de Fangeval (Tréfonds)',
+      bio: 'Il vit dans la boue tiède et mange les spores qui tombent des champignons. Son goût est… surprenant.'
     }
   };
   // Gibier : animaux du monde qu'on peut chasser (zones : biomes où ils vivent), viande obtenue et petite bio.
@@ -122,25 +197,83 @@
       where: 'Bord de l’eau du Marais',
       bio: 'Elle chante tout le soir dans le marais. Ses cuisses sautées sont un mets de choix au Camp de l’Aurore.'
     },
+    faisan: {
+      name: 'Faisan',
+      meat: 'faisan',
+      zones: [1, 3],
+      where: 'Forêt ancienne et Forêt automnale',
+      bio: 'Superbe et bruyant, il s’envole dans un grand fracas d’ailes quand on le surprend dans les fougères.'
+    },
+    canard: {
+      name: 'Canard colvert',
+      meat: 'canard',
+      zones: [2],
+      where: 'Bord de l’eau du Marais',
+      bio: 'Il barbote toute la journée entre les roseaux et cancane au moindre bruit.'
+    },
+    chevre: {
+      name: 'Chèvre des sables',
+      meat: 'chevre',
+      zones: [4],
+      where: 'Désert oublié',
+      bio: 'Elle grimpe sur les dunes et les rochers brûlants, et broute ce que personne d’autre ne veut.'
+    },
+    lezard: {
+      name: 'Lézard des dunes',
+      meat: 'lezard',
+      zones: [4],
+      where: 'Désert oublié',
+      bio: 'Il file entre les pierres chaudes plus vite qu’on ne cligne des yeux. Grillé, il paraît que c’est délicieux.'
+    },
     astral: {
       name: 'Bête astrale',
       meat: 'astrale',
       zones: [5],
       where: 'Forêt enchantée (cerfs et lièvres lumineux)',
       bio: 'Cerfs et lièvres baignés de lumière d’étoiles. On dit que leur chair garde un peu de la magie du ciel.'
+    },
+    // Gibier des Tréfonds (zones 6 à 9 : Galeries, Cité Engloutie, Nécropole, Fangeval).
+    taupe: {
+      name: 'Taupe des cavernes',
+      meat: 'taupe',
+      zones: [6, 7, 9],
+      where: 'Galeries d’Argile et Fangeval (Tréfonds)',
+      bio: 'Grosse comme un chien, aveugle et têtue, elle creuse sans cesse. Les nains en font un ragoût réputé.'
+    },
+    salamandre: {
+      name: 'Salamandre des ruines',
+      meat: 'salamandre',
+      zones: [7, 8],
+      where: 'Cité Engloutie et Nécropole (Tréfonds)',
+      bio: 'Elle file entre les pierres froides, sa peau brille d’un orange de braise. On dit qu’elle ne craint pas le feu.'
+    },
+    crapaud: {
+      name: 'Crapaud des fanges',
+      meat: 'cuisses',
+      zones: [9],
+      where: 'Boue de Fangeval (Tréfonds)',
+      bio: 'Gros, verruqueux et bruyant, il coasse toute la nuit éternelle des Tréfonds. Ses cuisses valent celles des grenouilles.'
     }
   };
   const MEAT = {
-    lievre: { name: 'Viande de lièvre', icon: '🍖' },
-    venaison: { name: 'Venaison', icon: '🥩' },
-    gigot: { name: 'Gigot', icon: '🍖' },
-    cuisses: { name: 'Cuisses de grenouille', icon: '🐸' },
-    astrale: { name: 'Chair astrale', icon: '✨' }
+    lievre: { name: 'Viande de lièvre', icon: '⟦meat_lievre⟧' },
+    venaison: { name: 'Venaison', icon: '⟦meat_venaison⟧' },
+    gigot: { name: 'Gigot', icon: '⟦meat_gigot⟧' },
+    cuisses: { name: 'Cuisses de grenouille', icon: '⟦meat_cuisses⟧' },
+    astrale: { name: 'Chair astrale', icon: '⟦meat_astrale⟧' },
+    faisan: { name: 'Viande de faisan', icon: '⟦meat_faisan⟧' },
+    canard: { name: 'Magret de canard', icon: '⟦meat_canard⟧' },
+    chevre: { name: 'Viande de chèvre', icon: '⟦meat_chevre⟧' },
+    lezard: { name: 'Queue de lézard', icon: '⟦meat_lezard⟧' },
+    taupe: { name: 'Viande de taupe', icon: '⟦meat_taupe⟧' },
+    salamandre: { name: 'Queue de salamandre', icon: '⟦meat_salamandre⟧' }
   };
   // Ingrédients de cuisine : poissons (bourriche) et viandes (gibecière).
   const ING = {};
   for (const [id, f] of Object.entries(FISH)) ING[id] = { name: f.name, icon: f.icon, bag: 'fish' };
   for (const [id, m] of Object.entries(MEAT)) ING[id] = { name: m.name, icon: m.icon, bag: 'meat' };
+  // Herbes de la cueillette (canaan-gathering) : cuisinées en infusions.
+  for (const [id, h] of Object.entries(CANAAN_GATHER.HERBS)) ING[id] = { name: h.name, icon: h.icon, bag: 'herb' };
   // Recettes : effet du repas. kind : heal / mana (tout de suite), hot / regen (sur la durée), buff (bonus).
   const RECIPES = {
     soupe: { name: 'Soupe de gardon', fish: 'gardon', kind: 'heal' },
@@ -156,10 +289,37 @@
     gigot: { name: 'Gigot aux herbes', fish: 'gigot', kind: 'hot', seconds: 8 },
     cuisses: { name: 'Cuisses de grenouille sautées', fish: 'cuisses', kind: 'buff', stat: 'speed', seconds: 180 },
     banquet: { name: 'Banquet céleste', fish: 'astrale', kind: 'regen', seconds: 15 },
+    meuniere: { name: 'Perche meunière', fish: 'perche', kind: 'heal' },
+    quenelles: { name: 'Quenelles de brochet', fish: 'brochet', kind: 'buff', stat: 'damage', seconds: 90 },
+    fumee: { name: 'Anguille fumée', fish: 'anguille', kind: 'hot', seconds: 6 },
+    merou: { name: 'Mérou grillé', fish: 'merou', kind: 'buff', stat: 'armor', seconds: 90 },
+    raie: { name: 'Raie aux câpres', fish: 'raie', kind: 'both' },
+    faisan: { name: 'Faisan rôti', fish: 'faisan', kind: 'buff', stat: 'speed', seconds: 120 },
+    magret: { name: 'Magret de canard', fish: 'canard', kind: 'both' },
+    chevre: { name: 'Ragoût de chèvre', fish: 'chevre', kind: 'hot', seconds: 8 },
+    lezard: { name: 'Brochette de lézard', fish: 'lezard', kind: 'buff', stat: 'damage', seconds: 60 },
+    // Infusions des herbes de la cueillette.
+    infmenthe: { name: 'Infusion de menthe', fish: 'menthe', kind: 'mana' },
+    tisane: { name: 'Tisane de sauge', fish: 'sauge', kind: 'heal' },
+    bouillon: { name: 'Bouillon des brumes', fish: 'mousse', kind: 'hot', seconds: 6 },
+    soupeortie: { name: 'Soupe d’ortie', fish: 'ortie', kind: 'buff', stat: 'armor', seconds: 120 },
+    aloes: { name: 'Jus d’aloès', fish: 'aloes', kind: 'regen', seconds: 8 },
+    nectar: { name: 'Nectar de lys étoilé', fish: 'lys', kind: 'regen', seconds: 12 },
     // Recette de la grand-mère d'Éloi : apprise en terminant sa quête.
     dore: { name: 'Poisson doré en croûte de sel', fish: 'dore', kind: 'buff', stat: 'feast', seconds: 240, quest: 5 },
     // Recette d'Amira : apprise en rendant son eau à l'oasis.
-    tajine: { name: 'Tajine de l’oasis', fish: 'silure', kind: 'both', quest: 25 }
+    tajine: { name: 'Tajine de l’oasis', fish: 'silure', kind: 'both', quest: 25 },
+    // Recettes des Tréfonds (taverne de Dorn, Forteresse de Durgrim, ou n'importe quelle cuisinière).
+    papillote: { name: 'Papillote de poisson aveugle', fish: 'aveugle', kind: 'heal' },
+    lanterne: { name: 'Poisson-lanterne flambé', fish: 'lanterne', kind: 'buff', stat: 'damage', seconds: 90 },
+    murene: { name: 'Murène en ragoût', fish: 'murene', kind: 'both' },
+    fangeux: { name: 'Silure fangeux fumé', fish: 'fangeux', kind: 'hot', seconds: 7 },
+    taupe: { name: 'Ragoût de taupe des nains', fish: 'taupe', kind: 'buff', stat: 'armor', seconds: 120 },
+    salamandre: { name: 'Salamandre grillée', fish: 'salamandre', kind: 'buff', stat: 'speed', seconds: 120 },
+    racine: { name: 'Décoction de racine de pierre', fish: 'racine', kind: 'both' },
+    lichen: { name: 'Thé de lichen', fish: 'lichen', kind: 'mana' },
+    pavot: { name: 'Infusion de pavot funèbre', fish: 'pavot', kind: 'hot', seconds: 8 },
+    champignon: { name: 'Velouté de champignons luisants', fish: 'champignon', kind: 'buff', stat: 'feast', seconds: 120 }
   };
   const knows = (hero, id) => !RECIPES[id].quest || CANAAN_QUESTS.done(hero, RECIPES[id].quest);
   const QUICK_COOLDOWN = 20 * 60;
@@ -211,13 +371,13 @@
   const DEEP = new Set([0, 18]);
   // Espèces selon l'eau : mer, lac scintillant, ou lac d'un biome (ordre des ZONES).
   const TABLES = {
-    sea: [['saumon', 45], ['thon', 40], ['espadon', 15]],
+    sea: [['saumon', 35], ['thon', 30], ['merou', 20], ['espadon', 8], ['raie', 7]],
     glow: [['lune', 60], ['truite', 40]],
     lake: [
-      [['gardon', 60], ['carpe', 40]],
-      [['truite', 55], ['gardon', 45]],
-      [['carpe', 60], ['gardon', 40]],
-      [['carpe', 50], ['truite', 50]],
+      [['gardon', 45], ['carpe', 30], ['perche', 25]],
+      [['truite', 45], ['gardon', 30], ['brochet', 25]],
+      [['carpe', 40], ['anguille', 35], ['gardon', 25]],
+      [['carpe', 40], ['truite', 40], ['brochet', 20]],
       [['silure', 80], ['carpe', 20]],
       [['truite', 50], ['gardon', 30], ['lune', 20]]
     ]
@@ -275,6 +435,8 @@
           kind = t === 18 ? 'glow' : sea ? 'sea' : 'lake';
         spots.push({ tx, ty, x: (tx + 0.5) * TS, y: (ty + 0.5) * TS, kind, zone, table: kind === 'lake' ? TABLES.lake[zone] : TABLES[kind] });
       }
+    // Puis les bancs des lacs souterrains (layer: 'under').
+    spots.push(...CANAAN_UNDER.spots());
     return spots;
   }
   const allSpots = () => spots || findSpots();
@@ -284,6 +446,7 @@
     let best = -1,
       bd = REACH;
     allSpots().forEach((s, i) => {
+      if (!canaanHere(s)) return;
       const d = Math.hypot(s.x - x, s.y - y);
       if (d < bd) {
         bd = d;
@@ -309,7 +472,7 @@
       s.exp -= xpNeeded(s.level);
       s.level++;
       const unlocked = QUALITY_LEVEL.indexOf(s.level);
-      tell(hero, ({ fishing: '🎣 Pêche', cooking: '🍳 Cuisine', hunting: '🏹 Chasse' }[skill]) + ' niveau ' + s.level + ' !' + (unlocked > 0 ? ' Qualité ' + qualityName(unlocked) + ' débloquée.' : ''));
+      tell(hero, ({ fishing: '⟦prof_fishing⟧ Pêche', cooking: '⟦prof_cooking⟧ Cuisine', hunting: '⟦prof_hunting⟧ Chasse', mining: '⟦prof_mining⟧ Minage', herbalism: '⟦prof_herbalism⟧ Cueillette', enchanting: '⟦prof_enchanting⟧ Enchanteur' }[skill]) + ' niveau ' + s.level + ' !' + (unlocked > 0 ? ' Qualité ' + qualityName(unlocked) + ' débloquée.' : ''));
     }
     if (s.level >= MAX_LEVEL) s.exp = 0;
   }
@@ -340,6 +503,12 @@
     const prof = profOf(hero),
       cap = capOf(prof.fishing.level),
       q = Math.max(0, cap - Math.floor(-Math.log(1 - Math.random()) * 1.3));
+    // Le poisson est un objet du sac : sans place pour lui, il est relâché.
+    if (!CANAAN_BAG.room(hero, 'fish', kind, q)) {
+      hero.fishing = null;
+      tell(hero, '🎒 Sac plein : ' + FISH[kind].name + ' relâché.');
+      return true;
+    }
     const key = kind + ':' + q;
     prof.fish[key] = (prof.fish[key] || 0) + 1;
     discover(prof, kind, q);
@@ -347,6 +516,7 @@
     float(hero.player.x, hero.player.y - 50, FISH[kind].icon + ' ' + FISH[kind].name + ' (' + qualityName(q) + ')', qualityColor(q));
     tell(hero, '🎣 ' + FISH[kind].name + ' ' + qualityName(q) + ' pêché !');
     gainXp(hero, 'fishing', 10 + 6 * q);
+    canaanAchieve(hero, 'fish', kind, q);
     hero.netBag = null;
     return true;
   }
@@ -375,17 +545,23 @@
       p = hero?.player;
     if (!g || !p || p.dead || hero.away || game.world.instance) return false;
     if ((hero.huntCd || 0) > time) return false;
-    const zone = ZONES.indexOf(regionAt(p.x / TS, p.y / TS));
+    // Zone de chasse : 0 à 5 sur l'île, 6 à 9 dans les Tréfonds.
+    const zone = canaanUnder() ? CANAAN_UNDER.zoneId(p.x / TS, p.y / TS) : ZONES.indexOf(regionAt(p.x / TS, p.y / TS));
     if (!g.zones.includes(zone)) return false;
     hero.huntCd = time + 40;
     const prof = profOf(hero),
       q = Math.max(0, capOf(prof.hunting.level) - Math.floor(-Math.log(1 - Math.random()) * 1.3)),
-      key = g.meat + ':' + q,
-      first = discover(prof, kind, q);
+      key = g.meat + ':' + q;
+    if (!CANAAN_BAG.room(hero, 'meat', g.meat, q)) {
+      tell(hero, '🎒 Sac plein : impossible de ramasser la viande.');
+      return false;
+    }
+    const first = discover(prof, kind, q);
     prof.meat[key] = (prof.meat[key] || 0) + 1;
     float(p.x, p.y - 50, MEAT[g.meat].icon + ' ' + MEAT[g.meat].name + ' (' + qualityName(q) + ')', qualityColor(q));
     tell(hero, '🏹 ' + g.name + ' : ' + MEAT[g.meat].name + ' ' + qualityName(q) + (first ? ' · nouvelle espèce dans ton carnet !' : ''));
     gainXp(hero, 'hunting', 10 + 6 * q);
+    canaanAchieve(hero, 'hunt', kind, q);
     hero.netBag = null;
     return true;
   }
@@ -397,6 +573,20 @@
     hero.fishing = null;
     tell(hero, '🎣 Tu remontes ta ligne.');
     return true;
+  }
+  // Cuisiner prend du temps : le héros prépare le repas à la cuisinière (6 s, un peu plus en série), sans bouger.
+  function startCook(hero, recipe, quality, count = 1) {
+    const r = RECIPES[recipe],
+      prof = profOf(hero);
+    if (!r || !Number.isInteger(quality) || quality < 0 || quality > 7 || !knows(hero, recipe)) return false;
+    if (!nearFire(hero.player.x, hero.player.y)) {
+      tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).');
+      return false;
+    }
+    const have = prof[ING[r.fish].bag]?.[r.fish + ':' + quality] || 0;
+    if (!have) return false;
+    const n = Math.max(1, Math.min(count | 0, have, 20));
+    return CANAAN_GATHER.startCook(hero, { x: hero.player.x + TS * 0.6, y: hero.player.y - TS * 0.4 }, () => cook(hero, recipe, quality, n), n);
   }
   function cook(hero, recipe, quality, count = 1) {
     const r = RECIPES[recipe],
@@ -415,11 +605,19 @@
       const mq = Math.min(quality, capOf(prof.cooking.level)),
         meal = recipe + ':' + mq;
       bag[key]--;
+      // Le repas prend sa place dans le sac (l'ingrédient vient de libérer la sienne s'il était le dernier).
+      if (!CANAAN_BAG.room(hero, 'meal', recipe, mq)) {
+        bag[key]++;
+        tell(hero, '🎒 Sac plein : impossible de ranger d’autres repas.');
+        break;
+      }
       prof.meals[meal] = (prof.meals[meal] || 0) + 1;
       gainXp(hero, 'cooking', 14 + 8 * mq);
+      canaanAchieve(hero, 'cook', recipe, mq);
       made++;
     }
     if (!bag[key]) delete bag[key];
+    if (!made) return false;
     tell(hero, '🍳 ' + made + ' × ' + r.name + ' préparé' + (made > 1 ? 's' : '') + '.');
     hero.netBag = null;
     return true;
@@ -458,15 +656,17 @@
   // Action d'un invité (déjà mise en forme) ; l'hôte appelle les mêmes fonctions pour lui-même.
   function handle(hero, action) {
     if (action.op === 'fish') return fish(hero);
-    if (action.op === 'cook') return cook(hero, action.recipe, action.quality, action.count);
+    if (action.op === 'cook') return startCook(hero, action.recipe, action.quality, action.count);
     if (action.op === 'eat') return eat(hero, action.recipe, action.quality);
     if (action.op === 'hunt') return hunt(hero, action.game);
+    if (action.op === 'gather' || action.op === 'enchant-craft' || action.op === 'enchant-apply') return CANAAN_GATHER.handle(hero, action);
     return false;
   }
   // Étape du pipeline : touches et poissons qui s'échappent, soins des repas, fin des bonus.
   window.CanaanStages.professions = {
     after() {
       if (!started || paused) return;
+      CANAAN_GATHER.stepWork();
       for (const hero of game.heroes) {
         const p = hero.player,
           f = hero.fishing;
@@ -505,8 +705,8 @@
   };
   // Bonus du repas en cours (dégâts, protection, vitesse), lus par le combat et le déplacement.
   const buffOf = hero => (hero?.food && hero.food.until > time ? effect(hero.food.recipe, hero.food.q, hero) : null);
-  const damageMult = hero => 1 + (buffOf(hero)?.damage || 0) / 100;
-  const armorMult = hero => 1 - (buffOf(hero)?.armor || 0) / 100;
+  const damageMult = hero => (100 + (buffOf(hero)?.damage || 0)) / 100;
+  const armorMult = hero => (100 - (buffOf(hero)?.armor || 0)) / 100;
   const speedMult = hero => 1 + (buffOf(hero)?.speed || 0) / 100;
 
   // ---------------------------------------------------------------- État envoyé à un invité
@@ -521,11 +721,15 @@
       fishing: f ? { spot: f.spot, bite: f.state === 'bite' } : null,
       food: hero.food && hero.food.until > time ? { recipe: hero.food.recipe, q: hero.food.q, left: left(hero.food.until) } : null,
       hot: hero.foodHot && hero.foodHot.until > time ? { recipe: hero.foodHot.recipe, q: hero.foodHot.q, left: left(hero.foodHot.until) } : null,
-      cd: left(hero.foodCd || 0)
+      cd: left(hero.foodCd || 0),
+      // Travail en cours (miner, cueillir, forger, cuisiner) : animation et barre d'avancement.
+      work: CANAAN_GATHER.workView(hero),
+      // Gisements de minerai et d'herbes épuisés pour ce héros.
+      gather: CANAAN_GATHER.depleted(hero)
     };
   }
   // Invité : ce qu'il a reçu de l'hôte.
-  let remoteLive = { fishing: null, food: null, hot: null, cd: 0 };
+  let remoteLive = { fishing: null, food: null, hot: null, cd: 0, gather: [] };
   function applyRemote(live) {
     if (live && typeof live === 'object') remoteLive = live;
   }
@@ -534,6 +738,8 @@
   // Bouton E : lancer, ferrer ou remonter la ligne. Renvoie vrai si E a servi à la pêche.
   function interact() {
     const fishing = guest() ? !!remoteLive.fishing : !!game.hero.fishing;
+    // Filon ou herbe à portée (sauf pendant une pêche) : miner ou cueillir.
+    if (!fishing && CANAAN_GATHER.interact()) return true;
     if (!fishing && spotNear(P.x, P.y) < 0) return false;
     if (guest()) CANAAN_NET.requestAction({ op: 'fish' });
     else fish(game.hero);
@@ -553,10 +759,12 @@
   // ---------------------------------------------------------------- Affichage dans le monde
   function drawSpots(c) {
     if (game.world.instance) return;
+    CANAAN_GATHER.draw(c);
     c.save();
     const near = spotNear(P.x, P.y),
       busy = myLive().fishing;
     allSpots().forEach((s, i) => {
+      if (!canaanHere(s)) return;
       if (Math.abs(s.x - camX - W / 2) > W / 2 + 80 || Math.abs(s.y - camY - H / 2) > H / 2 + 80) return;
       // Remous : cercles qui s'élargissent, bulles, et un petit poisson qui saute de temps en temps.
       for (let k = 0; k < 3; k++) {
@@ -761,27 +969,19 @@
     );
   }
   function tabFishing() {
-    const fish = stock(myProf().fish, id => FISH[id]);
     return (
       bar('fishing') +
       '<p class="prof-help">Approche-toi d’un banc de poissons (remous dans l’eau profonde : mer et lacs) et appuie sur <b>E</b>. Quand ça mord ❗, appuie vite sur <b>E</b> pour ferrer. Plus ton niveau est haut, meilleure est la qualité des prises.</p>' +
       codex(Object.entries(FISH), fishIcon, 'Pêchés') +
-      '<h3>Bourriche</h3>' +
-      (fish.length
-        ? '<div class="prof-grid">' + fish.map(x => '<div class="prof-item"><span style="color:' + qualityColor(x.q) + '">' + FISH[x.id].icon + ' ' + esc(FISH[x.id].name) + '</span><small>' + esc(qualityName(x.q)) + '</small><b>× ' + x.n + '</b></div>').join('') + '</div>'
-        : '<p class="prof-empty">Aucun poisson pour l’instant.</p>')
+      '<p class="prof-help">⟦menu_inventory⟧ Tes poissons sont des objets de ton sac (I), par piles de 100.</p>'
     );
   }
   function tabHunting() {
-    const meat = stock(myProf().meat, id => MEAT[id]);
     return (
       bar('hunting') +
       '<p class="prof-help">Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales. Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin. Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité.</p>' +
       codex(Object.entries(GAME), gameIcon, 'Chassés') +
-      '<h3>Gibecière</h3>' +
-      (meat.length
-        ? '<div class="prof-grid">' + meat.map(x => '<div class="prof-item"><span style="color:' + qualityColor(x.q) + '">' + MEAT[x.id].icon + ' ' + esc(MEAT[x.id].name) + '</span><small>' + esc(qualityName(x.q)) + '</small><b>× ' + x.n + '</b></div>').join('') + '</div>'
-        : '<p class="prof-empty">Aucune viande pour l’instant.</p>')
+      '<p class="prof-help">⟦menu_inventory⟧ Ta viande est un objet de ton sac (I), par piles de 100.</p>'
     );
   }
   function tabCooking() {
@@ -791,7 +991,7 @@
     return (
       bar('cooking') +
       '<p class="prof-help">' + (fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Approche-toi d’une cuisinière pour cuisiner : La Marmite dorée au Camp de l’Aurore, un refuge, ou ta maison si tu en as posé une.') +
-      ' Un poisson ou une viande donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + ').</p>' +
+      ' Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière.</p>' +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)
         .filter(([id]) => knows(game.hero, id))
@@ -811,7 +1011,7 @@
                   })
                   .join('') +
                 '</div>'
-              : '<p class="prof-empty">Pas de ' + esc(ING[r.fish].name.toLowerCase()) + ' dans ta ' + (ING[r.fish].bag === 'fish' ? 'bourriche' : 'gibecière') + '.</p>') +
+              : '<p class="prof-empty">Pas de ' + esc(ING[r.fish].name.toLowerCase()) + ' dans ton sac.</p>') +
             '</article>'
           );
         })
@@ -845,14 +1045,45 @@
   let shown = '';
   function render() {
     if (!modalOpen() || !document.querySelector('#window .prof-panel')) return;
-    const tabs = [['peche', '🎣 Pêche'], ['chasse', '🏹 Chasse'], ['cuisine', '🍳 Cuisine'], ['repas', '🍽️ Repas']];
-    shown = JSON.stringify([myProf(), myLive(), ui.tab, ui.codex, nearFire(P.x, P.y)]);
+    const tabs = [
+      ['peche', '⟦prof_fishing⟧ Pêche'],
+      ['chasse', '⟦prof_hunting⟧ Chasse'],
+      ['minage', '⟦prof_mining⟧ Minage'],
+      ['cueillette', '⟦prof_herbalism⟧ Cueillette'],
+      ['cuisine', '⟦prof_cooking⟧ Cuisine'],
+      ['enchant', '⟦prof_enchanting⟧ Enchantement'],
+      ['repas', '🍽️ Repas']
+    ];
+    const helpers = { bar, esc };
+    shown = signature();
     showPanel(
       '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +
         '<div class="prof-tabs">' + tabs.map(([id, label]) => '<button type="button" class="' + (ui.tab === id ? 'on' : '') + '" data-action="profTab" data-tab="' + id + '">' + label + '</button>').join('') + '</div>' +
-        (ui.tab === 'peche' ? tabFishing() : ui.tab === 'chasse' ? tabHunting() : ui.tab === 'cuisine' ? tabCooking() : tabMeals()) +
+        (ui.tab === 'peche'
+          ? tabFishing()
+          : ui.tab === 'chasse'
+            ? tabHunting()
+            : ui.tab === 'minage'
+              ? CANAAN_GATHER.tabs.mining(helpers)
+              : ui.tab === 'cueillette'
+                ? CANAAN_GATHER.tabs.herbalism(helpers)
+                : ui.tab === 'enchant'
+                  ? CANAAN_GATHER.tabs.enchant(helpers)
+                  : ui.tab === 'cuisine'
+                    ? tabCooking()
+                    : tabMeals()) +
         '</div>'
     );
+  }
+  // Ce qui change l'affichage : métiers, pêche et repas en cours, onglet, sac et équipement (enchantement).
+  const signature = () =>
+    JSON.stringify([myProf(), myLive(), ui.tab, ui.codex, nearFire(P.x, P.y), game.hero.inventory.map(i => [i.id, i.ench?.value]), Object.values(game.hero.equipment).map(i => i && [i.id, i.ench?.value])]);
+  // Ouvrir le panneau sur un onglet (depuis le sac : un enchantement choisi).
+  function open(tab) {
+    if (!started) return;
+    ui.tab = tab;
+    showPanel('<div class="rpg-paper prof-panel"></div>');
+    render();
   }
   function toggle() {
     if (!started || paused) return;
@@ -866,7 +1097,7 @@
   }
   setInterval(() => {
     if (!started || !modalOpen() || !document.querySelector('#window .prof-panel')) return;
-    if (JSON.stringify([myProf(), myLive(), ui.tab, ui.codex, nearFire(P.x, P.y)]) !== shown) render();
+    if (signature() !== shown) render();
   }, 300);
   // Pastille du repas en cours, sous le panneau du héros.
   setInterval(() => {
@@ -893,14 +1124,18 @@
   };
   const actions = {
     tab(id) {
-      if (['peche', 'chasse', 'cuisine', 'repas'].includes(id)) ui.tab = id;
+      if (['peche', 'chasse', 'minage', 'cueillette', 'cuisine', 'enchant', 'repas'].includes(id)) ui.tab = id;
       render();
     },
     codex(kind) {
       ui.codex = ui.codex === kind ? null : kind;
       render();
     },
-    cook: (recipe, quality, count = 1) => act({ op: 'cook', recipe, quality, count }),
+    // Cuisiner : la fenêtre se ferme pour laisser voir le héros aux fourneaux.
+    cook(recipe, quality, count = 1) {
+      closePanels();
+      return act({ op: 'cook', recipe, quality, count });
+    },
     eat: (recipe, quality) => act({ op: 'eat', recipe, quality })
   };
 
@@ -908,7 +1143,7 @@
   function sanitize(raw) {
     const out = canaanFreshProf();
     if (!raw || typeof raw !== 'object') return out;
-    for (const skill of ['fishing', 'cooking', 'hunting']) {
+    for (const skill of ['fishing', 'cooking', 'hunting', 'mining', 'herbalism', 'enchanting']) {
       const s = raw[skill] || {};
       out[skill].level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(Number(s.level)) || 1));
       out[skill].exp = Math.max(0, Math.min(xpNeeded(out[skill].level) - 1, Math.floor(Number(s.exp)) || 0));
@@ -920,16 +1155,24 @@
           best = Math.floor(Number(e?.best));
         if ((Object.hasOwn(FISH, id) || Object.hasOwn(GAME, id)) && n > 0) out.codex[id] = { n: Math.min(n, 999999), best: Math.max(0, Math.min(7, best || 0)) };
       }
-    for (const [bag, known] of [['fish', FISH], ['meat', MEAT], ['meals', RECIPES]])
+    // Qualités au format actuel (qv 2) ; une ancienne sauvegarde est convertie (l'enchantement garde son métal).
+    const convert = raw.qv !== 2;
+    for (const [bag, known] of [['fish', FISH], ['meat', MEAT], ['meals', RECIPES], ['ore', CANAAN_GATHER.ORES], ['herb', CANAAN_GATHER.HERBS], ['ench', CANAAN_GATHER.ENCHANTS]])
       if (raw[bag] && typeof raw[bag] === 'object')
         for (const [key, n] of Object.entries(raw[bag])) {
-          const [id, q] = key.split(':'),
+          const [id, qs] = key.split(':'),
             count = Math.floor(Number(n));
-          if (Object.hasOwn(known, id) && /^[0-7]$/.test(q) && count > 0) out[bag][id + ':' + q] = Math.min(count, 9999);
+          if (!Object.hasOwn(known, id) || !/^[0-7]$/.test(qs) || !(count > 0)) continue;
+          const q = bag === 'ench' ? Math.min(5, Number(qs)) : convert ? OLD_QUALITY[Number(qs)] : Math.min(5, Number(qs)),
+            k = id + ':' + q;
+          out[bag][k] = Math.min((out[bag][k] || 0) + count, 9999);
         }
+    for (const e of Object.values(out.codex)) e.best = convert ? OLD_QUALITY[e.best] : Math.min(5, e.best);
     return out;
   }
   window.CANAAN_PROF = Object.freeze({
+    profOf,
+    open,
     FISH,
     GAME,
     MEAT,
@@ -940,6 +1183,8 @@
     capOf,
     effect,
     spots: allSpots,
+    // Bancs de l'île calculés à la surface (avant de descendre dans les Tréfonds).
+    prepare: () => allSpots().length,
     spotNear,
     nearFire,
     fish,

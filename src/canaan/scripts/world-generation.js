@@ -90,6 +90,7 @@
   function currentZoneName() {
     if (game.world.instance?.arena) return CANAAN_ARENA_NAME;
     if (game.world.instance) return instances[game.world.instance.index].name;
+    if (canaanUnder()) return CANAAN_UNDER.zoneName(P.x / TS, P.y / TS);
     const x = P.x / TS,
       y = P.y / TS;
     const room = canaanRoomAt(x, y);
@@ -350,6 +351,8 @@
     clearArea(camp.x, camp.y, 3, 2);
     // Portails : terre ferme dans le biome de l'instance, avec une petite esplanade.
     instances.forEach((d, i) => {
+      // Les donjons des Tréfonds ont leur portail sous l'île (underground.js).
+      if (d.under) return;
       const target = polar(...PORTAL_SPOTS[i]),
         spot = nearestSpot(target.x, target.y, d.biome);
       d.x = spot.x;
@@ -394,6 +397,7 @@
     paveLine(main);
     // Embranchements vers chaque portail, depuis le point le plus proche de la route.
     for (const d of instances) {
+      if (d.under) continue;
       const near = main.reduce(
         (best, p) => {
           const dist = Math.hypot(p[0] - d.x, p[1] - d.y);
@@ -424,7 +428,7 @@
       clearArea(p.x, p.y, 2);
     }
     // Coffres secrets : tirage reproductible, loin des portails, des boss et des autres coffres.
-    const taken = [...instances, CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES].map(p => [p.x, p.y]);
+    const taken = [...instances.filter(d => !d.under), CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES].map(p => [p.x, p.y]);
     let next = 0;
     CHEST_SHARE.forEach((count, biome) => {
       for (let n = 0; n < count && next < hiddenChestSpots.length; n++) {
@@ -454,7 +458,7 @@
     const camp = villages[0],
       reach = reachableFrom(camp.x, camp.y);
     const places = [
-      ...instances.map(d => ['portail', d.name, d.x, d.y]),
+      ...instances.filter(d => !d.under).map(d => ['portail', d.name, d.x, d.y]),
       ['portail', CANAAN_ARENA_NAME, CANAAN_ARENA_PORTAL.x, CANAAN_ARENA_PORTAL.y],
       ...WORLD_BOSSES.map(b => ['boss', b.name, b.x, b.y]),
       ...hiddenChestSpots.map(c => ['coffre', c.id, c.x, c.y]),
@@ -475,6 +479,8 @@
 
   // Remplacement des spawns : créatures propres à leur biome, densité locale.
   function spawnMonsters(count = 100) {
+    // Tréfonds : leurs créatures, au niveau du héros (underground.js).
+    if (canaanUnder()) return CANAAN_UNDER.spawn(count);
     if (game.world.instance) {
       game.world.monsters.forEach(canaanSetupMob);
       return;
@@ -562,7 +568,7 @@
       reachableFrom,
       valid,
       biomeAt: (x, y) => BIOME_MAP[y * MAPW + x],
-      taken: () => [...instances, CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES, ...hiddenChestSpots].map(p => [p.x, p.y])
+      taken: () => [...instances.filter(d => !d.under), CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES, ...hiddenChestSpots].map(p => [p.x, p.y])
     }),
     spawnMonsters,
     updateWorld,

@@ -1,7 +1,23 @@
-/* CANAAN ONLINE V1.8.26 — Phase 3 : styles d’interface regroupés.
+/* THE LEGEND OF NASHI V1.8.26 — Phase 3 : styles d’interface regroupés.
    Les règles restent dans leur ordre d’origine pour conserver la cascade. */
 
 /* ===== base-interface ===== */
+/* Taille des textes (Paramètres → Affichage) : toutes les polices en pixels sont multipliées par --font-scale
+   (125 % par défaut) ; les tailles en em suivent leur parent. L'interface elle-même garde sa taille. */
+:root {
+  --font-scale: 1.25;
+}
+/* Tailles par défaut du navigateur (texte 16 px, boutons et champs 13,33 px) : elles suivent aussi le réglage. */
+body {
+  font-size: calc(16px * var(--font-scale));
+}
+button,
+input,
+select,
+textarea {
+  font-size: calc(13.33px * var(--font-scale));
+}
+
 
 * {
   margin: 0;
@@ -73,7 +89,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   font-weight: 700;
   text-shadow: 0 1px 2px #000;
 }
@@ -106,7 +122,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: calc(26px * var(--font-scale));
   position: relative;
   cursor: pointer;
   transition: 0.15s;
@@ -123,7 +139,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   font-weight: 800;
 }
 .skill .key {
@@ -133,7 +149,7 @@ body {
   background: #2a2444;
   border: 1px solid #6c5ce7;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   padding: 1px 5px;
 }
 #chat {
@@ -148,7 +164,7 @@ body {
 #chatlog {
   flex: 1;
   overflow-y: auto;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   line-height: 1.5;
 }
 #chatlog b {
@@ -161,7 +177,7 @@ body {
   border-radius: 8px;
   color: #fff;
   padding: 7px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   outline: none;
   width: 100%;
 }
@@ -178,7 +194,7 @@ body {
   margin-bottom: 10px;
 }
 #dialog p {
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
   line-height: 1.6;
   margin-bottom: 14px;
 }
@@ -210,7 +226,7 @@ body {
   z-index: 50;
 }
 #title h1 {
-  font-size: 64px;
+  font-size: calc(64px * var(--font-scale));
   background: linear-gradient(90deg, #ffd54a, #ff6b9d, #6c5ce7);
   -webkit-background-clip: text;
   background-clip: text;
@@ -222,13 +238,13 @@ body {
   margin: 14px 0 34px;
   color: #9a90c0;
   letter-spacing: 6px;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #title button {
   background: linear-gradient(90deg, #6c5ce7, #e056fd);
   border: none;
   color: #fff;
-  font-size: 20px;
+  font-size: calc(20px * var(--font-scale));
   font-weight: 800;
   padding: 16px 54px;
   border-radius: 50px;
@@ -319,18 +335,18 @@ body {
 #window .entry {
   padding: 9px;
   border-bottom: 1px solid #52476d;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .muted {
   color: #aaa0c9;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #window .preview {
   height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 95px;
+  font-size: calc(95px * var(--font-scale));
   background: #0c1027;
   border-radius: 15px;
   margin: 8px 0;
@@ -356,7 +372,7 @@ body {
   .skill {
     width: 45px;
     height: 48px;
-    font-size: 20px;
+    font-size: calc(20px * var(--font-scale));
   }
   #menuButtons {
     bottom: 83px;
@@ -374,7 +390,7 @@ body {
   background: radial-gradient(ellipse at 50% 45%, #233c3b, #0c1024 65%, #060811);
 }
 #title h1 {
-  font-size: clamp(38px, 6vw, 78px);
+  font-size: calc(clamp(38px, 6vw, 78px) * var(--font-scale));
 }
 #minimap {
   border-color: #79b59b;
@@ -455,13 +471,13 @@ body {
   text-align: center;
 }
 #pauseCard h2 {
-  font-size: 34px;
+  font-size: calc(34px * var(--font-scale));
   color: #f6d996;
   margin-bottom: 6px;
 }
 #pauseCard p {
   color: #c4c9d1;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   line-height: 1.6;
   margin-bottom: 22px;
 }
@@ -474,7 +490,7 @@ body {
   border: 1px solid #877c99;
   background: #28384c;
   color: white;
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   font-weight: 700;
   cursor: pointer;
 }
@@ -492,7 +508,7 @@ body {
   background: rgba(7, 12, 29, 0.68);
 }
 #window .gear-compare-head {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   font-weight: 800;
   color: #e9d9b5;
   margin-bottom: 7px;
@@ -502,7 +518,7 @@ body {
   grid-template-columns: 1fr 90px 75px;
   gap: 8px;
   align-items: center;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   padding: 3px 0;
   border-bottom: 1px solid #ffffff10;
 }
@@ -606,7 +622,7 @@ body {
   width: clamp(35px, 5.4vw, 57px);
   height: clamp(42px, 5.6vw, 60px);
   flex: 0 1 57px;
-  font-size: clamp(19px, 2.5vw, 26px);
+  font-size: calc(clamp(19px, 2.5vw, 26px) * var(--font-scale));
 }
 #skills .skill .key {
   bottom: -6px;
@@ -621,7 +637,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 9px;
+  font-size: calc(9px * var(--font-scale));
   color: #ddd;
   background: #111827a9;
   padding: 1px 4px;
@@ -663,7 +679,7 @@ body {
   min-width: 43px;
   padding: 5px;
   border-radius: 11px;
-  font-size: 21px;
+  font-size: calc(21px * var(--font-scale));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -676,7 +692,7 @@ body {
   border-radius: 5px;
   background: #15182b;
   color: #fff;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   line-height: 1;
   padding: 2px 4px;
   font-weight: 800;
@@ -697,7 +713,7 @@ body {
     width: 35px;
     min-width: 35px;
     height: 38px;
-    font-size: 17px;
+    font-size: calc(17px * var(--font-scale));
   }
   #menuButtons {
     right: 8px;
@@ -716,7 +732,7 @@ body {
   width: 40px;
   min-width: 40px;
   height: 42px;
-  font-size: 19px;
+  font-size: calc(19px * var(--font-scale));
 }
 #skills {
   max-width: min(620px, calc(100vw - 20px));
@@ -741,7 +757,7 @@ body {
     width: 34px;
     min-width: 34px;
     height: 37px;
-    font-size: 16px;
+    font-size: calc(16px * var(--font-scale));
   }
   #skills {
     bottom: 12px;
@@ -766,7 +782,7 @@ body {
   color: #fff;
   padding: 8px 11px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   font-weight: 700;
 }
 #layoutTools button.active {
@@ -780,7 +796,7 @@ body {
   border: 1px solid #8d79dd;
   border-radius: 9px;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
 }
 #layoutTools input {
   width: 72px;
@@ -801,7 +817,7 @@ body.layout-edit #ui .panel[data-movable='1']:before {
   color: #ffe2a3;
   border-radius: 5px;
   padding: 2px 6px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   white-space: nowrap;
   pointer-events: none;
 }
@@ -812,7 +828,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   pointer-events: auto;
 }
 #layoutTools .small {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
 }
 @media (max-width: 1050px) {
   #layoutTools {
@@ -849,7 +865,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
 
 /* ===== armes-reserve ===== */
 #window .weapon-hint {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #a7e4ed;
   margin: 8px 0 12px;
 }
@@ -865,7 +881,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border: 1px solid #a4cfff;
   border-radius: 5px;
   padding: 3px 7px;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   color: #fff;
   z-index: 2;
 }
@@ -901,7 +917,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   padding: 12px;
 }
 #window .character-layout .stats52-ilvl {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   font-weight: 700;
   color: #f1d69b;
   margin: 0 0 12px;
@@ -950,7 +966,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   gap: 12px;
   align-items: center;
   padding: 10px 8px;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #window .character-layout .stats52 .stat52 span {
   min-width: 0;
@@ -977,7 +993,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   #window .character-layout .stats52 .stat52 {
     grid-template-columns: minmax(0, 1fr) 55px 72px;
     gap: 5px;
-    font-size: 11px;
+    font-size: calc(11px * var(--font-scale));
     padding: 8px 3px;
   }
 }
@@ -1001,7 +1017,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border-radius: 9px;
   background: #5a2636;
   color: #fff;
-  font-size: 25px;
+  font-size: calc(25px * var(--font-scale));
   line-height: 1;
   font-weight: 500;
   display: flex;
@@ -1038,7 +1054,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   height: 48px;
   padding: 4px;
   white-space: nowrap;
-  font-size: 24px;
+  font-size: calc(24px * var(--font-scale));
   line-height: 1;
 }
 #menuButtons button .menu-icon {
@@ -1055,7 +1071,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border: 1px solid #8d79dd;
   border-radius: 5px;
   color: white;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   padding: 2px 4px;
   font-weight: 800;
   line-height: 1;
@@ -1069,7 +1085,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
     width: 39px;
     min-width: 39px;
     height: 42px;
-    font-size: 21px;
+    font-size: calc(21px * var(--font-scale));
   }
 }
 #regionBanner {
@@ -1080,7 +1096,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   pointer-events: none;
   z-index: 12;
   color: #f6e7bd;
-  font: bold 16px system-ui;
+  font: bold calc(16px * var(--font-scale)) system-ui;
   text-shadow:
     0 2px 5px #000,
     0 0 12px #000;
@@ -1089,11 +1105,11 @@ body.layout-edit #ui .panel[data-movable='1'] {
 #hud .hud-title {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   font-weight: 700;
 }
 #hud .hud-info {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   color: #9a90c0;
 }
 #hud #gold {
@@ -1103,7 +1119,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   color: #8f7bff;
 }
 #pauseCard .pause-icon {
-  font-size: 35px;
+  font-size: calc(35px * var(--font-scale));
 }
 #pauseCard .pause-hint {
   margin: 14px 0 0;
@@ -1123,11 +1139,11 @@ body.layout-edit #ui .panel[data-movable='1'] {
   box-shadow: 0 8px 35px #0009;
 }
 #saveRecovery #saveRecoveryTitle {
-  font-size: 18px;
+  font-size: calc(18px * var(--font-scale));
   margin-bottom: 8px;
 }
 #saveRecovery .recovery-text {
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   line-height: 1.5;
   margin-bottom: 12px;
 }
@@ -1141,7 +1157,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   font-weight: 700;
 }
 #saveRecovery #saveRecoveryStatus {
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   line-height: 1.5;
   margin-top: 10px;
 }
@@ -1171,7 +1187,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
 }
 #settingsCard h2 {
   text-align: center;
-  font-size: 30px;
+  font-size: calc(30px * var(--font-scale));
   margin-bottom: 16px;
 }
 #settingsCard .settings-group {
@@ -1180,7 +1196,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border-radius: 10px;
 }
 #settingsCard .settings-group h3 {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   margin-bottom: 8px;
 }
 #settingsCard .settings-row {
@@ -1189,7 +1205,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   justify-content: space-between;
   gap: 14px;
   padding: 7px 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
 }
 #settingsCard .settings-row input[type='range'] {
   width: 180px;
@@ -1198,7 +1214,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
 #settingsCard .settings-row button {
   min-width: 130px;
   padding: 7px 12px;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
   cursor: pointer;
 }
 #settingsCard .settings-actions {
@@ -1209,12 +1225,12 @@ body.layout-edit #ui .panel[data-movable='1'] {
 #settingsCard .settings-actions button {
   flex: 1;
   padding: 12px;
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   cursor: pointer;
 }
 #settingsCard .settings-hint {
   text-align: center;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   margin-top: 12px;
 }
 #titleTools {
@@ -1223,13 +1239,13 @@ body.layout-edit #ui .panel[data-movable='1'] {
   margin-top: 22px;
 }
 #titleTools button {
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   padding: 10px 22px;
   border-radius: 10px;
 }
 #settingsCard .settings-row small {
   opacity: 0.7;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #settingsCard .settings-step {
   display: flex;
@@ -1243,17 +1259,17 @@ body.layout-edit #ui .panel[data-movable='1'] {
 #settingsCard .settings-step b {
   min-width: 170px;
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #settingsCard .settings-row.disabled {
   opacity: 0.45;
   pointer-events: none;
 }
 #settingsCard .settings-restart {
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 #settingsCard .settings-note {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   margin-top: 6px;
 }
 /* Compteur d'images par seconde (Paramètres). */
@@ -1267,7 +1283,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border-radius: 6px;
   background: rgba(10, 6, 4, 0.7);
   color: #b8f0a0;
-  font: bold 12px monospace;
+  font: bold calc(12px * var(--font-scale)) monospace;
   pointer-events: none;
 }
 #settingsCard .settings-row[hidden] {
@@ -1294,4 +1310,18 @@ body.layout-edit #ui .panel[data-movable='1'] {
   #settingsCard .settings-groups {
     grid-template-columns: 1fr;
   }
+}
+/* Icônes SVG du jeu (canaan-icons) à la place des émojis : à la taille du texte qui les entoure. */
+svg.ico {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.24em;
+  flex: none;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
+}
+svg.ico.solo {
+  width: 1.45em;
+  height: 1.45em;
+  vertical-align: -0.32em;
 }

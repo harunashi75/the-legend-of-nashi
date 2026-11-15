@@ -13,7 +13,8 @@ export const ARENA_GROUP = Object.freeze([
   { hp: 3.1, dmg: 1.1 }
 ]);
 // Boss de référence : PV et coup de base, avant les multiplicateurs de vague.
-export const ARENA_BASE = Object.freeze({ hp: 8500, hit: 62 });
+// PV relevés avec les nouvelles attaques et compétences (≈ 2× plus de dégâts) : les combats gardent leur durée.
+export const ARENA_BASE = Object.freeze({ hp: 15000, hit: 62 });
 // Cadence : les boss enchaînent leurs attaques de plus en plus vite (vague 1 : ×1, vague 12 : ×0,76 d'intervalle).
 // Les annonces au sol gardent leur durée : chaque attaque reste lisible et esquivable.
 export const arenaTempo = wave => 1 - 0.022 * (wave - 1);

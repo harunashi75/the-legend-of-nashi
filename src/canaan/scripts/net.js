@@ -43,17 +43,6 @@
     corrections: 0
   };
   // ---------------------------------------------------------------- Préférences : identité et relais
-  const PINGGY_SERVER = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.pinggy\.io$/i;
-  // Jeton seul, ou commande copiée du tableau de bord Pinggy (« ssh -p 443 … JETON@free.pinggy.io »).
-  function parsePinggyLogin(text) {
-    const clean = String(text || '').trim();
-    if (!clean) return { token: '', host: '' };
-    if (/^[A-Za-z0-9_-]{4,128}$/.test(clean)) return { token: clean, host: '' };
-    const m = clean.match(/(?:^|[\s"'])(?:([A-Za-z0-9_-]{4,128})(?:\+[a-z+]+)?@)?([a-z0-9-]+(?:\.[a-z0-9-]+)*\.pinggy\.io)\b/i);
-    if (!m) return null;
-    const user = m[1] && !/^(tcp|tls|http|https|qr|auth|tlstcp|udp)$/i.test(m[1]) ? m[1] : '';
-    return { token: user, host: m[2].toLowerCase() };
-  }
   function settings() {
     const saved = CANAAN_PREFERENCES.read('network', {});
     const id = isGuestId(saved.id) ? saved.id : makeGuestId(Math.random);
@@ -63,14 +52,10 @@
       // Apparence de son héros quand on rejoint un ami (forme compacte, voir shared/data/looks.js).
       look: encodeLook(typeof saved.look === 'string' ? decodeLook(saved.look) : saved.look),
       relay: typeof saved.relay === 'string' && /^wss?:\/\//.test(saved.relay) ? saved.relay : DEFAULT_RELAY,
-      code: normalizeRoomCode(saved.code) || '',
-      // Abonnement Pinggy (facultatif) : jeton pour une adresse fixe, et type de tunnel (http par défaut, ou tcp).
-      pinggyToken: typeof saved.pinggyToken === 'string' && /^[A-Za-z0-9_-]{4,128}$/.test(saved.pinggyToken) ? saved.pinggyToken : '',
-      pinggyMode: saved.pinggyMode === 'tcp' ? 'tcp' : 'http',
-      // Serveur Pinggy lu dans la commande du tableau de bord (vide : free.pinggy.io).
-      pinggyHost: typeof saved.pinggyHost === 'string' && PINGGY_SERVER.test(saved.pinggyHost) ? saved.pinggyHost : ''
+      code: normalizeRoomCode(saved.code) || ''
     };
-    if (value.id !== saved.id) CANAAN_PREFERENCES.write('network', value);
+    // Anciens réglages Pinggy : retirés au passage.
+    if (value.id !== saved.id || 'pinggyToken' in saved || 'pinggyHost' in saved || 'pinggyMode' in saved) CANAAN_PREFERENCES.write('network', value);
     return value;
   }
   function remember(changes) {
@@ -100,12 +85,14 @@
     };
     socket.onerror = () => {
       net.unreachable = true;
-      const port = relay.split(':')[2];
+      const port = (relay.split(':')[2] || '').replace(/\D.*/, ''),
+        host = relay.replace(/^wss?:\/\//, '').split(/[:/]/)[0],
+        tail = /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host) || /\.ts\.net$/i.test(host);
       setStatus(
         'Relais injoignable : ' + relay + '. ' +
-          (port
-            ? 'Vérifie l’adresse, que l’hôte a bien ouvert son salon, et son pare-feu (le port ' + port.replace(/\D.*/, '') + ' doit accepter les connexions).'
-            : 'Vérifie que c’est bien le lien affiché par l’hôte en ce moment (en Pinggy gratuit, il change à chaque ouverture du tunnel).')
+          (tail
+            ? 'Adresse Tailscale : Tailscale doit être lancé et connecté chez toi, et tu dois être dans le réseau Tailscale de l’hôte (il t’invite, ou partage sa machine avec toi). Vérifie aussi que l’hôte a bien ouvert son salon.'
+            : 'Vérifie l’adresse, que l’hôte a bien ouvert son salon, et son pare-feu' + (port ? ' (le port ' + port + ' doit accepter les connexions).' : '.'))
       );
     };
     socket.onclose = () => {
@@ -141,18 +128,23 @@
       relay,
       () => send({ t: 'host', version: window.CANAAN_VERSION, schema: SAVE_SCHEMA }),
       hostMessage,
-      () => {
-        for (const hero of net.peers.values()) CANAAN_GROUP.leave(hero.id);
-        for (const hero of awayHeroes()) release(hero, false);
-        net.peers.clear();
-        net.code = null;
-        if (game.mode === 'host') game.mode = 'solo';
-        setStatus('Salon fermé.');
-      }
+      hostClosed
     );
   }
+  // Salon fermé (par le relais, ou par l'hôte) : les invités partent, on repasse en solo.
+  function hostClosed() {
+    for (const hero of net.peers.values()) CANAAN_GROUP.leave(hero.id);
+    for (const hero of awayHeroes()) release(hero, false);
+    net.peers.clear();
+    net.code = null;
+    if (game.mode === 'host') game.mode = 'solo';
+    setStatus('Salon fermé.');
+  }
+  // Fermeture voulue : la connexion n'appelle plus son « onclose » (le socket est déjà oublié), on range ici.
   function closeRoom() {
+    const hosting = game.mode === 'host' && !!net.socket;
     disconnect();
+    if (hosting) hostClosed();
   }
   function hostMessage(message) {
     if (message.t === 'room') {
@@ -245,7 +237,7 @@
     const inst = game.world.instance,
       map = inst
         ? { instance: inst.arena ? 'arena' : inst.index, cleared: !!inst.cleared, bosses: inst.bossesDown || 0 }
-        : { instance: null };
+        : { instance: null, layer: game.world.layer === 'under' ? 'under' : 'surface' };
     for (const m of game.world.monsters) if (!m.netId) m.netId = ++net.monsterCounter;
     return {
       t: 'state',
@@ -253,7 +245,15 @@
       map,
       heroes: game.heroes.map(hero => ({
         ...heroSnapshot(hero === game.hero ? 'host' : hero.id, hero),
+        // Arme tenue et visée (centièmes de radian), pour dessiner l'arme et son attaque chez chacun.
+        wpn: hero.equipment?.weapon?.weaponType || 'sword',
+        aim: Math.round(CANAAN_WEAPON_LOOK.aimOf(hero, hero.player) * 100),
+        // Travail en cours (miner, cueillir, forger, cuisiner) : animation vue par les autres.
+        act: (w => (w ? [w.kind, w.p, w.tx, w.ty, w.node] : 0))(CANAAN_GATHER.workView(hero)),
         level: clampLevel(hero.level),
+        // Titre choisi parmi les succès, et aura dorée de la Légende de Nashi.
+        ttl: CANAAN_ACHIEVEMENTS.titleOf(hero),
+        aur: hero.succes?.done?.d20 ? 1 : 0,
         // Lumi et bénédiction des racines d'or, dessinées chez chacun.
         q: CANAAN_QUESTS.questLook(hero),
         away: hero.away ? Math.max(0, Math.ceil((hero.away.until - time) / 60)) : 0,
@@ -266,7 +266,7 @@
       quests: CANAAN_QUESTS.netView(),
       monsters: game.world.monsters.map(monsterSnapshot),
       drops: game.world.drops.map(d => ({ x: Math.round(d.x), y: Math.round(d.y) })),
-      projectiles: game.world.projectiles.slice(0, 60).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), c: p.c })),
+      projectiles: game.world.projectiles.slice(0, 60).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), c: p.c, a: Math.round(Math.atan2(p.vy || 0, p.vx || 0) * 100), k: p.kind === 'arrow' ? 1 : 0 })),
       fx: net.fx.splice(0),
       // Coffres : coffre de fin d'instance (position, ouvert), et coffres secrets déjà ouverts du monde
       // (envoyés quand la liste change, et toutes les 5 secondes pour un invité qui vient d'arriver).
@@ -308,6 +308,8 @@
           const spec = CANAAN_SKILLS.spec(hero, i);
           return spec ? Math.max(0, Math.round((cooldowns[spec.key] || 0) * 10) / 10) : 0;
         }),
+        // Postures et charges des compétences (badges de la barre de l'invité).
+        stance: (st => Object.fromEntries(['arcane', 'parryReady', 'combo', 'fastBow', 'focus', 'shadow', 'berserk', 'flurry', 'shieldGuard'].map(k => [k, Math.round((st[k] || 0) * 10) / 10])))(CANAAN_SKILLS.state(hero)),
         dodge: Math.round(CANAAN_COMBAT.dodgeState(hero).ready * 10) / 10,
         revive: p.dead && hero.reviveAt ? Math.max(0, Math.ceil((hero.reviveAt - time) / 60)) : 0
       };
@@ -326,6 +328,21 @@
       hero.netBag = bag;
       out.bag = JSON.parse(bag);
     }
+    // Carnet des succès (quand il change, au plus toutes les trois secondes sauf déblocage).
+    const ach = CANAAN_ACHIEVEMENTS.netView(hero);
+    if (ach !== undefined) out.ach = ach;
+    // Banque près du banquier (quand elle change ; null ailleurs).
+    const bank = JSON.stringify(CANAAN_BANK.view(hero));
+    if (bank !== hero.netBank) {
+      hero.netBank = bank;
+      out.bank = JSON.parse(bank);
+    }
+    // Marchandise du marchand proche (quand elle change ; null loin d'un marchand).
+    const shop = JSON.stringify(CANAAN_SHOP.view(hero));
+    if (shop !== hero.netShop) {
+      hero.netShop = shop;
+      out.shop = JSON.parse(shop);
+    }
     // Échange entre joueurs : sa vue, envoyée quand elle change.
     const trade = JSON.stringify(CANAAN_TRADE.view(hero));
     if (trade !== hero.netTrade) {
@@ -338,9 +355,12 @@
   function heroAction(hero, action) {
     if (!action) return false;
     if (action.op.startsWith('trade-')) return CANAAN_TRADE.handle(hero, action);
+    if (action.op === 'shop-buy' || action.op === 'sell-stack') return CANAAN_SHOP.handle(hero, action);
+    if (action.op === 'bank-deposit' || action.op === 'bank-withdraw') return CANAAN_BANK.handle(hero, action);
     if (action.op.startsWith('house-')) return CANAAN_HOUSE.handle(hero, action);
-    if (action.op === 'fish' || action.op === 'cook' || action.op === 'eat' || action.op === 'hunt') return CANAAN_PROF.handle(hero, action);
+    if (['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply'].includes(action.op)) return CANAAN_PROF.handle(hero, action);
     if (action.op.startsWith('quest-')) return CANAAN_QUESTS.handle(hero, action);
+    if (action.op === 'ach-title') return CANAAN_ACHIEVEMENTS.handle(hero, action);
     if (action.op === 'class-choose') return CANAAN_CLASS.choose(action.cls, hero);
     if (action.op === 'talent-equip') return CANAAN_CLASS.equip(action.talent, hero);
     if (action.op === 'talent-unequip') return CANAAN_CLASS.unequip(action.talent, hero);
@@ -439,7 +459,7 @@
   }
   // Carte de l'hôte : monde extérieur, ou donjon reconstruit à l'identique (génération déterministe).
   function applyMap(map) {
-    const key = map.instance === null ? 'monde' : String(map.instance),
+    const key = map.instance === null ? (map.layer === 'under' ? 'sous' : 'monde') : String(map.instance),
       bosses = Number.isInteger(map.bosses) ? map.bosses : 0;
     if (key === net.lastMap) {
       if (game.world.instance) game.world.instance.cleared = !!map.cleared;
@@ -453,9 +473,9 @@
     net.lastBosses = 0;
     net.snapSelf = true;
     if (map.instance === null) {
+      // L'île, ou les Tréfonds sous l'île (générés à l'identique chez chacun).
       game.world.instance = null;
-      game.world.tiles = game.world.overworld;
-      game.world.decor = game.world.overdecor;
+      CANAAN_UNDER.setLayer(map.layer === 'under' ? 'under' : 'surface');
     } else if (map.instance === 'arena') {
       // Colisée de l'Arène : même plan que chez l'hôte ; la herse suit la vue de l'arène.
       game.world.instance = { index: 'arena', arena: true, cleared: !!map.cleared, bossesDown: 0, guestView: true };
@@ -498,6 +518,12 @@
         hero.name = cleanPseudo(h.name);
         hero.color = /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : '#8068db';
         hero.fishView = Array.isArray(h.fish) && Number.isInteger(h.fish[0]) ? { spot: h.fish[0], bite: !!h.fish[1] } : null;
+        hero.netWeapon = typeof WEAPON_DEFINITIONS !== 'undefined' && Object.hasOwn(WEAPON_DEFINITIONS, h.wpn) ? h.wpn : 'sword';
+        hero.netAim = Number.isFinite(h.aim) ? h.aim / 100 : null;
+        hero.netAct =
+          Array.isArray(h.act) && ['mine', 'herb', 'forge', 'cook'].includes(h.act[0]) && h.act.slice(1).every(Number.isFinite)
+            ? { kind: h.act[0], p: Math.max(0, Math.min(1, h.act[1])), tx: h.act[2], ty: h.act[3], node: h.act[4] | 0 }
+            : null;
         if (hero.lookCode !== h.look) {
           hero.lookCode = h.look;
           hero.look = decodeLook(h.look);
@@ -511,6 +537,8 @@
       p.veiled = !!h.veil;
       p.shielded = h.shield ? 1 : 0;
       hero.questLook = Number(h.q) || 0;
+      hero.achTitle = typeof h.ttl === 'string' ? h.ttl.slice(0, 40) : '';
+      hero.achAura = h.aur === 1;
       if (Math.hypot(h.vx || 0, h.vy || 0) > 0.1) p.anim = (p.anim || 0) + 0.25;
       if (mine) {
         // Sa propre position est prédite : elle se corrige avec le message privé, sauf au premier état ou après un changement de carte.
@@ -535,7 +563,7 @@
       return m;
     });
     game.world.drops = (state.drops || []).map(d => ({ x: d.x, y: d.y, t: 'or', v: 0, life: 99 }));
-    game.world.projectiles = (state.projectiles || []).map(p => ({ x: p.x, y: p.y, vx: 0, vy: 0, c: p.c, life: 2 }));
+    game.world.projectiles = (state.projectiles || []).map(p => ({ x: p.x, y: p.y, vx: 0, vy: 0, c: p.c, life: 2, a: Number.isFinite(p.a) ? p.a / 100 : 0, kind: p.k ? 'arrow' : 'orb' }));
     if (Array.isArray(state.fx)) playEffects(state.fx);
     if (game.world.instance && Array.isArray(state.chests))
       game.world.chests = state.chests
@@ -559,6 +587,8 @@
   function applyPrivate(me) {
     if (Number.isFinite(me.speed)) net.speed = Math.max(0, Math.min(20, me.speed));
     if (Array.isArray(me.cds)) SKILLS.forEach((s, i) => (s.cd = Number.isFinite(me.cds[i]) ? me.cds[i] : 0));
+    if (me.stance && typeof me.stance === 'object')
+      canaanGuestStance = Object.fromEntries(Object.entries(me.stance).filter(([, v]) => Number.isFinite(v)).map(([k, v]) => [k, Math.max(0, Math.min(99, v))]));
     net.revive = Number.isFinite(me.revive) ? me.revive : 0;
     if (Number.isInteger(me.level) && Number.isInteger(me.exp)) {
       game.hero.level = clampLevel(me.level);
@@ -566,6 +596,9 @@
     }
     if (Number.isFinite(me.special)) CANAAN_CLASS.setGuestSpecial(me.special);
     if (me.trade && typeof me.trade === 'object') CANAAN_TRADE.applyRemote(me.trade);
+    if (me.shop !== undefined) CANAAN_SHOP.applyRemote(me.shop);
+    if (me.bank !== undefined) CANAAN_BANK.applyRemote(me.bank);
+    if (me.ach && typeof me.ach === 'object') CANAAN_ACHIEVEMENTS.applyRemote(me.ach);
     if (me.live && typeof me.live === 'object') CANAAN_PROF.applyRemote(me.live);
     const bag = me.bag;
     if (bag && Array.isArray(bag.inventory) && bag.equipment && typeof bag.equipment === 'object') {
@@ -590,7 +623,7 @@
         net.lastWeapon = weapon;
         refreshWeaponBar();
       }
-      if (modalOpen() && (currentGearPanel === 'inventory' || currentGearPanel === 'character')) refreshGearPanel();
+      if (modalOpen() && (currentGearPanel === 'inventory' || currentGearPanel === 'character') && !CANAAN_SHOP.isOpen() && !CANAAN_BANK.isOpen()) refreshGearPanel();
       if (modalOpen() && document.querySelector('#window .classes')) renderTalents();
     }
     if (Number.isFinite(me.x) && Number.isFinite(me.y)) correct(me);
@@ -706,86 +739,63 @@
       for (const hero of net.peers.values()) send(privateSnapshot(hero));
     } else if (game.mode === 'guest') guestTick();
   }
-  // ---------------------------------------------------------------- Jouer sur Internet (application de bureau)
-  // L'application lance le relais chez l'hôte et ouvre un tunnel Pinggy ; le salon s'ouvre sur ce relais local,
-  // et l'adresse publique du tunnel est celle que les amis collent dans « Relais ».
+  // ---------------------------------------------------------------- Jouer à plusieurs (application de bureau)
+  // L'application lance le relais chez l'hôte : sur son adresse Tailscale (amis loin, dans le même réseau Tailscale)
+  // ou ouvert au réseau local (quelqu'un chez toi). Le salon s'ouvre sur ce relais ; l'invitation donne son adresse.
   const desktop = window.canaanDesktop?.hosting || null;
   net.internet = { state: 'off' };
   const internetStatus = st => {
     const s = st && typeof st === 'object' ? st : {};
     return {
       state: ['off', 'starting', 'online', 'closed', 'error'].includes(s.state) ? s.state : 'off',
-      // internet : tunnel Pinggy ; lan : relais ouvert au réseau local (adresses de ce PC sur le réseau).
-      kind: s.kind === 'lan' ? 'lan' : s.kind === 'internet' ? 'internet' : null,
+      // tailscale : relais sur l'adresse Tailscale de l'hôte ; lan : relais ouvert au réseau local.
+      kind: s.kind === 'lan' ? 'lan' : s.kind === 'tailscale' ? 'tailscale' : null,
       addresses: Array.isArray(s.addresses) ? s.addresses.map(normalizeRelayUrl).filter(Boolean).slice(0, 4) : [],
-      // Commandes pour ouvrir le port dans les pare-feux actifs (Linux), et système de l'hôte.
+      // Commandes pour laisser passer les invités dans les pare-feux actifs (Linux), et système de l'hôte.
       firewall: Array.isArray(s.firewall) ? s.firewall.filter(c => typeof c === 'string' && /^sudo [\w .=/&+-]+$/.test(c)).slice(0, 3) : [],
       platform: typeof s.platform === 'string' ? s.platform.slice(0, 16) : '',
       local: typeof s.local === 'string' ? s.local : null,
       relay: typeof s.relay === 'string' ? normalizeRelayUrl(s.relay) : null,
-      free: !!s.free,
-      expiresAt: Number.isFinite(s.expiresAt) ? s.expiresAt : null,
       message: typeof s.message === 'string' ? s.message.slice(0, 300) : ''
     };
   };
   if (desktop)
     desktop.onStatus(st => {
       net.internet = internetStatus(st);
-      if (net.internet.state === 'closed' || net.internet.state === 'error') {
+      if (net.internet.state === 'error') {
         if (game.mode === 'host') chat('Groupe', net.internet.message);
         toast('🌍 ' + net.internet.message);
       }
       setStatus(net.status);
     });
-  async function openInternet() {
-    if (!desktop || game.mode === 'guest') return false;
-    // Passage du réseau local à Internet : le salon local se ferme d'abord (le relais change).
-    if (game.mode === 'host' && net.internet.kind === 'lan') closeRoom();
-    const me = settings();
-    setStatus('Ouverture du tunnel Pinggy…');
-    let st;
-    try {
-      st = internetStatus(await desktop.start({ token: me.pinggyToken, mode: me.pinggyMode, host: me.pinggyHost }));
-    } catch (error) {
-      st = internetStatus({ state: 'error', message: String(error?.message || error) });
-    }
-    net.internet = st;
-    if (st.state !== 'online') {
-      setStatus(st.message || 'Tunnel impossible.');
-      return false;
-    }
-    // Le salon s'ouvre sur le relais local (s'il ne l'est pas déjà : un tunnel rouvert garde le même salon).
-    if (!(game.mode === 'host' && net.relay === st.local && net.socket)) openRoom(st.local, { keep: false });
-    else setStatus('Tunnel rouvert : donne le nouveau lien à tes amis.');
-    return true;
-  }
-  // Jouer en réseau local : même salon, relais ouvert aux appareils de la maison ; l'invitation donne
-  // l'adresse de ce PC sur le réseau (ws://192.168.x.x:8787).
-  async function openLan() {
+  // Ouvre le relais (Tailscale ou réseau local) puis le salon dessus.
+  async function openHosted(kind) {
     if (!desktop || game.mode === 'guest') return false;
     if (game.mode === 'host') closeRoom();
-    setStatus('Ouverture du relais sur ton réseau local…');
+    setStatus(kind === 'lan' ? 'Ouverture du relais sur ton réseau local…' : 'Ouverture du relais sur ton réseau Tailscale…');
     let st;
     try {
-      st = internetStatus(await desktop.startLan());
+      st = internetStatus(await (kind === 'lan' ? desktop.startLan() : desktop.startTailscale()));
     } catch (error) {
-      st = internetStatus({ state: 'error', kind: 'lan', message: String(error?.message || error) });
+      st = internetStatus({ state: 'error', kind, message: String(error?.message || error) });
     }
     net.internet = st;
     if (st.state !== 'online') {
-      setStatus(st.message || 'Relais local impossible.');
+      setStatus(st.message || 'Relais impossible.');
       return false;
     }
     openRoom(st.local, { keep: false });
     return true;
   }
+  const openTailscale = () => openHosted('tailscale');
+  const openLan = () => openHosted('lan');
   async function closeInternet() {
     closeRoom();
     if (desktop) await desktop.stop();
     net.internet = internetStatus({ state: 'off' });
     setStatus('Salon fermé.');
   }
-  // Invitation à partager : lien public du tunnel (ou adresse du relais) et code du salon.
+  // Invitation à partager : adresse du relais (Tailscale ou réseau local) et code du salon.
   function invitation() {
     if (!net.code) return '';
     const relay = net.internet.state === 'online' && net.internet.relay ? net.internet.relay : net.relay;
@@ -847,23 +857,15 @@
       internet: { ...net.internet },
       canHostOnline: !!desktop
     }),
-    openInternet,
+    openTailscale,
     openLan,
     closeInternet,
     invitation,
     copyInvitation,
-    parsePinggyLogin,
     // Apparence de son héros d'invité (choisie sur l'écran titre, envoyée en rejoignant).
     setLook(look) {
       remember({ look: encodeLook(look) });
       return decodeLook(settings().look);
-    },
-    // Préférences Pinggy (abonnement facultatif).
-    setPinggy({ token = '', mode = 'http' } = {}) {
-      const login = parsePinggyLogin(token);
-      if (!login) return false;
-      remember({ pinggyToken: login.token, pinggyHost: login.host, pinggyMode: mode === 'tcp' ? 'tcp' : 'http' });
-      return true;
     },
     debug: net
   });

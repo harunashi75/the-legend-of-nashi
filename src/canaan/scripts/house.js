@@ -1353,6 +1353,8 @@
   // Cuisiner : près d'une cuisinière, d'une marmite ou d'une cheminée (dans n'importe quel bâtiment).
   function nearStove(x, y) {
     if (game.world.instance) return false;
+    // Tréfonds : l'âtre de la taverne naine.
+    if (game.world.layer === 'under') return CANAAN_UNDER.nearStove(x, y);
     const room = roomAt(x, y);
     return itemsOf(room).some(it => {
       const c = CATALOG[it.k];

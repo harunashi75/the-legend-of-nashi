@@ -27,6 +27,10 @@
   // Place pavée de la fontaine.
   const PLAZA = [-7, -7, -2, -3];
   // Objets : genre, case du coin haut-gauche, taille en cases ; block : toutes les cases bloquent.
+  // Places de rechange de la forge autour du camp (cases depuis le camp), des plus proches aux plus lointaines.
+  const FORGE_SPOTS = [];
+  for (let dy = -12; dy <= 12; dy += 2) for (let dx = -26; dx <= 26; dx += 2) FORGE_SPOTS.push([dx, dy]);
+  FORGE_SPOTS.sort((a, b) => Math.abs(a[0] - 9) + Math.abs(a[1] - 1) - (Math.abs(b[0] - 9) + Math.abs(b[1] - 1)));
   const PROPS = [
     { kind: 'barn', x: 2, y: 6, w: 5, h: 4, block: true },
     { kind: 'silo', x: 7, y: 8, w: 2, h: 2, block: true },
@@ -54,6 +58,8 @@
     { kind: 'logs', x: -26, y: 12, w: 2, h: 1, block: true },
     { kind: 'woodpile', x: -6, y: 2, w: 3, h: 1, block: true },
     { kind: 'chop', x: -3, y: 2, w: 1, h: 1, block: true },
+    // Forge du camp : là seulement se fabriquent les enchantements (canaan-gathering).
+    { kind: 'forge', x: 9, y: 1, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
     { kind: 'fountain', x: -6, y: -6, w: 3, h: 3, block: true, on: 'plaza' },
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
     { kind: 'apple', x: -6, y: -18, w: 1, h: 1, block: true },
@@ -234,13 +240,29 @@
 
     // Objets : toute l'emprise doit être libre (et hors des chemins pour ce qui bloque).
     for (const p of PROPS) {
-      const x0 = cx + p.x,
-        y0 = cy + p.y,
-        cells = [];
-      for (let y = y0; y < y0 + p.h; y++) for (let x = x0; x < x0 + p.w; x++) cells.push([x, y]);
       const path = (x, y) => tiles[y][x] === 2;
       const fits = (x, y) => (p.on && ground.get(key(x, y))?.type === p.on ? land(x, y) && !solid.has(key(x, y)) : free(x, y));
-      const ok = cells.every(([x, y]) => (p.kind === 'arch' ? land(x, y) || ground.get(key(x, y))?.type === 'gpath' : fits(x, y) && (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))));
+      const cellsAt = (x0, y0) => {
+        const out = [];
+        for (let y = y0; y < y0 + p.h; y++) for (let x = x0; x < x0 + p.w; x++) out.push([x, y]);
+        return out;
+      };
+      const fitsAt = list => list.every(([x, y]) => (p.kind === 'arch' ? land(x, y) || ground.get(key(x, y))?.type === 'gpath' : fits(x, y) && (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))));
+      // Place prévue, puis les places de rechange (alt) dans l'ordre : la première libre.
+      let x0 = cx + p.x,
+        y0 = cy + p.y,
+        cells = cellsAt(x0, y0),
+        ok = fitsAt(cells);
+      for (const [ax, ay] of p.alt || []) {
+        if (ok) break;
+        const list = cellsAt(cx + ax, cy + ay);
+        if (fitsAt(list)) {
+          x0 = cx + ax;
+          y0 = cy + ay;
+          cells = list;
+          ok = true;
+        }
+      }
       if (!ok) {
         missing.push(p.kind + (p.crop ? ':' + p.crop : '') + '@' + p.x + ',' + p.y);
         continue;
@@ -649,6 +671,39 @@
       R(9, 9, 6, 1, '#c4c4cc');
       R(14, 10, 1, 4, '#5a5a62');
       for (const [x, y] of [[1, 26], [24, 25], [3, 29]]) R(x, y, 3, 2, '#c9a06c');
+    });
+  // Forge : fourneau de pierre à la gueule rougeoyante, cheminée, soufflet de cuir, enclume et marteau.
+  const forgeSprite = () =>
+    sprite('forge', 100, 78, (R, D, E, L) => {
+      // Cheminée et fourneau.
+      R(10, 2, 18, 30, '#6a6a72');
+      R(10, 2, 18, 3, '#8a8a92');
+      R(26, 2, 2, 30, '#4a4a52');
+      R(4, 28, 44, 42, '#7a7a82');
+      for (let y = 30; y < 70; y += 8) for (let x = 4 + ((y / 8) % 2) * 6; x < 46; x += 12) R(x, y, 11, 7, '#86868e');
+      R(4, 28, 44, 3, '#9a9aa2');
+      R(46, 28, 2, 42, '#56565e');
+      // Gueule du fourneau (le feu s'anime par-dessus).
+      R(14, 46, 24, 20, '#2a1a14');
+      E(26, 46, 12, 6, '#2a1a14');
+      // Soufflet.
+      R(50, 52, 14, 8, '#7a4a2a');
+      R(50, 52, 14, 2, '#a06a3a');
+      L(64, 56, 72, 54, '#5a3a22', 2);
+      // Enclume sur son billot.
+      R(70, 58, 16, 14, '#6e4c32');
+      R(70, 58, 4, 14, '#8a6440');
+      R(66, 50, 26, 6, '#4a4e58');
+      R(64, 50, 6, 3, '#4a4e58');
+      R(72, 56, 14, 3, '#3a3e48');
+      R(66, 50, 26, 2, '#7a7e88');
+      // Marteau posé.
+      L(80, 49, 90, 42, '#8a6440', 2);
+      R(86, 38, 8, 5, '#5a5e68');
+      R(86, 38, 8, 1, '#9a9ea8');
+      // Seau d'eau et outils.
+      R(92, 62, 7, 9, '#5a6070');
+      R(92, 62, 7, 2, '#58a8e0');
     });
   const fountainSprite = () =>
     sprite('fontaine', 76, 64, (R, D, E) => {
@@ -1532,6 +1587,32 @@
         shadow(c, cx, bottom - 6, w * 0.5, 8);
         put(c, woodpileSprite(), cx, bottom - 2);
         break;
+      case 'forge': {
+        shadow(c, cx, bottom - 8, w * 0.55, 10);
+        const fs = forgeSprite(),
+          k = fs.width / 100;
+        put(c, fs, cx, bottom - 2);
+        // Feu dans la gueule du fourneau (sprite dessiné à l'échelle k) : flammes qui dansent et lueur.
+        const fx = cx - fs.width / 2 + 26 * k,
+          fy = bottom - 2 - fs.height + 58 * k,
+          f = Math.sin(time * 0.3) * 2;
+        c.save();
+        c.globalCompositeOperation = 'lighter';
+        const g = c.createRadialGradient(fx, fy, 2, fx, fy, 34);
+        g.addColorStop(0, 'rgba(255,170,60,.55)');
+        g.addColorStop(1, 'rgba(255,90,20,0)');
+        c.fillStyle = g;
+        c.beginPath();
+        c.arc(fx, fy, 34, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#ff7a2a';
+        c.fillRect(fx - 18, fy - 6 + f, 36, 14);
+        c.fillStyle = '#ffd060';
+        c.fillRect(fx - 10, fy - 2 - f, 20, 10);
+        c.restore();
+        if (typeof canaanLight === 'function') canaanLight(fx, fy, 90, '#ff9a40', 0.5);
+        break;
+      }
       case 'chop':
         shadow(c, cx, bottom - 8, 18, 5);
         put(c, chopSprite(), cx, bottom - 4);
@@ -1610,6 +1691,11 @@
     layout,
     items: () => items.map(it => ({ kind: it.kind, crop: it.crop || null, x: it.tx, y: it.ty, w: it.w, h: it.h })),
     solidAt: (tx, ty) => solid.has(key(tx, ty)),
+    // Forge du camp (centre, en pixels), ou null si elle n'a pas trouvé sa place.
+    forge() {
+      const f = items.find(it => it.kind === 'forge');
+      return f ? { x: (f.tx + f.w / 2) * TS, y: (f.ty + f.h) * TS } : null;
+    },
     groundAt: (tx, ty) => ground.get(key(tx, ty))?.type || null
   });
 })();

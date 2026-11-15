@@ -3,7 +3,23 @@
 // game.hero est le héros de l'hôte. Les invités rejoindront game plus tard, chacun avec le même format de héros.
 // Métiers d'un héros neuf : pêche et cuisine au niveau 1, bourriche (poissons) et garde-manger (repas) vides.
 function canaanFreshProf() {
-  return { fishing: { level: 1, exp: 0 }, cooking: { level: 1, exp: 0 }, hunting: { level: 1, exp: 0 }, fish: {}, meat: {}, meals: {}, codex: {} };
+  return {
+    fishing: { level: 1, exp: 0 },
+    cooking: { level: 1, exp: 0 },
+    hunting: { level: 1, exp: 0 },
+    mining: { level: 1, exp: 0 },
+    herbalism: { level: 1, exp: 0 },
+    enchanting: { level: 1, exp: 0 },
+    fish: {},
+    meat: {},
+    meals: {},
+    ore: {},
+    herb: {},
+    ench: {},
+    codex: {},
+    // Version des qualités (6 qualités, de Commun à Mythique).
+    qv: 2
+  };
 }
 const game = {
   // solo, host (salon ouvert à des invités) ou guest (connecté au monde d'un hôte, sans simulation locale).
@@ -56,6 +72,12 @@ const game = {
     // Carte extérieure, gardée pendant une instance pour y revenir.
     overworld: null,
     overdecor: null,
+    // Les Tréfonds, sous l'île (underground.js) : même taille et mêmes coordonnées que l'île.
+    underworld: null,
+    underdecor: null,
+    // Couche affichée : 'surface' (l'île) ou 'under' (les Tréfonds) ; couche de retour d'une instance.
+    layer: 'surface',
+    returnLayer: 'surface',
     monsters: [],
     projectiles: [],
     drops: [],
@@ -109,6 +131,16 @@ function canaanBagLimit(hero) {
 }
 // Message de butin : à l'écran pour l'hôte, dans le chat pour un allié.
 // Un invité en ligne reçoit aussi le message sur son écran (game.view.remote, branché par canaan-net).
+// Couche du monde : true dans les Tréfonds (hors instance). canaanHere : la chose (PNJ, gisement, coffre, animal)
+// est sur la couche affichée (sans champ layer : à la surface).
+function canaanUnder() {
+  return game.world.layer === 'under' && !game.world.instance;
+}
+function canaanHere(o) {
+  return (o?.layer === 'under') === (game.world.layer === 'under');
+}
+// Exploits pour les succès (achievements.js remplace ce relais vide une fois chargé).
+function canaanAchieve() {}
 function canaanLootNotice(hero, message) {
   if (hero === game.hero) return game.view.notify(message);
   game.view.chat('Butin', hero.name + ' — ' + message);

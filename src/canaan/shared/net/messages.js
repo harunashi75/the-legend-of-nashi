@@ -27,7 +27,7 @@ export function normalizeRoomCode(text) {
   return ROOM_CODE.test(code) ? code : null;
 }
 // Adresse du relais saisie ou collée par un joueur : ws:// ou wss://, avec un nom d'hôte et un port facultatif.
-// Un lien https:// (Pinggy…) devient wss://, http:// devient ws:// ; sans préfixe, wss:// pour une adresse
+// Un lien https:// devient wss://, http:// devient ws:// ; sans préfixe, wss:// pour une adresse
 // sans port (tunnel HTTPS) et ws:// avec un port. Renvoie null si l'adresse n'est pas lisible.
 export function normalizeRelayUrl(text) {
   let s = String(text ?? '').trim();
@@ -40,12 +40,13 @@ export function normalizeRelayUrl(text) {
 }
 // Invitation à partager : adresse du relais et code du salon, dans un texte lisible.
 export function makeInvitation(relay, code) {
-  return 'Rejoins ma partie Canaan Online ! Relais : ' + relay + ' · Code : ' + code;
+  return 'Rejoins ma partie The Legend of Nashi ! Relais : ' + relay + ' · Code : ' + code;
 }
 // Invitation collée par un invité (ou n'importe quel texte) : relais et code retrouvés si présents.
 export function parseInvitation(text) {
   const s = String(text ?? '');
-  const relay = /\b((?:wss?|https?):\/\/[^\s·,;]+)/i.exec(s),
+  // Adresse avec préfixe, sinon une adresse nue avec son port (100.120.239.59:8787, mon-pc.tail1234.ts.net:8787).
+  const relay = /\b((?:wss?|https?):\/\/[^\s·,;]+)/i.exec(s) || /(?:^|[\s:])((?:\d{1,3}(?:\.\d{1,3}){3}|[a-z0-9-]+(?:\.[a-z0-9-]+)+):\d{2,5})\b/i.exec(s),
     code = /code\s*:?\s*([A-Za-z0-9]{6})\b/i.exec(s);
   return { relay: relay ? normalizeRelayUrl(relay[1]) : null, code: code ? normalizeRoomCode(code[1]) : null };
 }
@@ -97,6 +98,8 @@ export function sanitizeIntent(raw) {
 }
 // Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
+// Repère d'une pile du sac (voir scripts/bag.js).
+export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 export function sanitizeAction(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
@@ -118,6 +121,13 @@ export function sanitizeAction(raw) {
   if (r.op === 'rubis-equip') return word(r.rubis) ? { op: r.op, rubis: r.rubis } : null;
   // Marchand : l'hôte vérifie la présence d'un marchand, l'or et l'objet.
   if (r.op === 'sell') return id ? { op: r.op, id } : null;
+  // Banque : un équipement (identifiant) ou une pile (repère) à déposer ou reprendre.
+  // Succès : titre choisi (identifiant d'un succès débloqué, ou none).
+  if (r.op === 'ach-title') return typeof r.id === 'string' && /^[a-z0-9]{1,8}$/.test(r.id) ? { op: r.op, id: r.id } : null;
+  if (r.op === 'bank-deposit' || r.op === 'bank-withdraw') return typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96 ? { op: r.op, ref: r.ref } : null;
+  if (r.op === 'shop-buy') return Number.isInteger(r.index) && r.index >= 0 && r.index < 32 ? { op: r.op, index: r.index } : null;
+  // Pile du sac (poissons, viandes, repas, Rubis) : « genre:id:qualité*nombre ».
+  if (r.op === 'sell-stack') return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
   if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest') return { op: r.op };
   if (r.op === 'rubis-unequip') return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
@@ -129,6 +139,11 @@ export function sanitizeAction(raw) {
   if (r.op === 'house-place') return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y) ? { op: 'house-place', k: r.k, x: r.x, y: r.y, r: turn } : null;
   if (r.op === 'house-remove' || r.op === 'house-rotate') return cell(r.x) && cell(r.y) ? { op: r.op, x: r.x, y: r.y } : null;
   if (r.op === 'fish') return { op: 'fish' };
+  // Minage et cueillette : numéro du gisement ; enchanteur : statistique, métal (0 à 5), nombre ; poser : pile et pièce.
+  if (r.op === 'gather') return Number.isInteger(r.node) && r.node >= 0 && r.node < 5000 ? { op: 'gather', node: r.node } : null;
+  if (r.op === 'enchant-craft')
+    return word(r.stat) && Number.isInteger(r.tier) && r.tier >= 0 && r.tier <= 5 && Number.isInteger(r.count) && r.count >= 1 && r.count <= 20 ? { op: r.op, stat: r.stat, tier: r.tier, count: r.count } : null;
+  if (r.op === 'enchant-apply') return typeof r.token === 'string' && STACK_TOKEN.test(r.token) && typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96 ? { op: r.op, token: r.token, ref: r.ref } : null;
   if (r.op === 'hunt') return typeof r.game === 'string' && /^[a-z]{2,16}$/.test(r.game) ? { op: 'hunt', game: r.game } : null;
   const recipe = typeof r.recipe === 'string' && /^[a-z]{2,16}$/.test(r.recipe) ? r.recipe : null,
     quality = Number.isInteger(r.quality) && r.quality >= 0 && r.quality <= 7 ? r.quality : null;

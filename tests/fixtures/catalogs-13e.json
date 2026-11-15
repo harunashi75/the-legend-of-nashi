@@ -42,7 +42,7 @@
    "color": "#ff9955",
    "level": 18,
    "mobLevel": 20,
-   "rarity": "Épique",
+   "rarity": "Rare",
    "dropLevel": 21
   },
   {
@@ -57,7 +57,7 @@
    "color": "#b79cff",
    "level": 25,
    "mobLevel": 27,
-   "rarity": "Épique",
+   "rarity": "Rare",
    "dropLevel": 28
   },
   {
@@ -72,7 +72,7 @@
    "color": "#6bdfa2",
    "level": 32,
    "mobLevel": 34,
-   "rarity": "Épique",
+   "rarity": "Rare",
    "dropLevel": 35
   },
   {
@@ -87,7 +87,7 @@
    "color": "#e88aff",
    "level": 37,
    "mobLevel": 39,
-   "rarity": "Épique",
+   "rarity": "Rare",
    "dropLevel": 40
   },
   {
@@ -105,7 +105,7 @@
    "raid": true,
    "level": 44,
    "mobLevel": 46,
-   "rarity": "Héroïque",
+   "rarity": "Épique",
    "dropLevel": 47
   },
   {
@@ -123,7 +123,7 @@
    "raid": true,
    "level": 49,
    "mobLevel": 51,
-   "rarity": "Héroïque",
+   "rarity": "Épique",
    "dropLevel": 52
   },
   {
@@ -141,7 +141,7 @@
    "raid": true,
    "level": 54,
    "mobLevel": 56,
-   "rarity": "Légendaire",
+   "rarity": "Épique",
    "dropLevel": 57
   },
   {
@@ -163,25 +163,98 @@
    "difficulties": {
     "normal": {
      "label": "Normal",
-     "icon": "⚔️",
+     "icon": "⟦mode_normal⟧",
      "level": 58,
      "mobLevel": 60,
-     "rarity": "Mythique",
+     "rarity": "Épique",
      "dropLevel": 60,
      "hp": 1,
      "damage": 1
     },
     "heroic": {
      "label": "Héroïque",
-     "icon": "🔥",
+     "icon": "⟦mode_heroic⟧",
      "level": 60,
      "mobLevel": 60,
-     "rarity": "Céleste",
+     "rarity": "Épique",
+     "prestige": "raidHeroic",
      "dropLevel": 60,
      "hp": 1.65,
      "damage": 1.4
     }
    }
+  },
+  {
+   "name": "La Mine Effondrée de Durgrim",
+   "biome": 6,
+   "x": 89,
+   "y": 182,
+   "boss": "Grumbar, le Contremaître Maudit",
+   "bosses": [
+    "Grumbar, le Contremaître Maudit"
+   ],
+   "color": "#e0a060",
+   "level": 1,
+   "mobLevel": 1,
+   "rarity": "Peu commun",
+   "prestige": "underground",
+   "dropLevel": 1,
+   "under": true,
+   "scaled": true
+  },
+  {
+   "name": "Les Halls Engloutis de Khaz-Ombral",
+   "biome": 7,
+   "x": 218,
+   "y": 89,
+   "boss": "Ombral, le Roi sous la Pierre",
+   "bosses": [
+    "Ombral, le Roi sous la Pierre"
+   ],
+   "color": "#8ac8e8",
+   "level": 1,
+   "mobLevel": 1,
+   "rarity": "Peu commun",
+   "prestige": "underground",
+   "dropLevel": 1,
+   "under": true,
+   "scaled": true
+  },
+  {
+   "name": "La Crypte des Mille Tombes",
+   "biome": 8,
+   "x": 311,
+   "y": 218,
+   "boss": "Le Fossoyeur Éternel",
+   "bosses": [
+    "Le Fossoyeur Éternel"
+   ],
+   "color": "#a8f0c0",
+   "level": 1,
+   "mobLevel": 1,
+   "rarity": "Peu commun",
+   "prestige": "underground",
+   "dropLevel": 1,
+   "under": true,
+   "scaled": true
+  },
+  {
+   "name": "Les Tréfonds Fongiques",
+   "biome": 9,
+   "x": 182,
+   "y": 311,
+   "boss": "La Reine des Spores",
+   "bosses": [
+    "La Reine des Spores"
+   ],
+   "color": "#e870c0",
+   "level": 1,
+   "mobLevel": 1,
+   "rarity": "Peu commun",
+   "prestige": "underground",
+   "dropLevel": 1,
+   "under": true,
+   "scaled": true
   }
  ],
  "rarities": [
@@ -206,11 +279,6 @@
    "mult": 1.3
   },
   {
-   "name": "Héroïque",
-   "color": "#ffdc65",
-   "mult": 1.4
-  },
-  {
    "name": "Légendaire",
    "color": "#ff983d",
    "mult": 1.5
@@ -219,49 +287,44 @@
    "name": "Mythique",
    "color": "#45e1db",
    "mult": 1.7
-  },
-  {
-   "name": "Céleste",
-   "color": "#ff4deb",
-   "mult": 1.85
   }
  ],
  "weapons": {
   "sword": {
    "name": "Épée",
-   "icon": "⚔️"
+   "icon": "⟦w_sword⟧"
   },
   "dualsword": {
    "name": "Épées doubles",
-   "icon": "⚔️"
+   "icon": "⟦w_dualsword⟧"
   },
   "axe": {
    "name": "Hache",
-   "icon": "🪓"
+   "icon": "⟦w_axe⟧"
   },
   "mace": {
    "name": "Masse",
-   "icon": "🔨"
+   "icon": "⟦w_mace⟧"
   },
   "spear": {
    "name": "Lance",
-   "icon": "🔱"
+   "icon": "⟦w_spear⟧"
   },
   "dualdagger": {
    "name": "Dagues doubles",
-   "icon": "🗡️"
+   "icon": "⟦w_dualdagger⟧"
   },
   "bow": {
    "name": "Arc",
-   "icon": "🏹"
+   "icon": "⟦w_bow⟧"
   },
   "shield": {
    "name": "Égide sacrée",
-   "icon": "🛡️"
+   "icon": "⟦w_shield⟧"
   },
   "staff": {
    "name": "Bâton arcanique",
-   "icon": "🪄"
+   "icon": "⟦w_staff⟧"
   }
  },
  "craft": [
@@ -280,270 +343,342 @@
    [
     "🗡️",
     "Frappe précise",
-    "Coup frontal rapide · 120 %",
-    3,
-    8
+    "Cône court · 260 %",
+    4,
+    8,
+    2.6,
+    "Un coup puissant devant toi qui touche tous les ennemis du cône."
    ],
    [
     "🌀",
     "Tourbillon",
-    "Zone circulaire · 85 %",
+    "Cercle autour de toi · 180 %",
     7,
-    14
+    14,
+    1.8,
+    "Tu tournoies et frappes tous les ennemis autour de toi."
    ],
    [
     "🛡️",
     "Parade",
-    "Réduit les dégâts reçus de 40 % pendant 2 s",
+    "−40 % de dégâts reçus 2,5 s · prépare la Riposte",
     12,
-    14
+    12,
+    0,
+    "Pendant 2,5 s, tu subis 40 % de dégâts en moins. Pendant 4 s, ta Riposte héroïque est renforcée."
    ],
    [
     "💚",
     "Riposte héroïque",
-    "220 % (280 % après parade) · vol de vie 15 % des dégâts réels",
-    12,
-    23
+    "Cône · 450 % (600 % après Parade) · vol de vie 20 %",
+    11,
+    22,
+    4.5,
+    "Un coup dévastateur devant toi. Après une Parade, il inflige 600 %. Tu récupères 20 % des dégâts infligés en PV."
    ]
   ],
   "dualsword": [
    [
     "⚡",
     "Rafale de lames",
-    "4 coups rapides · 45 % chacun",
-    6,
-    13
+    "4 coups rapides · 75 % chacun (300 %)",
+    5,
+    12,
+    3,
+    "4 coups en cône devant toi en moins d’une demi-seconde. Active le combo pendant 4 s."
    ],
    [
     "🌪️",
     "Danse des lames",
-    "3 frappes circulaires · 55 % chacune",
+    "3 tours · 70 % chacun (210 %)",
     9,
-    20
+    18,
+    2.1,
+    "3 frappes circulaires autour de toi. Active le combo pendant 4 s."
    ],
    [
     "🔥",
     "Élan offensif",
-    "Vitesse d’attaque +20 %, défense -10 %, 5 s",
+    "Attaques de base 30 % plus rapides et +15 % de dégâts, 6 s",
     14,
-    16
+    14,
+    0,
+    "Pendant 6 s, tes attaques de base sont 30 % plus rapides et tous tes coups font +15 % de dégâts. Tu subis 10 % de dégâts en plus."
    ],
    [
     "💥",
     "Assaut final",
-    "6 frappes · 45 %, dernier coup renforcé en combo",
+    "6 frappes · 80 % (480 %), dernier coup ×2 en combo",
     13,
-    26
+    24,
+    4.8,
+    "6 frappes en cône. Si le combo est actif (Rafale ou Danse lancée dans les 4 s), la dernière frappe fait double dégâts (560 % au total)."
    ]
   ],
   "axe": [
    [
     "🪓",
     "Frappe écrasante",
-    "Coup frontal · 170 %",
+    "Cône · 320 %",
     5,
-    12
+    12,
+    3.2,
+    "Un coup lourd devant toi."
    ],
    [
     "🌋",
     "Fendoir",
-    "Cône de 120° · 125 %",
+    "Large cône de 120° · 220 %",
     8,
-    17
+    16,
+    2.2,
+    "Un grand coup de taille qui touche tous les ennemis devant toi."
    ],
    [
     "🔥",
     "Rage du berserker",
-    "Dégâts +20 %, défense -15 %, 6 s",
+    "+25 % de dégâts pendant 8 s",
     16,
-    18
+    16,
+    0,
+    "Pendant 8 s, tous tes coups (attaques de base comprises) font +25 % de dégâts. Tu subis 15 % de dégâts en plus."
    ],
    [
     "💀",
     "Exécution",
-    "240 %, ou 320 % sous 30 % PV",
-    14,
-    26
+    "Cône · 500 %, ou 750 % sous 30 % de PV",
+    13,
+    24,
+    5,
+    "Un coup fatal devant toi. Contre une cible sous 30 % de ses PV, il inflige 750 %."
    ]
   ],
   "mace": [
    [
     "🔨",
     "Coup fracassant",
-    "130 % · bris d’armure 10 %, 6 s",
+    "Cône · 260 % · armure brisée 6 s",
     6,
-    13
+    12,
+    2.6,
+    "Brise l’armure des ennemis touchés : ils subissent 10 % de dégâts en plus pendant 6 s (de toi et de ton groupe)."
    ],
    [
     "💢",
     "Onde de choc",
-    "Zone · 90 % et ralentissement 25 %, 3 s",
+    "Cercle · 180 % · ralentit 3 s",
     10,
-    19
+    18,
+    1.8,
+    "Frappe le sol : tous les ennemis autour de toi sont touchés et ralentis pendant 3 s."
    ],
    [
     "✋",
     "Coup d’interruption",
-    "100 % · interrompt ou affaiblit un boss",
+    "Cône · 200 % · étourdit 1,5 s (boss : affaibli)",
     11,
-    17
+    16,
+    2,
+    "Étourdit les monstres touchés pendant 1,5 s. Un boss n’est pas étourdi mais affaibli : il inflige 5 % de dégâts en moins pendant 4 s."
    ],
    [
     "💥",
     "Briseur de rempart",
-    "210 %, ou 260 % contre armure brisée",
+    "Cône · 460 %, ou 600 % sur armure brisée",
     14,
-    25
+    24,
+    4.6,
+    "Un coup massif devant toi. Contre une cible à l’armure brisée (Coup fracassant), il inflige 600 %."
    ]
   ],
   "spear": [
    [
     "🔱",
     "Estoc perforant",
-    "Ligne traversante · 135 %",
+    "Ligne longue · 270 %",
     5,
-    12
+    12,
+    2.7,
+    "Un coup en ligne droite qui traverse tous les ennemis alignés devant toi."
    ],
    [
     "🌙",
     "Balayage du lancier",
-    "Arc de 180° · 95 % et repoussement",
+    "Demi-cercle · 190 % · repousse",
     8,
-    17
+    16,
+    1.9,
+    "Un balayage devant toi qui repousse les monstres (pas les boss)."
    ],
    [
     "💨",
     "Charge du lancier",
-    "Bond en avant et dégâts sur la trajectoire · 115 %",
-    11,
-    19
+    "Bond en avant · 240 % sur la trajectoire",
+    10,
+    18,
+    2.4,
+    "Tu bondis vers la souris et frappes tous les ennemis sur ton chemin et devant toi."
    ],
    [
     "🎯",
     "Percée parfaite",
-    "220 %, ou 275 % à portée optimale",
+    "Cône étroit · 460 %, ou 600 % à portée idéale",
     13,
-    25
+    24,
+    4.6,
+    "Un estoc puissant. Contre une cible entre 3 et 5 cases de toi (ni collée, ni trop loin), il inflige 600 %."
    ]
   ],
   "dualdagger": [
    [
     "🩸",
     "Entaille rapide",
-    "2 frappes · 65 %, saignement 5 s",
+    "2 coups · 120 % chacun · saignement 5 s",
     5,
-    11
+    11,
+    2.4,
+    "2 coups devant toi. Le second fait saigner : 35 % de ta Puissance par seconde pendant 5 s (175 % en tout)."
    ],
    [
     "🌀",
     "Lames tournoyantes",
-    "Zone · 90 % et prolonge les saignements",
+    "Cercle · 180 % · saignements +3 s",
     8,
-    16
+    16,
+    1.8,
+    "Frappe tous les ennemis autour de toi et prolonge de 3 s leurs saignements."
    ],
    [
     "💨",
     "Pas de l’ombre",
-    "Esquive directionnelle, prochain coup +25 %",
-    11,
-    15
+    "Bond arrière · prochain coup +60 %",
+    10,
+    12,
+    0,
+    "Tu bondis en arrière (dos à la souris). Ton prochain coup, dans les 4 s, fait +60 % de dégâts."
    ],
    [
     "🩸",
     "Mille coupures",
-    "5 frappes · 45 %, consume les saignements",
+    "5 coups · 85 % (425 %) · consume les saignements",
     13,
-    24
+    24,
+    4.25,
+    "5 coups en cône. Chaque saignement touché explose aussitôt : il inflige d’un coup 150 % de ce qu’il lui restait à faire."
    ]
   ],
   "bow": [
    [
     "🏹",
-    "Tir chargé",
-    "Projectile · 100–190 % selon charge",
+    "Tir puissant",
+    "Flèche · 280 % (360 % après un Repli)",
     4,
-    11
+    10,
+    2.8,
+    "Une flèche puissante vers la souris. Juste après un Repli tactique (5 s), elle inflige 360 %."
    ],
    [
     "🌧️",
     "Pluie de flèches",
-    "4 impacts en zone · 40 % chacun",
+    "Zone sous la souris · 4 salves de 90 % (360 %)",
     11,
-    21
+    20,
+    3.6,
+    "Une pluie de flèches tombe là où tu vises : 4 salves en 2 s sur tous les ennemis de la zone."
    ],
    [
     "🕸️",
     "Tir entravant",
-    "80 % · ralentit, ou marque un boss",
+    "Flèche · 200 % · ralentit 4 s (boss : marqué)",
     9,
-    15
+    14,
+    2,
+    "Une flèche qui ralentit les monstres sur sa ligne pendant 4 s. Un boss est marqué : son prochain coup reçu fait +30 % de dégâts."
    ],
    [
     "💨",
     "Repli tactique",
-    "Bond arrière et tir · 110 %, accélère le prochain tir",
-    11,
-    17
+    "Bond arrière · tir 240 % · renforce le Tir puissant",
+    10,
+    16,
+    2.4,
+    "Tu bondis en arrière et tires une flèche (240 %). Ton prochain Tir puissant dans les 5 s inflige 360 %."
    ]
   ],
   "shield": [
    [
     "🌀",
     "Tempête d’égide",
-    "Tourbillon de bouclier · 4 frappes de zone à 40 %",
+    "Cercle · 4 frappes de 65 % (260 %)",
     9,
-    18
+    18,
+    2.6,
+    "Ton bouclier tourne autour de toi et frappe 4 fois tous les ennemis proches."
    ],
    [
     "☀️",
     "Sol consacré",
-    "Zone sacrée 6 s : dégâts sur la durée et soins périodiques",
+    "Zone 6 s · 60 %/s aux ennemis · soigne 3 % PV/s",
     17,
-    26
+    24,
+    3.6,
+    "Consacre le sol pendant 6 s : chaque seconde, les ennemis dedans subissent 60 % de dégâts sacrés et chaque héros du groupe dedans récupère 3 % de ses PV max."
    ],
    [
     "🛡️",
     "Lancer du rempart",
-    "Bouclier projeté en ligne droite · 155 % et retour visuel",
+    "Ligne longue · 290 %",
     7,
-    15
+    14,
+    2.9,
+    "Tu lances ton bouclier en ligne droite : il traverse et frappe tous les ennemis alignés."
    ],
    [
     "✨",
     "Serment du gardien",
-    "Réduit les dégâts reçus de 35 % pendant 5 s et soigne 12 % des PV max",
-    23,
-    28
+    "−35 % de dégâts reçus 6 s · soigne 15 % PV",
+    22,
+    26,
+    0,
+    "Pendant 6 s, tu subis 35 % de dégâts en moins, et tu récupères aussitôt 15 % de tes PV max."
    ]
   ],
   "staff": [
    [
     "🔮",
     "Projectile arcanique",
-    "120 % magique · +1 charge",
+    "Projectile magique · 220 % · +1 charge",
     3,
-    11
+    10,
+    2.2,
+    "Un projectile magique vers la souris. Donne 1 charge arcanique (3 au maximum, affichées sur la barre et sous ton héros)."
    ],
    [
     "💠",
     "Onde magique",
-    "Zone · 100 % magique · +1 charge si touche",
+    "Cercle magique · 190 % · +1 charge si touche",
     8,
-    19
+    18,
+    1.9,
+    "Une onde autour de toi qui frappe tous les ennemis proches. Donne 1 charge si elle touche au moins un ennemi."
    ],
    [
     "✨",
     "Concentration",
-    "Prochain sort +30 % · +1 charge",
+    "Prochaine compétence +40 % · +1 charge",
     12,
-    14
+    12,
+    0,
+    "Ta prochaine compétence offensive (dans les 8 s) fait +40 % de dégâts. Les attaques de base ne la consomment pas. Donne 1 charge."
    ],
    [
     "🌌",
     "Surcharge arcanique",
-    "170 % +55 % par charge consommée (max 3)",
-    13,
-    27
+    "Zone sous la souris · 320 % +140 % par charge (max 740 %)",
+    12,
+    26,
+    3.2,
+    "Explosion là où tu vises : 320 %, plus 140 % par charge consommée (740 % avec 3 charges). Consomme toutes les charges."
    ]
   ]
  },
@@ -575,14 +710,14 @@
   [
    47,
    "tier",
-   "Héroïque",
-   469
+   "Épique",
+   436
   ],
   [
    60,
    "tier",
-   "Céleste",
-   788
+   "Mythique",
+   724
   ]
  ],
  "loot": [
@@ -625,19 +760,19 @@
   [
    47,
    "tier",
-   "Héroïque",
+   "Épique",
    {
     "level": 47,
-    "rarity": "Héroïque"
+    "rarity": "Épique"
    }
   ],
   [
    60,
    "tier",
-   "Céleste",
+   "Mythique",
    {
     "level": 60,
-    "rarity": "Céleste"
+    "rarity": "Mythique"
    }
   ]
  ],
@@ -723,26 +858,6 @@
    554
   ],
   [
-   "Héroïque",
-   1,
-   18
-  ],
-  [
-   "Héroïque",
-   10,
-   106
-  ],
-  [
-   "Héroïque",
-   30,
-   302
-  ],
-  [
-   "Héroïque",
-   60,
-   596
-  ],
-  [
    "Légendaire",
    1,
    20
@@ -781,26 +896,6 @@
    "Mythique",
    60,
    724
-  ],
-  [
-   "Céleste",
-   1,
-   24
-  ],
-  [
-   "Céleste",
-   10,
-   141
-  ],
-  [
-   "Céleste",
-   30,
-   400
-  ],
-  [
-   "Céleste",
-   60,
-   788
   ]
  ]
 }

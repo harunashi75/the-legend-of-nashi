@@ -13,8 +13,9 @@ function awardBossLoot(source, index, hero = game.hero) {
 function grantSourceReward(kind, hero = game.hero, level = 1) {
   const reward = SOURCE_REWARDS[kind];
   if (!reward.rarity) return null;
+  // Rubis Prospecteur : un Peu commun à la place d'un Commun.
   const better = kind === 'normal' && CANAAN_RUBIS.betterDrop(hero),
-    rarity = better ? SOURCE_REWARDS.elite.rarity : reward.rarity;
+    rarity = better ? 'Peu commun' : reward.rarity;
   return giveGear(level, reward.source, rarity, hero);
 }
 function gearItemLevel(item) {
@@ -25,17 +26,7 @@ function shopPrice() {
   return shopPriceAt(heroLevel());
 }
 function openShop(n) {
-  showPanel(
-    '<h2>🛍️ ' +
-      safeGearText(n.name) +
-      '</h2><p>' +
-      safeGearText(n.village || CANAAN_CAMP.name) +
-      ' · Or : ' +
-      P.gold +
-      '</p><button data-action="buyGear">Équipement vert de ton niveau · ' +
-      shopPrice() +
-      ' or</button><p class="muted">Le marchand du camp vend du matériel vert. Pour devenir plus fort, il faut trouver mieux : les monstres, les boss mondiaux, les donjons et les raids lâchent des équipements toujours plus puissants.</p><button data-action="renderInventory">🎒 Vendre des objets</button>'
-  );
+  return CANAAN_SHOP.open(n);
 }
 // Acheter l'équipement vert du marchand pour un héros (l'hôte, ou un invité en ligne à sa demande).
 function buyGearFor(hero) {
@@ -45,7 +36,7 @@ function buyGearFor(hero) {
     say('🛍️ Va voir un marchand pour acheter.');
     return false;
   }
-  if (hero.inventory.length >= canaanBagLimit(hero)) {
+  if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
     say('Sac plein');
     return false;
   }

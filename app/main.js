@@ -1,4 +1,4 @@
-// Application de bureau Canaan Online : une fenêtre Electron qui affiche le jeu assemblé.
+// Application de bureau The Legend of Nashi : une fenêtre Electron qui affiche le jeu assemblé.
 // Le jeu reste le même HTML autonome que la version de test ; aucune page externe n'est chargée.
 'use strict';
 const { app, BrowserWindow, clipboard, ipcMain, screen, session, shell } = require('electron');
@@ -6,10 +6,29 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { createSaveStore } = require('./saves.js');
-const { createHosting, isPinggyTunnel } = require('./hosting.js');
+const { createHosting } = require('./hosting.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const DEV = !app.isPackaged;
+
+// Le jeu s'appelait « Canaan Online » : son dossier de données (sauvegardes, affichage) portait ce nom. Au premier
+// lancement sous le nouveau nom, les sauvegardes et réglages de l'ancien dossier sont copiés (jamais déplacés ni
+// effacés). Rien n'est copié quand un dossier de données est imposé (--user-data-dir, tests).
+function adoptOldData() {
+  if (app.commandLine.hasSwitch('user-data-dir')) return;
+  const now = app.getPath('userData'),
+    old = path.join(app.getPath('appData'), 'Canaan Online');
+  if (path.resolve(now) === path.resolve(old) || !fs.existsSync(old)) return;
+  try {
+    fs.mkdirSync(now, { recursive: true });
+    for (const name of ['saves', 'display.json'])
+      if (fs.existsSync(path.join(old, name)) && !fs.existsSync(path.join(now, name)))
+        fs.cpSync(path.join(old, name), path.join(now, name), { recursive: true, errorOnExist: false, force: false });
+  } catch (error) {
+    console.error('[données] copie de l’ancien dossier impossible :', error.message);
+  }
+}
+adoptOldData();
 
 // Nom du HTML assemblé, déduit de la version unique déclarée dans runtime-config.js (comme tools/build_canaan.py).
 function gameFile() {
@@ -119,17 +138,12 @@ ipcMain.on('saves:open-folder', event => {
   if (mainWindow && event.sender === mainWindow.webContents) shell.openPath(store.dir);
 });
 
-// Jouer sur Internet : relais local et tunnel Pinggy (hosting.js). L'état est renvoyé à la page à chaque changement.
+// Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local (hosting.js). L'état est renvoyé à la page.
 let hosting = null;
 const fromGame = event => !!mainWindow && event.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame;
-ipcMain.handle('net:host-start', async (event, options) => {
+ipcMain.handle('net:host-tailscale', async event => {
   if (!fromGame(event)) throw new Error('Origine refusée');
-  const o = options && typeof options === 'object' ? options : {};
-  return hosting.start({
-    token: typeof o.token === 'string' ? o.token.trim() : '',
-    mode: o.mode === 'tcp' ? 'tcp' : 'http',
-    host: typeof o.host === 'string' ? o.host.trim() : ''
-  });
+  return hosting.startTailscale();
 });
 ipcMain.handle('net:host-lan', async event => {
   if (!fromGame(event)) throw new Error('Origine refusée');
@@ -181,7 +195,7 @@ function createWindow() {
     fullscreen: display.fullscreen,
     minWidth: 960,
     minHeight: 600,
-    title: 'Canaan Online',
+    title: 'The Legend of Nashi',
     backgroundColor: '#0b0906',
     autoHideMenuBar: true,
     show: false,
@@ -243,17 +257,10 @@ function createWindow() {
 app.whenReady().then(() => {
   store = createSaveStore(path.join(app.getPath('userData'), 'saves'));
   hosting = createHosting({
-    dataDir: path.join(app.getPath('userData'), 'pinggy'),
     onStatus: status => mainWindow?.webContents.send('net:host-status', status)
   });
   // Aucune autorisation (caméra, micro, notifications…) n'est accordée.
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
-  // Tunnels Pinggy gratuits : la page d'avertissement réservée aux navigateurs est sautée (sinon la connexion de
-  // l'invité au relais reçoit cette page et échoue : « Relais injoignable »).
-  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ['wss://*/*', 'ws://*/*', 'https://*/*', 'http://*/*'] }, (details, callback) => {
-    if (!isPinggyTunnel(details.url)) return callback({});
-    callback({ requestHeaders: { ...details.requestHeaders, 'X-Pinggy-No-Screen': 'canaan' } });
-  });
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -262,7 +269,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-// En quittant : tunnel fermé et relais arrêté.
+// En quittant : relais arrêté.
 app.on('before-quit', () => {
   hosting?.stop();
 });

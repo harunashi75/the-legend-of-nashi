@@ -12,10 +12,10 @@
   background: linear-gradient(150deg, #10192e, #16112b);
   box-shadow: 0 12px 44px #000d;
   color: #eee8fa;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #gearHoverTooltip .tooltip-name {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   font-weight: 800;
   margin-bottom: 5px;
 }
@@ -28,7 +28,7 @@
   border-top: 1px solid #504769;
 }
 #gearHoverTooltip .gear-compare-head {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   line-height: 1.4;
   margin-bottom: 6px;
 }
@@ -101,7 +101,7 @@
   gap: 8px;
   padding: 8px 5px;
   border-bottom: 1px solid #ffffff18;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #window .stats52 .stat52 b,
 #window .stats52 .stat52 em {
@@ -131,7 +131,7 @@
   padding: 11px;
   margin-top: 10px;
   color: #f9e1ae;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   line-height: 1.6;
 }
 #gearHoverTooltip .artifact56 b {
@@ -143,7 +143,7 @@
   padding: 10px;
   margin-top: 8px;
   background: #1a2036;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   line-height: 1.6;
 }
 #window .bag-sale-wrap {
@@ -171,7 +171,7 @@
   background: #912e3a;
   border: 1px solid #f39ba5;
   color: #fff;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   font-weight: 800;
   padding: 4px 7px;
   margin: 0;

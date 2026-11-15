@@ -11,6 +11,8 @@
     const inst = game.world.instance;
     if (!inst) return null;
     if (inst.arena) return clampLevel(game.hero?.level);
+    // Donjon des Tréfonds : au niveau du groupe, fixé à l'entrée.
+    if (Number.isFinite(inst.scaledLevel)) return clampLevel(inst.scaledLevel + (boss ? 1 : 0));
     const d = instances[inst.index],
       mode = instanceDifficulty();
     return clampLevel((mode?.mobLevel || d?.mobLevel || 1) + (boss ? (d?.raid ? 2 : 1) : 0));
@@ -52,9 +54,11 @@
     if (!m || m.boss || m.worldBoss || m.arenaBoss || m.arenaClone || m.hp <= 0 || m._levelHp) return;
     const type = MOB_TYPES.find(t => t.name === m.t),
       inst = game.world.instance && !game.world.instance.arena,
-      // En donjon et en raid, les monstres sont 25 % plus résistants que dehors.
+      // En donjon et en raid, les monstres sont 25 % plus résistants que dehors (boss : voir bossHealth).
       scale = inst ? INSTANCE_TOUGHNESS * (instanceDifficulty()?.hp || 1) * canaanGroupScale().hp : 1,
-      desired = Math.round(mobHealth(mobLevel(m), !!m.elite, type?.hp || 100) * scale),
+      // Une élite d'instance a 1,6× les PV d'un monstre (×2,4 dehors) : jamais autant qu'un boss.
+      eliteScale = inst && m.elite ? 1.6 / 2.4 : 1,
+      desired = Math.round(mobHealth(mobLevel(m), !!m.elite, type?.hp || 100) * scale * eliteScale),
       ratio = m.mhp > 0 ? Math.min(1, Math.max(0, m.hp / m.mhp)) : 1;
     m.mhp = desired;
     m.hp = Math.max(1, Math.round(desired * ratio));

@@ -53,6 +53,7 @@
     tradeCancel: () => CANAAN_TRADE.actions.cancel(),
     tradeReady: () => CANAAN_TRADE.actions.ready(),
     tradeAdd: element => CANAAN_TRADE.actions.add(actionInteger(element, 'index')),
+    tradeAddId: element => CANAAN_TRADE.actions.addId(element.dataset.id),
     tradeRemove: element => CANAAN_TRADE.actions.remove(actionInteger(element, 'index')),
     tradeGold: () => CANAAN_TRADE.actions.gold(),
     groupCreate: () => CANAAN_GROUP.actions.create(),
@@ -64,11 +65,10 @@
     groupCancel: () => CANAAN_GROUP.actions.cancel(),
     groupOpenRoom: () => CANAAN_GROUP.actions.openRoom(),
     groupCloseRoom: () => CANAAN_GROUP.actions.closeRoom(),
-    groupOpenInternet: () => CANAAN_GROUP.actions.openInternet(),
+    groupOpenTailscale: () => CANAAN_GROUP.actions.openTailscale(),
     groupOpenLan: () => CANAAN_GROUP.actions.openLan(),
     groupCloseInternet: () => CANAAN_GROUP.actions.closeInternet(),
     groupCopyInvitation: () => CANAAN_GROUP.actions.copyInvitation(),
-    groupSavePinggy: () => CANAAN_GROUP.actions.savePinggy(),
     netJoinForm: () => CANAAN_SLOT_MENU.joinForm(),
     lookSet: element => CANAAN_SLOT_MENU.lookSet(actionText(element, 'key'), actionInteger(element, 'index')),
     lookRandom: () => CANAAN_SLOT_MENU.lookRandom(),
@@ -81,6 +81,10 @@
     restartFresh: () => CANAAN_PERSISTENCE.restartFresh(),
     toggleTalents: () => toggleTalents(),
     toggleJournal: () => toggleJournal(),
+    toggleAchievements: () => toggleAchievements(),
+    achTab: element => CANAAN_ACHIEVEMENTS.actions.tab(actionText(element, 'tab')),
+    achCat: element => CANAAN_ACHIEVEMENTS.actions.cat(actionText(element, 'cat')),
+    achTitle: element => CANAAN_ACHIEVEMENTS.actions.title(actionText(element, 'title')),
     questTab: element => questTab(actionText(element, 'tab')),
     questTrack: element => questTrack(actionInteger(element, 'quest')),
     questAccept: element => questAccept(actionInteger(element, 'quest')),
@@ -118,6 +122,17 @@
       equipReserveWeapon(index);
     },
     sellAllCommon: () => sellAllCommon(),
+    // Sac unifié et boutique : utiliser une pile (Rubis, repas), acheter au marchand, vendre une pile.
+    useBagStack: element => CANAAN_BAG.use(element.dataset.token),
+    shopBuy: element => CANAAN_SHOP.buyAt(actionInteger(element, 'index')),
+    shopSellStack: element => CANAAN_SHOP.sellToken(element.dataset.token),
+    // Enchanteur (panneau P) : statistique, création, enchantement choisi, pièce à enchanter.
+    enchantStat: element => CANAAN_GATHER.actions.stat(element.dataset.stat),
+    enchantCraft: element => CANAAN_GATHER.actions.craft(element.dataset.stat, actionInteger(element, 'tier'), element.dataset.count ? actionInteger(element, 'count') : 1),
+    enchantPick: element => CANAAN_GATHER.actions.pick(element.dataset.token),
+    enchantApply: element => CANAAN_GATHER.actions.apply(element.dataset.ref),
+    bankDeposit: element => CANAAN_BANK.depositRef(element.dataset.ref),
+    bankWithdraw: element => CANAAN_BANK.withdrawRef(element.dataset.ref),
     unequip: element => {
       const slot = actionText(element, 'slot');
       hideGearTooltip();
@@ -154,10 +169,9 @@
     'groupAskRemove',
     'groupRemove',
     'groupOpenRoom',
-    'groupOpenInternet',
+    'groupOpenTailscale',
     'groupOpenLan',
     'groupCloseInternet',
-    'groupSavePinggy',
     'restartFresh',
     'enterInstance',
     'enterArena',
@@ -250,13 +264,19 @@
 
   // Survol délégué : les événements pointerover/out remontent depuis les panneaux dynamiques.
   const CANAAN_HOVER_SELECTOR =
-    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-map-instance]';
+    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-map-instance]';
   function canaanHover(event, enter) {
     const element = eventClosest(event, CANAAN_HOVER_SELECTOR);
     if (!element || (event.relatedTarget && element.contains(event.relatedTarget))) return;
     if (element.dataset.mapInstance !== undefined)
       highlightMapInstance(Number(element.dataset.mapInstance), enter);
     else if (!enter) hideGearTooltip();
+    else if (element.dataset.tooltipSkill !== undefined)
+      showSkillTooltip(element.dataset.tooltipSkill, event);
+    else if (element.dataset.tooltipStack !== undefined) CANAAN_BAG.showTooltip(element.dataset.tooltipStack, event);
+    else if (element.dataset.tooltipShop !== undefined) CANAAN_SHOP.showTooltip(Number(element.dataset.tooltipShop), event);
+    else if (element.dataset.tooltipTrade !== undefined) CANAAN_TRADE.showTooltip(element.dataset.tooltipTrade, event);
+    else if (element.dataset.tooltipBank !== undefined) CANAAN_BANK.showTooltip(element.dataset.tooltipBank, event);
     else if (element.dataset.tooltipRubis !== undefined)
       showRubisTooltip(element.dataset.tooltipRubis, event);
     else if (element.dataset.tooltipIndex !== undefined)
@@ -266,7 +286,7 @@
   document.addEventListener('pointerover', event => canaanHover(event, true));
   document.addEventListener('pointerout', event => canaanHover(event, false));
   document.addEventListener('pointermove', event => {
-    if (eventClosest(event, '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis]'))
+    if (eventClosest(event, '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]'))
       moveGearTooltip(event);
   });
   // Noms publics du module ; tout le reste est privé.

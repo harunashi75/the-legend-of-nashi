@@ -39,6 +39,7 @@
     const st = characterStats(hero),
       blow = resolveOutgoing(d, st, m, Math.random, CANAAN_RUBIS.armorFactor(hero), CANAAN_RUBIS.critFactor(hero));
     m._lastCrit = blow.crit;
+    canaanAchieve(hero, 'hit', m, blow.damage, blow.crit);
     if (blow.crit) float(m.x, m.y - 44, 'CRITIQUE !', '#ffdf77');
     return damageMonster(m, blow.damage, hero);
   }
@@ -78,12 +79,13 @@
   window.canaanGroupScale = groupScale;
   // Dégâts bruts d'un ennemi selon son niveau (boss : selon leur type), avec la difficulté de l'instance et la
   // taille du groupe.
+  const INSTANCE_DAMAGE = 1.5;
   function enemyRawDamage(m) {
     const level = canaanMobLevel(m),
       raw = m.boss || m.worldBoss ? bossDamage(level, m.worldBoss ? 'world' : bossTier(m).raid ? 'raid' : 'dungeon') : mobDamage(level);
-    // Donjons et raids : monstres 12 % plus forts que dehors ; un boss enragé (boss-mechanics.js) frappe 15 % plus fort.
-    const inst = game.world?.instance && !game.world.instance.arena ? 1.12 : 1;
-    return raw * inst * (m.enraged ? 1.15 : 1) * (instanceDifficulty()?.damage || 1) * canaanGroupScale().dmg;
+    // Donjons et raids : monstres 50 % plus forts que dehors ; un boss enragé (boss-mechanics.js) frappe 25 % plus fort.
+    const inst = game.world?.instance && !game.world.instance.arena ? INSTANCE_DAMAGE : 1;
+    return raw * inst * (m.enraged ? 1.25 : 1) * (instanceDifficulty()?.damage || 1) * canaanGroupScale().dmg;
   }
   window.CANAAN_ENEMY_RAW_DAMAGE = enemyRawDamage;
   // Dégâts reçus par un héros (l'hôte par défaut) : Défense (contre le niveau de l'ennemi), Résistance, déviation
@@ -118,13 +120,14 @@
     const st = characterStats(hero);
     return (1 - defenseReduction(st.defense, attackerLevel)) * (1 - Math.min(90, st.resist) / 100) * (1 - Math.min(90, st.guard) / 100);
   };
-  // Étape du pipeline : les monstres proches se tournent vers le héros.
+  // Étape du pipeline : chaque monstre se tourne vers le héros qu'il poursuit. Un héros caché par le Voile
+  // d'ombre n'attire plus le regard (seuls les boss le voient encore, et le visent).
   window.CanaanStages.facing = {
     after() {
-      if (!started || paused || P.dead) return;
+      if (!started || paused) return;
       for (const m of game.world.monsters) {
-        if (m.hp > 0 && Math.hypot(P.x - m.x, P.y - m.y) < 430)
-          m.facingAngle = Math.atan2(P.y - m.y, P.x - m.x);
+        const t = m.targetHero?.player;
+        if (m.hp > 0 && t && !t.dead && Math.hypot(t.x - m.x, t.y - m.y) < 430) m.facingAngle = Math.atan2(t.y - m.y, t.x - m.x);
       }
     }
   };
@@ -206,7 +209,10 @@
       itemLevel(item) +
       '</div>';
     for (const [key, value] of Object.entries(st.primary)) html += '<div class="stat-line primary">+' + value + ' ' + label(key) + '</div>';
-    for (const [key, value] of Object.entries(st.secondary)) html += '<div class="stat-line secondary">+' + value + ' ' + label(key) + '</div>';
+    const base = validSecondaries(item.sec) ? item.sec : {};
+    for (const [key, value] of Object.entries(base)) html += '<div class="stat-line secondary">+' + value + ' ' + label(key) + '</div>';
+    // Enchantement : la troisième secondaire, en violet.
+    if (st.enchant) html += '<div class="stat-line secondary enchant">✨ +' + st.enchant.value + ' ' + label(st.enchant.stat) + ' <small>(enchantement)</small></div>';
     return html + requirement(item);
   }
   // Ce que fait une statistique (fiche du personnage).

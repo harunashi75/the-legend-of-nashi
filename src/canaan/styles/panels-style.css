@@ -53,10 +53,10 @@
   gap: 5px;
 }
 #window .rpg-slot b {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #window .rpg-slot small {
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   color: #a9b9c3;
 }
 #window .rpg-item-grid {
@@ -78,12 +78,12 @@
   gap: 8px;
 }
 #window .rpg-item button {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   padding: 6px;
   margin: 2px;
 }
 #window .rpg-icon {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-scale));
   text-align: center;
 }
 #window .rpg-stats {
@@ -140,18 +140,18 @@
   cursor: default;
 }
 #window .bag-cell .bag-icon {
-  font-size: 26px;
+  font-size: calc(26px * var(--font-scale));
   display: block;
 }
 #window .bag-cell .bag-name {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 #window .bag-cell .bag-ilvl {
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   color: #d7c59c;
 }
 #window .bag-details {
@@ -212,14 +212,14 @@
   border-color: #f2ce7d;
 }
 #window .equip-square .eq-icon {
-  font-size: 21px;
+  font-size: calc(21px * var(--font-scale));
 }
 #window .equip-square .eq-label {
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   color: #b3c5cf;
 }
 #window .equip-square .eq-name {
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -232,10 +232,10 @@
 }
 #window .char-stats .stat-row {
   padding: 7px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 #window .modern-foot {
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: #c6bda8;
   margin-top: 10px;
 }
@@ -275,10 +275,10 @@
 }
 #window .bag-upgrade strong {
   color: #f7dfa0;
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
 }
 #window .bag-upgrade p {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   color: #b7c9d7;
   margin: 7px 0 0;
 }
@@ -293,5 +293,5 @@
 }
 #window .bag-max {
   color: #8ce0ae;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }

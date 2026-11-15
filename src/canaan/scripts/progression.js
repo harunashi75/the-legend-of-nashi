@@ -54,7 +54,7 @@
     const d = instances[index];
     if (!d) return 0;
     const mode = instanceDifficulty(),
-      level = mode?.mobLevel || d.mobLevel || 1;
+      level = game.world.instance?.scaledLevel || mode?.mobLevel || d.mobLevel || 1;
     return grantXp(hero, clearXp(level, !!d.raid), hero.player);
   }
   // Barre d'XP et niveau de l'affichage tête haute.

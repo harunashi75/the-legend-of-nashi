@@ -53,6 +53,21 @@ globalThis.canaanGroupBot = (() => {
     const type = hero.equipment.weapon?.weaponType || 'sword';
     return type === 'bow' || type === 'staff' ? 330 : type === 'spear' ? 150 : 95;
   }
+  // Comme un joueur : lance ses compétences dès qu'elles sont prêtes (une par pas, mana suffisant).
+  function useSkills(hero) {
+    for (let i = 0; i < 4; i++) {
+      if (hero === game.hero) {
+        const type = currentWeaponType();
+        if ((weaponCooldowns[type + ':' + i] || 0) > 0) continue;
+        const before = P.mp;
+        useSkill(i);
+        if (P.mp < before) return;
+      } else if (CANAAN_SKILLS.ready(hero, i)) {
+        hero.intent.skill = i;
+        return;
+      }
+    }
+  }
   const state = { phase: 'combat', done: false };
   // Un pas de pilotage pour tout le groupe.
   function step() {
@@ -86,6 +101,7 @@ globalThis.canaanGroupBot = (() => {
         if (d <= reach(hero) + (m.r || 0) * 0.5) {
           hero.intent.dx = hero.intent.dy = 0;
           hero.intent.attack = 'quick';
+          useSkills(hero);
         } else steer(hero, m.x, m.y);
         continue;
       }

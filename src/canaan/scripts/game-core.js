@@ -57,7 +57,7 @@ const CANAAN_HOUSE_ROOM = CANAAN_ROOMS[0];
 // Pièce qui contient la case (tx, ty), murs compris, ou null dehors (et toujours null en donjon, dont la carte
 // réutilise les mêmes coordonnées).
 function canaanRoomAt(tx, ty) {
-  if (game.world.instance) return null;
+  if (game.world.instance || game.world.layer === 'under') return null;
   for (const r of CANAAN_ROOMS) if (tx >= r.x - 1 && ty >= r.y - 1 && tx < r.x + r.w + 1 && ty < r.y + r.h + 1) return r;
   return null;
 }
@@ -69,7 +69,8 @@ const CANAAN_SPAWN = Object.freeze({ x: (CANAAN_CAMP.x + 0.5) * TS, y: (CANAAN_C
 // Eau profonde, roche, murs et lacs scintillants bloquent le passage ; l'eau peu profonde se traverse.
 // 19 herse et 22 danger (lave, gouffre, vide…) n'existent qu'en instance.
 // 31 : murs des intérieurs ; 32 : bâtiments vus de l'extérieur (voir house.js).
-const SOLID = [0, 4, 9, 18, 19, 22, 31, 32];
+// Tréfonds (underground.js) : 43 rivière de boue, 44 paroi rocheuse, 48 lac souterrain, 49 gouffre.
+const SOLID = [0, 4, 9, 18, 19, 22, 31, 32, 43, 44, 48, 49];
 function tileAt(x, y) {
   if (x < 0 || y < 0 || x >= MAPW || y >= MAPH) return 4;
   return game.world.tiles[y][x];
@@ -187,6 +188,10 @@ addEventListener('keydown', e => {
     toggleJournal();
     return;
   }
+  if (k === 'y' && !e.repeat) {
+    toggleAchievements();
+    return;
+  }
   if (e.key >= '1' && e.key <= '4' && !e.repeat) useSkill(+e.key - 1);
   if (e.key === 'Enter') chatInput.focus();
 });
@@ -284,17 +289,35 @@ function burst(x, y, c, n) {
   }
 }
 // dialog
-// Mort de l'hôte (ou de tout le groupe dans l'Arène) : retour au camp 1,5 s plus tard, l'instance est quittée.
+// Mort de l'hôte (ou de tout le groupe) : retour au camp 1,5 s plus tard, l'instance est quittée
+// et tout le groupe se relève avec lui. Un seul retour à la fois, même si plusieurs morts l'annoncent.
+let canaanRespawnPending = false;
 function canaanHostRespawn(message) {
   P.dead = true;
+  if (canaanRespawnPending) return;
+  canaanRespawnPending = true;
   toast(message);
   setTimeout(() => {
-    if (game.world.instance) leaveInstance();
-    P.x = CANAAN_SPAWN.x;
-    P.y = CANAAN_SPAWN.y;
-    P.hp = P.mhp;
-    P.dead = false;
-    saveGame();
+    try {
+      if (game.world.instance) leaveInstance();
+    } finally {
+      canaanRespawnPending = false;
+      // Dans les Tréfonds, on se relève à la Forteresse de Durgrim ; sur l'île, au camp.
+      const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_SPAWN;
+      P.x = home.x;
+      P.y = home.y;
+      P.hp = P.mhp;
+      P.dead = false;
+      for (const hero of game.heroes) {
+        if (hero === game.hero || !hero.player.dead) continue;
+        hero.player.dead = false;
+        hero.player.hp = Math.max(1, Math.round(hero.player.mhp * 0.5));
+        hero.reviveAt = null;
+        hero.player.x = P.x + (Math.random() - 0.5) * 60;
+        hero.player.y = P.y + 40;
+      }
+      saveGame();
+    }
   }, 1500);
 }
 function interact() {
@@ -304,19 +327,18 @@ function interact() {
     // Un coffre à côté : l'hôte vérifie que le héros y est bien, puis l'ouvre pour lui.
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
     if (game.world.instance) return;
-    // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte).
-    if (CANAAN_QUESTS.interact()) return;
-    // Bâtiments : porte d'entrée ou porte intérieure.
-    if (CANAAN_HOUSE.interact()) return;
+    // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte) ; bâtiments : portes (île seulement).
+    if (!canaanUnder() && CANAAN_QUESTS.interact()) return;
+    if (!canaanUnder() && CANAAN_HOUSE.interact()) return;
     // Pêche : lancer, ferrer ou remonter la ligne près d'un banc de poissons.
     if (CANAAN_PROF.interact()) return;
-    const shop = game.world.npcs.find(n => n.type === 'shop' && Math.hypot(P.x - n.x, P.y - n.y) < 120);
-    if (shop) openShop(shop);
+    const npc = game.world.npcs.find(n => (n.type === 'shop' || n.type === 'bank' || n.type === 'dwarf' || n.type === 'descend' || n.type === 'ascend') && canaanHere(n) && Math.hypot(P.x - n.x, P.y - n.y) < 120);
+    if (npc) openDialog(npc);
     return;
   }
   if (openNearbyChest()) return;
-  if (!game.world.instance && !modalOpen() && CANAAN_QUESTS.interact()) return;
-  if (!game.world.instance && !modalOpen() && CANAAN_HOUSE.interact()) return;
+  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_QUESTS.interact()) return;
+  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_HOUSE.interact()) return;
   if (!game.world.instance && !modalOpen() && CANAAN_PROF.interact()) return;
   if (game.world.instance?.arena) {
     CANAAN_ARENA.interact();
@@ -334,7 +356,7 @@ function interact() {
   }
   if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
   let n = game.world.npcs
-    .filter(n => !game.world.instance && Math.hypot(P.x - n.x, P.y - n.y) < (n.type === 'shop' ? 120 : 85))
+    .filter(n => !game.world.instance && canaanHere(n) && Math.hypot(P.x - n.x, P.y - n.y) < (n.type === 'shop' || n.type === 'bank' ? 120 : n.type === 'descend' || n.type === 'ascend' ? 100 : 85))
     .sort((a, b) => Math.hypot(P.x - a.x, P.y - a.y) - Math.hypot(P.x - b.x, P.y - b.y))[0];
   if (n) openDialog(n);
 }
@@ -342,6 +364,10 @@ function openDialog(npc) {
   if (npc.type === 'portal') return openPortal(npc);
   if (npc.type === 'arena') return openArenaPortal();
   if (npc.type === 'shop') return openShop(npc);
+  if (npc.type === 'bank') return CANAAN_BANK.open(npc);
+  // Tréfonds : parler à un nain, descendre ou remonter par une entrée.
+  if (npc.type === 'dwarf') return CANAAN_UNDER.talk(npc);
+  if (npc.type === 'descend' || npc.type === 'ascend') return CANAAN_UNDER.use(npc);
 }
 // game loop
 // Réglages d'affichage du menu Paramètres (settings.js) : secousses de l'écran, lueurs des lumières, particules et
@@ -563,6 +589,8 @@ function canWalk(x, y) {
     [-r, r],
     [r, r]
   ].every(([a, b]) => {
+    // Tréfonds : la roche et les bâtiments souterrains bloquent ; rien de la surface (quêtes, maisons) ne compte.
+    if (canaanUnder()) return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !CANAAN_UNDER.blocked(x + a, y + b);
     // Lieux des quêtes : socles et haies bloquent, nénuphars et pont restauré portent (quests.js).
     const quest = canaanQuestWalk(x + a, y + b);
     if (quest !== null) return quest;
@@ -633,8 +661,9 @@ function nearestHero(m) {
     bestDistance = Infinity;
   for (const hero of game.heroes) {
     const p = hero.player;
-    // Un invité déconnecté (place réservée) ou caché par le Voile d'ombre n'est jamais visé.
-    if (p.dead || hero.away || p.veiled) continue;
+    // Un invité déconnecté (place réservée) n'est jamais visé ; caché par le Voile d'ombre, seuls les boss
+    // (d'instance et mondiaux) le voient encore.
+    if (p.dead || hero.away || (p.veiled && !m.boss && !m.worldBoss)) continue;
     const d = Math.hypot(p.x - m.x, p.y - m.y);
     if (d < bestDistance) {
       best = hero;
@@ -659,8 +688,9 @@ function update() {
   game.world.monsters.forEach(m => {
     // Les boss de l'Arène et leurs clones sont pilotés par canaan-arena.
     if (m.arenaBoss || m.arenaClone) return;
-    // Cible : le héros vivant le plus proche.
+    // Cible : le héros vivant le plus proche (gardée pour l'orientation du monstre).
     const target = nearestHero(m);
+    m.targetHero = target;
     if (!target) {
       m.cd -= 1 / 60;
       return;
@@ -777,6 +807,7 @@ function updateView() {
     cd.style.display = s.cd > 0 ? 'flex' : 'none';
     if (s.cd > 0) cd.textContent = Math.ceil(s.cd);
   }
+  canaanUpdateSkillBadges();
   if (game.world.clock % 12 === 0) updateZoneDisplay();
   // camera
   // Dans un bâtiment, la caméra se cale sur le centre de la pièce (toute la pièce reste visible).
@@ -828,10 +859,17 @@ function draw() {
   // Sol : par blocs gardés sur l'île (world-look.js), case par case en donjon.
   if (game.world.instance) {
     for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) drawDungeonTile(ctx, x, y, game.world.tiles[y][x]);
-  } else drawWorldGround(ctx, x0, x1, y0, y1);
+  } else if (canaanUnder()) CANAAN_UNDER.drawGround(ctx, x0, x1, y0, y1);
+  else drawWorldGround(ctx, x0, x1, y0, y1);
   // Villages, maisons, monuments et portails
   if (game.world.instance) drawDungeonDecor(ctx);
-  else {
+  else if (canaanUnder()) {
+    // Tréfonds : gisements et bancs de poissons, décor, bâtiments, portails, entrées, nains et faune.
+    CANAAN_PROF.drawSpots(ctx);
+    CANAAN_UNDER.draw(ctx);
+    CANAAN_LIFE.update();
+    CANAAN_LIFE.drawAnimals(ctx);
+  } else {
     // Ruisseau, mare, pavés, champs et fleurs du camp, posés sur le sol.
     canaanCampLife.drawGround(ctx);
     // Vie dans l'eau profonde et bancs de poissons où pêcher.
@@ -849,6 +887,8 @@ function draw() {
     CANAAN_LIFE.drawVillagers(ctx);
     // Lieux des quêtes : énigmes, PNJ de l'histoire et leurs marques.
     CANAAN_QUESTS.drawWorld(ctx);
+    // Entrées des Tréfonds, sous l'île.
+    CANAAN_UNDER.drawSurface(ctx);
   }
   drawWorldFeatures(ctx);
   // drops
@@ -861,7 +901,8 @@ function draw() {
   // inhabitants, enemies and treasures
   if (!game.world.instance)
     game.world.npcs
-      .filter(n => n.type === 'shop' || n.type === 'portal' || n.type === 'arena')
+      // PNJ de la couche affichée ; les nains des Tréfonds sont dessinés par underground.js.
+      .filter(n => (n.type === 'shop' || n.type === 'bank' || n.type === 'portal' || n.type === 'arena') && canaanHere(n) && !n.dwarf)
       .forEach(n => {
         if (Math.abs(n.x - P.x) > W || Math.abs(n.y - P.y) > H) return;
         // Une seule pièce visible à la fois : le marchand de l'échoppe n'apparaît que chez lui.
@@ -906,15 +947,7 @@ function draw() {
     ctx.fillRect(m.x - 22, top, 44 * Math.max(0, m.hp / m.mhp), 5);
   });
   // projectiles
-  game.world.projectiles.forEach(p => {
-    ctx.fillStyle = p.c;
-    ctx.shadowColor = p.c;
-    ctx.shadowBlur = 15;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 7, 0, 7);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  });
+  game.world.projectiles.forEach(p => canaanDrawProjectile(ctx, p));
   // particles
   particles.forEach(p => {
     ctx.globalAlpha = p.life / 40;
@@ -929,25 +962,17 @@ function draw() {
   // animated equipped adventurer
   drawPixelHero(ctx, P.x, P.y, '#8068db', P.anim, true);
   drawWade(ctx, P, P.x, P.y + 16, 40, Math.hypot(P.vx || 0, P.vy || 0) > 0.1, 1);
+  // Titres et aura des succès, au-dessus de chaque héros.
+  CANAAN_ACHIEVEMENTS.draw(ctx);
   // Lignes de pêche et bouchons.
   CANAAN_PROF.drawLines(ctx);
   // Arène : projectiles et effets des boss, au-dessus des combattants.
   if (game.world.instance?.arena) CANAAN_ARENA.drawAir(ctx);
-  // sword swing
-  if (P.atk > 0) {
-    ctx.strokeStyle = '#e9e2ff';
-    ctx.shadowColor = '#a99aff';
-    ctx.shadowBlur = 18;
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.arc(P.x, P.y, 65, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
+  // L'attaque se voit sur l'arme tenue en main (canaan-weapon-look) et sur son effet, dans la direction visée.
   // Vent : feuilles emportées et souffles légers (monde extérieur).
   drawWindLayer(ctx);
   // Obscurité, lumières et particules du biome ou du donjon, sous les nombres flottants.
-  drawCanaanLighting(ctx, game.world.instance ? dungeonAmbience() : worldAmbience());
+  drawCanaanLighting(ctx, game.world.instance ? dungeonAmbience() : canaanUnder() ? CANAAN_UNDER.ambience() : worldAmbience());
   // Bulles de dialogue des habitants, lisibles même dans l'obscurité.
   CANAAN_LIFE.drawBubbles(ctx);
   CANAAN_QUESTS.drawBubbles(ctx);

@@ -1,19 +1,24 @@
 const itemIcon = {
-  weapon: '⚔️',
-  armor: '🛡️',
-  helm: '🪖',
-  boots: '🥾',
-  shoulders: '🦾',
-  gloves: '🧤',
-  neck: '📿',
-  ring: '💍',
-  artifact: '🔮'
+  weapon: '⟦slot_weapon⟧',
+  armor: '⟦slot_armor⟧',
+  helm: '⟦slot_helm⟧',
+  boots: '⟦slot_boots⟧',
+  shoulders: '⟦slot_shoulders⟧',
+  gloves: '⟦slot_gloves⟧',
+  neck: '⟦slot_neck⟧',
+  ring: '⟦slot_ring⟧',
+  artifact: '⟦slot_artifact⟧'
 };
+// Objet de prestige (Légendaire, Mythique) : attribut des cases du sac et de la fiche, pour leur brillance animée.
+function canaanPrestige(item) {
+  const name = item ? rarityInfo(item).name : '';
+  return name === 'Légendaire' ? ' data-prestige="legendaire"' : name === 'Mythique' ? ' data-prestige="mythique"' : '';
+}
 function rpgHeader(title) {
   return (
     '<div class="rpg-head"><h2>' +
     title +
-    '</h2><div class="rpg-tabs"><button data-action="renderInventory">🎒 Sac</button><button data-action="renderCharacter">🧙 Personnage</button></div></div>'
+    '</h2><div class="rpg-tabs"><button data-action="renderInventory">⟦menu_inventory⟧ Sac</button><button data-action="renderCharacter">⟦menu_character⟧ Personnage</button></div></div>'
   );
 }
 
@@ -25,7 +30,7 @@ let BAG_LIMIT = 40; // Capacité dynamique, actualisée selon le niveau du sac a
 // Un héros (l'hôte par défaut) est-il près d'un marchand ? L'hôte le vérifie aussi pour ses invités.
 function nearMerchant(hero = game.hero) {
   const p = hero.player;
-  return !game.world.instance && game.world.npcs.some(n => n.type === 'shop' && Math.hypot(p.x - n.x, p.y - n.y) < 135);
+  return !game.world.instance && game.world.npcs.some(n => n.type === 'shop' && canaanHere(n) && Math.hypot(p.x - n.x, p.y - n.y) < 135);
 }
 function modernPanel(html) {
   showPanel(html);

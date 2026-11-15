@@ -1,4 +1,4 @@
-// CANAAN ONLINE — GEAR/LOOT ENGINE UNIQUE (normalize + grant, sauvegarde différée).
+// THE LEGEND OF NASHI — GEAR/LOOT ENGINE UNIQUE (normalize + grant, sauvegarde différée).
 // Tables de noms d'armes : source unique WEAPON_NAMES.
 // Moteur des objets : normalisation, création, dépôt et conversion en or si le sac est plein.
 (function () {
@@ -35,7 +35,7 @@
     const originalType = item.weaponType,
       originalName = item.name;
     normalizeWeapon(item);
-    // Une rareté absente ou inconnue devient Commun.
+    // Une rareté absente ou inconnue devient Commun ; Héroïque devient Épique, Céleste devient Mythique.
     item.rarity = rarityInfo(item).name;
     item.level = itemLevel(item);
     const weapon = item.slot === 'weapon';
@@ -44,6 +44,8 @@
     applyItemName(item);
     if (weapon && WEAPONS.has(originalType) && originalName && !/^Lame\s/.test(originalName)) item.name = originalName;
     window.CANAAN_STATS_PREPARE(item);
+    // Enchantement enregistré : vérifié (sinon retiré).
+    CANAAN_GATHER.cleanItem(item);
     return item;
   }
   // Crée un objet du niveau donné et le dépose dans le sac du héros (l'hôte par défaut) ; sac plein : converti en or.
@@ -53,17 +55,9 @@
     const item = createRawGear(level, source, guaranteed);
     if (!item) return item;
     item.level = clampLevel(level);
-    if (!guaranteed) {
-      item.rarity =
-        source === 'hidden_common'
-          ? 'Commun'
-          : ['normal', 'chest'].includes(source)
-            ? rnd() < 0.35
-              ? 'Commun'
-              : 'Peu commun'
-            : rarityInfo(item).name;
-    }
-    if (hero.inventory.length >= canaanBagLimit(hero)) {
+    // Sans qualité imposée : monstres et coffres donnent du Commun.
+    if (!guaranteed) item.rarity = ['normal', 'chest', 'hidden_common'].includes(source) ? 'Commun' : rarityInfo(item).name;
+    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       const price = gearSellValue(item);
       hero.player.gold += price;
       canaanLootNotice(hero, '🎒 Sac plein ! Butin converti en ' + price + ' or.');

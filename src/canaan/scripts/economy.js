@@ -11,9 +11,12 @@
     const reward = d.difficulties
       ? (game.world.instance?.index === index && instanceDifficulty()) || d.difficulties.normal
       : d;
-    const rarity = reward.rarity,
-      level = reward.dropLevel;
-    if (hero.inventory.length >= canaanBagLimit(hero)) {
+    // Niveau de l'objet : entre le niveau requis de l'instance et son niveau de butin (7 à 10 pour la Cave),
+    // pour pouvoir porter tout de suite ce qu'on y gagne. Mode héroïque du dernier raid : chance de prestige.
+    // Donjon des Tréfonds : un objet du niveau du héros.
+    const level = d.scaled ? clampLevel(hero.level) : reward.level + Math.floor(Math.random() * (reward.dropLevel - reward.level + 1)),
+      rarity = prestigeRoll(reward.prestige) || reward.rarity;
+    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       canaanLootNotice(hero, '🎒 Sac plein : équipement non récupéré');
       return false;
     }
@@ -21,9 +24,14 @@
     if (!item) return false;
     // Provenance gardée sur l'objet (sans suffixe dans le nom de l'arme).
     item.origin = d.raid ? 'raid' : 'donjon';
-    canaanLootNotice(hero, '✨ Butin : ' + rarity + ' · niveau ' + level);
+    canaanLootNotice(hero, (rarity === 'Légendaire' || rarity === 'Mythique' ? '🌟 BUTIN ' + rarity.toUpperCase() + ' ! ' : '✨ Butin : ' + rarity + ' · ') + 'niveau ' + level);
     saveGame();
     return true;
   }
-  Object.assign(window, { dropTierGear });
+  // Qualité de prestige tirée pour un butin (null : la qualité normale de la source).
+  function prestigeRoll(kind) {
+    for (const [rarity, chance] of PRESTIGE_DROPS[kind] || []) if (Math.random() < chance) return rarity;
+    return null;
+  }
+  Object.assign(window, { dropTierGear, prestigeRoll });
 })();

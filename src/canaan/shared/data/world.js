@@ -46,7 +46,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 20,
     // Récompense garantie du coffre de boss.
-    rarity: 'Épique',
+    rarity: 'Rare',
     dropLevel: 21
   },
   {
@@ -61,7 +61,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 27,
     // Récompense garantie du coffre de boss.
-    rarity: 'Épique',
+    rarity: 'Rare',
     dropLevel: 28
   },
   {
@@ -76,7 +76,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 34,
     // Récompense garantie du coffre de boss.
-    rarity: 'Épique',
+    rarity: 'Rare',
     dropLevel: 35
   },
   {
@@ -91,7 +91,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 39,
     // Récompense garantie du coffre de boss.
-    rarity: 'Épique',
+    rarity: 'Rare',
     dropLevel: 40
   },
   {
@@ -107,7 +107,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 46,
     // Récompense garantie du coffre de boss.
-    rarity: 'Héroïque',
+    rarity: 'Épique',
     dropLevel: 47
   },
   {
@@ -123,7 +123,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 51,
     // Récompense garantie du coffre de boss.
-    rarity: 'Héroïque',
+    rarity: 'Épique',
     dropLevel: 52
   },
   {
@@ -139,7 +139,7 @@ export const INSTANCE_DEFS = deepFreeze([
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 56,
     // Récompense garantie du coffre de boss.
-    rarity: 'Légendaire',
+    rarity: 'Épique',
     dropLevel: 57
   },
   {
@@ -156,18 +156,86 @@ export const INSTANCE_DEFS = deepFreeze([
     mobLevel: 60,
     // La difficulté choisie au portail fixe la qualité du butin, garanti, et la puissance des ennemis.
     difficulties: {
-      normal: { label: 'Normal', icon: '⚔️', level: 58, mobLevel: 60, rarity: 'Mythique', dropLevel: 60, hp: 1, damage: 1 },
+      normal: { label: 'Normal', icon: '⟦mode_normal⟧', level: 58, mobLevel: 60, rarity: 'Épique', dropLevel: 60, hp: 1, damage: 1 },
       heroic: {
         label: 'Héroïque',
-        icon: '🔥',
+        icon: '⟦mode_heroic⟧',
         level: 60,
         mobLevel: 60,
-        rarity: 'Céleste',
+        rarity: 'Épique',
+        // Butin de prestige : 5 % de Légendaire, 1 % de Mythique (voir PRESTIGE_DROPS).
+        prestige: 'raidHeroic',
         dropLevel: 60,
         hp: 1.65,
         damage: 1.4
       }
     }
+  },
+  // Donjons des Tréfonds (sous l'île, underground.js) : aucun niveau requis ; ennemis au niveau du groupe et
+  // butin du niveau de chaque héros : Peu commun, 30 % de chances de Rare (PRESTIGE_DROPS.underground).
+  {
+    name: 'La Mine Effondrée de Durgrim',
+    biome: 6,
+    x: 0,
+    y: 0,
+    boss: 'Grumbar, le Contremaître Maudit',
+    bosses: ['Grumbar, le Contremaître Maudit'],
+    color: '#e0a060',
+    level: 1,
+    mobLevel: 1,
+    rarity: 'Peu commun',
+    prestige: 'underground',
+    dropLevel: 1,
+    under: true,
+    scaled: true
+  },
+  {
+    name: 'Les Halls Engloutis de Khaz-Ombral',
+    biome: 7,
+    x: 0,
+    y: 0,
+    boss: 'Ombral, le Roi sous la Pierre',
+    bosses: ['Ombral, le Roi sous la Pierre'],
+    color: '#8ac8e8',
+    level: 1,
+    mobLevel: 1,
+    rarity: 'Peu commun',
+    prestige: 'underground',
+    dropLevel: 1,
+    under: true,
+    scaled: true
+  },
+  {
+    name: 'La Crypte des Mille Tombes',
+    biome: 8,
+    x: 0,
+    y: 0,
+    boss: 'Le Fossoyeur Éternel',
+    bosses: ['Le Fossoyeur Éternel'],
+    color: '#a8f0c0',
+    level: 1,
+    mobLevel: 1,
+    rarity: 'Peu commun',
+    prestige: 'underground',
+    dropLevel: 1,
+    under: true,
+    scaled: true
+  },
+  {
+    name: 'Les Tréfonds Fongiques',
+    biome: 9,
+    x: 0,
+    y: 0,
+    boss: 'La Reine des Spores',
+    bosses: ['La Reine des Spores'],
+    color: '#e870c0',
+    level: 1,
+    mobLevel: 1,
+    rarity: 'Peu commun',
+    prestige: 'underground',
+    dropLevel: 1,
+    under: true,
+    scaled: true
   }
 ]);
 // Liste modifiable pour une partie : la génération de l'île y place chaque portail.
@@ -205,7 +273,24 @@ export const MOB_TYPES = deepFreeze([
   { name: 'Fée sauvage', color: '#e99bda', hp: 88 },
   { name: 'Minotaure', color: '#b98b67', hp: 290 },
   { name: 'Serpent des glaces', color: '#9bdde8', hp: 160 },
-  { name: 'Drake astral', color: '#9c86ff', hp: 310 }
+  { name: 'Drake astral', color: '#9c86ff', hp: 310 },
+  // Les Tréfonds, sous l'île (underground.js) : quatre créatures par biome, à la taille du héros qui les croise.
+  { name: 'Ver des boues', color: '#8a6440', hp: 120, under: 0 },
+  { name: 'Taupe-garou', color: '#6a4e3a', hp: 150, under: 0 },
+  { name: 'Scarabée foreur', color: '#4a6a7a', hp: 110, under: 0 },
+  { name: 'Gobelin des mines', color: '#8aa05a', hp: 95, under: 0 },
+  { name: 'Sentinelle de pierre', color: '#8a8478', hp: 210, under: 1 },
+  { name: 'Spectre minier', color: '#7ab8e0', hp: 100, under: 1 },
+  { name: 'Squelette nain', color: '#d8ccb0', hp: 115, under: 1 },
+  { name: 'Gargouille', color: '#6a6e7a', hp: 140, under: 1 },
+  { name: 'Goule', color: '#a8b49a', hp: 160, under: 2 },
+  { name: 'Âme errante', color: '#9ae8c0', hp: 85, under: 2 },
+  { name: 'Chevalier des tombes', color: '#5a5e6e', hp: 240, under: 2 },
+  { name: 'Corbeau des tombes', color: '#4a4258', hp: 90, under: 2 },
+  { name: 'Myconide', color: '#c8604a', hp: 150, under: 3 },
+  { name: 'Limace des fanges', color: '#6a7a3a', hp: 130, under: 3 },
+  { name: 'Mille-pattes géant', color: '#9a4a2a', hp: 125, under: 3 },
+  { name: 'Moustique des fanges', color: '#5a6a4a', hp: 70, under: 3 }
 ]);
 // Huit boss mondiaux persistants répartis dans les six biomes, au niveau de leur zone ; position fixée par la
 // génération de l'île. Leurs PV et dégâts viennent de leur niveau (shared/rules/stats.js).

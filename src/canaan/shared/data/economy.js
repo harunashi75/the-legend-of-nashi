@@ -14,9 +14,10 @@ export const SOURCE_REWARDS = deepFreeze({
     source: 'normal',
     rarity: 'Commun'
   },
+  // Monstres (élites comprises) et coffres cachés : Commun ; le marchand vend du Peu commun.
   elite: {
     source: 'normal',
-    rarity: 'Peu commun'
+    rarity: 'Commun'
   },
   worldBoss: { source: 'world', rarity: 'Rare' },
   secretChest: {

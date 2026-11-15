@@ -119,6 +119,66 @@
         R(f ? 12 : 11, 7, 1, 3, '#2a1a14');
       }
     },
+    // Faisan : longue queue rayée, tête verte à joue rouge, collier blanc.
+    faisan: {
+      w: 18,
+      h: 11,
+      pal: [['#b0602a', '#7a3e1a', '#d8904a']],
+      draw(R, f, [m, d, l]) {
+        R(0, 3, 6, 2, d);
+        R(1, 4, 6, 1, l);
+        R(5, 4, 7, 4, m);
+        R(6, 5, 5, 1, l);
+        R(7, 7, 4, 1, d);
+        R(11, 2, 3, 4, '#2a6a3a');
+        R(12, 1, 3, 2, '#2a6a3a');
+        R(13, 2, 2, 2, '#d8302a');
+        R(11, 5, 3, 1, '#f4f0e0');
+        R(15, 2, 2, 1, '#e0b040');
+        R(14, 2, 1, 1, '#1a1418');
+        R(7, 8, 1, 3, '#8a6a3a');
+        R(f ? 10 : 9, 8, 1, 3, '#8a6a3a');
+      }
+    },
+    // Canard colvert : tête verte, collier blanc, poitrine brune, bec jaune.
+    canard: {
+      w: 14,
+      h: 10,
+      pal: [['#c8c0b0', '#8a8478', '#e8e0d0']],
+      draw(R, f, [m, d, l]) {
+        R(1, 4, 9, 4, m);
+        R(0, 4, 2, 2, d);
+        R(2, 7, 7, 1, d);
+        R(3, 5, 5, 1, l);
+        R(7, 4, 3, 3, '#8a5a3a');
+        R(8, 1, 4, 4, '#2a7a4a');
+        R(8, 4, 3, 1, '#f4f0e0');
+        R(12, 2, 2, 2, '#e8b020');
+        R(10, 2, 1, 1, '#1a1418');
+        R(4, 8, 1, 2, '#e89020');
+        R(f ? 7 : 6, 8, 1, 2, '#e89020');
+      }
+    },
+    // Chèvre des sables : pelage clair, cornes recourbées, barbichette.
+    chevre: {
+      w: 16,
+      h: 13,
+      pal: [['#e0c8a0', '#b09870', '#f4e4c4']],
+      draw(R, f, [m, d, l]) {
+        R(2, 4, 10, 5, m);
+        R(3, 5, 8, 1, l);
+        R(1, 4, 2, 2, d);
+        R(11, 2, 4, 4, m);
+        R(11, 0, 2, 3, '#7a6a5a');
+        R(10, 0, 1, 2, '#7a6a5a');
+        R(14, 3, 1, 1, '#1a1418');
+        R(13, 6, 2, 2, d);
+        R(3, 9, 1, 4, d);
+        R(f ? 6 : 5, 9, 1, 4, d);
+        R(9, 9, 1, 4, d);
+        R(f ? 11 : 10, 9, 1, 4, d);
+      }
+    },
     ecureuil: {
       w: 10,
       h: 10,
@@ -208,6 +268,57 @@
         R(11, 1, 1, 1, '#1a1418');
         R(4, f ? 3 : 4, 1, 1, d);
         R(7, f ? 4 : 3, 1, 1, d);
+      }
+    },
+    // Animaux des Tréfonds.
+    taupe: {
+      w: 14,
+      h: 8,
+      pal: [['#4a3a34', '#2e2420', '#6e5a50']],
+      draw(R, f, [m, d, l]) {
+        R(1, 2, 10, 5, m);
+        R(0, 3, 12, 3, m);
+        R(2, 2, 7, 1, l);
+        R(11, 3, 2, 3, '#e8a0a0');
+        R(13, 4, 1, 1, '#f0b0b0');
+        R(10, 3, 1, 1, '#1a1418');
+        R(1, 7, 3, 1, '#e8c8b0');
+        R(f ? 8 : 7, 7, 3, 1, '#e8c8b0');
+        R(0, 5, 1, 2, d);
+      }
+    },
+    salamandre: {
+      w: 15,
+      h: 5,
+      pal: [['#e8702a', '#a8401a', '#ffb060']],
+      draw(R, f, [m, d, l]) {
+        R(0, 3, 4, 1, m);
+        R(3, 2, 7, 2, m);
+        R(4, 2, 1, 1, '#1a1418');
+        R(6, 2, 1, 1, '#1a1418');
+        R(8, 2, 1, 1, '#1a1418');
+        R(10, 1, 4, 3, m);
+        R(11, 1, 2, 1, l);
+        R(13, 2, 1, 1, '#1a1418');
+        R(4, f ? 4 : 3, 1, 1, d);
+        R(9, f ? 3 : 4, 1, 1, d);
+      }
+    },
+    crapaud: {
+      w: 11,
+      h: 8,
+      pal: [['#6a7a3a', '#46522a', '#9aaa5a']],
+      draw(R, f, [m, d, l]) {
+        R(1, 2, 9, 5, m);
+        R(2, 1, 3, 2, m);
+        R(7, 1, 3, 2, m);
+        R(3, 1, 1, 1, '#f0d040');
+        R(8, 1, 1, 1, '#f0d040');
+        R(2, 5, 7, 1, '#c8c890');
+        R(3, 3, 1, 1, d);
+        R(6, 4, 1, 1, d);
+        R(0, f ? 6 : 7, 3, 1, d);
+        R(8, f ? 7 : 6, 3, 1, d);
       }
     },
     fennec: {
@@ -343,6 +454,12 @@
     tortue: { speed: 0.15, roam: 2, shy: 0, water: true },
     herisson: { speed: 0.3, roam: 3, shy: 0 },
     lezard: { speed: 1.4, roam: 3, shy: 120, dart: true },
+    taupe: { speed: 0.5, roam: 3, shy: 110 },
+    salamandre: { speed: 1.2, roam: 3, shy: 120, dart: true },
+    crapaud: { speed: 0.8, roam: 2, shy: 90, hop: true },
+    faisan: { speed: 0.7, roam: 5, shy: 160 },
+    canard: { speed: 0.5, roam: 3, shy: 130, water: true },
+    chevre: { speed: 0.45, roam: 5, shy: 110, herd: 2 },
     fennec: { speed: 0.9, roam: 5, shy: 160 },
     chameau: { speed: 0.3, roam: 5, shy: 0, herd: 3 },
     vache: { speed: 0.25, roam: 2, shy: 0 },
@@ -351,10 +468,10 @@
   // Biomes (ordre des ZONES) : [espèce, nombre, variante, options] ; puis insectes volants.
   const FAUNA = [
     { ground: [['lapin', 32, 0], ['mouton', 10, 0], ['cerf', 12, 0], ['renard', 6, 0]], fliers: [['papillon', 36]] },
-    { ground: [['cerf', 24, 0], ['renard', 16, 0], ['ecureuil', 28, 0], ['lapin', 12, 0]], fliers: [['papillon', 12], ['luciole', 28]] },
-    { ground: [['grenouille', 44, 0], ['heron', 18, 0], ['tortue', 18, 0]], fliers: [['libellule', 40]] },
-    { ground: [['renard', 18, 0], ['herisson', 20, 0], ['cerf', 16, 0], ['ecureuil', 20, 0]], fliers: [['papillon', 16]] },
-    { ground: [['lezard', 36, 0], ['fennec', 18, 0], ['chameau', 6, 0]], fliers: [] },
+    { ground: [['cerf', 24, 0], ['renard', 16, 0], ['ecureuil', 28, 0], ['lapin', 12, 0], ['faisan', 14, 0]], fliers: [['papillon', 12], ['luciole', 28]] },
+    { ground: [['grenouille', 44, 0], ['heron', 18, 0], ['tortue', 18, 0], ['canard', 22, 0]], fliers: [['libellule', 40]] },
+    { ground: [['renard', 18, 0], ['herisson', 20, 0], ['cerf', 16, 0], ['ecureuil', 20, 0], ['faisan', 14, 0]], fliers: [['papillon', 16]] },
+    { ground: [['lezard', 36, 0], ['fennec', 18, 0], ['chameau', 6, 0], ['chevre', 10, 0]], fliers: [] },
     { ground: [['cerf', 18, 1, { glow: true }], ['lapin', 20, 1, { glow: true }], ['ecureuil', 8, 0]], fliers: [['luciole', 52], ['papillon', 24, true]] }
   ];
   const animals = [],
@@ -417,6 +534,10 @@
         animals.push({ kind: f.kind, sp: { ...SPECIES[f.kind], roam: f.roam }, variant: f.variant || 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 37, dir: k % 2 ? -1 : 1, step: 0, flee: 0, farm: true, rng: seeded(k * 53 + 7) });
     });
     for (const f of canaanCampLife.fliers()) fliers.push({ kind: f.kind, x: f.x, y: f.y, seed: f.seed, glow: false });
+    // Faune des Tréfonds (underground.js) : sur leur propre carte, marquée layer: 'under'.
+    const under = CANAAN_UNDER.fauna();
+    under.ground.forEach((f, k) => animals.push({ kind: f.kind, sp: SPECIES[f.kind], variant: 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 23, dir: 1, step: 0, flee: 0, layer: 'under', rng: seeded(k * 71 + 5) }));
+    for (const f of under.fliers) fliers.push({ ...f });
   }
   const near = (x, y, margin) => Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
   function stepAnimal(a) {
@@ -482,7 +603,7 @@
     c.save();
     c.imageSmoothingEnabled = false;
     for (const a of animals) {
-      if (a.dead || !near(a.x, a.y, 260)) continue;
+      if (a.dead || !canaanHere(a) || !near(a.x, a.y, 260)) continue;
       const frame = a.moving ? Math.floor(a.step / 6) % 2 : 0,
         spr = sprite(a.kind, a.variant, frame, a.opts),
         hop = a.sp.hop && a.moving ? -Math.abs(Math.sin(a.step * 0.35)) * 6 : 0;
@@ -503,11 +624,35 @@
     }
     // Insectes : papillons, libellules et lucioles qui virevoltent autour de leur coin.
     for (const f of fliers) {
-      if (!near(f.x, f.y, 120)) continue;
+      if (!canaanHere(f) || !near(f.x, f.y, 120)) continue;
       const t = time * 0.02 + f.seed,
         x = f.x + Math.sin(t * 0.7) * 40 + Math.sin(t * 2.3) * 10,
         y = f.y - 20 + Math.cos(t * 0.9) * 26 + Math.sin(t * 3.1) * 6;
-      if (f.kind === 'luciole') {
+      if (f.kind === 'chauve') {
+        // Chauve-souris : silhouette aux ailes qui battent, vol en huit.
+        const flap = Math.sin(time * 0.6 + f.seed) > 0 ? 1 : 0;
+        c.globalAlpha = 0.95;
+        c.fillStyle = '#2a2230';
+        c.fillRect(Math.round(x - 2), Math.round(y - 1), 4, 3);
+        c.fillRect(Math.round(x - 8), Math.round(y - 3 + flap * 3), 6, 2);
+        c.fillRect(Math.round(x + 2), Math.round(y - 3 + flap * 3), 6, 2);
+        c.fillStyle = '#ff6a5a';
+        c.fillRect(Math.round(x - 1), Math.round(y - 1), 1, 1);
+        c.fillRect(Math.round(x + 1), Math.round(y - 1), 1, 1);
+      } else if (f.kind === 'mouche') {
+        c.globalAlpha = 0.8;
+        c.fillStyle = '#1a1c18';
+        for (let k = 0; k < 3; k++) c.fillRect(Math.round(x + Math.sin(t * 7 + k * 2) * 6), Math.round(y + Math.cos(t * 6 + k) * 5), 2, 2);
+      } else if (f.kind === 'spore') {
+        // Spore luisante qui monte lentement et retombe.
+        const rise = ((time * 0.3 + f.seed * 37) % 120) / 120,
+          sx = f.x + Math.sin(t * 0.5) * 30,
+          sy = f.y - rise * 90;
+        c.globalAlpha = 0.25 + (1 - rise) * 0.6;
+        c.fillStyle = f.seed % 2 > 1 ? '#a8fff0' : '#ff9ae8';
+        c.fillRect(Math.round(sx), Math.round(sy), 3, 3);
+        if (rise < 0.4) canaanLight(sx, sy, 26, c.fillStyle);
+      } else if (f.kind === 'luciole') {
         const on = 0.5 + 0.5 * Math.sin(t * 3 + f.seed);
         c.globalAlpha = 0.35 + on * 0.65;
         c.fillStyle = '#e8ff9a';
@@ -797,7 +942,7 @@
   // De temps en temps, un habitant visible parle tout seul (un peu de vie même de loin).
   let chatter = 0;
   function drawVillagers(c) {
-    if (game.world.instance) return;
+    if (game.world.instance || canaanUnder()) return;
     if (!settled) settle();
     c.save();
     c.imageSmoothingEnabled = false;
@@ -844,7 +989,7 @@
     return lines;
   }
   function drawBubbles(c) {
-    if (game.world.instance || !settled) return;
+    if (game.world.instance || canaanUnder() || !settled) return;
     c.save();
     c.font = '12px system-ui, sans-serif';
     c.textAlign = 'center';
@@ -894,7 +1039,7 @@
     const ticks = last === null ? 1 : Math.max(0, Math.min(5, time - last));
     last = time;
     for (let k = 0; k < ticks; k++) {
-      for (const a of animals) if (near(a.x, a.y, 500)) stepAnimal(a);
+      for (const a of animals) if (canaanHere(a) && near(a.x, a.y, 500)) stepAnimal(a);
       // Un animal chassé revient une minute plus tard, chez lui.
       for (const a of animals)
         if (a.dead && time - a.dead > 3600) {
@@ -903,10 +1048,10 @@
           a.y = a.ty = a.hy;
           a.flee = 0;
         }
-      for (const v of villagers) if (near(v.x, v.y, 400)) stepVillager(v);
+      if (!canaanUnder()) for (const v of villagers) if (near(v.x, v.y, 400)) stepVillager(v);
     }
     huntCheck();
-    if (ticks && --chatter <= 0) {
+    if (ticks && --chatter <= 0 && !canaanUnder()) {
       chatter = 600 + Math.floor(Math.random() * 600);
       const here = canaanRoomAt(P.x / TS, P.y / TS),
         idle = villagers.filter(v => near(v.x, v.y, -40) && !v.bubble && canaanRoomAt(v.x / TS, v.y / TS) === here);
@@ -929,7 +1074,7 @@
     let best = null,
       bd = 1e9;
     for (const an of animals) {
-      if (an.dead || !CANAAN_PROF.huntable(an.kind, !!an.opts.glow)) continue;
+      if (an.dead || !canaanHere(an) || !CANAAN_PROF.huntable(an.kind, !!an.opts.glow)) continue;
       const dx = an.x - P.x,
         dy = an.y - 10 - P.y,
         d = Math.hypot(dx, dy);
@@ -961,6 +1106,11 @@
     drawVillagers,
     drawBubbles,
     animals: () => animals,
+    // Animaux de l'île placés à la surface (avant de descendre dans les Tréfonds).
+    prepare: () => {
+      if (!peopled) populate();
+      if (!settled) settle();
+    },
     fliers: () => fliers,
     villagers: () => villagers
   });

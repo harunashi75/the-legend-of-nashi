@@ -325,6 +325,103 @@
         { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'], halo: true },
         { look: 'angel', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'], wings6: true }
       ]
+    },
+    // ---------------------------------------------------------------- Donjons des Tréfonds (sous l'île)
+    {
+      key: 'durgrim',
+      entrance: 'mine',
+      shape: 'cave',
+      floor: { style: 'dirt', a: '#5e4632', b: '#3e2e20', c: '#84664a' },
+      accent: { style: 'rails', a: '#5e4632', b: '#5a3e28', c: '#a8a2a0', width: 0 },
+      wall: { style: 'rock', top: '#140e0a', face: '#4e3a2a', dark: '#2e2218', light: '#70543e' },
+      hazard: { style: 'water', a: '#3a2a1a', b: '#5a4026', c: '#8a6a44', pools: 3 },
+      light: { dark: 0.7, tint: '22,12,4' },
+      flame: ['#e5822e', '#f9c640', '#fff6c5'],
+      rune: '#e0a060',
+      banner: ['#4a3420', '#e0a060'],
+      pillar: ['#5e4430', '#3b2a1d', '#80614a'],
+      wallProps: ['lantern', 'beam', 'roots', 'beam'],
+      floorProps: ['minecart', 'crate', 'ore', 'pickaxe', 'rubble', 'bones', 'ore'],
+      centerpiece: 'mithrilcluster',
+      gate: 'portcullis',
+      particles: 'dust',
+      mobs: [
+        { name: 'Mineur maudit', look: 'skeleton', pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040'] },
+        { name: 'Taupe des galeries', look: 'beast', pal: ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a'] }
+      ],
+      bosses: [{ look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }]
+    },
+    {
+      key: 'ombral',
+      entrance: 'penitents',
+      shape: 'hall',
+      floor: { style: 'flagstone', a: '#4a5058', b: '#33383e', c: '#6a727c' },
+      accent: { style: 'carpet', a: '#2a4a6a', b: '#1a3450', c: '#c9a24a', width: 1 },
+      wall: { style: 'brick', top: '#0c1016', face: '#454c56', dark: '#2a3038', light: '#68707c' },
+      hazard: { style: 'water', a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0', pools: 2 },
+      light: { dark: 0.6, tint: '4,12,22' },
+      flame: ['#3a8ad8', '#7ac8ff', '#e0f4ff'],
+      rune: '#8ac8e8',
+      banner: ['#1e3a5a', '#c9a24a'],
+      pillar: ['#5a626c', '#3a4048', '#7e8894'],
+      wallProps: ['sconce', 'banner', 'chains', 'banner'],
+      floorProps: ['pillar', 'statue', 'rubble', 'candles', 'brazier', 'statue'],
+      centerpiece: 'throne',
+      gate: 'portcullis',
+      particles: 'motes',
+      mobs: [
+        { name: 'Garde de pierre', look: 'golem', pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff'] },
+        { name: 'Esprit d’Ombral', look: 'spirit', pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff'] }
+      ],
+      bosses: [{ look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }]
+    },
+    {
+      key: 'mille_tombes',
+      entrance: 'fosse',
+      shape: 'pit',
+      floor: { style: 'flagstone', a: '#3c3a36', b: '#282624', c: '#58544e' },
+      accent: { style: 'gravel', a: '#34322e', b: '#22201e', c: '#4e4a44', width: 1 },
+      wall: { style: 'brick', top: '#08090a', face: '#3a3c3a', dark: '#222422', light: '#5a5c58' },
+      hazard: { style: 'chasm', a: '#030404', b: '#0c100e', c: '#1e2a24', pools: 1 },
+      light: { dark: 0.72, tint: '4,14,10' },
+      flame: ['#3ad87a', '#8affb0', '#e0fff0'],
+      rune: '#a8f0c0',
+      banner: ['#1a2a22', '#a8f0c0'],
+      pillar: ['#4a4c48', '#2c2e2a', '#6c6e68'],
+      wallProps: ['skulls', 'sconce', 'chains', 'skulls'],
+      floorProps: ['bonepile', 'candles', 'bones', 'cage', 'statue', 'candles'],
+      centerpiece: 'altar',
+      gate: 'portcullis',
+      particles: 'motes',
+      mobs: [
+        { name: 'Goule des cryptes', look: 'brute', pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0'] },
+        { name: 'Âme sans repos', look: 'spirit', pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff'] }
+      ],
+      bosses: [{ look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }]
+    },
+    {
+      key: 'fongique',
+      entrance: 'terriers',
+      shape: 'cave',
+      floor: { style: 'dirt', a: '#3e4a2e', b: '#2a3420', c: '#5e6e40' },
+      accent: { style: 'gravel', a: '#4a3a46', b: '#322630', c: '#6a5664', width: 1 },
+      wall: { style: 'rock', top: '#0c0a10', face: '#3e3446', dark: '#241e2a', light: '#5e5068' },
+      hazard: { style: 'water', a: '#2e3818', b: '#4a5a24', c: '#a8c060', pools: 3 },
+      light: { dark: 0.66, tint: '16,4,20' },
+      flame: ['#d84ac0', '#ff8ae8', '#ffe0f8'],
+      rune: '#e870c0',
+      banner: ['#3a1a34', '#e870c0'],
+      pillar: ['#4e4258', '#302838', '#6e6080'],
+      wallProps: ['roots', 'lantern', 'roots', 'roots'],
+      floorProps: ['mushroom', 'crystal', 'mushroom', 'bones', 'rubble', 'mushroom'],
+      centerpiece: 'mithrilcluster',
+      gate: 'barrier',
+      particles: 'motes',
+      mobs: [
+        { name: 'Porte-spores', look: 'golem', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], leafy: true },
+        { name: 'Larve des fanges', look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] }
+      ],
+      bosses: [{ look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }]
     }
   ];
   // Arène des Épreuves : colisée de sable chaud, gradins de grès, bannières pourpres et or.
@@ -2059,7 +2156,7 @@
     c.beginPath();
     c.ellipse(x, y + 26, 84, 22, 0, 0, Math.PI * 2);
     c.fill();
-    switch (th.key) {
+    switch (th.entrance || th.key) {
       case 'arene': {
         // Façade de colisée : deux étages d'arcades en grès, grande arche centrale, braseros et bannières.
         const sand = '#c8a878',
@@ -2492,8 +2589,22 @@
     CANAAN_DUNGEON_AUDIT: auditDungeon,
     // Monstres d'une instance (renforts appelés par les boss, boss-mechanics.js).
     CANAAN_DUNGEON_MOBS: i => THEMES[i].mobs,
+    // Apparence des boss d'une instance (portraits du bestiaire).
+    CANAAN_DUNGEON_BOSS_LOOKS: i => THEMES[i].bosses,
     // Pinceaux partagés avec les intérieurs des bâtiments et le camp (house.js, world-settlements.js) : mêmes
     // textures de sol et de mur, même flamme, même ombre au pied des murs que dans les donjons et les raids.
-    CANAAN_TILE_KIT: Object.freeze({ canvas, rect, specks, paintFloor, paintFace, flame, shadowTile })
+    CANAAN_TILE_KIT: Object.freeze({
+      canvas,
+      rect,
+      specks,
+      paintFloor,
+      paintFace,
+      paintHazard,
+      flame,
+      shadowTile,
+      // Objets des donjons (torches, os, caisses, statues, braseros…), réutilisés par les Tréfonds (underground.js).
+      floorProp: (c, p, th) => drawFloorProp(c, p, th),
+      wallProp: (c, p, th) => drawWallProp(c, p, th)
+    })
   });
 })();

@@ -140,5 +140,5 @@ module.exports = { createRelay };
 if (require.main === module) {
   const port = Number(process.env.PORT) || 8787;
   const relay = createRelay({ port, log: text => console.log('[relais] ' + text) });
-  relay.ready.then(() => console.log('[relais] Canaan Online : relais prêt sur ws://localhost:' + relay.port));
+  relay.ready.then(() => console.log('[relais] The Legend of Nashi : relais prêt sur ws://localhost:' + relay.port));
 }

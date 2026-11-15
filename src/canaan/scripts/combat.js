@@ -21,7 +21,7 @@
       if (target.spell_vulnerable > 0) damage *= 1.15;
       if (target.v1746_armor > 0) damage *= 1.1;
       if (target.v1746_mark > 0) {
-        damage *= 1.15;
+        damage *= 1.3;
         target.v1746_mark = 0;
       }
       const artifact = window.CANAAN_ARTIFACT_PASSIVE(hero);
@@ -82,6 +82,7 @@
       if (n) n = window.CANAAN_CLASS_FATAL(n, hero);
       if (!n) return 0;
       p.hp -= n;
+      canaanAchieve(hero, 'hurt', n);
       if (hero === game.hero) {
         float(P.x, P.y - 30, '-' + n, '#ff5c5c');
         shake = Math.max(shake, 8);
@@ -130,6 +131,7 @@
       CANAAN_RUBIS.onDodge();
       window.CANAAN_CLASS_ON_DODGE();
       CANAAN_SOUND.cue('dodge');
+      canaanAchieve(game.hero, 'dodge');
       return true;
     },
     invulnerable(hero = game.hero) {
@@ -152,6 +154,7 @@
       p.dodgeReady = clock() + DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor(hero);
       CANAAN_RUBIS.onDodge(hero);
       window.CANAAN_CLASS_ON_DODGE(hero);
+      canaanAchieve(hero, 'dodge');
       return true;
     },
     dodgeState(hero = game.hero) {

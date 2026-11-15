@@ -240,7 +240,7 @@
       return '<button type="button" class="slot-join-open" data-action="netJoinForm">🌐 Rejoindre la partie d’un ami</button>';
     return (
       '<div class="slot-join"><h3>Rejoindre la partie d’un ami</h3>' +
-      '<label for="joinInvite">Invitation reçue (colle-la ici)</label><input id="joinInvite" class="slot-input" autocomplete="off" placeholder="Rejoins ma partie Canaan Online ! Relais : wss://… · Code : …">' +
+      '<label for="joinInvite">Invitation reçue (colle-la ici)</label><input id="joinInvite" class="slot-input" autocomplete="off" placeholder="Rejoins ma partie The Legend of Nashi ! Relais : wss://… · Code : …">' +
       '<label for="joinPseudo">Pseudo</label><input id="joinPseudo" class="slot-input" maxlength="24" autocomplete="off" value="' + esc(me.pseudo === 'Invité' ? '' : me.pseudo) + '">' +
       '<label for="joinCode">Code du salon</label><input id="joinCode" class="slot-input" maxlength="8" autocomplete="off" placeholder="ABC234" value="' + esc(me.code) + '">' +
       '<label for="joinRelay">Relais</label><input id="joinRelay" class="slot-input" autocomplete="off" value="' + esc(me.relay) + '">' +
