@@ -512,3 +512,33 @@
   color: #d8c49a;
   font-size: calc(12px * var(--font-scale));
 }
+
+/* Sac (touche I) : deux onglets, le sac et les matériaux récoltés. */
+#window .bag-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+#window .bag-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#window .bag-tabs button small {
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+}
+#window .bag-tabs button.on {
+  background: linear-gradient(180deg, #8a6420, #5a3e12);
+  border-color: #f6dc98;
+  color: #fff4d0;
+}
+#window .bag-tabs button.on small {
+  color: #ffe9a8;
+}
+#window .bag-subhead {
+  margin: 12px 0 6px;
+  color: #f6dc98;
+  font-size: calc(14px * var(--font-scale));
+}

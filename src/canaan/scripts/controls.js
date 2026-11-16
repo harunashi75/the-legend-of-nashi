@@ -82,6 +82,9 @@
     toggleTalents: () => toggleTalents(),
     toggleJournal: () => toggleJournal(),
     toggleAchievements: () => toggleAchievements(),
+    // Garde-robe (V) : ouvrir, porter une apparence (vide : la retirer).
+    toggleWardrobe: () => toggleWardrobe(),
+    wearSkin: element => CANAAN_WARDROBE.choose(element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''),
     achTab: element => CANAAN_ACHIEVEMENTS.actions.tab(actionText(element, 'tab')),
     achCat: element => CANAAN_ACHIEVEMENTS.actions.cat(actionText(element, 'cat')),
     achTitle: element => CANAAN_ACHIEVEMENTS.actions.title(actionText(element, 'title')),
@@ -139,6 +142,7 @@
       unequip(slot);
     },
     renderInventory: () => renderInventory(),
+    bagSection: element => canaanBagSection(actionText(element, 'tab')),
     renderCharacter: () => renderCharacter(),
     chooseClass: element => chooseClass(actionText(element, 'class')),
     equipTalent: element => equipTalent(actionInteger(element, 'talent')),

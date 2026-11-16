@@ -145,13 +145,18 @@
       left = '<p class="muted">Clique un objet pour le reprendre dans ton sac.</p><div class="modern-bag bank-grid">' + tiles.join('') + empty(Math.min(CAPACITY - tiles.length, 40)) + '</div>';
     }
     const gear = hero.inventory.map((it, i) => gearTile(it, 'data-tooltip-index="' + i + '" data-action="bankDeposit" data-ref="' + esc(it.id) + '" title="Déposer à la banque"')),
-      stacks = CANAAN_BAG.tiles(hero).map(p => stackTile(p, 'data-action="bankDeposit" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Déposer à la banque"'));
+      depositTile = p => stackTile(p, 'data-action="bankDeposit" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Déposer à la banque"'),
+      stacks = CANAAN_BAG.tiles(hero, 'main').map(depositTile),
+      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile);
     showPanel(
       '<div class="rpg-head"><h2>🏦 Banque</h2></div><div class="bank-panel shop-columns">' +
         '<section class="shop-side"><h3>🏦 Ta banque · ' + (bank ? used(bank) : 0) + ' / ' + CAPACITY + '</h3>' + left + '</section>' +
         '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' + canaanBagUsed(hero) + ' / ' + canaanBagLimit(hero) + '</h3>' +
         '<p class="muted">Clique un objet pour le déposer. Les objets portés et les Rubis équipés restent sur toi.</p>' +
-        '<div class="modern-bag">' + gear.join('') + stacks.join('') + empty(canaanBagLimit(hero) - gear.length - stacks.length) + '</div></section></div>'
+        '<div class="modern-bag">' + gear.join('') + stacks.join('') + empty(canaanBagLimit(hero) - gear.length - stacks.length) + '</div>' +
+        '<h3 class="bag-subhead">⟦prof_mining⟧ Matériaux · ' + mats.length + ' / ' + CANAAN_BAG.MAT_LIMIT + '</h3>' +
+        (mats.length ? '<div class="modern-bag">' + mats.join('') + '</div>' : '<p class="muted">Aucun matériau.</p>') +
+        '</section></div>'
     );
   }
   function open() {

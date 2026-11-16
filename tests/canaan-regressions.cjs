@@ -55,7 +55,7 @@ function game() {
     // Tréfonds (underground.js, testé à part) : l'île seulement.
     canaanUnder: () => false, canaanHere: o => o?.layer !== 'under',
     CANAAN_PROF: {damageMult: () => 1, armorMult: () => 1, speedMult: () => 1, sanitize: p => p || {fishing: {level: 1, exp: 0}, cooking: {level: 1, exp: 0}, hunting: {level: 1, exp: 0}, fish: {}, meat: {}, meals: {}, codex: {}}},
-    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, bossMechanics: {}, achievements: {}},
+    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, bossMechanics: {}, achievements: {}},
     document: {activeElement: null, createElement: element, getElementById: () => ({style: {display:'none'}})},
     skEl: element(), chatInput: {}, performance: {now: () => 100000},
     // Niveau des monstres (monster-scaling.js, non chargé ici) : celui qu'ils portent, 1 sinon.
@@ -904,7 +904,7 @@ test('Version actuelle, actions sans onclick et CSS sans important',()=>{
 
 test('Commandes : délégation, multitouch, annulation, pause et visée',()=>{
  const listeners={},rootListeners={},skillListeners={},calls=[];
- const names=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','interact','switchWeapon','useSkill'];
+ const names=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','interact','switchWeapon','useSkill'];
  const g={Map,keys:{},started:true,paused:false,P:{dead:false,x:10,y:20,face:-1},monsters:[],mouseWorldX:0,mouseWorldY:0,CanaanStages:{},modalOpen:()=>false,
   CANAAN_PERSISTENCE:{restartFresh:()=>calls.push(['restart'])},
   document:{hidden:false,addEventListener:(name,fn)=>listeners[name]=fn,getElementById:id=>id==='touchControls'?{addEventListener:(name,fn)=>rootListeners[name]=fn}:id==='skills'?{addEventListener:(name,fn)=>skillListeners[name]=fn}:{style:{display:'none'}}},
@@ -1063,7 +1063,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  assert.doesNotMatch(source,/const\s+\w+\s*=\s*(?:window\.)?CanaanStages\.\w+\s*;/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','bossMechanics','achievements']);
+ assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','bossMechanics','achievements']);
  // Les vraies étapes tournent sur une partie chargée.
  run('started=true;paused=false;P.dead=false');
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline();updateWorld()');
@@ -1077,7 +1077,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  run('runUpdatePipeline();runDrawPipeline()');
  assert.deepEqual(calls,['before:rubis','before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
   'after:weaponEffects=weaponEffects','after:mobScaling','after:weaponVfx=weaponVfx','after:facing','after:classes=classes',
-  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
+  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
  for(const state of ['paused=true','paused=false;P.dead=true','P.dead=false;started=false']){
   calls.length=0;run(state+';runUpdatePipeline()');assert.deepEqual(calls,[],state);
  }
@@ -1193,7 +1193,7 @@ test('Survols délégués : objet, emplacement, mouvement et transitions entre e
  const g={Map,CanaanStages:{},keys:{},document:{addEventListener:(name,fn)=>listeners[name]=fn,getElementById:()=>({addEventListener(){}})},addEventListener(){},
   CANAAN_PERSISTENCE:{restartFresh(){}},
   showGearTooltip:(...a)=>calls.push(['bag',...a]),showEquippedTooltip:(...a)=>calls.push(['slot',...a]),moveGearTooltip:()=>calls.push(['move']),highlightMapInstance:(...a)=>calls.push(['map',...a])};
- const actions=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels'];
+ const actions=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels'];
  for(const name of actions)g[name]=()=>calls.push([name]);
  g.window=g;linkGameState(g);vm.createContext(g);vm.runInContext(script('canaan-controls'),g);
  const element={dataset:{tooltipIndex:'2'},contains:()=>false};const event={target:{closest:()=>element},relatedTarget:null};
@@ -1224,7 +1224,7 @@ test('Interface générée : actions autorisées, catalogue officiel, musique et
  const actionCalls=[];g.actionCalls=actionCalls;
  const stubbed=['togglePause','pauseOpenPanel','pauseToTitle','startGame','toggleMap','enterInstance','renderInventory','renderCharacter','unequip','equipReserveWeapon','buyGear'];
  run('globalThis.realActions={'+stubbed.join(',')+',restartFresh:CANAAN_PERSISTENCE.restartFresh}');
- run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleMap','toggleGroup','toggleTrade','toggleProfessions','toggleHousing','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','quitGame'])
+ run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','toggleHousing','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','quitGame'])
   globalThis[name]=(...args)=>actionCalls.push([name,...args]);
   togglePause=globalThis.togglePause;pauseOpenPanel=globalThis.pauseOpenPanel;pauseToTitle=globalThis.pauseToTitle;startGame=globalThis.startGame;
   toggleMap=globalThis.toggleMap;enterInstance=globalThis.enterInstance;renderInventory=globalThis.renderInventory;
@@ -1338,9 +1338,15 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  r=reward(mob,.999);assert.deepEqual(r.items,[['Commun',7]]);
  r=reward(elite,.5);assert.deepEqual(r.items,[['Commun',12]]);
  r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=1000&&r.gold<=1500,String(r.gold));
- // Coffre secret : Commun du niveau de sa zone (milieu de la plage) et 40 or.
+ // Coffre secret : verrouillé sans clé des secrets ; avec une clé (consommée), un Épique du niveau de sa zone
+ // (milieu de la plage), 200 à 400 or et 25 % de chance d'un Rubis.
  const chestLevel=run('(()=>{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot),[lo,hi]=ZONE_LEVELS[canaanZoneIndexAt(at.x,at.y)];return Math.round((lo+hi)/2)})()');
- r=reward(chest,0);assert.deepEqual(r.items,[['Commun',chestLevel]]);assert.equal(r.gold,40);
+ const opened0=run('openedChests.length');
+ r=reward('P.keys=0;'+chest,0);assert.deepEqual(r.items,[]);assert.equal(r.gold,0);assert.equal(run('openedChests.length'),opened0,'sans clé, il reste fermé');
+ const rubis0=run('Object.values(CANAAN_RUBIS_STATE.export().owned).reduce((a,b)=>a+b,0)');
+ r=reward('P.keys=2;'+chest,0);assert.deepEqual(r.items,[['Épique',chestLevel]]);assert.equal(r.gold,200);assert.equal(run('P.keys'),1,'une clé consommée');
+ assert.equal(run('Object.values(CANAAN_RUBIS_STATE.export().owned).reduce((a,b)=>a+b,0)'),rubis0+1,'Rubis gagné');
+ r=reward('P.keys=1;'+chest,0.99);assert.deepEqual(r.items,[['Épique',chestLevel]]);assert.equal(r.gold,398);
  // Les ennemis d’une instance, même élites, ne donnent rien : le coffre du boss fait le butin.
  r=reward('instanceState={index:0,cleared:false};'+mob,0);assert.deepEqual(r.items,[]);
  r=reward('instanceState={index:6,cleared:false};'+elite,.46);assert.deepEqual(r.items,[]);
@@ -1542,45 +1548,127 @@ test('Île unique : six biomes, un seul camp sûr, route continue et lieux acces
 });
 
 
-test('Donjons et raids : thème fidèle au nom, un boss par donjon, trois par raid, herses et coffre final',()=>{
+test('Donjons et raids en exploration : trois boss par donjon, six par raid, énigmes, passages secrets et clés',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- // Chaque instance a son thème, ses boss et un plan entièrement accessible, herses levées.
+ // Chaque instance a son thème, ses boss, ses boss cachés et un plan jouable (énigmes faisables, boss scellés).
  const audits=JSON.parse(run('JSON.stringify(instances.map((d,i)=>CANAAN_DUNGEON_AUDIT(i)))'));
- // Dix instances sur l'île, quatre donjons dans les Tréfonds.
  assert.equal(new Set(audits.map(a=>a.theme)).size,14);
- assert.deepEqual(audits.map(a=>a.bosses),[1,1,1,1,1,1,3,3,3,3,1,1,1,1]);
- assert.deepEqual(audits.map(a=>a.gates),[0,0,0,0,0,0,2,2,2,2,0,0,0,0]);
- for(const a of audits){assert.equal(a.reachable,true,a.theme);assert.equal(a.sealed,true,a.theme);assert.ok(a.props>20,a.theme)}
- assert.equal(run('instances.every(d=>d.bosses.length===(d.raid?3:1)&&d.bosses[d.bosses.length-1]===d.boss)'),true);
- assert.equal(run("instances[1].boss"),'Golem de Mithril');
- assert.equal(run("instances[6].bosses.join(' → ')"),'Sire Écorcheur → La Comtesse Écarlate → Le Roi Sanglant');
- // Les herses et dangers bloquent ; le plan est identique à chaque entrée.
- assert.equal(run('SOLID.includes(19)&&SOLID.includes(22)&&!SOLID.includes(20)&&!SOLID.includes(21)'),true);
+ assert.deepEqual(audits.map(a=>a.bosses),[3,3,3,3,3,3,6,6,6,6,3,3,3,3]);
+ assert.deepEqual(audits.map(a=>a.secrets),[1,1,1,1,1,1,2,2,2,2,1,1,1,1]);
+ assert.deepEqual(audits.map(a=>a.doors),audits.map(a=>a.bosses));assert.deepEqual(audits.map(a=>a.gates),audits.map(a=>a.bosses-1));
+ for(const a of audits){assert.equal(a.reachable,true,a.theme);assert.equal(a.sealed,true,a.theme);assert.ok(a.props>60,a.theme);assert.ok(a.rooms>=(a.bosses===6?20:12),a.theme+' : '+a.rooms+' salles')}
+ // Les quatre mécanismes servent, et chaque instance en mélange plusieurs.
+ assert.deepEqual([...new Set(audits.flatMap(a=>a.locks))].sort(),['braziers','guardian','levers','runes']);
+ assert.ok(audits.every(a=>new Set(a.locks).size>=3));
+ assert.equal(run('instances.every(d=>d.bosses.length===(d.raid?6:3)&&d.bosses[d.bosses.length-1]===d.boss&&d.secrets.length===(d.raid?2:1))'),true);
+ assert.equal(run("instances[6].bosses.join(' → ')"),'Le Maître-Chien Ravageur → Sire Écorcheur → Le Chapelain Sanguin → La Comtesse Écarlate → Le Champion du Sang → Le Roi Sanglant');
+ assert.equal(run('SOLID.includes(19)&&SOLID.includes(22)&&SOLID.includes(23)&&!SOLID.includes(20)&&!SOLID.includes(21)'),true);
  assert.equal(run('JSON.stringify(makeDungeon(7))===JSON.stringify(makeDungeon(7))'),true);
- // Portail : la liste des boss du raid.
  run('game.hero.level=60;openPortal({instance:6})');
- assert.match(g.document.getElementById('window').innerHTML,/Boss \(3\) : Sire Écorcheur → La Comtesse Écarlate → Le Roi Sanglant/);
+ assert.match(g.document.getElementById('window').innerHTML,/Boss \(6\) : Le Maître-Chien Ravageur → Sire Écorcheur/);
  run('closePanels()');
- // Raid : chaque boss tombé lève la herse suivante ; le coffre apparaît après le troisième.
- run('enterInstance(6)');
- assert.equal(run("monsters.filter(m=>m.boss).map(m=>m.t).join()"),'Sire Écorcheur,La Comtesse Écarlate,Le Roi Sanglant');
- assert.equal(run('monsters.filter(m=>!m.boss).every(m=>m.look&&m.pal&&["Garde sanglant","Vampire écarlate"].includes(m.t))'),true);
- const gates=()=>run('world.flat().filter(t=>t===19).length');
- const kill=k=>run('{const m=monsters.filter(m=>m.boss)['+k+'];m.hp=0;recordKill(m);monsters=monsters.filter(o=>o!==m)}');
- const g0=gates();assert.ok(g0>=6,'herses fermées : '+g0);
- kill(0);assert.ok(gates()<g0&&gates()>0);assert.equal(run('instanceState.cleared'),false);assert.equal(run('chests.length'),0);
- kill(0);assert.equal(gates(),0);assert.equal(run('instanceState.cleared'),false);
- kill(0);assert.equal(run('instanceState.cleared'),true);
- const chest=JSON.parse(run('JSON.stringify(chests[0])')),spot=JSON.parse(run('JSON.stringify(dungeonChestSpot(6))'));
- assert.deepEqual([chest.x,chest.y],[spot.x,spot.y]);assert.equal(run('world['+Math.floor(spot.y)+']['+Math.floor(spot.x)+']===20||world['+Math.floor(spot.y)+']['+Math.floor(spot.x)+']===21'),true);
- run('leaveInstance()');
- // Donjon : un seul boss, coffre immédiat ; les ennemis portent le thème du donjon.
+ // Donjon : trois boss et un boss caché ; les ennemis portent le thème du donjon.
  run('enterInstance(0)');
- assert.equal(run('monsters.filter(m=>m.boss).length'),1);
- assert.equal(run("monsters.filter(m=>!m.boss).every(m=>['Osselet','Rat des terriers'].includes(m.t))"),true);
- kill(0);assert.equal(run('instanceState.cleared'),true);assert.equal(run('chests.length'),1);
+ assert.equal(run("monsters.filter(m=>m.boss&&m.secretBoss===undefined).map(m=>m.t).join()"),'Grignotte, Reine des Rats,Le Fossoyeur Bossu,Gardien des Os');
+ assert.equal(run("monsters.filter(m=>m.secretBoss!==undefined).map(m=>m.t).join()"),'Le Rat-Roi aux Mille Queues');
+ assert.equal(run("monsters.filter(m=>!m.boss).every(m=>['Osselet','Rat des terriers','Gardien du sceau'].includes(m.t))"),true);
+ const plan='CANAAN_DUNGEON_EXPLORE.plan(0)',st='CANAAN_DUNGEON_EXPLORE.state()';
+ const walk=(x,y)=>run('P.x=('+x+'+0.5)*TS;P.y=('+y+'+0.5)*TS');
+ const doorOpen=s=>run('{const g='+plan+'.doors['+s+'];g.cells.every(([x,y])=>world[y][x]!==19)}');
+ const lock=s=>JSON.parse(run('JSON.stringify('+plan+'.locks['+s+'])'));
+ const use=it=>{walk(it.x,it.y+1);return run('CANAAN_DUNGEON_EXPLORE.interact()')};
+ // Porte scellée : E donne l'indice, la porte reste fermée.
+ const d0=JSON.parse(run('JSON.stringify('+plan+'.doors[0].cells[1])'));walk(d0[0],d0[1]+1);
+ assert.equal(run('CANAAN_DUNGEON_EXPLORE.interact()'),true);assert.equal(doorOpen(0),false);
+ // Résout chaque porte du donjon selon son mécanisme.
+ const solve=s=>{
+  const L=lock(s);
+  if(L.type==='braziers')for(const it of L.items)use(it);
+  if(L.type==='levers'){
+   // Un mauvais ordre relève tous les leviers ; le bon ordre ouvre la porte.
+   const wrong=L.items.find(it=>it.id!==L.order[0]);use(wrong);assert.equal(run(st+'.locks['+s+'].step'),0);
+   for(const id of L.order)use(L.items[id]);
+  }
+  if(L.type==='runes'){
+   const press=it=>{walk(it.x,it.y);run('P.y-=10;CanaanStages.dungeonPuzzles.after()');walk(it.x+3,it.y+3);run('P.x=0;P.y=0;CanaanStages.dungeonPuzzles.after()')};
+   for(const id of L.order)press(L.items[id]);
+  }
+  if(L.type==='guardian'){run('for(const m of monsters.filter(m=>m.guardian==='+s+'))m.hp=0');run('CanaanStages.dungeonPuzzles.after()')}
+  assert.equal(doorOpen(s),true,'porte '+s+' ('+L.type+')');
+ };
+ // La stèle donne l'ordre des leviers ou des dalles en énigme.
+ const L1=lock(1);if(L1.stele){walk(L1.stele.x,L1.stele.y+1);run('CANAAN_DUNGEON_EXPLORE.interact()')}
+ solve(0);
+ // Boss : 30 % de chance d'équipement par héros ; sa mort lève la herse de sa salle.
+ const gates=()=>run('world.flat().filter(t=>t===19).length');
+ const kill=(name,r)=>run('{const real=Math.random;Math.random=()=>'+r+';const m=monsters.find(m=>m.t==='+JSON.stringify(name)+');m.hp=0;recordKill(m);monsters=monsters.filter(o=>o!==m);Math.random=real}');
+ run('inventory.length=0');const g0=gates();
+ kill('Grignotte, Reine des Rats',0.1);assert.equal(run('inventory.filter(i=>i.origin==="donjon").length'),1,'chanceux : un équipement');assert.ok(gates()<g0);
+ solve(1);kill('Le Fossoyeur Bossu',0.9);assert.equal(run('inventory.filter(i=>i.origin==="donjon").length'),1,'pas de chance : rien');
+ // Passage secret : le mur fissuré s'effondre (E) ; le boss caché donne une clé des secrets.
+ const w=JSON.parse(run('JSON.stringify('+plan+'.secretWalls[0].cells[1])'));
+ assert.equal(run('world['+w[1]+']['+w[0]+']'),23);walk(w[0],w[1]+1);run('P.y-=8');
+ assert.equal(run('CANAAN_DUNGEON_EXPLORE.interact()'),true);assert.notEqual(run('world['+w[1]+']['+w[0]+']'),23);
+ run('P.keys=0');kill('Le Rat-Roi aux Mille Queues',0.1);assert.equal(run('P.keys'),1);assert.equal(run('instanceState.cleared'),false);
+ solve(2);kill('Gardien des Os',0.9);assert.equal(run('instanceState.cleared'),true);assert.equal(run('chests.length'),1);
+ const chest=JSON.parse(run('JSON.stringify(chests[0])')),spot=JSON.parse(run('JSON.stringify(dungeonChestSpot(0))'));
+ assert.deepEqual([chest.x,chest.y],[spot.x,spot.y]);
+ // La clé est gardée dans la sauvegarde.
+ assert.equal(JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.heroSnapshot({x:0,y:0}).player)')).keys,1);
+ // Les clés sont des objets du sac (touche I), en piles de 20 qui prennent de la place ; elles ne se vendent pas.
+ const used0=run('canaanBagUsed(game.hero)');run('P.keys=45');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero,"main").filter(t=>t.kind==="key").map(t=>t.n))')),[20,20,5]);
+ assert.equal(run('canaanBagUsed(game.hero)'),used0+2);assert.equal(run('CANAAN_BAG.info({kind:"key",id:"secret",q:0,n:1}).name'),'Clé des secrets');
+ assert.equal(run('!!CANAAN_BAG.parse("key:secret:0*20")&&!CANAAN_BAG.parse("key:secret:0*21")'),true);
+ assert.equal(run('CANAAN_SHOP.sellStack?CANAAN_SHOP.sellStack(game.hero,"key:secret:0*5"):false'),false);assert.equal(run('P.keys'),45);
+ run('P.keys=1');
+ // Lumi accompagne le héros sans bulle de message.
+ assert.doesNotMatch(source,/lumiCloud|Lumi : ✨/);
  run('leaveInstance()');assert.equal(run('world'),run('overworld'));
+ // Raid : six boss, deux boss cachés.
+ run('enterInstance(6)');
+ assert.equal(run('monsters.filter(m=>m.boss&&m.secretBoss===undefined).length'),6);assert.equal(run('monsters.filter(m=>m.secretBoss!==undefined).length'),2);
+ run('leaveInstance()');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus, port vérifié, sauvegarde et réseau',async()=>{
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ // Catalogue : des tenues complètes dans chaque qualité, les plus hautes avec ailes, aura ou particules.
+ const skins=JSON.parse(run('JSON.stringify(SKINS)'));
+ assert.ok(skins.length>=24);assert.deepEqual([0,1,2,3,4,5].map(r=>skins.filter(s=>s.rarity===r).length>=4),[true,true,true,true,true,true]);
+ assert.ok(skins.filter(s=>s.rarity>=4).every(s=>['dragonwings','angelwings','batwings','fairywings','flamecape'].includes(s.back)&&s.fx&&s.fx.length));
+ assert.ok(skins.filter(s=>s.rarity===5).every(s=>s.fx.includes('aura')));assert.ok(skins.filter(s=>s.rarity===0).every(s=>!s.fx));
+ // Apparence portée dans le look : codée seulement quand il y en a une (l'ancienne forme reste identique).
+ assert.equal(run('encodeLook(defaultLook())'),'m|humain|#f0c7a0|court|#7d5140|#202938|acier');
+ assert.equal(run('encodeLook({...defaultLook(),wear:"dragon"})'),'m|humain|#f0c7a0|court|#7d5140|#202938|acier|dragon');
+ assert.equal(run('decodeLook(encodeLook({...defaultLook(),wear:"dragon"})).wear'),'dragon');assert.equal(run('sanitizeLook({wear:"pirate<b>"}).wear||""'),'');assert.equal(run('"wear" in defaultLook()'),false,'sans apparence, le look ne change pas');
+ // Tirage : chance et qualités selon la source.
+ const roll=(src,seq)=>run('{const q='+JSON.stringify(seq)+';let k=0;CANAAN_WARDROBE.roll("'+src+'",()=>q[k++%q.length])}');
+ assert.equal(roll('normal',[0.5]),null,'un monstre ne donne presque jamais rien');
+ assert.equal(run('SKINS.find(s=>s.id==='+JSON.stringify(roll('secretBoss',[0,0.999,0]))+').rarity'),5,'boss caché : jusqu’au Mythique');
+ assert.equal(run('SKINS.find(s=>s.id==='+JSON.stringify(roll('normal',[0,0,0]))+').rarity'),0);
+ // Gagner, doublon revendu, porter seulement ce qu'on possède.
+ run('game.hero.skins={owned:[]};P.gold=0');
+ assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),true);assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),false);assert.equal(run('P.gold'),300);
+ assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"dragon")'),false,'pas possédée');assert.equal(run('(game.hero.look||{}).wear||""'),'');
+ assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"pirate")'),true);assert.equal(run('game.hero.look.wear'),'pirate');
+ // Le sprite d'une tenue a de la place pour les ailes ; sans tenue, rien ne change.
+ assert.equal(run('canaanHeroSprite({...game.hero.look,wear:"dragon"},0,0).padX'),12);assert.equal(run('canaanHeroSprite(defaultLook(),0,0).padX'),0);
+ // Sauvegarde : collection et tenue portée.
+ const saved=JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.heroSnapshot({x:0,y:0}))'));
+ assert.deepEqual(saved.skins,{owned:['pirate']});assert.equal(saved.look.wear,'pirate');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_WARDROBE.sanitize({owned:["pirate","pirate","inconnue",3]}))')),{owned:['pirate']});
+ // Réseau : l'invité demande (l'hôte vérifie) ; les E de donjon passent aussi le filtre des actions.
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'skin-wear',id:'pirate'}),{op:'skin-wear',id:'pirate'});assert.deepEqual(n.sanitizeAction({op:'skin-wear',id:''}),{op:'skin-wear',id:''});
+ assert.equal(n.sanitizeAction({op:'skin-wear',id:'<x>'}),null);assert.deepEqual(n.sanitizeAction({op:'dungeon-use'}),{op:'dungeon-use'});
+ // Butin : un boss de donjon tire une apparence pour chaque héros (ici, forcée).
+ run('game.hero.skins={owned:[]};game.hero.level=60;enterInstance(0);{const real=Math.random;Math.random=()=>0;const m=monsters.find(m=>m.bossStage===0);m.hp=0;recordKill(m);Math.random=real}');
+ assert.equal(run('game.hero.skins.owned.length'),1,'apparence du boss');run('leaveInstance()');
+ assert.equal(errors.length,0,errors.join('\n'));
 });
 
 test('Monde au niveau des donjons : créatures détaillées, textures des biomes, entrées thématiques et ambiance',()=>{
@@ -1624,8 +1712,9 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
  assert.equal(run('walker._rippleT===time'),true);
  run('globalThis.dry={};drawWade(ctx,dry,CANAAN_SPAWN.x,CANAAN_SPAWN.y,40,true,1);drawWaterRipples(ctx)');
  assert.equal(run('dry._rippleT'),undefined);
- // Arbres redessinés et thème RPG chargé en dernier.
- assert.equal(run("['tree','bigtree','pine','palm','twisted','autumn_red','glowtree'].every(k=>PIXEL_DECOR[k]&&PIXEL_DECOR[k].width===68)"),true);
+ // Arbres redessinés deux fois plus grands (pixels de 2) et thème RPG chargé en dernier.
+ assert.equal(run("['tree','bigtree','pine','palm','twisted','autumn_red','glowtree'].every(k=>PIXEL_DECOR[k]&&PIXEL_DECOR[k].width===132)"),true);
+ assert.equal(run("['rock','flower','bush','cactus'].every(k=>PIXEL_DECOR[k]&&PIXEL_DECOR[k].width===68)"),true);
  const styles=[...source.matchAll(/<style id="([^"]+)"/g)].map(m=>m[1]);
  assert.equal(styles[styles.length-1],'canaan-rpg-theme');
  assert.match(source,/--rpg-serif:/);
@@ -2013,7 +2102,7 @@ test('Chasse et collections : gibier abattu à l’arme, viande et qualités, ca
  assert.match(html(),/Collection · 1 \/ 18 espèces découvertes/);assert.match(html(),/\?\?\?/);
  const fishId=run('["saumon","thon","espadon","merou","raie"].find(k=>game.hero.prof.codex[k])');
  run('CANAAN_PROF.actions.codex("'+fishId+'")');assert.match(html(),new RegExp(run('CANAAN_PROF.FISH["'+fishId+'"].bio').slice(0,30).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
- run('CANAAN_PROF.actions.tab("chasse")');assert.match(html(),/Collection · 1 \/ 12 espèces découvertes/);assert.match(html(),/Ta viande est un objet de ton sac/);assert.doesNotMatch(html(),/Gibecière/);
+ run('CANAAN_PROF.actions.tab("chasse")');assert.match(html(),/Collection · 1 \/ 13 espèces découvertes/);assert.match(html(),/Ta viande est un objet de ton sac/);assert.doesNotMatch(html(),/Gibecière/);
  // Sauvegarde : carnet, viandes et niveau de chasse gardés.
  assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.prof;
@@ -2026,9 +2115,14 @@ test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habita
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;game.world.monsters=[];CANAAN_LIFE.update()');
  const zoneOf=`(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS)))`;
- const kinds=JSON.parse(run('JSON.stringify(ZONES.map((z,i)=>[...new Set(CANAAN_LIFE.animals().filter(a=>a.kind!=="poule"&&!a.farm&&!a.layer&&'+zoneOf+'(a)===i).map(a=>a.kind))].sort()))'));
+ const kinds=JSON.parse(run('JSON.stringify(ZONES.map((z,i)=>[...new Set(CANAAN_LIFE.animals().filter(a=>a.kind!=="poule"&&!a.sp.coast&&!a.farm&&!a.pet&&!a.layer&&'+zoneOf+'(a)===i).map(a=>a.kind))].sort()))'));
  // Chaque biome a ses espèces, et seulement les siennes (les bêtes de la ferme du camp sont à part).
  assert.deepEqual(kinds,[['cerf','lapin','mouton','renard'],['cerf','ecureuil','faisan','lapin','renard'],['canard','grenouille','heron','tortue'],['cerf','ecureuil','faisan','herisson','renard'],['chameau','chevre','fennec','lezard'],['cerf','ecureuil','lapin']]);
+ // Crabes : sur les plages tout autour de l'île, sur la terre ferme au bord de la mer, dans plusieurs biomes.
+ assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.kind==="crabe").length')>=30);
+ assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.kind==="crabe").every(a=>{const x=Math.floor(a.hx/TS),y=Math.floor(a.hy/TS);return canWalk(a.hx,a.hy)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([u,v])=>game.world.overworld[y+v][x+u]===0)})'),'crabes au bord de la mer');
+ assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.kind==="tortue_mer").length')>=10,'tortues de mer sur les plages');
+ assert.ok(run('new Set(CANAAN_LIFE.animals().filter(a=>a.kind==="crabe").map(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS)))).size')>=4,'crabes tout autour de l’île');
  assert.ok(run('CANAAN_LIFE.animals().length')>350);assert.ok(run('CANAAN_LIFE.fliers().length')>150);
  assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.opts.glow).every(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS))===5)'),'cerfs et lapins lumineux de la Forêt enchantée');
  assert.ok(run('CANAAN_LIFE.animals().filter(a=>!a.layer).every(a=>canWalk(a.x,a.y))'),'tous sur un sol praticable');
@@ -2325,6 +2419,8 @@ test('Simulation sans écran : intention du héros, monstres, projectiles et but
   run('game.hero.intent.dx=1;game.hero.intent.dy=0');
   // PV le plus bas pendant la simulation (une montée de niveau rend tous les PV).
   run('globalThis.__minHp=P.hp');
+  // Hasard reproductible : esquives et déviations ne laissent jamais le loup sans toucher.
+  run('Math.random=(()=>{let s=7;return()=>(s=(s*16807)%2147483647)/2147483647})()');
   for(let i=0;i<600;i++)run('time++;simulateStep();updateWorld();__minHp=Math.min(__minHp,P.hp)');
  }finally{g.document=screen}
  assert.ok(run('P.x')>x0,'le héros suit son intention');
@@ -2454,15 +2550,15 @@ function groupInDungeon(level,rarity){
  for(const [n,w] of [['Lina','spear'],['Oren','bow'],['Maë','axe']])run('{const h=canaanCreateHero({name:"'+n+'",x:P.x,y:P.y,equipment:'+gear(w,n)+'});h.level='+level+';recomputeHeroStats(h);h.player.hp=h.player.mhp;game.heroes.push(h)}');
  return boot;
 }
-function playInstance(run,index,maxSeconds){
- run('globalThis.__gold0=game.heroes.map(h=>h.player.gold);enterInstance('+index+')');
+function playInstance(run,index,maxSeconds,prep=''){
+ run('globalThis.__gold0=game.heroes.map(h=>h.player.gold);enterInstance('+index+');'+prep);
  const foes=run('game.world.monsters.length'),phases=[];let ticks=0;
  for(;ticks<60*maxSeconds;ticks++){
   const st=run('canaanGroupBot.step()');if(phases.at(-1)!==st.phase)phases.push(st.phase);
   if(st.done||run('P.dead'))break;
   run('time++;simulateStep();updateWorld()');
  }
- return {foes,phases,seconds:ticks/60,heroes:JSON.parse(run('JSON.stringify(game.heroes.map(h=>({dead:h.player.dead,kills:h.kills,purse:h.player.gold-__gold0[game.heroes.indexOf(h)],relics:h.inventory.filter(i=>i.origin).map(i=>i.rarity+" "+i.level)})))'))};
+ return {foes,phases,seconds:ticks/60,heroes:JSON.parse(run('JSON.stringify(game.heroes.map(h=>({dead:h.player.dead,kills:h.kills,purse:h.player.gold-__gold0[game.heroes.indexOf(h)],keys:h.player.keys||0,relics:h.inventory.filter(i=>i.origin).map(i=>i.rarity+" "+i.level)})))'))};
 }
 
 test('Groupe en instance : entrée et sortie ensemble, allié à terre relevé, coffre de boss individuel',()=>{
@@ -2471,36 +2567,41 @@ test('Groupe en instance : entrée et sortie ensemble, allié à terre relevé, 
  assert.equal(run('!!game.world.instance'),true);
  assert.ok(run('game.heroes.every(h=>Math.hypot(h.player.x-P.x,h.player.y-P.y)<3*TS&&canWalk(h.player.x,h.player.y))'),'tout le groupe à l’entrée');
  assert.equal(run('game.heroes[2].player.dead'),false);assert.equal(run('game.heroes[2].player.hp===game.heroes[2].player.mhp'),true);
- // Coffre de boss : un objet garanti et une bourse d'or pour chaque héros, quel que soit celui qui l'ouvre.
+ // Coffre de fin : une bourse d'or pour chaque héros, quel que soit celui qui l'ouvre (l'équipement vient des boss).
  run('globalThis.__gold0=game.heroes.map(h=>h.player.gold);game.world.monsters=[];game.world.instance.cleared=true;spawnRewardChest();const c=game.world.chests[0];game.heroes[1].player.x=c.x*TS;game.heroes[1].player.y=c.y*TS');
  assert.equal(run('openNearbyChest(game.heroes[1])'),true);assert.equal(run('openNearbyChest(game.heroes[1])'),false,'une seule ouverture');
- assert.ok(run('game.heroes.every(h=>h.inventory.some(i=>i.origin==="donjon"&&i.rarity==="Rare"&&i.level>=7&&i.level<=10)&&h.player.gold-__gold0[game.heroes.indexOf(h)]>=60)'));
+ assert.ok(run('game.heroes.every(h=>!h.inventory.some(i=>i.origin==="donjon")&&h.player.gold-__gold0[game.heroes.indexOf(h)]>=60)'));
  run('leaveInstance()');assert.equal(run('game.world.instance'),null);
  assert.ok(run('game.heroes.every(h=>Math.hypot(h.player.x-game.world.returnPos.x,h.player.y-game.world.returnPos.y)<3*TS)'),'tout le groupe ressort');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Jalon de la phase 2 : quatre héros finissent un donjon puis un raid, sans écran, chacun avec son butin',()=>{
- // Donjon 1 : la Cave des Terriers Abandonnés.
- {const {run,errors}=groupInDungeon(10,'Épique');
-  run('const C=[["paladin",[2,9]],["druide",[1,3]],["elementaliste",[0,5]],["assassin",[1,4]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
-  const r=playInstance(run,0,300);
-  assert.deepEqual(r.phases.filter(p=>p!=='coffre'),['combat','sortie']);assert.equal(run('canaanGroupBot.state.done'),true);
-  assert.equal(run('game.world.instance'),null,'le groupe est ressorti');assert.ok(r.seconds<150,'terminé en '+r.seconds+' s');
-  assert.ok(r.heroes.every(h=>!h.dead),'personne n’est tombé');
-  assert.ok(r.heroes.every(h=>h.relics.length===1&&/^Rare (7|8|9|10)$/.test(h.relics[0])&&h.purse>=60),'un objet garanti et une bourse d’or pour chacun');
-  assert.ok(r.heroes.reduce((n,h)=>n+h.kills,0)>=r.foes,'tous les ennemis, le boss et ses renforts sont abattus');
-  assert.ok(r.heroes.slice(1).some(h=>h.kills>0),'les alliés participent');
-  assert.equal(errors.length,0,errors.join('\n'));}
- // Raid 1 : le Bastion du Roi Sanglant, trois boss et deux herses. À quatre, les ennemis ont ×3,1 PV et ×1,1 dégâts
- // (difficulté selon le nombre de joueurs), et les boss ont leurs mécaniques : il faut un groupe complet, équipé, avec
- // ses classes et ses talents (Paladin, Druide, Élémentaliste, Assassin), qui esquive les cercles annoncés.
- {const {run,errors}=groupInDungeon(48,'Mythique');
-  run('const C=[["paladin",[1,2,7,9,6]],["druide",[1,3,7,8,0]],["elementaliste",[0,3,7,1,5]],["assassin",[1,3,4,5,8]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
-  const r=playInstance(run,6,400);
-  assert.equal(run('canaanGroupBot.state.done'),true);assert.equal(run('game.world.instance'),null);
-  assert.ok(r.heroes.every(h=>!h.dead&&h.relics.length===1&&/^Épique 4[4-7]$/.test(h.relics[0])&&h.purse>=150),JSON.stringify(r.heroes));
-  assert.equal(errors.length,0,errors.join('\n'));}
+test('Jalon de la phase 2 : quatre héros explorent un donjon sans écran, énigmes, passage secret et butin de chacun',()=>{
+ // La Cave des Terriers Abandonnés : le pilote résout les portes scellées, examine le mur fissuré, abat les trois
+ // boss et le boss caché, ouvre le coffre et ressort.
+ const {run,errors}=groupInDungeon(12,'Épique');
+ run('const C=[["paladin",[2,9]],["druide",[1,3]],["elementaliste",[0,5]],["assassin",[1,4]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
+ const r=playInstance(run,0,700);
+ assert.ok(r.phases.includes('exploration'),r.phases.join());assert.equal(r.phases.at(-1),'sortie');assert.equal(run('canaanGroupBot.state.done'),true);
+ assert.equal(run('game.world.instance'),null,'le groupe est ressorti');assert.ok(r.seconds<700,'terminé en '+r.seconds+' s');
+ assert.ok(r.heroes.every(h=>!h.dead),'personne n’est tombé');
+ // Butin : 30 % par boss et par héros (0 à 3 objets), la bourse du coffre et une clé des secrets pour chacun.
+ assert.ok(r.heroes.every(h=>h.relics.length<=3&&h.relics.every(x=>/^Rare (7|8|9|10)$/.test(x))&&h.purse>=60&&h.keys===1),JSON.stringify(r.heroes));
+ assert.ok(r.heroes.reduce((n,h)=>n+h.kills,0)>=r.foes,'tous les ennemis, les boss et leurs renforts sont abattus');
+ assert.ok(r.heroes.slice(1).some(h=>h.kills>0),'les alliés participent');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Jalon de la phase 2 : quatre héros finissent un raid de six boss, deux passages secrets, chacun son butin',()=>{
+ // Le Bastion du Roi Sanglant, sans les monstres de passage (le test reste court) : six portes scellées, deux murs
+ // fissurés, huit boss. À quatre, les ennemis ont ×3,1 PV et ×1,1 dégâts ; les boss ont leurs mécaniques : il faut un
+ // groupe complet, équipé, avec ses classes et ses talents, qui esquive les cercles annoncés.
+ const {run,errors}=groupInDungeon(48,'Mythique');
+ run('const C=[["paladin",[1,2,7,9,6]],["druide",[1,3,7,8,0]],["elementaliste",[0,3,7,1,5]],["assassin",[1,3,4,5,8]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
+ const r=playInstance(run,6,900,'game.world.monsters=game.world.monsters.filter(m=>m.boss||m.guardian!==undefined)');
+ assert.equal(run('canaanGroupBot.state.done'),true,'fini en '+r.seconds+' s');assert.equal(run('game.world.instance'),null);
+ assert.ok(r.heroes.every(h=>!h.dead&&h.relics.length<=6&&h.relics.every(x=>/^Épique 4[4-7]$/.test(x))&&h.purse>=150&&h.keys===2),JSON.stringify(r.heroes));
+ assert.equal(errors.length,0,errors.join('\n'));
 });
 
 test('Groupe local : créer, faire venir, renvoyer, supprimer ; 6 enregistrés, 3 présents ; équipement de départ et meilleur équipement',()=>{
@@ -2711,6 +2812,8 @@ test('Jalon de la phase 4 : un hôte et un invité, reliés par le relais, se vo
   await step(30);
   assert.equal(host.run('game.guests["'+id+'"].look.race'),'orc','l’hôte voit l’orc de l’invité');assert.equal(host.run('game.guests["'+id+'"].look.hairStyle'),'tresses');
   assert.equal(guest.run('game.heroes.find(h=>h.id==="host").look.race'),'minotaure','l’invité voit le minotaure de l’hôte');
+  // L'hôte part du point d'apparition, sur la place dégagée (les troncs des grands arbres bloquent le passage).
+  host.run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y');await step(10);
   const before={hostSeenByGuest:guest.run('game.heroes.find(h=>h.id==="host").player.x'),guestSelf:guest.run('P.y'),guestSeenByHost:host.run('game.guests["'+id+'"].player.y')};
   host.run('keys.d=true');guest.run('keys.s=true');
   await step(90);host.run('keys.d=false');guest.run('keys.s=false');await step(30);
@@ -2925,9 +3028,12 @@ test('Vie du camp : ferme, enclos, champs, verger, jardin, fontaine, ruisseau so
  assert.ok(run('[...BRIDGE_TILES].filter(k=>{const x=k%MAPW,y=(k-x)/MAPW;return Math.abs(y-CANAAN_CAMP.y-5.5)<1&&Math.abs(x-CANAAN_CAMP.x+16.5)<2.5}).length')>=4,'pont du verger');
  assert.equal(run(`canWalk(${at(-16,-3)})`),true,'on traverse le pont');
  // Les bâtiments, la fontaine et les clôtures bloquent ; les champs, la cour et la porte du jardin se traversent.
- for(const [dx,dy,name] of [[4,7,'grange'],[7,9,'silo'],[-2,8,'poulailler'],[-5,-5,'fontaine'],[-12,10,'clôture de l’enclos'],[-7,-17,'clôture du jardin'],[-24,2,'pommier'],[-10,17,'épouvantail']])assert.equal(run(`canWalk(${at(dx,dy)})`),false,name);
- for(const [dx,dy,name] of [[-6,16,'champ de légumes'],[-12,18,'champ de blé'],[5,17,'champ de fruits'],[0,10,'allée de la ferme'],[-6,-14,'porte du jardin'],[-3,-16,'allée du jardin'],[-2,-4,'place pavée']])assert.equal(run(`canWalk(${at(dx,dy)})`),true,name);
- assert.equal(run(`CANAAN_CAMP_LIFE.groundAt(CANAAN_CAMP.x-5,CANAAN_CAMP.y-3)`),'plaza');
+ for(const [dx,dy,name] of [[4,7,'grange'],[7,9,'silo'],[-2,8,'poulailler'],[0,0,'fontaine au centre'],[-5,-5,'forge'],[-12,10,'clôture de l’enclos'],[-7,-17,'clôture du jardin'],[-24,2,'pommier'],[-10,17,'épouvantail']])assert.equal(run(`canWalk(${at(dx,dy)})`),false,name);
+ for(const [dx,dy,name] of [[-6,16,'champ de légumes'],[-12,18,'champ de blé'],[5,17,'champ de fruits'],[0,10,'allée de la ferme'],[-6,-14,'porte du jardin'],[-3,-16,'allée du jardin'],[-2,-4,'herbe près de la forge'],[-4,-2,'allée de la forge']])assert.equal(run(`canWalk(${at(dx,dy)})`),true,name);
+ // Plus de vieille place pavée : la forge est à sa place, reliée au centre par une allée ; la fontaine au centre.
+ assert.equal(run(`CANAAN_CAMP_LIFE.groundAt(CANAAN_CAMP.x-5,CANAAN_CAMP.y-3)`),null);
+ assert.equal(run(`(()=>{const f=CANAAN_CAMP_LIFE.items().find(i=>i.kind==='fountain');return f.x===CANAAN_CAMP.x-1&&f.y===CANAAN_CAMP.y-1})()`),true);
+ assert.equal(run(`(()=>{const f=CANAAN_CAMP_LIFE.items().find(i=>i.kind==='forge');return f.x===CANAAN_CAMP.x-6&&f.y===CANAAN_CAMP.y-5})()`),true);
  // En donjon, la carte de l'instance réutilise les mêmes coordonnées : rien de la ferme n'y bloque.
  assert.equal(run(`(()=>{const s=game.world.instance;game.world.instance={index:0};const r=canaanCampLife.blocked(${at(4,7)});game.world.instance=s;return r})()`),false);
  // Les bêtes de la ferme restent chez elles : l'enclos garde moutons, vaches et cochons ; les poules autour du poulailler.
@@ -3454,9 +3560,10 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
    await turn();
   };
   for(let i=0;i<20;i++)await tick();
-  host.run('enterInstance(0)');assert.equal(host.run('game.world.instance.group'),4,'donjon pour quatre');
+  // Sans les monstres de passage : les boss, les gardiens et le boss caché suffisent à tester le jeu en ligne.
+  host.run('enterInstance(0);game.world.monsters=game.world.monsters.filter(m=>m.boss||m.guardian!==undefined)');assert.equal(host.run('game.world.instance.group'),4,'donjon pour quatre');
   const foes=host.run('game.world.monsters.length');let ticks=0,sawDungeon=0;
-  for(;ticks<60*300;ticks++){
+  for(;ticks<60*700;ticks++){
    // Le pilote décide pour tout le groupe ; chaque invité envoie lui-même sa décision par le relais.
    const remote='game.heroes.filter(h=>h.peer)';
    host.run('globalThis.__kept=new Map('+remote+'.map(h=>[h,{...h.intent}]))');
@@ -3473,16 +3580,18 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
   assert.equal(host.run('game.world.instance'),null,'tout le groupe est ressorti');
   assert.ok(sawDungeon>0,'les invités voyaient le donjon et ses monstres');
   for(let i=0;i<20;i++)await tick();
-  // Chacun son butin : la relique de chaque invité est dans son sac, chez l'hôte et chez lui, avec sa bourse d'or.
+  // Chacun son butin : les reliques de chaque invité (30 % par boss) sont dans son sac, chez l'hôte comme chez lui,
+  // avec sa bourse d'or et sa clé des secrets (boss caché).
   ids.forEach((id,k)=>{
    const G='game.guests["'+id+'"]';
-   assert.equal(host.run(G+'.inventory.filter(i=>i.origin==="donjon").length'),1,'relique de '+['Lina','Oren','Maë'][k]);
+   const relics=host.run(G+'.inventory.filter(i=>i.origin==="donjon").length');assert.ok(relics<=3,'reliques de '+['Lina','Oren','Maë'][k]);
    assert.ok(guests[k].run('P.gold')>=60,'bourse d’or de '+['Lina','Oren','Maë'][k]);
-   assert.equal(guests[k].run('game.hero.inventory.filter(i=>i.origin==="donjon").length'),1,'visible chez '+['Lina','Oren','Maë'][k]);
+   assert.equal(guests[k].run('game.hero.inventory.filter(i=>i.origin==="donjon").length'),relics,'visible chez '+['Lina','Oren','Maë'][k]);
+   assert.equal(host.run(G+'.player.keys'),1,'clé de '+['Lina','Oren','Maë'][k]);assert.equal(guests[k].run('P.keys'),1,'clé visible chez '+['Lina','Oren','Maë'][k]);
    assert.equal(guests[k].run('game.world.instance'),null,'revenu au monde');
   });
-  assert.equal(host.run('game.hero.inventory.filter(i=>i.origin==="donjon").length'),1);
-  assert.ok(host.run('game.heroes.reduce((n,h)=>n+h.kills,0)')>=foes,'tous les ennemis et les renforts abattus');
+  assert.ok(host.run('game.hero.inventory.filter(i=>i.origin==="donjon").length')<=3);assert.equal(host.run('P.keys'),1);
+  assert.ok(host.run('game.heroes.reduce((n,h)=>n+h.kills,0)')>=foes,'tous les boss, gardiens et renforts abattus');
   // Cinq ennemis à se partager entre quatre héros : les invités en abattent au moins un ensemble.
   assert.ok(ids.reduce((n,id)=>n+host.run('game.guests["'+id+'"].kills'),0)>=1,'les invités participent');
   assert.ok(bytes/seconds<200*1024,'débit raisonnable');
@@ -3680,11 +3789,12 @@ test('Chacun à son niveau : monstres à niveau fixe, chacun frappe et encaisse 
   host.run('game.world.openedChests.push(hiddenChestSpots[0].id)');await step(10);
   assert.equal(guest.run('game.world.openedChests.includes(hiddenChestSpots[0].id)'),true);
   // L'invité va près d'un autre coffre et appuie sur E.
-  host.run('{const c=chestPosition(hiddenChestSpots[1]);'+G+'.player.x=c.x*TS;'+G+'.player.y=c.y*TS;P.x=c.x*TS+3000;P.y=c.y*TS}');await step(15);
+  host.run('{const c=chestPosition(hiddenChestSpots[1]);'+G+'.player.x=c.x*TS;'+G+'.player.y=c.y*TS;'+G+'.player.keys=1;P.x=c.x*TS+3000;P.y=c.y*TS}');await step(15);
   const gold0=host.run(G+'.player.gold'),bag0=host.run(G+'.inventory.length');
   guest.run('interact()');await step(10);
   assert.equal(host.run('game.world.openedChests.includes(hiddenChestSpots[1].id)'),true,'coffre ouvert chez l’hôte');
   assert.ok(host.run(G+'.player.gold')>gold0&&host.run(G+'.inventory.length')>bag0,'butin pour l’invité');
+  assert.equal(host.run(G+'.player.keys'),0,'sa clé est consommée');
   assert.ok(guest.run('__toasts.some(t=>t.includes("Coffre secret"))'),'annoncé à l’invité');
   assert.equal(guest.run('game.world.openedChests.includes(hiddenChestSpots[1].id)'),true,'il le voit ouvert');
   // Loin d'un coffre : rien.
@@ -3875,7 +3985,8 @@ test('Donjons et raids : moins d’XP, plus coriaces, et des boss qui annoncent 
  run('started=true;paused=false;P.dead=false;game.view={notify:()=>{},chat:()=>{}};game.hero.level=10;recomputeStats();P.hp=P.mhp;enterInstance(0)');
  // Monstres d'instance plus résistants que dehors (×1,25) et plus forts (×1,12).
  const trash=run('game.world.monsters.find(m=>!m.boss)');assert.ok(run('(m=>m.mhp>=Math.round(mobHealth(m.level,false,(MOB_TYPES.find(t=>t.name===m.t)||{hp:100}).hp)*1.2))(game.world.monsters.find(m=>!m.boss))'));
- run('globalThis.boss=game.world.monsters.find(m=>m.boss);game.world.monsters=[boss];boss.x=P.x+200;boss.y=P.y;boss.cd=99');
+ // Boss sorti de sa salle pour le test : ses mécaniques visent le héros où qu'il soit.
+ run('globalThis.boss=game.world.monsters.find(m=>m.boss);delete boss.room;game.world.monsters=[boss];boss.x=P.x+200;boss.y=P.y;boss.cd=99');
  // Onde de choc : un cercle annoncé, puis des dégâts à qui y reste ; une roulade (invulnérable) l'évite.
  run('boss.mech={wave:0,rain:1e9,adds:0};time++;CanaanStages.bossMechanics.after()');
  assert.equal(run('CANAAN_BOSS_MECHANICS.zones().length'),1);
@@ -4064,13 +4175,20 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  // Piles de 100 au plus par case, et elles prennent de la place.
  run('const h=game.hero;h.prof.fish["gardon:1"]=230;h.prof.meat["lievre:0"]=5;h.prof.meals["soupe:1"]=2;h.rubis.owned.phenix=2;h.rubis.equipped=["phenix",null,null,null,null,null]');
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero).map(p=>CANAAN_BAG.token(p)))')),['rubis:phenix:0*1','fish:gardon:1*100','fish:gardon:1*100','fish:gardon:1*30','meat:lievre:0*5','meal:soupe:1*2']);
- assert.equal(run('canaanBagUsed(game.hero)'),6,'un Rubis équipé n’est plus dans le sac');
- // Sac plein : un poisson qui demande une nouvelle case est refusé ; un de plus dans une pile entamée passe.
- run('game.hero.bagLimit=10;BAG_LIMIT=6');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
- assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);
- // Le sac (I) montre l'équipement puis les piles ; un repas se mange d'un clic.
- run('BAG_LIMIT=40;renderInventory()');const inv=run('document.getElementById("window").innerHTML');
- assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,6);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);
+ // Deux sections : le sac (Rubis, repas…) et les matériaux (poissons, viandes, minerais, herbes), chacun sa place.
+ assert.equal(run('canaanBagUsed(game.hero)'),2,'un Rubis équipé n’est plus dans le sac ; les matériaux ont leur section');
+ assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),4);
+ // Section pleine : un poisson qui demande une nouvelle case est refusé ; un de plus dans une pile entamée passe.
+ run('game.hero.bagLimit=10;BAG_LIMIT=2');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),true,'le sac plein ne bloque pas les matériaux');
+ assert.equal(run('CANAAN_BAG.room(game.hero,"meal","grillade",0,1)'),false);
+ run('game.hero.prof.ore["fer:0"]=9600');assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),100);
+ assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
+ assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);run('delete game.hero.prof.ore["fer:0"]');
+ // Le sac (I) : onglet Sac (équipement, Rubis, repas) et onglet Matériaux ; un repas se mange d'un clic.
+ run('BAG_LIMIT=40;renderInventory()');let inv=run('document.getElementById("window").innerHTML');
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,2);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);assert.match(inv,/data-action="bagSection" data-tab="mat"/);
+ run('canaanBagSection("mat")');inv=run('document.getElementById("window").innerHTML');
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,4);assert.match(inv,/Matériaux — 4\/100/);run('canaanBagSection("main")');
  // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.
  run('const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+30;openShop(m)');
  assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),16);
@@ -4111,7 +4229,7 @@ test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, 
  assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*101")'),false);assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*40")'),true);
  assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),90);assert.equal(run('CANAAN_BANK.of(game.hero).stacks["fish:gardon:1"]'),60);
  // Sac plein : on ne reprend pas.
- run('BAG_LIMIT=1;game.hero.bagLimit=1');assert.equal(run('CANAAN_BANK.withdraw(game.hero,'+JSON.stringify(id)+')'),false);run('BAG_LIMIT=40;game.hero.bagLimit=40');
+ run('game.hero.prof.meals["soupe:0"]=1;BAG_LIMIT=1;game.hero.bagLimit=1');assert.equal(run('CANAAN_BANK.withdraw(game.hero,'+JSON.stringify(id)+')'),false);run('delete game.hero.prof.meals["soupe:0"]');run('BAG_LIMIT=40;game.hero.bagLimit=40');
  assert.equal(run('CANAAN_BANK.withdraw(game.hero,'+JSON.stringify(id)+')'),true);assert.equal(run('game.hero.inventory.length'),1);
  // Banque pleine : 500 cases au plus.
  run('CANAAN_BANK.of(game.hero).stacks["meat:lievre:0"]=49900');assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),false,'banque pleine');run('delete CANAAN_BANK.of(game.hero).stacks["meat:lievre:0"]');
@@ -4152,13 +4270,13 @@ test('Minage, cueillette et enchanteur : filons et herbes dans chaque biome, enc
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),2);assert.equal(run('game.hero.prof.ore["fer:1"]'),1);
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",4,1)'),false,'pas de pépites d’or');
  // Niveaux requis : cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25.
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_GATHER.ENCH_LEVEL)')),[1,5,10,15,20,25]);
- run('game.hero.prof.ore["mithril:0"]=3;game.hero.prof.enchanting.level=24');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 25');
- run('game.hero.prof.enchanting.level=25');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),true);
- run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Enchanteur niveau 10 requis pour le fer \(tu es niveau 1\)/);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_GATHER.ENCH_LEVEL)')),[1,6,12,20,28,35]);
+ run('game.hero.prof.ore["mithril:0"]=3;game.hero.prof.enchanting.level=34');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 35');
+ run('game.hero.prof.enchanting.level=35');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),true);
+ run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Enchanteur niveau 12 requis pour le fer \(tu es niveau 1\)/);
  run('closePanels();game.hero.prof.enchanting.level=12');
  // Poser : l'objet porté gagne une troisième secondaire, comptée dans les statistiques du héros.
- run('giveGear(30,"normal","Rare");const it=game.hero.inventory.at(-1);globalThis.slot=it.slot;equipItem(it.id)');
+ run('let it;do{giveGear(30,"normal","Rare");it=game.hero.inventory.at(-1)}while(it.slot==="artifact");globalThis.slot=it.slot;equipItem(it.id)');
  const before=run('characterStats().secondary.haste');
  assert.equal(run('CANAAN_GATHER.apply(game.hero,"ench:haste:2*1",slot)'),true);
  const ench=JSON.parse(run('JSON.stringify(game.hero.equipment[slot].ench)'));assert.equal(ench.stat,'haste');assert.equal(ench.value,run('CANAAN_GATHER.value(game.hero.equipment[slot],2,game.hero)'));assert.ok(ench.value>run('CANAAN_GATHER.value(game.hero.equipment[slot],2)'),'bonus du niveau d’enchanteur');
@@ -4212,7 +4330,7 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  for(const c of ['combat','explore','eco','magic','defi'])assert.equal(list.filter(a=>a.cat===c).length,20,c);
  assert.match(source,/data-action="toggleAchievements"[^>]*>.*?menu-shortcut">Y</);assert.match(source,/k === 'y'/);
  // Bestiaire : monstres du monde, créatures des instances, boss mondiaux, boss d'instance et de l'Arène.
- assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[31,16,27,12,22,12]');
+ assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[31,16,27,12,72,12]');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Loup"})'),'m:Loup');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"x",worldBoss:true,worldBossId:"fenrir"})'),'w:fenrir');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Le Roi Sanglant",boss:true})'),'b:Le Roi Sanglant');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Clone",arenaClone:true})'),null);
  run('started=true;paused=false;game.hero.level=5;game.hero.kills=0;P.gold=0;game.hero.inventory=[];game.hero.equipment.weapon={id:"w",slot:"weapon",level:5,rarity:"Commun",weaponType:"bow"};toast=()=>{}');

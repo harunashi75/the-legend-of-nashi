@@ -142,7 +142,8 @@
         local: !!hero.local,
         color: hero.color,
         look: sanitizeLook(hero.look),
-        player: { x: where.x, y: where.y, hp: p.hp, mp: p.mp, gold: p.gold },
+        skins: { owned: [...(hero.skins?.owned || [])] },
+        player: { x: where.x, y: where.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
         kills: hero.kills,
         level: clampLevel(hero.level),
         exp: Math.max(0, Math.floor(hero.exp || 0)),
@@ -175,6 +176,8 @@
       hero.local = d.local !== false;
       hero.color = /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : COLORS[Object.keys(game.guests).length % COLORS.length];
       hero.look = sanitizeLook(d.look);
+      hero.skins = { owned: [...new Set((Array.isArray(d.skins?.owned) ? d.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
+      if (!hero.skins.owned.includes(hero.look.wear)) delete hero.look.wear;
       hero.prof = CANAAN_PROF.sanitize(d.prof);
       hero.succes = CANAAN_ACHIEVEMENTS.sanitize(d.succes);
       hero.quetes = sanitizeQuests(d.quetes);
@@ -193,6 +196,7 @@
       hero.bagLevel = canaanBagLevel({ bagLevel: d.bagVersion === 2 ? d.bagLevel : Math.max(0, (Number(d.bagLevel) || 0) - 3) });
       // Anciens matériaux de forge (supprimés) : rendus en or.
       hero.player.gold = count(p.gold) + legacyMaterialGold(d.materials, LEGACY_MATERIAL_GOLD);
+      hero.player.keys = count(p.keys);
       hero.player.mhp = characterStats(hero).maxHp;
       hero.player.hp = Math.max(1, Math.min(hero.player.mhp, Number(p.hp) || hero.player.mhp));
       // Classe et Rubis agissent en combat : mêmes vérifications que pour l'hôte (classe connue, talents

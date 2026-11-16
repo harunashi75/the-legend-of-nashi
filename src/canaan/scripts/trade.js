@@ -122,7 +122,7 @@
     };
     move(s.a, s.b, ga);
     move(s.b, s.a, gb);
-    const full = [s.a, s.b].find(hero => canaanBagUsed(hero) > canaanBagLimit(hero));
+    const full = [s.a, s.b].find(hero => canaanBagUsed(hero) > canaanBagLimit(hero) || CANAAN_BAG.matUsed(hero) > CANAAN_BAG.MAT_LIMIT);
     if (full) {
       move(s.b, s.a, ga);
       move(s.a, s.b, gb);

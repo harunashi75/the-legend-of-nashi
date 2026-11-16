@@ -13,9 +13,22 @@
   const FLOOR_TILE = 30,
     WALL_TILE = 31,
     OUTSIDE_TILE = 32;
+  // Pendant la peinture de l'image gardée d'un bâtiment (MAT), chaque rectangle note aussi sa matière (rouge) et
+  // un numéro de bloc (vert) dans une image jumelle : la finition y lit reliefs et textures, pixel par pixel.
+  let MAT = null;
   const R = (g, x, y, w, h, col) => {
+    const rx = Math.round(x),
+      ry = Math.round(y),
+      rw = Math.round(w),
+      rh = Math.round(h);
     g.fillStyle = col;
-    g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    g.fillRect(rx, ry, rw, rh);
+    if (MAT && g === MAT.g && g.globalAlpha >= 1 && col.length < 9) {
+      const code = col === '#22160e' ? 0 : MAT.map.get(col) ?? MAT.def;
+      MAT.id = (MAT.id % 250) + 1;
+      MAT.m.fillStyle = 'rgb(' + code + ',' + MAT.id + ',0)';
+      MAT.m.fillRect(rx, ry, rw, rh);
+    }
   };
   function fire(g, x, y, w, h) {
     const f = Math.sin(time * 0.3) * 2;
@@ -1094,10 +1107,10 @@
   // Camp de l'Aurore : échoppe, cuisine et deux demeures autour du feu (décalages en cases depuis le camp) ;
   // maison du joueur à l'ouest du camp, loin des portails ; chaque refuge devient une cabane où l'on entre.
   const VILLAGE = [
-    { room: 'marmite', style: 'auberge', w: 5, h: 3, dx: -2, dy: -11, sign: 'bol' },
+    { room: 'marmite', style: 'auberge', form: 'storey', w: 5, h: 3, dx: -2, dy: -11, sign: 'bol' },
     { room: 'echoppe', style: 'echoppe', w: 5, h: 3, dx: 5, dy: -9, sign: 'or' },
-    { room: 'aubepines', style: 'demeure', w: 4, h: 3, dx: -12, dy: -7 },
-    { room: 'puits', style: 'demeure_bleue', w: 4, h: 3, dx: -12, dy: 2 }
+    { room: 'aubepines', style: 'demeure', form: 'gable', w: 4, h: 3, dx: -12, dy: -7 },
+    { room: 'puits', style: 'demeure_bleue', form: 'storey', w: 4, h: 3, dx: -12, dy: 2 }
   ];
   const REFUGES = {
     'Refuge du Vieux Chêne': 'chene',
@@ -1109,6 +1122,8 @@
     'Refuge des Cristaux': 'cristaux'
   };
   let buildings = [];
+  // Modèle de chaque refuge, accordé à son biome et à son nom.
+  const REFUGE_FORM = { chene: 'tree', clairieres: 'gable', oasis: 'dome', dunes: 'tent', pilotis: 'round', rousses: 'gambrel', cristaux: 'tower' };
   const homeB = () => buildings.find(b => b.room === HOME);
   const groundOk = (x, y) => {
     const t = game.world.overworld[y]?.[x];
@@ -1160,7 +1175,7 @@
     }
     buildings = [];
     const home = findHome();
-    for (const v of VILLAGE) buildings.push({ room: ROOM[v.room], style: v.style, w: v.w, h: v.h, x: CANAAN_CAMP.x + v.dx, y: CANAAN_CAMP.y + v.dy, sign: v.sign, label: ROOM[v.room].name, village: true });
+    for (const v of VILLAGE) buildings.push({ room: ROOM[v.room], style: v.style, form: v.form, w: v.w, h: v.h, x: CANAAN_CAMP.x + v.dx, y: CANAAN_CAMP.y + v.dy, sign: v.sign, label: ROOM[v.room].name, village: true });
     buildings.push({ room: HOME, style: 'chaume', w: 4, h: 3, x: home.x, y: home.y, label: '🏠 Ta maison' });
     // Chaque refuge prend l'architecture de son biome.
     const BIOME_STYLE = ['chaume', 'foret', 'marais', 'automne', 'desert', 'enchantee'];
@@ -1169,7 +1184,7 @@
       if (!id) continue;
       const at = findCabin(p),
         zone = Math.max(0, ZONES.indexOf(regionAt(at.x + 2, at.y + 1)));
-      buildings.push({ room: ROOM[id], style: BIOME_STYLE[zone], w: 4, h: 3, x: at.x, y: at.y, label: p.name, place: p });
+      buildings.push({ room: ROOM[id], style: BIOME_STYLE[zone], form: REFUGE_FORM[id], w: 4, h: 3, x: at.x, y: at.y, label: p.name, place: p });
     }
     // Emprise au sol (pleine) et décor dégagé autour.
     for (const b of buildings) {
@@ -1250,9 +1265,26 @@
     }
     return true;
   }
-  stamp();
+  // Images des bâtiments peintes d'avance, une par une, quand le navigateur a du temps libre (jamais au moment où un
+  // bâtiment entre à l'écran).
+  function prebake() {
+    const todo = buildings.slice();
+    const next = () => {
+      const b = todo.shift();
+      if (!b) return;
+      builtOf(b);
+      if (typeof requestIdleCallback === 'function') requestIdleCallback(next, { timeout: 1500 });
+      else setTimeout(next, 40);
+    };
+    if (typeof document !== 'undefined' && document.createElement) setTimeout(next, 200);
+  }
+  function restamp() {
+    stamp();
+    prebake();
+  }
+  restamp();
   // Une île régénérée (même graine) retrouve ses bâtiments.
-  window.canaanAfterWorld = stamp;
+  window.canaanAfterWorld = restamp;
   // Points de passage : devant la porte d'un bâtiment, et juste devant la porte intérieure de sa pièce.
   const outsideDoor = (b = homeB()) => ({ x: (b.x + b.w / 2) * TS, y: (b.y + b.h) * TS + 10 });
   const insideDoor = (room = HOME) => {
@@ -1752,13 +1784,114 @@
     return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
   };
   const pick = (list, a, b) => list[Math.floor(rnd(a, b) * list.length)];
+  // Effets animés d'un bâtiment (lueurs, fumée, clapotis) : notés pendant la peinture de son image gardée (FX),
+  // puis rejoués à chaque image par-dessus.
+  let FX = null;
+  function light(x, y, r, col) {
+    if (FX) FX.push([0, x, y, r, col]);
+    else canaanLight(x, y, r, col);
+  }
+  // Fumée : volutes rondes en dégradé qui grossissent, pâlissent et dérivent avec le vent.
   function smoke(c, x, y) {
-    for (let k = 0; k < 5; k++) {
-      const s = (time * 0.4 + k * 20) % 100;
-      c.globalAlpha = 0.5 * (1 - s / 100);
-      const sz = 6 + Math.floor(s / 25) * 2;
-      R(c, x + Math.sin((s + k * 30) * 0.06) * 7 + s * 0.25 - sz / 2, y - s * 0.9 - sz / 2, sz, sz, '#e4e4e4');
+    if (FX) return void FX.push([1, x, y]);
+    const wind = typeof windAt === 'function' ? windAt(x, y) : 0.5;
+    for (let k = 0; k < 7; k++) {
+      const s = (time * 0.35 + k * 15) % 105,
+        life = s / 105,
+        px = x + Math.sin((s + k * 30) * 0.05) * 6 + s * (0.18 + wind * 0.25),
+        py = y - s * 0.85,
+        r = 5 + life * 14;
+      if (!c.createRadialGradient) {
+        c.globalAlpha = 0.5 * (1 - life);
+        R(c, px - r / 2, py - r / 2, r, r, '#e4e4e4');
+        continue;
+      }
+      const g = c.createRadialGradient(px, py, 0, px, py, r);
+      const shade = 225 - Math.round(life * 40);
+      g.addColorStop(0, 'rgba(' + shade + ',' + shade + ',' + (shade + 6) + ',' + (0.5 * (1 - life)).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(' + shade + ',' + shade + ',' + (shade + 6) + ',0)');
+      c.fillStyle = g;
+      c.fillRect(px - r, py - r, r * 2, r * 2);
     }
+    c.globalAlpha = 1;
+  }
+  // Fenêtre vivante : la flamme vacille derrière la vitre (plus fort dans les biomes sombres), et de temps en temps
+  // une silhouette passe.
+  function windowLife(c, x, y, w, h, seed) {
+    const amb = typeof worldAmbience === 'function' ? worldAmbience().dark || 0 : 0,
+      flick = 0.5 + 0.3 * Math.sin(time * 0.21 + seed) + 0.2 * Math.sin(time * 0.53 + seed * 2);
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    c.globalAlpha = (0.1 + amb * 0.35) * flick;
+    c.fillStyle = '#ffb040';
+    c.fillRect(x, y, w, h);
+    c.restore();
+    const cycle = (time + seed * 997) % 1100;
+    if (cycle < 140) {
+      const t = cycle / 140,
+        sx = x - 8 + t * (w + 16);
+      c.save();
+      c.beginPath();
+      c.rect(x, y, w, h);
+      c.clip();
+      c.globalAlpha = 0.55;
+      c.fillStyle = '#2a1a10';
+      c.fillRect(Math.round(sx - 4), y + h - 12, 8, 12);
+      c.fillRect(Math.round(sx - 3), y + h - 18, 6, 6);
+      c.restore();
+    }
+  }
+  function flag(c, x, y, col, len) {
+    R(c, x - 1, y, 2, 18, '#4a3020');
+    for (let k = 0; k < len; k += 2) {
+      const wave = Math.round(Math.sin(time * 0.15 - k * 0.5) * 2 * (k / len));
+      R(c, x + 1 + k, y + 1 + wave, 2, Math.max(2, 8 - (k * 6) / len), col);
+    }
+  }
+  function laundry(c, x1, x2, y) {
+    c.strokeStyle = '#d8d0c0';
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(x1, y);
+    c.quadraticCurveTo((x1 + x2) / 2, y + 6, x2, y);
+    c.stroke();
+    [['#e8e4dc', 12, 14], ['#c85a4a', 10, 12], ['#5a8ac0', 14, 10], ['#f0d070', 8, 12]].forEach(([col, w, h], k) => {
+      const cx = x1 + ((k + 1) * (x2 - x1)) / 5,
+        sway = Math.sin(time * 0.08 + k * 1.3) * 2.5;
+      c.save();
+      c.translate(cx, y + 4);
+      c.transform(1, 0, sway * 0.06, 1, 0, 0);
+      R(c, -w / 2 - 1, -1, w + 2, h + 2, '#22160e');
+      R(c, -w / 2, 0, w, h, col);
+      R(c, -w / 2, 0, w, 2, '#ffffff55');
+      c.restore();
+    });
+  }
+  function leaves(c, x, y, w, h, cols, seed) {
+    for (let k = 0; k < 7; k++) {
+      const fall = (time * (0.35 + (k % 3) * 0.1) + k * 37 + seed) % h,
+        px = x + ((k * 53 + seed) % w) + Math.sin(time * 0.05 + k * 2) * 10,
+        py = y + fall;
+      c.globalAlpha = Math.min(1, (h - fall) / 30);
+      R(c, px, py, 3, 2, cols[k % cols.length]);
+    }
+    c.globalAlpha = 1;
+  }
+  function campfire(c, x, y) {
+    const f = Math.sin(time * 0.3) * 2;
+    R(c, x - 6, y - 10 + f, 12, 10 - f, '#e5522e');
+    R(c, x - 4, y - 14 + f, 8, 10, '#f9a640');
+    R(c, x - 2, y - 10, 4, 6, '#fff1b5');
+    canaanLight(x, y - 8, 110 + Math.sin(time * 0.4) * 10, '#ffb050');
+  }
+  function ripple(c, x, y, w) {
+    c.globalAlpha = 0.5;
+    R(c, x + ((time * 0.3) % w), y, 10, 2, '#cfe8e0');
+    c.globalAlpha = 1;
+  }
+  function spark(c, x, y, col, k) {
+    c.globalAlpha = 0.5 + Math.sin(time * 0.08 + k) * 0.4;
+    R(c, x, y, 3, 3, col);
     c.globalAlpha = 1;
   }
   // Façade : enduit et colombages, pierres taillées, rondins, planches ou terre crue.
@@ -1829,13 +1962,51 @@
       }
       R(c, X + 4, top, Wd - 8, 3, f1);
     }
-    // Volume : reflet sur l'arête gauche, ombre sur la droite, ombre portée du toit en haut.
-    c.globalAlpha = 0.18;
-    R(c, X + 4, top, 3, h, '#ffffff');
-    c.globalAlpha = 0.28;
-    R(c, X + Wd - 14, top, 10, h, '#000000');
-    R(c, X + 4, top, Wd - 8, 8, '#000000');
-    c.globalAlpha = 1;
+    // Volume en dégradés : lumière sur la gauche, ombre vers la droite, ombre portée de l'avant-toit en haut et
+    // occlusion au pied du mur.
+    if (c.createLinearGradient) {
+      c.save();
+      c.beginPath();
+      c.rect(X + 4, top, Wd - 8, h);
+      c.clip();
+      const side = c.createLinearGradient(X + 4, 0, X + Wd - 4, 0);
+      side.addColorStop(0, 'rgba(255,248,226,.22)');
+      side.addColorStop(0.35, 'rgba(255,248,226,0)');
+      side.addColorStop(0.7, 'rgba(10,8,20,0)');
+      side.addColorStop(1, 'rgba(10,8,20,.34)');
+      c.fillStyle = side;
+      c.fillRect(X + 4, top, Wd - 8, h);
+      const eave = c.createLinearGradient(0, top, 0, top + 22);
+      eave.addColorStop(0, 'rgba(8,6,14,.5)');
+      eave.addColorStop(1, 'rgba(8,6,14,0)');
+      c.fillStyle = eave;
+      c.fillRect(X + 4, top, Wd - 8, 22);
+      const foot = c.createLinearGradient(0, bot - 16, 0, bot);
+      foot.addColorStop(0, 'rgba(30,22,10,0)');
+      foot.addColorStop(1, 'rgba(30,22,10,.32)');
+      c.fillStyle = foot;
+      c.fillRect(X + 4, bot - 16, Wd - 8, 16);
+      c.restore();
+    } else {
+      c.globalAlpha = 0.18;
+      R(c, X + 4, top, 3, h, '#ffffff');
+      c.globalAlpha = 0.28;
+      R(c, X + Wd - 14, top, 10, h, '#000000');
+      R(c, X + 4, top, Wd - 8, 8, '#000000');
+      c.globalAlpha = 1;
+    }
+  }
+  // Halo chaud autour d'une fenêtre ou d'une lanterne, peint dans l'image (en plus de la lumière dynamique).
+  function halo(c, x, y, r, col = '255,210,130') {
+    if (!c.createRadialGradient) return;
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(' + col + ',.38)');
+    g.addColorStop(1, 'rgba(' + col + ',0)');
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+    c.restore();
   }
   // Soubassement de pierres (ou pilotis du marais).
   function drawBase(c, L, X, Wd, bot, seed) {
@@ -1865,8 +2036,9 @@
     // Eau qui clapote au pied des pilotis.
     c.globalAlpha = 0.5;
     R(c, X - 6, bot + lift - 2, Wd + 12, 4, '#4a7a6a');
-    R(c, X + ((time * 0.3) % Wd), bot + lift - 2, 10, 2, '#cfe8e0');
     c.globalAlpha = 1;
+    if (FX) FX.push([2, X, bot + lift - 2, Wd]);
+    else ripple(c, X, bot + lift - 2, Wd);
   }
   // Toit à quatre pans en escalier de pixels : pan avant texturé, croupes plus sombres sur les côtés, faîtage.
   function drawRoof(c, L, X, Wd, top, eave, seed) {
@@ -1927,11 +2099,8 @@
           R(c, x, r.y + 1, 8, 4, '#4e7434');
           R(c, x + 2, r.y, 4, 2, '#6e9a48');
         } else if (L.leaves) R(c, x, r.y + 2, 3, 3, pick(['#e8a040', '#c84a2a', '#f0c040'], k, seed));
-        else {
-          c.globalAlpha = 0.5 + Math.sin(time * 0.08 + k) * 0.4;
-          R(c, x, r.y + 2, 3, 3, pick(['#9af0ff', '#ff9af0', '#ffffff'], k, seed));
-          c.globalAlpha = 1;
-        }
+        else if (FX) FX.push([3, x, r.y + 2, pick(['#9af0ff', '#ff9af0', '#ffffff'], k, seed), k]);
+        else spark(c, x, r.y + 2, pick(['#9af0ff', '#ff9af0', '#ffffff'], k, seed), k);
       }
   }
   // Toit plat du désert : terrasse bordée d'un parapet (tapis et jarres), tour carrée coiffée d'un dôme blanchi,
@@ -1991,7 +2160,7 @@
     R(c, wx, ty0 + 14, 12, 3, OUT);
     R(c, wx + 2, ty0 + 13, 8, 2, OUT);
     R(c, wx + 5, ty0 + 16, 2, 18, L.beam[0]);
-    canaanLight(wx + 6, ty0 + 24, 60, '#ffd890');
+    light(wx + 6, ty0 + 24, 60, '#ffd890');
     // Ombre de la tour sur la terrasse.
     c.globalAlpha = 0.25;
     R(c, tx0 + tw, y0 + 2, 18, eave - y0 - 10, '#000000');
@@ -2033,6 +2202,8 @@
       }
     }
     R(c, x - 5, y + 21, 32, 4, b1);
+    halo(c, x + 11, y + 10, 26);
+    if (FX) FX.push([4, x, y, 22, 20, x * 7 + y]);
     if (L.flowers) {
       R(c, x - 4, y + 23, 30, 6, '#8a5a34');
       R(c, x - 4, y + 23, 30, 1, '#a87444');
@@ -2064,7 +2235,7 @@
     R(c, lx - 1, ly - 1, 8, 13, OUT);
     R(c, lx, ly, 6, 11, '#ffcf6a');
     R(c, lx + 1, ly + 1, 4, 3, '#fff2b0');
-    canaanLight(lx + 3, ly + 6, 80, '#ffcf6a');
+    light(lx + 3, ly + 6, 80, '#ffcf6a');
   }
   // Pignon au-dessus de la porte : petit toit avancé avec un œil-de-bœuf, pour donner du relief.
   function gableAt(c, L, mid, eave) {
@@ -2159,42 +2330,381 @@
           R(c, x + 3, y - 17, 5, 17, '#9ae0ff');
           R(c, x + 3, y - 17, 2, 17, '#e0f8ff');
           R(c, x + 9, y - 10, 5, 10, '#c89aff');
-          canaanLight(x + 6, y - 10, 60 * p, '#9ae0ff');
+          light(x + 6, y - 10, 60 * p, '#9ae0ff');
         }
       }
     }
   }
-  function drawBuilding(c, b) {
-    const L = LOOKS[b.style] || LOOKS.chaume,
-      X = b.x * TS,
-      Y = b.y * TS,
-      Wd = b.w * TS,
-      Hd = b.h * TS,
-      base = Y + Hd,
-      mid = X + Wd / 2,
-      seed = b.x * 31 + b.y,
-      lift = L.stilts ? 16 : 0,
-      bot = base - 6 - lift,
-      top = bot - 66,
-      roofTop = Y - 34,
-      eave = top + 10;
-    if (!visible(mid, Y + Hd / 2, 300)) return;
-    c.save();
-    c.imageSmoothingEnabled = false;
-    // Ombre portée vers le bas et la droite.
-    c.globalAlpha = 0.28;
-    R(c, X, base - 8, Wd + 14, 12, '#0a0e12');
-    R(c, X + Wd, top + 16, 12, base - top - 16, '#0a0e12');
-    c.globalAlpha = 1;
+  // ---------------------------------------------------------------- Architectures
+  // Chaque biome a plusieurs silhouettes (form) : maison à quatre pans, maison à étage à colombages, chalet au
+  // grand pignon, grange à toit brisé, hutte ronde au toit conique, maison à dôme, tour ronde, maison-champignon,
+  // terrasse du désert. La porte reste au milieu du bas (même emprise, mêmes collisions).
+  const STONE_LOOK = L => ({ ...L, wall: 'stone', face: L.ground === 'desert' ? ['#d8b47e', '#c49e6a', '#a8844f'] : L.ground === 'enchantee' ? ['#a49cc0', '#8c84aa', '#6e668e'] : ['#b4ae9e', '#9c9686', '#7e786a'] });
+  // Rangées d'un triangle (toit conique ou pignon) : demi-largeur de la pointe à la base, par pas de 4 px.
+  function cone(c, L, mid, apex, base, half, seed, fringe) {
+    const T = L.tones,
+      rows = [];
+    for (let y = apex; y < base; y += 4) rows.push([y, Math.max(3, Math.round(((y - apex + 4) / (base - apex)) * half / 2) * 2)]);
+    for (const [y, hw] of rows) R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
+    rows.forEach(([y, hw], i) => {
+      R(c, mid - hw, y, hw * 2, 4, T[1]);
+      R(c, mid - hw, y, Math.max(2, Math.round(hw * 0.45)), 4, T[0]);
+      R(c, mid + hw - Math.max(2, Math.round(hw * 0.4)), y, Math.max(2, Math.round(hw * 0.4)), 4, T[2]);
+      for (let x = mid - hw + (i % 2) * 3; x < mid + hw - 2; x += 6) R(c, x, y + 3, 3, 1, T[3]);
+      if (rnd(i, seed) < 0.4) R(c, mid - hw + 4 + rnd(seed, i) * Math.max(1, hw * 2 - 10), y + 1, 4, 2, T[i % 2 ? 0 : 2]);
+    });
+    R(c, mid - half / 2 - 2, base - 2, half + 4, 4, T[3]);
+    if (fringe) for (let x = mid - half / 2; x < mid + half / 2; x += 4) R(c, x, base, 3, 2 + Math.floor(rnd(x, seed) * 6), T[2]);
+  }
+  // Mur arrondi (hutte, tour) : bandes verticales plus sombres vers les bords pour le volume.
+  function roundWall(c, L, x0, w, top, bot, seed) {
+    R(c, x0 - 2, top - 2, w + 4, bot - top + 4, OUT);
+    const [f0, f1, f2] = L.face;
+    for (let x = 0; x < w; x += 4) {
+      const t = x / w,
+        col = t < 0.15 ? f1 : t > 0.78 ? f2 : t < 0.35 ? f0 : rnd(x, seed) < 0.5 ? f0 : f1;
+      R(c, x0 + x, top, Math.min(4, w - x), bot - top, col);
+      if (L.wall === 'stone') for (let y = top + ((x / 4) % 2) * 6; y < bot; y += 12) R(c, x0 + x, y, 4, 1, f2);
+      else R(c, x0 + x + 3, top, 1, bot - top, L.beam[1]);
+    }
+    R(c, x0 + 2, top, 3, bot - top, '#ffffff30');
+  }
+  function paintForm(c, b, L, g) {
+    const { X, Wd, bot, mid, seed, base } = g;
+    let top = bot - 66,
+      roofTop = b.y * TS - 34;
+    const form = b.form || 'house';
+    const windows = (y, round, spread = 21 + 26) => {
+      windowAt(c, L, mid - 22 - spread, y, round);
+      windowAt(c, L, mid + spread, y, round);
+      light(mid - spread - 11, y + 10, 70, '#ffd890');
+      light(mid + spread + 11, y + 10, 70, '#ffd890');
+    };
+    if (form === 'storey') {
+      // Rez-de-chaussée de pierre, étage à colombages en encorbellement, toit à quatre pans.
+      const mid1 = bot - 56;
+      top = bot - 116;
+      drawWall(c, STONE_LOOK(L), X, mid1, Wd, bot, seed + 1);
+      drawWall(c, L, X - 6, top, Wd + 12, mid1, seed);
+      R(c, X - 10, mid1 - 3, Wd + 20, 8, OUT);
+      R(c, X - 8, mid1 - 2, Wd + 16, 5, L.beam[0]);
+      for (const bx of [X + 2, X + Wd - 10]) {
+        R(c, bx - 1, mid1 + 3, 10, 12, OUT);
+        R(c, bx, mid1 + 3, 8, 10, L.beam[1]);
+      }
+      drawBase(c, L, X, Wd, bot, seed);
+      doorAt(c, L, mid, bot);
+      windows(top + 14, false, 34);
+      windowAt(c, L, mid - 11, top + 14, false);
+      windowAt(c, L, mid - 22 - 47, mid1 + 12, false);
+      roofTop = top - 46;
+      drawRoof(c, L, X - 6, Wd + 12, roofTop, top + 10, seed);
+      if (L.chimney) chimneyAt(c, L, X + Wd - 50, roofTop + 4);
+      return roofTop;
+    }
+    if (form === 'gable') {
+      // Chalet : murs bas, grand pignon de face entre deux pans de toit qui descendent presque au sol, balcon.
+      top = bot - 52;
+      drawWall(c, L, X, top, Wd, bot, seed);
+      drawBase(c, L, X, Wd, bot, seed);
+      doorAt(c, L, mid, bot);
+      windows(top + 12, false);
+      const apex = top - 96,
+        baseY = top + 14,
+        half = Wd / 2 + 18;
+      for (let y = apex; y < baseY; y += 4) {
+        const hw = Math.round(((y - apex + 4) / (baseY - apex)) * half);
+        R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
+      }
+      for (let y = apex, i = 0; y < baseY; y += 4, i++) {
+        const hw = Math.round(((y - apex + 4) / (baseY - apex)) * half),
+          band = Math.min(hw, 26);
+        // Pignon (bois) au centre, pans de toit de chaque côté.
+        R(c, mid - hw, y, hw * 2, 4, L.wall === 'logs' ? L.face[i % 3 === 0 ? 1 : 0] : L.face[0]);
+        if (L.wall !== 'logs') for (let x = mid - hw + band; x < mid + hw - band; x += 10) R(c, x, y, 1, 4, L.face[2]);
+        R(c, mid - hw, y, band, 4, L.tones[i % 2 ? 0 : 1]);
+        R(c, mid + hw - band, y, band, 4, L.tones[i % 2 ? 2 : 3]);
+        R(c, mid - hw + band - 2, y, 2, 4, L.tones[3]);
+        R(c, mid + hw - band, y, 2, 4, OUT);
+      }
+      // Balcon et fenêtre du pignon.
+      R(c, mid - 44, top - 6, 88, 8, OUT);
+      R(c, mid - 42, top - 5, 84, 5, L.beam[0]);
+      for (let x = mid - 40; x < mid + 40; x += 8) R(c, x, top - 18, 3, 13, L.beam[0]);
+      R(c, mid - 42, top - 20, 84, 4, L.beam[0]);
+      windowAt(c, L, mid - 11, top - 56, false);
+      light(mid, top - 46, 70, '#ffd890');
+      if (L.chimney) chimneyAt(c, L, X + Wd - 40, top - 52);
+      return apex - 10;
+    }
+    if (form === 'gambrel') {
+      // Grange : planches, toit brisé en deux pans (bas raide et sombre, haut plus clair), lucarne à foin.
+      top = bot - 62;
+      drawWall(c, { ...L, wall: 'planks' }, X, top, Wd, bot, seed);
+      for (const x of [X + 16, X + Wd - 40]) {
+        R(c, x, top + 14, 24, 30, L.beam[0]);
+        for (let k = 0; k < 12; k++) {
+          R(c, x + k * 2, top + 14 + k * 2.5, 3, 3, L.beam[1]);
+          R(c, x + 22 - k * 2, top + 14 + k * 2.5, 3, 3, L.beam[1]);
+        }
+      }
+      drawBase(c, L, X, Wd, bot, seed);
+      doorAt(c, L, mid, bot);
+      const T = L.tones,
+        lowTop = top - 30,
+        upTop = lowTop - 34;
+      // Contour rangée par rangée (le pan haut est plus étroit : pas de coins noirs).
+      R(c, X - 14, lowTop - 2, Wd + 28, top + 12 - lowTop, OUT);
+      for (let y = upTop; y < lowTop; y += 5) {
+        const inset = Math.round(((lowTop - y) / 34) * 22);
+        R(c, X - 14 + inset, y - 2, Wd + 28 - inset * 2, 9, OUT);
+      }
+      for (let y = lowTop, i = 0; y < top + 10; y += 5, i++) {
+        R(c, X - 12, y, Wd + 24, 5, T[i % 2 ? 2 : 1]);
+        for (let x = X - 12 + (i % 2) * 7; x < X + Wd + 12; x += 14) R(c, x, y, 1, 5, T[3]);
+      }
+      for (let y = upTop, i = 0; y < lowTop; y += 5, i++) {
+        const inset = Math.round(((lowTop - y) / 34) * 22);
+        R(c, X - 12 + inset, y, Wd + 24 - inset * 2, 5, T[i % 2 ? 0 : 1]);
+        for (let x = X - 12 + inset + (i % 2) * 7; x < X + Wd + 12 - inset; x += 14) R(c, x, y, 1, 5, T[2]);
+      }
+      R(c, X - 12, lowTop - 2, Wd + 24, 3, T[3]);
+      R(c, X + 10, upTop - 4, Wd - 20, 4, T[3]);
+      // Lucarne à foin.
+      R(c, mid - 16, lowTop - 22, 32, 30, OUT);
+      R(c, mid - 14, lowTop - 20, 28, 26, L.face[1]);
+      R(c, mid - 10, lowTop - 16, 20, 20, '#3a2414');
+      R(c, mid - 10, lowTop - 4, 20, 8, '#e0c060');
+      R(c, mid - 1, lowTop - 30, 2, 12, L.beam[1]);
+      if (L.leaves) for (let k = 0; k < 10; k++) R(c, X + rnd(k, seed) * Wd, lowTop + rnd(seed, k) * 34, 3, 3, pick(['#e8a040', '#c84a2a', '#f0c040'], k, seed));
+      return upTop - 8;
+    }
+    if (form === 'round') {
+      // Hutte ronde (roseaux) au toit conique frangé ; sur pilotis au marais.
+      const x0 = X + 24,
+        w = Wd - 48;
+      top = bot - 58;
+      roundWall(c, L, x0, w, top, bot, seed);
+      if (!L.stilts) drawBase(c, L, x0, w, bot, seed);
+      doorAt(c, L, mid, bot);
+      windowAt(c, L, x0 + 6, top + 12, true);
+      light(x0 + 17, top + 22, 60, '#ffd890');
+      const apex = top - 118;
+      cone(c, L, mid, apex, top + 16, w + 26, seed, true);
+      R(c, mid - 2, apex - 10, 4, 12, L.beam[0]);
+      R(c, mid - 5, apex - 14, 10, 5, L.tones[3]);
+      return apex - 12;
+    }
+    if (form === 'dome') {
+      // Maison à dôme blanchi à la chaux : murs bas de terre, dôme, petite tour à vent et arcades.
+      top = bot - 46;
+      drawWall(c, L, X, top, Wd, bot, seed);
+      drawBase(c, L, X, Wd, bot, seed);
+      doorAt(c, L, mid, bot);
+      windows(top + 10, true);
+      const R0 = Wd / 2 - 8,
+        cy = top + 6,
+        rows = [];
+      for (let y = cy - Math.round(R0 * 0.82); y < cy; y += 4) {
+        const t = (cy - y) / (R0 * 0.82);
+        rows.push([y, Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * R0 / 2) * 2]);
+      }
+      for (const [y, hw] of rows) R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
+      rows.forEach(([y, hw]) => {
+        R(c, mid - hw, y, hw * 2, 4, '#f4ecda');
+        R(c, mid - hw, y, Math.max(3, Math.round(hw * 0.35)), 4, '#ffffff');
+        R(c, mid + hw - Math.max(4, Math.round(hw * 0.38)), y, Math.max(4, Math.round(hw * 0.38)), 4, '#d6c6a4');
+      });
+      for (let k = 0; k < 6; k++) R(c, mid - R0 * 0.6 + k * R0 * 0.24, cy - 18, 6, 9, '#3a3a5a');
+      const ty = cy - Math.round(R0 * 0.82);
+      R(c, mid - 2, ty - 16, 4, 16, '#c9a24a');
+      R(c, mid - 4, ty - 21, 8, 6, '#f0d070');
+      R(c, X + Wd - 40, top - 40, 26, 44, OUT);
+      R(c, X + Wd - 38, top - 38, 22, 40, L.face[0]);
+      R(c, X + Wd - 34, top - 32, 14, 8, '#3a2414');
+      R(c, X + Wd - 38, top - 38, 22, 3, '#fff2d8');
+      return ty - 22;
+    }
+    if (form === 'tower') {
+      // Tour ronde de pierre au toit conique, appentis à gauche, fenêtres superposées.
+      const tw = 104,
+        x0 = mid - tw / 2;
+      top = bot - 132;
+      drawWall(c, STONE_LOOK(L), X, bot - 56, 52, bot, seed + 3);
+      R(c, X - 6, bot - 66, 60, 12, OUT);
+      for (let y = bot - 64, i = 0; y < bot - 56; y += 4, i++) R(c, X - 4 + i * 2, y, 56 - i * 2, 4, L.tones[i % 2 ? 1 : 2]);
+      roundWall(c, STONE_LOOK(L), x0, tw, top, bot, seed);
+      drawBase(c, L, x0, tw, bot, seed);
+      doorAt(c, L, mid, bot);
+      windowAt(c, L, mid - 11, top + 18, true);
+      windowAt(c, L, mid - 11, top + 62, true);
+      light(mid, top + 28, 70, '#c8b0ff');
+      light(mid, top + 72, 70, '#c8b0ff');
+      const apex = top - 96;
+      cone(c, L, mid, apex, top + 12, tw + 28, seed, false);
+      R(c, mid - 2, apex - 16, 4, 18, '#c9a24a');
+      R(c, mid - 6, apex - 22, 12, 8, L.glow ? '#9af0ff' : '#f0d070');
+      if (L.glow) {
+        light(mid, apex - 18, 50, '#9af0ff');
+        // Cristaux qui poussent au pied et contre la tour, avec leur halo.
+        for (const [cx, ch, cw, col] of [[x0 - 14, 46, 12, '#9af0ff'], [x0 - 2, 30, 9, '#c89aff'], [x0 + tw + 4, 52, 13, '#9af0ff'], [x0 + tw + 18, 28, 9, '#ffb0f0'], [X + 6, 24, 8, '#c89aff']]) {
+          for (let k = 0; k < ch; k += 4) {
+            const hw = Math.max(1, Math.round((cw / 2) * Math.min(1, (k + 6) / 14)));
+            R(c, cx - hw - 1, bot - ch + k - 1, hw * 2 + 2, 6, OUT);
+          }
+          for (let k = 0; k < ch; k += 4) {
+            const hw = Math.max(1, Math.round((cw / 2) * Math.min(1, (k + 6) / 14)));
+            R(c, cx - hw, bot - ch + k, hw * 2, 4, col);
+            R(c, cx - hw, bot - ch + k, Math.max(1, hw - 1), 4, '#ffffff');
+          }
+          halo(c, cx, bot - ch / 2, 30, '160,240,255');
+          if (FX) FX.push([8, cx, bot - ch / 2, 60, col, cx]);
+          else light(cx, bot - ch / 2, 50, col);
+        }
+      }
+      return apex - 24;
+    }
+    if (form === 'tree') {
+      // Maison dans le tronc d'un chêne géant : écorce, racines, porte et fenêtres creusées, ramure pour toit.
+      const tw = Wd - 36,
+        x0 = mid - tw / 2;
+      top = bot - 86;
+      R(c, x0 - 2, top - 2, tw + 4, bot - top + 4, OUT);
+      for (let x = 0; x < tw; x += 4) {
+        const t = x / tw,
+          col = t < 0.18 ? '#7a5434' : t > 0.75 ? '#3e2a18' : rnd(x, seed) < 0.5 ? '#5e3e24' : '#664428';
+        R(c, x0 + x, top, 4, bot - top, col);
+        for (let y = top + Math.floor(rnd(seed, x) * 10); y < bot; y += 14 + Math.floor(rnd(x, y) * 8)) R(c, x0 + x, y, 4, 2, '#2e1e10');
+      }
+      for (const [rx, rw] of [[x0 - 22, 30], [x0 + tw - 8, 30], [x0 + 20, 18]]) {
+        R(c, rx - 1, bot - 13, rw + 2, 15, OUT);
+        R(c, rx, bot - 12, rw, 12, '#5e3e24');
+        R(c, rx, bot - 12, rw, 3, '#7a5434');
+      }
+      doorAt(c, L, mid, bot);
+      for (const [wx, wy] of [[x0 + 10, top + 14], [x0 + tw - 32, top + 30]]) {
+        R(c, wx - 3, wy - 3, 28, 28, OUT);
+        R(c, wx, wy, 22, 22, '#ffd890');
+        R(c, wx + 10, wy, 2, 22, '#5e3e24');
+        R(c, wx, wy + 10, 22, 2, '#5e3e24');
+        halo(c, wx + 11, wy + 11, 26);
+        light(wx + 11, wy + 11, 70, '#ffd890');
+        if (FX) FX.push([4, wx, wy, 22, 22, wx + wy]);
+      }
+      // Ramure : grosses touffes de feuilles en trois tons, éclairées en haut à gauche.
+      const blobs = [];
+      for (let k = 0; k < 14; k++) blobs.push([mid + (rnd(k, seed) - 0.5) * (Wd + 60), top - 24 - rnd(seed, k) * 74, 26 + rnd(k + 3, seed) * 16]);
+      blobs.sort((a, b) => a[1] - b[1]);
+      const leaf = L.ground === 'automne' ? ['#e08a3a', '#c0602a', '#8a4020'] : ['#5a9a44', '#3e7a34', '#2a5426'];
+      for (const [bx, by, br] of blobs) {
+        for (let y = -br; y < br; y += 4) {
+          const hw = Math.round(Math.sqrt(Math.max(0, br * br - y * y)) / 2) * 2;
+          R(c, bx - hw - 2, by + y - 2, hw * 2 + 4, 8, OUT);
+        }
+      }
+      for (const [bx, by, br] of blobs)
+        for (let y = -br; y < br; y += 4) {
+          const hw = Math.round(Math.sqrt(Math.max(0, br * br - y * y)) / 2) * 2;
+          R(c, bx - hw, by + y, hw * 2, 4, leaf[1]);
+          if (y < 0) R(c, bx - hw, by + y, Math.round(hw * 0.9), 4, leaf[0]);
+          if (y > br * 0.3) R(c, bx - hw, by + y, hw * 2, 4, leaf[2]);
+          for (let x = bx - hw + ((y / 4) % 2) * 4; x < bx + hw - 2; x += 8) R(c, x, by + y + 1, 2, 2, y < 0 ? '#8ac860' : leaf[2]);
+        }
+      return top - 110;
+    }
+    if (form === 'tent') {
+      // Grande tente de nomades : toile rayée tendue entre mâts, pans relevés à l'entrée, cordages et piquets, tapis.
+      top = bot - 70;
+      const apex = top - 46,
+        half = Wd / 2 + 16,
+        stripes = ['#e8dcc0', '#b8423a', '#e8dcc0', '#3a6a9a'];
+      for (let y = apex; y < bot; y += 4) {
+        const t = (y - apex) / (bot - apex),
+          hw = Math.round((0.18 + t * 0.82) * half);
+        R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
+      }
+      for (let y = apex; y < bot; y += 4) {
+        const t = (y - apex) / (bot - apex),
+          hw = Math.round((0.18 + t * 0.82) * half);
+        for (let x = -hw; x < hw; x += 4) {
+          const band = Math.floor(((x / hw) * 0.5 + 0.5) * 9);
+          R(c, mid + x, y, 4, 4, stripes[band % stripes.length]);
+        }
+        // Plis de la toile entre les cordes.
+        if ((y - apex) % 24 < 4) R(c, mid - hw, y, hw * 2, 2, '#00000022');
+      }
+      // Entrée : pans relevés, ombre de l'intérieur.
+      for (let y = bot - 58; y < bot; y += 4) {
+        const hw = Math.round(((y - (bot - 58)) / 58) * 30) + 8;
+        R(c, mid - hw, y, hw * 2, 4, '#3a2418');
+      }
+      R(c, mid - 30, bot - 60, 14, 22, '#c8a878');
+      R(c, mid + 16, bot - 60, 14, 22, '#c8a878');
+      doorAt(c, { ...L, beam: ['#6a4a2a', '#3a2418'] }, mid, bot);
+      R(c, mid - 2, apex - 18, 4, 20, '#6a4a2a');
+      R(c, mid - 7, apex - 22, 14, 6, '#c9a24a');
+      for (const sx of [-1, 1]) {
+        R(c, mid + sx * (half - 4) - 2, bot - 40, 4, 40, '#6a4a2a');
+        for (let k = 0; k < 10; k++) R(c, mid + sx * (half + 4 + k * 3), apex + 20 + k * 9, 2, 2, '#d8c8a0');
+        R(c, mid + sx * (half + 34) - 2, bot - 4, 5, 6, '#4a3020');
+      }
+      // Tapis devant l'entrée.
+      R(c, mid - 34, bot + 2, 68, 10, OUT);
+      R(c, mid - 33, bot + 3, 66, 8, '#a8343a');
+      R(c, mid - 30, bot + 5, 60, 4, '#d8a040');
+      halo(c, mid, bot - 24, 40);
+      light(mid, bot - 24, 90, '#ffcf6a');
+      return apex - 26;
+    }
+    if (form === 'mushroom') {
+      // Maison-champignon : pied crème aux fenêtres rondes, grand chapeau tacheté.
+      const w = Wd - 56,
+        x0 = mid - w / 2;
+      top = bot - 60;
+      roundWall(c, { ...L, wall: 'cream', face: ['#f2e8d0', '#e0d2b2', '#c4b28e'], beam: ['#8a6a4a', '#6a4e34'] }, x0, w, top, bot, seed);
+      doorAt(c, L, mid, bot);
+      for (const wx of [x0 + 8, x0 + w - 26]) {
+        R(c, wx - 2, top + 12, 22, 22, OUT);
+        R(c, wx, top + 14, 18, 18, '#ffd890');
+        R(c, wx + 8, top + 14, 2, 18, '#8a6a4a');
+        light(wx + 9, top + 23, 55, '#ffd890');
+        if (FX) FX.push([4, wx, top + 14, 18, 18, wx]);
+      }
+      const cy = top + 10,
+        rx = Wd / 2 + 22,
+        ry = 66,
+        T = L.tones;
+      for (let y = cy - ry; y < cy + 8; y += 4) {
+        const t = Math.min(1, (cy - y) / ry),
+          hw = Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * rx / 2) * 2;
+        R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
+      }
+      for (let y = cy - ry, i = 0; y < cy + 8; y += 4, i++) {
+        const t = Math.min(1, (cy - y) / ry),
+          hw = Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * rx / 2) * 2;
+        R(c, mid - hw, y, hw * 2, 4, y > cy ? T[3] : T[1]);
+        R(c, mid - hw, y, Math.round(hw * 0.4), 4, y > cy ? T[3] : T[0]);
+        R(c, mid + hw - Math.round(hw * 0.35), y, Math.round(hw * 0.35), 4, T[2]);
+      }
+      for (let k = 0; k < 9; k++) {
+        const a = rnd(k, seed) * Math.PI - Math.PI,
+          r = 0.35 + rnd(seed, k) * 0.55,
+          sx = mid + Math.cos(a) * rx * r,
+          sy = cy + Math.sin(a) * ry * r * 0.9,
+          sz = 6 + Math.floor(rnd(k + 9, seed) * 3) * 2;
+        R(c, sx - sz / 2 - 1, sy - sz / 2 - 1, sz + 2, sz + 2, T[3]);
+        R(c, sx - sz / 2, sy - sz / 2, sz, sz, '#f6f0ff');
+        R(c, sx - sz / 2, sy - sz / 2, sz / 2, 2, '#ffffff');
+      }
+      return cy - ry - 6;
+    }
+    // Maison à quatre pans (ou terrasse du désert) : la forme d'origine.
+    const lift = L.stilts ? 16 : 0;
     if (L.stilts) drawStilts(c, L, X, Wd, bot, lift, mid);
     drawWall(c, L, X, top, Wd, bot, seed);
     drawBase(c, L, X, Wd, bot, seed);
     doorAt(c, L, mid, bot);
-    const wy = top + 16;
-    windowAt(c, L, mid - 21 - 22 - 26, wy, L.wall === 'adobe');
-    windowAt(c, L, mid + 21 + 26, wy, L.wall === 'adobe');
-    canaanLight(mid - 58, wy + 10, 70, '#ffd890');
-    canaanLight(mid + 58, wy + 10, 70, '#ffd890');
+    windows(top + 16, L.wall === 'adobe');
     // Auvent : rayé rouge et crème à l'échoppe, toile tendue sur perches dans le désert.
     if (L.awning === true) {
       R(c, mid - 30, top - 2, 60, 16, OUT);
@@ -2207,14 +2717,257 @@
       R(c, mid - 33, top + 12, 3, 30, L.beam[0]);
       R(c, mid + 30, top + 12, 3, 30, L.beam[0]);
     }
-    drawRoof(c, L, X, Wd, roofTop, eave, seed);
-    if (L.roof !== 'flat') gableAt(c, L, mid, eave);
+    drawRoof(c, L, X, Wd, roofTop, top + 10, seed);
+    if (L.roof !== 'flat') gableAt(c, L, mid, top + 10);
     if (L.chimney) chimneyAt(c, L, X + Wd - 56, roofTop + 4);
+    return L.roof === 'flat' ? roofTop - 50 : roofTop - (L.chimney ? 18 : 0);
+  }
+  // ---------------------------------------------------------------- Abords
+  // Petits objets autour de chaque bâtiment, accordés à son modèle et à son biome (vrai : ils remplacent les abords
+  // génériques). Le contour sombre et la lumière d'en haut à gauche suivent le style des décors.
+  const PROP = {
+    barrel(c, x, y) {
+      R(c, x - 1, y - 23, 20, 24, OUT);
+      R(c, x, y - 22, 18, 22, '#8a5a34');
+      R(c, x, y - 18, 18, 2, '#4a4a52');
+      R(c, x, y - 7, 18, 2, '#4a4a52');
+      R(c, x + 3, y - 22, 3, 22, '#a8743e');
+      R(c, x + 13, y - 22, 3, 22, '#6a4226');
+    },
+    jar(c, x, y, h = 16, col = '#c8783a') {
+      R(c, x - 1, y - h - 1, 12, h + 2, OUT);
+      R(c, x, y - h, 10, h, col);
+      R(c, x + 2, y - h - 4, 6, 5, OUT);
+      R(c, x + 3, y - h - 3, 4, 3, col);
+      R(c, x + 2, y - h + 3, 2, h - 6, '#ffffff44');
+    },
+    lantern(c, x, y) {
+      R(c, x - 2, y - 40, 4, 40, OUT);
+      R(c, x - 1, y - 40, 2, 40, '#4a3020');
+      R(c, x - 5, y - 50, 10, 12, OUT);
+      R(c, x - 4, y - 49, 8, 10, '#ffcf6a');
+      R(c, x - 3, y - 48, 6, 3, '#fff2b0');
+      halo(c, x, y - 44, 22);
+      light(x, y - 44, 70, '#ffcf6a');
+    },
+    fence(c, x0, x1, y, col = '#e8dcc0') {
+      R(c, x0 - 1, y - 15, x1 - x0 + 2, 4, OUT);
+      R(c, x0, y - 14, x1 - x0, 2, col);
+      R(c, x0, y - 7, x1 - x0, 2, col);
+      for (let x = x0; x <= x1 - 4; x += 9) {
+        R(c, x - 1, y - 21, 6, 22, OUT);
+        R(c, x, y - 20, 4, 20, col);
+        R(c, x, y - 20, 4, 2, '#ffffff');
+      }
+    },
+    bed(c, x, y, w, cols) {
+      R(c, x - 1, y - 9, w + 2, 10, OUT);
+      R(c, x, y - 8, w, 8, '#5a3e24');
+      for (let k = 0; k < w - 4; k += 6) {
+        R(c, x + 2 + k, y - 12 - (k % 12 ? 0 : 2), 4, 4, '#4f8a42');
+        R(c, x + 3 + k, y - 13 - (k % 12 ? 0 : 2), 2, 2, cols[(k / 6) % cols.length]);
+      }
+    },
+    bale(c, x, y) {
+      R(c, x - 1, y - 17, 26, 18, OUT);
+      R(c, x, y - 16, 24, 16, '#d8b45a');
+      for (let k = 0; k < 24; k += 3) R(c, x + k, y - 16, 1, 16, '#b8943e');
+      R(c, x, y - 16, 24, 3, '#efd27a');
+      R(c, x + 7, y - 16, 2, 16, '#8a6a2a');
+      R(c, x + 16, y - 16, 2, 16, '#8a6a2a');
+    },
+    pumpkin(c, x, y) {
+      R(c, x - 1, y - 11, 16, 12, OUT);
+      R(c, x, y - 10, 14, 10, '#e07a28');
+      R(c, x + 4, y - 10, 1, 10, '#b05a1a');
+      R(c, x + 9, y - 10, 1, 10, '#b05a1a');
+      R(c, x + 6, y - 14, 3, 4, '#4e6a2a');
+    },
+    mushroom(c, x, y, col, glow) {
+      R(c, x + 3, y - 8, 4, 8, '#efe4c8');
+      R(c, x - 1, y - 13, 12, 7, OUT);
+      R(c, x, y - 12, 10, 5, col);
+      R(c, x + 2, y - 12, 2, 2, '#ffffff');
+      if (glow) {
+        halo(c, x + 5, y - 9, 16, '190,140,255');
+        if (FX) FX.push([8, x + 5, y - 9, 34, col, x]);
+      }
+    },
+    stump(c, x, y) {
+      R(c, x - 1, y - 15, 24, 16, OUT);
+      R(c, x, y - 14, 22, 14, '#6a4a2a');
+      R(c, x, y - 14, 22, 4, '#c8a070');
+      R(c, x + 5, y - 13, 12, 2, '#a07a50');
+      // Hache plantée.
+      R(c, x + 12, y - 30, 3, 18, '#7a5230');
+      R(c, x + 8, y - 30, 9, 6, '#9a9aa0');
+      R(c, x + 8, y - 30, 9, 2, '#d4d4dc');
+    },
+    sacks(c, x, y) {
+      for (const [dx, dy] of [[0, 0], [14, 0], [7, -12]]) {
+        R(c, x + dx - 1, y + dy - 15, 16, 16, OUT);
+        R(c, x + dx, y + dy - 14, 14, 14, '#c8a878');
+        R(c, x + dx + 4, y + dy - 16, 6, 3, '#a8885a');
+        R(c, x + dx + 2, y + dy - 12, 3, 8, '#e0c898');
+      }
+    },
+    well(c, x, y) {
+      R(c, x - 1, y - 21, 38, 22, OUT);
+      for (let k = 0; k < 36; k += 9) R(c, x + k, y - 20, 8, 20, k % 18 ? '#8e8a84' : '#a4a09a');
+      R(c, x, y - 20, 36, 3, '#c4c4ca');
+      R(c, x + 3, y - 52, 3, 32, '#5e3c22');
+      R(c, x + 30, y - 52, 3, 32, '#5e3c22');
+      R(c, x - 3, y - 60, 42, 10, OUT);
+      R(c, x - 2, y - 59, 40, 8, '#9e402e');
+      R(c, x - 2, y - 59, 40, 2, '#de6c4e');
+      R(c, x + 16, y - 50, 2, 18, '#d8d0c0');
+      R(c, x + 12, y - 34, 10, 8, '#7a5230');
+    },
+    net(c, x, y) {
+      R(c, x, y - 40, 3, 40, '#5e4630');
+      R(c, x + 36, y - 40, 3, 40, '#5e4630');
+      for (let k = 0; k < 36; k += 4) {
+        R(c, x + 3 + k, y - 38, 1, 26 + Math.round(Math.sin(k * 0.3) * 3), '#c8c0a0');
+      }
+      for (let k = 0; k < 26; k += 5) R(c, x + 3, y - 38 + k, 33, 1, '#c8c0a0');
+      R(c, x + 10, y - 20, 5, 4, '#e8a040');
+    },
+    boat(c, x, y) {
+      R(c, x - 1, y - 11, 46, 12, OUT);
+      R(c, x, y - 10, 44, 10, '#7a5638');
+      R(c, x + 4, y - 10, 36, 3, '#a87444');
+      R(c, x, y - 4, 44, 2, '#5a3e24');
+      R(c, x + 18, y - 14, 3, 6, '#5a3e24');
+    },
+    rug(c, x, y, w) {
+      R(c, x - 1, y - 1, w + 2, 10, OUT);
+      R(c, x, y, w, 8, '#a8343a');
+      R(c, x + 3, y + 2, w - 6, 4, '#d8a040');
+    },
+    palm(c, x, y) {
+      for (let k = 0; k < 40; k += 4) R(c, x + Math.round(Math.sin(k * 0.05) * 4) - 3, y - k - 4, 6, 4, k % 8 ? '#8a6a3a' : '#a8844a');
+      for (const [dx, dy, w] of [[-22, -46, 24], [2, -48, 24], [-14, -54, 28], [-6, -42, 12]]) {
+        R(c, x + dx - 1, y + dy - 1, w + 2, 7, OUT);
+        R(c, x + dx, y + dy, w, 5, '#3e7a34');
+        R(c, x + dx, y + dy, w, 2, '#5a9a44');
+      }
+    },
+    firepit(c, x, y) {
+      for (let k = 0; k < 6; k++) R(c, x - 14 + k * 5, y - 4, 5, 5, k % 2 ? '#7e786a' : '#9c9686');
+      R(c, x - 8, y - 7, 16, 3, '#5e3c22');
+      if (FX) FX.push([10, x, y - 4]);
+    }
+  };
+  function surroundings(c, b, L, g) {
+    const { X, Wd, base, mid } = g,
+      id = b.room?.id,
+      y = base + 2;
+    switch (id) {
+      case 'maison':
+        PROP.fence(c, X - 60, X - 6, y);
+        PROP.fence(c, X + Wd + 6, X + Wd + 60, y);
+        PROP.bed(c, X - 54, y - 26, 40, ['#e05a7a', '#f0c040', '#ffffff']);
+        R(c, X + Wd + 50, base - 70, 3, 52, '#5e3c22');
+        R(c, X + Wd + 14, base - 70, 3, 52, '#5e3c22');
+        if (FX) FX.push([6, X + Wd + 15, X + Wd + 51, base - 66]);
+        return true;
+      case 'marmite':
+        PROP.lantern(c, X - 40, y);
+        PROP.barrel(c, X + Wd + 8, y);
+        PROP.barrel(c, X + Wd + 28, y - 4);
+        return true;
+      case 'echoppe':
+        PROP.sacks(c, X - 52, y);
+        PROP.barrel(c, X + Wd + 30, y);
+        R(c, X + Wd + 31, base - 26, 16, 6, '#c83a2a');
+        return false;
+      case 'aubepines':
+        PROP.fence(c, X - 62, X - 8, y, '#f0e6d0');
+        PROP.bed(c, X - 56, y - 26, 42, ['#e85a7a', '#ffffff', '#e85a7a']);
+        PROP.lantern(c, X + Wd + 22, y);
+        return true;
+      case 'puits':
+        PROP.well(c, X + Wd + 8, y);
+        PROP.bed(c, X - 48, y, 40, ['#9a7ae0', '#ffffff']);
+        return true;
+      case 'chene':
+        for (const [dx, col] of [[-50, '#c83a2a'], [-34, '#e85a7a'], [Wd + 14, '#c83a2a'], [Wd + 30, '#f0c040']]) PROP.mushroom(c, X + dx, y - 6, col, false);
+        PROP.lantern(c, X - 18, y);
+        if (FX) FX.push([7, X - 40, b.y * TS - 120, Wd + 80, 200, ['#5a9a44', '#8ac860', '#e0c040'], b.x]);
+        return true;
+      case 'clairieres':
+        PROP.stump(c, X - 54, y);
+        PROP.lantern(c, X - 16, y);
+        return false;
+      case 'oasis':
+        PROP.palm(c, X - 36, y);
+        PROP.jar(c, X + Wd + 8, y);
+        PROP.jar(c, X + Wd + 22, y, 12, '#a8602c');
+        PROP.rug(c, mid - 30, base + 4, 60);
+        return true;
+      case 'dunes':
+        PROP.firepit(c, X - 44, y);
+        PROP.jar(c, X + Wd + 14, y);
+        PROP.sacks(c, X + Wd + 30, y);
+        if (FX) FX.push([9, mid + 1, b.y * TS - 118, '#b8423a', 18]);
+        return true;
+      case 'pilotis':
+        PROP.net(c, X - 66, y);
+        PROP.boat(c, X + Wd + 10, y + 6);
+        PROP.lantern(c, X + Wd + 4, y - 8);
+        return true;
+      case 'rousses':
+        PROP.bale(c, X - 56, y);
+        PROP.bale(c, X - 44, y - 14);
+        PROP.pumpkin(c, X + Wd + 8, y);
+        PROP.pumpkin(c, X + Wd + 26, y + 2);
+        if (FX) FX.push([7, X - 50, b.y * TS - 90, Wd + 100, 170, ['#e8a040', '#c84a2a', '#f0c040'], b.x]);
+        return true;
+      case 'cristaux':
+        for (const [dx, col] of [[-56, '#c89aff'], [-40, '#9af0ff'], [Wd + 30, '#ff9af0'], [Wd + 46, '#c89aff']]) PROP.mushroom(c, X + dx, y - 4, col, true);
+        return true;
+    }
+    return false;
+  }
+  // Peinture complète (sans les effets animés ni les noms), dans l'image gardée du bâtiment.
+  function paintBuilding(c, b) {
+    const L = LOOKS[b.style] || LOOKS.chaume,
+      X = b.x * TS,
+      Y = b.y * TS,
+      Wd = b.w * TS,
+      Hd = b.h * TS,
+      base = Y + Hd,
+      mid = X + Wd / 2,
+      seed = b.x * 31 + b.y,
+      lift = L.stilts ? 16 : 0,
+      bot = base - 6 - lift,
+      top = bot - 66;
+    // Ombre au sol : ovale en dégradé radial, décalée vers le bas et la droite (lumière en haut à gauche).
+    if (c.createRadialGradient) {
+      c.save();
+      c.translate(mid + 10, base - 2);
+      c.scale(1, 0.26);
+      const sh = c.createRadialGradient(0, 0, Wd * 0.2, 0, 0, Wd * 0.68);
+      sh.addColorStop(0, 'rgba(8,10,14,.42)');
+      sh.addColorStop(1, 'rgba(8,10,14,0)');
+      c.fillStyle = sh;
+      c.fillRect(-Wd, -Wd, Wd * 2, Wd * 2);
+      c.restore();
+    } else {
+      c.globalAlpha = 0.28;
+      R(c, X, base - 8, Wd + 14, 12, '#0a0e12');
+      c.globalAlpha = 1;
+    }
+    if (L.stilts && b.form === 'round') drawStilts(c, L, X + 20, Wd - 40, bot, lift, mid);
+    const roofTop = paintForm(c, b, L, { X, Wd, bot, mid, seed, base });
     // Enseigne en potence, à l'angle gauche de la façade.
     if (b.sign) {
       R(c, X - 22, top + 2, 28, 3, '#3a2a1e');
-      signAt(c, X - 22, top + 2, b.sign);
+      if (FX) FX.push([5, X - 22, top + 2, b.sign]);
+      else signAt(c, X - 22, top + 2, b.sign);
     }
+    // Abords propres à chaque bâtiment.
+    const decorated = surroundings(c, b, L, { X, Wd, base, mid, seed });
     // Détails propres à chaque lieu.
     if (L.crates)
       for (const [dx, dy] of [[Wd - 4, 0], [Wd + 14, 6]]) {
@@ -2242,13 +2995,301 @@
           R(c, X + Wd + j * 10 + k * 5, base - 12 - k * 9, 9, 8, '#7a5638');
           R(c, X + Wd + j * 10 + k * 5 + 2, base - 10 - k * 9, 5, 4, '#c8a070');
         }
-    if (!L.crates && !L.barrels && !L.wood) groundAt(c, L, X, Wd, base, seed);
-    // Nom du lieu (de près pour les demeures) et invitation à entrer.
-    const near = Math.hypot(P.x - mid, P.y - base) < 320,
-      ly = roofTop - (L.roof === 'flat' ? 64 : L.chimney ? 32 : 14);
-    if (b.place || b.sign || b.room === HOME || near) label(c, b.place ? b.place.name : b.label, mid, ly);
-    const d = outsideDoor(b);
-    if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Entrer', d.x, top - 8, '#fff2cb');
+    if (!decorated && !L.crates && !L.barrels && !L.wood) groundAt(c, L, X, Wd, base, seed);
+    return roofTop;
+  }
+  // ---------------------------------------------------------------- Matières et finition
+  // Codes des matières (canal rouge de l'image jumelle).
+  const M = { none: 0, plaster: 1, stone: 2, wood: 3, logs: 4, thatch: 5, tiles: 6, slate: 7, shingles: 8, glass: 9, metal: 10, leaves: 11, cloth: 12, crystal: 13, adobe: 14, bark: 15, reeds: 16, plain: 17, cap: 18 };
+  // Relief de chaque matière : hauteur du biseau des blocs et force du grain en relief.
+  const BEVEL = [0, 0.4, 1.4, 1, 1.3, 0.6, 1.1, 1.1, 1, 0.3, 0.6, 0.9, 0.3, 1.2, 0.5, 1.1, 0.6, 0.4, 0.5];
+  const BUMP = [0, 0.25, 0.6, 0.45, 0.5, 0.9, 0.35, 0.3, 0.45, 0, 0.2, 0.8, 0.3, 0, 0.35, 0.9, 0.9, 0.15, 0.2];
+  // Couleur → matière, pour un bâtiment donné (murs, poutres, toit selon son allure ; détails communs).
+  function matsFor(b, L) {
+    const map = new Map(),
+      put = (cols, m) => cols.forEach(c => map.set(c, m)),
+      wall = { timber: M.plaster, stone: M.stone, logs: M.logs, planks: M.wood, adobe: M.adobe }[L.wall] ?? M.plaster,
+      roof = { thatch: M.thatch, reeds: M.reeds, tiles: M.tiles, slate: M.slate, shingles: M.shingles, flat: M.adobe }[L.roof] ?? M.shingles;
+    put(['#9a9aa0', '#c4c4ca', '#8e8a84', '#76726c', '#a4a09a', '#b89a70', '#a2865e', '#c8aa80', '#8a84a4', '#746e90', '#9e98b8', '#b4ae9e', '#9c9686', '#7e786a', '#d8b47e', '#c49e6a', '#a8844f', '#a49cc0', '#8c84aa', '#6e668e', '#9a5a44', '#6a3a2c', '#8a8680', '#64605a', '#5a5a62'], M.stone);
+    put(['#8a5a34', '#a87444', '#5e3c22', '#7a5230', '#b08250', '#a07444', '#c8945a', '#8a5a34', '#a8743e', '#6a4226', '#7a5638', '#c8a070', '#6a4a2a', '#3a2a1e', '#4a3020', '#7a6446', '#c8a878'], M.wood);
+    put(['#ffd890', '#fff0c0', '#f0c070'], M.glass);
+    put(['#3a3a40', '#e0c060', '#4a4a52', '#c9a24a', '#f0d070', '#fff2a0'], M.metal);
+    put(['#7a5434', '#5e3e24', '#3e2a18', '#664428', '#2e1e10'], M.bark);
+    put(['#5a9a44', '#3e7a34', '#2a5426', '#8ac860', '#e08a3a', '#c0602a', '#8a4020', '#4f8a42', '#6aa852', '#4e7434', '#6e9a48'], M.leaves);
+    put(['#e8dcc0', '#b8423a', '#3a6a9a', '#a8343a', '#d8a040'], M.cloth);
+    put(['#9af0ff', '#c89aff', '#ffb0f0', '#9ae0ff', '#e0f8ff'], M.crystal);
+    put(['#f4ecda', '#d6c6a4', '#f6eedc', '#d8c8a8', '#fff2d8'], M.adobe);
+    put(L.face, wall);
+    put(L.beam, M.wood);
+    put(L.tones, b.form === 'mushroom' ? M.cap : roof);
+    if (b.form === 'tent') put(['#e8dcc0', '#b8423a', '#3a6a9a'], M.cloth);
+    return map;
+  }
+  // Finition, au niveau des routes : une carte de reliefs est tirée des matières (biseau de chaque bloc : pierre,
+  // planche, tuile, rondin ; grain en relief : chaume, écorce, feuillage), éclairée en haut à gauche ; puis chaque
+  // matière reçoit sa texture (veinage du bois, mèches du chaume, piqûres de la pierre, reflets du verre, trame de la
+  // toile, facettes des cristaux), l'usure du biome (mousse en forêt, au marais et en forêt enchantée ; poussière au
+  // désert ; humidité au pied des murs), la lumière d'ensemble (plus claire à gauche) et un grain fin.
+  function finish(cv, mat, x0, wd, groundY, zone) {
+    const g = cv.getContext('2d');
+    let img, mimg;
+    try {
+      img = g.getImageData(0, 0, cv.width, cv.height);
+      mimg = mat ? mat.getContext('2d').getImageData(0, 0, cv.width, cv.height) : null;
+    } catch (e) {
+      return;
+    }
+    const d = img?.data,
+      md = mimg?.data,
+      W2 = cv.width,
+      H2 = cv.height;
+    if (!d || d.length !== W2 * H2 * 4) return;
+    const n = W2 * H2,
+      code = new Uint8Array(n),
+      id = new Uint8Array(n),
+      height = new Float32Array(n);
+    if (md && md.length === d.length)
+      for (let i = 0; i < n; i++) {
+        code[i] = md[i * 4 + 3] > 200 ? md[i * 4] : 0;
+        id[i] = md[i * 4 + 1];
+      }
+    const hsh = (x, y, k) => {
+      let h = (x * 374761393 + y * 668265263 + k * 1442695041) | 0;
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    const vn = (x, y, k) => {
+      const xi = Math.floor(x),
+        yi = Math.floor(y),
+        u = x - xi,
+        v = y - yi,
+        a = hsh(xi, yi, k),
+        b2 = hsh(xi + 1, yi, k),
+        c2 = hsh(xi, yi + 1, k),
+        e = hsh(xi + 1, yi + 1, k);
+      return a + (b2 - a) * u * u * (3 - 2 * u) + (c2 - a) * v * v * (3 - 2 * v) + (a - b2 - c2 + e) * u * v;
+    };
+    const mossy = zone === 1 || zone === 2 || zone === 5,
+      dusty = zone === 4;
+    // 1. Carte de reliefs : distance au bord du bloc (jusqu'à 3 px) pour le biseau, plus le grain de la matière.
+    const runH = new Uint8Array(n),
+      runV = new Uint8Array(n);
+    for (let y = 0; y < H2; y++)
+      for (let x = 0; x < W2; x++) {
+        const i = y * W2 + x,
+          m = code[i];
+        if (!m || d[i * 4 + 3] < 200) continue;
+        const me = id[i],
+          same = (u, v) => u >= 0 && v >= 0 && u < W2 && v < H2 && id[v * W2 + u] === me && code[v * W2 + u] === m;
+        let dist = 3,
+          h = 0,
+          v = 0;
+        for (let k = 1; k <= 3 && dist === 3; k++) if (!same(x - k, y) || !same(x + k, y) || !same(x, y - k) || !same(x, y + k)) dist = k - 1;
+        for (let k = 1; k <= 8; k++) {
+          if (same(x - k, y)) h++;
+          if (same(x + k, y)) h++;
+          if (same(x, y - k)) v++;
+          if (same(x, y + k)) v++;
+        }
+        runH[i] = h;
+        runV[i] = v;
+        let bump = 0;
+        if (m === M.thatch || m === M.reeds) bump = hsh(x, y >> 2, 3) * 0.7 + hsh(x >> 1, y, 4) * 0.3;
+        else if (m === M.bark) bump = hsh(x >> 1, (y / 6) | 0, 5);
+        else if (m === M.leaves) bump = vn(x / 3, y / 3, 6);
+        else if (m === M.wood || m === M.logs) bump = h >= v ? vn(x / 9, y / 1.5, 7) : vn(x / 1.5, y / 9, 7);
+        else bump = vn(x / 2.5, y / 2.5, 8);
+        height[i] = (Math.min(dist, 3) / 3) * BEVEL[m] + bump * BUMP[m];
+      }
+    // 2. Lumière, textures et usure.
+    for (let y = 0; y < H2; y++)
+      for (let x = 0; x < W2; x++) {
+        const i = y * W2 + x,
+          k = i * 4;
+        if (d[k + 3] < 200) continue;
+        const m = code[i],
+          t = Math.min(1, Math.max(0, (x - x0) / wd));
+        let f = 1.06 - 0.13 * t + (hsh(x >> 1, y >> 1, 9) - 0.5) * 0.05,
+          tint = null,
+          tintK = 0;
+        if (m) {
+          const hl = x > 0 ? height[i - 1] : height[i],
+            hr = x < W2 - 1 ? height[i + 1] : height[i],
+            hu = y > 0 ? height[i - W2] : height[i],
+            hd = y < H2 - 1 ? height[i + W2] : height[i];
+          // Pente de la carte de reliefs, éclairée depuis le haut à gauche.
+          f += ((hr - hl) * -0.6 + (hd - hu) * -0.8) * 0.32;
+          const me = id[i],
+            wet = Math.max(0, 1 - (groundY - y) / 26);
+          switch (m) {
+            case M.stone:
+              f *= 0.93 + hsh(me, 1, 11) * 0.14;
+              if (hsh(x, y, 12) > 0.975) f *= 0.72;
+              if (mossy && vn(x / 7, y / 7, 13) > 0.62 && (y > groundY - 30 || hsh(me, 2, 14) > 0.7)) (tint = [78, 120, 54]), (tintK = 0.45);
+              break;
+            case M.plaster:
+            case M.adobe:
+              f *= 1 + (hsh(x, y, 15) - 0.5) * 0.06 - vn(x / 18, y / 10, 16) * 0.06;
+              if (hsh(x >> 2, y >> 2, 17) > 0.992) f *= 0.8;
+              break;
+            case M.wood:
+            case M.logs:
+              f *= 1 + Math.sin((runH[i] >= runV[i] ? y * 1.7 + vn(x / 10, y, 18) * 5 : x * 1.7 + vn(x, y / 10, 18) * 5) + me) * 0.06;
+              if (hsh(x >> 1, y >> 1, 19) > 0.985) f *= 0.75;
+              if (mossy && wet > 0 && vn(x / 6, y / 4, 20) > 0.58) (tint = [70, 100, 48]), (tintK = 0.35 * wet);
+              break;
+            case M.thatch:
+            case M.reeds:
+              f *= 0.9 + hsh(x, (y / 3) | 0, 21) * 0.22;
+              break;
+            case M.tiles:
+            case M.slate:
+            case M.shingles:
+              f *= 0.92 + hsh(me, 3, 22) * 0.16;
+              if (mossy && vn(x / 5, y / 5, 23) > 0.66) (tint = [84, 118, 60]), (tintK = 0.4);
+              else if (vn(x / 4, y / 4, 24) > 0.78) (tint = [196, 190, 150]), (tintK = 0.25);
+              break;
+            case M.glass:
+              if (((x + y) % 16) < 3) f *= 1.22;
+              f *= 1.05 - Math.min(0.12, ((y % 24) / 24) * 0.12);
+              break;
+            case M.cloth:
+              f *= ((x + y) & 1 ? 1.03 : 0.97) * (1 + Math.sin(x * 0.18) * 0.05);
+              break;
+            case M.crystal:
+              f *= (x + y) % 6 < 3 ? 1.14 : 0.94;
+              break;
+            case M.bark:
+              if (hsh(x >> 1, 0, 25) > 0.78) f *= 0.8;
+              break;
+            case M.leaves:
+              if (vn(x / 2, y / 2, 26) > 0.7) f *= 1.15;
+              break;
+            case M.cap:
+              f *= 1 + (vn(x / 12, y / 12, 27) - 0.5) * 0.12;
+              break;
+          }
+          // Humidité au pied des murs ; poussière claire au désert.
+          if (wet > 0 && m !== M.glass && m !== M.crystal) {
+            if (dusty) (tint = tint || [226, 200, 150]), (tintK = Math.max(tintK, 0.3 * wet));
+            else f *= 1 - 0.14 * wet;
+          }
+        } else if (y > groundY - 14) f *= 0.84 + 0.16 * Math.max(0, (groundY - y) / 14);
+        let r = d[k] * f,
+          gg = d[k + 1] * f,
+          bb = d[k + 2] * f * 0.985;
+        if (tint) {
+          r += (tint[0] * f - r) * tintK;
+          gg += (tint[1] * f - gg) * tintK;
+          bb += (tint[2] * f - bb) * tintK;
+        }
+        d[k] = Math.min(255, r);
+        d[k + 1] = Math.min(255, gg);
+        d[k + 2] = Math.min(255, bb);
+      }
+    g.putImageData(img, 0, 0);
+  }
+  // Image gardée de chaque bâtiment (et ses effets animés) : peinte une fois, posée d'un seul coup à chaque image.
+  const BUILT = new WeakMap();
+  function builtOf(b) {
+    let s = BUILT.get(b);
+    if (s !== undefined) return s;
+    // Modèle en pixel art (building-art.js) : image à la taille des pixels d'art, agrandie sans flou à l'affichage.
+    if (CANAAN_BUILDING_ART.has(b.room?.id)) {
+      const art = CANAAN_BUILDING_ART.paint(b, b.x * TS, (b.y + b.h) * TS, b.w * TS);
+      if (art) {
+        s = { cv: art.canvas, x0: art.x0, y0: art.y0, w: art.canvas.width * art.scale, h: art.canvas.height * art.scale, fx: art.fx, roofTop: art.roofTop, art: true };
+        BUILT.set(b, s);
+        return s;
+      }
+    }
+    const x0 = b.x * TS - 70,
+      y0 = b.y * TS - 210,
+      w = b.w * TS + 140,
+      h = b.h * TS + 250,
+      cv = document.createElement('canvas');
+    cv.width = w;
+    cv.height = h;
+    const g = cv.getContext?.('2d');
+    if (!g?.translate) {
+      BUILT.set(b, null);
+      return null;
+    }
+    g.imageSmoothingEnabled = false;
+    g.translate(-x0, -y0);
+    // Image jumelle des matières, à la même place.
+    const mat = document.createElement('canvas');
+    mat.width = w;
+    mat.height = h;
+    const mg = mat.getContext('2d');
+    if (mg?.translate) mg.translate(-x0, -y0);
+    const L = LOOKS[b.style] || LOOKS.chaume;
+    MAT = mg?.fillRect ? { g, m: mg, map: matsFor(b, L), def: M.plain, id: 0 } : null;
+    FX = [];
+    let roofTop;
+    try {
+      roofTop = paintBuilding(g, b);
+    } finally {
+      s = { cv, x0, y0, fx: FX, roofTop };
+      FX = null;
+      MAT = null;
+    }
+    finish(cv, mg ? mat : null, 70, b.w * TS, (b.y + b.h) * TS - y0 - 6, Math.max(0, ZONES.indexOf(regionAt(b.x + 2, b.y + 1))));
+    BUILT.set(b, s);
+    return s;
+  }
+  function drawBuilding(c, b) {
+    const X = b.x * TS,
+      Y = b.y * TS,
+      Wd = b.w * TS,
+      Hd = b.h * TS,
+      base = Y + Hd,
+      mid = X + Wd / 2;
+    if (!visible(mid, Y + Hd / 2, 340)) return;
+    c.save();
+    c.imageSmoothingEnabled = false;
+    const s = builtOf(b);
+    let roofTop;
+    if (s) {
+      if (s.art) {
+        // Ombre douce au sol, décalée vers le bas à droite.
+        c.globalAlpha = 0.22;
+        c.fillStyle = '#0a0e12';
+        c.beginPath();
+        c.ellipse(mid + 8, base - 2, Wd * 0.56, 16, 0, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 1;
+        c.drawImage(s.cv, s.x0, s.y0, s.w, s.h);
+      } else c.drawImage(s.cv, s.x0, s.y0);
+      for (const e of s.fx) {
+        if (e[0] === 0) canaanLight(e[1], e[2], e[3] * (0.94 + 0.06 * Math.sin(time * 0.23 + e[1])), e[4]);
+        else if (e[0] === 1) smoke(c, e[1], e[2]);
+        else if (e[0] === 2) ripple(c, e[1], e[2], e[3]);
+        else if (e[0] === 3) spark(c, e[1], e[2], e[3], e[4]);
+        else if (e[0] === 4) windowLife(c, e[1], e[2], e[3], e[4], e[5]);
+        else if (e[0] === 5) {
+          // Enseigne qui se balance au bout de sa potence.
+          c.save();
+          c.translate(e[1] + 10, e[2]);
+          c.rotate(Math.sin(time * 0.05 + e[1]) * 0.09);
+          c.translate(-e[1] - 10, -e[2]);
+          signAt(c, e[1], e[2], e[3]);
+          c.restore();
+        } else if (e[0] === 6) laundry(c, e[1], e[2], e[3]);
+        else if (e[0] === 7) leaves(c, e[1], e[2], e[3], e[4], e[5], e[6]);
+        else if (e[0] === 8) canaanLight(e[1], e[2], e[3] * (0.75 + 0.25 * Math.sin(time * 0.06 + e[5])), e[4]);
+        else if (e[0] === 9) flag(c, e[1], e[2], e[3], e[4]);
+        else if (e[0] === 10) campfire(c, e[1], e[2]);
+      }
+      roofTop = s.roofTop;
+    } else roofTop = paintBuilding(c, b);
+    // Nom du lieu (de près pour les demeures) et invitation à entrer (pas pour les maisons fermées des hameaux).
+    const near = Math.hypot(P.x - mid, P.y - base) < 320;
+    if (!b.closed && (b.place || b.sign || b.room === HOME || near)) label(c, b.place ? b.place.name : b.label, mid, roofTop - 8);
+    if (!b.closed) {
+      const d = outsideDoor(b);
+      if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Entrer', d.x, s?.art ? base - 52 : base - 86, '#fff2cb');
+    }
     c.restore();
   }
   function draw(c) {
@@ -2451,6 +3492,17 @@
     room: HOME,
     roomAt,
     outside: () => ({ x: homeB().x, y: homeB().y }),
+    // Bâtiments à redessiner devant les personnages qui passent derrière (world-look.js).
+    occluders: () => {
+      if (game.world.instance || current()) return [];
+      const out = [];
+      for (const b of buildings) {
+        const s = BUILT.get(b);
+        if (!s || !visible((b.x + b.w / 2) * TS, (b.y + b.h / 2) * TS, 340)) continue;
+        out.push({ x0: s.x0 + 30, x1: s.x0 + s.w - 30, y0: s.y0, base: (b.y + b.h) * TS - 4, draw: c => (s.art ? c.drawImage(s.cv, s.x0, s.y0, s.w, s.h) : c.drawImage(s.cv, s.x0, s.y0)) });
+      }
+      return out;
+    },
     buildings: () => buildings.map(b => ({ id: b.room.id, name: b.room.name, kind: b.room.kind, style: b.style, x: b.x, y: b.y, w: b.w, h: b.h, door: outsideDoor(b), inside: insideDoor(b.room) })),
     outsideDoor: id => outsideDoor(id ? buildings.find(b => b.room.id === id) : homeB()),
     insideDoor: id => insideDoor(id ? ROOM[id] : HOME),

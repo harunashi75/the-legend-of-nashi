@@ -1,6 +1,8 @@
-// Apparence des héros : sexe, race, peau, coiffure, couleurs des cheveux et des yeux, tenue.
+// Apparence des héros : sexe, race, peau, coiffure, couleurs des cheveux et des yeux, tenue, et l'apparence portée
+// (transmogrification, shared/data/skins.js ; vide : la tenue de création).
 // Purement visuel (aucun effet en combat). Module partagé pur : le jeu, le réseau et les tests l'utilisent.
 // Une apparence est un petit objet de chaînes ; toute valeur inconnue est remplacée par celle par défaut.
+import { SKIN_IDS } from './skins.js';
 
 export const LOOK_SEXES = Object.freeze([
   { id: 'f', name: 'Femme' },
@@ -54,7 +56,9 @@ export function sanitizeLook(raw) {
     hairStyle: pick(ids(LOOK_HAIR_STYLES), raw.hairStyle, base.hairStyle),
     hair: pick(LOOK_HAIR_COLORS, typeof raw.hair === 'string' ? raw.hair.toLowerCase() : '', base.hair),
     eyes: pick(LOOK_EYE_COLORS, typeof raw.eyes === 'string' ? raw.eyes.toLowerCase() : '', base.eyes),
-    outfit: pick(ids(LOOK_OUTFITS), raw.outfit, base.outfit)
+    outfit: pick(ids(LOOK_OUTFITS), raw.outfit, base.outfit),
+    // Apparence portée : seulement quand il y en a une.
+    ...(SKIN_IDS.includes(raw.wear) ? { wear: raw.wear } : {})
   };
 }
 // Apparence au hasard (rng : fonction qui renvoie un nombre dans [0, 1)).
@@ -71,11 +75,14 @@ export function randomLook(rng = Math.random) {
     outfit: one(LOOK_OUTFITS).id
   });
 }
-// Forme compacte pour le réseau et le cache des sprites : « m|humain|#f0c7a0|court|#7d5140|#202938|acier ».
-const ORDER = ['sex', 'race', 'skin', 'hairStyle', 'hair', 'eyes', 'outfit'];
+// Forme compacte pour le réseau et le cache des sprites : « m|humain|#f0c7a0|court|#7d5140|#202938|acier », suivie de
+// « |dragon » quand une apparence est portée.
+const ORDER = ['sex', 'race', 'skin', 'hairStyle', 'hair', 'eyes', 'outfit', 'wear'];
 export function encodeLook(look) {
   const clean = sanitizeLook(look);
-  return ORDER.map(key => clean[key]).join('|');
+  return ORDER.filter(key => key !== 'wear' || clean.wear)
+    .map(key => clean[key])
+    .join('|');
 }
 export function decodeLook(text) {
   if (typeof text !== 'string' || text.length > 120) return defaultLook();

@@ -53,6 +53,7 @@
   function sellStack(hero, text) {
     const p = CANAAN_BAG.parse(text);
     if (!p) return false;
+    if (!CANAAN_BAG.sellable(p)) return say(hero, '🗝️ ' + CANAAN_BAG.info(p).name + ' : ne se vend pas.'), false;
     if (!nearMerchant(hero)) return say(hero, '💰 Va voir un marchand pour vendre !'), false;
     if (!CANAAN_BAG.remove(hero, p.kind, p.id, p.q, p.n)) return false;
     const gold = CANAAN_BAG.price(p);
@@ -99,12 +100,17 @@
           '<span class="bag-icon">' + icon + '</span><span class="bag-name">' + esc(gearDisplayName(item)) + '</span><span class="bag-ilvl">' + itemLevel(item) + '</span></button></div>'
         );
       }),
-      stacks = CANAAN_BAG.tiles(hero).map(p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="shopSellStack" data-token="' + esc(CANAAN_BAG.token(p)) + '" title="Vendre pour ' + CANAAN_BAG.price(p) + ' or"') + '</div>'),
+      // Une pile qui ne se vend pas (clés des secrets) reste visible, sans action de vente.
+      sell = p => '<div class="bag-sale-wrap">' + (CANAAN_BAG.sellable(p) ? CANAAN_BAG.cell(p, 'data-action="shopSellStack" data-token="' + esc(CANAAN_BAG.token(p)) + '" title="Vendre pour ' + CANAAN_BAG.price(p) + ' or"') : CANAAN_BAG.cell(p, 'title="Ne se vend pas"')) + '</div>',
+      stacks = CANAAN_BAG.tiles(hero, 'main').map(sell),
+      mats = CANAAN_BAG.tiles(hero, 'mat').map(sell),
       empty = Math.max(0, canaanBagLimit(hero) - gear.length - stacks.length);
     return (
       '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' + (gear.length + stacks.length) + ' / ' + canaanBagLimit(hero) + '</h3>' +
       '<p class="muted">Clique un objet pour le vendre. Or : <b>🪙 ' + Math.floor(P.gold) + '</b></p>' +
       '<div class="modern-bag">' + gear.join('') + stacks.join('') + Array.from({ length: empty }, () => '<div class="bag-sale-wrap"><div class="bag-cell empty"><span class="bag-icon">＋</span></div></div>').join('') + '</div>' +
+      '<h3 class="bag-subhead">⟦prof_mining⟧ Matériaux · ' + mats.length + ' / ' + CANAAN_BAG.MAT_LIMIT + '</h3>' +
+      (mats.length ? '<div class="modern-bag">' + mats.join('') + '</div>' : '<p class="muted">Aucun matériau.</p>') +
       '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div></section>'
     );
   }

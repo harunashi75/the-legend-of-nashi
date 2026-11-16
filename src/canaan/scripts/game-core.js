@@ -70,7 +70,7 @@ const CANAAN_SPAWN = Object.freeze({ x: (CANAAN_CAMP.x + 0.5) * TS, y: (CANAAN_C
 // 19 herse et 22 danger (lave, gouffre, vide…) n'existent qu'en instance.
 // 31 : murs des intérieurs ; 32 : bâtiments vus de l'extérieur (voir house.js).
 // Tréfonds (underground.js) : 43 rivière de boue, 44 paroi rocheuse, 48 lac souterrain, 49 gouffre.
-const SOLID = [0, 4, 9, 18, 19, 22, 31, 32, 43, 44, 48, 49];
+const SOLID = [0, 4, 9, 18, 19, 22, 23, 31, 32, 43, 44, 48, 49];
 function tileAt(x, y) {
   if (x < 0 || y < 0 || x >= MAPW || y >= MAPH) return 4;
   return game.world.tiles[y][x];
@@ -190,6 +190,10 @@ addEventListener('keydown', e => {
   }
   if (k === 'y' && !e.repeat) {
     toggleAchievements();
+    return;
+  }
+  if (k === 'v' && !e.repeat) {
+    toggleWardrobe();
     return;
   }
   if (e.key >= '1' && e.key <= '4' && !e.repeat) useSkill(+e.key - 1);
@@ -326,6 +330,8 @@ function interact() {
     if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
     // Un coffre à côté : l'hôte vérifie que le héros y est bien, puis l'ouvre pour lui.
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
+    // Donjon : mur fissuré, brasero, levier, stèle ou porte scellée (l'hôte agit pour lui).
+    if (game.world.instance && CANAAN_DUNGEON_EXPLORE.near(P)) return CANAAN_NET.requestAction({ op: 'dungeon-use' });
     if (game.world.instance) return;
     // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte) ; bâtiments : portes (île seulement).
     if (!canaanUnder() && CANAAN_QUESTS.interact()) return;
@@ -345,6 +351,8 @@ function interact() {
     return;
   }
   if (game.world.instance) {
+    // Exploration : murs fissurés, braseros, leviers, stèles et portes scellées.
+    if (CANAAN_DUNGEON_EXPLORE.interact()) return;
     if (game.world.instance.cleared && Math.hypot(P.x - instanceEntrance.x, P.y - instanceEntrance.y) < 95) {
       leaveInstance();
       return;
@@ -594,8 +602,23 @@ function canWalk(x, y) {
     // Lieux des quêtes : socles et haies bloquent, nénuphars et pont restauré portent (quests.js).
     const quest = canaanQuestWalk(x + a, y + b);
     if (quest !== null) return quest;
-    return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !canaanHouseBlocked(x + a, y + b);
+    return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !canaanHouseBlocked(x + a, y + b) && !canaanTreeBlocked(x + a, y + b) && !canaanPortalBlocked(x + a, y + b);
   });
+}
+// Grands arbres de l'île (décor) : leur tronc bloque le passage, on les contourne.
+const CANAAN_BIG_TREES = new Set(['tree', 'pine', 'snowpine', 'palm', 'deadwood', 'bigtree', 'twisted', 'autumn_red', 'autumn_orange', 'autumn_gold', 'glowtree']);
+function canaanTreeBlocked(px, py) {
+  if (game.world.instance || game.world.layer === 'under') return false;
+  const tx = Math.floor(px / TS),
+    ty = Math.floor(py / TS);
+  if (!CANAAN_BIG_TREES.has(game.world.overdecor?.[ty]?.[tx])) return false;
+  const lx = px - tx * TS,
+    ly = py - ty * TS;
+  return lx >= 16 && lx <= 32 && ly >= 26 && ly <= 46;
+}
+// Entrées des donjons, des raids et de l'Arène sur l'île : leur pied bloque le passage (portal-art.js).
+function canaanPortalBlocked(px, py) {
+  return !game.world.instance && game.world.layer !== 'under' && CANAAN_PORTAL_ART.blocked(px, py);
 }
 // Meubles des bâtiments et objets du camp qui bloquent le passage (remplacé par house.js).
 let canaanHouseBlocked = () => false;
@@ -606,7 +629,7 @@ let canaanQuestWorld = () => {};
 // Vie du Camp de l'Aurore (ferme, enclos, champs, verger, jardin, fontaine, ruisseau) : remplacé par camp-life.js.
 // place : pose sur l'île ; blocked : objets qui bloquent ; farm : cases sans monstres ; animals / fliers : bêtes de la
 // ferme pour life.js ; drawGround : eau, pavés, champs et fleurs (sous tout le reste) ; draw : bâtiments et objets.
-let canaanCampLife = { place() {}, blocked: () => false, farm: () => false, animals: () => [], fliers: () => [], drawGround() {}, draw() {} };
+let canaanCampLife = { occluders: () => [], place() {}, blocked: () => false, farm: () => false, animals: () => [], fliers: () => [], drawGround() {}, draw() {} };
 
 // Entrées du joueur → intention du héros (direction voulue et point visé), lue par la simulation.
 function readInput() {
@@ -849,7 +872,9 @@ function draw() {
   g.addColorStop(1, '#141028');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
-  ctx.translate(-camX + sx, -camY + sy);
+  // Caméra calée sur un pixel entier : toutes les couches (sol, eau, décors, personnages) bougent ensemble, sans
+  // glisser l'une contre l'autre d'un pixel pendant que la caméra ralentit derrière le héros.
+  ctx.translate(Math.round(-camX + sx), Math.round(-camY + sy));
   // tiles
   let x0 = Math.max(0, Math.floor(camX / TS) - 1),
     x1 = Math.min(MAPW, Math.ceil((camX + W) / TS) + 1);
@@ -912,7 +937,9 @@ function draw() {
             ctx.textAlign = 'center';
             ctx.font = 'bold 12px system-ui';
             ctx.fillStyle = '#fff2cb';
-            ctx.fillText('[E] Entrer', n.x, n.type === 'arena' ? n.y - 166 : n.y - 91);
+            const at = CANAAN_PORTAL_ART.labelAt(n.type === 'arena' ? 'arena' : n.instance);
+            if (at) ctx.fillText('[E] Entrer', at.x, at.y);
+            else ctx.fillText('[E] Entrer', n.x, n.type === 'arena' ? n.y - 166 : n.y - 91);
           }
           return;
         }
@@ -962,6 +989,8 @@ function draw() {
   // animated equipped adventurer
   drawPixelHero(ctx, P.x, P.y, '#8068db', P.anim, true);
   drawWade(ctx, P, P.x, P.y + 16, 40, Math.hypot(P.vx || 0, P.vy || 0) > 0.1, 1);
+  // Devant / derrière : arbres, bâtiments et grands objets redessinés devant les personnages qui sont derrière eux.
+  drawCanaanOcclusion(ctx);
   // Titres et aura des succès, au-dessus de chaque héros.
   CANAAN_ACHIEVEMENTS.draw(ctx);
   // Lignes de pêche et bouchons.

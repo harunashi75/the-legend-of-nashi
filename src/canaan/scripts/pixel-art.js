@@ -70,10 +70,15 @@
       g.fillRect(x - 1 + ((k / 6) % 2) * 2, k, 2, 3);
     }
   }
+  // Arbres : dessinés deux fois plus grands (pixels de 2, comme les bâtiments et les animaux), pour dominer les
+  // personnages ; le reste du décor garde sa taille.
+  const BIG_TREES = CANAAN_BIG_TREES;
   function drawPixDecor(type) {
-    let c = pixCanvas(64, 76),
+    const big = BIG_TREES.has(type) ? 2 : 1;
+    let c = pixCanvas(64 * big, 76 * big),
       g = c.getContext('2d');
     g.imageSmoothingEnabled = false;
+    if (big > 1) g.scale(big, big);
     const R = (x, y, w, h, col) => {
       g.fillStyle = col;
       g.fillRect(x, y, w, h);
@@ -275,15 +280,500 @@
       ch = v => Math.max(0, Math.min(255, Math.round(f > 1 ? v + (255 - v) * (f - 1) : v * f)));
     return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(v => ch(v).toString(16).padStart(2, '0')).join('');
   }
+  // ---------------------------------------------------------------- Apparences (transmogrification)
+  // Pièces d'une tenue complète (shared/data/skins.js), dessinées sur la grille 24 × 30 du héros : dos (ailes, capes,
+  // carquois), corps (robe, salopette, kimono…), épaulières et coiffe. stage : 'behind' (avant le corps, de face et de
+  // profil), 'body' (après le torse et les bras), 'head' (après la coiffure), 'front' (dos tourné : ailes par-dessus).
+  function drawSkinParts(R, sk, stage, v) {
+    const [mD, mM, mL] = sk.main,
+      [cD, cM, cL] = sk.cape,
+      trim = sk.trim,
+      acc = sk.accent,
+      { back, side, right, female, broad, walk, tx, tw, ax, bx, pw } = v;
+    // Polygone plein sur la grille (balayage par lignes) et trait en escalier.
+    const poly = (pts, col) => {
+      let y0 = Infinity,
+        y1 = -Infinity;
+      for (const [, y] of pts) {
+        y0 = Math.min(y0, y);
+        y1 = Math.max(y1, y);
+      }
+      for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+        const xs = [];
+        for (let i = 0; i < pts.length; i++) {
+          const [ax2, ay] = pts[i],
+            [bx2, by] = pts[(i + 1) % pts.length];
+          if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax2 + ((y + 0.5 - ay) / (by - ay)) * (bx2 - ax2));
+        }
+        xs.sort((a, b) => a - b);
+        for (let i = 0; i + 1 < xs.length; i += 2) R(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1, col);
+      }
+    };
+    const line = (x0, y0, x1, y1, col) => {
+      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+      for (let i = 0; i <= n; i++) R(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), 1, 1, col);
+    };
+    const mirror = pts => pts.map(([x, y]) => [25 - x, y]);
+    const both = (pts, col) => {
+      poly(pts, col);
+      poly(mirror(pts), col);
+    };
+    const bothLine = (x0, y0, x1, y1, col) => {
+      line(x0, y0, x1, y1, col);
+      line(25 - x0, y0, 25 - x1, y1, col);
+    };
+    // ---------------------------------------------------------------- Dos
+    function wings() {
+      const big = sk.big ? 2 : 0;
+      if (sk.back === 'dragonwings' || sk.back === 'batwings') {
+        const bat = sk.back === 'batwings',
+          memb = bat ? cD : cM,
+          edge = bat ? '#0c080a' : cD;
+        const W = [[8, 12], [2, 3 - big], [-4 - big, 0 - big], [-3 - big, 5], [-6 - big, 8], [-3 - big, 11], [-5 - big, 15 + big], [1, 16], [7, 17]];
+        both(W, edge);
+        both([[8, 13], [2, 4 - big], [-3 - big, 2 - big], [-2 - big, 6], [-5 - big, 9], [-2 - big, 12], [-4 - big, 14 + big], [1, 15], [7, 16]], memb);
+        // Cellules plus claires entre les os.
+        both([[6, 13], [1, 6], [-2 - big, 4], [-1, 9]], bat ? cM : cL);
+        both([[5, 15], [-1, 11], [-3 - big, 13], [1, 14]], bat ? cM : cL);
+        bothLine(8, 12, -4 - big, 0 - big, mD);
+        bothLine(7, 13, -6 - big, 8, mD);
+        bothLine(7, 15, -5 - big, 15 + big, mD);
+        if (!bat) bothLine(8, 12, 2, 3 - big, trim);
+      } else if (sk.back === 'angelwings') {
+        const rows = sk.wings6 ? 4 : 3;
+        for (let r = rows - 1; r >= 0; r--) {
+          const y = 3 + r * 4 - big,
+            len = 11 - r * 2 + big,
+            col = [cL, '#ffffff', cM, cD][r % 4];
+          both([[8, y + 8], [8 - len, y], [8 - len - 1, y + 3], [8 - len + 2, y + 6], [7, y + 11]], col);
+          for (let k = 0; k < len; k += 2) R(8 - len + k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL), R(17 + len - k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL);
+        }
+        bothLine(8, 11, 8 - (11 + big), 3 - big, trim);
+      } else if (sk.back === 'fairywings') {
+        both([[8, 12], [3, 2 - big], [-2 - big, 3 - big], [-1 - big, 8], [5, 12]], cL);
+        both([[8, 12], [3, 3 - big], [-1 - big, 4 - big], [0, 8], [5, 11]], cM);
+        both([[8, 14], [1, 14], [-1 - big, 19 + big], [4, 19], [7, 16]], cL);
+        both([[8, 14], [2, 15], [0, 18 + big], [4, 18], [7, 16]], cD);
+        R(2, 6, 1, 1, '#ffffff');
+        R(22, 6, 1, 1, '#ffffff');
+      } else if (sk.back === 'flamecape') {
+        // Langues de feu qui jaillissent des épaules, de part et d'autre du corps.
+        both([[8, 12], [4, 5 - big], [5, 9], [1, 7 - big], [3, 13], [0, 14], [4, 18], [7, 17]], cD);
+        both([[8, 13], [5, 7 - big], [5, 10], [2, 9], [4, 14], [2, 15], [5, 17], [7, 16]], cM);
+        both([[7, 14], [5, 11], [4, 14], [6, 16]], cL);
+        R(4, 5 - big, 1, 1, '#fff0a0');
+        R(20, 5 - big, 1, 1, '#fff0a0');
+      } else if (sk.back === 'quiver') {
+        R(16, 7, 3, 12, '#5a3a22');
+        R(16, 7, 3, 1, '#8a6a48');
+        for (const ox of [16, 17, 18]) R(ox, 5 + (ox % 2), 1, 2, '#e8e0d0');
+        R(16, 4, 1, 1, '#c83a3a');
+        R(18, 5, 1, 1, '#c83a3a');
+      } else if (sk.back === 'backpack') {
+        R(7, 12, 11, 9, '#6a4a30');
+        R(7, 12, 11, 1, '#8e6a48');
+        R(9, 15, 7, 3, '#5a3a22');
+        R(6, 9, 13, 3, '#3a6a3a');
+      }
+    }
+    if (stage === 'behind' || stage === 'front') {
+      if (['dragonwings', 'batwings', 'angelwings', 'fairywings', 'flamecape', 'quiver', 'backpack'].includes(sk.back)) wings();
+      return;
+    }
+    // ---------------------------------------------------------------- Corps
+    if (stage === 'body') {
+      const skirt = (top, bottom, w0, w1, cols, hem) => {
+        for (let y = top; y <= bottom; y++) {
+          const t = (y - top) / Math.max(1, bottom - top),
+            w = w0 + (w1 - w0) * t,
+            x = Math.round(12.5 - w),
+            ww = Math.round(w * 2);
+          R(x, y, ww, 1, cols[1]);
+          R(x, y, 1, 1, cols[2]);
+          R(x + ww - 2, y, 2, 1, cols[0]);
+        }
+        const w = w1,
+          x = Math.round(12.5 - w);
+        R(x, bottom, Math.round(w * 2), 1, hem);
+        // Plis.
+        R(11, top + 2, 1, bottom - top - 2, cols[0]);
+        R(15, top + 2, 1, bottom - top - 3, cols[0]);
+      };
+      if (sk.body === 'robe' || sk.body === 'gown') {
+        R(tx, 12, tw, 8, mM);
+        R(tx + 1, 12, tw - 2, 1, mL);
+        if (!back) {
+          line(tx + 2, 12, 12, 16, trim);
+          line(tx + tw - 3, 12, 13, 16, trim);
+          R(12, 16, 2, 3, mD);
+        }
+        R(tx, 18, tw, 2, sk.body === 'gown' ? acc : trim);
+        skirt(19, 27, sk.body === 'gown' ? 5 : 4.5, sk.body === 'gown' ? 8 : 6.5, sk.main, trim);
+        if (sk.body === 'gown') for (let x = 5; x < 21; x += 2) R(x, 27, 1, 1, '#ffffff');
+        R(9, 27, 3, 1, '#24202d');
+        R(14, 27, 3, 1, '#24202d');
+      } else if (sk.body === 'overalls') {
+        R(tx, 12, tw, 8, cM);
+        for (let y = 13; y < 20; y += 2) R(tx, y, tw, 1, cD);
+        R(10, 15, 7, 5, mM);
+        R(10, 15, 7, 1, mL);
+        R(10, 12, 1, 4, mM);
+        R(16, 12, 1, 4, mM);
+        R(10, 15, 1, 1, trim);
+        R(16, 15, 1, 1, trim);
+        R(tx, 19, tw, 2, mM);
+        R(ax, 12 + walk / 2, 4, 6, cM);
+        R(bx, 12 - walk / 2, 4, 6, cM);
+      } else if (sk.body === 'tunic') {
+        R(tx, 12, tw, 8, mM);
+        R(tx + 1, 12, tw - 2, 1, mL);
+        if (sk.stripes) for (let y = 14; y < 19; y += 2) R(tx, y, tw, 1, cM);
+        if (!back) R(11, 12, 4, 2, sk.body === 'tunic' && sk.id === 'cuisinier' ? '#ffffff' : mD);
+        R(tx, 18, tw, 1, trim);
+        R(tx, 19, tw, 2, mD);
+        R(ax, 12 + walk / 2, 4, 7, mM);
+        R(bx, 12 - walk / 2, 4, 7, mM);
+        if (sk.id === 'cuisinier' && !back) {
+          R(10, 14, 7, 6, '#ffffff');
+          R(10, 14, 7, 1, '#d8d8d0');
+        }
+      } else if (sk.body === 'leather') {
+        R(tx, 12, tw, 8, mM);
+        R(tx + 1, 13, tw - 2, 6, mL);
+        R(tx + 2, 14, tw - 4, 4, mM);
+        if (!back) line(tx, 12, tx + tw - 1, 19, trim);
+        R(tx, 18, tw, 1, trim);
+        R(12, 18, 2, 1, acc);
+        R(ax, 12 + walk / 2, 4, 7, mD);
+        R(bx, 12 - walk / 2, 4, 7, mD);
+      } else if (sk.body === 'coat') {
+        R(tx, 12, tw, 8, mM);
+        R(tx + 1, 12, tw - 2, 1, mL);
+        if (!back) {
+          R(12, 12, 2, 8, mD);
+          R(11, 12, 1, 4, trim);
+          R(14, 12, 1, 4, trim);
+          R(12, 14, 1, 1, trim);
+          R(12, 17, 1, 1, trim);
+        }
+        // Pans du manteau sur les jambes.
+        R(7, 19, 5, 6, mM);
+        R(14, 19, 5, 6, mM);
+        R(7, 24, 5, 1, mD);
+        R(14, 24, 5, 1, mD);
+        R(ax, 12 + walk / 2, 4, 7, mM);
+        R(bx, 12 - walk / 2, 4, 7, mM);
+        R(ax, 18 + walk / 2, 4, 1, trim);
+        R(bx, 18 - walk / 2, 4, 1, trim);
+      } else if (sk.body === 'kimono') {
+        R(tx, 12, tw, 8, mM);
+        R(tx + 1, 13, tw - 2, 5, mL);
+        R(tx + 2, 14, tw - 4, 3, mM);
+        for (let y = 13; y < 18; y += 2) R(tx, y, tw, 1, mD);
+        R(tx, 17, tw, 2, acc);
+        R(12, 17, 2, 2, trim);
+        R(7, 19, 12, 7, cM);
+        R(7, 19, 12, 1, cL);
+        R(12, 20, 1, 6, cD);
+      } else {
+        // Armure de plates : segments, emblème au torse.
+        R(tx + 2, 14, tw - 4, 1, mD);
+        R(tx + 2, 16, tw - 4, 1, mD);
+        if (!back) {
+          R(12, 13, 2, 4, acc);
+          R(11, 14, 4, 2, acc);
+          R(12, 14, 2, 1, trim);
+        }
+      }
+      // Épaulières.
+      const pad = (x, y, flip) => {
+        if (sk.shoulders === 'gold') {
+          R(x - 1, y - 1, pw + 2, 3, '#d8a838');
+          R(x - 1, y - 1, pw + 2, 1, '#fff0a0');
+          R(x, y + 2, pw, 1, '#a87a22');
+        } else if (sk.shoulders === 'plate' || sk.shoulders === 'spiked') {
+          R(x - 1, y - 1, pw + 2, 3, mM);
+          R(x - 1, y - 1, pw + 2, 1, mL);
+          R(x, y + 2, pw, 1, mD);
+          if (sk.shoulders === 'spiked') {
+            R(x + (flip ? pw - 1 : 0), y - 3, 1, 2, trim);
+            R(x + Math.floor(pw / 2), y - 4, 1, 3, trim);
+          }
+        } else if (sk.shoulders === 'skull') {
+          R(x - 1, y - 1, pw + 2, 3, '#e8e0c8');
+          R(x, y, 1, 1, '#1a1210');
+          R(x + pw - 1, y, 1, 1, '#1a1210');
+          R(x - 1, y + 2, pw + 2, 1, '#b8ae98');
+        }
+      };
+      if (sk.shoulders) {
+        pad(ax - (pw > 4 ? 1 : 0), 12 + walk / 2, false);
+        pad(bx, 12 - walk / 2, true);
+      }
+      return;
+    }
+    // ---------------------------------------------------------------- Coiffe
+    const helm = col => {
+      R(8, 3, 11, 6, col[1]);
+      R(8, 3, 11, 1, col[2]);
+      R(9, 4, 3, 1, col[2]);
+      R(8, 8, 11, 1, col[0]);
+      if (!back && !side) {
+        R(10, 8, 7, 1, '#1a1a20');
+        R(12, 9, 3, 3, col[0]);
+      } else if (side) R(right ? 15 : 9, 8, 3, 1, '#1a1a20');
+    };
+    const hood = (col, tall = 0) => {
+      if (back) {
+        R(7, 3 - tall, 13, 11 + tall, col[1]);
+        R(9, 4 - tall, 9, 8, col[0]);
+        return;
+      }
+      R(8, 3 - tall, 11, 3 + tall, col[1]);
+      R(9, 3 - tall, 9, 1, col[2]);
+      if (!side || !right) R(7, 5, 2, 8, col[0]);
+      if (!side || right) R(18, 5, 2, 8, col[0]);
+      if (side) R(right ? 7 : 16, 5, 4, 8, col[1]);
+    };
+    switch (sk.head) {
+      case 'strawhat':
+      case 'rainhat': {
+        const a = sk.head === 'strawhat' ? ['#c8a040', '#e8c860', '#fff0a0'] : [mD, mM, mL];
+        R(5, 5, 17, 2, a[1]);
+        R(5, 6, 17, 1, a[0]);
+        R(8, 1, 11, 4, a[1]);
+        R(9, 2, 4, 1, a[2]);
+        R(8, 4, 11, 1, sk.head === 'strawhat' ? acc : a[0]);
+        break;
+      }
+      case 'chefhat':
+        R(8, 1, 11, 5, '#ffffff');
+        R(7, -1, 5, 3, '#ffffff');
+        R(11, -2, 5, 3, '#ffffff');
+        R(15, -1, 5, 3, '#ffffff');
+        R(8, 5, 11, 1, '#d8d8d0');
+        break;
+      case 'bandana':
+        R(8, 4, 11, 2, acc);
+        R(9, 4, 9, 1, tint(acc, 1.3));
+        if (!back) R(right ? 6 : 19, 5, 2, 3, acc);
+        break;
+      case 'hood':
+        hood(sk.cape, 1);
+        break;
+      case 'leafhood':
+        hood([cD, cM, cL], 1);
+        for (const [x, y] of [[8, 3], [12, 1], [17, 3], [10, 2], [15, 2]]) R(x, y, 2, 2, trim);
+        R(13, 2, 1, 1, acc);
+        R(9, 4, 1, 1, acc);
+        break;
+      case 'skullhood':
+        hood(sk.cape, 1);
+        if (!back) {
+          R(10, 2, 7, 4, '#e8e0c8');
+          R(11, 4, 2, 1, '#1a1210');
+          R(14, 4, 2, 1, '#1a1210');
+          R(12, 5, 1, 1, '#1a1210');
+        }
+        break;
+      case 'mask':
+        hood(sk.main, 0);
+        if (!back) {
+          R(10, 10, 7, 3, mD);
+          R(10, 10, 7, 1, mL);
+          R(right ? 6 : 19, 6, 2, 5, acc);
+        }
+        break;
+      case 'wizard':
+        R(5, 5, 17, 2, mD);
+        R(9, 2, 9, 3, mM);
+        R(10, 0, 7, 2, mM);
+        R(11, -2, 5, 2, mM);
+        R(13, -4, 3, 2, mM);
+        R(15, -5, 3, 1, mM);
+        R(9, 4, 9, 1, trim);
+        R(10, 1, 2, 1, mL);
+        R(13, 1, 1, 1, acc);
+        break;
+      case 'helm':
+        helm(sk.main);
+        if (sk.plume) {
+          R(12, -2, 3, 5, acc);
+          R(13, -3, 3, 1, acc);
+          R(12, -2, 1, 4, tint(acc, 1.3));
+        }
+        break;
+      case 'hornhelm':
+      case 'dragoncrown':
+        helm(sk.main);
+        for (const s of [0, 1]) {
+          const X = x => (s ? 25 - x - 1 : x);
+          R(X(6), 3, 2, 2, '#e8dcc0');
+          R(X(5), 1, 2, 2, '#e8dcc0');
+          R(X(4), -1, 2, 2, '#d8ccb0');
+          R(X(4), -2, 1, 1, '#8a7a60');
+        }
+        if (sk.head === 'dragoncrown') {
+          R(9, 2, 9, 1, '#fff0a0');
+          for (const x of [9, 12, 15, 17]) R(x, 0, 1, 2, '#f0c040');
+          R(13, 1, 1, 1, acc);
+        }
+        break;
+      case 'winghelm':
+        helm(sk.main);
+        for (const s of [0, 1]) {
+          const X = x => (s ? 25 - x - 1 : x);
+          R(X(6), 4, 2, 2, '#ffffff');
+          R(X(4), 2, 3, 2, '#ffffff');
+          R(X(3), 1, 2, 1, '#e8e0d0');
+        }
+        R(12, 2, 3, 1, trim);
+        break;
+      case 'kabuto':
+        helm(sk.cape);
+        R(7, 7, 13, 2, sk.cape[1]);
+        R(7, 8, 13, 1, sk.cape[0]);
+        R(10, -1, 1, 4, trim);
+        R(16, -1, 1, 4, trim);
+        R(11, 2, 5, 1, trim);
+        break;
+      case 'crown':
+      case 'icecrown': {
+        const g = sk.head === 'crown' ? ['#a87a22', '#f0c040', '#fff0a0'] : ['#6aa8c8', '#bfefff', '#ffffff'],
+          tall = sk.head === 'icecrown' ? 2 : 0;
+        R(9, 2, 9, 2, g[1]);
+        R(9, 2, 9, 1, g[2]);
+        for (const [x, h] of [[9, 2], [11, 3], [13, 4], [15, 3], [17, 2]]) R(x, 2 - h - tall + 1, 1, h + tall, g[1]);
+        R(13, 3, 1, 1, sk.head === 'crown' ? '#ff4050' : acc);
+        R(10, 3, 1, 1, acc);
+        R(16, 3, 1, 1, acc);
+        break;
+      }
+      case 'circlet':
+        R(9, 5, 9, 1, trim);
+        R(13, 4, 1, 2, acc);
+        break;
+      case 'tricorne':
+        R(6, 3, 15, 2, '#1e1e24');
+        R(9, 1, 9, 2, '#1e1e24');
+        R(6, 4, 15, 1, trim);
+        R(12, 2, 3, 1, '#e8e0d0');
+        break;
+      case 'horns':
+        for (const s of [0, 1]) {
+          const X = x => (s ? 25 - x - 1 : x);
+          R(X(7), 3, 2, 2, '#2a1a1a');
+          R(X(6), 1, 2, 2, '#2a1a1a');
+          R(X(5), -1, 2, 2, '#3a2020');
+          R(X(5), -2, 1, 1, '#c8303a');
+        }
+        break;
+      case 'flowercrown':
+        R(8, 4, 11, 1, '#4e8a3a');
+        for (const [x, col] of [[8, acc], [10, trim], [12, '#ffffff'], [14, acc], [16, trim], [18, '#ffffff']]) {
+          R(x, 3, 2, 2, col);
+          R(x, 3, 1, 1, tint(col, 1.3));
+        }
+        break;
+      case 'halo':
+        R(9, -2, 9, 1, '#fff0a0');
+        R(8, -1, 1, 1, '#fff0a0');
+        R(18, -1, 1, 1, '#fff0a0');
+        R(9, 0, 9, 1, '#e8c060');
+        break;
+    }
+    // Yeux luisants de certaines tenues.
+    if (sk.eyes && !back) {
+      if (!side) {
+        R(11, 10, 1, 1, sk.eyes);
+        R(16, 10, 1, 1, sk.eyes);
+      } else R(right ? 16 : 11, 10, 1, 1, sk.eyes);
+    }
+  }
+  // Effets vivants d'une tenue autour du héros (dessinés à chaque image, hors du sprite mis en cache).
+  function drawSkinFx(c, sk, x, y, layer) {
+    if (!sk || !sk.fx) return;
+    const glow = sk.glow || '#ffffff',
+      t = time,
+      sq = (px, py, s, col, a = 1) => {
+        c.globalAlpha = a;
+        c.fillStyle = col;
+        c.fillRect(Math.round(px), Math.round(py), s, s);
+      };
+    c.save();
+    for (const fx of sk.fx) {
+      if (layer === 'under' && fx === 'aura') {
+        // Aura : halo au sol qui respire, couleur de la tenue (l'aurore change de teinte).
+        const col = sk.id === 'aurore' ? ['#9affe8', '#ff9ad8', '#c8a8ff', '#9ae8ff'][Math.floor(t / 40) % 4] : glow;
+        c.globalAlpha = 0.22 + 0.1 * Math.sin(t * 0.06);
+        c.fillStyle = col;
+        c.beginPath();
+        c.ellipse(x, y + 16, 26, 9, 0, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 0.5;
+        c.strokeStyle = col;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.ellipse(x, y + 16, 30 + 3 * Math.sin(t * 0.08), 11, 0, 0, Math.PI * 2);
+        c.stroke();
+        canaanLight(x, y - 10, 120, col);
+      }
+      if (layer !== 'over') continue;
+      if (fx === 'sparkle')
+        for (let k = 0; k < 4; k++) {
+          const ph = (t * 0.02 + k * 1.7) % 4,
+            a = Math.max(0, 1 - Math.abs(ph - 1));
+          if (!a) continue;
+          const px = x + Math.sin(k * 2.3 + Math.floor(t / 160 + k)) * 22,
+            py = y - 20 + Math.cos(k * 1.9 + Math.floor(t / 160 + k)) * 22;
+          sq(px - 1, py - 3, 2, glow, a);
+          sq(px - 3, py - 1, 6, glow, a * 0.6);
+          sq(px - 1, py - 1, 2, '#ffffff', a);
+        }
+      else if (fx === 'embers')
+        for (let k = 0; k < 5; k++) {
+          const ph = (t * 0.012 + k / 5) % 1;
+          sq(x + Math.sin(k * 3.1 + t * 0.03) * 16, y + 10 - ph * 60, 3, ph < 0.5 ? '#fff0a0' : sk.ember || glow, 1 - ph);
+        }
+      else if (fx === 'stars')
+        for (let k = 0; k < 3; k++) {
+          const a = t * 0.03 + (k * Math.PI * 2) / 3,
+            px = x + Math.cos(a) * 26,
+            py = y - 18 + Math.sin(a) * 10;
+          sq(px - 1, py - 3, 2, glow, 0.9);
+          sq(px - 3, py - 1, 6, glow, 0.9);
+          sq(px - 1, py - 1, 2, '#ffffff', 1);
+        }
+      else if (fx === 'frost')
+        for (let k = 0; k < 4; k++) {
+          const ph = (t * 0.006 + k / 4) % 1;
+          sq(x - 20 + ((k * 13 + Math.floor(t / 300)) % 40) + Math.sin(t * 0.05 + k) * 3, y - 50 + ph * 60, 2, '#e8f8ff', 1 - ph * 0.7);
+        }
+      else if (fx === 'petals')
+        for (let k = 0; k < 4; k++) {
+          const ph = (t * 0.005 + k / 4) % 1;
+          sq(x - 24 + ((k * 17) % 48) + Math.sin(t * 0.04 + k * 2) * 8, y - 46 + ph * 62, 3, k % 2 ? sk.accent : '#ffc8e8', 1 - ph * 0.6);
+        }
+      else if (fx === 'shadow')
+        for (let k = 0; k < 4; k++) {
+          const ph = (t * 0.01 + k / 4) % 1;
+          sq(x - 14 + k * 9 + Math.sin(t * 0.04 + k) * 3, y + 12 - ph * 40, 4, k % 2 ? '#1a1024' : glow, (1 - ph) * 0.55);
+        }
+      else if (fx === 'halo') canaanLight(x, y - 46, 70, glow);
+    }
+    c.restore();
+  }
   // Héros en pixels 24x30 (dessiné à l'échelle 2) selon son apparence (voir shared/data/looks.js),
   // sa direction (0 face, 1 droite, 2 dos, 3 gauche) et son pas de marche.
   // opts.tool : objet tenu à la place de l'épée (PNJ) : 'spear', 'staff', 'rod', 'basket' ou 'none'.
   function drawHeroArt(c, face, step, rawLook, opts = {}) {
     const look = typeof sanitizeLook === 'function' ? sanitizeLook(rawLook) : rawLook || {};
     const outfit = typeof lookOutfit === 'function' ? lookOutfit(look.outfit) : null;
-    const [armorD, armorM, armorL] = outfit ? outfit.armor : ['#3e526e', '#4b617e', '#7a93aa'],
-      [capeD, capeM, capeL] = outfit ? outfit.cape : ['#292d53', '#4b447e', '#6a62a0'],
-      trim = outfit ? outfit.trim : '#b9a66d';
+    // Apparence portée (transmogrification) : ses couleurs remplacent celles de la tenue de création.
+    const sk = look.wear && typeof skinById === 'function' ? skinById(look.wear) : null;
+    const [armorD, armorM, armorL] = sk ? sk.main : outfit ? outfit.armor : ['#3e526e', '#4b617e', '#7a93aa'],
+      [capeD, capeM, capeL] = sk ? sk.cape : outfit ? outfit.cape : ['#292d53', '#4b447e', '#6a62a0'],
+      trim = sk ? sk.trim : outfit ? outfit.trim : '#b9a66d';
     const skin = look.skin || '#f0c7a0',
       skinD = tint(skin, 0.82),
       skinL = tint(skin, 1.12),
@@ -307,6 +797,14 @@
       back = face === 2,
       side = face === 1 || face === 3,
       right = face === 1;
+    // Ailes, carquois et sac d'une apparence : derrière le corps, sauf de dos.
+    const skinView = () => ({ back, side, right, female, broad, walk, tx, tw, ax, bx, pw });
+    let tx = 0,
+      tw = 0,
+      ax = 0,
+      bx = 0,
+      pw = 0;
+    if (sk && !back) drawSkinParts(R, sk, 'behind', skinView());
     // Ombre, jambes et bottes.
     R(5, 27, 15, 2, '#0a182055');
     R(8, 21 + walk, 4, 6, tint(armorD, 0.7));
@@ -315,14 +813,30 @@
     R(13, 25 - walk, 6, 3, bull ? '#2a2420' : '#24202d');
     R(7, 24 + walk, 5, 1, armorL);
     R(14, 24 - walk, 4, 1, armorL);
-    // Cape longue, plis et bord.
-    R(6, 12, 13, 12, capeD);
-    R(7, 14, 11, 11, capeM);
-    R(8, 16, 2, 8, capeL);
-    R(15, 16, 2, 8, tint(capeD, 0.85));
+    // Cape longue, plis et bord (une apparence a sa propre cape, ou n'en a pas).
+    const capeKind = sk ? sk.back : 'cape';
+    if (capeKind === 'scarf') {
+      R(8, 11, 10, 2, capeM);
+      R(right ? 6 : 16, 12, 3, 6, capeM);
+      R(right ? 6 : 16, 17, 2, 2, capeD);
+    } else if (['cape', 'longcape', 'flamecape', 'starcape', 'leafcape'].includes(capeKind)) {
+      const long = capeKind !== 'cape' ? 3 : 0;
+      R(6, 12, 13, 12 + long, capeD);
+      R(7, 14, 11, 11 + long, capeM);
+      R(8, 16, 2, 8 + long, capeL);
+      R(15, 16, 2, 8 + long, tint(capeD, 0.85));
+      if (capeKind === 'flamecape')
+        for (let x = 6; x < 19; x++) {
+          const h = 1 + ((x * 7) % 4);
+          R(x, 27 - h, 1, h + 1, x % 2 ? '#ffd36d' : capeL);
+          R(x, 28, 1, 1, '#fff0a0');
+        }
+      if (capeKind === 'starcape') for (const [sx2, sy2] of [[8, 17], [12, 20], [15, 16], [10, 24], [16, 23], [13, 26]]) R(sx2, sy2, 1, 1, sx2 % 3 ? '#ffffff' : sk.trim);
+      if (capeKind === 'leafcape') for (let x = 6; x < 19; x += 2) R(x, 26 + (x % 4 ? 1 : 0), 2, 2, x % 4 ? capeL : sk.trim);
+    }
     // Torse : plus fin pour une héroïne, plus large pour un orc ou un minotaure.
-    const tx = female ? 8 : broad ? 6 : 7,
-      tw = female ? 9 : broad ? 13 : 11;
+    tx = female ? 8 : broad ? 6 : 7;
+    tw = female ? 9 : broad ? 13 : 11;
     R(tx, 12, tw, 9, armorM);
     R(tx + 1, 13, tw - 2, 7, armorL);
     R(tx + 2, 14, tw - 4, 5, armorD);
@@ -332,9 +846,9 @@
     R(12, 19, 2, 2, tint(trim, 1.2));
     if (female && !back) R(11, 15, 4, 1, tint(armorL, 1.15));
     // Bras, épaulières et mains (couleur de peau).
-    const ax = broad ? 3 : female ? 5 : 4,
-      bx = broad ? 19 : female ? 17 : 18,
-      pw = broad ? 6 : female ? 4 : 5;
+    ax = broad ? 3 : female ? 5 : 4;
+    bx = broad ? 19 : female ? 17 : 18;
+    pw = broad ? 6 : female ? 4 : 5;
     R(ax, 12 + walk / 2, 4, 8, armorD);
     R(bx, 12 - walk / 2, 4, 8, armorD);
     R(ax - (broad ? 1 : 0) - (pw === 5 ? 1 : 0), 12 + walk / 2, pw, 4, armorL);
@@ -345,6 +859,8 @@
     R(bx + 1, 19 - walk / 2, 2, 2, skin);
     R(ax, 13 + walk / 2, 2, 2, tint(armorL, 1.3));
     R(bx + 2, 13 - walk / 2, 2, 2, tint(armorL, 1.3));
+    // Corps et épaulières d'une apparence (robe, salopette, kimono, armure…).
+    if (sk) drawSkinParts(R, sk, 'body', skinView());
     // Oreilles d'elfe (longues et pointues) et d'orc (courtes) ; oreilles et cornes du minotaure.
     if (elf && !back) {
       if (!side || !right) {
@@ -474,6 +990,11 @@
         }
       }
     }
+    // Coiffe d'une apparence, puis ailes par-dessus quand le héros tourne le dos.
+    if (sk) {
+      drawSkinParts(R, sk, 'head', skinView());
+      if (back) drawSkinParts(R, sk, 'front', skinView());
+    }
     const sx = face === 3 ? 2 : 21,
       tool = opts.tool || 'sword';
     if (tool === 'sword') {
@@ -511,10 +1032,16 @@
     let spr = CANAAN_HERO_SPRITES.get(key);
     if (!spr) {
       spr = document.createElement('canvas');
-      spr.width = 48;
-      spr.height = 60;
-      drawHeroArt(spr.getContext('2d'), face, frame, look, opts);
+      // Une apparence a de la place autour (ailes, chapeaux) : 12 px de chaque côté et au-dessus.
+      const pad = look?.wear ? 12 : 0;
+      spr.width = 48 + pad * 2;
+      spr.height = 60 + pad;
+      const g = spr.getContext('2d');
+      g.translate(pad, pad);
+      drawHeroArt(g, face, frame, look, opts);
       spr = canaanOutline(spr, 2);
+      spr.padX = pad;
+      spr.padY = pad;
       // Cache borné : quelques apparences à la fois (groupe de quatre, aperçu de création).
       if (CANAAN_HERO_SPRITES.size > 400) CANAAN_HERO_SPRITES.clear();
       CANAAN_HERO_SPRITES.set(key, spr);
@@ -659,8 +1186,14 @@
     c.save();
     if (body.veiled) c.globalAlpha *= 0.3;
     if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'back');
-    c.drawImage(spr, Math.round(x - 26 * scale), Math.round(y + 18 - 60 * scale + bob), Math.round(52 * scale), Math.round(64 * scale));
+    // Apparence portée : aura au sol sous le héros, particules par-dessus.
+    const sk = !feral && look?.wear && typeof skinById === 'function' ? skinById(look.wear) : null;
+    if (sk) drawSkinFx(c, sk, x, y + bob, 'under');
+    const px = spr.padX || 0,
+      py = spr.padY || 0;
+    c.drawImage(spr, Math.round(x - (26 + px) * scale), Math.round(y + 18 - (60 + py) * scale + bob), Math.round(spr.width * scale), Math.round(spr.height * scale));
     if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'front');
+    if (sk) drawSkinFx(c, sk, x, y + bob, 'over');
     c.restore();
   }
   // Ponts en planches hors des instances (les routes sont des tuiles texturées de canaan-world-look), dans le style
@@ -744,12 +1277,32 @@
     }
     return bridgeAxis;
   }
-  function drawPixelRoads(c) {
-    let x0 = Math.max(0, Math.floor(camX / TS) - 2),
-      x1 = Math.min(MAPW, Math.ceil((camX + W) / TS) + 2),
-      y0 = Math.max(0, Math.floor(camY / TS) - 2),
-      y1 = Math.min(MAPH, Math.ceil((camY + H) / TS) + 2);
+  // Ponts : chaque case est peinte une fois dans une image gardée (des dizaines de rectangles par case), puis chaque
+  // image ne pose que cette image et le reflet qui passe sur l'eau. only : peindre cette seule case à l'origine.
+  let bridgeImgs = new Map(),
+    bridgeImgsFor = null,
+    bridgeImgsSize = -1,
+    baked = null;
+  function bakeBridge(x, y) {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = TS;
+    const g = cv.getContext?.('2d');
+    if (!g?.fillRect) return null;
+    baked = null;
+    drawPixelRoads(g, { x, y });
+    return baked ? { cv, ...baked } : null;
+  }
+  function drawPixelRoads(c, only) {
+    let x0 = only ? only.x : Math.max(0, Math.floor(camX / TS) - 2),
+      x1 = only ? only.x + 1 : Math.min(MAPW, Math.ceil((camX + W) / TS) + 2),
+      y0 = only ? only.y : Math.max(0, Math.floor(camY / TS) - 2),
+      y1 = only ? only.y + 1 : Math.min(MAPH, Math.ceil((camY + H) / TS) + 2);
     if (game.world.instance) return;
+    if (!only && (bridgeImgsFor !== game.world.overworld || bridgeImgsSize !== BRIDGE_TILES.size)) {
+      bridgeImgs = new Map();
+      bridgeImgsFor = game.world.overworld;
+      bridgeImgsSize = BRIDGE_TILES.size;
+    }
     const axes = bridgeAxes(),
       tile = (x, y) => game.world.overworld[y]?.[x],
       isBridge = (x, y) => BRIDGE_TILES.has(y * MAPW + x),
@@ -761,8 +1314,27 @@
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
         if (!isBridge(x, y)) continue;
-        const px = x * TS,
-          py = y * TS,
+        if (!only) {
+          const key = y * MAPW + x;
+          let img = bridgeImgs.get(key);
+          if (img === undefined) bridgeImgs.set(key, (img = bakeBridge(x, y)));
+          if (img) {
+            const X = x * TS,
+              Y = y * TS,
+              ripple = (time * 0.4 + x * 13 + y * 7) % TS;
+            c.drawImage(img.cv, X, Y);
+            c.globalAlpha = 0.6;
+            c.fillStyle = img.water[2];
+            // Le reflet passe sous les pilotis (u 18 à 24 d'un côté, 26 à 32 de l'autre).
+            const r2 = (ripple + 20) % TS;
+            if (img.edgeA && (ripple + 8 <= 18 || ripple >= 24)) img.vert ? c.fillRect(X + 1, Y + ripple, 2, 8) : c.fillRect(X + ripple, Y + 1, 8, 2);
+            if (img.edgeB && (r2 + 8 <= 26 || r2 >= 32)) img.vert ? c.fillRect(X + TS - 3, Y + r2, 2, 8) : c.fillRect(X + r2, Y + TS - 3, 8, 2);
+            c.globalAlpha = 1;
+            continue;
+          }
+        }
+        const px = only ? 0 : x * TS,
+          py = only ? 0 : y * TS,
           along = axes.get(y * MAPW + x) || 'v',
           vert = along === 'v';
         // Repère local : u le long de la route, w en travers ; R(u, w, longueur, largeur).
@@ -778,15 +1350,21 @@
         // Eau sous le pont, de la couleur de l'eau voisine, avec un reflet qui passe.
         const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => tile(x + dx, y + dy)).find(t => BRIDGE_WATER[t]),
           water = BRIDGE_WATER[near] || BRIDGE_WATER[0];
-        c.fillStyle = water[1];
-        c.fillRect(px, py, TS, TS);
+        // Sous le pont, l'eau continue de l'île (world-look.js) se voit ; sinon, une eau unie.
+        if (!only || !CANAAN_BLEND.active() || CANAAN_BLEND.waterUnder(x, y) < 0) {
+          c.fillStyle = water[1];
+          c.fillRect(px, py, TS, TS);
+        }
         const wa = edgeA ? 7 : 0,
           wb = edgeB ? TS - 7 : TS;
-        c.globalAlpha = 0.6;
-        const ripple = (time * 0.4 + x * 13 + y * 7) % TS;
-        if (edgeA) R(ripple, 1, 8, 2, water[2]);
-        if (edgeB) R((ripple + 20) % TS, TS - 3, 8, 2, water[2]);
-        c.globalAlpha = 1;
+        if (only) baked = { edgeA, edgeB, water, vert };
+        else {
+          c.globalAlpha = 0.6;
+          const ripple = (time * 0.4 + x * 13 + y * 7) % TS;
+          if (edgeA) R(ripple, 1, 8, 2, water[2]);
+          if (edgeB) R((ripple + 20) % TS, TS - 3, 8, 2, water[2]);
+          c.globalAlpha = 1;
+        }
         // Ombre du tablier et pilotis qui plongent dans l'eau.
         if (edgeA) {
           R(0, wa - 3, TS, 3, water[0]);
@@ -913,6 +1491,7 @@
     PIXEL_DECOR,
     CANAAN_HERO_SPRITES,
     drawHeroArt,
+    drawSkinFx,
     drawFeralArt,
     canaanHeroSprite,
     drawPixelHero,

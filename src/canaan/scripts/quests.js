@@ -2670,13 +2670,12 @@
     }
   }
   // Lumi et la bénédiction des racines d'or, au-dessus des héros ; suivi de la quête à l'écran.
+  // Lumi flotte et éclaire, sans bulle de message (le suivi de la quête reste dans le cadre à l'écran).
   const lumiAt = new WeakMap();
-  let hint = null,
-    hintAt = 0;
   window.CanaanStages.drawQuests = function () {
     if (!started) return;
     ctx.save();
-    ctx.translate(-camX, -camY);
+    ctx.translate(Math.round(-camX), Math.round(-camY));
     for (const hero of game.heroes) {
       const p = hero.player,
         flags = hero === game.hero ? stateOf(hero).flags : { lumi: hero.questLook & 1, blessing: hero.questLook & 2, aurora: hero.questLook & 4 };
@@ -2707,82 +2706,9 @@
       R(ctx, l.x - 9 + Math.sin(time * 0.3) * 2, l.y - 3, 4, 2, '#dff4ff');
       R(ctx, l.x + 5 - Math.sin(time * 0.3) * 2, l.y - 3, 4, 2, '#dff4ff');
     }
-    // Indice de Lumi pour la quête suivie, de temps en temps.
-    const st = stateOf(game.hero),
-      l = lumiAt.get(game.hero);
-    if (st.flags.lumi && l && time - hintAt > 2700 && st.track) {
-      hintAt = time;
-      const tr = target(game.hero);
-      if (tr) hint = { text: 'Lumi : ✨ ' + tr.text + ' (' + direction(tr) + ')', until: time + 300 };
-    }
-    if (hint && time < hint.until && l) lumiCloud(ctx, l.x, l.y, hint.text, Math.min(1, (hint.until - time) / 40));
     ctx.restore();
     if (time % 15 === 0) tracker();
   };
-  // Pensée de Lumi : un petit nuage léger et un peu transparent au-dessus d'elle (texte court sur quelques lignes),
-  // aux bords bosselés irréguliers, relié à elle par deux petites bulles. alpha : fondu à la fin.
-  function lumiCloud(c, x, y, text, alpha = 1) {
-    c.save();
-    c.font = '11px system-ui, sans-serif';
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    const words = String(text).replace(/^Lumi : /, '').split(' '),
-      lines = [];
-    let line = '';
-    for (const w of words) {
-      const test = line ? line + ' ' + w : w;
-      if (line && c.measureText(test).width > 150) {
-        lines.push(line);
-        line = w;
-      } else line = test;
-    }
-    if (line) lines.push(line);
-    const lh = parseFloat(c.font) * 1.2,
-      w = Math.max(...lines.map(t => c.measureText(t).width)),
-      h = lines.length * lh,
-      rx = w / 2 + 10,
-      ry = h / 2 + 7,
-      cx = x + 6,
-      cy = y - 28 - ry;
-    // Bosses du pourtour : rayons variés (toujours les mêmes pour un même texte), comme un vrai cumulus.
-    const n = Math.max(7, Math.round((rx + ry) / 9)),
-      bumps = [];
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2,
-        wob = 0.75 + 0.45 * Math.abs(Math.sin(i * 2.7 + text.length));
-      bumps.push([cx + Math.cos(a) * rx * 0.86, cy + Math.sin(a) * ry * 0.78, ry * 0.62 * wob]);
-    }
-    const blob = grow => {
-      c.beginPath();
-      c.ellipse(cx, cy, rx + grow, ry + grow, 0, 0, Math.PI * 2);
-      for (const [bx, by, r] of bumps) {
-        c.moveTo(bx + r + grow, by);
-        c.arc(bx, by, r + grow, 0, Math.PI * 2);
-      }
-    };
-    // Liseré bleuté très fin, puis le nuage blanc légèrement transparent.
-    c.globalAlpha = 0.55 * alpha;
-    c.fillStyle = '#9cc8ec';
-    blob(1.2);
-    c.fill();
-    c.globalAlpha = 0.86 * alpha;
-    c.fillStyle = '#ffffff';
-    blob(0);
-    c.fill();
-    // Deux petites bulles vers Lumi.
-    for (const [k, r] of [
-      [0, 3.2],
-      [1, 2]
-    ]) {
-      c.beginPath();
-      c.arc(x + 3 - k * 2, cy + ry + 8 + k * 6, r, 0, Math.PI * 2);
-      c.fill();
-    }
-    c.globalAlpha = alpha;
-    c.fillStyle = '#2a4664';
-    lines.forEach((t, i) => c.fillText(t, cx, cy - ((lines.length - 1) * lh) / 2 + i * lh));
-    c.restore();
-  }
   // Cible de la quête suivie : le PNJ s'il faut y retourner, sinon le lieu ou l'objet de l'étape.
   function target(hero) {
     const st = stateOf(hero),
@@ -2804,11 +2730,6 @@
     }
     if (step.k === 'search' || step.k === 'trials') return { x: px(site, 0), y: py(site, 0), text: step.text, q, vague: true };
     return { x: px(site, 0), y: py(site, 0), text: step.text, q };
-  }
-  function direction(tr) {
-    const a = Math.atan2(tr.y - P.y, tr.x - P.x),
-      names = ['l’est', 'le sud-est', 'le sud', 'le sud-ouest', 'l’ouest', 'le nord-ouest', 'le nord', 'le nord-est'];
-    return 'vers ' + names[((Math.round(a / (Math.PI / 4)) % 8) + 8) % 8];
   }
   const trackerEl = document.createElement('div');
   trackerEl.id = 'questTracker';

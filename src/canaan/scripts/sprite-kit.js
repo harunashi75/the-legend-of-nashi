@@ -916,9 +916,11 @@
       ? CANAAN_ARENA.frameLabel(boss)
       : !d
         ? 'Boss mondial'
-        : count > 1
-          ? 'Boss ' + ((boss.bossStage || 0) + 1) + '/' + count
-          : 'Boss';
+        : boss.secretBoss !== undefined
+          ? 'Boss caché'
+          : count > 1
+            ? 'Boss ' + ((boss.bossStage || 0) + 1) + '/' + count
+            : 'Boss';
     c.fillText(label + (mode ? ' · ' + mode.label : ''), x + w - 4, y - 6);
     c.fillStyle = '#2a1418';
     c.fillRect(x, y, w, 14);

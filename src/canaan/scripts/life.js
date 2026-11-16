@@ -21,6 +21,70 @@
   // ---------------------------------------------------------------- Sprites des animaux (de profil, vers la droite)
   // Chaque dessin reçoit R(x, y, l, h, couleur) sur une grille agrandie 2 fois, et le pas de marche (0 ou 1).
   const ART = {
+    // Crabe des sables, vu de dessus : carapace, pinces levées, pattes qui alternent à chaque pas.
+    crabe: {
+      w: 15,
+      h: 10,
+      pal: [['#d8582e', '#9e3a1c', '#f08a52'], ['#c8743a', '#8a4a22', '#e8a060']],
+      draw(R, f, [m, d, l]) {
+        for (const [x, y] of f ? [[1, 4], [2, 7], [11, 3], [12, 6]] : [[1, 5], [2, 8], [11, 4], [12, 7]]) R(x, y, 2, 1, d);
+        R(4, 3, 7, 6, m);
+        R(3, 4, 9, 4, m);
+        R(5, 3, 4, 2, l);
+        R(4, 8, 7, 1, d);
+        R(0, f ? 0 : 1, 3, 3, m);
+        R(12, f ? 1 : 0, 3, 3, m);
+        R(0, f ? 0 : 1, 1, 1, l);
+        R(14, f ? 1 : 0, 1, 1, l);
+        R(2, 2, 2, 2, d);
+        R(11, 2, 2, 2, d);
+        R(6, 1, 1, 2, d);
+        R(8, 1, 1, 2, d);
+        R(6, 0, 1, 1, '#1a1418');
+        R(8, 0, 1, 1, '#1a1418');
+      }
+    },
+    // Chat du camp, de profil : queue en l'air, oreilles pointues.
+    chat: {
+      w: 14,
+      h: 10,
+      pal: [['#e89a4a', '#b86a2a', '#f8c890'], ['#4a4a52', '#2a2a30', '#7a7a84']],
+      draw(R, f, [m, d, l]) {
+        R(2, 4, 8, 4, m);
+        R(3, 4, 6, 1, l);
+        R(9, 2, 4, 4, m);
+        R(9, 1, 1, 1, m);
+        R(12, 1, 1, 1, m);
+        R(11, 3, 1, 1, '#1a1418');
+        R(13, 4, 1, 1, '#f0a0a0');
+        R(0, f ? 1 : 2, 1, 3, d);
+        R(1, 3, 1, 2, m);
+        R(3, 8, 1, 2, d);
+        R(f ? 7 : 6, 8, 1, 2, d);
+        R(9, 8, 1, 2, d);
+        R(4, 5, 4, 1, d);
+      }
+    },
+    // Chien du camp : oreilles tombantes, queue qui remue.
+    chien: {
+      w: 16,
+      h: 12,
+      pal: [['#c8945a', '#8e5a30', '#ecc890']],
+      draw(R, f, [m, d, l]) {
+        R(2, 4, 10, 5, m);
+        R(3, 4, 8, 1, l);
+        R(11, 1, 5, 5, m);
+        R(11, 1, 2, 4, d);
+        R(14, 3, 1, 1, '#1a1418');
+        R(15, 5, 1, 1, '#1a1418');
+        R(0, f ? 2 : 3, 2, 2, m);
+        R(3, 9, 2, 3, d);
+        R(f ? 8 : 7, 9, 2, 3, d);
+        R(10, 9, 2, 3, d);
+        R(5, 6, 4, 1, d);
+        R(12, 6, 3, 1, '#d8483a');
+      }
+    },
     lapin: {
       w: 13,
       h: 11,
@@ -223,6 +287,30 @@
         R(5, 0, 2, 1, '#2a2a34');
         R(3, 11, 1, 8, '#c8a050');
         R(f ? 6 : 5, 11, 1, 8, '#c8a050');
+      }
+    },
+    // Tortue de mer, de profil : carapace bombée à écailles, nageoires qui rament sur le sable, tête ronde.
+    tortue_mer: {
+      w: 21,
+      h: 11,
+      pal: [['#4a7a52', '#2e5238', '#78a870'], ['#6a7a42', '#46542a', '#98a860']],
+      draw(R, f, [m, d, l]) {
+        R(4, 2, 12, 5, m);
+        R(6, 1, 8, 1, m);
+        R(3, 4, 14, 3, m);
+        R(6, 2, 3, 2, l);
+        R(10, 2, 3, 2, l);
+        R(13, 3, 2, 2, l);
+        R(5, 4, 2, 2, d);
+        R(8, 4, 3, 2, d);
+        R(12, 5, 2, 1, d);
+        R(3, 7, 14, 1, '#d8c890');
+        R(16, 4, 4, 3, '#8ab07a');
+        R(18, 4, 1, 1, '#1a1418');
+        R(19, 6, 1, 1, '#5a7a4a');
+        R(f ? 12 : 13, 7, 4, 2, '#7aa06a');
+        R(f ? 4 : 3, 7, 3, 2, '#7aa06a');
+        R(1, 6, 3, 1, '#7aa06a');
       }
     },
     tortue: {
@@ -463,8 +551,86 @@
     fennec: { speed: 0.9, roam: 5, shy: 160 },
     chameau: { speed: 0.3, roam: 5, shy: 0, herd: 3 },
     vache: { speed: 0.25, roam: 2, shy: 0 },
-    cochon: { speed: 0.4, roam: 2, shy: 0 }
+    cochon: { speed: 0.4, roam: 2, shy: 0 },
+    chat: { speed: 0.5, roam: 3, shy: 0, still: 0.5 },
+    chien: { speed: 0.7, roam: 4, shy: 0 },
+    crabe: { speed: 0.45, roam: 0, shy: 120, coast: true },
+    tortue_mer: { speed: 0.3, roam: 0, shy: 0, coast: true, rest: true }
   };
+  // Crabes : ils longent les plages de toute l'île, de côté, en suivant le rivage (chemin des cases de terre qui
+  // bordent la mer, dans l'ordre du tour de l'île). Un trou dans la plage (roche, rivière, camp) les fait demi-tourner.
+  let coastPath = null;
+  function coastOf() {
+    if (coastPath) return coastPath;
+    coastPath = [];
+    const tiles = game.world.overworld,
+      cx = MAPW / 2,
+      cy = MAPH / 2,
+      sea = (x, y) => tiles[y]?.[x] === 0 && !BRIDGE_TILES.has(y * MAPW + x);
+    for (let a = 0; a < 1440; a++) {
+      const ang = (a / 1440) * Math.PI * 2,
+        dx = Math.cos(ang),
+        dy = Math.sin(ang);
+      let best = null;
+      for (let r = 120; r < 190; r += 0.5) {
+        const tx = Math.round(cx + dx * r),
+          ty = Math.round(cy + dy * r);
+        if (tx < 2 || ty < 2 || tx >= MAPW - 2 || ty >= MAPH - 2) break;
+        const x = (tx + 0.5) * TS,
+          y = (ty + 0.5) * TS;
+        if (!sea(tx, ty) && walkable(x, y) && !isSafe(tx, ty) && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([u, v]) => sea(tx + u, ty + v))) best = { x, y };
+      }
+      if (best && !(coastPath.length && Math.hypot(coastPath.at(-1).x - best.x, coastPath.at(-1).y - best.y) < 6)) coastPath.push(best);
+    }
+    return coastPath;
+  }
+  function stepCrab(a) {
+    const path = coastOf();
+    if (path.length < 2) return;
+    const r = a.rng;
+    for (const hero of game.heroes) {
+      const p = hero.player;
+      if (!p.dead && Math.hypot(p.x - a.x, p.y - a.y) < a.sp.shy && a.flee <= 0) {
+        // Il détale le long de la plage, à l'opposé du héros.
+        const ahead = path[(Math.floor(a.i) + a.dir + path.length) % path.length];
+        if (Math.hypot(ahead.x - p.x, ahead.y - p.y) < Math.hypot(a.x - p.x, a.y - p.y)) a.dir = -a.dir;
+        a.flee = 90;
+        a.wait = 0;
+      }
+    }
+    if (a.wait > 0) {
+      a.wait--;
+      a.moving = false;
+      return;
+    }
+    if (a.flee <= 0 && r() < (a.sp.rest ? 0.0025 : 0.004)) {
+      // Les tortues font des siestes au soleil, puis repartent.
+      a.wait = Math.floor((a.sp.rest ? 120 : 60) + r() * (a.sp.rest ? 300 : 240));
+      if (r() < 0.3) a.dir = -a.dir;
+      return;
+    }
+    const k = Math.floor(a.i),
+      from = path[(k + path.length) % path.length],
+      to = path[(k + a.dir + path.length) % path.length];
+    // Trou dans la plage : demi-tour.
+    if (Math.hypot(to.x - from.x, to.y - from.y) > TS * 2.6) {
+      a.dir = -a.dir;
+      return;
+    }
+    const seg = Math.max(1, Math.hypot(to.x - from.x, to.y - from.y) / TS);
+    a.i += (a.dir * a.sp.speed * (a.flee > 0 ? 3 : 1)) / (TS * seg) * 2.2;
+    if (a.flee > 0) a.flee--;
+    a.i = (a.i + path.length) % path.length;
+    const j = Math.floor(a.i),
+      t = a.i - j,
+      p0 = path[j],
+      p1 = path[(j + 1) % path.length];
+    if (Math.hypot(p1.x - p0.x, p1.y - p0.y) > TS * 2.6) return;
+    a.x = p0.x + (p1.x - p0.x) * t + Math.sin(a.seed + a.i * 0.7) * 6;
+    a.y = p0.y + (p1.y - p0.y) * t + Math.cos(a.seed + a.i * 0.5) * 4;
+    a.moving = true;
+    a.step += 2;
+  }
   // Biomes (ordre des ZONES) : [espèce, nombre, variante, options] ; puis insectes volants.
   const FAUNA = [
     { ground: [['lapin', 32, 0], ['mouton', 10, 0], ['cerf', 12, 0], ['renard', 6, 0]], fliers: [['papillon', 36]] },
@@ -474,6 +640,8 @@
     { ground: [['lezard', 36, 0], ['fennec', 18, 0], ['chameau', 6, 0], ['chevre', 10, 0]], fliers: [] },
     { ground: [['cerf', 18, 1, { glow: true }], ['lapin', 20, 1, { glow: true }], ['ecureuil', 8, 0]], fliers: [['luciole', 52], ['papillon', 24, true]] }
   ];
+  // Animaux de compagnie du camp (chats, chien) : ils se promènent dans le camp, hors de l'enclos.
+  const PETS = new Set(['chat', 'chien']);
   const animals = [],
     fliers = [];
   let peopled = false;
@@ -520,6 +688,21 @@
           if (at) fliers.push({ kind, x: at.x, y: at.y, seed: rng() * 1000, glow: !!glow || kind === 'luciole' });
         }
     }
+    // Crabes des plages, répartis tout autour de l'île.
+    {
+      const path = coastOf();
+      // Tortues de mer, plus rares, qui se traînent lentement le long des plages.
+      for (let k = 0; path.length > 40 && k < 32; k++) {
+        const i = Math.floor(((k + 0.5) / 32) * path.length + rng() * 8) % path.length,
+          p = path[i];
+        animals.push({ kind: 'tortue_mer', sp: SPECIES.tortue_mer, variant: k % 4 === 0 ? 1 : 0, opts: {}, x: p.x, y: p.y, hx: p.x, hy: p.y, tx: p.x, ty: p.y, i, seed: rng() * 10, wait: Math.floor(rng() * 120), dir: rng() < 0.5 ? 1 : -1, step: 0, flee: 0, rng: seeded(k * 197 + 31) });
+      }
+      for (let k = 0; path.length > 40 && k < 36; k++) {
+        const i = Math.floor((k / 36) * path.length + rng() * 8) % path.length,
+          p = path[i];
+        animals.push({ kind: 'crabe', sp: SPECIES.crabe, variant: k % 3 === 0 ? 1 : 0, opts: {}, x: p.x, y: p.y, hx: p.x, hy: p.y, tx: p.x, ty: p.y, i, seed: rng() * 10, wait: Math.floor(rng() * 200), dir: rng() < 0.5 ? 1 : -1, step: 0, flee: 0, rng: seeded(k * 131 + 17) });
+      }
+    }
     // Poules du Camp de l'Aurore.
     for (let k = 0; k < 4; k++) {
       const x = (CANAAN_CAMP.x - 3 + k * 1.6) * TS,
@@ -531,7 +714,7 @@
     // papillons du jardin et des champs, libellules au-dessus du ruisseau et de la mare.
     canaanCampLife.animals().forEach((f, k) => {
       if (walkable(f.x, f.y))
-        animals.push({ kind: f.kind, sp: { ...SPECIES[f.kind], roam: f.roam }, variant: f.variant || 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 37, dir: k % 2 ? -1 : 1, step: 0, flee: 0, farm: true, rng: seeded(k * 53 + 7) });
+        animals.push({ kind: f.kind, sp: { ...SPECIES[f.kind], roam: f.roam }, variant: f.variant || 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 37, dir: k % 2 ? -1 : 1, step: 0, flee: 0, farm: !PETS.has(f.kind), pet: PETS.has(f.kind), rng: seeded(k * 53 + 7) });
     });
     for (const f of canaanCampLife.fliers()) fliers.push({ kind: f.kind, x: f.x, y: f.y, seed: f.seed, glow: false });
     // Faune des Tréfonds (underground.js) : sur leur propre carte, marquée layer: 'under'.
@@ -542,6 +725,7 @@
   const near = (x, y, margin) => Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
   function stepAnimal(a) {
     if (a.dead) return;
+    if (a.sp.coast) return stepCrab(a);
     const sp = a.sp,
       r = a.rng;
     // Fuite : un héros trop proche fait détaler les bêtes craintives.
@@ -583,7 +767,7 @@
       ny = a.y + (dy / dist) * Math.min(speed, dist);
     if (a.flee > 0) a.flee--;
     // Chacun reste sur un sol qui lui convient (les bêtes d'eau ne s'éloignent pas du bord).
-    const ok = walkable(nx, ny) && (a.kind === 'poule' || a.farm || !isSafe(nx / TS, ny / TS));
+    const ok = walkable(nx, ny) && (a.kind === 'poule' || a.farm || a.pet || !isSafe(nx / TS, ny / TS));
     if (!ok || Math.hypot(nx - a.hx, ny - a.hy) > (sp.roam + 4) * TS) {
       a.tx = a.x;
       a.ty = a.y;
@@ -1046,6 +1230,7 @@
           a.dead = 0;
           a.x = a.tx = a.hx;
           a.y = a.ty = a.hy;
+          if (a.sp.coast) a.i = coastOf().findIndex(p => p.x === a.hx && p.y === a.hy);
           a.flee = 0;
         }
       if (!canaanUnder()) for (const v of villagers) if (near(v.x, v.y, 400)) stepVillager(v);

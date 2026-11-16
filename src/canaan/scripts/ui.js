@@ -82,27 +82,44 @@
       '</div>'
     );
   }
+  // Onglet du sac : 'main' (équipement, Rubis, repas, enchantements) ou 'mat' (minerais, poissons, herbes, viandes).
+  let bagTab = 'main';
+  function bagSection(tab) {
+    if (tab === 'main' || tab === 'mat') bagTab = tab;
+    renderInventory();
+  }
   function renderInventory() {
     updateCapacity();
     game.hero.inventory.forEach(item => window.CANAAN_GEAR.normalize(item));
     currentGearPanel = 'inventory';
     hideGearTooltip();
-    // Équipement d'abord, puis les piles (Rubis, poissons, viandes, repas), puis les cases libres.
+    // Sac : équipement d'abord, puis les piles, puis les cases libres. Matériaux : leurs piles, puis leurs cases libres.
     const merchant = nearMerchant(),
-      gear = game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
-      stacks = CANAAN_BAG.tiles(game.hero).map(p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"') + '</div>'),
-      empty = Math.max(0, BAG_LIMIT - gear.length - stacks.length),
-      cells = gear.join('') + stacks.join('') + Array.from({ length: empty }, () => bagCell(null)).join('');
+      mat = bagTab === 'mat',
+      stackCell = p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"') + '</div>',
+      gear = mat ? [] : game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
+      stacks = CANAAN_BAG.tiles(game.hero, mat ? 'mat' : 'main').map(stackCell),
+      limit = mat ? CANAAN_BAG.MAT_LIMIT : BAG_LIMIT,
+      empty = Math.max(0, limit - gear.length - stacks.length),
+      cells = gear.join('') + stacks.join('') + Array.from({ length: empty }, () => bagCell(null)).join(''),
+      used = canaanBagUsed(game.hero),
+      matUsed = CANAAN_BAG.matUsed(game.hero),
+      tabs =
+        '<div class="bag-tabs">' +
+        '<button type="button" class="' + (mat ? '' : 'on') + '" data-action="bagSection" data-tab="main">⟦menu_inventory⟧ Sac <small>' + used + ' / ' + BAG_LIMIT + '</small></button>' +
+        '<button type="button" class="' + (mat ? 'on' : '') + '" data-action="bagSection" data-tab="mat">⟦prof_mining⟧ Matériaux <small>' + matUsed + ' / ' + CANAAN_BAG.MAT_LIMIT + '</small></button></div>';
     modernPanel(
-      rpgHeader('🎒 Sac — ' + canaanBagUsed(game.hero) + '/' + BAG_LIMIT + ' emplacements') +
+      rpgHeader(mat ? '⛏️ Matériaux — ' + matUsed + '/' + CANAAN_BAG.MAT_LIMIT + ' emplacements' : '🎒 Sac — ' + used + '/' + BAG_LIMIT + ' emplacements') +
         '<div class="modern-body">' +
+        tabs +
         '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un Rubis s’équipe, un repas se mange). ' +
         (merchant
           ? '💰 Marchand proche : vente disponible.'
           : '💰 Pour vendre, rends-toi chez un marchand et appuie sur E.') +
         '</p>' +
-        '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
-        bagUpgradeHTML() +
+        (mat
+          ? '<p class="weapon-hint">⛏️ Minerais, poissons, herbes et viandes que tu récoltes : rangés ici, ils ne prennent pas la place du sac (' + CANAAN_BAG.MAT_LIMIT + ' cases de 100).</p>'
+          : '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' + bagUpgradeHTML()) +
         '<div class="modern-bag">' +
         cells +
         '</div>' +
@@ -166,7 +183,7 @@
         '</div>' +
         '<div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas><p class="muted">⚔️ ' +
         count +
-        '/10 équipés</p></div>' +
+        '/10 équipés</p><button type="button" class="wardrobe-open" data-action="toggleWardrobe">👗 Garde-robe (V)</button></div>' +
         '<div class="doll-column">' +
         ['neck', 'ring', 'artifact', 'weapon', 'weapon2'].map(charSlot).join('') +
         '</div></div></div>' +
@@ -224,7 +241,7 @@
       gearStat: !!window.gearStat
     })
   });
-  Object.assign(window, { renderInventory, renderCharacter, charSlot, showGearTooltip, showEquippedTooltip, bagUpgradeHTML });
+  Object.assign(window, { renderInventory, canaanBagSection: bagSection, renderCharacter, charSlot, showGearTooltip, showEquippedTooltip, bagUpgradeHTML });
 })();
 // Aperçu direct, utilisé une fois par rendu de la fiche personnage.
 function drawCharacterPreview() {
@@ -235,10 +252,11 @@ function drawCharacterPreview() {
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.clearRect(0, 0, preview.width, preview.height);
   c.imageSmoothingEnabled = false;
-  const scale = Math.min(preview.width / 48, preview.height / 60) * 0.77;
+  // Le sprite d'une apparence est plus grand (ailes, chapeaux) : il est ramené dans le cadre.
+  const sprite = canaanHeroSprite(game.hero?.look, 0, 0),
+    scale = Math.min(preview.width / sprite.width, preview.height / sprite.height) * (sprite.padX ? 0.95 : 0.82);
   c.translate(Math.round(preview.width / 2), Math.round(preview.height / 2));
   c.scale(scale, scale);
-  const sprite = canaanHeroSprite(game.hero?.look, 0, 0);
-  c.drawImage(sprite, -24, -30, 48, 60);
+  c.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
   c.restore();
 }

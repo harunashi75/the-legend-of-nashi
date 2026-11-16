@@ -7,7 +7,12 @@
    "y": 264,
    "boss": "Gardien des Os",
    "bosses": [
+    "Grignotte, Reine des Rats",
+    "Le Fossoyeur Bossu",
     "Gardien des Os"
+   ],
+   "secrets": [
+    "Le Rat-Roi aux Mille Queues"
    ],
    "color": "#a3c7ff",
    "level": 7,
@@ -22,7 +27,12 @@
    "y": 130,
    "boss": "Golem de Mithril",
    "bosses": [
+    "Le Contremaître Kobold Grisch",
+    "L’Araignée des Galeries",
     "Golem de Mithril"
+   ],
+   "secrets": [
+    "Le Mineur Sans Visage"
    ],
    "color": "#67d8ee",
    "level": 13,
@@ -37,7 +47,12 @@
    "y": 115,
    "boss": "Oracle de l’Éclipse",
    "bosses": [
+    "L’Acolyte du Crépuscule",
+    "Le Gardien Solaire",
     "Oracle de l’Éclipse"
+   ],
+   "secrets": [
+    "L’Ombre de l’Astre Mort"
    ],
    "color": "#ff9955",
    "level": 18,
@@ -52,7 +67,12 @@
    "y": 76,
    "boss": "Le Grand Inquisiteur",
    "bosses": [
+    "Le Geôlier Flagellant",
+    "La Mère Supérieure",
     "Le Grand Inquisiteur"
+   ],
+   "secrets": [
+    "Le Pénitent Oublié"
    ],
    "color": "#b79cff",
    "level": 25,
@@ -67,7 +87,12 @@
    "y": 130,
    "boss": "Pyrrhax, Wyrm d’Écaille-Ardente",
    "bosses": [
+    "Maître-Forgeron Kraag",
+    "L’Élémentaire de Scories",
     "Pyrrhax, Wyrm d’Écaille-Ardente"
+   ],
+   "secrets": [
+    "La Salamandre d’Obsidienne"
    ],
    "color": "#6bdfa2",
    "level": 32,
@@ -82,7 +107,12 @@
    "y": 197,
    "boss": "Le Bourreau de l’Expiation",
    "bosses": [
+    "Le Gardien des Chaînes",
+    "La Pleureuse des Abysses",
     "Le Bourreau de l’Expiation"
+   ],
+   "secrets": [
+    "Celui-qui-Rampe-au-Fond"
    ],
    "color": "#e88aff",
    "level": 37,
@@ -97,9 +127,16 @@
    "y": 270,
    "boss": "Le Roi Sanglant",
    "bosses": [
+    "Le Maître-Chien Ravageur",
     "Sire Écorcheur",
+    "Le Chapelain Sanguin",
     "La Comtesse Écarlate",
+    "Le Champion du Sang",
     "Le Roi Sanglant"
+   ],
+   "secrets": [
+    "Le Bourreau Masqué",
+    "La Dame Blanche du Bastion"
    ],
    "color": "#ffd36d",
    "raid": true,
@@ -115,9 +152,16 @@
    "y": 285,
    "boss": "Le Dévoreur Stellaire",
    "bosses": [
+    "L’Horloger Fou",
     "Le Gardien des Rouages",
+    "Le Sablier Vivant",
     "La Tisseuse du Temps",
+    "L’Écho des Âges",
     "Le Dévoreur Stellaire"
+   ],
+   "secrets": [
+    "Le Paradoxe Errant",
+    "L’Enfant d’Avant le Temps"
    ],
    "color": "#ff7fa7",
    "raid": true,
@@ -133,9 +177,16 @@
    "y": 332,
    "boss": "Le Séraphin Divin",
    "bosses": [
+    "Le Chérubin Vigilant",
     "L’Archonte Radieux",
+    "Le Trône Ailé",
     "La Sentinelle Auréolée",
+    "La Voix du Chœur",
     "Le Séraphin Divin"
+   ],
+   "secrets": [
+    "L’Ange Déchu Sans Nom",
+    "Le Gardien du Septième Ciel"
    ],
    "color": "#c4a0ff",
    "raid": true,
@@ -152,9 +203,16 @@
    "y": 288,
    "boss": "L’Avatar du Jugement",
    "bosses": [
+    "Le Porte-Étoile",
     "Le Héraut de Célestia",
+    "L’Astrolabe Vivant",
     "La Balance Éternelle",
+    "Le Juge des Constellations",
     "L’Avatar du Jugement"
+   ],
+   "secrets": [
+    "La Comète Écarlate",
+    "Le Témoin du Premier Jour"
    ],
    "color": "#fff0a8",
    "raid": true,
@@ -191,7 +249,12 @@
    "y": 182,
    "boss": "Grumbar, le Contremaître Maudit",
    "bosses": [
+    "Le Chef d’Équipe Brisepierre",
+    "La Foreuse Possédée",
     "Grumbar, le Contremaître Maudit"
+   ],
+   "secrets": [
+    "Le Nain Emmuré"
    ],
    "color": "#e0a060",
    "level": 1,
@@ -209,7 +272,12 @@
    "y": 89,
    "boss": "Ombral, le Roi sous la Pierre",
    "bosses": [
+    "Le Héraut des Profondeurs",
+    "La Garde de Pierre Noire",
     "Ombral, le Roi sous la Pierre"
+   ],
+   "secrets": [
+    "Le Prince Noyé"
    ],
    "color": "#8ac8e8",
    "level": 1,
@@ -227,7 +295,12 @@
    "y": 218,
    "boss": "Le Fossoyeur Éternel",
    "bosses": [
+    "Le Pilleur de Tombes",
+    "La Veuve des Cryptes",
     "Le Fossoyeur Éternel"
+   ],
+   "secrets": [
+    "Le Mille-et-Unième Mort"
    ],
    "color": "#a8f0c0",
    "level": 1,
@@ -245,7 +318,12 @@
    "y": 311,
    "boss": "La Reine des Spores",
    "bosses": [
+    "Le Champignon Hurleur",
+    "Le Mycélium Vivant",
     "La Reine des Spores"
+   ],
+   "secrets": [
+    "Le Cœur de Moisissure"
    ],
    "color": "#e870c0",
    "level": 1,

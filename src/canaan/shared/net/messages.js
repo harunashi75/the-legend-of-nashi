@@ -99,7 +99,7 @@ export function sanitizeIntent(raw) {
 // Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
-export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 export function sanitizeAction(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
@@ -128,7 +128,10 @@ export function sanitizeAction(raw) {
   if (r.op === 'shop-buy') return Number.isInteger(r.index) && r.index >= 0 && r.index < 32 ? { op: r.op, index: r.index } : null;
   // Pile du sac (poissons, viandes, repas, Rubis) : « genre:id:qualité*nombre ».
   if (r.op === 'sell-stack') return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
-  if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest') return { op: r.op };
+  // Donjon : E devant un mur fissuré, un brasero, un levier, une stèle ou une porte scellée (l'hôte vérifie).
+  if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest' || r.op === 'dungeon-use') return { op: r.op };
+  // Garde-robe : apparence à porter (identifiant court, ou vide pour la retirer) ; l'hôte vérifie qu'elle est possédée.
+  if (r.op === 'skin-wear') return r.id === '' || word(r.id) ? { op: r.op, id: r.id } : null;
   if (r.op === 'rubis-unequip') return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
   // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;
@@ -195,6 +198,8 @@ export function heroSnapshot(id, hero) {
     mp: Math.floor(finite(p.mp)),
     mmp: round(p.mmp),
     gold: Math.floor(finite(p.gold)),
+    // Clés des secrets (boss cachés des donjons), pour les coffres secrets de l'île.
+    keys: Math.floor(finite(p.keys)),
     dead: !!p.dead,
     face: finite(p.face, 1),
     atk: Math.round(finite(p.atk) * 100) / 100,
@@ -220,5 +225,8 @@ export function monsterSnapshot(m) {
   for (const key of ['boss', 'worldBoss', 'elite', 'arenaBoss', 'hidden']) if (m[key]) out[key] = true;
   for (const key of MONSTER_LOOK) if (m[key] !== undefined) out[key] = m[key];
   if (Number.isFinite(m.facingAngle)) out.facingAngle = Math.round(m.facingAngle * 100) / 100;
+  // Rang du boss dans l'instance et boss caché (barre de boss des invités).
+  if (Number.isInteger(m.bossStage)) out.bossStage = m.bossStage;
+  if (Number.isInteger(m.secretBoss)) out.secretBoss = m.secretBoss;
   return out;
 }

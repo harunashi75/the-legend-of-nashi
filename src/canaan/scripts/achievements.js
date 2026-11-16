@@ -68,6 +68,13 @@
         push({ key: 'b:' + name, group: 'boss', name, where: (d.raid ? 'Raid · ' : 'Donjon · ') + d.name, look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color } });
       })
     );
+    // Boss cachés, derrière les passages secrets des donjons et des raids.
+    instances.forEach((d, i) =>
+      (d.secrets || []).forEach((name, k) => {
+        const look = CANAAN_DUNGEON_SECRET_LOOKS(i)[k] || {};
+        push({ key: 'b:' + name, group: 'boss', name, where: 'Boss caché · ' + d.name, look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color } });
+      })
+    );
     ARENA_BOSSES.forEach((b, k) => push({ key: 'a:' + b.name, group: 'arena', name: b.name, where: 'Arène des Épreuves · vague ' + (k + 1), look: { t: b.name, look: b.look, pal: b.pal, lookOpts: b.opts || {} } }));
     beasts = out;
     return out;

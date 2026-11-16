@@ -657,7 +657,7 @@
   window.CanaanStages.drawClassEffects = function () {
     if (!started) return;
     ctx.save();
-    ctx.translate(-camX, -camY);
+    ctx.translate(Math.round(-camX), Math.round(-camY));
     for (const z of zones) {
       ctx.globalAlpha = 0.16 + 0.05 * Math.sin(time * 0.15);
       ctx.fillStyle = '#ffd76a';

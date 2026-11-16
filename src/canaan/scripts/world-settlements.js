@@ -8,11 +8,8 @@
     FLAME = ['#e5522e', '#f9a640', '#fff1b5'];
   // Objets autour du feu : position (pixels, depuis le centre du camp) et emprise au sol [x, y, largeur, hauteur].
   // canWalk ne teste que les quatre coins du personnage (à ±12 pixels) : chaque emprise fait au moins 26 pixels.
+  // Le feu de camp et ses rondins ont laissé la place à la fontaine (camp-life.js) ; restent les torches.
   const PROPS = [
-    { kind: 'fire', dx: 0, dy: 0, box: [-30, -10, 60, 28] },
-    { kind: 'stump', dx: -70, dy: 6, box: [-15, -10, 30, 26] },
-    { kind: 'stump', dx: 66, dy: 18, box: [-15, -10, 30, 26] },
-    { kind: 'bench', dx: -4, dy: 72, box: [-54, -10, 108, 26] },
     { kind: 'torch', dx: -230, dy: 40, box: [-13, -12, 26, 26] },
     { kind: 'torch', dx: 230, dy: 40, box: [-13, -12, 26, 26] }
   ];

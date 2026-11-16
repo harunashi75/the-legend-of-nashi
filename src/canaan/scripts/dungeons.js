@@ -1,12 +1,16 @@
 // Donjons et raids : plan, textures, décor, éclairage, ennemis et boss de chaque instance, fidèles à son nom.
-// Un donjon a un boss ; un raid en a trois, séparés par des herses qui s'ouvrent à la mort du boss précédent.
+// Des explorations : un donjon a trois boss, un raid six ; chaque boss attend derrière une porte scellée par une
+// énigme de son aile (braseros, leviers, dalles gravées ou gardiens du sceau), et des murs fissurés cachent les salles
+// des boss secrets, qui donnent les clés des coffres secrets de l'île.
 (() => {
   'use strict';
   const WALL = 9,
     GATE = 19,
     FLOOR = 20,
     ACCENT = 21,
-    HAZARD = 22;
+    HAZARD = 22,
+    // Mur fissuré d'un passage secret : bloque jusqu'à ce qu'un héros le découvre (E).
+    SECRET = 23;
   // Le héros entre toujours sur cette case (enterInstance).
   const ENTRY = { x: 120, y: 133 };
   const WALKABLE = t => t === FLOOR || t === ACCENT;
@@ -424,6 +428,147 @@
       bosses: [{ look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }]
     }
   ];
+  // Apparence de chaque boss, dans l'ordre des noms de l'instance (trois en donjon, six en raid ; le dernier est le
+  // boss final), et des boss cachés derrière les passages secrets.
+  const LOOKS = {
+    terriers: {
+      bosses: [
+        { look: 'beast', pal: ['#8a6a50', '#4e3a2a', '#b89878', '#e6a7a7', '#ff5040'], crown: true },
+        { look: 'robed', pal: ['#5a4a3a', '#2e241a', '#80705a', '#c9a46e', '#a3c7ff'], hood: true },
+        { look: 'skeleton', pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'], crown: true }
+      ],
+      secrets: [{ look: 'beast', pal: ['#4a3a30', '#2a1e16', '#7a6050', '#d0a040', '#ffd040'], horns: true, crown: true }]
+    },
+    mine: {
+      bosses: [
+        { look: 'imp', pal: ['#8a7a5a', '#4e4430', '#b0a07a', '#c9a24a', '#9fe8ff'], nowings: true, crown: true },
+        { look: 'spider', pal: ['#3d4652', '#22282e', '#6a7a8c', '#9fe8ff', '#c8f7ff'] },
+        { look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'] }
+      ],
+      secrets: [{ look: 'robed', pal: ['#2a2e36', '#14161a', '#4a5260', '#ffcf6a', '#ffffff'], hood: true }]
+    },
+    eclipse: {
+      bosses: [
+        { look: 'robed', pal: ['#3a2a5a', '#1e1530', '#6a5090', '#ff9955', '#ffcc88'], hood: true },
+        { look: 'golem', pal: ['#c89a40', '#7a5a22', '#f0d080', '#ffcc55', '#fff0b0'], halo: true },
+        { look: 'robed', pal: ['#1e1530', '#0f0a1c', '#4a3670', '#ffcc55', '#ffdd88'], halo: true }
+      ],
+      secrets: [{ look: 'spirit', pal: ['#120a1c', '#06040c', '#3a2a5a', '#ff7a3a', '#ffb080'] }]
+    },
+    penitents: {
+      bosses: [
+        { look: 'brute', pal: ['#5a5560', '#33303a', '#807a8a', '#b79cff', '#e2d4ff'], hood: true },
+        { look: 'robed', pal: ['#e8e4f0', '#a8a0b8', '#ffffff', '#5a161a', '#b79cff'], hood: true },
+        { look: 'knight', pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'], hood: true }
+      ],
+      secrets: [{ look: 'skeleton', pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'], hood: true }]
+    },
+    forge: {
+      bosses: [
+        { look: 'brute', pal: ['#7a4a30', '#4a2a18', '#a87050', '#ff8a3c', '#ffd36b'], heavy: true },
+        { look: 'golem', pal: ['#3a2a26', '#1e1412', '#5a3d33', '#ff6a1f', '#ffd36b'] },
+        { look: 'dragon', pal: ['#d0401c', '#7a1e0c', '#ff8a4a', '#ffd36b', '#fff6b0'] }
+      ],
+      secrets: [{ look: 'scorpion', pal: ['#1e1a22', '#0c0a10', '#3e3446', '#ff6a1f', '#ffd36b'] }]
+    },
+    fosse: {
+      bosses: [
+        { look: 'knight', pal: ['#3a3a40', '#1e1e22', '#5e5e66', '#e88aff', '#f4d0ff'], heavy: true },
+        { look: 'spirit', pal: ['#6a5070', '#3a2840', '#a080b0', '#e88aff', '#ffffff'] },
+        { look: 'brute', pal: ['#4a3438', '#2a1c20', '#6e5056', '#c03040', '#ff5050'] }
+      ],
+      secrets: [{ look: 'horror', pal: ['#1e1420', '#0c080e', '#3e2a42', '#e88aff', '#ffd0ff'] }]
+    },
+    bastion: {
+      bosses: [
+        { look: 'quad', pal: ['#5a2020', '#300e0e', '#8a3a34', '#d4a44a', '#ff6040'] },
+        { look: 'knight', pal: ['#6a1c1c', '#3a0e0e', '#9a3a34', '#c0c0c8', '#ff6040'] },
+        { look: 'robed', pal: ['#4a0a16', '#24040a', '#7a1a2a', '#d4a44a', '#ff3050'], hood: true },
+        { look: 'robed', pal: ['#8a1428', '#4a0a16', '#c03a50', '#ffd36d', '#ff3050'], crown: true },
+        { look: 'brute', pal: ['#7a1a1a', '#420a0a', '#b03a34', '#ffd36d', '#ff8060'], heavy: true },
+        { look: 'knight', pal: ['#9a1a1a', '#550c0c', '#d04040', '#ffd36d', '#ffee88'], crown: true }
+      ],
+      secrets: [
+        { look: 'rogue', pal: ['#2a1a1a', '#140a0a', '#4a2a2a', '#c8303a', '#ff5050'] },
+        { look: 'spirit', pal: ['#f4f0f0', '#c8b8b8', '#ffffff', '#c8303a', '#ffd0d0'] }
+      ]
+    },
+    continuum: {
+      bosses: [
+        { look: 'imp', pal: ['#a07a3a', '#5a4220', '#d0aa60', '#7de0ff', '#d0faff'], nowings: true },
+        { look: 'golem', pal: ['#c09a40', '#705a22', '#f0d080', '#7de0ff', '#d0faff'] },
+        { look: 'golem', pal: ['#e8d0a0', '#a08a60', '#fff4d8', '#ff7fa7', '#ffd0e0'], halo: true },
+        { look: 'robed', pal: ['#3a4a9a', '#1e2860', '#6a7ad8', '#ffd36d', '#9fe8ff'], halo: true },
+        { look: 'spirit', pal: ['#5a6ac8', '#2a3470', '#9aa8ff', '#7de0ff', '#ffffff'] },
+        { look: 'horror', pal: ['#2a1a4a', '#140a2a', '#5a3a8a', '#ff7fa7', '#ffd0e0'] }
+      ],
+      secrets: [
+        { look: 'flyer', pal: ['#7a5ad8', '#3a2a70', '#b8a0ff', '#7de0ff', '#ffffff'] },
+        { look: 'spirit', pal: ['#fff0d8', '#c8b090', '#ffffff', '#ff7fa7', '#7de0ff'] }
+      ]
+    },
+    seraphin: {
+      bosses: [
+        { look: 'angel', pal: ['#ffe8d0', '#c8a888', '#ffffff', '#ffd36d', '#fff6c0'] },
+        { look: 'angel', pal: ['#f0e6c8', '#b8a878', '#ffffff', '#ffd36d', '#fff6c0'] },
+        { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#ffffff', '#fff6c0'], halo: true },
+        { look: 'golem', pal: ['#f4f0e4', '#c4baa0', '#ffffff', '#ffd36d', '#ffe680'], halo: true },
+        { look: 'robed', pal: ['#f8f4ec', '#c8c0b0', '#ffffff', '#c4a0ff', '#fff6c0'], halo: true },
+        { look: 'angel', pal: ['#ffffff', '#d8cfa8', '#ffffff', '#ffcf40', '#fff0a0'], wings6: true }
+      ],
+      secrets: [
+        { look: 'angel', pal: ['#3a3040', '#1a141e', '#6a5a72', '#c4a0ff', '#ff5070'] },
+        { look: 'angel', pal: ['#c8e0ff', '#7a90c0', '#ffffff', '#c4a0ff', '#ffffff'], wings6: true }
+      ]
+    },
+    celestia: {
+      bosses: [
+        { look: 'spirit', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'] },
+        { look: 'angel', pal: ['#c8d8ff', '#7a8ac0', '#ffffff', '#9fd8ff', '#e0f4ff'] },
+        { look: 'golem', pal: ['#2a2e60', '#1a1c40', '#4a50a0', '#fff0a8', '#ffffff'], halo: true },
+        { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'], halo: true },
+        { look: 'robed', pal: ['#1a1c40', '#0c0e24', '#3a3e80', '#fff0a8', '#ffffff'], crown: true },
+        { look: 'angel', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'], wings6: true }
+      ],
+      secrets: [
+        { look: 'dragon', pal: ['#c8303a', '#7a1018', '#ff7060', '#fff0a8', '#ffffff'] },
+        { look: 'spirit', pal: ['#ffffff', '#d8d4f0', '#ffffff', '#fff0a8', '#9fd8ff'] }
+      ]
+    },
+    durgrim: {
+      bosses: [
+        { look: 'brute', pal: ['#7a6048', '#4a3a2a', '#a0866a', '#e0a060', '#ffd080'], tusks: true },
+        { look: 'golem', pal: ['#5e5a5a', '#3a3636', '#86807a', '#e0a060', '#ffd080'] },
+        { look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }
+      ],
+      secrets: [{ look: 'skeleton', pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'], crown: true }]
+    },
+    ombral: {
+      bosses: [
+        { look: 'robed', pal: ['#3a4a5a', '#1e2834', '#5a6e84', '#8ac8e8', '#d8f0ff'], hood: true },
+        { look: 'golem', pal: ['#2a3038', '#14181e', '#4a5260', '#8ac8e8', '#d8f0ff'], heavy: true },
+        { look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }
+      ],
+      secrets: [{ look: 'spirit', pal: ['#4a7a8a', '#2a4a54', '#7ab0c0', '#8ac8e8', '#ffffff'], crown: true }]
+    },
+    mille_tombes: {
+      bosses: [
+        { look: 'rogue', pal: ['#4a4a40', '#2a2a22', '#6e6e60', '#a8f0c0', '#d8fff0'] },
+        { look: 'spirit', pal: ['#2a2e2a', '#141614', '#4a524a', '#a8f0c0', '#ffffff'] },
+        { look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }
+      ],
+      secrets: [{ look: 'skeleton', pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'], crown: true }]
+    },
+    fongique: {
+      bosses: [
+        { look: 'golem', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], leafy: true },
+        { look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] },
+        { look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }
+      ],
+      secrets: [{ look: 'horror', pal: ['#4a5a26', '#2a3414', '#7a8a40', '#e870c0', '#ffe0f8'], leafy: true }]
+    }
+  };
+  for (const th of THEMES) Object.assign(th, LOOKS[th.key]);
   // Arène des Épreuves : colisée de sable chaud, gradins de grès, bannières pourpres et or.
   THEMES.arena = {
     key: 'arene',
@@ -463,7 +608,11 @@
     'dragonskull'
   ]);
 
-  // ---------------------------------------------------------------- Plans
+  // ---------------------------------------------------------------- Plans d'exploration
+  // Chaque instance est un réseau de salles : l'entrée, puis une aile par boss (salle de passage, salles annexes,
+  // énigme qui scelle la porte du boss), la salle du boss, et derrière des murs fissurés les salles des boss cachés.
+  // Les salles sont posées sur une grille de cases de 30 × 24 tuiles (une salle par case) et reliées seulement entre
+  // cases voisines : aucun couloir ne traverse une autre salle. Le plan est le même à chaque entrée (graine fixe).
   function seeded(i) {
     let s = (i + 1) * 9973 + 17;
     return () => {
@@ -480,6 +629,15 @@
   });
   const STEP = { N: [0, -1], E: [1, 0], W: [-1, 0], S: [0, 1] };
   const OPPOSITE = { N: 'S', S: 'N', E: 'W', W: 'E' };
+  const CELL = { w: 30, h: 24, ox: 15, oy: 23, cols: 12, rows: 15 };
+  // Mécanismes qui scellent la porte d'un boss, en alternance d'une aile à l'autre.
+  const LOCKS = ['braziers', 'levers', 'runes', 'guardian'];
+  const SIGILS = [
+    { sym: '☀', name: 'le Soleil', col: '#ffcf4a' },
+    { sym: '☾', name: 'la Lune', col: '#b8c8ff' },
+    { sym: '★', name: 'l’Étoile', col: '#fff0a8' },
+    { sym: '◆', name: 'le Cristal', col: '#7de0ff' }
+  ];
   function corridorPoints(a, b, dir) {
     if (dir === 'N' || dir === 'S') {
       const my = Math.round((a.cy + b.cy) / 2);
@@ -510,107 +668,229 @@
       }
     }
   }
-  function overlaps(r, rooms, margin) {
-    const b = bounds(r);
-    return rooms.some(o => {
-      const c = bounds(o);
-      return b.x0 - margin <= c.x1 && b.x1 + margin >= c.x0 && b.y0 - margin <= c.y1 && b.y1 + margin >= c.y0;
-    });
-  }
-  function placeRoom(room, prev, rooms, rnd) {
-    const order = rnd() < 0.5 ? ['N', 'E', 'W'] : rnd() < 0.5 ? ['E', 'N', 'W'] : ['W', 'N', 'E'];
-    if (prev.dir) order.sort((a, b) => (a === OPPOSITE[prev.dir]) - (b === OPPOSITE[prev.dir]));
-    for (let attempt = 0; attempt < 3; attempt++)
-      for (const dir of order) {
-        const len = 4 + Math.floor(rnd() * 4) + attempt * 3,
-          side = Math.round((rnd() * 2 - 1) * 2),
-          [sx, sy] = STEP[dir];
-        room.cx = prev.cx + sx * ((prev.w - 1) / 2 + len + (room.w - 1) / 2) + (sy ? side : 0);
-        room.cy = prev.cy + sy * ((prev.h - 1) / 2 + len + (room.h - 1) / 2) + (sx ? side : 0);
-        const b = bounds(room);
-        if (b.x0 < 8 || b.y0 < 8 || b.x1 > MAPW - 8 || b.y1 > ENTRY.y - 6) continue;
-        if (overlaps(room, rooms, 4)) continue;
-        const others = rooms.filter(o => o !== prev);
-        let clash = false;
-        eachPathCell(corridorPoints(prev, room, dir), (x, y) => {
-          if (others.some(o => overlaps({ cx: x, cy: y, w: 3, h: 3 }, [o], 1))) clash = true;
-        });
-        if (clash) continue;
-        room.dir = dir;
-        return;
+  // Réseau de salles sur la grille de cases ; null si le tirage se coince (on retente avec une autre graine).
+  function layout(d, rnd) {
+    const B = d.raid ? 6 : 3,
+      secretWings = d.raid ? [1, 4] : [1],
+      taken = new Map(),
+      rooms = [],
+      links = [],
+      key = (c, r) => c + ',' + r,
+      free = (c, r) => c >= 0 && r >= 0 && c < CELL.cols && r < CELL.rows && !taken.has(key(c, r)),
+      shuffle = a => {
+        for (let k = a.length - 1; k > 0; k--) {
+          const j = Math.floor(rnd() * (k + 1));
+          [a[k], a[j]] = [a[j], a[k]];
+        }
+        return a;
+      },
+      around = room => shuffle(Object.entries(STEP).map(([dir, [dx, dy]]) => [dir, room.c + dx, room.r + dy])).filter(([, c, r]) => free(c, r)),
+      add = (kind, c, r, extra) => {
+        const room = { kind, c, r, ...extra };
+        taken.set(key(c, r), room);
+        rooms.push(room);
+        return room;
+      },
+      link = (a, b, dir, extra = {}) => links.push({ from: rooms.indexOf(a), to: rooms.indexOf(b), dir, ...extra });
+    let cur = add('entry', 3, 4, { stage: -1 }),
+      reserved = null;
+    for (let s = 0; s < B; s++) {
+      const hubs = [],
+        nHubs = 1 + (rnd() < (d.raid ? 0.3 : 0.55) ? 1 : 0);
+      for (let h = 0; h < nHubs; h++) {
+        let at;
+        if (reserved) {
+          taken.delete(key(reserved[1], reserved[2]));
+          at = reserved;
+          reserved = null;
+        } else at = around(cur)[0];
+        if (!at) return null;
+        const hub = add('hub', at[1], at[2], { stage: s });
+        link(cur, hub, at[0], cur.kind === 'boss' ? { gate: cur.stage } : {});
+        hubs.push(hub);
+        cur = hub;
       }
-    // Repli : plein nord, loin de tout.
-    room.cx = prev.cx;
-    room.cy = prev.cy - ((prev.h - 1) / 2 + 12 + (room.h - 1) / 2);
-    room.dir = 'N';
+      // Salle du boss : une case voisine du dernier hub qui garde une case libre pour l'aile suivante.
+      let bossAt = null,
+        next = null;
+      for (const opt of around(cur)) {
+        taken.set(key(opt[1], opt[2]), 1);
+        const after = s === B - 1 ? [] : around({ c: opt[1], r: opt[2] });
+        taken.delete(key(opt[1], opt[2]));
+        if (s === B - 1 || after.length) {
+          bossAt = opt;
+          next = after[0] || null;
+          break;
+        }
+      }
+      if (!bossAt) return null;
+      const boss = add('boss', bossAt[1], bossAt[2], { stage: s });
+      link(cur, boss, bossAt[0], { door: s });
+      if (next) {
+        reserved = next;
+        taken.set(key(next[1], next[2]), 'réservée');
+      }
+      // Salles annexes de l'aile, accrochées aux salles de passage (ou à une autre annexe).
+      const nSides = d.raid ? 1 + (s % 2) : 2;
+      for (let k = 0; k < nSides; k++) {
+        const hosts = shuffle([...hubs, ...rooms.filter(r => r.kind === 'side' && r.stage === s)]);
+        const host = hosts.find(h => around(h).length);
+        if (!host) break;
+        const at = around(host)[0],
+          side = add('side', at[1], at[2], { stage: s });
+        link(host, side, at[0]);
+      }
+      if (!rooms.some(r => r.kind === 'side' && r.stage === s)) return null;
+      // Passage secret : une salle cachée derrière le mur d'une annexe de cette aile.
+      const sk = secretWings.indexOf(s);
+      if (sk >= 0) {
+        const host = shuffle(rooms.filter(r => r.kind === 'side' && r.stage === s)).find(h => around(h).length);
+        if (!host) return null;
+        const at = around(host)[0],
+          room = add('secret', at[1], at[2], { stage: s, secret: sk });
+        link(host, room, at[0], { secret: sk });
+      }
+      cur = boss;
+    }
+    return { rooms, links };
+  }
+  // Taille et position de chaque salle dans sa case.
+  function sizeRooms(d, rooms, rnd) {
+    const odd = (lo, hi) => lo + 2 * Math.floor(rnd() * ((hi - lo) / 2 + 1)),
+      B = d.raid ? 6 : 3;
+    for (const room of rooms) {
+      if (room.kind === 'entry') {
+        Object.assign(room, { w: 11, h: 9, cx: ENTRY.x, cy: ENTRY.y - 2 });
+        continue;
+      }
+      const final = room.kind === 'boss' && room.stage === B - 1;
+      if (room.kind === 'hub') Object.assign(room, { w: odd(13, 17), h: odd(11, 13) });
+      else if (room.kind === 'side') Object.assign(room, { w: odd(11, 15), h: odd(9, 11) });
+      else if (room.kind === 'secret') Object.assign(room, { w: 15, h: 13 });
+      else Object.assign(room, d.raid ? (final ? { w: 27, h: 21 } : { w: 23, h: 17 }) : final ? { w: 23, h: 17 } : { w: 21, h: 15 });
+      const mx = Math.max(0, Math.floor((CELL.w - room.w) / 2) - 2),
+        my = Math.max(0, Math.floor((CELL.h - room.h) / 2) - 2);
+      room.cx = CELL.ox + room.c * CELL.w + 15 + Math.round((rnd() * 2 - 1) * mx);
+      room.cy = CELL.oy + room.r * CELL.h + 12 + Math.round((rnd() * 2 - 1) * my);
+    }
+  }
+  // Les trois cases d'un couloir juste à la sortie d'une salle (porte, herse ou mur secret).
+  function doorCells(room, link) {
+    const pts = link.points,
+      b = bounds(room),
+      cells = [];
+    const order = [];
+    eachPathCell(pts, (x, y) => order.push([x, y]));
+    if (link.to === room.index) order.reverse();
+    for (let k = 1; k < order.length; k++) {
+      const [x, y] = order[k];
+      if (x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1) continue;
+      const horizontal = order[k][1] === order[k - 1][1];
+      for (let o = -1; o <= 1; o++) cells.push(horizontal ? [x, y + o] : [x + o, y]);
+      break;
+    }
+    return cells;
   }
   function planDungeon(i) {
     if (PLANS[i]) return PLANS[i];
+    const d = instances[i];
+    for (let attempt = 0; attempt < 400; attempt++) {
+      const rnd = seeded(i * 1000 + attempt),
+        net = layout(d, rnd);
+      if (!net) continue;
+      const plan = buildPlan(i, net, rnd);
+      if (plan && validPlan(plan)) {
+        PLANS[i] = plan;
+        return plan;
+      }
+    }
+    throw new Error('Plan introuvable pour ' + d.name);
+  }
+  function buildPlan(i, net, rnd) {
     const d = instances[i],
       th = THEMES[i],
-      rnd = seeded(i),
-      seq = d.raid
-        ? ['entry', 'trash', 'boss', 'trash', 'trash', 'boss', 'trash', 'boss']
-        : ['entry', 'trash', 'trash', 'trash', 'boss'],
-      rooms = [];
-    let stage = 0;
-    seq.forEach((kind, k) => {
-      const final = k === seq.length - 1;
-      let w = 11,
-        h = 9;
-      if (kind === 'trash') {
-        w = 11 + 2 * Math.floor(rnd() * 3);
-        h = 9 + 2 * Math.floor(rnd() * 3);
-      } else if (kind === 'boss') {
-        w = d.raid && final ? 27 : d.raid ? 23 : 21;
-        h = d.raid && final ? 21 : 17;
-      }
-      const room = { kind, w, h, stage: kind === 'boss' ? stage++ : -1 };
-      if (!k) {
-        room.cx = ENTRY.x;
-        room.cy = ENTRY.y - 2;
-      } else placeRoom(room, rooms[k - 1], rooms, rnd);
-      rooms.push(room);
-    });
-    const links = rooms.slice(1).map((room, k) => ({
-      from: k,
-      to: k + 1,
-      dir: room.dir,
-      points: corridorPoints(rooms[k], room, room.dir)
-    }));
-    // Herses : à la sortie de chaque salle de boss qui n'est pas la dernière.
-    const gates = [];
-    for (const link of links) {
-      const a = rooms[link.from];
-      if (a.kind !== 'boss') continue;
-      const b = bounds(a),
-        cells = [];
-      // Toute la ligne du mur côté sortie ; seules les cases du couloir deviendront herse.
-      if (link.dir === 'N') for (let x = b.x0 - 1; x <= b.x1 + 1; x++) cells.push([x, b.y0 - 1]);
-      if (link.dir === 'E') for (let y = b.y0 - 1; y <= b.y1 + 1; y++) cells.push([b.x1 + 1, y]);
-      if (link.dir === 'W') for (let y = b.y0 - 1; y <= b.y1 + 1; y++) cells.push([b.x0 - 1, y]);
-      gates[a.stage] = { cells, dir: link.dir };
+      { rooms, links } = net;
+    sizeRooms(d, rooms, rnd);
+    rooms.forEach((r, k) => (r.index = k));
+    for (const l of links) l.points = corridorPoints(rooms[l.from], rooms[l.to], l.dir);
+    for (const room of rooms) room.doors = links.filter(l => l.from === room.index || l.to === room.index).map(l => (l.from === room.index ? l.dir : OPPOSITE[l.dir]));
+    const B = d.raid ? 6 : 3,
+      plan = {
+        index: i,
+        theme: th,
+        rooms,
+        links,
+        gates: [],
+        doors: [],
+        secretWalls: [],
+        locks: [],
+        plates: [],
+        guardians: [],
+        bossCount: B,
+        secretCount: rooms.filter(r => r.kind === 'secret').length,
+        props: [],
+        decals: [],
+        lights: [],
+        trash: []
+      };
+    for (const l of links) {
+      if (l.gate !== undefined) plan.gates[l.gate] = { cells: doorCells(rooms[l.from], l), dir: l.dir };
+      if (l.door !== undefined) plan.doors[l.door] = { cells: doorCells(rooms[l.to], l), dir: l.dir, room: l.to };
+      if (l.secret !== undefined) plan.secretWalls[l.secret] = { cells: doorCells(rooms[l.from], l), dir: l.dir, room: l.to };
     }
-    for (const room of rooms) {
-      room.doors = links
-        .filter(l => l.from === rooms.indexOf(room) || l.to === rooms.indexOf(room))
-        .map(l => (l.from === rooms.indexOf(room) ? l.dir : OPPOSITE[l.dir]));
-    }
-    const plan = {
-      index: i,
-      theme: th,
-      rooms,
-      links,
-      gates,
-      bossCount: stage,
-      props: [],
-      decals: [],
-      lights: [],
-      trash: []
-    };
     plan.grid = carve(plan, i, rnd);
-    PLANS[i] = plan;
     return plan;
+  }
+  // Vérification d'un plan : chaque énigme est faisable avant sa porte, aucun boss n'est accessible avant d'avoir
+  // ouvert sa porte, les salles cachées restent fermées tant que leur mur n'est pas découvert.
+  function reachFrom(plan, open) {
+    const grid = plan.grid,
+      seen = new Set([ENTRY.y * MAPW + ENTRY.x]),
+      queue = [[ENTRY.x, ENTRY.y]];
+    while (queue.length) {
+      const [x, y] = queue.pop();
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1]
+      ]) {
+        const nx = x + dx,
+          ny = y + dy,
+          id = ny * MAPW + nx;
+        if (seen.has(id) || !(WALKABLE(grid[ny]?.[nx]) || open.has(id))) continue;
+        seen.add(id);
+        queue.push([nx, ny]);
+      }
+    }
+    return seen;
+  }
+  const near = (seen, x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has((y + dy) * MAPW + x + dx));
+  function openings(list) {
+    const out = new Set();
+    for (const g of list) if (g) for (const [x, y] of g.cells) out.add(y * MAPW + x);
+    return out;
+  }
+  function validPlan(plan) {
+    const bossRooms = plan.rooms.filter(r => r.kind === 'boss'),
+      secretRooms = plan.rooms.filter(r => r.kind === 'secret');
+    if (plan.gates.filter(Boolean).length !== plan.bossCount - 1 || plan.doors.filter(Boolean).length !== plan.bossCount) return false;
+    if ([...plan.gates, ...plan.doors, ...plan.secretWalls].some(g => g && g.cells.length < 2)) return false;
+    for (let s = 0; s < plan.bossCount; s++) {
+      const before = reachFrom(plan, openings([...plan.gates.slice(0, s), ...plan.doors.slice(0, s)])),
+        lock = plan.locks[s],
+        boss = bossRooms[s].boss;
+      if (!lock || !lock.ok || !lock.items.every(it => near(before, it.x, it.y))) return false;
+      if (near(before, boss.x, boss.y)) return false;
+      const after = reachFrom(plan, openings([...plan.gates.slice(0, s), ...plan.doors.slice(0, s + 1)]));
+      if (!near(after, boss.x, boss.y)) return false;
+    }
+    const all = openings([...plan.gates, ...plan.doors]),
+      closed = reachFrom(plan, all);
+    if (secretRooms.some(r => near(closed, r.boss.x, r.boss.y))) return false;
+    if (!plan.secretWalls.every(w => w.cells.some(([x, y]) => near(closed, x, y)))) return false;
+    const open = reachFrom(plan, openings([...plan.gates, ...plan.doors, ...plan.secretWalls]));
+    return secretRooms.every(r => near(open, r.boss.x, r.boss.y)) && plan.trash.every(t => open.has(t.y * MAPW + t.x)) && plan.guardians.every(g => open.has(g.y * MAPW + g.x));
   }
   function carve(plan, i, rnd) {
     const th = plan.theme,
@@ -640,14 +920,12 @@
           if (inside) set(x, y, FLOOR);
         }
     }
-    // Couloirs (ponts au-dessus du vide pour les thèmes célestes).
-    const cw = 1;
+    // Couloirs de trois cases (ponts au-dessus du vide pour les thèmes célestes).
     for (const link of plan.links)
       eachPathCell(link.points, (x, y) => {
-        for (let oy = -cw; oy <= cw; oy++)
-          for (let ox = -cw; ox <= cw; ox++) {
-            const jag =
-              th.shape === 'cave' && Math.abs(ox) + Math.abs(oy) === 2 && hash(x + ox, y + oy, i) < 0.4;
+        for (let oy = -1; oy <= 1; oy++)
+          for (let ox = -1; ox <= 1; ox++) {
+            const jag = th.shape === 'cave' && Math.abs(ox) + Math.abs(oy) === 2 && hash(x + ox, y + oy, i) < 0.4;
             if (!jag && grid[y + oy]?.[x + ox] !== FLOOR) set(x + ox, y + oy, FLOOR);
           }
       });
@@ -669,8 +947,7 @@
             set(x, y, HAZARD);
             placed++;
           }
-        if (placed && th.hazard.glow)
-          plan.lights.push({ x: px + 0.5, y: py + 0.5, r: 150, col: th.hazard.glow });
+        if (placed && th.hazard.glow) plan.lights.push({ x: px + 0.5, y: py + 0.5, r: 150, col: th.hazard.glow });
       }
       // La Fosse : un anneau de gouffre autour de l'arène, franchi par quatre passerelles.
       if (th.shape === 'pit' && room.kind === 'boss') {
@@ -681,32 +958,112 @@
             const dx = (x - room.cx) / rx,
               dy = (y - room.cy) / ry,
               e = Math.sqrt(dx * dx + dy * dy);
-            if (e > 0.62 && e < 0.8 && Math.abs(x - room.cx) > 1 && Math.abs(y - room.cy) > 1)
-              set(x, y, HAZARD);
+            if (e > 0.62 && e < 0.8 && Math.abs(x - room.cx) > 1 && Math.abs(y - room.cy) > 1) set(x, y, HAZARD);
           }
       }
     }
-    // Tapis, rails, runes ou passerelles le long du chemin principal.
+    // Tapis, rails, runes ou passerelles le long des couloirs (jamais vers un passage secret, qui se trahirait).
     for (const link of plan.links)
-      eachPathCell(link.points, (x, y) => {
-        const aw = th.accent.width;
-        for (let oy = -aw; oy <= aw; oy++)
-          for (let ox = -aw; ox <= aw; ox++)
-            if (grid[y + oy]?.[x + ox] === FLOOR) set(x + ox, y + oy, ACCENT);
-      });
+      if (link.secret === undefined)
+        eachPathCell(link.points, (x, y) => {
+          const aw = th.accent.width;
+          for (let oy = -aw; oy <= aw; oy++) for (let ox = -aw; ox <= aw; ox++) if (grid[y + oy]?.[x + ox] === FLOOR) set(x + ox, y + oy, ACCENT);
+        });
+    placePuzzles(plan, grid, rnd, solid, set);
     decorate(plan, grid, rnd, solid, set);
-    // Herses fermées.
-    plan.gates.forEach(g => {
+    // Herses de sortie et portes scellées fermées ; murs fissurés des passages secrets.
+    for (const g of [...plan.gates, ...plan.doors]) {
+      if (!g) continue;
       g.cells = g.cells.filter(([x, y]) => WALKABLE(grid[y][x]));
       g.under = g.cells.map(([x, y]) => grid[y][x]);
       g.cells.forEach(([x, y]) => set(x, y, GATE));
-    });
+    }
+    for (const g of plan.secretWalls) {
+      g.cells = g.cells.filter(([x, y]) => WALKABLE(grid[y][x]));
+      g.under = g.cells.map(([x, y]) => grid[y][x]);
+      g.cells.forEach(([x, y]) => set(x, y, SECRET));
+    }
     return grid;
+  }
+  // Énigmes : chaque porte de boss est scellée par un mécanisme posé dans son aile.
+  function placePuzzles(plan, grid, rnd, solid, set) {
+    const d = instances[plan.index],
+      taken = [],
+      spot = room => {
+        const b = bounds(room);
+        for (let tries = 0; tries < 200; tries++) {
+          const x = Math.round(b.x0 + 1 + rnd() * (room.w - 3)),
+            y = Math.round(b.y0 + 1 + rnd() * (room.h - 3));
+          // Hors de la croix des couloirs, qui doit rester libre.
+          if (Math.abs(x - room.cx) <= 1 || Math.abs(y - room.cy) <= 1) continue;
+          if (grid[y]?.[x] !== FLOOR || taken.some(([tx, ty]) => Math.abs(tx - x) < 3 && Math.abs(ty - y) < 3)) continue;
+          if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => WALKABLE(grid[y + dy]?.[x + dx]))) continue;
+          taken.push([x, y]);
+          return { x, y };
+        }
+        return null;
+      },
+      solidAt = (x, y) => {
+        set(x, y, WALL);
+        solid.add(y * MAPW + x);
+      };
+    for (let s = 0; s < plan.bossCount; s++) {
+      const wing = plan.rooms.filter(r => r.stage === s && (r.kind === 'hub' || r.kind === 'side')),
+        sides = wing.filter(r => r.kind === 'side'),
+        hub = wing.find(r => r.kind === 'hub'),
+        type = LOCKS[(plan.index + s) % LOCKS.length],
+        n = d.raid ? 4 : 3,
+        lock = { type, items: [], order: [], stele: null };
+      plan.locks[s] = lock;
+      if (type === 'braziers' || type === 'levers') {
+        // Répartis dans toutes les salles de l'aile, annexes d'abord.
+        const order = [...sides, ...wing.filter(r => r.kind === 'hub')];
+        for (let k = 0; k < n; k++) {
+          const at = spot(order[k % order.length]);
+          if (!at) return;
+          lock.items.push({ ...at, id: k, sym: k });
+          solidAt(at.x, at.y);
+          plan.props.push({ ...at, kind: type === 'braziers' ? 'brazier_off' : 'lever', lock: s, id: k });
+        }
+        if (type === 'levers') {
+          lock.order = [...Array(n).keys()].sort(() => rnd() - 0.5);
+          const st = spot(hub);
+          if (!st) return;
+          lock.stele = st;
+          solidAt(st.x, st.y);
+          plan.props.push({ ...st, kind: 'stele', lock: s });
+        }
+        lock.ok = true;
+      } else if (type === 'runes') {
+        // Quatre dalles gravées dans une même salle ; la stèle donne l'ordre.
+        const room = sides.slice().sort((a, b) => b.w * b.h - a.w * a.h)[0] || hub;
+        for (let k = 0; k < 4; k++) {
+          const at = spot(room);
+          if (!at) return;
+          lock.items.push({ ...at, id: k, sym: k });
+          plan.plates.push({ ...at, lock: s, id: k });
+        }
+        lock.order = [0, 1, 2, 3].sort(() => rnd() - 0.5);
+        const st = spot(room);
+        if (!st) return;
+        lock.stele = st;
+        solidAt(st.x, st.y);
+        plan.props.push({ ...st, kind: 'stele', lock: s });
+        lock.ok = true;
+      } else {
+        // Gardiens du sceau : un par annexe (deux au plus), au centre de la salle.
+        for (const room of sides.slice(0, 2)) {
+          const g = { x: room.cx + 1, y: room.cy, lock: s, type: plan.guardians.length % 2 };
+          plan.guardians.push(g);
+          lock.items.push({ x: g.x, y: g.y, id: lock.items.length });
+        }
+        lock.ok = lock.items.length > 0;
+      }
+    }
   }
   function decorate(plan, grid, rnd, solid, set) {
     const th = plan.theme,
-      free = (x, y) =>
-        grid[y]?.[x] === FLOOR && !plan.props.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2);
+      free = (x, y) => grid[y]?.[x] === FLOOR && !plan.props.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2) && !plan.plates.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2);
     const addProp = (x, y, kind, extra = {}) => {
       plan.props.push({ x, y, kind, ...extra });
       if (SOLID_PROPS.has(kind)) {
@@ -714,9 +1071,6 @@
         solid.add(y * MAPW + x);
       }
     };
-    let trashLeft = plan.rooms.filter(r => r.kind === 'trash').length;
-    const trashTotal = 4 + plan.index * 2;
-    let trashPlaced = 0;
     plan.rooms.forEach((room, k) => {
       const b = bounds(room);
       // Torches, bannières et veines de mithril sur le mur du fond.
@@ -725,24 +1079,17 @@
           if (Math.abs(x - room.cx) <= 2) continue;
           for (let y = b.y0 - 1; y <= room.cy; y++) {
             if (grid[y][x] === WALL && WALKABLE(grid[y + 1]?.[x]) && !solid.has(y * MAPW + x)) {
-              const kind = th.wallProps[n++ % th.wallProps.length];
-              plan.props.push({ x, y, kind, wall: true });
+              plan.props.push({ x, y, kind: th.wallProps[n++ % th.wallProps.length], wall: true });
               break;
             }
             if (WALKABLE(grid[y][x])) break;
           }
         }
       // Colonnes des grandes salles, symétriques, hors des portes.
-      if (
-        (th.shape === 'hall' || th.shape === 'void') &&
-        room.w >= 13 &&
-        room.h >= 11 &&
-        room.kind !== 'entry'
-      ) {
+      if ((th.shape === 'hall' || th.shape === 'void') && room.w >= 13 && room.h >= 11 && room.kind !== 'entry') {
         const kind = th.floorProps.includes('pillarlight') && room.kind === 'boss' ? 'pillarlight' : 'pillar';
         for (let y = b.y0 + 3; y <= b.y1 - 3; y += 4)
-          if (Math.abs(y - room.cy) > 2)
-            for (const x of [b.x0 + 3, b.x1 - 3]) if (free(x, y) && grid[y][x] === FLOOR) addProp(x, y, kind);
+          if (Math.abs(y - room.cy) > 2) for (const x of [b.x0 + 3, b.x1 - 3]) if (free(x, y) && grid[y][x] === FLOOR) addProp(x, y, kind);
       }
       if (room.kind === 'entry') {
         plan.decals.push({ x: ENTRY.x, y: ENTRY.y, kind: 'portal' });
@@ -755,18 +1102,15 @@
         const x = b.x0 + 1 + Math.floor(rnd() * (room.w - 2)),
           y = b.y0 + 1 + Math.floor(rnd() * (room.h - 2));
         if (Math.abs(x - room.cx) <= 2 || Math.abs(y - room.cy) <= 2 || !free(x, y)) continue;
-        if (room.kind === 'boss' && Math.hypot(x - room.cx, y - room.cy) < 5) continue;
+        if ((room.kind === 'boss' || room.kind === 'secret') && Math.hypot(x - room.cx, y - room.cy) < 5) continue;
+        // Jamais collé à un mur fissuré : le passage doit rester dégagé.
+        if (plan.secretWalls.some(w => w.cells.some(([cx, cy]) => Math.abs(cx - x) < 3 && Math.abs(cy - y) < 3))) continue;
         addProp(x, y, th.floorProps[Math.floor(rnd() * th.floorProps.length)]);
         n++;
       }
       if (th.hazard.style === 'blood' || th.key === 'fosse')
-        for (let n = 0; n < 3; n++)
-          plan.decals.push({
-            x: b.x0 + 1 + rnd() * (room.w - 2),
-            y: b.y0 + 1 + rnd() * (room.h - 2),
-            kind: 'splat'
-          });
-      if (room.kind === 'boss') {
+        for (let n = 0; n < 3; n++) plan.decals.push({ x: b.x0 + 1 + rnd() * (room.w - 2), y: b.y0 + 1 + rnd() * (room.h - 2), kind: 'splat' });
+      if (room.kind === 'boss' || room.kind === 'secret') {
         // Pièce maîtresse sur un côté sans porte, de préférence face à l'entrée.
         const entry = room.doors[0],
           sides = [OPPOSITE[entry], 'N', 'E', 'W', 'S'].filter(s => !room.doors.includes(s)),
@@ -774,7 +1118,7 @@
           [sx, sy] = STEP[side],
           px = room.cx + sx * ((room.w - 1) / 2 - 2),
           py = room.cy + sy * ((room.h - 1) / 2 - 2);
-        plan.props.push({ x: px, y: py, kind: th.centerpiece, center: true });
+        plan.props.push({ x: px, y: py, kind: room.kind === 'secret' ? 'treasure' : th.centerpiece, center: room.kind === 'boss' });
         for (let o = -1; o <= 1; o++) {
           const cx = px + (sy ? o : 0),
             cy = py + (sx ? o : 0);
@@ -783,29 +1127,23 @@
             solid.add(cy * MAPW + cx);
           }
         }
-        plan.decals.push({ x: room.cx, y: room.cy, kind: th.decal || 'runecircle', boss: room.stage });
+        plan.decals.push({ x: room.cx, y: room.cy, kind: room.kind === 'secret' ? 'runecircle' : th.decal || 'runecircle', boss: room.stage });
         room.boss = { x: room.cx + sx * 2, y: room.cy + sy * 2 };
         room.chest = { x: room.cx + 0.5, y: room.cy + 0.5 };
         // Gardes du boss dans les raids.
-        if (instances[plan.index].raid)
-          for (const o of [-3, 3])
-            plan.trash.push({
-              x: room.boss.x + (sy ? o : -sx * 2),
-              y: room.boss.y + (sx ? o : -sy * 2),
-              type: o < 0 ? 0 : 1
-            });
+        if (room.kind === 'boss' && instances[plan.index].raid)
+          for (const o of [-3, 3]) plan.trash.push({ x: room.boss.x + (sy ? o : -sx * 2), y: room.boss.y + (sx ? o : -sy * 2), type: o < 0 ? 0 : 1 });
         return;
       }
-      // Groupes d'ennemis répartis dans les salles de passage.
-      const share = Math.round((trashTotal - trashPlaced) / trashLeft--);
+      // Groupes d'ennemis dans les salles de passage et les annexes, plus nombreux au fil des instances.
+      const share = (room.kind === 'hub' ? 3 : 2) + Math.floor(plan.index / 5) + (instances[plan.index].raid ? 1 : 0);
       for (let n = 0, tries = 0; n < share && tries < 60; tries++) {
         const a = rnd() * Math.PI * 2,
           rr = 1.5 + rnd() * Math.min(room.w, room.h) * 0.28,
           x = Math.round(room.cx + Math.cos(a) * rr),
           y = Math.round(room.cy + Math.sin(a) * rr);
         if (!WALKABLE(grid[y]?.[x]) || plan.trash.some(t => t.x === x && t.y === y)) continue;
-        plan.trash.push({ x, y, type: trashPlaced % 2 });
-        trashPlaced++;
+        plan.trash.push({ x, y, type: plan.trash.length % 2 });
         n++;
       }
     });
@@ -932,37 +1270,55 @@
   }
 
   // ---------------------------------------------------------------- Ennemis et boss
+  // Chance, pour chaque héros du groupe, qu'un boss (hors boss cachés) lâche un équipement de l'instance.
+  const BOSS_DROP_CHANCE = 0.3;
   function spawnInstanceBoss(i) {
     const d = instances[i],
       th = THEMES[i],
       plan = planFor(i),
-      down = game.world.instance?.index === i ? game.world.instance.bossesDown || 0 : 0,
-      names = d.bosses || [d.boss];
+      inst = game.world.instance?.index === i ? game.world.instance : null,
+      down = inst ? inst.bossesDown || 0 : 0,
+      st = inst ? dunState() : null,
+      names = d.bosses || [d.boss],
+      base = 260 + i * 220,
+      make = (room, name, look, extra) => ({
+        x: (room.boss.x + 0.5) * TS,
+        y: (room.boss.y + 0.5) * TS,
+        t: name,
+        r: d.raid ? 36 : 26,
+        cd: 0,
+        g: 90 + i * 60,
+        boss: true,
+        look: look.look,
+        pal: look.pal,
+        lookOpts: look,
+        mobColor: d.color,
+        room: room.index,
+        ...extra
+      });
     plan.rooms
       .filter(r => r.kind === 'boss' && r.stage >= down)
       .forEach(r => {
-        const look = th.bosses[r.stage] || th.bosses[0],
-          final = r.stage === plan.bossCount - 1;
-        game.world.monsters.push({
-          x: (r.boss.x + 0.5) * TS,
-          y: (r.boss.y + 0.5) * TS,
-          hp: 260 + i * 220,
-          mhp: 260 + i * 220,
-          t: names[r.stage] || d.boss,
-          r: d.raid ? 36 : 26,
-          cd: 0,
-          g: 90 + i * 60,
-          boss: true,
-          bossStage: r.stage,
-          finalBoss: final,
-          look: look.look,
-          pal: look.pal,
-          lookOpts: look,
-          mobColor: d.color,
-          scale: d.raid ? (final ? 4.1 : 3.5) : 3.3
-        });
+        const final = r.stage === plan.bossCount - 1,
+          hp = Math.round(base * (0.7 + (0.3 * r.stage) / Math.max(1, plan.bossCount - 1)));
+        game.world.monsters.push(
+          make(r, names[r.stage] || d.boss, th.bosses[r.stage] || th.bosses[0], {
+            hp,
+            mhp: hp,
+            bossStage: r.stage,
+            finalBoss: final,
+            scale: d.raid ? (final ? 4.1 : 3.5) : final ? 3.3 : 3
+          })
+        );
       });
-    if (!down)
+    // Boss cachés, derrière les murs fissurés : seulement ceux que le groupe n'a pas encore vaincus.
+    plan.rooms
+      .filter(r => r.kind === 'secret' && !(st && st.hidden & (1 << r.secret)))
+      .forEach(r => {
+        const hp = Math.round(base * 1.1);
+        game.world.monsters.push(make(r, (d.secrets || [])[r.secret] || 'Boss caché', th.secrets?.[r.secret] || th.bosses[0], { hp, mhp: hp, secretBoss: r.secret, scale: d.raid ? 3.6 : 3.2 }));
+      });
+    if (!down) {
       for (const spot of plan.trash) {
         const type = th.mobs[spot.type];
         game.world.monsters.push({
@@ -979,6 +1335,26 @@
           g: 12 + i * 5
         });
       }
+      // Gardiens du sceau : élites qui tiennent fermée la porte de leur boss.
+      for (const g of plan.guardians) {
+        const type = th.mobs[g.type];
+        game.world.monsters.push({
+          x: (g.x + 0.5) * TS,
+          y: (g.y + 0.5) * TS,
+          hp: (60 + i * 22) * 3,
+          mhp: (60 + i * 22) * 3,
+          t: 'Gardien du sceau',
+          mobColor: type.pal[0],
+          look: type.look,
+          pal: type.pal,
+          r: 16,
+          cd: 0,
+          g: 30 + i * 8,
+          elite: true,
+          guardian: g.lock
+        });
+      }
+    }
     // Ennemis au niveau de l'instance (boss un peu plus haut) ; la difficulté et le nombre de héros du groupe
     // multiplient leurs PV (canaanSetupMob, scaleBossHp).
     for (const mob of game.world.monsters) {
@@ -987,29 +1363,48 @@
     }
     game.world.monsters.forEach(scaleBossHp);
   }
-  // Mort d'un boss d'instance : ouvre la herse suivante ou termine l'instance. Renvoie true au dernier boss.
+  const members = () => game.heroes.filter(h => !h.away);
+  const tellAll = text => {
+    for (const h of members()) canaanLootNotice(h, text);
+  };
+  // Mort d'un boss d'instance. Boss caché : une clé des secrets pour chaque héros. Boss : 30 % de chance d'un
+  // équipement pour chacun, puis la herse de sa salle se lève. Renvoie true au dernier boss (instance terminée).
   function onInstanceBossDown(m) {
-    if (!game.world.instance) return false;
-    const plan = planFor(game.world.instance.index),
+    const inst = game.world.instance;
+    if (!inst) return false;
+    const i = inst.index,
+      plan = planFor(i),
       total = plan ? plan.bossCount : 1;
-    game.world.instance.bossesDown = (game.world.instance.bossesDown || 0) + 1;
-    if (game.world.instance.bossesDown >= total) return true;
-    const gate = plan.gates[game.world.instance.bossesDown - 1];
+    if (m.secretBoss !== undefined) {
+      dunState().hidden |= 1 << m.secretBoss;
+      // La clé va dans le sac (piles de 20) ; sac plein : elle est perdue, comme un équipement.
+      for (const h of members()) {
+        if (!CANAAN_BAG.room(h, 'key', 'secret', 0, 1)) {
+          canaanLootNotice(h, '🎒 Sac plein : clé des secrets non récupérée.');
+          continue;
+        }
+        CANAAN_BAG.add(h, 'key', 'secret', 0, 1);
+        CANAAN_WARDROBE.drop('secretBoss', h);
+        canaanLootNotice(h, '🗝️ ' + m.t + ' vaincu : clé des secrets dans ton sac ! Elle ouvre un coffre secret de l’île (' + CANAAN_BAG.count(h, 'key', 'secret') + ').');
+      }
+      burst(m.x, m.y, '#ffd36d', 30);
+      return false;
+    }
+    for (const h of members()) {
+      if (Math.random() < BOSS_DROP_CHANCE) dropTierGear(i, h);
+      else canaanLootNotice(h, '🎲 ' + m.t + ' : pas d’équipement cette fois.');
+      // Apparence : chance propre à chaque héros (plus haute et plus belle en raid).
+      CANAAN_WARDROBE.drop(instances[i].raid ? 'raid' : 'dungeon', h);
+    }
+    inst.bossesDown = (inst.bossesDown || 0) + 1;
+    if (inst.bossesDown >= total) return true;
+    const gate = plan.gates[Number.isInteger(m.bossStage) ? m.bossStage : inst.bossesDown - 1];
     if (gate)
       gate.cells.forEach(([x, y], k) => {
         if (game.world.tiles[y][x] === GATE) game.world.tiles[y][x] = gate.under[k];
-        burst((x + 0.5) * TS, (y + 0.5) * TS, THEMES[game.world.instance.index].rune, 10);
+        burst((x + 0.5) * TS, (y + 0.5) * TS, THEMES[i].rune, 10);
       });
-    toast(
-      '⚔️ ' +
-        m.t +
-        ' vaincu (' +
-        game.world.instance.bossesDown +
-        '/' +
-        total +
-        ') — ' +
-        (THEMES[game.world.instance.index].gate === 'barrier' ? 'la barrière se dissipe.' : 'la herse se lève.')
-    );
+    toast('⚔️ ' + m.t + ' vaincu (' + inst.bossesDown + '/' + total + ') — ' + (THEMES[i].gate === 'barrier' ? 'la barrière se dissipe.' : 'la herse se lève.'));
     return false;
   }
   function dungeonChestSpot(index) {
@@ -1018,6 +1413,202 @@
     return room ? room.chest : { x: ENTRY.x, y: ENTRY.y - 6 };
   }
 
+  // ---------------------------------------------------------------- Énigmes, portes scellées et passages secrets
+  // État de l'exploration en cours (hôte ; copié chez les invités) : pour chaque porte, ouverte ou non, les objets
+  // activés (bits) et le nombre de bons pas d'une séquence ; murs secrets découverts et boss cachés vaincus (bits).
+  function dunState() {
+    const inst = game.world.instance;
+    if (!inst || inst.arena) return null;
+    const plan = planFor(inst.index);
+    if (!inst.dun || inst.dun.locks?.length !== plan.locks.length) inst.dun = { locks: plan.locks.map(() => ({ done: 0, prog: 0, step: 0 })), secrets: 0, hidden: 0 };
+    return inst.dun;
+  }
+  const lockGoal = lock => (lock.type === 'guardian' ? lock.items.length : lock.type === 'runes' ? 4 : lock.items.length);
+  const bossName = (i, s) => (instances[i].bosses || [instances[i].boss])[s] || instances[i].boss;
+  function openCells(g) {
+    let opened = 0;
+    if (!g) return 0;
+    g.cells.forEach(([x, y], k) => {
+      const t = game.world.tiles[y]?.[x];
+      if (t === GATE || t === SECRET) {
+        game.world.tiles[y][x] = g.under[k];
+        opened++;
+      }
+    });
+    return opened;
+  }
+  function solveLock(i, s) {
+    const st = dunState(),
+      plan = planFor(i),
+      door = plan.doors[s];
+    if (st.locks[s].done) return;
+    st.locks[s].done = 1;
+    openCells(door);
+    if (door) for (const [x, y] of door.cells) burst((x + 0.5) * TS, (y + 0.5) * TS, THEMES[i].rune, 14);
+    tellAll('🔓 Le sceau se brise : la porte de ' + bossName(i, s) + ' s’ouvre !');
+  }
+  function revealSecret(i, k) {
+    const st = dunState(),
+      wall = planFor(i).secretWalls[k];
+    if (st.secrets & (1 << k)) return;
+    st.secrets |= 1 << k;
+    openCells(wall);
+    for (const [x, y] of wall.cells) burst((x + 0.5) * TS, (y + 0.5) * TS, '#c8b8a0', 18);
+    shake = Math.max(shake, 8);
+    tellAll('🕳️ Un passage secret ! Le mur s’effondre… quelque chose rôde derrière.');
+  }
+  // Un pas dans une séquence (leviers, dalles) : bon symbole, ou tout se remet à zéro.
+  function sequenceStep(i, s, id, hero) {
+    const lock = planFor(i).locks[s],
+      ls = dunState().locks[s],
+      goal = lockGoal(lock);
+    if (ls.done || ls.prog & (1 << id)) return;
+    if (lock.order[ls.step] === id) {
+      ls.prog |= 1 << id;
+      ls.step++;
+      const it = lock.items[id];
+      burst((it.x + 0.5) * TS, (it.y + 0.5) * TS, SIGILS[id].col, 12);
+      if (ls.step >= goal) solveLock(i, s);
+      else canaanLootNotice(hero, SIGILS[id].sym + ' ' + (lock.type === 'levers' ? 'Le levier s’abaisse' : 'La dalle s’illumine') + ' (' + ls.step + '/' + goal + ').');
+    } else {
+      ls.prog = 0;
+      ls.step = 0;
+      const it = lock.items[id];
+      burst((it.x + 0.5) * TS, (it.y + 0.5) * TS, '#ff4a3a', 16);
+      tellAll('✖ Mauvais ordre : ' + (lock.type === 'levers' ? 'les leviers se relèvent.' : 'les dalles s’éteignent.') + ' Relis la stèle.');
+    }
+  }
+  // Texte de la stèle : l'ordre des symboles, en énigme.
+  function riddle(lock) {
+    const names = lock.order.map(id => SIGILS[id].name),
+      verb = lock.type === 'levers' ? 'Abaisse les leviers' : 'Foule les dalles';
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const lines = [cap(names[0]) + ' ouvre la marche'];
+    for (let k = 1; k < names.length - 1; k++) lines.push(k === 1 ? names[k] + ' le suit' : 'puis ' + names[k]);
+    lines.push('et ' + names[names.length - 1] + ' ferme le cortège');
+    return '📜 « ' + lines.join(', ') + '. » — ' + verb + ' dans cet ordre.';
+  }
+  function lockHint(i, s) {
+    const lock = planFor(i).locks[s],
+      ls = dunState().locks[s],
+      goal = lockGoal(lock),
+      done = lock.type === 'guardian' ? goal - game.world.monsters.filter(m => m.guardian === s && m.hp > 0).length : lock.type === 'braziers' ? bits(ls.prog) : ls.step,
+      what = {
+        braziers: 'allume les ' + goal + ' braseros éteints de cette aile',
+        levers: 'abaisse les ' + goal + ' leviers de cette aile dans l’ordre gravé sur la stèle',
+        runes: 'foule les 4 dalles gravées dans l’ordre donné par la stèle',
+        guardian: 'vaincs les gardiens du sceau dans les salles voisines'
+      }[lock.type];
+    return '🔒 La porte de ' + bossName(i, s) + ' est scellée : ' + what + ' (' + Math.max(0, done) + '/' + goal + ').';
+  }
+  const bits = n => {
+    let c = 0;
+    for (; n; n &= n - 1) c++;
+    return c;
+  };
+  // Ce que le héros a à portée de main (E) : mur fissuré, brasero, levier, stèle ou porte scellée.
+  function reachable(p) {
+    const inst = game.world.instance;
+    if (!inst || inst.arena) return null;
+    const i = inst.index,
+      plan = planFor(i),
+      st = dunState(),
+      hx = p.x / TS,
+      hy = p.y / TS,
+      close = (x, y, r) => Math.hypot(hx - (x + 0.5), hy - (y + 0.5)) < r;
+    for (let k = 0; k < plan.secretWalls.length; k++)
+      if (!(st.secrets & (1 << k)) && plan.secretWalls[k].cells.some(([x, y]) => close(x, y, 1.6))) return { kind: 'secret', k };
+    for (let s = 0; s < plan.locks.length; s++) {
+      const lock = plan.locks[s],
+        ls = st.locks[s];
+      if (!ls.done && (lock.type === 'braziers' || lock.type === 'levers'))
+        for (const it of lock.items) if (close(it.x, it.y, 1.7)) return { kind: lock.type, s, id: it.id };
+      if (lock.stele && close(lock.stele.x, lock.stele.y, 1.8)) return { kind: 'stele', s };
+      if (!ls.done && plan.doors[s]?.cells.some(([x, y]) => close(x, y, 2))) return { kind: 'door', s };
+    }
+    return null;
+  }
+  // Interaction d'un héros (l'hôte décide, aussi pour un invité) ; true si quelque chose a répondu.
+  function dungeonInteract(hero = game.hero) {
+    const inst = game.world.instance;
+    if (!inst || inst.arena || hero.player.dead) return false;
+    const i = inst.index,
+      what = reachable(hero.player);
+    if (!what) return false;
+    const plan = planFor(i),
+      st = dunState();
+    if (what.kind === 'secret') revealSecret(i, what.k);
+    else if (what.kind === 'braziers') {
+      const ls = st.locks[what.s],
+        lock = plan.locks[what.s],
+        it = lock.items[what.id];
+      if (ls.prog & (1 << what.id)) return true;
+      ls.prog |= 1 << what.id;
+      burst((it.x + 0.5) * TS, (it.y + 0.3) * TS, THEMES[i].flame[1], 18);
+      if (bits(ls.prog) >= lockGoal(lock)) solveLock(i, what.s);
+      else canaanLootNotice(hero, '🔥 Brasero allumé (' + bits(ls.prog) + '/' + lockGoal(lock) + ').');
+    } else if (what.kind === 'levers') sequenceStep(i, what.s, what.id, hero);
+    else if (what.kind === 'stele') {
+      const lock = plan.locks[what.s];
+      canaanLootNotice(hero, lock.type === 'braziers' || lock.type === 'guardian' ? lockHint(i, what.s) : riddle(lock));
+    } else if (what.kind === 'door') canaanLootNotice(hero, lockHint(i, what.s));
+    return true;
+  }
+  // Un héros dans la salle d'un boss (ses mécaniques ne traversent ni les murs ni les portes scellées).
+  function inBossRoom(m, p) {
+    const inst = game.world.instance;
+    if (!inst || inst.arena || !Number.isInteger(m.room)) return true;
+    const room = planFor(inst.index).rooms[m.room];
+    if (!room) return true;
+    const b = bounds(room),
+      x = p.x / TS,
+      y = p.y / TS;
+    return x >= b.x0 - 0.5 && x <= b.x1 + 1.5 && y >= b.y0 - 0.5 && y <= b.y1 + 1.5;
+  }
+  // Dalles gravées et gardiens : vérifiés à chaque pas de simulation chez l'hôte.
+  const onPlate = new Map();
+  function updatePuzzles() {
+    const inst = game.world.instance;
+    if (!inst || inst.arena || game.mode === 'guest' || inst.guestView) return;
+    const i = inst.index,
+      plan = planFor(i),
+      st = dunState();
+    for (let s = 0; s < plan.locks.length; s++) {
+      const lock = plan.locks[s],
+        ls = st.locks[s];
+      if (ls.done) continue;
+      if (lock.type === 'guardian' && !game.world.monsters.some(m => m.guardian === s && m.hp > 0)) solveLock(i, s);
+      if (lock.type !== 'runes') continue;
+      for (const h of members()) {
+        if (h.player.dead) continue;
+        const tx = Math.floor(h.player.x / TS),
+          ty = Math.floor((h.player.y + 10) / TS),
+          plate = plan.plates.find(p => p.lock === s && p.x === tx && p.y === ty),
+          key = plate ? s + ':' + plate.id : null;
+        if (key && onPlate.get(h) !== key) sequenceStep(i, s, plate.id, h);
+        onPlate.set(h, key);
+      }
+    }
+  }
+  window.CanaanStages.dungeonPuzzles = { after: updatePuzzles };
+  // Copie compacte de l'état pour les invités, et son application chez eux (portes et murs ouverts).
+  function dungeonStateOut() {
+    const st = game.world.instance && !game.world.instance.arena ? dunState() : null;
+    return st ? { l: st.locks.map(l => [l.done, l.prog, l.step]), s: st.secrets, h: st.hidden } : null;
+  }
+  function dungeonStateIn(raw) {
+    const st = dunState();
+    if (!st || !raw || !Array.isArray(raw.l)) return;
+    const plan = planFor(game.world.instance.index);
+    raw.l.forEach((v, s) => {
+      if (!st.locks[s] || !Array.isArray(v)) return;
+      [st.locks[s].done, st.locks[s].prog, st.locks[s].step] = v.map(n => Math.max(0, Math.floor(Number(n) || 0)));
+      if (st.locks[s].done) openCells(plan.doors[s]);
+    });
+    st.secrets = Math.max(0, Math.floor(Number(raw.s) || 0));
+    st.hidden = Math.max(0, Math.floor(Number(raw.h) || 0));
+    plan.secretWalls.forEach((w, k) => st.secrets & (1 << k) && openCells(w));
+  }
   // ---------------------------------------------------------------- Textures des cases
   function canvas(w, h) {
     const c = document.createElement('canvas');
@@ -1311,6 +1902,186 @@
       specks(g, 10, [h.b, h.c], v + 90, 2);
     }
   }
+  // ---------------------------------------------------------------- Cases en pixel art
+  // Même facture que les bâtiments, les routes et le sol de l'île : gros pixels de 3 px (16 × 16 par case), aplats de
+  // 3 à 4 tons, joints sombres, reflet en haut à gauche de chaque dalle ou pierre, pied des murs ombré.
+  const PXU = 3;
+  const toRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const mixHex = (a, b, t) => {
+    const A = toRgb(a),
+      B = toRgb(b);
+    return '#' + A.map((v, k) => Math.round(v + (B[k] - v) * t).toString(16).padStart(2, '0')).join('');
+  };
+  function pxDot(g, x, y, col, w = 1, h = 1) {
+    g.fillStyle = col;
+    g.fillRect(x * PXU, y * PXU, w * PXU, h * PXU);
+  }
+  // Dalle : aplat, reflet en haut et à gauche, ombre en bas et à droite, quelques grains et parfois une fissure.
+  function pxSlab(g, x, y, w, h, base, p, seed) {
+    pxDot(g, x, y, base, w, h);
+    pxDot(g, x, y, mixHex(base, '#ffffff', 0.14), w, 1);
+    pxDot(g, x, y, mixHex(base, '#ffffff', 0.08), 1, h);
+    pxDot(g, x, y + h - 1, mixHex(base, p.b, 0.45), w, 1);
+    pxDot(g, x + w - 1, y, mixHex(base, p.b, 0.3), 1, h);
+    if (hash(seed, x, y) > 0.55) pxDot(g, x + 1 + Math.floor(hash(x, seed, y) * (w - 2)), y + 1 + Math.floor(hash(y, x, seed) * (h - 2)), mixHex(base, p.b, 0.5));
+    if (hash(x, y, seed + 7) > 0.86 && w > 4) {
+      const cx = x + 2 + Math.floor(hash(seed, y, 3) * (w - 4));
+      pxDot(g, cx, y + 1, mixHex(base, p.b, 0.7));
+      pxDot(g, cx + 1, y + 2, mixHex(base, p.b, 0.7));
+    }
+  }
+  function slabTone(p, k) {
+    return [p.a, mixHex(p.a, p.c, 0.35), mixHex(p.a, p.b, 0.3), p.a][Math.floor(k * 4)];
+  }
+  function pxFloor(g, p, v, style) {
+    const joint = mixHex(p.b, '#000000', 0.25),
+      seed = v * 31 + 7;
+    pxDot(g, 0, 0, joint, 16, 16);
+    if (style === 'dirt' || style === 'gravel') {
+      // Terre battue : taches de tons par bruit doux, cailloux éclairés en haut.
+      for (let y = 0; y < 16; y++)
+        for (let x = 0; x < 16; x++) {
+          const n = field(x / 5 + v * 3, y / 5, 2.2, 91) + (hash(x, y, seed) - 0.5) * 0.18;
+          pxDot(g, x, y, n > 0.62 ? mixHex(p.a, p.c, 0.45) : n < 0.36 ? mixHex(p.a, p.b, 0.4) : p.a);
+        }
+      for (let k = 0; k < (style === 'gravel' ? 6 : 3); k++) {
+        const x = 1 + Math.floor(hash(k, seed, 1) * 13),
+          y = 1 + Math.floor(hash(seed, k, 2) * 13);
+        pxDot(g, x, y + 1, mixHex(p.b, '#000000', 0.2), 2, 1);
+        pxDot(g, x, y, p.c, 2, 1);
+      }
+      return;
+    }
+    if (style === 'planks' || style === 'logs') {
+      for (let row = 0; row < 4; row++) {
+        const seam = 2 + Math.floor(hash(row, v, 17) * 12);
+        pxSlab(g, 0, row * 4, seam, 3, slabTone(p, hash(row, v, 3)), p, seed + row);
+        pxSlab(g, seam + 1, row * 4, 15 - seam, 3, slabTone(p, hash(row, v, 5)), p, seed + row + 9);
+      }
+      return;
+    }
+    if (style === 'flagstone' || style === 'stone') {
+      // Dalles irrégulières en rangées décalées.
+      const rows = style === 'stone' ? [5, 5, 6] : [8, 8];
+      let y = 0;
+      rows.forEach((hgt, row) => {
+        let x = -Math.floor(hash(row, v, 23) * 5);
+        while (x < 16) {
+          const w = (style === 'stone' ? 4 : 5) + Math.floor(hash(x + 9, row, v) * 5),
+            x0 = Math.max(0, x),
+            x1 = Math.min(16, x + w);
+          if (x1 - x0 > 1) pxSlab(g, x0, y, x1 - x0 - 1, hgt - 1, slabTone(p, hash(x, row, v + 3)), p, seed + x * 3 + row);
+          x += w;
+        }
+        y += hgt;
+      });
+      return;
+    }
+    // Carreaux carrés (temples, marbre, basalte, arcanes, pierre d'étoiles).
+    for (let ty = 0; ty < 2; ty++)
+      for (let tx = 0; tx < 2; tx++) pxSlab(g, tx * 8, ty * 8, 7, 7, slabTone(p, hash(tx + v * 2, ty, 11)), p, seed + tx * 5 + ty);
+    if (style === 'marble') {
+      for (let k = 0; k < 6; k++) pxDot(g, 2 + k * 2, 3 + ((k * 3 + v) % 4), mixHex(p.a, p.b, 0.5));
+      pxDot(g, 7, 7, p.c, 2, 2);
+    }
+    if (style === 'basalt' && v === 3) {
+      pxDot(g, 2, 4, '#ff7a2a', 3, 1);
+      pxDot(g, 4, 5, '#ffb14a', 1, 2);
+      pxDot(g, 5, 6, '#ff7a2a', 3, 1);
+    }
+    if (style === 'arcane' && v % 2 === 0) {
+      pxDot(g, 3, 3, p.glow, 2, 1);
+      pxDot(g, 3, 3, p.glow, 1, 2);
+      pxDot(g, 11, 11, p.glow, 2, 1);
+      pxDot(g, 12, 11, p.glow, 1, 2);
+    }
+    if (style === 'starstone') for (let k = 0; k < 4; k++) pxDot(g, Math.floor(hash(k, seed, 2) * 15), Math.floor(hash(seed, k, 8) * 15), p.c);
+  }
+  // Chemin principal : tapis à motif, rails, dalles runiques ou grille au-dessus des braises.
+  function pxAccent(g, p, floor, v) {
+    if (p.style === 'gravel') return pxFloor(g, p, v, 'gravel');
+    if (p.style === 'rails') return pxFloor(g, floor, v, floor.style);
+    if (p.style === 'carpet') {
+      pxDot(g, 0, 0, p.a, 16, 16);
+      for (let k = 0; k < 16; k += 4) pxDot(g, k, 0, mixHex(p.a, p.b, 0.4), 2, 16);
+      for (const [x, y] of [[7, 2], [6, 3], [8, 3], [5, 4], [9, 4], [6, 5], [8, 5], [7, 6]]) pxDot(g, x, y, p.c);
+      for (const [x, y] of [[7, 10], [6, 11], [8, 11], [7, 12]]) pxDot(g, x, y, p.b);
+      return;
+    }
+    if (p.style === 'grate') {
+      pxDot(g, 0, 0, '#3a1206', 16, 16);
+      for (let k = 0; k < 16; k += 3) {
+        pxDot(g, k, 0, p.a, 1, 16);
+        pxDot(g, 0, k, p.a, 16, 1);
+      }
+      if (v % 2) pxDot(g, 4, 4, p.c);
+      return;
+    }
+    // Dalle runique : carreau sombre et glyphe lumineux en pixels.
+    pxDot(g, 0, 0, mixHex(p.b, '#000000', 0.3), 16, 16);
+    pxSlab(g, 0, 0, 15, 15, p.a, p, v + 3);
+    const glyphs = [
+      [[7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [7, 11], [5, 5], [9, 5], [4, 7], [10, 7], [5, 9], [9, 9]],
+      [[7, 3], [6, 5], [8, 5], [5, 7], [9, 7], [4, 9], [10, 9], [4, 11], [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11]],
+      [[4, 7], [5, 7], [6, 7], [7, 7], [8, 7], [9, 7], [10, 7], [5, 4], [6, 5], [8, 9], [9, 10]],
+      [[6, 6], [7, 6], [8, 6], [6, 7], [8, 7], [6, 8], [7, 8], [8, 8]]
+    ];
+    for (const [x, y] of glyphs[v]) pxDot(g, x, y, p.c);
+  }
+  // Face d'un mur : couronnement clair cerné d'encre, pierres ou briques, pied ombré.
+  function pxFace(g, w, v) {
+    const joint = mixHex(w.dark, '#000000', 0.3),
+      seed = v * 17 + 3;
+    pxDot(g, 0, 0, joint, 16, 16);
+    if (w.style === 'brick') {
+      for (let row = 0; row < 3; row++) {
+        const y = 4 + row * 3,
+          off = row % 2 ? 0 : 3;
+        for (let x = -off; x < 16; x += 6) {
+          const x0 = Math.max(0, x),
+            x1 = Math.min(16, x + 5);
+          if (x1 > x0) pxSlab(g, x0, y, x1 - x0, 2, [w.face, mixHex(w.face, w.light, 0.3), mixHex(w.face, w.dark, 0.3), w.face][Math.floor(hash(x, row, v) * 4)], { b: w.dark }, seed + x + row);
+        }
+      }
+    } else if (w.style === 'marble') {
+      pxDot(g, 0, 3, '#d4aa3a', 16, 1);
+      pxSlab(g, 1, 4, 6, 9, w.face, { b: w.dark }, seed);
+      pxSlab(g, 9, 4, 6, 9, w.face, { b: w.dark }, seed + 5);
+      pxDot(g, 7, 5, w.dark, 2, 7);
+    } else {
+      // Roche : blocs de tailles variées aux coins arrondis.
+      let y = 4;
+      for (let row = 0; y < 13; row++) {
+        const hgt = 2 + Math.floor(hash(row, v, 4) * 2);
+        let x = -Math.floor(hash(v, row, 9) * 3);
+        while (x < 16) {
+          const bw = 3 + Math.floor(hash(x + 5, row, v) * 4),
+            x0 = Math.max(0, x),
+            x1 = Math.min(16, x + bw),
+            h = Math.min(hgt, 13 - y);
+          if (x1 - x0 > 1 && h > 0) {
+            pxSlab(g, x0, y, x1 - x0 - 1, h, [w.face, mixHex(w.face, w.light, 0.35), mixHex(w.face, w.dark, 0.35)][Math.floor(hash(x, row, v + 1) * 3)], { b: w.dark }, seed + x * 7 + row);
+            pxDot(g, x0, y, joint);
+            pxDot(g, x1 - 2, y + h - 1, joint);
+          }
+          x += bw;
+        }
+        y += hgt + 0;
+      }
+    }
+    // Couronnement : liseré d'encre, arête claire, puis pied ombré.
+    pxDot(g, 0, 0, mixHex(w.top, '#000000', 0.3), 16, 1);
+    pxDot(g, 0, 1, w.light, 16, 1);
+    pxDot(g, 0, 2, mixHex(w.light, w.face, 0.5), 16, 1);
+    pxDot(g, 0, 3, joint, 16, 1);
+    pxDot(g, 0, 13, mixHex(w.dark, '#000000', 0.35), 16, 1);
+    pxDot(g, 0, 14, mixHex(w.dark, '#000000', 0.5), 16, 2);
+  }
+  // Dessus des murs : aplat sombre tramé.
+  function pxTop(g, w) {
+    pxDot(g, 0, 0, w.top, 16, 16);
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if ((x + y * 3) % 7 === 0 && hash(x, y, 77) > 0.4) pxDot(g, x, y, w.dark);
+  }
   function themeArt(i) {
     if (ART[i]) return ART[i];
     const th = THEMES[i],
@@ -1322,15 +2093,13 @@
           return c;
         });
     const art = {
-      floor: mk((g, v) => paintFloor(g, th.floor, v, th.floor.style)),
-      accent: mk((g, v) => paintAccent(g, th.accent, th.floor, v)),
-      face: mk((g, v) => paintFace(g, th.wall, v)),
+      floor: mk((g, v) => pxFloor(g, th.floor, v, th.floor.style)),
+      accent: mk((g, v) => pxAccent(g, th.accent, th.floor, v)),
+      face: mk((g, v) => pxFace(g, th.wall, v)),
       hazard: mk((g, v) => paintHazard(g, th.hazard, v))
     };
-    const top = canvas(48, 48),
-      tg = top.getContext('2d');
-    rect(tg, 0, 0, 48, 48, th.wall.top);
-    specks(tg, 10, [th.wall.dark], 77);
+    const top = canvas(48, 48);
+    pxTop(top.getContext('2d'), th.wall);
     art.top = top;
     ART[i] = art;
     return art;
@@ -1357,6 +2126,19 @@
   }
   // Dessin d'une case d'instance, appelé par la boucle de rendu à la place des tuiles du monde.
   function drawDungeonTile(c, x, y, t) {
+    if (t === SECRET) {
+      // Mur fissuré : comme un mur, avec des lézardes et un filet de poussière.
+      drawDungeonTile(c, x, y, WALL);
+      const X = x * TS,
+        Y = y * TS;
+      c.fillStyle = 'rgba(10,8,6,.75)';
+      for (const [px, py, w, h] of [[20, 14, 2, 8], [18, 21, 2, 6], [22, 26, 2, 7], [14, 30, 6, 2], [24, 32, 6, 2], [26, 18, 5, 2]]) c.fillRect(X + px, Y + py, w, h);
+      if (Math.floor(time / 9 + x * 3) % 7 === 0) {
+        c.fillStyle = 'rgba(220,200,170,.6)';
+        c.fillRect(X + 21, Y + 36 + ((time * 0.5) % 10), 2, 2);
+      }
+      return;
+    }
     const i = game.world.instance.index,
       th = THEMES[i],
       art = themeArt(i),
@@ -1364,7 +2146,10 @@
       X = x * TS,
       Y = y * TS,
       v = (x * 7 + y * 13) & 3,
-      at = (xx, yy) => (plan.solid.has(yy * MAPW + xx) ? FLOOR : tileAt(xx, yy));
+      at = (xx, yy) => {
+        const n = tileAt(xx, yy);
+        return plan.solid.has(yy * MAPW + xx) ? FLOOR : n === SECRET ? WALL : n;
+      };
     if (t === WALL && !plan.solid.has(y * MAPW + x)) {
       const below = at(x, y + 1);
       if (WALKABLE(below) || below === GATE || below === HAZARD) {
@@ -2072,6 +2857,228 @@
     c.fillStyle = '#8a8a94';
     if (w >= h) for (let x = X + 4; x < X + w; x += 12) c.fillRect(x, Y + h - 6, 5, 6);
   }
+  // ---------------------------------------------------------------- Objets de l'exploration
+  // Dessinés en gros pixels de 3 px, aplats de 3 tons et contour sombre, comme les bâtiments de l'île.
+  const INK = '#1a1210';
+  function px3(c, x, y, w, h, col) {
+    c.fillStyle = col;
+    c.fillRect(Math.round(x), Math.round(y), w * 3, h * 3);
+  }
+  // Rectangle de pixels cerné d'encre.
+  function block(c, x, y, w, h, col) {
+    px3(c, x - 3, y - 3, w + 2, h + 2, INK);
+    px3(c, x, y, w, h, col);
+  }
+  function sigil(c, id, x, y, lit, size = 14) {
+    const sg = SIGILS[id];
+    c.save();
+    c.font = 'bold ' + size + 'px system-ui, sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = INK;
+    c.fillText(sg.sym, x + 1, y + 1);
+    c.fillStyle = lit ? sg.col : '#8a8070';
+    c.fillText(sg.sym, x, y);
+    c.restore();
+    if (lit) canaanLight(x, y, 70, sg.col);
+  }
+  function drawLever(c, p, th, down) {
+    const X = p.x * TS + 9,
+      Y = p.y * TS + 6;
+    block(c, X + 3, Y + 27, 8, 4, th.pillar[1]);
+    px3(c, X + 3, Y + 27, 8, 1, th.pillar[2]);
+    // Manche : relevé (vers le haut à gauche) ou abaissé (vers le bas à droite), pommeau coloré.
+    const pts = down ? [[0, 0], [1, 1], [2, 2], [3, 3]] : [[0, 0], [-1, -1], [-2, -2], [-3, -3]];
+    for (const [dx, dy] of pts) px3(c, X + 15 + dx * 3, Y + 21 + dy * 3 + (down ? 0 : 0), 1, 1, '#6a4a30');
+    const [ex, ey] = pts[3];
+    block(c, X + 15 + ex * 3 - 1, Y + 21 + ey * 3 - 3, 2, 2, down ? SIGILS[p.id].col : '#c84a3a');
+    sigil(c, p.id, X + 15, Y - 6, down);
+  }
+  function drawBrazierOff(c, p, th, lit) {
+    const X = p.x * TS + 9,
+      Y = p.y * TS + 6;
+    for (const dx of [1, 8]) block(c, X + dx * 3, Y + 21, 1, 6, '#3a3a40');
+    block(c, X + 3, Y + 15, 8, 3, '#4a4a52');
+    px3(c, X + 3, Y + 15, 8, 1, '#6a6a72');
+    px3(c, X + 6, Y + 12, 2, 1, lit ? '#3a2014' : '#2a2a2e');
+    if (lit) {
+      flame(c, p.x * TS + 24, Y + 14, 1.1, th.flame, p.x + p.y);
+      canaanLight(p.x * TS + 24, Y + 6, 150, th.flame[1]);
+    } else {
+      // Braises froides et filet de fumée.
+      px3(c, X + 9, Y + 12, 1, 1, '#5a4a40');
+      c.fillStyle = 'rgba(150,140,140,.35)';
+      c.fillRect(X + 22, Y + 4 - ((time * 0.3) % 12), 3, 3);
+    }
+  }
+  function drawStele(c, p, th, lock) {
+    const X = p.x * TS + 12,
+      Y = p.y * TS - 6;
+    block(c, X, Y + 6, 8, 12, th.pillar[0]);
+    px3(c, X, Y + 6, 8, 1, th.pillar[2]);
+    px3(c, X + 21, Y + 6, 1, 12, th.pillar[1]);
+    px3(c, X - 3, Y + 39, 10, 2, th.pillar[1]);
+    for (let k = 0; k < 4; k++) px3(c, X + 3, Y + 15 + k * 6, 6, 1, th.pillar[1]);
+    // Symboles de la séquence (leviers, dalles) ou flamme gravée (braseros) au fronton.
+    if (lock.type === 'levers' || lock.type === 'runes') {
+      c.fillStyle = th.rune;
+      c.globalAlpha = 0.5 + 0.3 * Math.sin(time * 0.06 + p.x);
+      c.fillRect(X + 9, Y + 9, 6, 3);
+      c.globalAlpha = 1;
+    }
+    canaanLight(X + 12, Y + 18, 60, th.rune);
+  }
+  function drawPlate(c, p, th, lit) {
+    const X = p.x * TS,
+      Y = p.y * TS;
+    c.fillStyle = INK;
+    c.fillRect(X + 3, Y + 3, 42, 42);
+    c.fillStyle = lit ? SIGILS[p.id].col : th.pillar[1];
+    c.fillRect(X + 6, Y + 6, 36, 36);
+    c.fillStyle = lit ? '#ffffff' : th.pillar[0];
+    c.fillRect(X + 6, Y + 6, 36, 3);
+    c.fillStyle = INK;
+    c.fillRect(X + 9, Y + 39, 30, 3);
+    sigil(c, p.id, X + 24, Y + 25, lit, 18);
+  }
+  function drawTreasure(c, p) {
+    const X = p.x * TS + 3,
+      Y = p.y * TS + 12;
+    // Tas de pièces d'or, gemmes et un calice.
+    block(c, X + 3, Y + 18, 12, 4, '#c8961e');
+    block(c, X + 9, Y + 12, 6, 3, '#e8b830');
+    px3(c, X + 6, Y + 18, 2, 1, '#fff0a0');
+    px3(c, X + 21, Y + 12, 1, 1, '#fff0a0');
+    px3(c, X + 30, Y + 21, 1, 1, '#ff5070');
+    px3(c, X + 9, Y + 21, 1, 1, '#7de0ff');
+    block(c, X + 27, Y + 6, 2, 3, '#d8a838');
+    px3(c, X + 24, Y + 3, 4, 1, '#ffd36d');
+    if (Math.floor(time / 12 + p.x) % 5 === 0) px3(c, X + 15, Y + 9, 1, 1, '#ffffff');
+    canaanLight(X + 21, Y + 18, 90, '#ffd36d');
+  }
+  // Porte scellée : dalle de pierre cerclée de fer, sceau lumineux du mécanisme qui la tient.
+  function drawDoor(c, g, th, lock) {
+    const xs = g.cells.map(cl => cl[0]),
+      ys = g.cells.map(cl => cl[1]),
+      X = Math.min(...xs) * TS,
+      Y = Math.min(...ys) * TS,
+      w = (Math.max(...xs) - Math.min(...xs) + 1) * TS,
+      h = (Math.max(...ys) - Math.min(...ys) + 1) * TS;
+    c.fillStyle = INK;
+    c.fillRect(X, Y, w, h);
+    c.fillStyle = th.pillar[1];
+    c.fillRect(X + 3, Y + 3, w - 6, h - 6);
+    c.fillStyle = th.pillar[0];
+    for (let k = 0; k < (w > h ? w : h); k += 24) (w > h ? c.fillRect(X + k + 3, Y + 6, 18, h - 15) : c.fillRect(X + 6, Y + k + 3, w - 15, 18));
+    c.fillStyle = '#3a3a40';
+    if (w > h) c.fillRect(X, Y + h / 2 - 3, w, 6);
+    else c.fillRect(X + w / 2 - 3, Y, 6, h);
+    const cx = X + w / 2,
+      cy = Y + h / 2,
+      pulse = 0.6 + 0.4 * Math.sin(time * 0.07);
+    c.fillStyle = INK;
+    c.fillRect(cx - 15, cy - 15, 30, 30);
+    c.fillStyle = th.pillar[2];
+    c.fillRect(cx - 12, cy - 12, 24, 24);
+    c.globalAlpha = pulse;
+    c.fillStyle = th.rune;
+    c.fillRect(cx - 6, cy - 6, 12, 12);
+    c.globalAlpha = 1;
+    c.font = 'bold 14px system-ui, sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = INK;
+    c.fillText({ braziers: '🔥', levers: '⚙', runes: '✦', guardian: '⚔' }[lock.type], cx, cy + 1);
+    c.textBaseline = 'alphabetic';
+    canaanLight(cx, cy, 120, th.rune);
+  }
+  function drawExplore(c, plan, th, view) {
+    const st = dunState();
+    if (!st) return;
+    for (const p of plan.plates) if (view(p.x, p.y)) drawPlate(c, p, th, !!(st.locks[p.lock].prog & (1 << p.id)) || !!st.locks[p.lock].done);
+    for (const p of plan.props) {
+      if (!view(p.x, p.y, 4)) continue;
+      if (p.kind === 'treasure') drawTreasure(c, p);
+      if (p.lock === undefined) continue;
+      const ls = st.locks[p.lock],
+        on = !!ls.done || !!(ls.prog & (1 << p.id));
+      // Agrandis d'un tiers autour du pied (pixels de 4 px) : bien lisibles à côté du héros.
+      const ax = p.x * TS + 24,
+        ay = p.y * TS + 42;
+      c.save();
+      c.translate(ax, ay);
+      c.scale(4 / 3, 4 / 3);
+      c.translate(-ax, -ay);
+      if (p.kind === 'lever') drawLever(c, p, th, on);
+      else if (p.kind === 'brazier_off') drawBrazierOff(c, p, th, on);
+      else if (p.kind === 'stele') drawStele(c, p, th, plan.locks[p.lock]);
+      c.restore();
+    }
+    plan.doors.forEach((g, s) => g && game.world.tiles[g.cells[0][1]]?.[g.cells[0][0]] === GATE && drawDoor(c, g, th, plan.locks[s]));
+    // Invitation à agir sur ce qui est à portée de main.
+    const what = reachable(P);
+    if (!what) return;
+    let at = null,
+      text = '';
+    if (what.kind === 'secret') {
+      const [x, y] = plan.secretWalls[what.k].cells[1] || plan.secretWalls[what.k].cells[0];
+      at = [x, y];
+      text = '[E] Examiner le mur fissuré';
+    } else if (what.kind === 'door') {
+      const g = plan.doors[what.s];
+      at = g.cells[Math.floor(g.cells.length / 2)];
+      text = '🔒 [E] Porte scellée';
+    } else if (what.kind === 'stele') {
+      at = [plan.locks[what.s].stele.x, plan.locks[what.s].stele.y];
+      text = '[E] Lire la stèle';
+    } else {
+      const it = plan.locks[what.s].items[what.id];
+      at = [it.x, it.y];
+      text = what.kind === 'braziers' ? '[E] Allumer le brasero' : '[E] Actionner le levier';
+    }
+    c.save();
+    c.font = 'bold 13px Palatino Linotype, Georgia, serif';
+    c.textAlign = 'center';
+    c.lineWidth = 3;
+    c.strokeStyle = '#1a1008';
+    c.strokeText(text, at[0] * TS + 24, at[1] * TS - 18);
+    c.fillStyle = '#f6dc98';
+    c.fillText(text, at[0] * TS + 24, at[1] * TS - 18);
+    c.restore();
+  }
+  // Objets au sol en gros pixels cernés d'encre, comme le décor de l'île : peints une fois (leurs lumières notées),
+  // réduits au tiers sans lissage, contourés, puis réutilisés. Les objets animés restent dessinés à chaque image.
+  const LIVE_PROPS = new Set(['brazier', 'candles', 'gear', 'hourglass', 'orb', 'furnace', 'pillarlight', 'crystal']);
+  let propCache = { key: null, map: new Map() };
+  function pixelProp(c, p, th, i) {
+    if (LIVE_PROPS.has(p.kind) || typeof window.canaanOutline !== 'function') return drawFloorProp(c, p, th);
+    if (propCache.key !== i) propCache = { key: i, map: new Map() };
+    const id = p.x + ',' + p.y;
+    let e = propCache.map.get(id);
+    if (!e) {
+      const big = canvas(144, 144),
+        g = big.getContext('2d'),
+        lights = [],
+        keep = window.canaanLight;
+      if (!g || !g.drawImage) return drawFloorProp(c, p, th);
+      window.canaanLight = (x, y, r, col) => lights.push([x - p.x * TS, y - p.y * TS, r, col]);
+      try {
+        g.translate(48 - p.x * TS, 48 - p.y * TS);
+        drawFloorProp(g, p, th);
+      } finally {
+        window.canaanLight = keep;
+      }
+      const small = canvas(48, 48),
+        sg = small.getContext('2d');
+      sg.imageSmoothingEnabled = false;
+      sg.drawImage(big, 0, 0, 48, 48);
+      e = { img: canaanOutline(small, 1), lights };
+      propCache.map.set(id, e);
+    }
+    c.imageSmoothingEnabled = false;
+    c.drawImage(e.img, p.x * TS - 51, p.y * TS - 51, e.img.width * 3, e.img.height * 3);
+    for (const [x, y, r, col] of e.lights) canaanLight(p.x * TS + x, p.y * TS + y, r, col);
+  }
   // Décor de l'instance : sols spéciaux, objets, pièce maîtresse, herses et titre.
   function drawDungeonDecor(c) {
     if (!game.world.instance) return;
@@ -2090,12 +3097,14 @@
     if (plan.arena) drawArenaStands(c);
     for (const dcl of plan.decals) if (view(dcl.x, dcl.y, 4)) drawDecal(c, dcl, th);
     for (const p of plan.props)
-      if (view(p.x, p.y, 4)) {
+      if (view(p.x, p.y, 4) && p.lock === undefined && p.kind !== 'treasure') {
         if (p.wall) drawWallProp(c, p, th);
         else if (p.center) drawCenterpiece(c, p, th);
-        else drawFloorProp(c, p, th);
+        else if (plan.arena) drawFloorProp(c, p, th);
+        else pixelProp(c, p, th, i);
       }
     for (const g of plan.gates) if (g && game.world.tiles[g.cells[0][1]][g.cells[0][0]] === GATE) drawGate(c, g, th);
+    if (!plan.arena) drawExplore(c, plan, th, view);
     const d = instances[i],
       mode = instanceDifficulty();
     if (plan.title && view(plan.title.x, plan.title.y, 6)) {
@@ -2504,7 +3513,9 @@
       col = { dust: '#d8c8a8', embers: '#ffb14a', motes: th.rune, sparks: th.hazard.c, feathers: '#ffffff' }[
         th.particles
       ];
-    return { dark: th.light.dark, tint: th.light.tint, particles: th.particles, color: col };
+    // Pénombre adoucie : on voit le pixel art des salles, les torches gardent leur halo.
+    const arena = game.world.instance.arena;
+    return { dark: arena ? th.light.dark : th.light.dark * 0.62, tint: th.light.tint, particles: th.particles, color: col };
   }
   function dungeonMinimapColor(t) {
     if (!game.world.instance) return BIOME_COLORS[t];
@@ -2515,43 +3526,22 @@
     if (t === GATE) return th.rune;
     return '#08080e';
   }
-  // Vérification : chaque boss, coffre et ennemi accessible depuis l'entrée une fois les herses levées,
-  // et aucun boss suivant accessible tant que la première herse est fermée.
+  // Vérification d'une instance (tests et outils) : nombre de boss, de boss cachés, mécanismes des portes, et plan
+  // jouable (énigmes faisables avant leur porte, boss scellés, salles cachées fermées tant que le mur tient).
   function auditDungeon(i) {
-    const plan = planFor(i),
-      grid = plan.grid,
-      reach = openGates => {
-        const seen = new Set([ENTRY.y * MAPW + ENTRY.x]),
-          queue = [[ENTRY.x, ENTRY.y]];
-        while (queue.length) {
-          const [x, y] = queue.pop();
-          for (const [dx, dy] of [
-            [1, 0],
-            [-1, 0],
-            [0, 1],
-            [0, -1]
-          ]) {
-            const nx = x + dx,
-              ny = y + dy,
-              id = ny * MAPW + nx,
-              t = grid[ny]?.[nx];
-            if (seen.has(id) || !(WALKABLE(t) || (openGates && t === GATE))) continue;
-            seen.add(id);
-            queue.push([nx, ny]);
-          }
-        }
-        return seen;
-      },
-      open = reach(true),
-      closed = reach(false),
+    const plan = planFor(i);
+    if (i === 'arena') return { bosses: 0, theme: plan.theme.key };
+    const closed = reachFrom(plan, new Set()),
       bosses = plan.rooms.filter(r => r.kind === 'boss');
     return {
       bosses: bosses.length,
+      secrets: plan.secretCount,
+      locks: plan.locks.map(l => l.type),
       gates: plan.gates.filter(Boolean).length,
-      reachable:
-        bosses.every(r => open.has(r.boss.y * MAPW + r.boss.x)) &&
-        plan.trash.every(t => open.has(t.y * MAPW + t.x)),
-      sealed: bosses.slice(1).every(r => !closed.has(r.boss.y * MAPW + r.boss.x)),
+      doors: plan.doors.filter(Boolean).length,
+      rooms: plan.rooms.length,
+      reachable: validPlan(plan),
+      sealed: bosses.every(r => !near(closed, r.boss.x, r.boss.y)),
       trash: plan.trash.length,
       props: plan.props.length,
       theme: plan.theme.key
@@ -2587,10 +3577,13 @@
     dungeonMinimapColor,
     arenaLayout,
     CANAAN_DUNGEON_AUDIT: auditDungeon,
+    // Exploration : interaction (E), ce qui est à portée, état copié chez les invités.
+    CANAAN_DUNGEON_EXPLORE: Object.freeze({ inBossRoom, interact: dungeonInteract, near: p => !!reachable(p), stateOut: dungeonStateOut, stateIn: dungeonStateIn, state: () => dunState(), plan: i => planFor(i) }),
     // Monstres d'une instance (renforts appelés par les boss, boss-mechanics.js).
     CANAAN_DUNGEON_MOBS: i => THEMES[i].mobs,
     // Apparence des boss d'une instance (portraits du bestiaire).
     CANAAN_DUNGEON_BOSS_LOOKS: i => THEMES[i].bosses,
+    CANAAN_DUNGEON_SECRET_LOOKS: i => THEMES[i].secrets || [],
     // Pinceaux partagés avec les intérieurs des bâtiments et le camp (house.js, world-settlements.js) : mêmes
     // textures de sol et de mur, même flamme, même ombre au pied des murs que dans les donjons et les raids.
     CANAAN_TILE_KIT: Object.freeze({

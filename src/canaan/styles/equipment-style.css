@@ -189,3 +189,77 @@
   bottom: 5px;
   right: 5px;
 }
+
+/* Garde-robe (V) : apparences en cartes, cadre de la couleur de leur qualité, verrouillées tant qu'elles ne sont pas
+   trouvées ; la tenue portée est mise en avant. */
+#window .wardrobe-open {
+  margin-top: 6px;
+}
+#window .skin-current {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0 14px;
+  padding: 8px 12px;
+  border: 1px solid rgba(232, 200, 120, 0.35);
+  border-radius: 8px;
+  background: rgba(20, 14, 10, 0.35);
+}
+#window .skin-current img {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+}
+#window .skin-current div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#window .skin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+}
+#window .skin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px 8px;
+  border: 2px solid var(--rarity);
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rarity) 22%, transparent), rgba(16, 12, 10, 0.55) 70%);
+  color: #f3e6c4;
+  cursor: pointer;
+}
+#window .skin-card img {
+  width: 76px;
+  height: 76px;
+  image-rendering: pixelated;
+}
+#window .skin-card.worn {
+  box-shadow: 0 0 0 2px #fff2cb, 0 0 14px var(--rarity);
+}
+#window .skin-card.locked {
+  cursor: default;
+  opacity: 0.55;
+  filter: grayscale(0.7);
+}
+#window .skin-unknown {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  font-size: calc(34px * var(--font-scale));
+  color: var(--rarity);
+}
+#window .skin-name {
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.15;
+}
+#window .skin-rarity {
+  font-size: calc(11px * var(--font-scale));
+  color: var(--rarity);
+}

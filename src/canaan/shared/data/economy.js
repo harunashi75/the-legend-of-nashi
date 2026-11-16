@@ -14,15 +14,16 @@ export const SOURCE_REWARDS = deepFreeze({
     source: 'normal',
     rarity: 'Commun'
   },
-  // Monstres (élites comprises) et coffres cachés : Commun ; le marchand vend du Peu commun.
+  // Monstres (élites comprises) : Commun ; le marchand vend du Peu commun. Coffres secrets (ouverts avec une clé
+  // des secrets) : Épique.
   elite: {
     source: 'normal',
     rarity: 'Commun'
   },
   worldBoss: { source: 'world', rarity: 'Rare' },
   secretChest: {
-    source: 'hidden_common',
-    rarity: 'Commun'
+    source: 'hidden',
+    rarity: 'Épique'
   }
 });
 // Anciens matériaux de forge (minerai, bois, essence, noyau) : supprimés. Les stocks des anciennes sauvegardes sont

@@ -56,7 +56,7 @@
     const raid = instances[game.world.instance.index].raid,
       s = (m.mech ??= { wave: now() + (raid ? 300 : 360), rain: now() + (raid ? 480 : 600), adds: 0 }),
       ratio = m.hp / m.mhp,
-      targets = game.heroes.filter(h => alive(h) && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 12 * T);
+      targets = game.heroes.filter(h => alive(h) && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 12 * T && CANAAN_DUNGEON_EXPLORE.inBossRoom(m, h.player));
     if (!targets.length) return;
     // Onde de choc sous un héros au hasard, toutes les 7 s (5 s en raid).
     if (now() >= s.wave) {
@@ -105,7 +105,7 @@
   window.CanaanStages.drawBossMechanics = function () {
     if (!started || !zones.length) return;
     ctx.save();
-    ctx.translate(-camX, -camY);
+    ctx.translate(Math.round(-camX), Math.round(-camY));
     for (const z of zones) {
       const k = Math.min(1, (now() - z.start) / Math.max(1, z.at - z.start));
       ctx.globalAlpha = 0.18 + 0.25 * k;

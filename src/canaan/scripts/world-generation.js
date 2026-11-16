@@ -345,11 +345,20 @@
           decorate(x, y, game.world.tiles[y][x]);
         }
     }
+    // Forêts éclaircies : on retire une bonne part des grands arbres, et ceux qui restent ne se touchent jamais (au
+    // moins une case libre entre deux arbres) : on circule entre eux, on passe devant et derrière.
+    for (let y = 3; y < MAPH - 3; y++)
+      for (let x = 3; x < MAPW - 3; x++) {
+        const d = game.world.decor[y][x];
+        if (!CANAAN_BIG_TREES.has(d)) continue;
+        const crowded = [[-1, -1], [0, -1], [1, -1], [-1, 0]].some(([dx, dy]) => CANAAN_BIG_TREES.has(game.world.decor[y + dy][x + dx]));
+        if (crowded || hash(x, y, 61) > 0.42) game.world.decor[y][x] = hash(x, y, 62) < 0.25 && d !== 'palm' ? 'bush' : null;
+      }
     // Camp de l'Aurore : clairière d'herbe, terre battue autour du feu.
     const camp = villages[0];
     clearArea(camp.x, camp.y, camp.r + 2, 1);
     clearArea(camp.x, camp.y, 3, 2);
-    // Portails : terre ferme dans le biome de l'instance, avec une petite esplanade.
+    // Portails : terre ferme dans le biome de l'instance, posés sur le sol (décor dégagé autour, sans esplanade).
     instances.forEach((d, i) => {
       // Les donjons des Tréfonds ont leur portail sous l'île (underground.js).
       if (d.under) return;
@@ -357,7 +366,7 @@
         spot = nearestSpot(target.x, target.y, d.biome);
       d.x = spot.x;
       d.y = spot.y;
-      clearArea(d.x, d.y, 2, 2);
+      clearArea(d.x, d.y, 2);
       const npc = game.world.npcs.find(n => n.type === 'portal' && n.instance === i);
       if (npc) {
         npc.x = d.x * TS;
@@ -369,7 +378,7 @@
       const spot = nearestSpot(camp.x + 14, camp.y - 3, BIOME_MAP[camp.y * MAPW + camp.x]);
       CANAAN_ARENA_PORTAL.x = spot.x;
       CANAAN_ARENA_PORTAL.y = spot.y;
-      clearArea(spot.x, spot.y, 3, 2);
+      clearArea(spot.x, spot.y, 3);
       const npc = game.world.npcs.find(n => n.type === 'arena');
       if (npc) {
         npc.x = spot.x * TS;

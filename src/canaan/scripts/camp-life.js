@@ -22,10 +22,10 @@
     [0, 4, 1, 19],
     [-26, 5, -12, 6],
     [-6, -13, -5, -8],
-    [2, 10, 8, 11]
+    [2, 10, 8, 11],
+    // Allée de la forge jusqu'au centre du camp.
+    [-5, -3, -2, -2]
   ];
-  // Place pavée de la fontaine.
-  const PLAZA = [-7, -7, -2, -3];
   // Objets : genre, case du coin haut-gauche, taille en cases ; block : toutes les cases bloquent.
   // Places de rechange de la forge autour du camp (cases depuis le camp), des plus proches aux plus lointaines.
   const FORGE_SPOTS = [];
@@ -59,14 +59,24 @@
     { kind: 'woodpile', x: -6, y: 2, w: 3, h: 1, block: true },
     { kind: 'chop', x: -3, y: 2, w: 1, h: 1, block: true },
     // Forge du camp : là seulement se fabriquent les enchantements (canaan-gathering).
-    { kind: 'forge', x: 9, y: 1, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
-    { kind: 'fountain', x: -6, y: -6, w: 3, h: 3, block: true, on: 'plaza' },
+    { kind: 'forge', x: -6, y: -5, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
+    // Fontaine au centre du camp, sur les pavés de la place (là où était le feu de camp).
+    { kind: 'fountain', x: -1, y: -1, w: 3, h: 3, block: true, onRoad: true },
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
     { kind: 'apple', x: -6, y: -18, w: 1, h: 1, block: true },
     { kind: 'apple', x: 1, y: -18, w: 1, h: 1, block: true },
     { kind: 'bench', x: -3, y: -18, w: 2, h: 1, block: true },
     { kind: 'birdbath', x: -1, y: -17, w: 1, h: 1, block: true },
-    { kind: 'arch', x: -6, y: -14, w: 2, h: 1 }
+    { kind: 'arch', x: -6, y: -14, w: 2, h: 1 },
+    // Embellissements du camp (posés seulement s'ils trouvent leur place) : jardinières fleuries, étal du marché,
+    // panneau d'affichage, poteau indicateur, bancs autour de la fontaine. Jamais sur les rangées du point d'apparition
+    // (2 à 4 cases sous le centre), où l'on arrive et repart.
+    ...[[-4, -9], [3, -9], [4, -7], [10, -6], [-13, -4], [-8, -5], [-13, 5], [-8, 5], [3, -4], [-9, -9]].map(([x, y]) => ({ kind: 'planter', x, y, w: 1, h: 1, block: true, optional: true })),
+    { kind: 'stall', x: 6, y: -5, w: 3, h: 1, block: true, optional: true, alt: [[11, -4], [5, -3], [-12, -1], [6, 4]] },
+    { kind: 'board', x: -9, y: 0, w: 2, h: 1, block: true, optional: true, alt: [[-10, -2], [6, 0], [-9, 2], [7, -2]] },
+    { kind: 'signpost', x: 5, y: 1, w: 1, h: 1, block: true, optional: true, alt: [[8, 1], [-7, 1]] },
+    { kind: 'bench', x: -9, y: -6, w: 2, h: 1, block: true, optional: true, alt: [[-9, -4], [-1, -6]] },
+    { kind: 'bench', x: -1, y: -4, w: 2, h: 1, block: true, optional: true, alt: [[-1, -3], [-8, -2]] }
   ];
   // Parterres du jardin (cases depuis le camp) : fleur de chaque case.
   const BEDS = [
@@ -228,15 +238,6 @@
         }
     }
     bridgeAcross();
-    // Place pavée.
-    for (let y = PLAZA[1]; y <= PLAZA[3]; y++)
-      for (let x = PLAZA[0]; x <= PLAZA[2]; x++) {
-        const tx = cx + x,
-          ty = cy + y;
-        if (!free(tx, ty)) continue;
-        clear(tx, ty);
-        ground.set(key(tx, ty), { type: 'plaza', edge: x === PLAZA[0] || x === PLAZA[2] || y === PLAZA[1] || y === PLAZA[3] });
-      }
 
     // Objets : toute l'emprise doit être libre (et hors des chemins pour ce qui bloque).
     for (const p of PROPS) {
@@ -247,7 +248,7 @@
         for (let y = y0; y < y0 + p.h; y++) for (let x = x0; x < x0 + p.w; x++) out.push([x, y]);
         return out;
       };
-      const fitsAt = list => list.every(([x, y]) => (p.kind === 'arch' ? land(x, y) || ground.get(key(x, y))?.type === 'gpath' : fits(x, y) && (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))));
+      const fitsAt = list => list.every(([x, y]) => (p.onRoad ? land(x, y) && !solid.has(key(x, y)) : p.kind === 'arch' ? land(x, y) || ground.get(key(x, y))?.type === 'gpath' : fits(x, y) && (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))));
       // Place prévue, puis les places de rechange (alt) dans l'ordre : la première libre.
       let x0 = cx + p.x,
         y0 = cy + p.y,
@@ -264,7 +265,7 @@
         }
       }
       if (!ok) {
-        missing.push(p.kind + (p.crop ? ':' + p.crop : '') + '@' + p.x + ',' + p.y);
+        if (!p.optional) missing.push(p.kind + (p.crop ? ':' + p.crop : '') + '@' + p.x + ',' + p.y);
         continue;
       }
       // Les arbres et buissons sauvages autour sont dégagés.
@@ -332,6 +333,8 @@
     }
     if (items.some(it => it.kind === 'coop'))
       for (const [x, y, variant] of [[-2, 10, 0], [-3, 10, 1], [-1, 11, 0]]) animalsList.push({ kind: 'poule', ...at(x, y), roam: 2, variant });
+    // Chats et chien du camp.
+    for (const [kind, x, y, variant] of [['chat', -4, -2, 0], ['chat', 6, -6, 1], ['chien', 3, 2, 0]]) animalsList.push({ kind, ...at(x, y), roam: 3, variant });
     for (const [x, y, k] of [[-3, -16, 1], [1, -15, 2], [-10, 16, 3], [-4, 17, 4], [5, 17, 5], [-6, -4, 6]]) fliersList.push({ kind: 'papillon', ...at(x, y), seed: k * 97.3 });
     for (const [x, y, k] of [[-20, 14, 7], [-17, 6, 8], [-16, -4, 9]]) fliersList.push({ kind: 'libellule', ...at(x, y), seed: k * 61.7 });
   }
@@ -373,12 +376,39 @@
       for (let i = 0; i <= n; i++) R(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, wd, wd, col);
     };
     paint(R, D, E, L);
-    canaanPolish(cv, 2, name.length);
+    // Aplats francs, comme les maisons du camp (building-art.js) : pas de grain, un contour net.
     s = canaanOutline(cv, 2);
     CACHE.set(name, s);
     return s;
   }
+  // Hauteur des objets du camp qui cachent un personnage passé derrière eux (pixels au-dessus de leur pied).
+  const TALL_ITEMS = { barn: 270, silo: 220, coop: 150, apple: 190, forge: 150, fountain: 160, stall: 110, board: 100, signpost: 112, lantern: 100, scarecrow: 90, woodpile: 60, hay: 60, cart: 60, birdbath: 70, bench: 50, planter: 46 };
+  let redrawing = false;
+  function occluders() {
+    if (game.world.instance || !items.length || canaanInHouse(P.x / TS, P.y / TS)) return [];
+    const out = [];
+    for (const it of items) {
+      const hgt = TALL_ITEMS[it.kind];
+      if (!hgt || it.part) continue;
+      const bottom = it.y + it.h * T;
+      if (it.x + it.w * T < camX - 200 || it.x > camX + W + 200 || bottom < camY - 60 || bottom - hgt > camY + H + 60) continue;
+      out.push({
+        x0: it.x - 30,
+        x1: it.x + it.w * T + 30,
+        y0: bottom - hgt,
+        base: bottom - 8,
+        draw: c => {
+          redrawing = true;
+          c.imageSmoothingEnabled = false;
+          drawItem(c, it);
+          redrawing = false;
+        }
+      });
+    }
+    return out;
+  }
   function shadow(c, x, y, rx, ry, a = 0.3) {
+    if (redrawing) return;
     c.globalAlpha = a;
     c.fillStyle = '#0a0806';
     c.beginPath();
@@ -740,6 +770,79 @@
       R(13, 4, 1, 11, '#c4c0b4');
       D(15, 4, 3, '#b0aca0');
       R(14, 2, 2, 2, '#d8d4ca');
+    });
+  // Jardinière de bois débordant de fleurs.
+  const planterSprite = v =>
+    sprite('jardiniere' + v, 22, 22, (R, D) => {
+      R(2, 12, 18, 9, '#9a6a40');
+      R(2, 12, 18, 2, '#c89058');
+      R(2, 19, 18, 2, '#6a4426');
+      for (const x of [5, 10, 15]) R(x, 14, 1, 5, '#7a5230');
+      const cols = [['#f06a8a', '#ffe070'], ['#9a7ae0', '#ffffff'], ['#ff9a4a', '#ffd0e0']][v % 3];
+      for (const [x, y, r] of [[5, 9, 3], [11, 7, 4], [17, 9, 3], [8, 5, 2], [14, 4, 2]]) D(x, y, r, '#4e8a3a');
+      for (const [x, y, r] of [[5, 8, 2], [11, 6, 3], [17, 8, 2]]) D(x - 1, y - 1, r - 1, '#74b04e');
+      for (const [x, y, k] of [[4, 7, 0], [7, 4, 1], [11, 5, 0], [14, 3, 1], [17, 7, 0], [9, 9, 1], [13, 9, 0]]) {
+        R(x, y, 2, 2, cols[k]);
+        R(x, y, 1, 1, '#ffffff');
+      }
+    });
+  // Étal du marché : comptoir de planches, auvent rayé sur deux perches, cageots de fruits et de légumes.
+  const stallSprite = () =>
+    sprite('etal-marche', 72, 52, R => {
+      R(4, 4, 2, 44, '#6a4426');
+      R(66, 4, 2, 44, '#6a4426');
+      for (let x = 0; x < 72; x += 8) {
+        R(x, 2, 8, 10, (x / 8) % 2 ? '#fff4dc' : '#d8483a');
+        R(x + 2, 12, 4, 2, (x / 8) % 2 ? '#fff4dc' : '#d8483a');
+      }
+      R(0, 2, 72, 1, '#ffffff');
+      R(6, 30, 60, 6, '#b47c46');
+      R(6, 30, 60, 1, '#d8a066');
+      R(8, 36, 56, 12, '#8e5a30');
+      for (let x = 10; x < 64; x += 6) R(x, 36, 1, 12, '#663c1e');
+      const crates = [['#e0503c', '#f07a5a'], ['#ffd060', '#fff0a0'], ['#7ad070', '#a8e890'], ['#c88ae8', '#e8b8ff']];
+      crates.forEach(([a, b], k) => {
+        const x = 9 + k * 14;
+        R(x, 24, 12, 6, '#a8703e');
+        for (let i = 0; i < 4; i++) {
+          R(x + 1 + i * 3, 21 + (i % 2), 3, 3, a);
+          R(x + 1 + i * 3, 21 + (i % 2), 1, 1, b);
+        }
+      });
+    });
+  // Panneau d'affichage : cadre de bois, petit toit, avis épinglés.
+  const boardSprite = () =>
+    sprite('panneau-avis', 50, 50, R => {
+      R(6, 14, 3, 34, '#6a4426');
+      R(41, 14, 3, 34, '#6a4426');
+      R(2, 8, 46, 6, '#86321f');
+      R(2, 8, 46, 2, '#b84a32');
+      R(5, 14, 40, 24, '#8e5a30');
+      R(7, 16, 36, 20, '#c89a64');
+      for (const [x, y, w, h, col] of [[9, 17, 10, 12, '#fff6e4'], [21, 18, 9, 8, '#f6e0a0'], [32, 17, 9, 13, '#fff6e4'], [20, 28, 11, 7, '#e8f0ff']]) {
+        R(x, y, w, h, col);
+        R(x + 1, y + 3, w - 2, 1, '#9a8a70');
+        R(x + 1, y + 5, w - 3, 1, '#9a8a70');
+        R(x + Math.floor(w / 2), y, 1, 1, '#d8483a');
+      }
+    });
+  // Poteau indicateur à trois flèches.
+  const signpostSprite = () =>
+    sprite('poteau-indicateur', 44, 56, R => {
+      R(20, 6, 4, 48, '#6a4426');
+      R(20, 6, 1, 48, '#9a6a40');
+      for (const [x, y, w, dir, col] of [[22, 8, 20, 1, '#c89058'], [2, 18, 20, -1, '#b47c46'], [22, 28, 18, 1, '#c89058']]) {
+        R(x - (dir < 0 ? 0 : 0), y, w, 7, col);
+        R(x, y, w, 1, '#e0b078');
+        if (dir > 0) {
+          R(x + w, y + 1, 2, 5, col);
+          R(x + w + 2, y + 2, 1, 3, col);
+        } else {
+          R(x - 2, y + 1, 2, 5, col);
+          R(x - 3, y + 2, 1, 3, col);
+        }
+        R(x + 3, y + 3, w - 6, 1, '#5a3a20');
+      }
     });
   const benchSprite = () =>
     sprite('banc-jardin', 50, 26, (R) => {
@@ -1315,17 +1418,22 @@
       }
       case 'lawn':
         break;
-      case 'gpath':
-        R(X, Y, T, T, '#8a7a5a');
-        for (let k = 0; k < 4; k++) {
-          const sx = X + 3 + (k % 2) * 23 + hash(x, y, k) * 3,
-            sy = Y + 3 + Math.floor(k / 2) * 23 + hash(x, y, k + 2) * 3;
-          R(sx - 1, sy - 1, 18, 14, OUT);
-          R(sx, sy, 16, 12, '#a39a8c');
-          R(sx, sy, 16, 2, '#c4bcae');
-          R(sx + 13, sy + 2, 3, 10, '#6e675d');
+      case 'gpath': {
+        // Allée de terre battue et pas japonais ronds, aux couleurs des chemins.
+        R(X, Y, T, T, '#b8925e');
+        for (let k = 0; k < 10; k++) R(X + hash(x, y, k + 5) * 44, Y + hash(y, x, k + 6) * 44, 2, 2, k % 2 ? '#a07c4a' : '#cca674');
+        for (let k = 0; k < 2; k++) {
+          const sx = X + 8 + k * 18 + hash(x, y, k) * 4,
+            sy = Y + 8 + k * 16 + hash(x, y, k + 2) * 4;
+          R(sx - 1, sy + 1, 18, 12, OUT);
+          R(sx + 1, sy - 1, 14, 16, OUT);
+          R(sx, sy + 2, 16, 10, '#c8c0b0');
+          R(sx + 2, sy, 12, 14, '#c8c0b0');
+          R(sx + 2, sy + 1, 10, 3, '#e8e2d6');
+          R(sx + 12, sy + 4, 3, 8, '#9a9284');
         }
         break;
+      }
       case 'bed':
         R(X + 2, Y + 4, T - 4, T - 6, '#5a3e28');
         R(X + 2, Y + 4, T - 4, 2, '#8a6440');
@@ -1516,7 +1624,12 @@
       case 'hay':
       case 'cart':
         shadow(c, cx, bottom - 4, w * 0.5, 12);
-        put(c, BIG[it.kind](), cx, bottom + (it.kind === 'barn' ? 2 : 0));
+        {
+          // Grange, silo et poulailler : modèles en pixel art des maisons (building-art.js).
+          const art = (it.kind === 'barn' || it.kind === 'silo' || it.kind === 'coop') && CANAAN_BUILDING_ART.farm(it.kind, w);
+          if (art) c.drawImage(art.canvas, Math.round(cx - art.canvas.width), Math.round(bottom + 4 - art.canvas.height * 2), art.canvas.width * 2, art.canvas.height * 2);
+          else put(c, BIG[it.kind](), cx, bottom + (it.kind === 'barn' ? 2 : 0));
+        }
         if (it.kind === 'barn') {
           canaanLight(X + 44, bottom - 70, 70, '#ffd36b');
           canaanLight(X + w - 44, bottom - 70, 70, '#ffd36b');
@@ -1565,7 +1678,8 @@
         c.save();
         c.translate(cx, bottom - 2);
         c.transform(1, 0, -bend, 1, 0, 0);
-        c.drawImage(s, -s.width / 2, -s.height);
+        // Pommier agrandi (une fois et demie : ses pixels de 2 deviennent des pixels de 3, nets), comme les arbres.
+        c.drawImage(s, Math.round(-s.width * 0.75), Math.round(-s.height * 1.5), Math.round(s.width * 1.5), Math.round(s.height * 1.5));
         c.restore();
         break;
       }
@@ -1632,6 +1746,22 @@
         shadow(c, cx, bottom - 10, 44, 6);
         put(c, benchSprite(), cx, bottom - 8);
         break;
+      case 'planter':
+        shadow(c, cx, bottom - 8, 20, 5);
+        put(c, planterSprite((it.tx * 3 + it.ty) % 3), cx, bottom - 6);
+        break;
+      case 'stall':
+        shadow(c, cx, bottom - 8, w * 0.5, 8);
+        put(c, stallSprite(), cx, bottom - 4);
+        break;
+      case 'board':
+        shadow(c, cx, bottom - 8, 40, 6);
+        put(c, boardSprite(), cx, bottom - 4);
+        break;
+      case 'signpost':
+        shadow(c, cx, bottom - 8, 16, 5);
+        put(c, signpostSprite(), cx, bottom - 4);
+        break;
       case 'birdbath':
         shadow(c, cx, bottom - 10, 16, 5);
         put(c, birdbathSprite(), cx, bottom - 6);
@@ -1660,7 +1790,79 @@
       if (it.x + it.w * T < camX - 200 || it.x > camX + W + 200 || it.y + it.h * T < camY - 60 || it.y > camY + H + 220) continue;
       drawItem(c, it);
     }
+    drawGarlands(c);
+    drawPetals(c);
     c.restore();
+  }
+  // Guirlandes de fanions tendues d'une maison du camp à l'autre, qui flottent au vent.
+  const BUNTING = ['#e8483a', '#ffd060', '#56a648', '#4a84cc', '#f06a8a', '#fff4dc'];
+  function garlandAnchors() {
+    const ids = ['aubepines', 'marmite', 'echoppe'],
+      list = ids.map(id => CANAAN_HOUSE.buildings().find(b => b.id === id)).filter(Boolean),
+      pairs = [];
+    for (let i = 0; i + 1 < list.length; i++) {
+      const a = list[i],
+        b = list[i + 1];
+      pairs.push([(a.x + a.w) * TS - 10, (a.y + a.h) * TS - 70, b.x * TS + 10, (b.y + b.h) * TS - 70]);
+    }
+    return pairs;
+  }
+  let garlands = null,
+    garlandsFor = null;
+  function drawGarlands(c) {
+    if (garlandsFor !== items) {
+      garlands = garlandAnchors();
+      garlandsFor = items;
+    }
+    for (const [x0, y0, x1, y1] of garlands) {
+      if (Math.max(x0, x1) < camX - 100 || Math.min(x0, x1) > camX + W + 100 || Math.max(y0, y1) < camY - 100 || Math.min(y0, y1) > camY + H + 100) continue;
+      const len = Math.hypot(x1 - x0, y1 - y0),
+        sag = 18 + len * 0.06,
+        at = t => [x0 + (x1 - x0) * t, y0 + (y1 - y0) * t + Math.sin(t * Math.PI) * sag];
+      c.strokeStyle = '#3a2a1e';
+      c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(x0, y0);
+      c.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2 + sag * 2, x1, y1);
+      c.stroke();
+      const n = Math.max(3, Math.floor(len / 22));
+      for (let k = 1; k < n; k++) {
+        const t = k / n,
+          [fx, fy] = at(t),
+          sway = Math.sin(time * 0.09 + k * 1.3 + x0) * 3;
+        c.fillStyle = '#22160e';
+        c.beginPath();
+        c.moveTo(fx - 7, fy);
+        c.lineTo(fx + 7, fy);
+        c.lineTo(fx + sway, fy + 15);
+        c.closePath();
+        c.fill();
+        c.fillStyle = BUNTING[k % BUNTING.length];
+        c.beginPath();
+        c.moveTo(fx - 5, fy + 1);
+        c.lineTo(fx + 5, fy + 1);
+        c.lineTo(fx + sway, fy + 12);
+        c.closePath();
+        c.fill();
+      }
+    }
+  }
+  // Pétales qui volent au-dessus de la place et du jardin.
+  function drawPetals(c) {
+    const ox = (origin.x + 0.5) * T,
+      oy = (origin.y - 4) * T;
+    if (Math.abs(ox - camX - W / 2) > W + 400 || Math.abs(oy - camY - H / 2) > H + 400) return;
+    const cols = ['#ffd0e0', '#ffffff', '#f6b0c8', '#fff0a0'];
+    for (let k = 0; k < 18; k++) {
+      const life = (time * 0.0025 + k * 0.137) % 1,
+        x = ox - 520 + ((k * 211) % 1040) + life * 260 + Math.sin(time * 0.03 + k) * 18,
+        y = oy - 300 + ((k * 137) % 600) + life * 120 + Math.cos(time * 0.025 + k * 2) * 12;
+      c.globalAlpha = Math.sin(life * Math.PI) * 0.9;
+      c.fillStyle = cols[k % cols.length];
+      c.fillRect(Math.round(x), Math.round(y), 3, 2);
+      c.fillRect(Math.round(x) + 1, Math.round(y) - 1, 1, 1);
+    }
+    c.globalAlpha = 1;
   }
 
   // ---------------------------------------------------------------- Contrôle
@@ -1678,6 +1880,7 @@
 
   layout();
   canaanCampLife = {
+    occluders,
     place: layout,
     blocked,
     farm,

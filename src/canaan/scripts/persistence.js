@@ -138,7 +138,10 @@ window.CANAAN_PERSISTENCE = {
     const p = hero.player;
     return {
       look: sanitizeLook(hero.look),
-      player: { x: position.x, y: position.y, hp: p.hp, mp: p.mp, gold: p.gold },
+      // Garde-robe : apparences trouvées (la tenue portée est dans l'apparence).
+      skins: { owned: [...(hero.skins?.owned || [])] },
+      // Clés des secrets : gardées seulement quand le héros en a.
+      player: { x: position.x, y: position.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
       level: clampLevel(hero.level),
       exp: Math.max(0, Math.floor(hero.exp || 0)),
       kills: hero.kills,
@@ -345,9 +348,13 @@ window.CANAAN_PERSISTENCE = {
       P.y = home.y;
     }
     P.gold = nonnegative(p.gold);
+    P.keys = nonnegative(p.keys);
     game.hero.kills = nonnegative(h.kills);
     // Apparence (les aventures d'avant la création de personnage gardent le héros d'origine).
     game.hero.look = sanitizeLook(h.look);
+    // Garde-robe : seulement des apparences connues ; la tenue portée doit en faire partie.
+    game.hero.skins = { owned: [...new Set((Array.isArray(h.skins?.owned) ? h.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
+    if (!game.hero.skins.owned.includes(game.hero.look.wear)) delete game.hero.look.wear;
     // Métiers (les aventures d'avant les métiers commencent au niveau 1).
     game.hero.prof = CANAAN_PROF.sanitize(h.prof);
     game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);

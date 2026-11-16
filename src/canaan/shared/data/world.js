@@ -2,7 +2,8 @@
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 
-// Donjons et raids : biome d'accueil ; la position (x, y) est fixée par la génération de l'île.
+// Donjons et raids : biome d'accueil ; la position (x, y) est fixée par la génération de l'île. Trois boss par
+// donjon, six par raid (le dernier est `boss`), plus des boss cachés (`secrets`) derrière des passages secrets.
 export const INSTANCE_DEFS = deepFreeze([
   {
     name: 'La Cave des Terriers Abandonnés',
@@ -10,12 +11,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Gardien des Os',
-    bosses: ['Gardien des Os'],
+    bosses: ['Grignotte, Reine des Rats', 'Le Fossoyeur Bossu', 'Gardien des Os'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Rat-Roi aux Mille Queues'],
     color: '#a3c7ff',
     level: 7,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 9,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 10
   },
@@ -25,12 +28,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Golem de Mithril',
-    bosses: ['Golem de Mithril'],
+    bosses: ['Le Contremaître Kobold Grisch', 'L’Araignée des Galeries', 'Golem de Mithril'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Mineur Sans Visage'],
     color: '#67d8ee',
     level: 13,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 15,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 16
   },
@@ -40,12 +45,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Oracle de l’Éclipse',
-    bosses: ['Oracle de l’Éclipse'],
+    bosses: ['L’Acolyte du Crépuscule', 'Le Gardien Solaire', 'Oracle de l’Éclipse'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['L’Ombre de l’Astre Mort'],
     color: '#ff9955',
     level: 18,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 20,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 21
   },
@@ -55,12 +62,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Grand Inquisiteur',
-    bosses: ['Le Grand Inquisiteur'],
+    bosses: ['Le Geôlier Flagellant', 'La Mère Supérieure', 'Le Grand Inquisiteur'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Pénitent Oublié'],
     color: '#b79cff',
     level: 25,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 27,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 28
   },
@@ -70,12 +79,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Pyrrhax, Wyrm d’Écaille-Ardente',
-    bosses: ['Pyrrhax, Wyrm d’Écaille-Ardente'],
+    bosses: ['Maître-Forgeron Kraag', 'L’Élémentaire de Scories', 'Pyrrhax, Wyrm d’Écaille-Ardente'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['La Salamandre d’Obsidienne'],
     color: '#6bdfa2',
     level: 32,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 34,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 35
   },
@@ -85,12 +96,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Bourreau de l’Expiation',
-    bosses: ['Le Bourreau de l’Expiation'],
+    bosses: ['Le Gardien des Chaînes', 'La Pleureuse des Abysses', 'Le Bourreau de l’Expiation'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Celui-qui-Rampe-au-Fond'],
     color: '#e88aff',
     level: 37,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 39,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 40
   },
@@ -100,13 +113,15 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Roi Sanglant',
-    bosses: ['Sire Écorcheur', 'La Comtesse Écarlate', 'Le Roi Sanglant'],
+    bosses: ['Le Maître-Chien Ravageur', 'Sire Écorcheur', 'Le Chapelain Sanguin', 'La Comtesse Écarlate', 'Le Champion du Sang', 'Le Roi Sanglant'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Bourreau Masqué', 'La Dame Blanche du Bastion'],
     color: '#ffd36d',
     raid: true,
     level: 44,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 46,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 47
   },
@@ -116,13 +131,15 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Dévoreur Stellaire',
-    bosses: ['Le Gardien des Rouages', 'La Tisseuse du Temps', 'Le Dévoreur Stellaire'],
+    bosses: ['L’Horloger Fou', 'Le Gardien des Rouages', 'Le Sablier Vivant', 'La Tisseuse du Temps', 'L’Écho des Âges', 'Le Dévoreur Stellaire'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Paradoxe Errant', 'L’Enfant d’Avant le Temps'],
     color: '#ff7fa7',
     raid: true,
     level: 49,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 51,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 52
   },
@@ -132,13 +149,15 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Séraphin Divin',
-    bosses: ['L’Archonte Radieux', 'La Sentinelle Auréolée', 'Le Séraphin Divin'],
+    bosses: ['Le Chérubin Vigilant', 'L’Archonte Radieux', 'Le Trône Ailé', 'La Sentinelle Auréolée', 'La Voix du Chœur', 'Le Séraphin Divin'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['L’Ange Déchu Sans Nom', 'Le Gardien du Septième Ciel'],
     color: '#c4a0ff',
     raid: true,
     level: 54,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 56,
-    // Récompense garantie du coffre de boss.
+    // Qualité du butin des boss (30 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 57
   },
@@ -149,7 +168,9 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'L’Avatar du Jugement',
-    bosses: ['Le Héraut de Célestia', 'La Balance Éternelle', 'L’Avatar du Jugement'],
+    bosses: ['Le Porte-Étoile', 'Le Héraut de Célestia', 'L’Astrolabe Vivant', 'La Balance Éternelle', 'Le Juge des Constellations', 'L’Avatar du Jugement'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['La Comète Écarlate', 'Le Témoin du Premier Jour'],
     color: '#fff0a8',
     raid: true,
     level: 58,
@@ -179,7 +200,9 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Grumbar, le Contremaître Maudit',
-    bosses: ['Grumbar, le Contremaître Maudit'],
+    bosses: ['Le Chef d’Équipe Brisepierre', 'La Foreuse Possédée', 'Grumbar, le Contremaître Maudit'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Nain Emmuré'],
     color: '#e0a060',
     level: 1,
     mobLevel: 1,
@@ -195,7 +218,9 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Ombral, le Roi sous la Pierre',
-    bosses: ['Ombral, le Roi sous la Pierre'],
+    bosses: ['Le Héraut des Profondeurs', 'La Garde de Pierre Noire', 'Ombral, le Roi sous la Pierre'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Prince Noyé'],
     color: '#8ac8e8',
     level: 1,
     mobLevel: 1,
@@ -211,7 +236,9 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Fossoyeur Éternel',
-    bosses: ['Le Fossoyeur Éternel'],
+    bosses: ['Le Pilleur de Tombes', 'La Veuve des Cryptes', 'Le Fossoyeur Éternel'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Mille-et-Unième Mort'],
     color: '#a8f0c0',
     level: 1,
     mobLevel: 1,
@@ -227,7 +254,9 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'La Reine des Spores',
-    bosses: ['La Reine des Spores'],
+    bosses: ['Le Champignon Hurleur', 'Le Mycélium Vivant', 'La Reine des Spores'],
+    // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
+    secrets: ['Le Cœur de Moisissure'],
     color: '#e870c0',
     level: 1,
     mobLevel: 1,

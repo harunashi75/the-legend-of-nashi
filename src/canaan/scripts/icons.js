@@ -102,6 +102,13 @@
     chain: g('rotate(-45 12 12)', r(3, 9, 9, 6, 'none', 3).replace('fill="none" ' + O, 'fill="none" stroke="' + INK + '" stroke-width="3.6"') + r(12, 9, 9, 6, 'none', 3).replace('fill="none" ' + O, 'fill="none" stroke="' + INK + '" stroke-width="3.6"') +
          r(3, 9, 9, 6, 'none', 3).replace('fill="none" ' + O, 'fill="none" stroke="' + STEELD + '" stroke-width="1.8"') + r(12, 9, 9, 6, 'none', 3).replace('fill="none" ' + O, 'fill="none" stroke="' + STEEL + '" stroke-width="1.8"')),
     lock: p('M8 10 L8 7 C8 3 16 3 16 7 L16 10', 'none').replace('fill="none" ' + O, 'fill="none" stroke="' + INK + '" stroke-width="3.6"') + l('M8 10 L8 7 C8 3 16 3 16 7 L16 10', STEELD, 1.8) + r(5, 10, 14, 11, GOLD, 2) + c(12, 15, 1.6, INK) + l('M12 15.5 L12 18', INK, 1.4),
+    // Clé des secrets (boss cachés), cadenas ouvert, trou d'un passage secret, croix d'erreur.
+    key: c(7.5, 8.5, 5, INK) + c(7.5, 8.5, 3.6, GOLD) + c(7.5, 8.5, 1.5, INK) + l('M10.5 11.5 L20 21', INK, 4) + l('M10.5 11.5 L20 21', GOLD, 2.2) + l('M16 17 L18.5 14.5 M18.5 19.5 L21 17', GOLDD, 2),
+    unlock: p('M8 10 L8 6 C8 2 16 2 16 6', 'none').replace('fill="none" ' + O, 'fill="none" stroke="' + INK + '" stroke-width="3.6"') + l('M8 10 L8 6 C8 2 16 2 16 6', STEELD, 1.8) + r(5, 10, 14, 11, GOLD, 2) + c(12, 15, 1.6, INK) + l('M12 15.5 L12 18', INK, 1.4),
+    hole: p('M3 14 C3 10 21 10 21 14 C21 18 3 18 3 14 Z', '#5a4a3a') + p('M5.5 14 C5.5 11.6 18.5 11.6 18.5 14 C18.5 16.4 5.5 16.4 5.5 14 Z', '#0c0a10') + l('M6 12 L9 11.3', '#8a7a64', 1.2),
+    cross: l('M5 5 L19 19 M19 5 L5 19', INK, 5) + l('M5 5 L19 19 M19 5 L5 19', RED, 2.8),
+    // Garde-robe : robe sur un cintre.
+    dress: l('M12 3 L12 5 M8 6 L12 4.5 L16 6', STEELD, 1.4) + p('M9 6 L15 6 L14 10 L18 21 L6 21 L10 10 Z', '#c05a8a') + p('M10 10 L14 10 L15 13 L9 13 Z', '#e07aaa') + l('M9.5 13 L14.5 13', GOLD, 1.2),
     bell: p('M12 3 C16.5 3 18 7 18 11 C18 14 19 16 21 17.5 L3 17.5 C5 16 6 14 6 11 C6 7 7.5 3 12 3 Z', GOLD) + c(12, 19.5, 2, GOLDD) + hi('M8.5 8 C8.8 6.6 9.6 5.6 10.8 5.2'),
     horn: p('M3 11 L3 14 L8 14 L18 20 C20 20.5 21 19 21 17 L21 8 C21 6 20 4.5 18 5 L8 11 Z', GOLD) + l('M8 11 L8 14', GOLDD, 1.2) + l('M5 8 L5 6 M5 17 L5 19', '#ffe07a', 1.4),
     note: l('M9 18 L9 5 L19 3 L19 16', INK, 3) + l('M9 18 L9 5 L19 3 L19 16', '#7a5ae0', 1.4) + c(6.5, 18, 2.8, '#7a5ae0') + c(16.5, 16, 2.8, '#7a5ae0'),
@@ -231,7 +238,7 @@
     '🪖': 'helmet', '🥾': 'boot', '👟': 'shoe', '🧤': 'glove', '🦾': 'arm', '💍': 'ring', '📿': 'necklace', '💎': 'gem', '💠': 'gemShape',
     '💰': 'moneybag', '🪙': 'coin', '🎒': 'backpack', '🏠': 'house', '🏚': 'ruin', '🛖': 'hut', '🏰': 'castle', '🏛': 'temple', '🏦': 'bank', '⛏': 'pickaxe', '🏕': 'tent', '🗼': 'tower', '🚪': 'door',
     '🤝': 'handshake', '📜': 'scroll', '📖': 'book', '📚': 'books', '🗺': 'map', '🧭': 'compass', '⚙': 'gear', '💾': 'floppy', '📂': 'folder', '🎨': 'palette', '⚖': 'scales',
-    '📋': 'clipboard', '📍': 'pin', '🔍': 'magnifier', '🔎': 'magnifier', '🔗': 'chain', '⛓': 'chain', '🔒': 'lock', '🔔': 'bell', '📯': 'horn', '🎵': 'note',
+    '📋': 'clipboard', '📍': 'pin', '🔍': 'magnifier', '🔎': 'magnifier', '🔗': 'chain', '⛓': 'chain', '🔒': 'lock', '👗': 'dress', '🔓': 'unlock', '🗝': 'key', '🕳': 'hole', '✖': 'cross', '🔔': 'bell', '📯': 'horn', '🎵': 'note',
     '🔊': 'speaker', '🔇': 'mute', '⏸': 'pause', '⏩': 'fast', '⏳': 'hourglass', '🔁': 'refresh', '🔄': 'refresh', '🏆': 'trophy', '👑': 'crown', '🎁': 'gift', '📦': 'box', '🎲': 'dice',
     '✨': 'sparkles', '⭐': 'star', '🌟': 'starGlow', '💫': 'dizzy', '💥': 'boom', '💢': 'anger', '🔥': 'fire', '⚡': 'bolt', '❄': 'snow', '☀': 'sun', '🌙': 'moon', '🌑': 'newmoon',
     '🌬': 'wind', '💨': 'dash', '🌀': 'cyclone', '🌪': 'tornado', '🌧': 'rain', '💧': 'droplet', '💦': 'splash', '🩸': 'blood', '🌋': 'volcano', '🌅': 'sunrise', '🌌': 'galaxy',

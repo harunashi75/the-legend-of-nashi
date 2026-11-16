@@ -238,7 +238,7 @@
       total = DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor();
     if (left <= 0 && !roll) return;
     ctx.save();
-    ctx.translate(-camX, -camY);
+    ctx.translate(Math.round(-camX), Math.round(-camY));
     ctx.globalAlpha = roll ? 0.9 : 0.55;
     ctx.strokeStyle = roll ? '#bfe8ff' : '#7fb8d8';
     ctx.lineWidth = 3;

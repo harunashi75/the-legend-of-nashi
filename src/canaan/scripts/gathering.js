@@ -52,7 +52,7 @@
   // niveau d'enchanteur requis pour le forger. Le niveau d'enchanteur de celui qui pose l'enchantement le renforce
   // aussi de 1 % par niveau (jusqu'à +40 %).
   const ENCH_MULT = [0.16, 0.2, 0.24, 0.28, 0.33, 0.4];
-  const ENCH_LEVEL = [1, 5, 10, 15, 20, 25];
+  const ENCH_LEVEL = [1, 6, 12, 20, 28, 35];
   const levelTooLow = (hero, tier) => CANAAN_PROF.profOf(hero).enchanting.level < ENCH_LEVEL[tier];
   const levelText = (hero, tier) => 'Enchanteur niveau ' + ENCH_LEVEL[tier] + ' requis pour le ' + ORES[METALS[tier]].metal + ' (tu es niveau ' + CANAAN_PROF.profOf(hero).enchanting.level + ').';
   const levelBonus = hero => 1 + 0.01 * (CANAAN_PROF.profOf(hero).enchanting.level || 1);

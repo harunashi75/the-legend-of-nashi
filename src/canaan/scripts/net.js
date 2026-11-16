@@ -215,11 +215,12 @@
     let hero = game.guests[message.id];
     const back = !!hero?.away && game.heroes.includes(hero);
     if (!hero) {
-      hero = CANAAN_GROUP.createRemote(message.id, cleanPseudo(message.pseudo), decodeLook(message.look));
+      hero = CANAAN_GROUP.createRemote(message.id, cleanPseudo(message.pseudo), { ...decodeLook(message.look), wear: '' });
       if (!hero) return refuse('Cette aventure a déjà six héros invités.');
     }
-    // L'invité choisit son apparence chez lui : elle suit à chaque connexion.
-    if (typeof message.look === 'string') hero.look = decodeLook(message.look);
+    // L'invité choisit son apparence chez lui : elle suit à chaque connexion. L'apparence portée (garde-robe) reste
+    // celle que l'hôte lui connaît : jamais une tenue qu'il ne possède pas.
+    if (typeof message.look === 'string') hero.look = sanitizeLook({ ...decodeLook(message.look), wear: hero.look?.wear || '' });
     if (!game.heroes.includes(hero) && !CANAAN_GROUP.join(hero.id)) return refuse('Trois invités sont déjà présents.');
     hero.local = false;
     hero.peer = message.peer;
@@ -236,7 +237,7 @@
   function snapshot() {
     const inst = game.world.instance,
       map = inst
-        ? { instance: inst.arena ? 'arena' : inst.index, cleared: !!inst.cleared, bosses: inst.bossesDown || 0 }
+        ? { instance: inst.arena ? 'arena' : inst.index, cleared: !!inst.cleared, bosses: inst.bossesDown || 0, dun: inst.arena ? null : CANAAN_DUNGEON_EXPLORE.stateOut() }
         : { instance: null, layer: game.world.layer === 'under' ? 'under' : 'surface' };
     for (const m of game.world.monsters) if (!m.netId) m.netId = ++net.monsterCounter;
     return {
@@ -322,7 +323,8 @@
       quetes: hero.quetes,
       rubis: { owned: hero.rubis.owned, equipped: hero.rubis.equipped },
       arena: hero.arena,
-      prof: CANAAN_PROF.bagOf(hero)
+      prof: CANAAN_PROF.bagOf(hero),
+      skins: CANAAN_WARDROBE.export(hero)
     });
     if (bag !== hero.netBag) {
       hero.netBag = bag;
@@ -368,6 +370,8 @@
     if (action.op === 'rubis-equip') return CANAAN_RUBIS.equipFor(hero, action.rubis);
     if (action.op === 'rubis-unequip') return CANAAN_RUBIS.unequipFor(hero, action.slot);
     if (action.op === 'open-chest') return openNearbyChest(hero);
+    if (action.op === 'dungeon-use') return CANAAN_DUNGEON_EXPLORE.interact(hero);
+    if (action.op === 'skin-wear') return CANAAN_WARDROBE.handle(hero, action);
     if (action.op === 'sell') return sellItemFor(hero, action.id);
     if (action.op === 'sell-common') return sellCommonFor(hero);
     if (action.op === 'buy-gear') return buyGearFor(hero);
@@ -467,6 +471,8 @@
         openDungeonGates(game.world.instance.index, bosses);
         game.world.instance.bossesDown = net.lastBosses = bosses;
       }
+      // Exploration : portes descellées, murs secrets découverts, objets activés.
+      if (Number.isInteger(game.world.instance?.index) && map.dun) CANAAN_DUNGEON_EXPLORE.stateIn(map.dun);
       return;
     }
     net.lastMap = key;
@@ -485,6 +491,7 @@
       game.world.instance = { index: map.instance, cleared: !!map.cleared, bossesDown: bosses, guestView: true };
       game.world.tiles = makeDungeon(map.instance);
       openDungeonGates(map.instance, bosses);
+      if (map.dun) CANAAN_DUNGEON_EXPLORE.stateIn(map.dun);
       net.lastBosses = bosses;
       game.world.decor = Array.from({ length: MAPH }, () => Array(MAPW).fill(null));
       instanceEntrance = { x: 120 * TS, y: 133 * TS };
@@ -529,9 +536,13 @@
           hero.look = decodeLook(h.look);
         }
         seen.add(h.id);
+      } else if (typeof h.look === 'string') {
+        // Son propre héros : seule l'apparence portée vient de l'hôte (garde-robe vérifiée chez lui).
+        const wear = decodeLook(h.look).wear || '';
+        if ((game.hero.look?.wear || '') !== wear) game.hero.look = sanitizeLook({ ...game.hero.look, wear });
       }
       const p = hero.player;
-      for (const key of ['hp', 'mhp', 'mp', 'mmp', 'gold', 'vx', 'vy', 'face', 'atk']) if (Number.isFinite(h[key])) p[key] = h[key];
+      for (const key of ['hp', 'mhp', 'mp', 'mmp', 'gold', 'keys', 'vx', 'vy', 'face', 'atk']) if (Number.isFinite(h[key])) p[key] = h[key];
       p.dead = !!h.dead;
       p.form = h.form ? 'feral' : null;
       p.veiled = !!h.veil;
@@ -608,6 +619,7 @@
       if (Number.isInteger(bag.bagLevel)) game.hero.bagLevel = canaanBagLevel({ bagLevel: bag.bagLevel });
       applyClassAndRubis(bag);
       if (bag.prof && typeof bag.prof === 'object') game.hero.prof = CANAAN_PROF.sanitize(bag.prof);
+      if (bag.skins && typeof bag.skins === 'object') CANAAN_WARDROBE.applyRemote(bag.skins);
       if (bag.quetes && typeof bag.quetes === 'object') game.hero.quetes = sanitizeQuests(bag.quetes);
       if (bag.arena && typeof bag.arena === 'object')
         game.hero.arena = {

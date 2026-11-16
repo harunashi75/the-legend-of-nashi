@@ -446,7 +446,7 @@
   window.CanaanStages.drawWeaponEffects = function () {
     if (!started) return;
     ctx.save();
-    ctx.translate(-camX, -camY);
+    ctx.translate(Math.round(-camX), Math.round(-camY));
     // Direction et portée : indication légère, même sans lancer un sort.
     const type = currentWeaponType(),
       a = aim(),

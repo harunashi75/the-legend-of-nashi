@@ -1,16 +1,26 @@
 // Sac unifié : chaque chose possédée est un objet du sac (touche I). En plus de l'équipement (hero.inventory), les
 // Rubis non équipés, les poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent
-// de la place. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
+// de la place ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
 // meals) : le sac en est la vue, sans changer les sauvegardes ni l'état envoyé aux invités.
 // Une pile se désigne par un repère texte « genre:id:qualité*nombre » (fish:gardon:2*30, rubis:phenix:0*1), utilisé
 // par la vente au marchand et par l'échange entre joueurs.
 (() => {
   'use strict';
   const STACK = 100;
-  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench'];
+  // Taille d'une pile selon le genre (100 par défaut ; clés des secrets : 20).
+  const STACK_OF = { key: 20 };
+  const stackOf = kind => STACK_OF[kind] || STACK;
+  // Deux sections : le sac (équipement, Rubis, repas, enchantements) et les matériaux qu'on récolte (minerais,
+  // poissons, herbes, viandes), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac.
+  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb']);
+  const MAT_LIMIT = 100;
+  const isMat = kind => MAT_KINDS.has(kind);
+  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key'];
   const PROF_BAG = { fish: 'fish', meat: 'meat', meal: 'meals', ore: 'ore', herb: 'herb', ench: 'ench' };
   // Prix de vente d'une unité au marchand, selon le genre et la qualité (0 à 7).
-  const UNIT_PRICE = { fish: q => 4 + 4 * q, meat: q => 5 + 5 * q, meal: q => 10 + 8 * q, rubis: () => 300, ore: q => 6 + 5 * q, herb: q => 4 + 4 * q, ench: q => 60 + 40 * q };
+  const UNIT_PRICE = { fish: q => 4 + 4 * q, meat: q => 5 + 5 * q, meal: q => 10 + 8 * q, rubis: () => 300, ore: q => 6 + 5 * q, herb: q => 4 + 4 * q, ench: q => 60 + 40 * q, key: () => 0 };
+  // Les clés des secrets ne se vendent pas.
+  const sellable = p => p.kind !== 'key';
   const profOf = hero => hero.prof || (hero.prof = canaanFreshProf());
   // Qualités : les mêmes noms et couleurs que l'équipement (Commun à Mythique).
   const qualityName = q => GEAR_RARITIES[q]?.name || 'Commun';
@@ -20,6 +30,7 @@
   // ---------------------------------------------------------------- Lecture
   // Quantité d'une pile (Rubis : ceux qui ne sont pas équipés).
   function count(hero, kind, id, q = 0) {
+    if (kind === 'key') return id === 'secret' && !q ? Math.max(0, Math.floor(Number(hero.player?.keys) || 0)) : 0;
     if (kind === 'rubis') {
       const r = rubisOf(hero);
       return Math.max(0, (r.owned[id] || 0) - (r.equipped.includes(id) ? 1 : 0));
@@ -35,6 +46,8 @@
       const n = count(hero, 'rubis', id);
       if (n > 0) out.push({ kind: 'rubis', id, q: 0, n });
     }
+    const keys = count(hero, 'key', 'secret');
+    if (keys > 0) out.push({ kind: 'key', id: 'secret', q: 0, n: keys });
     const prof = profOf(hero);
     for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench'])
       for (const [key, n] of Object.entries(prof[PROF_BAG[kind]] || {}).sort()) {
@@ -43,30 +56,36 @@
       }
     return out;
   }
-  // Cases du sac occupées par les piles (une pile de 230 prend 3 cases : 100, 100, 30).
-  function tiles(hero) {
+  // Cases occupées par les piles (une pile de 230 prend 3 cases : 100, 100, 30). section : 'main' (le sac),
+  // 'mat' (les matériaux), ou rien (toutes).
+  function tiles(hero, section) {
     const out = [];
-    for (const p of piles(hero))
-      for (let left = p.n; left > 0; left -= STACK) out.push({ ...p, n: Math.min(STACK, left) });
+    for (const p of piles(hero)) {
+      if (section && (section === 'mat') !== isMat(p.kind)) continue;
+      for (let left = p.n, size = stackOf(p.kind); left > 0; left -= size) out.push({ ...p, n: Math.min(size, left) });
+    }
     return out;
   }
-  const tilesFor = n => Math.ceil(Math.max(0, n) / STACK);
+  const tilesFor = (n, kind) => Math.ceil(Math.max(0, n) / stackOf(kind));
+  // Cases du sac : l'équipement et les piles qui ne sont pas des matériaux.
   function used(hero) {
-    return (hero.inventory || []).length + tiles(hero).length;
+    return (hero.inventory || []).length + tiles(hero, 'main').length;
   }
-  function free(hero) {
-    return canaanBagLimit(hero) - used(hero);
+  const matUsed = hero => tiles(hero, 'mat').length;
+  function free(hero, kind) {
+    return isMat(kind) ? MAT_LIMIT - matUsed(hero) : canaanBagLimit(hero) - used(hero);
   }
-  // Peut-on ajouter n unités à cette pile ? Seules les cases supplémentaires demandent de la place.
+  // Peut-on ajouter n unités à cette pile ? Seules les cases supplémentaires demandent de la place, dans sa section.
   function room(hero, kind, id, q = 0, n = 1) {
     const now = count(hero, kind, id, q);
-    return tilesFor(now + n) - tilesFor(now) <= free(hero);
+    return tilesFor(now + n, kind) - tilesFor(now, kind) <= free(hero, kind);
   }
 
   // ---------------------------------------------------------------- Écriture
   function add(hero, kind, id, q, n) {
     if (!(n > 0)) return;
-    if (kind === 'rubis') {
+    if (kind === 'key') hero.player.keys = count(hero, 'key', 'secret') + n;
+    else if (kind === 'rubis') {
       const r = (hero.rubis ||= { owned: {}, equipped: [null, null, null, null, null, null] });
       r.owned[id] = (r.owned[id] || 0) + n;
     } else {
@@ -78,7 +97,8 @@
   }
   function remove(hero, kind, id, q, n) {
     if (!(n > 0) || count(hero, kind, id, q) < n) return false;
-    if (kind === 'rubis') {
+    if (kind === 'key') hero.player.keys = count(hero, 'key', 'secret') - n;
+    else if (kind === 'rubis') {
       const r = rubisOf(hero);
       r.owned[id] -= n;
       if (r.owned[id] <= 0) delete r.owned[id];
@@ -93,19 +113,20 @@
   }
 
   // ---------------------------------------------------------------- Repères (vente, échange)
-  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
+  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
   const token = (p, n = p.n) => p.kind + ':' + p.id + ':' + p.q + '*' + n;
   function parse(text) {
     const m = TOKEN.exec(String(text || ''));
     if (!m) return null;
     const n = Number(m[4]);
-    if (n < 1 || n > STACK) return null;
+    if (n < 1 || n > stackOf(m[1])) return null;
     const p = { kind: m[1], id: m[2], q: Number(m[3]), n };
     return known(p) ? p : null;
   }
   // Une pile existe dans les catalogues du jeu.
   function known(p) {
     if (!KINDS.includes(p.kind)) return false;
+    if (p.kind === 'key') return p.id === 'secret' && p.q === 0;
     if (p.kind === 'rubis') return !!RUBIS_CATALOG.find(r => r.id === p.id) && p.q === 0;
     const cat = { fish: CANAAN_PROF.FISH, meat: CANAAN_PROF.MEAT, meal: CANAAN_PROF.RECIPES, ore: CANAAN_GATHER.ORES, herb: CANAAN_GATHER.HERBS, ench: CANAAN_GATHER.ENCHANTS }[p.kind];
     // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité.
@@ -115,6 +136,8 @@
 
   // ---------------------------------------------------------------- Présentation
   function info(p) {
+    if (p.kind === 'key')
+      return { name: 'Clé des secrets', icon: '🗝️', color: '#f0c040', sub: 'Clé · piles de 20', desc: 'Ouvre un coffre secret de l’île ou des Tréfonds (E devant le coffre). Les boss cachés des donjons et des raids en donnent une à chaque héros.', quality: null };
     const qual = p.kind === 'rubis' ? null : { name: qualityName(p.q), color: qualityColor(p.q) };
     if (p.kind === 'rubis') {
       const r = RUBIS_CATALOG.find(x => x.id === p.id),
@@ -177,7 +200,7 @@
       '<div class="tooltip-name skill-tip-head" style="color:' + it.color + '"><span class="skill-tip-icon">' + CANAAN_ICONS.html(it.icon) + '</span>' + esc(it.name) + '</div>' +
       '<div class="tooltip-sub">' + esc(it.sub) + ' · ×' + p.n + '</div>' +
       '<div class="skill-tip-desc">' + esc(it.desc) + '</div>' +
-      '<div class="skill-tip-meta">Vente : ' + unitPrice(p) + ' or l’unité' + (merchant ? ' · clic droit ou bouton pièce chez le marchand' : '') + '</div>'
+      '<div class="skill-tip-meta">' + (sellable(p) ? 'Vente : ' + unitPrice(p) + ' or l’unité' + (merchant ? ' · clic droit ou bouton pièce chez le marchand' : '') : 'Ne se vend pas.') + '</div>'
     );
   }
   function showTooltip(text, event) {
@@ -198,12 +221,18 @@
     if (p.kind === 'rubis') return equipRubis(p.id);
     if (p.kind === 'meal') return CANAAN_PROF.actions.eat(p.id, p.q);
     if (p.kind === 'ench') return CANAAN_GATHER.actions.use(text);
+    if (p.kind === 'key') return toast('🗝️ Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.'), false;
     toast(info(p).name + ' : à cuisiner près d’une cuisinière (panneau P).');
     return false;
   }
 
   window.CANAAN_BAG = Object.freeze({
     STACK,
+    stackOf,
+    sellable,
+    MAT_LIMIT,
+    isMat,
+    matUsed,
     count,
     piles,
     tiles,

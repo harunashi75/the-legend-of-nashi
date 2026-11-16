@@ -672,7 +672,7 @@
       for (const e of CANAAN_UNDER.ENTRANCES) put('stairs', e.x, e.y, {}, e.name);
       for (const b of houses) if (b.id === 'maison') put('home', b.x + b.w / 2, b.y + b.h / 2, {}, 'Ta maison');
       if (!v.mini && v.scale >= 8)
-        for (const b of houses) if (b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y)) label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
+        for (const b of houses) if (b.name && b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y)) label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
       for (const n of game.world.npcs) if (n.type === 'shop' && (v.mini || v.scale >= 6)) put('shop', n.x / TS, n.y / TS, {}, null);
       for (const b of WORLD_BOSSES) put('boss', b.x, b.y, {}, b.name);
       put('arena', CANAAN_ARENA_PORTAL.x, CANAAN_ARENA_PORTAL.y, {}, CANAAN_ARENA_NAME);

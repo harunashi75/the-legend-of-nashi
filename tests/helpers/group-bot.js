@@ -1,9 +1,13 @@
 // Pilote de test : joue les intentions d'un groupe de héros dans une instance, sans écran.
 // Chaque héros suit un chemin case par case (recherche en largeur), attaque le monstre le plus proche
 // à portée de son arme ; une fois le dernier boss vaincu, l'hôte ouvre le coffre et ramène le groupe à la sortie.
+// Exploration : quand plus aucun monstre n'est accessible, l'hôte examine les murs fissurés et résout les énigmes
+// des portes scellées (braseros, leviers dans l'ordre de la stèle, dalles gravées), comme un joueur.
 // Exécuté dans le contexte du jeu (script classique), comme le ferait un invité qui envoie ses intentions.
 globalThis.canaanGroupBot = (() => {
   const plans = new Map();
+  // Cases à contourner (dalles gravées qu'il ne faut pas fouler maintenant).
+  let avoid = new Set();
   const tileOf = v => Math.floor(v / TS);
   const free = (x, y) => x >= 0 && y >= 0 && x < MAPW && y < MAPH && canWalk((x + 0.5) * TS, (y + 0.5) * TS);
   // Chemin de cases entre deux cases (4 voisins), ou null.
@@ -11,7 +15,7 @@ globalThis.canaanGroupBot = (() => {
     const key = (x, y) => y * MAPW + x,
       seen = new Map([[key(fx, fy), -1]]),
       queue = [[fx, fy]];
-    for (let head = 0; head < queue.length && queue.length < 60000; head++) {
+    for (let head = 0; head < queue.length && queue.length < 200000; head++) {
       const [x, y] = queue[head];
       if (x === gx && y === gy) {
         const path = [];
@@ -22,7 +26,7 @@ globalThis.canaanGroupBot = (() => {
         const nx = x + dx,
           ny = y + dy,
           k = key(nx, ny);
-        if (seen.has(k) || !(free(nx, ny) || (nx === gx && ny === gy))) continue;
+        if (seen.has(k) || (avoid.has(k) && !(nx === gx && ny === gy)) || !(free(nx, ny) || (nx === gx && ny === gy))) continue;
         seen.set(k, key(x, y));
         queue.push([nx, ny]);
       }
@@ -69,11 +73,67 @@ globalThis.canaanGroupBot = (() => {
     }
   }
   const state = { phase: 'combat', done: false };
+  // Cases accessibles depuis l'hôte, recalculées de temps en temps (portes et murs s'ouvrent en cours de route).
+  let reachSet = null,
+    reachAge = 0;
+  function reachable() {
+    if (reachSet && reachAge++ < 20) return reachSet;
+    reachAge = 0;
+    const p = game.hero.player,
+      start = tileOf(p.y) * MAPW + tileOf(p.x),
+      queue = [start];
+    reachSet = new Set(queue);
+    for (let head = 0; head < queue.length; head++) {
+      const k = queue[head],
+        x = k % MAPW,
+        y = Math.floor(k / MAPW);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const n = (y + dy) * MAPW + x + dx;
+        if (!reachSet.has(n) && free(x + dx, y + dy)) {
+          reachSet.add(n);
+          queue.push(n);
+        }
+      }
+    }
+    return reachSet;
+  }
+  const near = (set, x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => set.has((y + dy) * MAPW + x + dx));
+  // Prochaine chose à faire pour ouvrir la suite : mur fissuré, brasero, levier ou dalle accessibles.
+  function objective() {
+    const E = CANAAN_DUNGEON_EXPLORE,
+      plan = E.plan(game.world.instance.index),
+      st = E.state(),
+      set = reachable();
+    if (!st) return null;
+    for (let k = 0; k < plan.secretWalls.length; k++) {
+      const [x, y] = plan.secretWalls[k].cells[1] || plan.secretWalls[k].cells[0];
+      if (!(st.secrets & (1 << k)) && near(set, x, y)) return { x, y, act: 'use' };
+    }
+    for (let s = 0; s < plan.locks.length; s++) {
+      const lock = plan.locks[s],
+        ls = st.locks[s];
+      if (ls.done) continue;
+      let it = null;
+      if (lock.type === 'braziers') it = lock.items.find(i => !(ls.prog & (1 << i.id)));
+      if (lock.type === 'levers' || lock.type === 'runes') it = lock.items[lock.order[ls.step]];
+      if (it && near(set, it.x, it.y)) {
+        // Dalles : ne marcher que sur la bonne, comme un joueur attentif.
+        const next = new Set(lock.type === 'runes' ? lock.items.filter(i => i !== it).map(i => i.y * MAPW + i.x) : []);
+        if ([...next].join() !== [...avoid].join()) plans.clear();
+        avoid = next;
+        return { x: it.x, y: it.y, act: lock.type === 'runes' ? 'stand' : 'use' };
+      }
+    }
+    if (avoid.size) plans.clear();
+    avoid = new Set();
+    return null;
+  }
   // Un pas de pilotage pour tout le groupe.
   function step() {
     if (state.done) return state;
     const host = game.hero;
-    const alive = game.world.monsters.filter(m => m.hp > 0);
+    const set = game.world.instance && !game.world.instance.arena ? reachable() : null,
+      alive = game.world.monsters.filter(m => m.hp > 0 && (!set || near(set, tileOf(m.x), tileOf(m.y))));
     for (const hero of game.heroes) {
       const p = hero.player;
       if (p.dead) continue;
@@ -105,13 +165,30 @@ globalThis.canaanGroupBot = (() => {
         } else steer(hero, m.x, m.y);
         continue;
       }
-      // Plus d'ennemi : l'hôte mène, les alliés le suivent.
-      if (hero !== host) {
+      // Plus d'ennemi : l'hôte mène, les alliés le suivent (ils attendent pendant qu'il foule les dalles).
+      if (hero !== host && avoid.size) stop(hero);
+      else if (hero !== host) {
         if (Math.hypot(host.player.x - p.x, host.player.y - p.y) > 2 * TS) steer(hero, host.player.x, host.player.y);
         else stop(hero);
       }
     }
     if (alive.length || !game.world.instance) return state;
+    // Exploration : murs fissurés et énigmes des portes scellées.
+    const goal = game.world.instance.cleared ? null : objective();
+    if (goal) {
+      state.phase = 'exploration';
+      const p = host.player,
+        d = Math.hypot(p.x / TS - (goal.x + 0.5), p.y / TS - (goal.y + 0.5));
+      if (goal.act === 'use' && d < 1.4) {
+        stop(host);
+        CANAAN_DUNGEON_EXPLORE.interact(host);
+        reachAge = 99;
+      } else if (goal.act === 'stand' && tileOf(p.x) === goal.x && tileOf(p.y + 10) === goal.y) {
+        stop(host);
+        reachAge = 99;
+      } else steer(host, (goal.x + 0.5) * TS, (goal.y + 0.5) * TS);
+      return state;
+    }
     const chest = game.world.chests.find(c => c.instance);
     if (game.world.instance.cleared && chest && !chest.opened) {
       state.phase = 'coffre';

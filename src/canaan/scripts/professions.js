@@ -232,6 +232,13 @@
       where: 'Forêt enchantée (cerfs et lièvres lumineux)',
       bio: 'Cerfs et lièvres baignés de lumière d’étoiles. On dit que leur chair garde un peu de la magie du ciel.'
     },
+    crabe: {
+      name: 'Crabe des sables',
+      meat: 'crabe',
+      zones: [0, 1, 2, 3, 4, 5],
+      where: 'Plages de toute l’île',
+      bio: 'Il fait le tour de l’île en marchant de côté, toujours au bord des vagues, et file à la moindre ombre. Sa chair est douce et sucrée.'
+    },
     // Gibier des Tréfonds (zones 6 à 9 : Galeries, Cité Engloutie, Nécropole, Fangeval).
     taupe: {
       name: 'Taupe des cavernes',
@@ -266,7 +273,8 @@
     chevre: { name: 'Viande de chèvre', icon: '⟦meat_chevre⟧' },
     lezard: { name: 'Queue de lézard', icon: '⟦meat_lezard⟧' },
     taupe: { name: 'Viande de taupe', icon: '⟦meat_taupe⟧' },
-    salamandre: { name: 'Queue de salamandre', icon: '⟦meat_salamandre⟧' }
+    salamandre: { name: 'Queue de salamandre', icon: '⟦meat_salamandre⟧' },
+    crabe: { name: 'Chair de crabe', icon: '⟦meat_crabe⟧' }
   };
   // Ingrédients de cuisine : poissons (bourriche) et viandes (gibecière).
   const ING = {};
@@ -298,6 +306,7 @@
     magret: { name: 'Magret de canard', fish: 'canard', kind: 'both' },
     chevre: { name: 'Ragoût de chèvre', fish: 'chevre', kind: 'hot', seconds: 8 },
     lezard: { name: 'Brochette de lézard', fish: 'lezard', kind: 'buff', stat: 'damage', seconds: 60 },
+    crabe: { name: 'Crabe farci', fish: 'crabe', kind: 'buff', stat: 'armor', seconds: 120 },
     // Infusions des herbes de la cueillette.
     infmenthe: { name: 'Infusion de menthe', fish: 'menthe', kind: 'mana' },
     tisane: { name: 'Tisane de sauge', fish: 'sauge', kind: 'heal' },

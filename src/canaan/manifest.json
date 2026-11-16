@@ -87,6 +87,16 @@
     },
     {
       "kind": "script",
+      "id": "canaan-world-roads",
+      "file": "scripts/world-roads.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-world-blend",
+      "file": "scripts/world-blend.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-progression-economy",
       "file": "scripts/progression-economy.js"
     },
@@ -239,6 +249,21 @@
       "kind": "script",
       "id": "canaan-professions",
       "file": "scripts/professions.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-building-art",
+      "file": "scripts/building-art.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-portal-art",
+      "file": "scripts/portal-art.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-wardrobe",
+      "file": "scripts/wardrobe.js"
     },
     {
       "kind": "script",

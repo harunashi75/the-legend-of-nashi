@@ -64,10 +64,13 @@ function recordKill(m, hero = game.hero) {
   CANAAN_RUBIS.onKill(m, hero);
   // Arène : un Rubis par boss vaincu ; les clones ne donnent rien.
   if (game.world.instance?.arena) {
-    if (m.arenaBoss) CANAAN_ARENA.onBossDown(m);
+    if (m.arenaBoss) {
+      CANAAN_ARENA.onBossDown(m);
+      CANAAN_WARDROBE.drop('arenaBoss', hero);
+    }
     return;
   }
-  // Donjon : un boss. Raid : trois boss, la herse suivante s'ouvre à chaque victoire ; coffre après le dernier.
+  // Donjon : trois boss. Raid : six. La herse de chaque salle de boss se lève à sa mort ; coffre après le dernier.
   if (game.world.instance && m.boss && onInstanceBossDown(m)) {
     game.world.instance.cleared = true;
     spawnRewardChest();
@@ -77,6 +80,9 @@ function recordKill(m, hero = game.hero) {
   // butin, voir SOURCE_REWARDS).
   if (!m.boss && !m.worldBoss)
     grantSourceReward(game.world.instance ? 'instanceMob' : m.elite ? 'elite' : 'normal', hero, canaanMobLevel(m));
+  // Apparences (garde-robe) : une petite chance sur chaque monstre, plus sur les élites et les boss mondiaux. Les
+  // boss d'instance tirent la leur dans dungeons.js, pour chaque héros du groupe.
+  if (!m.boss) CANAAN_WARDROBE.drop(m.worldBoss ? 'worldBoss' : m.elite ? 'elite' : 'normal', hero);
   // Expérience : pour le vainqueur et ses alliés proches (progression.js).
   canaanKillXp(m, hero);
   saveProgress();
@@ -717,9 +723,10 @@ function drawWorldFeatures(c) {
       y = d.y * TS;
     // Les portails des Tréfonds sont dessinés sous l'île (underground.js).
     if (d.under) continue;
-    if (x < camX - 180 || x > camX + W + 180 || y < camY - 180 || y > camY + H + 180) continue;
+    if (x < camX - 260 || x > camX + W + 260 || y < camY - 120 || y > camY + H + 280) continue;
     c.save();
-    drawDungeonEntrance(c, i, x, y);
+    // Entrée en pixel art posée dans son biome (portal-art.js) ; l'ancien dessin reste en secours.
+    if (!CANAAN_PORTAL_ART.draw(c, i, x, y)) drawDungeonEntrance(c, i, x, y);
     c.restore();
   }
   // Colisée de l'Arène des Épreuves, près du camp.
@@ -727,7 +734,7 @@ function drawWorldFeatures(c) {
     ay = CANAAN_ARENA_PORTAL.y * TS;
   if (ax > camX - 220 && ax < camX + W + 220 && ay > camY - 220 && ay < camY + H + 260) {
     c.save();
-    drawDungeonEntrance(c, 'arena', ax, ay);
+    if (!CANAAN_PORTAL_ART.draw(c, 'arena', ax, ay)) drawDungeonEntrance(c, 'arena', ax, ay);
     c.restore();
   }
 }
@@ -799,9 +806,11 @@ function spawnRewardChest() {
   const spot = dungeonChestSpot(game.world.instance.index);
   game.world.chests = [{ id: 'instance_' + game.world.instance.index, x: spot.x, y: spot.y, instance: true }];
 }
-// Coffre de boss : butin d'instance et une bourse d'or (60–100 en donjon, 150–250 en raid).
-// Ouvre le coffre proche d'un héros (l'hôte par défaut). Coffre de boss : chaque héros du groupe reçoit
-// son objet garanti et sa bourse (butin individuel). Coffre secret : seul celui qui l'ouvre est récompensé.
+// Coffre de fin d'instance : une bourse d'or (60–100 en donjon, 150–250 en raid) et la grosse récompense d'XP pour
+// chaque héros du groupe ; l'équipement vient des boss (30 % de chance chacun, dungeons.js).
+// Coffre secret de l'île ou des Tréfonds : il faut une clé des secrets (boss cachés des donjons) ; seul celui qui
+// l'ouvre est récompensé : un équipement Épique au niveau de la zone, 200 à 400 or, et 25 % de chance d'un Rubis.
+const SECRET_CHEST_RUBIS = 0.25;
 // Coffre encore fermé à moins de 2 cases d'une position (coffre secret du monde ou coffre de fin d'instance).
 function nearbyChest(p) {
   const list = game.world.instance
@@ -819,7 +828,6 @@ function openNearbyChest(hero = game.hero) {
     c.opened = true;
     const index = game.world.instance.index;
     for (const member of game.heroes) {
-      awardBossLoot('dungeon', index, member);
       canaanAchieve(member, 'clear', index);
       // Instance terminée : grosse récompense d'XP pour chacun.
       CANAAN_PROGRESSION.clearInstanceXp(index, member);
@@ -828,13 +836,27 @@ function openNearbyChest(hero = game.hero) {
       canaanLootNotice(member, '💰 +' + gold + ' or dans le coffre');
     }
   } else {
+    if (!CANAAN_BAG.count(hero, 'key', 'secret')) {
+      canaanLootNotice(hero, '🔒 Coffre secret verrouillé : il faut une clé des secrets. Les boss cachés des donjons et des raids en donnent une.');
+      return true;
+    }
+    CANAAN_BAG.remove(hero, 'key', 'secret', 0, 1);
     game.world.openedChests.push(c.id);
     canaanAchieve(hero, 'chest');
-    p.gold += 40;
-    // Objet au niveau de la zone du coffre (le milieu de sa plage) ; dans les Tréfonds, au niveau du héros.
-    const [lo, hi] = ZONE_LEVELS[canaanZoneIndexAt(c.x, c.y)];
-    grantSourceReward('secretChest', hero, c.layer === 'under' ? clampLevel(hero.level) : Math.round((lo + hi) / 2));
-    canaanLootNotice(hero, '🎁 Coffre secret : équipement gris + 40 or !');
+    const gold = 200 + Math.floor(Math.random() * 201);
+    p.gold += gold;
+    // Objet Épique au niveau de la zone du coffre (le milieu de sa plage) ; dans les Tréfonds, au niveau du héros.
+    const [lo, hi] = ZONE_LEVELS[canaanZoneIndexAt(c.x, c.y)],
+      level = c.layer === 'under' ? clampLevel(hero.level) : Math.round((lo + hi) / 2);
+    if (canaanBagUsed(hero) < canaanBagLimit(hero)) grantSourceReward('secretChest', hero, level);
+    else canaanLootNotice(hero, '🎒 Sac plein : équipement non récupéré');
+    let extra = '';
+    if (Math.random() < SECRET_CHEST_RUBIS) {
+      const got = CANAAN_RUBIS.grant(null, hero);
+      extra = ' + Rubis ' + got.rubis.name + (got.fresh ? ' (nouveau !)' : '');
+    }
+    canaanLootNotice(hero, '🗝️ Coffre secret ouvert : équipement Épique + ' + gold + ' or' + extra + ' !');
+    CANAAN_WARDROBE.drop('secretChest', hero);
   }
   saveGame();
   return true;
@@ -857,9 +879,11 @@ function drawChests() {
       ctx.font = 'bold 13px Palatino Linotype, Georgia, serif';
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#1a1008';
-      ctx.strokeText('[E] Ouvrir', x, y - 40);
+      // Coffre secret : il faut une clé des secrets.
+      const text = ch.instance ? '[E] Ouvrir' : Number(P.keys) > 0 ? '[E] Ouvrir (🗝️ ' + Math.floor(P.keys) + ')' : '🔒 Clé des secrets requise';
+      ctx.strokeText(text, x, y - 40);
       ctx.fillStyle = '#f6dc98';
-      ctx.fillText('[E] Ouvrir', x, y - 40);
+      ctx.fillText(text, x, y - 40);
       ctx.restore();
     }
   }
