@@ -32,10 +32,10 @@ const produced = new Set();
 const CACHE_MAX = 20000;
 
 // Valeurs des modèles : {n}, {m}, {s}, {max} et {or} sont des nombres (« 1 234 », « −15 », « 2.5 ») ; les autres, un texte
-// sans séparateur « · — | » ; {qualite}, une qualité d'objet.
+// court (80 caractères au plus), sans séparateur « · — | » ni fin de phrase ; {qualite}, une qualité d'objet.
 const NUMERIC = new Set(['n', 'm', 's', 'max', 'or']);
 const NUMBER = '([+−-]?\\d[\\d\\s\\u00a0\\u202f.,]*?)';
-const VALUE = '([^·—|\\n]+?)';
+const VALUE = '((?:(?![.!?…]\\s)[^·—|\\n]){1,80}?)';
 // {qualite} : le nom d'une qualité d'objet, pour séparer « Truite Rare » en un nom et une qualité.
 const QUALITY = '(Commun|Peu commun|Rare|Épique|Légendaire|Mythique|Relique)';
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -142,7 +142,15 @@ function single(text) {
     if (said) return quotes(lead) + said + quotes(quoted[2]);
   }
   const inner = exact(core);
-  return inner === null ? null : quotes(lead) + inner + quotes(punctuation(trail));
+  if (inner !== null) return quotes(lead) + inner + quotes(punctuation(trail));
+  // Le cœur avec le début de sa ponctuation (« Talents équipés : » suivi d'un nombre, « Étoiles du Cœur : ★★☆ »).
+  for (let k = trail.length - 1; k > 0; k--) {
+    const head = trail.slice(0, k);
+    if (!/\S/u.test(head)) continue;
+    const found = exact(core + head.trimEnd());
+    if (found !== null) return quotes(lead) + found + quotes(trail.slice(head.trimEnd().length));
+  }
+  return null;
 }
 // Guillemets français autour d'un texte traduit : « … » devient “…”.
 const quotes = part => part.replace(/«[\s\u00a0\u202f]*/gu, '“').replace(/[\s\u00a0\u202f]*»/gu, '”');
@@ -160,18 +168,30 @@ function lookup(text, level = 0) {
   for (let k = level; k < SPLITS.length; k++) {
     const parts = text.split(SPLITS[k]);
     if (parts.length < 3) continue;
-    let any = false;
-    const out = parts.map((part, i) => {
-      if (i % 2 || !HAS_LETTER.test(part)) return part;
-      const tr = lookup(part, k + 1);
-      if (tr === null) {
-        missing.add(part.trim());
-        return part;
+    let any = false,
+      out = '';
+    // Morceaux pris de gauche à droite ; d'abord le plus long groupe connu (une description de deux phrases suivie
+    // de « Mana 15. »), puis un morceau seul.
+    for (let i = 0; i < parts.length; i += 2) {
+      let done = false;
+      for (let j = parts.length - 1; j > i && !done; j -= 2) {
+        const group = parts.slice(i, j + 1).join('');
+        const tr = single(group);
+        if (tr !== null) {
+          out += tr + (j + 1 < parts.length ? parts[j + 1] : '');
+          any = done = true;
+          i = j;
+        }
       }
-      any = true;
-      return tr;
-    });
-    return any ? out.join('') : null;
+      if (done) continue;
+      const part = parts[i],
+        sep = i + 1 < parts.length ? parts[i + 1] : '';
+      const tr = HAS_LETTER.test(part) ? lookup(part, k + 1) : null;
+      if (tr === null && HAS_LETTER.test(part)) missing.add(part.trim());
+      if (tr !== null) any = true;
+      out += (tr ?? part) + sep;
+    }
+    return any ? out : null;
   }
   return null;
 }

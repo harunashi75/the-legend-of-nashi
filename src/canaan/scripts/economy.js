@@ -24,7 +24,7 @@
     canaanLootNotice(
       hero,
       (rarity === 'Légendaire' || rarity === 'Mythique'
-        ? '🌟 BUTIN ' + rarity.toUpperCase() + ' ! '
+        ? '🌟 ' + tt('BUTIN {qualite} !', { qualite: translateText(rarity).toUpperCase() }) + ' '
         : '✨ Butin : ' + rarity + ' · ') +
         'niveau ' +
         level

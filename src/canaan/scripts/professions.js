@@ -960,7 +960,8 @@
       ['minage', '⟦prof_mining⟧ Minage'],
       ['cueillette', '⟦prof_herbalism⟧ Cueillette'],
       ['cuisine', '⟦prof_cooking⟧ Cuisine'],
-      ['enchant', '⟦prof_enchanting⟧ Enchantement'],
+      // « Enchantement » : ici le métier (Enchanting), pas l'objet (Enchantment).
+      ['enchant', '⟦prof_enchanting⟧ ' + tt('Enchantement', null, 'métier')],
       ['repas', '🍽️ Repas']
     ];
     const helpers = { bar, esc, tips, status };

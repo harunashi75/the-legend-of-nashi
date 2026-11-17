@@ -2492,7 +2492,7 @@
           c,
           x,
           y - 76,
-          '✦ ' + e.name.toUpperCase() + ' ✦',
+          '✦ ' + translateText(e.name).toUpperCase() + ' ✦',
           Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Descendre dans les Tréfonds' : null
         );
     }
@@ -2532,7 +2532,7 @@
           c,
           x,
           y - 70,
-          '✦ ' + e.name.toUpperCase() + ' ✦',
+          '✦ ' + translateText(e.name).toUpperCase() + ' ✦',
           Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Remonter à la surface' : null
         );
     }

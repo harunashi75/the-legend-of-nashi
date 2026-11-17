@@ -1561,7 +1561,14 @@
       c.fillText(s, x, y);
     };
     if (run.phase !== 'victory')
-      text('⚔️ VAGUE ' + wave + ' / ' + WAVES + ' · ' + tier.toUpperCase(), W / 2, 118, 15, '#ffd36d', 4);
+      text(
+        '⚔️ VAGUE ' + wave + ' / ' + WAVES + ' · ' + translateText(tier).toUpperCase(),
+        W / 2,
+        118,
+        15,
+        '#ffd36d',
+        4
+      );
     // Bouclier de cristal : jauge sous la barre du boss.
     const b = run.boss;
     if (b && b.shieldHp > 0) {

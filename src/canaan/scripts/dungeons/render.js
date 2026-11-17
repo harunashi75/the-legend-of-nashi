@@ -2004,7 +2004,11 @@
         c.lineWidth = 4;
         c.strokeStyle = '#0b0a10';
         const name = plan.arena ? CANAAN_ARENA_NAME : d.name,
-          title = '✦ ' + name.toUpperCase() + (mode ? ' · ' + mode.icon + ' ' + mode.label : '') + ' ✦';
+          title =
+            '✦ ' +
+            translateText(name).toUpperCase() +
+            (mode ? ' · ' + mode.icon + ' ' + mode.label : '') +
+            ' ✦';
         c.strokeText(title, plan.title.x * TS + 24, plan.title.y * TS);
         c.fillStyle = th.rune;
         c.fillText(title, plan.title.x * TS + 24, plan.title.y * TS);

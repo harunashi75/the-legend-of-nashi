@@ -82,7 +82,18 @@ test('Traduction au point de passage : texte entier, cœur sans émoji ni ponctu
     'Classe et talents (Y)': 'Class and talents (Y)',
     'Survole un objet pour afficher son comparatif. 💰 Marchand proche : vente disponible.':
       'Hover over an item to compare it. 💰 Merchant nearby: selling available.',
-    'Texte encore inconnu': 'Texte encore inconnu'
+    'Texte encore inconnu': 'Texte encore inconnu',
+    // Ponctuation suivie d'autre chose, guillemets, valeurs traduites à leur tour.
+    'Talents équipés : ': 'Talents equipped: ',
+    'Étoiles du Cœur : ☆☆☆': 'Stars of the Heart: ☆☆☆',
+    '« Halte ! Ah, c’est toi. Rien à signaler. »': '“Halt! Ah, it’s you. Nothing to report.”',
+    '🎣 Poisson doré Épique pêché !': '🎣 Golden fish Epic caught!',
+    '🍽️ Truite grillée (Rare) : Rend 120 PV tout de suite.':
+      '🍽️ Grilled trout (Rare): Restores 120 HP instantly.',
+    // Plusieurs phrases suivies d'un ajout ; un modèle ne déborde pas sur la phrase suivante.
+    'Restaure 1 % des PV maximum toutes les 5 secondes en combat. Mana 15.':
+      'Restores 1% of maximum HP every 5 seconds in combat. Mana 15.',
+    'Plaines verdoyantes, niveaux 1 à 10': 'Verdant Plains, levels 1 to 10'
   };
   for (const [fr, en] of Object.entries(cases)) assert.equal(translateText(fr), en, fr);
   // Une traduction repassée reste telle quelle ; un texte inconnu est relevé.

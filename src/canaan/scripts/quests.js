@@ -3125,7 +3125,9 @@
     for (const npc of Object.values(NPCS)) {
       const d = Math.hypot(P.x - npc.x, P.y - npc.y);
       if (d > 4 * T || d < 1.6 * T || npcState(game.hero, npc.quest) !== 'offer') continue;
-      const text = npc.quest.talk.offer[0].slice(0, 60) + (npc.quest.talk.offer[0].length > 60 ? '…' : '');
+      // Traduite avant d'être coupée : un début de phrase seul ne serait pas reconnu.
+      const said = translateText(npc.quest.talk.offer[0]),
+        text = said.slice(0, 60) + (said.length > 60 ? '…' : '');
       c.save();
       c.font = '12px system-ui, sans-serif';
       c.textAlign = 'center';

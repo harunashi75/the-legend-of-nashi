@@ -2652,7 +2652,7 @@ export default {
   'La Légende Vivante': 'The Living Legend',
   'Titre « {titre} »': 'Title “{titre}”',
   'aura dorée': 'golden aura',
-  'un objet {qualite} de ton niveau': 'a {qualite} item of your level',
+  'un objet {qualite} de ton niveau': '{qualite} item of your level',
   'un Rubis qui te manque': 'a Ruby you are missing',
   '{n} % d’un niveau d’XP': '{n}% of a level’s XP',
   'Récompense du succès « {nom} » : objet {qualite} de ton niveau ({objet})':
@@ -3884,5 +3884,22 @@ export default {
   'Retourne voir {nom}': 'Go back to {nom}',
   'Tu y es': 'You’re there',
   'tout près': 'very close',
-  '{n} cases': '{n} tiles'
+  '{n} cases': '{n} tiles',
+  // ------------------------------------------------------------ Compléments vus à l'écran (butin, chapitres, bannières)
+  'BUTIN {qualite} !': '{qualite} LOOT!',
+  'Butin : {qualite}': 'Loot: {qualite}',
+  'niveau {n}': 'level {n}',
+  'Chapitre I': 'Chapter I',
+  'Chapitre II': 'Chapter II',
+  'Chapitre III': 'Chapter III',
+  'Chapitre IV': 'Chapter IV',
+  'Chapitre V': 'Chapter V',
+  'Chapitre VI': 'Chapter VI',
+  '{zone}, niveaux {n} à {m}': '{zone}, levels {n} to {m}',
+  "Plaines d'Aube": 'Dawn Plains',
+  '{n} × {nom}': '{n} × {nom}',
+  'VAGUE {n} / {m}': 'WAVE {n} / {m}',
+  // ------------------------------------------------------------ Compléments : métiers
+  'métier|Enchantement': 'Enchanting',
+  'niv. {n}': 'lv. {n}'
 };

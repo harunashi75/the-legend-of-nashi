@@ -164,9 +164,9 @@
       c.font = 'bold 16px monospace';
       c.lineWidth = 4;
       c.strokeStyle = '#131b24';
-      c.strokeText('✦ ' + v.name.toUpperCase() + ' ✦', x, y - 200);
+      c.strokeText('✦ ' + translateText(v.name).toUpperCase() + ' ✦', x, y - 200);
       c.fillStyle = '#ffd98a';
-      c.fillText('✦ ' + v.name.toUpperCase() + ' ✦', x, y - 200);
+      c.fillText('✦ ' + translateText(v.name).toUpperCase() + ' ✦', x, y - 200);
       c.restore();
     }
   }

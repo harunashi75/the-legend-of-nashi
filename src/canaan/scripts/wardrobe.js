@@ -33,7 +33,7 @@
     canaanLootNotice(
       hero,
       (sk.rarity >= 4
-        ? '🌟 APPARENCE ' + r.name.toUpperCase() + ' ! '
+        ? '🌟 ' + tt('APPARENCE {qualite} !', { qualite: translateText(r.name).toUpperCase() }) + ' '
         : '👗 Nouvelle apparence ' + r.name + ' : ') +
         sk.name +
         ' (touche V)'
