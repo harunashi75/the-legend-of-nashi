@@ -90,8 +90,8 @@ const HAS_LETTER = /\p{L}{2}/u;
 // Ce qui entoure le cœur d'un texte : espaces, émojis, repères d'icône ⟦…⟧, puces, flèches, ponctuation finale, et
 // l'étiquette d'une touche en tête (« [E] »). Les alternatives ne se recouvrent pas : sinon, sur une longue suite
 // d'espaces, le moteur essaierait toutes les façons de la découper.
-const LEAD = /^(?:⟦[a-z0-9_]+⟧|\[[^\]\s]{1,12}\]|[^\p{L}\p{N}«(¿¡⟦[])*/u;
-const TRAIL = /(?:⟦[a-z0-9_]+⟧|[^\p{L}\p{N}»)?!…⟦⟧])*$/u;
+const LEAD = /^(?:⟦[a-z0-9_]+⟧|\[[^\]\s]{1,12}\]|«[\s\u00a0\u202f]*|[^\p{L}\p{N}«(¿¡⟦[])*/u;
+const TRAIL = /(?:⟦[a-z0-9_]+⟧|[\s\u00a0\u202f]*»|[^\p{L}\p{N}»)?!…⟦⟧])*$/u;
 
 const PATTERN_MAX = 300;
 // Le texte commence par le premier morceau fixe, finit par le dernier, et contient les autres dans l'ordre.
@@ -123,7 +123,7 @@ function exact(text) {
   return null;
 }
 
-// Texte entier, ou son cœur sans ce qui l'entoure.
+// Texte entier, ou son cœur sans ce qui l'entoure (émoji, puce, étiquette de touche, guillemets, ponctuation).
 function single(text) {
   const whole = exact(text);
   if (whole !== null) return whole;
@@ -135,11 +135,17 @@ function single(text) {
   // Sans ce qui précède (émoji, puce) mais avec la ponctuation finale de l'entrée (« Partie sauvegardée ! »).
   if (lead) {
     const withEnd = exact(rest);
-    if (withEnd !== null) return lead + withEnd;
+    if (withEnd !== null) return quotes(lead) + withEnd;
+    // Réplique entre guillemets : la phrase garde sa ponctuation (« Rien à signaler. »).
+    const quoted = /^(.*?)([\s\u00a0\u202f]*»\s*)$/su.exec(rest);
+    const said = quoted && exact(quoted[1]);
+    if (said) return quotes(lead) + said + quotes(quoted[2]);
   }
   const inner = exact(core);
-  return inner === null ? null : lead + inner + punctuation(trail);
+  return inner === null ? null : quotes(lead) + inner + quotes(punctuation(trail));
 }
+// Guillemets français autour d'un texte traduit : « … » devient “…”.
+const quotes = part => part.replace(/«[\s\u00a0\u202f]*/gu, '“').replace(/[\s\u00a0\u202f]*»/gu, '”');
 // Un texte composé (« Guerrier · Niveau 12 · 340 or », plusieurs phrases) se traduit morceau par morceau : d'abord
 // aux séparateurs « · », « — », « | », puis phrase par phrase, puis autour des émojis (« +12 ⚔ Force »). Il suffit qu'un morceau soit connu ; les autres
 // restent tels quels (et sont signalés comme manquants).
