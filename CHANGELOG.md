@@ -4,6 +4,9 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ## [Non publié]
 
+### Corrigé
+- La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.
+
 ### Outillage
 - Le HTML autonome n’est plus versionné : il est assemblé par `npm run build` et joint à chaque release GitHub.
 - Version unique : le template reçoit `{{VERSION}}` à l’assemblage ; `package.json` est vérifié par les tests.

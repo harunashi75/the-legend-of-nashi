@@ -637,7 +637,7 @@
         R(g, x + 16, y + 36, 6, 8, '#3e7a3e');
       }
     },
-    tableau: {
+    grand_tableau: {
       name: 'Grand tableau',
       cat: 'murs',
       layer: 'wall',
@@ -1296,7 +1296,7 @@
     echoppe: [['presentoir', 1, 2], ['presentoir', 10, 2], ['etagere', 5, 0], ['fenetre', 3, 0], ['fenetre', 8, 0], ['horloge', 9, 0], ['comptoir', 5, 4], ['pot_fleurs', 4, 2], ['caisse', 8, 2], ['tonneau', 1, 6], ['sacs', 2, 7], ['caisse', 11, 6], ['coffre', 10, 7], ['tapis_long', 5, 6], ['lampe', 11, 4]],
     marmite: [['cheminee', 1, 2], ['cuisiniere', 4, 2], ['cuisiniere', 5, 2], ['marmite', 7, 2], ['tonneau', 10, 2], ['tonneau', 11, 2], ['sacs', 11, 3], ['casseroles', 4, 0], ['herbes', 7, 0], ['fenetre', 9, 0], ['herbes', 11, 0], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['table', 8, 5], ['chaise', 7, 5, 3], ['chaise', 10, 5, 1], ['pot_fleurs', 1, 7], ['lampe', 11, 7]],
     aubepines: [['lit', 1, 2], ['commode', 2, 2], ['bibliotheque', 6, 2], ['armoire', 9, 2], ['fenetre', 3, 0], ['rideaux', 3, 0], ['cadre', 5, 0], ['horloge', 8, 0], ['tapis_rond', 3, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 5, 5, 1], ['plante', 1, 7], ['pot_fleurs', 9, 7], ['lampe', 9, 5]],
-    puits: [['lit_double', 1, 2], ['commode', 3, 2], ['cuisiniere', 8, 2], ['tonneau', 9, 2], ['grande_fenetre', 4, 0], ['rideaux_bleus', 4, 0], ['rideaux_bleus', 5, 0], ['tableau', 6, 0], ['tapis', 5, 4], ['table', 5, 5], ['chaise', 4, 5, 3], ['chaise', 7, 5, 1], ['coffre', 1, 6], ['plante', 9, 7], ['aquarium', 1, 7]],
+    puits: [['lit_double', 1, 2], ['commode', 3, 2], ['cuisiniere', 8, 2], ['tonneau', 9, 2], ['grande_fenetre', 4, 0], ['rideaux_bleus', 4, 0], ['rideaux_bleus', 5, 0], ['grand_tableau', 6, 0], ['tapis', 5, 4], ['table', 5, 5], ['chaise', 4, 5, 3], ['chaise', 7, 5, 1], ['coffre', 1, 6], ['plante', 9, 7], ['aquarium', 1, 7]],
     chene: CABIN,
     clairieres: CABIN,
     oasis: ADOBE,
@@ -1317,7 +1317,7 @@
     ],
     sylv_armurerie: [['rack_armes', 2, 0], ['rack_armes', 4, 0], ['fenetre', 6, 0], ['rack_armes', 8, 0], ['rack_armes', 10, 0], ['enclume', 2, 3], ['presentoir', 9, 2], ['presentoir', 10, 2], ['tonneau', 1, 2], ['comptoir', 5, 3], ['caisse', 1, 6], ['coffre', 11, 6], ['tapis_long', 6, 5], ['lampe', 11, 4], ['plante', 1, 7]],
     sylv_couture: [['fenetre', 3, 0], ['rideaux', 3, 0], ['cadre', 6, 0], ['banniere_elfe', 9, 0], ['metier', 2, 2], ['mannequin', 5, 2], ['mannequin', 6, 2], ['mannequin', 7, 2], ['armoire', 10, 2], ['table', 3, 5], ['chaise', 2, 5, 3], ['tapis_rond', 7, 4], ['sacs', 11, 5], ['pot_fleurs', 1, 7], ['lampe', 11, 7]],
-    sylv_tour: [['tableau', 2, 0], ['grande_fenetre', 5, 0], ['grande_fenetre', 8, 0], ['bibliotheque', 1, 2], ['bibliotheque', 2, 2], ['telescope', 6, 2], ['coffre', 10, 2], ['lampe', 11, 2], ['table', 9, 4], ['chaise', 8, 4, 3], ['lit', 1, 5], ['tapis_rond', 5, 5], ['plante', 11, 7]],
+    sylv_tour: [['grand_tableau', 2, 0], ['grande_fenetre', 5, 0], ['grande_fenetre', 8, 0], ['bibliotheque', 1, 2], ['bibliotheque', 2, 2], ['telescope', 6, 2], ['coffre', 10, 2], ['lampe', 11, 2], ['table', 9, 4], ['chaise', 8, 4, 3], ['lit', 1, 5], ['tapis_rond', 5, 5], ['plante', 11, 7]],
     sylv_temple: [['banniere_elfe', 2, 0], ['grande_fenetre', 5, 0], ['banniere_elfe', 10, 0], ['statue_elfe', 2, 2], ['autel', 5, 2], ['statue_elfe', 10, 2], ['tapis_long', 6, 4], ['banc', 2, 5], ['banc', 9, 5], ['plante', 1, 7], ['plante', 11, 7], ['lampe', 4, 3], ['lampe', 8, 3]],
     sylv_maison: [['fenetre', 2, 0], ['rideaux', 2, 0], ['cadre', 5, 0], ['fenetre', 9, 0], ['lit', 1, 2], ['commode', 2, 2], ['cheminee', 5, 2], ['bibliotheque', 9, 2], ['harpe', 11, 2], ['tapis_rond', 4, 4], ['table_ronde', 5, 5], ['chaise', 4, 5, 3], ['chaise', 6, 5, 1], ['plante', 1, 7], ['pot_fleurs', 11, 7], ['lampe', 9, 6]],
     sylv_racines: [['herbes', 2, 0], ['fenetre', 5, 0], ['herbes', 9, 0], ['lit', 1, 2], ['plante', 3, 2], ['cuisiniere', 6, 2], ['marmite', 7, 2], ['tonneau', 10, 2], ['tapis', 4, 4], ['table', 4, 5], ['chaise', 3, 5, 3], ['chaise', 6, 5, 1], ['plante', 11, 5], ['pot_fleurs', 1, 7], ['plante', 11, 7], ['lampe', 9, 6]],
