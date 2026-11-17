@@ -868,7 +868,7 @@
       for (const hero of group) {
         const rec = records(hero);
         rec.completed = true;
-        // Butin de prestige du dernier boss : 5 % de chances d'un objet Légendaire du niveau du héros.
+        // Butin de prestige du dernier boss : 21 % de chances d'un objet Légendaire du niveau du héros.
         if (prestigeRoll('arenaFinal')) {
           const item = giveGear(clampLevel(hero.level), 'arena', 'Légendaire', hero);
           if (item)

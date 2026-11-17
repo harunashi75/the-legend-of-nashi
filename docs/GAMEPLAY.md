@@ -331,7 +331,7 @@ Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île
 - **Six entrées** à la surface (une par biome de l’île, près de la route ; marquées sur les cartes) : touche E pour descendre ou remonter, tout le groupe ensemble (l’hôte décide).
 - **Créatures** : 16 nouvelles (4 par biome, dont insectes : scarabée foreur, mille-pattes, moustique), élites (7 %), au **niveau du héros**. **Boss mondiaux** : Gorgrath (Galeries), le Gardien d’Argent (Cité), Morvane la Reine-Liche (Nécropole), Sporemère (Fangeval), au niveau du groupe, chacun dans son repaire (butin Rare comme les autres boss mondiaux).
 - **Faune** chassable (taupe, salamandre, crapaud) et insectes d’ambiance (lucioles, chauves-souris, mouches, spores). **Métiers** : minerais rares (fer noir, quartz, obsidienne, géode : vendus 3 à 5 fois plus cher, pas d’enchantement) et métaux de l’île ; herbes (racine de pierre, lichen, pavot funèbre, champignon luisant) ; poissons des lacs (aveugle, lanterne, murène, silure fangeux) ; dix nouvelles recettes. 16 coffres secrets (objet Commun du niveau du héros).
-- **Quatre donjons** (instances 10 à 13, `under` et `scaled`) : la Mine Effondrée de Durgrim, les Halls Engloutis de Khaz-Ombral, la Crypte des Mille Tombes, les Tréfonds Fongiques. **Aucun niveau requis** ; ennemis au niveau du héros le plus fort du groupe (`instance.scaledLevel`) ; coffre : objet **Peu commun**, ou **Rare** une fois sur trois environ (`PRESTIGE_DROPS.underground`), du niveau de chaque héros. On ressort dans les Tréfonds (`returnLayer`).
+- **Quatre donjons** (instances 10 à 13, `under` et `scaled`) : la Mine Effondrée de Durgrim, les Halls Engloutis de Khaz-Ombral, la Crypte des Mille Tombes, les Tréfonds Fongiques. **Aucun niveau requis** ; ennemis au niveau du héros le plus fort du groupe (`instance.scaledLevel`) ; coffre : objet **Peu commun**, ou **Rare** à 31 % (`PRESTIGE_DROPS.underground`), du niveau de chaque héros. On ressort dans les Tréfonds (`returnLayer`).
 - **Sauvegarde** : `monde.couche` ; **réseau** : `map.layer` dans l’état de l’hôte, l’invité bascule sur la même carte. Carte M et mini-carte dédiées ; musique et sons de caverne par biome.
 
 ## Succès et collections (touche Y)
@@ -442,7 +442,7 @@ Il n’y a plus d’iLvl ni de Ratings52 : la puissance vient du **niveau du per
 | Légendaire | ×1,87 |
 | Mythique | ×2,1 |
 
-Il y a six qualités ; Héroïque et Céleste n’existent plus (un ancien objet Héroïque devient Épique, un Céleste devient Mythique). **Légendaire et Mythique sont des objets de prestige** : jamais tirés au hasard, ils ne tombent qu’au Raid 4 en Héroïque (5 % Légendaire, 1 % Mythique, à la place de l’Épique garanti) et au dernier boss de l’arène (5 % de chances d’un Légendaire à son niveau pour chaque héros, `PRESTIGE_DROPS`, `prestigeRoll`). Dans le sac (I), le personnage (C), la boutique, la banque et l’échange, leur case brille (lueur pulsée orange ou cyan-violet, reflet qui passe) avec une vague colorée dans le fond (`canaanPrestige`, `[data-prestige]` dans `rpg-theme.css` ; immobile si le système demande moins d’animations).
+Il y a six qualités ; Héroïque et Céleste n’existent plus (un ancien objet Héroïque devient Épique, un Céleste devient Mythique). **Légendaire et Mythique sont des objets de prestige** : jamais tirés au hasard, ils ne tombent qu’au Raid 4 en Héroïque (21 % Légendaire, 11 % Mythique, en un seul tirage, à la place de l’Épique) et au dernier boss de l’arène (21 % de chances d’un Légendaire à son niveau pour chaque héros, `PRESTIGE_DROPS`, `prestigeRoll`). Dans le sac (I), le personnage (C), la boutique, la banque et l’échange, leur case brille (lueur pulsée orange ou cyan-violet, reflet qui passe) avec une vague colorée dans le fond (`canaanPrestige`, `[data-prestige]` dans `rpg-theme.css` ; immobile si le système demande moins d’animations).
 
 Exemple : une épée légendaire de niveau 45 donne +196 Attaque, +122 Défense, +147 Vitalité et deux secondaires entre +29 et +79.
 
@@ -473,7 +473,7 @@ La fiche du personnage (touche C) montre le niveau, la barre d’XP et deux tabl
 | 5. Désert oublié | 40–50 | Ifrit (45), Séraphin Déchu (50) |
 | 6. Forêt enchantée | 50–60 | Chronos (60) |
 
-Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (`mobLevel` ; ses boss sont un niveau au-dessus, deux en raid) et la qualité de son butin (`rarity`, `dropLevel`) : chaque boss (hors boss cachés) a 30 % de chance (`BOSS_DROP_CHANCE`, affichée sur la fiche du portail) de donner cet objet à chaque héros, sauf si son sac est plein. Son niveau est tiré entre le niveau requis et le niveau de butin (Cave : 7 à 10 ; Fosse : 37 à 40), pour pouvoir porter tout de suite ce qu’on y gagne. Sources : mobs Commun, marchand Peu commun, boss mondiaux et donjons Rare, raids Épique, coffres secrets (avec une clé) Épique. Les objets des **succès** sont de ton niveau, pas de celui de l’instance : ils sont annoncés « Récompense du succès … » et portent la provenance « succès » (par exemple « Conquérant des donjons », au sixième donjon terminé, donne un Épique de ton niveau).
+Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (`mobLevel` ; ses boss sont un niveau au-dessus, deux en raid) et la qualité de son butin (`rarity`, `dropLevel`) : chaque boss (hors boss cachés) a 61 % de chance (`BOSS_DROP_CHANCE`, affichée sur la fiche du portail) de donner cet objet à chaque héros, sauf si son sac est plein. Son niveau est tiré entre le niveau requis et le niveau de butin (Cave : 7 à 10 ; Fosse : 37 à 40), pour pouvoir porter tout de suite ce qu’on y gagne. Sources : mobs Commun, marchand Peu commun, boss mondiaux et donjons Rare, raids Épique, coffres secrets (avec une clé) Épique. Les objets des **succès** sont de ton niveau, pas de celui de l’instance : ils sont annoncés « Récompense du succès … » et portent la provenance « succès » (par exemple « Conquérant des donjons », au sixième donjon terminé, donne un Épique de ton niveau).
 
 | Instance | Zone | Niveau requis | Ennemis | Récompense |
 | --- | --- | --- | --- | --- |
@@ -487,7 +487,7 @@ Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (
 | Raid : L’Aiguille du Continuum | Désert | 49 | 51 | Épique 49–52 |
 | Raid : Le Thronos du Séraphin Divin | Forêt enchantée | 54 | 56 | Épique 54–57 |
 | Raid : Le Jugement de Célestia — Normal | Forêt enchantée | 58 | 60 | Épique 58–60 |
-| Raid : Le Jugement de Célestia — Héroïque | Forêt enchantée | 60 | 60 | Épique 60 (5 % Légendaire, 1 % Mythique) |
+| Raid : Le Jugement de Célestia — Héroïque | Forêt enchantée | 60 | 60 | Épique 60 (21 % Légendaire, 11 % Mythique) |
 
 **Anciennes aventures** : au chargement, l’iLvl de chaque objet devient un niveau (iLvl × 60 ÷ 190), ses anciens points Ratings52 disparaissent et deux secondaires sont tirées. Le héros commence au niveau de sa meilleure pièce portée, pour garder son équipement.
 

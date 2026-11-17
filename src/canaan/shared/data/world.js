@@ -231,7 +231,7 @@ export const INSTANCE_DEFS = deepFreeze([
     }
   },
   // Donjons des Tréfonds (sous l'île, underground.js) : aucun niveau requis ; ennemis au niveau du groupe et
-  // butin du niveau de chaque héros : Peu commun, 30 % de chances de Rare (PRESTIGE_DROPS.underground).
+  // butin du niveau de chaque héros : Peu commun, 31 % de chances de Rare (PRESTIGE_DROPS.underground).
   {
     name: 'La Mine Effondrée de Durgrim',
     biome: 6,

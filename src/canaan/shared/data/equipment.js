@@ -515,7 +515,7 @@ export const PRESTIGE_DROPS = Object.freeze({
     ['Mythique', 0.11],
     ['Légendaire', 0.21]
   ],
-  arenaFinal: [['Légendaire', 0.05]],
-  // Donjons des Tréfonds : Peu commun, ou Rare une fois sur trois environ.
-  underground: [['Rare', 0.3]]
+  arenaFinal: [['Légendaire', 0.21]],
+  // Donjons des Tréfonds : Peu commun, ou Rare à 31 %.
+  underground: [['Rare', 0.31]]
 });

@@ -68,7 +68,7 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
   assert.equal(host.run('game.world.instance'),null,'tout le groupe est ressorti');
   assert.ok(sawDungeon>0,'les invités voyaient le donjon et ses monstres');
   for(let i=0;i<20;i++)await tick();
-  // Chacun son butin : les reliques de chaque invité (30 % par boss) sont dans son sac, chez l'hôte comme chez lui,
+  // Chacun son butin : les reliques de chaque invité (61 % par boss) sont dans son sac, chez l'hôte comme chez lui,
   // avec sa bourse d'or et sa clé des secrets (boss caché).
   ids.forEach((id,k)=>{
    const G='game.guests["'+id+'"]';
