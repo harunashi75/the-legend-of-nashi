@@ -3503,28 +3503,36 @@
       const near = Math.hypot(P.x - mid, P.y - base) < 320;
       if (!b.closed && (b.place || b.sign || b.room === HOME || near))
         label(c, b.place ? b.place.name : b.label, mid, roofTop - 8);
-      if (!b.closed) {
-        const d = outsideDoor(b);
-        if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
-          label(c, '[E] Entrer', d.x, s?.art ? base - 52 : base - 86, '#fff2cb');
-      }
       c.restore();
     }
     function draw(c) {
       if (game.world.instance) return;
       if (!current()) {
         if (game.world.layer !== 'under') for (const b of scene.buildings()) drawBuilding(c, b);
-        // Bâtiments des autres modules : seulement l'invitation à entrer, devant la porte.
-        c.save();
-        for (const b of externals()) {
-          if (!!b.under !== (game.world.layer === 'under')) continue;
-          const d = outsideDoor(b);
-          if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
-            label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
-        }
-        c.restore();
       }
       drawRoom(c);
+    }
+    // Invitations à entrer, dessinées après tous les bâtiments (cité elfique comprise) et l'occlusion (game-core.js),
+    // pour qu'aucune façade ne passe par-dessus le texte.
+    function drawPrompts(c) {
+      if (game.world.instance || current()) return;
+      c.save();
+      if (game.world.layer !== 'under')
+        for (const b of scene.buildings()) {
+          if (b.closed) continue;
+          const d = outsideDoor(b);
+          if (Math.hypot(P.x - d.x, P.y - d.y) >= 90) continue;
+          const base = (b.y + b.h) * TS;
+          label(c, '[E] Entrer', d.x, builtOf(b)?.art ? base - 52 : base - 86, '#fff2cb');
+        }
+      // Bâtiments des autres modules : seulement l'invitation à entrer, devant la porte.
+      for (const b of externals()) {
+        if (!!b.under !== (game.world.layer === 'under')) continue;
+        const d = outsideDoor(b);
+        if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
+          label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
+      }
+      c.restore();
     }
     const previews = new Map();
     function preview(k) {
@@ -3573,6 +3581,7 @@
       builtOf,
       current,
       draw,
+      drawPrompts,
       drawTile,
       occluders,
       preview,

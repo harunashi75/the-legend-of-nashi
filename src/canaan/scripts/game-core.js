@@ -1233,6 +1233,8 @@ function draw() {
   drawWade(ctx, P, P.x, P.y + 16, 40, Math.hypot(P.vx || 0, P.vy || 0) > 0.1, 1);
   // Devant / derrière : arbres, bâtiments et grands objets redessinés devant les personnages qui sont derrière eux.
   drawCanaanOcclusion(ctx);
+  // Invitations « [E] Entrer » des bâtiments, au-dessus des façades et des personnages.
+  CANAAN_HOUSE.drawPrompts(ctx);
   // Titres et aura des succès, au-dessus de chaque héros.
   CANAAN_ACHIEVEMENTS.draw(ctx);
   // Lignes de pêche et bouchons.

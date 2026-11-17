@@ -762,6 +762,7 @@
         door: outsideDoor(b)
       })),
     draw: ART.draw,
+    drawPrompts: ART.drawPrompts,
     click,
     toggle,
     editing: () => editing,

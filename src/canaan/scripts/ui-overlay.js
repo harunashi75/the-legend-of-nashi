@@ -98,6 +98,39 @@
     if (target && !target.isConnected) hide();
   }, 300);
 
+  // ---------------------------------------------------------------- Gantelet : appui et onde de clic
+  // Tant qu'un bouton de la souris est enfoncé, le gantelet plie l'index (classe cursor-press sur <html>, au moins
+  // 120 ms pour qu'un clic bref se voie) ; chaque clic laisse une onde dorée sous le doigt. Rien à la manette.
+  const root = document.documentElement;
+  let pressedAt = 0,
+    releaseTimer = 0;
+  function release() {
+    clearTimeout(releaseTimer);
+    releaseTimer = setTimeout(
+      () => root.classList.remove('cursor-press'),
+      Math.max(0, 120 - (Date.now() - pressedAt))
+    );
+  }
+  document.addEventListener(
+    'pointerdown',
+    event => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      clearTimeout(releaseTimer);
+      pressedAt = Date.now();
+      root.classList.add('cursor-press');
+      const ring = document.createElement('div');
+      ring.className = 'cursor-ripple';
+      ring.style.left = event.clientX + 'px';
+      ring.style.top = event.clientY + 'px';
+      ring.addEventListener('animationend', () => ring.remove());
+      document.body.appendChild(ring);
+      setTimeout(() => ring.remove(), 800);
+    },
+    true
+  );
+  for (const name of ['pointerup', 'pointercancel']) document.addEventListener(name, release, true);
+  addEventListener('blur', release);
+
   // ---------------------------------------------------------------- Confirmation
   const box = document.createElement('div');
   box.id = 'uiConfirm';
