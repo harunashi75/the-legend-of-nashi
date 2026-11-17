@@ -292,6 +292,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-house-net",
+      "file": "scripts/house/net.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-house",
       "file": "scripts/house/house.js"
     },

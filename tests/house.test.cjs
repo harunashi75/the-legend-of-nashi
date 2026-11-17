@@ -197,3 +197,32 @@ test('Règles partagées de la maison : place des meubles, porte libre, murs, or
  for(const list of Object.values(D.HOUSE_ROOM_FURNITURE))for(const [k] of list)assert.ok(Object.hasOwn(C,k),k);
  for(const tab of new Set(Object.values(C).map(c=>c.cat)))assert.ok(D.HOUSE_FURNITURE_CATEGORIES.some(([c])=>c===tab),tab);
 });
+
+test('Maison en coopératif (house/net.js) : vue compacte, cadence d’envoi, actions routées, invité qui demande à l’hôte',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ // Vue compacte : aller-retour exact ; une vue illisible est ignorée.
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_HOUSE_NET.decodeView(CANAAN_HOUSE_NET.encodeView(3,[{k:"lit",x:1,y:2,r:1},{k:"tapis",x:4,y:4}])))')),
+  [{k:'lit',x:1,y:2,r:1},{k:'tapis',x:4,y:4,r:0}]);
+ assert.equal(run('CANAAN_HOUSE_NET.decodeView(null)'),null);assert.equal(run('CANAAN_HOUSE_NET.decodeView({items:"x"})'),null);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_HOUSE_NET.decodeView({items:[7]}))')),[null]);
+ // Une maison factice : chaque action est routée vers la bonne opération de l'hôte, pour le bon héros.
+ run(`globalThis.__log=[];globalThis.__state={version:1,items:[{k:"lit",x:1,y:2,r:0}]};
+  globalThis.__net=CANAAN_HOUSE_NET.create({door:h=>__log.push(["door",h])&&true,place:(h,k,x,y,r)=>__log.push(["place",h,k,x,y,r])&&true,
+   remove:(h,x,y)=>(__log.push(["remove",h,x,y]),{k:"lit"}),rotate:(h,x,y)=>__log.push(["rotate",h,x,y])&&true,
+   state:()=>__state,receive:raw=>__log.push(["receive",raw])});`);
+ run('__net.handle("H",{op:"house-door"});__net.handle("H",{op:"house-place",k:"lit",x:1,y:2});__net.handle("H",{op:"house-remove",x:1,y:2});__net.handle("H",{op:"house-rotate",x:3,y:4})');
+ assert.equal(run('__net.handle("H",{op:"house-inconnue"})'),false);assert.equal(run('__net.handle("H",{op:"house-remove",x:1,y:2})'),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__log.slice(0,4))')),[['door','H'],['place','H','lit',1,2,0],['remove','H',1,2],['rotate','H',3,4]]);
+ // Cadence : envoyée une fois, puis seulement si elle change ou toutes les 5 secondes.
+ run('time=1000');assert.deepEqual(JSON.parse(run('JSON.stringify(__net.netView())')),{v:1,items:[['lit',1,2,0]]});
+ run('time=1001');assert.equal(run('__net.netView()'),undefined);
+ run('__state={version:2,items:[]}');assert.deepEqual(JSON.parse(run('JSON.stringify(__net.netView())')),{v:2,items:[]});
+ run('time=1300');assert.equal(run('__net.netView()'),undefined);run('time=1302');assert.equal(run('__net.netView().v'),2);
+ // Invité : la vue reçue passe à la maison ; ses actions sont demandées à l'hôte, jamais appliquées sur place.
+ run('__log.length=0;__net.applyRemote({v:5,items:[["tapis",4,4,0]]});__net.applyRemote({oops:1})');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__log)')),[['receive',[{k:'tapis',x:4,y:4,r:0}]]]);
+ run('globalThis.__asked=[];const net=CANAAN_NET,mode=game.mode;CANAAN_NET={...net,requestAction:a=>(__asked.push(a),true)};game.mode="guest";__log.length=0;try{__net.send({op:"house-door"})}finally{CANAAN_NET=net;game.mode=mode}');
+ assert.deepEqual(JSON.parse(run('JSON.stringify([__asked,__log])')),[[{op:'house-door'}],[]]);
+ // Hôte : la même action s'applique tout de suite.
+ run('__net.send({op:"house-door"})');assert.equal(run('__log[0][0]'),'door');
+});

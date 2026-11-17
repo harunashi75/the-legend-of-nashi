@@ -8,7 +8,8 @@
 // Les meubles de la maison appartiennent à l'aventure (sauvegarde de l'hôte : monde.maison) ; un invité peut entrer
 // et décorer, l'hôte vérifie chaque meuble posé, tourné ou retiré et renvoie la maison à tous.
 // Ce fichier garde l'état (meubles posés, bâtiments, mode décoration) ; le catalogue et les règles des meubles sont
-// dans shared/data/house.js et shared/rules/house.js, tout le dessin dans scripts/house/render.js.
+// dans shared/data/house.js et shared/rules/house.js, tout le dessin dans scripts/house/render.js, le coopératif dans
+// scripts/house/net.js.
 (() => {
   'use strict';
 
@@ -459,13 +460,6 @@
       );
     return true;
   }
-  function handle(hero, action) {
-    if (action.op === 'house-door') return door(hero);
-    if (action.op === 'house-place') return place(hero, action.k, action.x, action.y, action.r || 0);
-    if (action.op === 'house-remove') return !!remove(hero, action.x, action.y);
-    if (action.op === 'house-rotate') return rotate(hero, action.x, action.y);
-    return false;
-  }
 
   // ---------------------------------------------------------------- Sauvegarde et réseau
   const sanitize = raw => houseSanitizeItems(HOUSE_FURNITURE, HOME, raw?.items, HOUSE_MAX_ITEMS);
@@ -474,22 +468,17 @@
     items = sanitize(raw);
     version++;
   }
-  // Maison envoyée aux invités : quand elle change, et toutes les 5 secondes pour un invité qui arrive.
-  let sent = -1,
-    sentAt = -1e9;
-  function netView() {
-    if (version === sent && time - sentAt < 300) return undefined;
-    sent = version;
-    sentAt = time;
-    return { v: version, items: items.map(it => [it.k, it.x, it.y, it.r || 0]) };
-  }
-  function applyRemote(view) {
-    if (!view || !Array.isArray(view.items)) return;
-    items = sanitize({
-      items: view.items.map(a => (Array.isArray(a) ? { k: a[0], x: a[1], y: a[2], r: a[3] || 0 } : null))
-    });
-  }
-  const guest = () => game.mode === 'guest';
+  // Coopératif (scripts/house/net.js) : actions des invités vérifiées par l'hôte, maison envoyée à tous.
+  const NET = CANAAN_HOUSE_NET.create({
+    door: hero => door(hero),
+    place: (hero, k, x, y, r) => place(hero, k, x, y, r),
+    remove: (hero, x, y) => remove(hero, x, y),
+    rotate: (hero, x, y) => rotate(hero, x, y),
+    state: () => ({ version, items }),
+    receive: raw => {
+      items = sanitize({ items: raw });
+    }
+  });
   // Touche E : porte d'un bâtiment ou porte intérieure. Renvoie vrai si E a servi.
   function interact() {
     if (game.world.instance) return false;
@@ -498,8 +487,7 @@
       const d = insideDoor(room);
       if (Math.hypot(P.x - d.x, P.y - d.y) > 90) return false;
     } else if (!nearestDoor(P.x, P.y)) return false;
-    if (guest()) CANAAN_NET.requestAction({ op: 'house-door' });
-    else door(game.hero);
+    NET.send({ op: 'house-door' });
     return true;
   }
   // Cuisiner : près d'une cuisinière, d'une marmite ou d'une cheminée (dans n'importe quel bâtiment).
@@ -605,7 +593,7 @@
     return true;
   }
   function act(action) {
-    const done = guest() ? CANAAN_NET.requestAction(action) : handle(game.hero, action);
+    const done = NET.send(action);
     renderBar();
     return done;
   }
@@ -748,7 +736,7 @@
     remove,
     rotate,
     door,
-    handle,
+    handle: NET.handle,
     items: () => items.map(it => ({ ...it })),
     roomItems: id => itemsOf(ROOM[id]).map(it => ({ ...it })),
     drawFacade: ART.drawFacade,
@@ -757,8 +745,8 @@
     layout,
     load,
     sanitize,
-    netView,
-    applyRemote,
+    netView: NET.netView,
+    applyRemote: NET.applyRemote,
     interact,
     nearStove,
     drawTile: ART.drawTile,
