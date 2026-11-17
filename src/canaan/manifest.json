@@ -16,14 +16,19 @@
       "file": "styles/boot-loader.css"
     },
     {
+      "kind": "module",
+      "id": "canaan-modules",
+      "file": "bridge.js"
+    },
+    {
       "kind": "script",
       "id": "canaan-icon-art",
-      "file": "scripts/icon-art.js"
+      "file": "client/icons/icon-art.js"
     },
     {
       "kind": "script",
       "id": "canaan-icons",
-      "file": "scripts/icons.js"
+      "file": "client/icons/icons.js"
     },
     {
       "kind": "script",
@@ -49,11 +54,6 @@
       "kind": "script",
       "id": "canaan-game-core",
       "file": "scripts/game-core.js"
-    },
-    {
-      "kind": "module",
-      "id": "canaan-modules",
-      "file": "bridge.js"
     },
     {
       "kind": "script",
@@ -138,7 +138,7 @@
     {
       "kind": "script",
       "id": "canaan-skill-icons",
-      "file": "scripts/skill-icons.js"
+      "file": "client/icons/skill-icons.js"
     },
     {
       "kind": "script",
@@ -263,7 +263,7 @@
     {
       "kind": "script",
       "id": "canaan-building-art",
-      "file": "scripts/building-art.js"
+      "file": "client/art/building-art.js"
     },
     {
       "kind": "script",
@@ -383,7 +383,7 @@
     {
       "kind": "script",
       "id": "canaan-dwarf-art",
-      "file": "scripts/dwarf-art.js"
+      "file": "client/art/dwarf-art.js"
     },
     {
       "kind": "script",
