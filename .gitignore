@@ -23,3 +23,6 @@ Thumbs.db
 # Éditeurs
 .vscode/
 .idea/
+
+# Icônes des succès Steam, produites par node tools/steam_achievements.cjs --icons
+steam/icons/

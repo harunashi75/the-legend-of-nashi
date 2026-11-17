@@ -53,7 +53,7 @@ test('Jeu installable : chaque fichier chargé par l’application est livré, s
     assert.ok(!shipped(path.join(ROOT, f)), f + ' ne doit pas être livré');
 });
 
-test('Jeu installable : outil épinglé, icône carrée d’au moins 512 px, nom de bureau Linux', () => {
+test('Jeu installable : outils épinglés, icône carrée d’au moins 512 px, nom de bureau Linux, Steam hors archive', () => {
   assert.match(pkg.devDependencies['electron-builder'], /^\d+\.\d+\.\d+$/, 'version exacte');
   const png = fs.readFileSync(path.join(ROOT, 'build', 'icon.png'));
   assert.equal(png.subarray(1, 4).toString(), 'PNG');
@@ -61,5 +61,21 @@ test('Jeu installable : outil épinglé, icône carrée d’au moins 512 px, nom
   assert.ok(w === h && w >= 512, w + ' × ' + h);
   assert.match(config, /^\s+icon: build\/icon\.png$/m);
   assert.equal(pkg.desktopName, 'legend-of-nashi.desktop');
+  // Bibliothèque Steam : binaires natifs hors de l'archive (sinon ils ne se chargent pas dans le jeu installé).
+  assert.match(config, /asarUnpack:\n\s+- node_modules\/steamworks\.js\/dist\/\*\*/);
+  assert.match(pkg.dependencies['steamworks.js'], /^\d+\.\d+\.\d+$/, 'version exacte');
   assert.match(config, /executableName: legend-of-nashi\n/);
+});
+
+test('Jeu installable : le processus principal n’écrit jamais directement sur la console (EBADF sous Windows)', () => {
+  // Sans console (jeu lancé par Steam ou l'Explorateur sous Windows), console.log peut lever EBADF et arrêter le jeu au
+  // démarrage : tout passe par log() de app/main.js, qui ne lève jamais.
+  for (const file of fs.readdirSync(path.join(ROOT, 'app'))) {
+    const src = fs.readFileSync(path.join(ROOT, 'app', file), 'utf8'),
+      uses = src.match(/\bconsole\.\w+/g) || [];
+    if (file === 'main.js') {
+      assert.deepEqual(uses, ['console.log'], 'une seule écriture, dans log()');
+      assert.ok(src.includes('function log(...parts) {\n  try {\n    console.log(...parts);\n  } catch {}'), 'log() protégé');
+    } else assert.deepEqual(uses, [], file);
+  }
 });

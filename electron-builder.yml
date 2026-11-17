@@ -21,11 +21,18 @@ files:
   - src/canaan/shared/**
   - '!src/canaan/shared/jsconfig.json'
 asar: true
+# Bibliothèque Steam (steamworks.js) : binaires natifs chargés depuis de vrais fichiers, hors de l'archive. Chaque
+# système ne garde que les siens (et pas la bibliothèque de liaison .lib de Windows).
+asarUnpack:
+  - node_modules/steamworks.js/dist/**
 # Seule la langue du jeu est gardée parmi les traductions de Chromium (menus système, boîtes de dialogue).
 electronLanguages: [fr, en-US]
 
 win:
   icon: build/icon.png
+  files:
+    - '!node_modules/steamworks.js/dist/{linux64,osx}/**'
+    - '!node_modules/steamworks.js/dist/win64/*.lib'
   target:
     - target: nsis
       arch: [x64]
@@ -44,6 +51,8 @@ nsis:
 
 linux:
   icon: build/icon.png
+  files:
+    - '!node_modules/steamworks.js/dist/{win64,osx}/**'
   category: Game
   executableName: legend-of-nashi
   # Associe la fenêtre du jeu à son raccourci (icône dans la barre des tâches) : desktopName de package.json.

@@ -1,0 +1,101 @@
+Nom d’API,Titre,Description,Catégorie,Icône obtenue,Icône non obtenue
+ACH_C1,Premiers pas ensanglantés,Vaincre ton tout premier monstre.,Combat & armes,ACH_C1.png,ACH_C1_locked.png
+ACH_C2,Le massacre des Plaines,Vaincre 100 monstres.,Combat & armes,ACH_C2.png,ACH_C2_locked.png
+ACH_C3,Fléau des ténèbres,Vaincre 1 000 monstres.,Combat & armes,ACH_C3.png,ACH_C3_locked.png
+ACH_C4,Génocide légendaire,Vaincre 10 000 monstres.,Combat & armes,ACH_C4.png,ACH_C4_locked.png
+ACH_C5,Chasseur d’élites,Vaincre 25 monstres élites.,Combat & armes,ACH_C5.png,ACH_C5_locked.png
+ACH_C6,Fléau des élites,Vaincre 250 monstres élites.,Combat & armes,ACH_C6.png,ACH_C6_locked.png
+ACH_C7,Œil du tigre,Réussir 500 coups critiques.,Combat & armes,ACH_C7.png,ACH_C7_locked.png
+ACH_C8,Frappe dévastatrice,Infliger 1 000 dégâts en un seul coup.,Combat & armes,ACH_C8.png,ACH_C8_locked.png
+ACH_C9,Le Dévastateur,Infliger 5 000 dégâts en un seul coup.,Combat & armes,ACH_C9.png,ACH_C9_locked.png
+ACH_C10,Artiste de l’esquive,Faire 500 roulades d’esquive.,Combat & armes,ACH_C10.png,ACH_C10_locked.png
+ACH_C11,Tempête d’acier,Lancer 1 000 compétences d’arme.,Combat & armes,ACH_C11.png,ACH_C11_locked.png
+ACH_C12,Pouvoir de classe,Lancer 100 fois le sort de ta classe (touche F).,Combat & armes,ACH_C12.png,ACH_C12_locked.png
+ACH_C13,Maître d’armes,Vaincre 50 ennemis avec chacune des neuf familles d’arme.,Combat & armes,ACH_C13.png,ACH_C13_locked.png
+ACH_C14,Tireur d’élite,Vaincre 200 ennemis avec une arme de la famille Arc.,Combat & armes,ACH_C14.png,ACH_C14_locked.png
+ACH_C15,Exécuteur silencieux,Vaincre 200 ennemis avec une arme de la famille Dagues doubles.,Combat & armes,ACH_C15.png,ACH_C15_locked.png
+ACH_C16,Bûcheron des âmes,Vaincre 200 ennemis avec une arme de la famille Hache.,Combat & armes,ACH_C16.png,ACH_C16_locked.png
+ACH_C17,Masse atomique,Vaincre 200 ennemis avec une arme de la famille Masse.,Combat & armes,ACH_C17.png,ACH_C17_locked.png
+ACH_C18,Surcharge arcanique,Vaincre 200 ennemis avec une arme de la famille Bâton arcanique.,Combat & armes,ACH_C18.png,ACH_C18_locked.png
+ACH_C19,Résilience de Phénix,Survivre à un coup fatal grâce au Rubis Phénix.,Combat & armes,ACH_C19.png,ACH_C19_locked.png
+ACH_C20,Bourreau des cœurs,Vaincre un boss mondial moins de 30 secondes après le premier coup.,Combat & armes,ACH_C20.png,ACH_C20_locked.png
+ACH_E1,Le grand départ,Quitter le Camp de l’Aurore pour la première fois.,Exploration & aventure,ACH_E1.png,ACH_E1_locked.png
+ACH_E2,Promeneur solitaire,Marcher 10 km dans le monde ouvert (une case = 1 m).,Exploration & aventure,ACH_E2.png,ACH_E2_locked.png
+ACH_E3,Globe-trotteur,Marcher 50 km dans le monde ouvert.,Exploration & aventure,ACH_E3.png,ACH_E3_locked.png
+ACH_E4,Touriste des biomes,Visiter les six régions de l’île.,Exploration & aventure,ACH_E4.png,ACH_E4_locked.png
+ACH_E5,Chasseur de trésors,Ouvrir ton premier coffre secret.,Exploration & aventure,ACH_E5.png,ACH_E5_locked.png
+ACH_E6,Pilleur de tombes,Ouvrir 25 coffres secrets.,Exploration & aventure,ACH_E6.png,ACH_E6_locked.png
+ACH_E7,Cartographe royal,Ouvrir tous les coffres secrets de l’île.,Exploration & aventure,ACH_E7.png,ACH_E7_locked.png
+ACH_E8,Premier portail,Entrer dans un donjon ou un raid.,Exploration & aventure,ACH_E8.png,ACH_E8_locked.png
+ACH_E9,Collectionneur de portails,"Entrer dans tous les donjons et raids, sur l’île et dans les Tréfonds.",Exploration & aventure,ACH_E9.png,ACH_E9_locked.png
+ACH_E10,Promenade en enfer,Entrer dans la Forge d’Écaille-Ardente.,Exploration & aventure,ACH_E10.png,ACH_E10_locked.png
+ACH_E11,Pèlerinage céleste,Atteindre l’Aiguille du Continuum.,Exploration & aventure,ACH_E11.png,ACH_E11_locked.png
+ACH_E12,Au cœur des ténèbres,"Rester 5 minutes d’affilée dans une région plus forte que toi, sans tomber.",Exploration & aventure,ACH_E12.png,ACH_E12_locked.png
+ACH_E13,Touriste égaré,Tomber dans la Forêt enchantée (niveau 50+) en étant niveau 10 ou moins.,Exploration & aventure,ACH_E13.png,ACH_E13_locked.png
+ACH_E14,Première chute,Tomber au combat pour la première fois.,Exploration & aventure,ACH_E14.png,ACH_E14_locked.png
+ACH_E15,Increvable,Tomber 100 fois et te relever à chaque fois.,Exploration & aventure,ACH_E15.png,ACH_E15_locked.png
+ACH_E16,Chasseur de légendes,Découvrir les huit boss mondiaux.,Exploration & aventure,ACH_E16.png,ACH_E16_locked.png
+ACH_E17,Premier chapitre,Terminer une quête.,Exploration & aventure,ACH_E17.png,ACH_E17_locked.png
+ACH_E18,Aventurier aguerri,Terminer 15 quêtes.,Exploration & aventure,ACH_E18.png,ACH_E18_locked.png
+ACH_E19,Chroniqueur de l’Aurore,Terminer toutes les quêtes.,Exploration & aventure,ACH_E19.png,ACH_E19_locked.png
+ACH_E20,Légende vivante,Terminer l’histoire « Les Échos de l’Aurore ».,Exploration & aventure,ACH_E20.png,ACH_E20_locked.png
+ACH_P1,Premier pécule,Gagner tes 100 premières pièces d’or.,Économie & métiers,ACH_P1.png,ACH_P1_locked.png
+ACH_P2,Magnat de l’or,Gagner 100 000 pièces d’or au total.,Économie & métiers,ACH_P2.png,ACH_P2_locked.png
+ACH_P3,Gros portefeuille,Agrandir ton sac jusqu’à 100 places.,Économie & métiers,ACH_P3.png,ACH_P3_locked.png
+ACH_P4,Maître artisan,Atteindre le niveau 40 dans un métier.,Économie & métiers,ACH_P4.png,ACH_P4_locked.png
+ACH_P5,Commerçant malin,Gagner 10 000 pièces d’or en vendant aux marchands.,Économie & métiers,ACH_P5.png,ACH_P5_locked.png
+ACH_P6,Coffre-fort,Ranger 50 cases à la banque.,Économie & métiers,ACH_P6.png,ACH_P6_locked.png
+ACH_P7,Mineur de fond,Extraire 100 minerais.,Économie & métiers,ACH_P7.png,ACH_P7_locked.png
+ACH_P8,Chercheur d’or pur,Extraire une pépite d’or.,Économie & métiers,ACH_P8.png,ACH_P8_locked.png
+ACH_P9,Herboriste des bois,Cueillir 100 herbes.,Économie & métiers,ACH_P9.png,ACH_P9_locked.png
+ACH_P10,La main verte,Cueillir un aloès ou un lys étoilé.,Économie & métiers,ACH_P10.png,ACH_P10_locked.png
+ACH_P11,Apprenti cuisinier,Cuisiner 10 recettes différentes.,Économie & métiers,ACH_P11.png,ACH_P11_locked.png
+ACH_P12,Maître cuisinier,Cuisiner toutes les recettes du jeu.,Économie & métiers,ACH_P12.png,ACH_P12_locked.png
+ACH_P13,Festin royal,Cuisiner un repas de qualité Mythique.,Économie & métiers,ACH_P13.png,ACH_P13_locked.png
+ACH_P14,Pêcheur du dimanche,Pêcher ton tout premier poisson.,Économie & métiers,ACH_P14.png,ACH_P14_locked.png
+ACH_P15,Gros poisson,Pêcher un espadon ou un poisson-lune astral.,Économie & métiers,ACH_P15.png,ACH_P15_locked.png
+ACH_P16,Maître des profondeurs,Compléter la collection des poissons.,Économie & métiers,ACH_P16.png,ACH_P16_locked.png
+ACH_P17,Enchanteur débutant,Avoir une pièce d’équipement enchantée.,Économie & métiers,ACH_P17.png,ACH_P17_locked.png
+ACH_P18,Runes mystiques,Porter huit pièces enchantées (toutes sauf l’artéfact).,Économie & métiers,ACH_P18.png,ACH_P18_locked.png
+ACH_P19,Chasseur de viande,Chasser 50 animaux.,Économie & métiers,ACH_P19.png,ACH_P19_locked.png
+ACH_P20,Le Philanthrope,Faire un échange avec un autre joueur.,Économie & métiers,ACH_P20.png,ACH_P20_locked.png
+ACH_M1,Éveil des pouvoirs,Atteindre le niveau 10.,"Magie, Rubis & progression",ACH_M1.png,ACH_M1_locked.png
+ACH_M2,Force de l’âge,Atteindre le niveau 30.,"Magie, Rubis & progression",ACH_M2.png,ACH_M2_locked.png
+ACH_M3,Transcendance totale,Atteindre le niveau maximum (60).,"Magie, Rubis & progression",ACH_M3.png,ACH_M3_locked.png
+ACH_M4,Premier Rubis,Équiper ton premier Rubis.,"Magie, Rubis & progression",ACH_M4.png,ACH_M4_locked.png
+ACH_M5,Collection de gemmes,Posséder 20 Rubis différents.,"Magie, Rubis & progression",ACH_M5.png,ACH_M5_locked.png
+ACH_M6,Joaillier suprême,Posséder les 48 Rubis.,"Magie, Rubis & progression",ACH_M6.png,ACH_M6_locked.png
+ACH_M7,Puissance écarlate,Remplir tes six emplacements avec des Rubis offensifs.,"Magie, Rubis & progression",ACH_M7.png,ACH_M7_locked.png
+ACH_M8,Forteresse impénétrable,Remplir tes six emplacements avec des Rubis défensifs.,"Magie, Rubis & progression",ACH_M8.png,ACH_M8_locked.png
+ACH_M9,Bénédiction divine,Remplir tes six emplacements avec des Rubis de soutien.,"Magie, Rubis & progression",ACH_M9.png,ACH_M9_locked.png
+ACH_M10,Immortalité du Phénix,Être sauvé par le Rubis Phénix en plein combat de boss.,"Magie, Rubis & progression",ACH_M10.png,ACH_M10_locked.png
+ACH_M11,Spécialisation de classe,Choisir ta classe.,"Magie, Rubis & progression",ACH_M11.png,ACH_M11_locked.png
+ACH_M12,Maître Druide,Remplir les cinq emplacements de talents en Druide.,"Magie, Rubis & progression",ACH_M12.png,ACH_M12_locked.png
+ACH_M13,Paladin éternel,Remplir les cinq emplacements de talents en Paladin.,"Magie, Rubis & progression",ACH_M13.png,ACH_M13_locked.png
+ACH_M14,Ombre mortelle,Remplir les cinq emplacements de talents en Assassin.,"Magie, Rubis & progression",ACH_M14.png,ACH_M14_locked.png
+ACH_M15,Seigneur des Éléments,Remplir les cinq emplacements de talents en Élémentaliste.,"Magie, Rubis & progression",ACH_M15.png,ACH_M15_locked.png
+ACH_M16,Toutes les voies,Jouer les quatre classes.,"Magie, Rubis & progression",ACH_M16.png,ACH_M16_locked.png
+ACH_M17,Éclat légendaire,Obtenir un objet Légendaire.,"Magie, Rubis & progression",ACH_M17.png,ACH_M17_locked.png
+ACH_M18,Mythe vivant,Obtenir un objet Mythique.,"Magie, Rubis & progression",ACH_M18.png,ACH_M18_locked.png
+ACH_M19,Panoplie épique,Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).,"Magie, Rubis & progression",ACH_M19.png,ACH_M19_locked.png
+ACH_M20,Collectionneur mythique,Porter huit pièces Mythiques (toutes sauf l’artéfact).,"Magie, Rubis & progression",ACH_M20.png,ACH_M20_locked.png
+ACH_D1,Entrée dans l’Arène,Tenter l’Arène des Épreuves.,Défis & Arène,ACH_D1.png,ACH_D1_locked.png
+ACH_D2,Gladiateur,Atteindre la vague 6 de l’Arène.,Défis & Arène,ACH_D2.png,ACH_D2_locked.png
+ACH_D3,Champion des champions,Vaincre les 12 vagues de l’Arène.,Défis & Arène,ACH_D3.png,ACH_D3_locked.png
+ACH_D4,Le triomphe de l’Héroïque,Terminer le Jugement de Célestia en mode Héroïque.,Défis & Arène,ACH_D4.png,ACH_D4_locked.png
+ACH_D5,Chasseur de divinités,Vaincre L’Avatar du Jugement.,Défis & Arène,ACH_D5.png,ACH_D5_locked.png
+ACH_D6,Premier boss mondial,Vaincre un boss mondial.,Défis & Arène,ACH_D6.png,ACH_D6_locked.png
+ACH_D7,Tueur de dieux anciens,Vaincre les huit boss mondiaux.,Défis & Arène,ACH_D7.png,ACH_D7_locked.png
+ACH_D8,Le réveil du dragon,"Vaincre Pyrrhax, Wyrm d’Écaille-Ardente.",Défis & Arène,ACH_D8.png,ACH_D8_locked.png
+ACH_D9,Cauchemar d’argent,Vaincre le Roi Sanglant dans le Bastion.,Défis & Arène,ACH_D9.png,ACH_D9_locked.png
+ACH_D10,Voyageur temporel,Vaincre le Dévoreur Stellaire dans l’Aiguille du Continuum.,Défis & Arène,ACH_D10.png,ACH_D10_locked.png
+ACH_D11,Jugement dernier,Vaincre L’Avatar du Jugement moins de 3 minutes après le premier coup.,Défis & Arène,ACH_D11.png,ACH_D11_locked.png
+ACH_D12,Défi en solitaire,"Terminer un donjon ou un raid seul, sans tomber.",Défis & Arène,ACH_D12.png,ACH_D12_locked.png
+ACH_D13,Le prix du sang,Vaincre un boss en ayant moins de 5 % de tes PV.,Défis & Arène,ACH_D13.png,ACH_D13_locked.png
+ACH_D14,Vitesse éclair,Terminer un donjon ou un raid en moins de 5 minutes.,Défis & Arène,ACH_D14.png,ACH_D14_locked.png
+ACH_D15,Conquérant des donjons,Terminer les six donjons de l’île.,Défis & Arène,ACH_D15.png,ACH_D15_locked.png
+ACH_D16,Fléau des raids,Terminer les quatre raids.,Défis & Arène,ACH_D16.png,ACH_D16_locked.png
+ACH_D17,Résistant suprême,Subir 1 000 000 de dégâts au total.,Défis & Arène,ACH_D17.png,ACH_D17_locked.png
+ACH_D18,Bestiaire complet,"Vaincre chaque espèce du monde, des donjons et des raids.",Défis & Arène,ACH_D18.png,ACH_D18_locked.png
+ACH_D19,Perfectionniste absolu,Débloquer 99 succès.,Défis & Arène,ACH_D19.png,ACH_D19_locked.png
+ACH_D20,La Légende de Nashi,Débloquer tous les autres succès.,Défis & Arène,ACH_D20.png,ACH_D20_locked.png

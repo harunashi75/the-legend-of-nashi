@@ -7,11 +7,13 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 Première version officielle avant la sortie sur Steam : la numérotation repart de 0.9.8 (les versions 1.9.x étaient des versions de développement). Les sauvegardes des versions 1.9.x restent lisibles : seul le format des sauvegardes compte, et il ne change pas. Prochaine étape : tests en jeu, puis 0.10.0, première version publique.
 
 ### Ajouté
+- Steam : les 100 succès du jeu sont reportés sur le compte Steam (anciens succès compris, invités en coopératif aussi), superposition Steam (Maj+Tab), sauvegardes prêtes pour Steam Cloud (Auto-Cloud). Sans Steam, rien ne change. Liste des succès et icônes 256 × 256 à déclarer produites par `tools/steam_achievements.cjs` ; guide de mise en place dans `docs/STEAM.md`.
 - Manette (Xbox, PlayStation, Steam Deck, Switch Pro…) : tout le jeu se joue sans clavier ni souris. Déplacement au stick gauche, visée au stick droit ou automatique, attaques aux gâchettes, compétences sur X, Y, LB, RB ; menus parcourus à la croix (A valider, B retour) ; boutons de la manette affichés à la place des touches ; vibrations (réglables dans les Paramètres, avec le rappel des commandes).
 - Jeu installable, sans navigateur : installateur `.exe` et `.zip` pour Windows, AppImage et `.tar.gz` pour Linux (`npm run dist:win`, `npm run dist:linux`, electron-builder). Les archives contiennent le dossier du jeu, prêt pour Steam. Icône provisoire en pixel art.
 - La release GitHub construit le jeu pour Windows et Linux, lance chaque version installée pour de vrai (menu, nouvelle aventure, sauvegarde sur disque, relais du coopératif ; `tools/smoke_package.cjs`) puis la publie.
 
 ### Corrigé
+- Application de bureau sous Windows : une écriture dans le journal sans console disponible (EBADF) pouvait arrêter le jeu au démarrage ; le journal ne peut plus lever d’erreur.
 - Trois lectures des anciens noms globaux (`monsters`, `projectiles`, `inventory`) avaient échappé au garde-fou : une expression régulière ignorait `...monsters`. Le garde-fou analyse maintenant les portées de tous les scripts du manifeste, sous-dossiers compris.
 - La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.
 

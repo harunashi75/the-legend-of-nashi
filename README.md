@@ -5,6 +5,7 @@ RPG d’action en pixel art, en vue de dessus : une île à six biomes, un monde
 - **Contenu du jeu** : [docs/GAMEPLAY.md](docs/GAMEPLAY.md)
 - **Architecture et code** : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Sauvegardes** : [docs/SAVES.md](docs/SAVES.md) · **Démarrage** : [docs/INITIALIZATION.md](docs/INITIALIZATION.md)
+- **Steam** (succès, Steam Cloud, dépôts) : [docs/STEAM.md](docs/STEAM.md)
 - **Journal des versions** : [CHANGELOG.md](CHANGELOG.md)
 
 ## Jouer

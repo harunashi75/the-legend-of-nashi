@@ -7,8 +7,16 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { createSaveStore } = require('./saves.js');
 const { createHosting } = require('./hosting.js');
+const { createSteam } = require('./steam.js');
 
 const ROOT = path.resolve(__dirname, '..');
+// Journal du processus principal. Sous Windows, un jeu lancé sans console (Steam, Explorateur) n'a pas toujours de
+// sortie utilisable : écrire dessus lèverait EBADF et arrêterait le jeu au démarrage. Le journal ne doit jamais gêner.
+function log(...parts) {
+  try {
+    console.log(...parts);
+  } catch {}
+}
 const DEV = !app.isPackaged;
 
 // Le jeu s'appelait « Canaan Online » : son dossier de données (sauvegardes, affichage) portait ce nom. Au premier
@@ -29,7 +37,7 @@ function adoptOldData() {
           force: false
         });
   } catch (error) {
-    console.error('[données] copie de l’ancien dossier impossible :', error.message);
+    log('[données] copie de l’ancien dossier impossible :', error.message);
   }
 }
 adoptOldData();
@@ -80,6 +88,10 @@ function writeDisplay() {
   }
 }
 const display = readDisplay();
+// Steam : succès du joueur quand le jeu est lancé par Steam (sinon inactif) ; la superposition (Maj+Tab) se règle avant
+// le démarrage de Chromium.
+const steam = createSteam({ log });
+steam.enableOverlay();
 // VSync coupée : Chromium dessine aussi vite qu'il peut (la limite d'images du jeu reste réglable).
 const VSYNC_AT_START = display.vsync;
 if (!display.vsync) {
@@ -174,6 +186,10 @@ ipcMain.handle('net:host-stop', async event => {
 ipcMain.handle('net:host-status', event => (fromGame(event) ? hosting.status() : null));
 // Copier l'invitation (texte court seulement).
 // Affichage : lu et changé seulement par la page du jeu ; chaque valeur est vérifiée.
+ipcMain.handle('steam:status', event => (fromGame(event) ? steam.status() : null));
+ipcMain.on('steam:unlock', (event, ids) => {
+  if (fromGame(event)) steam.unlock(ids);
+});
 ipcMain.handle('display:get', event => (fromGame(event) ? displayState() : null));
 ipcMain.handle('display:set', (event, options) => {
   if (!fromGame(event) || !options || typeof options !== 'object') return null;

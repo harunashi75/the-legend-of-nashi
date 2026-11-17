@@ -2,8 +2,8 @@
 // Test de fumée du jeu installé (après npm run dist:linux ou dist:win) : lance l'exécutable livré avec un dossier de
 // données temporaire (les vraies sauvegardes ne sont pas touchées), s'y connecte par le protocole de débogage de
 // Chromium et vérifie que le jeu tourne vraiment : HTML chargé depuis l'archive du jeu, bonne version, menu des
-// aventures prêt, sauvegarde écrite puis relue sur disque, réglages d'affichage, relais du coopératif démarré puis
-// arrêté, aucune erreur JavaScript.
+// aventures prêt, sauvegarde écrite puis relue sur disque, réglages d'affichage, bibliothèque Steam chargée, relais du
+// coopératif démarré puis arrêté, aucune erreur JavaScript.
 //
 //   node tools/smoke_package.cjs dist/linux-unpacked/legend-of-nashi
 //   node tools/smoke_package.cjs dist/Legend-of-Nashi-0.9.8-linux-x86_64.AppImage
@@ -122,6 +122,13 @@ async function main() {
   );
   const display = await run('canaanDesktop.display.get()');
   check(display && typeof display.fullscreen === 'boolean', 'réglages d’affichage', JSON.stringify(display));
+  // Steam : bibliothèque native chargée depuis le jeu installé, inactive quand le jeu n'est pas lancé par Steam.
+  const steam = await run('canaanDesktop.steam.status()');
+  check(
+    steam && steam.loaded && !steam.available,
+    'Steam : bibliothèque chargée, inactive hors de Steam',
+    steam?.reason
+  );
   // Relais du coopératif (relay/server.cjs et règles partagées, livrés dans l'archive).
   const lan = await run('canaanDesktop.hosting.startLan().then(s => s, e => ({ error: e.message }))');
   check(

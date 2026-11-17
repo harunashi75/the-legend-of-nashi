@@ -25,6 +25,11 @@ contextBridge.exposeInMainWorld(
       relaunch: () => ipcRenderer.send('display:relaunch'),
       onChange: callback => ipcRenderer.on('display:changed', (_event, state) => callback(state))
     }),
+    // Steam : état (lancé par Steam ou non) et succès du héros à reporter sur le compte Steam.
+    steam: Object.freeze({
+      status: () => ipcRenderer.invoke('steam:status'),
+      unlock: ids => ipcRenderer.send('steam:unlock', Array.isArray(ids) ? ids.map(String) : [])
+    }),
     // Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local, état reçu à chaque changement.
     hosting: Object.freeze({
       startTailscale: () => ipcRenderer.invoke('net:host-tailscale'),

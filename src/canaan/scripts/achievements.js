@@ -1353,6 +1353,7 @@
     hero.netAch = null;
     window.CANAAN_PERSISTENCE.requestSave();
     announce(hero, unlocked);
+    if (hero === game.hero) steamSync();
     return unlocked;
   }
   function announce(hero, list) {
@@ -1362,6 +1363,18 @@
       for (const a of list.slice(0, 3))
         chat('Succès', (hero.name || 'Le héros') + ' débloque « ' + a.name + ' »');
   }
+  // Succès Steam (application de bureau lancée par Steam) : les succès du héros joué sur cet appareil (l'hôte, ou
+  // l'invité avec le carnet reçu de l'hôte) sont reportés sur le compte Steam du joueur ; anciens succès compris.
+  let steamSent = -1;
+  function steamSync() {
+    const steam = window.canaanDesktop?.steam;
+    if (!steam || !started) return;
+    const done = Object.keys(stateOf(game.hero).done).filter(id => BY_ID[id]);
+    if (done.length === steamSent) return;
+    steamSent = done.length;
+    steam.unlock(done);
+  }
+  setInterval(steamSync, 5000);
   let clock = 0;
   function tick() {
     if (!started || guest() || paused) return;
@@ -1458,6 +1471,7 @@
       next = sanitize(v);
     game.hero.succes = next;
     if (before && before._remote) popup(LIST.filter(a => next.done[a.id] && !before.done[a.id]));
+    steamSync();
     next._remote = true;
     render();
   }
@@ -1832,7 +1846,8 @@
     render,
     toggle,
     isOpen,
-    actions
+    actions,
+    steamSync
   });
   Object.assign(window, { canaanAchieve: event, toggleAchievements: toggle });
 })();
