@@ -2688,5 +2688,174 @@ export default {
   'Titres': 'Titles',
   'Succès & collections': 'Achievements & collections',
   'succès': 'achievements',
-  '{n} points': '{n} points'
+  '{n} points': '{n} points',
+  // ------------------------------------------------------------ PNJ, villageois, cité elfique et coffres
+  'Tête': 'Head',
+  'Épaules': 'Shoulders',
+  'Armure': 'Armor',
+  'Gants': 'Gloves',
+  'Bottes': 'Boots',
+  'Collier': 'Necklace',
+  'Bague': 'Ring',
+  '{nom} vaincu ! Un coffre et un portail de retour sont apparus.':
+    '{nom} defeated! A chest and a return portal have appeared.',
+  'Lame': 'Blade',
+  'Cuirasse': 'Cuirass',
+  'Heaume': 'Helm',
+  'Épaulières': 'Shoulderpads',
+  'Anneau': 'Ring',
+  'Équipement': 'Gear',
+  '{piece} de l’Éclipse': '{piece} of the Eclipse',
+  '{piece} des Titans': '{piece} of the Titans',
+  '{piece} de Sylvaëlle': '{piece} of Sylvaëlle',
+  '{piece} des Profondeurs': '{piece} of the Depths',
+  '{piece} des Étoiles': '{piece} of the Stars',
+  '{piece} du Crépuscule': '{piece} of Dusk',
+  '{piece} du Gardien': '{piece} of the Guardian',
+  '{piece} de l’Aube': '{piece} of the Dawn',
+  'Fermer la fenêtre': 'Close the window',
+  'Fermer (Échap)': 'Close (Esc)',
+  '{n} objets communs vendus : +{m} or': '{n} common items sold: +{m} gold',
+  'Choisis une difficulté': 'Choose a difficulty',
+  'Retour dans les Tréfonds': 'Back to the Depths',
+  'Retour au monde de Canaan': 'Back to the world of Canaan',
+  '+{n} or dans le coffre': '+{n} gold in the chest',
+  'Coffre secret verrouillé : il faut une clé des secrets. Les boss cachés des donjons et des raids en donnent une.':
+    'Secret chest locked: you need a key of secrets. Hidden dungeon and raid bosses give one.',
+  'Sac plein : équipement non récupéré': 'Bag full: gear not collected',
+  '(nouveau !)': '(new!)',
+  'Clé des secrets requise': 'Key of secrets required',
+  'Coffre secret ouvert : équipement Épique + {n} or !': 'Secret chest opened: Epic gear + {n} gold!',
+  'Coffre secret ouvert : équipement Épique + {n} or + Rubis {nom} !':
+    'Secret chest opened: Epic gear + {n} gold + Ruby {nom}!',
+  'Coffre secret ouvert : équipement Épique + {n} or + Rubis {nom} (nouveau !) !':
+    'Secret chest opened: Epic gear + {n} gold + Ruby {nom} (new!)!',
+  'Halte ! Ah, c’est toi. Rien à signaler.': 'Halt! Ah, it’s you. Nothing to report.',
+  'Les loups rôdent à la lisière des plaines. Garde ton arme prête.':
+    'Wolves prowl at the edge of the plains. Keep your weapon ready.',
+  'On raconte qu’un boss mondial erre dans le désert…': 'They say a world boss roams the desert…',
+  'Je monte la garde depuis l’aube. Encore trois heures…': 'I’ve been on guard since dawn. Three more hours…',
+  'Si tu croises des squelettes, vise la tête.': 'If you run into skeletons, aim for the head.',
+  'Le marchand a reçu de nouvelles marchandises, va voir son échoppe !':
+    'The merchant got new wares, go check out the stall!',
+  'Le feu de camp, ça réchauffe le cœur après une longue route.':
+    'A campfire warms the heart after a long road.',
+  'La Marmite dorée sent bon toute la journée. On y cuisine ses prises.':
+    'The Golden Pot smells good all day long. That’s where you cook your catches.',
+  'Tu reviens des ruines ? Raconte-moi tout !': 'Back from the ruins? Tell me everything!',
+  'Ma grand-mère disait que l’Aube s’est brisée en mille éclats.':
+    'My grandmother used to say the Dawn shattered into a thousand shards.',
+  'Le meilleur équipement, c’est celui qu’on arrache aux boss des donjons !':
+    'The best gear is the gear you tear from dungeon bosses!',
+  'J’ai cueilli des baies ce matin. Elles sont délicieuses !':
+    'I picked berries this morning. They’re delicious!',
+  'Tu as vu ? J’ai attrapé un papillon !': 'Did you see? I caught a butterfly!',
+  'Quand je serai grand, je serai un héros comme toi !': 'When I grow up, I’ll be a hero like you!',
+  'Chut… je joue à cache-cache avec les lapins.': 'Shh… I’m playing hide-and-seek with the rabbits.',
+  'Est-ce que les dragons existent vraiment ?': 'Do dragons really exist?',
+  'Tu me montres ton épée ? S’il te plaît !': 'Will you show me your sword? Please!',
+  'De mon temps, les donjons étaient bien plus sombres…': 'In my day, dungeons were much darker…',
+  'Ne va pas au Bastion du Roi Sanglant sans tes amis.':
+    'Don’t go to the Bastion of the Blood King without your friends.',
+  'Le vent tourne… il va se passer quelque chose.': 'The wind is turning… something is going to happen.',
+  'Repose-toi près du feu, tes jambes te remercieront.': 'Rest by the fire, your legs will thank you.',
+  'Chaque héros commence par une épée émoussée, tu sais.':
+    'Every hero starts with a blunted sword, you know.',
+  'J’arrive de la Forêt enchantée : les arbres y brillent la nuit !':
+    'I’ve just come from the Enchanted Forest: the trees glow there at night!',
+  'Le désert est traître, emporte de l’eau.': 'The desert is treacherous, take water with you.',
+  'Avec des amis, les raids paraissent moins longs (touche G).': 'With friends, raids feel shorter (G key).',
+  'Les aventuriers s’échangent leur butin, tu savais ? (touche J)':
+    'Adventurers trade their loot with each other, did you know? (J key)',
+  'Je cherche une carte des oasis. Tu en aurais une ?':
+    'I’m looking for a map of the oases. Do you have one?',
+  'Ça ne mord pas beaucoup aujourd’hui…': 'Not many bites today…',
+  'Le plus gros poisson que j’ai vu ? Grand comme ton épée !':
+    'The biggest fish I’ve seen? As long as your sword!',
+  'Les grenouilles chantent, la pluie n’est pas loin.': 'The frogs are singing, rain isn’t far off.',
+  'Chut, tu vas faire fuir les poissons.': 'Shh, you’ll scare the fish away.',
+  'Approche-toi d’une cuisinière avec tes prises : je te prête mes fourneaux !':
+    'Come to a stove with your catches: I’ll lend you my ovens!',
+  'Une soupe de gardons, et la journée commence bien.': 'A bowl of roach soup, and the day starts well.',
+  'Le secret d’un bon ragoût ? Du gibier frais et de la patience.':
+    'The secret of a good stew? Fresh game and patience.',
+  'Plus tu cuisines, mieux tu cuisines. Ouvre ton carnet (touche P) !':
+    'The more you cook, the better you cook. Open your logbook (P key)!',
+  'Un repas de qualité légendaire… je n’en ai vu qu’un dans ma vie.':
+    'A meal of legendary quality… I’ve only seen one in my life.',
+  'Ces pierres se souviennent de l’Aube d’avant…': 'These stones remember the Dawn of old…',
+  'Les squelettes ne dorment jamais vraiment.': 'Skeletons never truly sleep.',
+  'Écoute… on entend encore les anciens murmurer.': 'Listen… you can still hear the ancients whisper.',
+  'Les Rubis de l’Arène renferment une vieille magie.': 'The Arena’s Rubies hold an old magic.',
+  'D’ici, on voit loin. Les brumes cachent bien des choses.':
+    'You can see far from here. The mists hide many things.',
+  'J’ai repéré des coffres cachés… mais c’est un secret.':
+    'I’ve spotted some hidden chests… but it’s a secret.',
+  'Un portail s’est ouvert au loin, je l’ai vu briller.': 'A portal opened in the distance, I saw it shine.',
+  'Les monstres sont plus forts à mesure qu’on s’éloigne du camp.':
+    'Monsters get stronger the farther you go from camp.',
+  'Les plaines sont douces, mais les sangliers ont mauvais caractère.':
+    'The plains are gentle, but the boars are bad-tempered.',
+  'Dans la Forêt ancienne, les araignées tissent des toiles géantes.':
+    'In the Ancient Forest, spiders weave giant webs.',
+  'Les feuilles d’automne cachent parfois des pièces d’or…': 'Autumn leaves sometimes hide gold coins…',
+  'La nuit, le sable chante sous le vent.': 'At night, the sand sings in the wind.',
+  'Les fées sauvages ne sont pas aussi gentilles qu’elles en ont l’air.':
+    'Wild fairies aren’t as nice as they look.',
+  'Cuisinier {nom}': 'Cook {nom}',
+  'Cuisinière {nom}': 'Cook {nom}',
+  'Garde {nom}': 'Guard {nom}',
+  'Vieux {nom}': 'Old {nom}',
+  'Vieille {nom}': 'Old {nom}',
+  'Petit {nom}': 'Little {nom}',
+  'Petite {nom}': 'Little {nom}',
+  'Pêcheur {nom}': 'Fisherman {nom}',
+  'Ermite {nom}': 'Hermit {nom}',
+  'Éclaireuse {nom}': 'Scout {nom}',
+  'Garde de Sylvaëlle': 'Guard of Sylvaëlle',
+  'Elwyn, la Tisseuse': 'Elwyn, the Weaver',
+  'Elwë, Reine de Sylvaëlle': 'Elwë, Queen of Sylvaëlle',
+  'Dame Aelin': 'Lady Aelin',
+  'Seigneur Calen': 'Lord Calen',
+  'Fëanwë, le tavernier': 'Fëanwë, the innkeeper',
+  'Ithilië, prêtresse de la Lune': 'Ithilië, priestess of the Moon',
+  'Elrohen, l’astronome': 'Elrohen, the astronomer',
+  'Haldir des Racines': 'Haldir of the Roots',
+  'Garde royal': 'Royal guard',
+  'Ylvarë : « Je t’ai déjà béni aujourd’hui, jeune pousse. Reviens demain. »':
+    'Ylvarë: “I have already blessed you today, young sprout. Come back tomorrow.”',
+  'Avant les hommes, avant le camp et ses feux, il y avait la forêt. J’ai vu naître chaque arbre de cette île, jeune pousse.':
+    'Before men, before the camp and its fires, there was the forest. I have seen every tree on this island be born, young sprout.',
+  'Les elfes de Sylvaëlle ont bâti leur cité entre mes racines quand la grande roche s’est ouverte. Ils l’ont ceinte de troncs offerts par la forêt elle-même.':
+    'The elves of Sylvaëlle built their city among my roots when the great rock opened. They girded it with trunks offered by the forest itself.',
+  'Le Cœur de l’Aurore bat encore sous l’île. Je l’entends, la nuit, comme une source sous la mousse. Les Échos que tu poursuis viennent de lui.':
+    'The Heart of Dawn still beats beneath the island. I hear it at night, like a spring beneath the moss. The Echoes you pursue come from it.',
+  'La porte de la cité est cachée derrière le lac : seuls ceux qui ont grandi assez pour voir au-delà des eaux la trouvent.':
+    'The city gate is hidden behind the lake: only those who have grown enough to see beyond the waters find it.',
+  'Les boss qui dorment derrière les murs fissurés gardent les clés de vieux coffres. Je ne sais pas qui les y a mis… mais ils sont plus vieux que moi.':
+    'The bosses sleeping behind cracked walls keep the keys to old chests. I do not know who put them there… but they are older than I am.',
+  'Repose-toi à l’ombre de mes branches. Une fois par jour, je peux te prêter un peu de ma sève.':
+    'Rest in the shade of my branches. Once a day, I can lend you a little of my sap.',
+  'Parle à Elwyn, dans la cité, pour acheter.': 'Talk to Elwyn, in the city, to buy.',
+  'Tu possèdes déjà cette apparence.': 'You already own this appearance.',
+  'Il faut {n} or.': 'You need {n} gold.',
+  'Déjà dans ta garde-robe': 'Already in your wardrobe',
+  'Atelier de la Tisseuse — Elwyn': 'The Weaver’s Workshop — Elwyn',
+  '« Des tenues tissées de fil de lune et de feuilles d’or, qu’on ne trouve nulle part ailleurs. » Elles rejoignent ta garde-robe (V).':
+    '“Outfits woven from moonthread and golden leaves, found nowhere else.” They join your wardrobe (V).',
+  'Ton or :': 'Your gold:',
+  'Écouter encore': 'Listen again',
+  'Bénédiction active : encore {n} min.': 'Blessing active: {n} min left.',
+  'Déjà béni aujourd’hui. Reviens demain.': 'Already blessed today. Come back tomorrow.',
+  'Recevoir la bénédiction (+10 % de dégâts et régénération, 30 min)':
+    'Receive the blessing (+10% damage and regeneration, 30 min)',
+  'Garde : « Halte. Seuls les héros de niveau {n} entrent à Sylvaëlle. Reviens quand tu seras prêt. »':
+    'Guard: “Halt. Only heroes of level {n} may enter Sylvaëlle. Come back when you are ready.”',
+  'Les portes s’ouvrent : bienvenue à Sylvaëlle, la Cité des Elfes.':
+    'The gates open: welcome to Sylvaëlle, City of the Elves.',
+  'Tu quittes Sylvaëlle.': 'You leave Sylvaëlle.',
+  '[E] Armurerie': '[E] Armory',
+  '[E] Demander à entrer (niveau {n})': '[E] Ask to enter (level {n})',
+  '[E] Sortir de Sylvaëlle': '[E] Leave Sylvaëlle',
+  '[E] Parler à Ylvarë': '[E] Talk to Ylvarë'
 };

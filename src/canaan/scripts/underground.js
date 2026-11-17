@@ -1532,7 +1532,8 @@
   function bubble(c, x, y, text) {
     c.save();
     c.font = '12px sans-serif';
-    const words = text.split(' '),
+    // Traduite entière avant d'être coupée en lignes (une ligne seule ne serait pas reconnue).
+    const words = translateText(text).split(' '),
       lines = [];
     let cur = '';
     for (const w of words) {

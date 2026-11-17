@@ -1473,8 +1473,9 @@
     c.restore();
   }
   // Bulles de dialogue, au-dessus de tout (même dans l'obscurité).
+  // La phrase est traduite entière avant d'être coupée en lignes (une ligne seule ne serait pas reconnue).
   function wrap(c, text, max) {
-    const words = text.split(' '),
+    const words = translateText(text).split(' '),
       lines = [];
     let line = '';
     for (const w of words) {
