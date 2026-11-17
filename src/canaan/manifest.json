@@ -412,6 +412,11 @@
     },
     {
       "kind": "style",
+      "id": "canaan-gamepad-style",
+      "file": "styles/gamepad.css"
+    },
+    {
+      "kind": "style",
       "id": "canaan-rpg-theme",
       "file": "styles/rpg-theme.css"
     },
@@ -419,6 +424,11 @@
       "kind": "script",
       "id": "canaan-controls",
       "file": "scripts/controls.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-gamepad",
+      "file": "scripts/gamepad.js"
     },
     {
       "kind": "script",

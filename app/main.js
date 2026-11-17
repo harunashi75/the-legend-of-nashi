@@ -222,6 +222,8 @@ function createWindow() {
       sandbox: true,
       nodeIntegration: false,
       spellcheck: false,
+      // Le son démarre sans clic préalable : une partie lancée à la manette (sans souris ni clavier) a aussi sa musique.
+      autoplayPolicy: 'no-user-gesture-required',
       devTools: DEV
     }
   });

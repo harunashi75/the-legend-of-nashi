@@ -1075,7 +1075,7 @@
       (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) +
       '<span class="skill-label">' +
       escape(c.special.name) +
-      '</span><div class="key">F</div><div class="cd" style="display:none"></div>';
+      '</span><div class="key" data-pad="↑">F</div><div class="cd" style="display:none"></div>';
     el.style.setProperty('--skill-element', c.color);
     bar.appendChild(el);
   }

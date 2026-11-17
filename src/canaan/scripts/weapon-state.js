@@ -27,7 +27,9 @@ function refreshWeaponBar() {
       CANAAN_SKILL_ICONS.weapon(type, i) +
       '<span class="skill-label">' +
       spec[1] +
-      '</span><div class="key">' +
+      '</span><div class="key" data-pad="' +
+      ['X', 'Y', 'LB', 'RB'][i] +
+      '">' +
       (i + 1) +
       '</div><div class="skill-badge" hidden></div><div class="cd" style="display:none"></div>';
     el.dataset.skill = i;

@@ -7,6 +7,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 Première version officielle avant la sortie sur Steam : la numérotation repart de 0.9.8 (les versions 1.9.x étaient des versions de développement). Les sauvegardes des versions 1.9.x restent lisibles : seul le format des sauvegardes compte, et il ne change pas. Prochaine étape : tests en jeu, puis 0.10.0, première version publique.
 
 ### Ajouté
+- Manette (Xbox, PlayStation, Steam Deck, Switch Pro…) : tout le jeu se joue sans clavier ni souris. Déplacement au stick gauche, visée au stick droit ou automatique, attaques aux gâchettes, compétences sur X, Y, LB, RB ; menus parcourus à la croix (A valider, B retour) ; boutons de la manette affichés à la place des touches ; vibrations (réglables dans les Paramètres, avec le rappel des commandes).
 - Jeu installable, sans navigateur : installateur `.exe` et `.zip` pour Windows, AppImage et `.tar.gz` pour Linux (`npm run dist:win`, `npm run dist:linux`, electron-builder). Les archives contiennent le dossier du jeu, prêt pour Steam. Icône provisoire en pixel art.
 - La release GitHub construit le jeu pour Windows et Linux, lance chaque version installée pour de vrai (menu, nouvelle aventure, sauvegarde sur disque, relais du coopératif ; `tools/smoke_package.cjs`) puis la publie.
 

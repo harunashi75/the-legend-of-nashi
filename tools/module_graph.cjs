@@ -21,6 +21,8 @@ const MODULES = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'ut
 // Noms fournis par le navigateur ou le langage : jamais des dépendances entre scripts.
 const BROWSER = new Set([
   ...Object.getOwnPropertyNames(globalThis),
+  // Tous les noms du navigateur connus d'ESLint (paquet globals) : événements, canevas, manette…
+  ...Object.keys(require('globals').browser),
   // Noms du navigateur absents de Node, et canaanDesktop (application de bureau : app/preload.js, contextBridge).
   'DOMMatrix',
   'dispatchEvent',

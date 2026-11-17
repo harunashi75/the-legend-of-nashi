@@ -506,8 +506,13 @@ Anciennes sauvegardes, au chargement :
 - les améliorations (`item.upgrade`) et passifs de forge (`item.craftPassive`) sont retirés par `CANAAN_GEAR.normalize` ;
 - les matériaux en stock sont rendus en or, une seule fois, à l’hôte comme aux invités enregistrés : 10 or par minerai ou bois, 50 par essence, 200 par noyau (`LEGACY_MATERIAL_GOLD`, `legacyMaterialGold`). Un message dans le chat indique la somme. La sauvegarde suivante ne contient plus de matériaux.
 
-## Attaque de base et écran tactile
+## Attaque de base, écran tactile et manette
 
 **Attaque de base** (`canaanBasicAttack`, `weapon-actions.js`) : elle ne coûte jamais de mana, pour pouvoir toujours se battre. Clic gauche : attaque rapide (40 % de puissance, toutes les 0,6 s). Clic droit : attaque lourde (90 %, toutes les 1,4 s, portée et angle plus grands). Maintenir un bouton enchaîne les attaques ; les deux partagent le même verrou. La forme suit l’arme : arc devant le héros pour les armes de mêlée, estoc en ligne pour la lance, flèche pour l’arc, projectile magique pour le bâton. Le clic ne lance plus la compétence 1.
 
 Sur écran tactile, les flèches permettent de se déplacer ; ⚔ donne une attaque de base rapide ; les boutons 1–4 lancent les compétences en visant le monstre vivant le plus proche. E sert à interagir, Q à changer d’arme et ⤳ à faire une roulade. Plusieurs doigts peuvent maintenir des directions simultanément.
+
+**Manette** (Xbox, PlayStation, Steam Deck, Switch Pro… en disposition standard ; `scripts/gamepad.js`) : tout le jeu se joue sans clavier ni souris, des menus de départ à la partie. La manette prend la main dès qu’on la touche (curseur masqué, boutons affichés à la place des touches : « [A] Entrer », X, Y, LB, RB sur la barre des compétences) ; la souris ou le clavier la reprennent dès qu’on s’en sert.
+- En jeu : stick gauche pour se déplacer (8 directions) ; stick droit pour viser, sinon visée automatique du monstre vivant le plus proche (420 px), puis devant soi ; RT attaque rapide et LT attaque lourde (maintenues) ; A interagir ; B roulade ; X, Y, LB, RB compétences 1 à 4 ; croix : ↑ sort de classe, ↓ changer d’arme, ← carte, → sac ; Start pause ; View ouvre la barre des menus (personnage, talents, quêtes…).
+- Dans les menus (écran titre, création, panneaux, dialogues, pause, paramètres) : croix ou stick gauche pour choisir (cadre doré, info-bulle des objets), A valider, B retour, stick droit pour faire défiler. Un nouvel écran propose d’abord son action principale (« Créer l’aventure », « Reprendre »).
+- Vibrations quand l’écran tremble (coups de boss, explosions) et, plus légères, quand le héros est touché ; désactivables dans les Paramètres (🎮 Manette, avec le rappel des commandes).

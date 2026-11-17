@@ -678,6 +678,14 @@
   function releaseBasicAttack() {
     basicHeld.left = basicHeld.right = false;
   }
+  // Visée sans souris (stick droit de la manette) : un point de l'écran, comme le curseur ; la souris reprend la main
+  // dès qu'elle bouge.
+  function aimBasicAttack(x, y) {
+    clientX = x;
+    clientY = y;
+    mouseWorldX = x + camX;
+    mouseWorldY = y + camY;
+  }
   addEventListener('mousemove', e => {
     clientX = e.clientX;
     clientY = e.clientY;
@@ -1117,7 +1125,8 @@
       spec: BASIC,
       lock: () => basicLock,
       held: () => ({ ...basicHeld }),
-      wanted: wantedBasicAttack
+      wanted: wantedBasicAttack,
+      aimAt: aimBasicAttack
     })
   });
 })();

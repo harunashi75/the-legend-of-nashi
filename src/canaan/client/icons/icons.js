@@ -391,6 +391,19 @@ const I = {
     p('M3 8 L12 4 L21 8 L21 17 L12 21 L3 17 Z', '#c89a52') +
     l('M3 8 L12 12 L21 8 M12 12 L12 21', '#7a5432', 1.2) +
     l('M7.5 6 L16.5 10', '#e8c07a', 1.6),
+  // Manette : corps sombre aux poignées arrondies, croix à gauche, boutons colorés à droite.
+  gamepad:
+    p(
+      'M6 7 L18 7 C21.5 7 23 11 23 15 C23 18.5 21 19.5 19 18 L16 15.5 L8 15.5 L5 18 C3 19.5 1 18.5 1 15 C1 11 2.5 7 6 7 Z',
+      '#3a3346'
+    ) +
+    hi('M6 8.8 L17.5 8.8', 1.2) +
+    r(4.6, 10.2, 4.8, 1.6, STEEL, 0.4) +
+    r(6.2, 8.6, 1.6, 4.8, STEEL, 0.4) +
+    c(16.5, 9.9, 1.15, GOLD) +
+    c(18.9, 12.2, 1.15, RED) +
+    c(14.1, 12.2, 1.15, '#6ec0ff') +
+    c(16.5, 14.5, 1.15, '#7ad66a'),
   dice:
     r(4, 4, 16, 16, '#f8f4ea', 3) +
     c(8, 8, 1.5, RED) +
@@ -945,6 +958,7 @@ const MAP = {
   '🎁': 'gift',
   '📦': 'box',
   '🎲': 'dice',
+  '🎮': 'gamepad',
   '✨': 'sparkles',
   '⭐': 'star',
   '🌟': 'starGlow',

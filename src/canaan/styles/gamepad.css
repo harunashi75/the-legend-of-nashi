@@ -1,0 +1,38 @@
+/* Manette (scripts/gamepad.js) : élément choisi dans les menus, curseur masqué et boutons de la manette affichés
+   à la place des touches tant qu'on joue à la manette (classe pad-active sur body). */
+body.pad-active .pad-focus,
+body.pad-active button.pad-focus,
+body.pad-active #window .pad-focus {
+  outline: 3px solid var(--rpg-gold-light, #f6dc98);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 5px rgba(122, 90, 42, 0.55),
+    0 0 16px rgba(246, 220, 152, 0.75);
+}
+body.pad-active,
+body.pad-active canvas {
+  cursor: none;
+}
+/* Barre des compétences : X, Y, LB, RB et ↑ (sort de classe) au lieu de 1 à 4 et F. */
+body.pad-active .skill .key[data-pad] {
+  font-size: 0;
+}
+body.pad-active .skill .key[data-pad]::after {
+  content: attr(data-pad);
+  font-size: calc(10px * var(--font-scale, 1));
+}
+/* Paramètres : aide des commandes de la manette. */
+.pad-help {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  font-size: calc(12px * var(--font-scale, 1));
+}
+.pad-help dt {
+  color: var(--rpg-gold-light, #f6dc98);
+  font-weight: 700;
+}
+.pad-help dd {
+  margin: 0;
+}
