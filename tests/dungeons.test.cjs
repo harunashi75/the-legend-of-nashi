@@ -25,8 +25,8 @@ test('Donjons et raids en exploration : trois boss par donjon, six par raid, én
  assert.equal(run('JSON.stringify(makeDungeon(7))===JSON.stringify(makeDungeon(7))'),true);
  run('game.hero.level=60;openPortal({instance:6})');
  assert.match(g.document.getElementById('window').innerHTML,/Boss \(6\) : Le Maître-Chien Ravageur → Sire Écorcheur/);
- // Fiche du portail : les chances réelles (30 % par boss et par héros), plus de « 100 % garanti ».
- assert.match(g.document.getElementById('window').innerHTML,/30 % de chance par boss et par héros \(0 à 6 objets\)/);assert.doesNotMatch(g.document.getElementById('window').innerHTML,/100 % garanti/);
+ // Fiche du portail : les chances réelles (61 % par boss et par héros), plus de « 100 % garanti ».
+ assert.match(g.document.getElementById('window').innerHTML,/61 % de chance par boss et par héros \(0 à 6 objets\)/);assert.doesNotMatch(g.document.getElementById('window').innerHTML,/100 % garanti/);
  run('closePanels()');
  // Donjon : trois boss et un boss caché ; les ennemis portent le thème du donjon.
  run('enterInstance(0)');
@@ -60,7 +60,7 @@ test('Donjons et raids en exploration : trois boss par donjon, six par raid, én
  // La stèle donne l'ordre des leviers ou des dalles en énigme.
  const L1=lock(1);if(L1.stele){walk(L1.stele.x,L1.stele.y+1);run('CANAAN_DUNGEON_EXPLORE.interact()')}
  solve(0);
- // Boss : 30 % de chance d'équipement par héros ; sa mort lève la herse de sa salle.
+ // Boss : 61 % de chance d'équipement par héros ; sa mort lève la herse de sa salle.
  const gates=()=>run('world.flat().filter(t=>t===19).length');
  const kill=(name,r)=>run('{const real=Math.random;Math.random=()=>'+r+';const m=monsters.find(m=>m.t==='+JSON.stringify(name)+');m.hp=0;recordKill(m);monsters=monsters.filter(o=>o!==m);Math.random=real}');
  run('inventory.length=0');const g0=gates();
@@ -124,7 +124,7 @@ test('Jalon de la phase 2 : quatre héros explorent un donjon sans écran, énig
  assert.ok(r.phases.includes('exploration'),r.phases.join());assert.equal(r.phases.at(-1),'sortie');assert.equal(run('canaanGroupBot.state.done'),true);
  assert.equal(run('game.world.instance'),null,'le groupe est ressorti');assert.ok(r.seconds<700,'terminé en '+r.seconds+' s');
  assert.ok(r.heroes.every(h=>!h.dead),'personne n’est tombé');
- // Butin : 30 % par boss et par héros (0 à 3 objets), la bourse du coffre et une clé des secrets pour chacun.
+ // Butin : 61 % par boss et par héros (0 à 3 objets), la bourse du coffre et une clé des secrets pour chacun.
  assert.ok(r.heroes.every(h=>h.relics.length<=3&&h.relics.every(x=>/^Rare (7|8|9|10)$/.test(x))&&h.purse>=60&&h.keys===1),JSON.stringify(r.heroes));
  assert.ok(r.heroes.reduce((n,h)=>n+h.kills,0)>=r.foes,'tous les ennemis, les boss et leurs renforts sont abattus');
  assert.ok(r.heroes.slice(1).some(h=>h.kills>0),'les alliés participent');

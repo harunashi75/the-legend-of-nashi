@@ -19,7 +19,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 7,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 9,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 10
   },
@@ -36,7 +36,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 13,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 15,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 16
   },
@@ -53,7 +53,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 18,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 20,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 21
   },
@@ -70,7 +70,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 25,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 27,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 28
   },
@@ -87,7 +87,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 32,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 34,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 35
   },
@@ -104,7 +104,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 37,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 39,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Rare',
     dropLevel: 40
   },
@@ -129,7 +129,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 44,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 46,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 47
   },
@@ -154,7 +154,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 49,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 51,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 52
   },
@@ -179,7 +179,7 @@ export const INSTANCE_DEFS = deepFreeze([
     level: 54,
     // Niveau des ennemis de l'instance (boss : +1 en donjon, +2 en raid).
     mobLevel: 56,
-    // Qualité du butin des boss (30 % de chance par boss et par héros).
+    // Qualité du butin des boss (61 % de chance par boss et par héros).
     rarity: 'Épique',
     dropLevel: 57
   },
@@ -222,7 +222,7 @@ export const INSTANCE_DEFS = deepFreeze([
         level: 60,
         mobLevel: 60,
         rarity: 'Épique',
-        // Butin de prestige : 5 % de Légendaire, 1 % de Mythique (voir PRESTIGE_DROPS).
+        // Butin de prestige : 21 % de Légendaire, 11 % de Mythique (voir PRESTIGE_DROPS).
         prestige: 'raidHeroic',
         dropLevel: 60,
         hp: 1.65,

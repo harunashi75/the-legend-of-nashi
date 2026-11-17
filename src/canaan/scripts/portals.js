@@ -19,7 +19,7 @@ function prestigeText(kind) {
     )
     .join('');
 }
-// Chances d'équipement d'une instance : chaque boss (hors boss cachés) a 30 % de chance de donner un objet à chaque
+// Chances d'équipement d'une instance : chaque boss (hors boss cachés) a 61 % de chance de donner un objet à chaque
 // héros, d'où 0 à 3 objets par donjon et 0 à 6 par raid ; les boss cachés donnent une clé des secrets.
 function lootOdds(raid) {
   return (

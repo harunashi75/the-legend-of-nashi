@@ -85,7 +85,7 @@ test('Raid 4 : Jugement de Célestia, choix Normal ou Héroïque, puissance et b
  const portal=lv=>{run('game.hero.level='+lv+';openPortal({instance:9})');return g.document.getElementById('window').innerHTML};
  let html=portal(58);
  assert.match(html,/data-difficulty="normal" >/);assert.match(html,/data-difficulty="heroic" disabled>/);
- assert.match(html,/Épique — niveau 58 à 60/);assert.match(html,/1 % Mythique/);assert.match(html,/5 % Légendaire/);assert.match(html,/\+65 % PV et \+40 % dégâts calculés/);
+ assert.match(html,/Épique — niveau 58 à 60/);assert.match(html,/11 % Mythique/);assert.match(html,/21 % Légendaire/);assert.match(html,/\+65 % PV et \+40 % dégâts calculés/);
  assert.match(portal(50),/data-difficulty="normal" disabled>/);
  assert.match(portal(60),/data-difficulty="heroic" >/);
  // Carte M : la plage de niveaux de chaque biome (1–10, 10–20 … 50–60).
@@ -132,7 +132,7 @@ test('Butin de prestige : niveaux requis à butin, Légendaire et Mythique seule
  assert.equal(inst[9].difficulties.normal.rarity,'Épique');assert.equal(inst[9].difficulties.normal.prestige,undefined);
  assert.equal(inst[9].difficulties.heroic.prestige,'raidHeroic');
  const roll=(kind,x)=>run('Math.random=()=>'+x+';prestigeRoll('+JSON.stringify(kind)+')');
- assert.equal(roll('raidHeroic',.005),'Mythique');assert.equal(roll('raidHeroic',.03),'Légendaire');assert.equal(roll('raidHeroic',.5),null);
+ assert.equal(roll('raidHeroic',.1),'Mythique');assert.equal(roll('raidHeroic',.3),'Légendaire');assert.equal(roll('raidHeroic',.5),null);
  assert.equal(roll('arenaFinal',.03),'Légendaire');assert.equal(roll('arenaFinal',.5),null);assert.equal(roll(undefined,0),null);
  // Le hasard seul ne donne jamais de Légendaire ni de Mythique.
  for(const x of [0,.5,.97,.99999])assert.ok(!['Légendaire','Mythique'].includes(run('Math.random=()=>'+x+';rarityRoll(1).name')));
@@ -240,9 +240,9 @@ test('Règles partagées de l’économie : butin garanti d’une instance, pres
  const shared=f=>import(pathToFileURL(p.join(__dirname,'..','src','canaan','shared',f)).href);
  const E=await shared('rules/economy.js'),W=await shared('data/world.js');
  const seq=v=>{let i=0;return ()=>v[i++%v.length]};
- // Prestige : un tirage par qualité possible, de la plus rare à la plus courante ; aucune pour une source inconnue.
- assert.equal(E.rollPrestige('raidHeroic',seq([0.005])),'Mythique');assert.equal(E.rollPrestige('raidHeroic',seq([0.5,0.03])),'Légendaire');
- assert.equal(E.rollPrestige('raidHeroic',seq([0.5,0.5])),null);assert.equal(E.rollPrestige('inconnu',seq([0])),null);assert.equal(E.rollPrestige(undefined,seq([0])),null);
+ // Prestige : un seul tirage, chances cumulées de la plus rare à la plus courante ; aucune pour une source inconnue.
+ assert.equal(E.rollPrestige('raidHeroic',seq([0.1])),'Mythique');assert.equal(E.rollPrestige('raidHeroic',seq([0.11])),'Légendaire');assert.equal(E.rollPrestige('raidHeroic',seq([0.31])),'Légendaire');assert.equal(E.rollPrestige('raidHeroic',seq([0.32])),null);
+ assert.equal(E.rollPrestige('inconnu',seq([0])),null);assert.equal(E.rollPrestige(undefined,seq([0])),null);
  // Butin d'instance : niveau entre le niveau requis et le niveau de butin, qualité de l'instance, provenance.
  const cave=W.INSTANCE_DEFS[0];
  assert.deepEqual(E.instanceLoot(cave,null,1,seq([0])),{level:cave.level,rarity:cave.rarity,origin:'donjon'});

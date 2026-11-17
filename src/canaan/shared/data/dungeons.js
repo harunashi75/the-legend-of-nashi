@@ -490,4 +490,4 @@ export const DUNGEON_SOLID_PROPS = deepFreeze([
   'dragonskull'
 ]);
 // Chance d'équipement de chaque boss, pour chaque héros.
-export const DUNGEON_BOSS_DROP_CHANCE = 0.3;
+export const DUNGEON_BOSS_DROP_CHANCE = 0.61;

@@ -47,15 +47,19 @@ export function sellValue(item, level) {
 export function shopPriceAt(level) {
   return 60 + Math.round(Math.max(1, Number(level) || 1) * 9);
 }
-// Qualité de prestige tirée pour un butin (null : la qualité normale de la source). Un tirage par qualité possible,
-// de la plus rare à la plus courante.
+// Qualité de prestige tirée pour un butin (null : la qualité normale de la source). Un seul tirage : chaque qualité
+// occupe sa part, de la plus rare à la plus courante, si bien que les chances affichées sont les chances réelles.
 /**
  * @param {string | undefined} kind clé de PRESTIGE_DROPS (raidHeroic, arenaFinal, underground…)
  * @param {() => number} rng
  * @returns {string | null}
  */
 export function rollPrestige(kind, rng) {
-  for (const [rarity, chance] of PRESTIGE_DROPS[kind ?? ''] || []) if (rng() < chance) return rarity;
+  const list = PRESTIGE_DROPS[kind ?? ''] || [];
+  if (!list.length) return null;
+  const roll = rng();
+  let edge = 0;
+  for (const [rarity, chance] of list) if (roll < (edge += chance)) return rarity;
   return null;
 }
 // Butin garanti d'un coffre de boss d'instance : récompense de l'instance (ou de la difficulté jouée), niveau tiré

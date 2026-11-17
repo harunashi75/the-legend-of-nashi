@@ -851,7 +851,7 @@
   const tellAll = text => {
     for (const h of members()) canaanLootNotice(h, text);
   };
-  // Mort d'un boss d'instance. Boss caché : une clé des secrets pour chaque héros. Boss : 30 % de chance d'un
+  // Mort d'un boss d'instance. Boss caché : une clé des secrets pour chaque héros. Boss : 61 % de chance d'un
   // équipement pour chacun, puis la herse de sa salle se lève. Renvoie true au dernier boss (instance terminée).
   function onInstanceBossDown(m) {
     const inst = game.world.instance;
