@@ -30,6 +30,8 @@ import * as professionRules from './shared/rules/professions.js';
 import * as puzzleData from './shared/data/puzzles.js';
 import * as puzzleRules from './shared/rules/puzzles.js';
 // Modules client convertis (src/canaan/client/) : navigateur, sans variable globale implicite.
+// Kit de pixel art : un seul nom global (ses outils, rect, tint, noise…, ne deviennent pas des variables globales).
+import { CANAAN_PIXEL_KIT } from './client/art/pixel-kit.js';
 import * as iconArt from './client/icons/icon-art.js';
 import * as icons from './client/icons/icons.js';
 import * as skillIcons from './client/icons/skill-icons.js';
@@ -66,6 +68,7 @@ Object.assign(
   professionRules,
   puzzleData,
   puzzleRules,
+  { CANAAN_PIXEL_KIT },
   iconArt,
   icons,
   skillIcons,

@@ -1,69 +1,18 @@
-// Kit graphique commun : sprites détaillés des créatures et des boss (contour, aura, gros format),
-// lumières dynamiques, particules d'ambiance et barre de boss, pour le monde comme pour les instances.
+// Sprites détaillés des créatures et des boss (contour, aura, gros format), lumières dynamiques, particules
+// d'ambiance, coffres et barre de boss, pour le monde comme pour les instances. Les outils de dessin (toile, contour,
+// modelé, couleurs, bruit) viennent du kit de pixel art commun (client/art/pixel-kit.js).
 (() => {
   'use strict';
-  function canvas(w, h) {
-    const c = document.createElement('canvas');
-    c.width = w;
-    c.height = h;
-    return c;
-  }
-  function rect(g, x, y, w, h, col) {
-    g.fillStyle = col;
-    g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-  }
-  // Contour sombre autour d'un sprite : renvoie une toile agrandie de `pad` pixels de chaque côté.
-  function canaanOutline(src, pad = 1, color = 'rgba(14,10,22,.85)') {
-    const w = src.width + pad * 2,
-      h = src.height + pad * 2,
-      sil = canvas(w, h),
-      sg = sil.getContext('2d');
-    for (const [dx, dy] of [
-      [0, pad],
-      [pad * 2, pad],
-      [pad, 0],
-      [pad, pad * 2]
-    ])
-      sg.drawImage(src, dx, dy);
-    sg.globalCompositeOperation = 'source-in';
-    rect(sg, 0, 0, w, h, color);
-    const out = canvas(w, h),
-      o = out.getContext('2d');
-    o.drawImage(sil, 0, 0);
-    o.drawImage(src, pad, pad);
-    return out;
-  }
-  // Volume et grain : éclaircit les bords exposés en haut, assombrit les bas, varie légèrement chaque bloc.
-  function canaanPolish(src, block = 2, seed = 0) {
-    const w = src.width,
-      h = src.height,
-      g = src.getContext('2d'),
-      img = g.getImageData(0, 0, w, h),
-      d = img.data;
-    if (!d || d.length !== w * h * 4) return src;
-    const alpha = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : d[(y * w + x) * 4 + 3]);
-    const out = new Uint8ClampedArray(d);
-    for (let y = 0; y < h; y++)
-      for (let x = 0; x < w; x++) {
-        const k = (y * w + x) * 4;
-        if (d[k + 3] < 200) continue;
-        let f = 1 + (hashKit(Math.floor(x / block), Math.floor(y / block), seed) - 0.5) * 0.16;
-        if (alpha(x, y - 2) < 100) f += 0.22;
-        else if (alpha(x, y + 2) < 100) f -= 0.22;
-        if (alpha(x - 2, y) < 100) f += 0.08;
-        else if (alpha(x + 2, y) < 100) f -= 0.1;
-        out[k] = d[k] * f;
-        out[k + 1] = d[k + 1] * f;
-        out[k + 2] = d[k + 2] * f;
-      }
-    d.set(out);
-    g.putImageData(img, 0, 0);
-    return src;
-  }
-  function hashKit(x, y, s = 0) {
-    const n = Math.sin(x * 127.1 + y * 311.7 + s * 71.3) * 43758.5453;
-    return n - Math.floor(n);
-  }
+  // Outils de dessin communs (client/art/pixel-kit.js) ; contour et modelé restent publics sous leurs anciens noms.
+  const {
+    makeCanvas,
+    rect,
+    outlineSprite: canaanOutline,
+    polish: canaanPolish,
+    shade,
+    rgba,
+    noise
+  } = CANAAN_PIXEL_KIT;
 
   // ---------------------------------------------------------------- Silhouettes
   const FLAGS = [
@@ -85,7 +34,7 @@
   function actor(look, pal, opts = {}) {
     const key = look + pal.join() + FLAGS.filter(f => opts[f]).join('');
     if (ACTORS[key]) return ACTORS[key];
-    const cv = canvas(32, 40),
+    const cv = makeCanvas(32, 40),
       g = cv.getContext('2d'),
       r = (x, y, w, h, col) => rect(g, x, y, w, h, col),
       [m, dk, lt, ac, ey] = pal;
@@ -499,10 +448,10 @@
       r(12, 1, 8, 1, '#fff2a8');
     }
     // Contour sombre d'un pixel : la silhouette reste lisible sur les sols clairs (marbre, nuages).
-    const out = canvas(34, 42),
+    const out = makeCanvas(34, 42),
       o = out.getContext('2d');
     rect(o, 7, 37, 20, 3, 'rgba(0,0,0,.35)');
-    const sil = canvas(34, 42),
+    const sil = makeCanvas(34, 42),
       sg = sil.getContext('2d');
     for (const [dx, dy] of [
       [0, 1],
@@ -584,13 +533,6 @@
     seraph: ['angel', ['#d0507a', '#7a2040', '#ff9ab8', '#2a1020', '#ffd0e0'], { wings6: true }],
     chronos: ['horror', ['#2a5a7a', '#123048', '#5ab0d0', '#72e6f4', '#e0ffff']]
   };
-  function shade(hex, f) {
-    const n = parseInt(String(hex).slice(1, 7), 16) || 0x888888,
-      c = v => Math.max(0, Math.min(255, Math.round(v * f)));
-    return (
-      '#' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => c(v).toString(16).padStart(2, '0')).join('')
-    );
-  }
   // Fixe une seule fois l'apparence d'une créature du monde.
   function resolveLook(m) {
     if (m.look) return;
@@ -671,7 +613,7 @@
   function whiteOf(spr) {
     let wcv = WHITE.get(spr);
     if (wcv) return wcv;
-    wcv = canvas(spr.width, spr.height);
+    wcv = makeCanvas(spr.width, spr.height);
     const g = wcv.getContext('2d');
     g.drawImage(spr, 0, 0);
     g.globalCompositeOperation = 'source-in';
@@ -796,20 +738,16 @@
   function resetCanaanLights() {
     lights = [];
   }
-  function hexAlpha(hex, a) {
-    const n = parseInt(String(hex).slice(1, 7), 16) || 0;
-    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
-  }
   // Halos précalculés : un disque dégradé blanc (pour percer l'obscurité) et un par couleur (lueurs).
   const PUFFS = {};
   function puff(col) {
     const key = col || 'hole';
     if (PUFFS[key]) return PUFFS[key];
-    const c = canvas(128, 128),
+    const c = makeCanvas(128, 128),
       g = c.getContext('2d'),
       grad = g.createRadialGradient(64, 64, 6, 64, 64, 64);
-    grad.addColorStop(0, col ? hexAlpha(col, 1) : 'rgba(0,0,0,1)');
-    grad.addColorStop(col ? 1 : 1, col ? hexAlpha(col, 0) : 'rgba(0,0,0,0)');
+    grad.addColorStop(0, col ? rgba(col, 1) : 'rgba(0,0,0,1)');
+    grad.addColorStop(col ? 1 : 1, col ? rgba(col, 0) : 'rgba(0,0,0,0)');
     g.fillStyle = grad;
     g.fillRect(0, 0, 128, 128);
     PUFFS[key] = c;
@@ -824,7 +762,7 @@
       .sort((a, b) => Math.hypot(a.x - P.x, a.y - P.y) - Math.hypot(b.x - P.x, b.y - P.y))
       .slice(0, MAX_LIGHTS);
     if (amb.dark > 0.02) {
-      if (!lightCanvas) lightCanvas = canvas(W, H);
+      if (!lightCanvas) lightCanvas = makeCanvas(W, H);
       if (lightCanvas.width !== W || lightCanvas.height !== H) {
         lightCanvas.width = W;
         lightCanvas.height = H;
@@ -861,9 +799,9 @@
     c.fillStyle = col;
     const n = kind === 'mist' ? 14 : 36;
     for (let k = 0; k < n; k++) {
-      const sx = hashKit(k, 1, 7),
-        sy = hashKit(k, 2, 7),
-        sp = 0.2 + hashKit(k, 3, 7) * 0.5;
+      const sx = noise(k, 1, 7),
+        sy = noise(k, 2, 7),
+        sp = 0.2 + noise(k, 3, 7) * 0.5;
       let x = sx * W,
         y = sy * H;
       if (kind === 'embers') y = H - ((sy * H + time * sp * 2) % H);
@@ -947,7 +885,7 @@
   function canaanChestSprite(kind) {
     if (CHESTS[kind]) return CHESTS[kind];
     const boss = kind === 'boss',
-      cv = canvas(24, 20),
+      cv = makeCanvas(24, 20),
       g = cv.getContext('2d'),
       r = (x, y, w, h, col) => rect(g, x, y, w, h, col),
       wood = boss ? '#5a1a2a' : '#7a5232',

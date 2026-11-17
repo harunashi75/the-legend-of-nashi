@@ -6,28 +6,9 @@
 // cygne, lapin, chouette, colibri). Tout est peint une fois et gardé.
 (() => {
   'use strict';
-  const K = () => window.CANAAN_BUILDING_ART && CANAAN_BUILDING_ART.kit;
-  const cache = new Map();
+  const { makeCanvas, noise, painter } = CANAAN_PIXEL_KIT;
   // Toile en pixels d'art, contourée ; null sans canevas (tests).
-  function paint(key, w, h, fn) {
-    if (cache.has(key)) return cache.get(key);
-    const kit = K();
-    let out = null;
-    if (kit && typeof document !== 'undefined') {
-      const k = kit.brush(w, h);
-      if (k.g && k.g.getImageData) {
-        fn(k, kit);
-        kit.outline(k);
-        out = k.cv;
-      }
-    }
-    cache.set(key, out);
-    return out;
-  }
-  const hsh = (a, b, s = 0) => {
-    const n = Math.sin(a * 127.1 + b * 311.7 + s * 71.3) * 43758.5453;
-    return n - Math.floor(n);
-  };
+  const paint = painter();
   const BARK = ['#b8906a', '#8a6444', '#64462c', '#44301c', '#2c1e10'];
   const LEAF = ['#c4ec90', '#8cca62', '#5ea44a', '#3e7a36', '#264c22'];
   const DEEP = ['#8ac868', '#5e9a48', '#447a38', '#2e5a2a', '#1c3a1a'];
@@ -151,15 +132,15 @@
           const u = (x - best.c) / best.sw;
           let tone = Math.abs(u) > 0.86 ? 4 : u < -0.45 ? 0 : u < 0.15 ? 1 : u < 0.6 ? 2 : 3;
           if (best.d < -0.2 && tone < 4) tone++;
-          if (tone < 3 && hsh(best.i, Math.round((x - best.c) * 0.6), Math.floor(y / 6)) < 0.14) tone++;
+          if (tone < 3 && noise(best.i, Math.round((x - best.c) * 0.6), Math.floor(y / 6)) < 0.14) tone++;
           k.px(x, y, BARK[tone]);
         }
       }
       // Couronne de devant (petites feuilles), feuilles d'or, lierre qui pend.
       front.forEach(([x, y, r], i) => cluster(k, kit, x, y, r, LEAF, i * 5 + 1, 0.85, 5));
       for (let i = 0; i < 80; i++) {
-        const x = 14 + hsh(i, 2) * 142,
-          y = 6 + hsh(2, i) * 100;
+        const x = 14 + noise(i, 2) * 142,
+          y = 6 + noise(2, i) * 100;
         k.rect(x, y, 2, 2, i % 3 ? '#f0d060' : '#fff4b0');
       }
       for (const [x, len] of [
@@ -341,7 +322,7 @@
         for (let y = 40; y < 74; y += 7) k.rect(30 + Math.sin(y * 0.12) * 3, y, 3, 1, '#3a3630');
         const jade = ['#e0fff4', '#a0ecd0', '#5ec4a4', '#3a8a7a', '#24585a'];
         crown(k, kit, jade, null, 44, [pale[0], pale[1], pale[2], pale[3]], 1);
-        for (let i = 0; i < 16; i++) k.px(8 + hsh(i, 1) * 48, 4 + hsh(1, i) * 40, '#f0d060');
+        for (let i = 0; i < 16; i++) k.px(8 + noise(i, 1) * 48, 4 + noise(1, i) * 40, '#f0d060');
         // Lanterne de cristal suspendue à une branche.
         k.rect(51, 44, 1, 5, '#c8ccd8');
         k.rect(49, 49, 5, 6, '#bfffee');
@@ -352,8 +333,8 @@
         limb(k, pts, 5, 3, BARK);
         const pink = ['#fff0f8', '#ffc8e0', '#f08ab8', '#c05a8a', '#803a60'];
         crown(k, kit, pink, null, 46, [BARK[0], BARK[1], BARK[2], BARK[3]], 2);
-        for (let i = 0; i < 18; i++) k.px(6 + hsh(i, 3) * 52, 4 + hsh(3, i) * 40, '#ffffff');
-        for (let i = 0; i < 6; i++) k.px(14 + hsh(i, 9) * 36, 66 + hsh(9, i) * 8, '#ffc8e0');
+        for (let i = 0; i < 18; i++) k.px(6 + noise(i, 3) * 52, 4 + noise(3, i) * 40, '#ffffff');
+        for (let i = 0; i < 6; i++) k.px(14 + noise(i, 9) * 36, 66 + noise(9, i) * 8, '#ffc8e0');
       } else if (kind === 'elfcypress') {
         const pts = [];
         for (let y = 74; y >= 58; y -= 2) pts.push([32, y]);
@@ -391,7 +372,7 @@
         const willow = ['#e8ffc0', '#b8e888', '#86c860', '#5aa448', '#3a7a36'];
         cluster(k, kit, 32, 26, 22, willow, 3, 0.7);
         for (let x = 12; x < 54; x += 3) {
-          const len = 18 + Math.round(hsh(x, 4) * 22);
+          const len = 18 + Math.round(noise(x, 4) * 22);
           for (let i = 0; i < len; i++)
             k.px(
               x + Math.round(Math.sin(i * 0.3 + x) * 1),
@@ -403,10 +384,8 @@
       }
     });
     if (!small) return null;
-    const big = document.createElement('canvas');
-    big.width = 128;
-    big.height = 152;
-    const g = big.getContext('2d');
+    const big = makeCanvas(128, 152),
+      g = big.getContext('2d');
     g.imageSmoothingEnabled = false;
     g.drawImage(small, 0, 0, 128, 152);
     return big;
@@ -561,8 +540,8 @@
           pts.push([28 - Math.cos((a / 20) * Math.PI) * 24, 22 - Math.sin((a / 20) * Math.PI) * 18]);
         kit.branch(k, pts, 3, [BARK[0], BARK[1], BARK[2]]);
         for (let i = 0; i < 40; i++) {
-          const a = hsh(i, 6) * Math.PI,
-            r = 24 + (hsh(6, i) - 0.5) * 6;
+          const a = noise(i, 6) * Math.PI,
+            r = 24 + (noise(6, i) - 0.5) * 6;
           k.rect(
             28 - Math.cos(a) * r,
             22 - Math.sin(a) * r * 0.75,

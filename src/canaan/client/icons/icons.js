@@ -6,38 +6,10 @@
 // Le texte des sources garde ses émojis comme repères : seul l'affichage change.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 import { CANAAN_ICON_ART } from './icon-art.js';
+import { svgPen } from './svg-pen.js';
 
-const INK = '#1a1220';
-const O = 'stroke="' + INK + '" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"';
-const p = (d, f) => '<path d="' + d + '" fill="' + f + '" ' + O + '/>';
-const c = (x, y, r, f) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + f + '" ' + O + '/>';
-const r = (x, y, w, h, f, rx = 1) =>
-  '<rect x="' +
-  x +
-  '" y="' +
-  y +
-  '" width="' +
-  w +
-  '" height="' +
-  h +
-  '" rx="' +
-  rx +
-  '" fill="' +
-  f +
-  '" ' +
-  O +
-  '/>';
-// Trait sans contour (détails, reflets).
-const l = (d, s, w = 1.4) =>
-  '<path d="' +
-  d +
-  '" fill="none" stroke="' +
-  s +
-  '" stroke-width="' +
-  w +
-  '" stroke-linecap="round" stroke-linejoin="round"/>';
-const hi = (d, w = 1) => l(d, '#ffffff', w).replace('/>', ' opacity=".75"/>');
-const g = (t, inner) => '<g transform="' + t + '">' + inner + '</g>';
+// Plume commune (contour d'encre, reflets) réglée pour la grille 24 × 24 des émojis.
+const { ink: INK, O, p, c, r, l, hi, g, star } = svgPen();
 // Couleurs communes.
 const STEEL = '#dfe8f0',
   STEELD = '#8796a6',
@@ -64,14 +36,6 @@ const sword = (t = '') =>
       r(11, 17, 2, 4, WOODD, 0.5) +
       c(12, 21.5, 1.3, GOLD)
   );
-const star = (n, R, ri, cx = 12, cy = 12, rot = -90) =>
-  'M' +
-  Array.from({ length: n * 2 }, (_, k) => {
-    const a = ((rot + (k * 180) / n) * Math.PI) / 180,
-      d = k % 2 ? ri : R;
-    return (cx + Math.cos(a) * d).toFixed(1) + ' ' + (cy + Math.sin(a) * d).toFixed(1);
-  }).join(' L') +
-  ' Z';
 const heart = f =>
   p('M12 20 C4 14 3 9 6.5 6.5 C9 5 11 6.5 12 8 C13 6.5 15 5 17.5 6.5 C21 9 20 14 12 20 Z', f) +
   hi('M7 9 C7.5 8 8.5 7.5 9.5 7.6');

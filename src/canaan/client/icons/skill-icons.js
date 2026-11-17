@@ -3,6 +3,8 @@
 // propre à l'arme, halo doux. CANAAN_SKILL_ICONS.weapon(type, i) et .special(id) renvoient le balisage SVG.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 
+import { svgPen } from './svg-pen.js';
+
 // Palette commune.
 const K = {
   ink: '#120c16',
@@ -27,7 +29,8 @@ const ACCENT = {
 };
 const at = (x, y, rot = 0, s = 1, inner = '') =>
   '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ') scale(' + s + ')">' + inner + '</g>';
-const st = 'stroke="' + K.ink + '" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
+// Contour d'encre de la plume commune (client/icons/svg-pen.js).
+const { O: st } = svgPen({ ink: K.ink, width: 1.6 });
 // ---------------------------------------------------------------- Pièces (orientées vers le haut, poignée en bas)
 const P = {
   sword: c =>

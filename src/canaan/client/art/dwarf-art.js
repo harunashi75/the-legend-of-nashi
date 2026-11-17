@@ -4,10 +4,8 @@
 // du roi, la forge, la taverne de Dorn, la chambre forte de Gimra, l'étal de Borin, les maisons naines et la statue du
 // premier roi. Les feux, fumées et lueurs restent animés à part (underground.js).
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
-import { CANAAN_BUILDING_ART } from './building-art.js';
+import { noise, painter, shingles } from './pixel-kit.js';
 
-const kit = () => CANAAN_BUILDING_ART && CANAAN_BUILDING_ART.kit;
-const cache = new Map();
 const STONE = ['#c4b8a6', '#a2968a', '#82766a', '#625850', '#433b34'];
 const GRANITE = ['#a8a4a8', '#86828a', '#66626c', '#4a4650', '#302e36'];
 const SLATE = ['#9aa4b8', '#76809a', '#58627c', '#3e465e', '#282e42'];
@@ -15,25 +13,7 @@ const WOOD = ['#b8844e', '#94643a', '#704a2a', '#4e321c', '#2e1e10'];
 const GOLD = ['#fff0a8', '#f0c858', '#c8962e', '#8a6418'];
 const RED = ['#c8384a', '#a8242e', '#7a1a20', '#4a0e14'];
 const IRON = ['#9aa0aa', '#6a707a', '#464a54', '#2a2c34'];
-const hsh = (a, b, s = 0) => {
-  const n = Math.sin(a * 127.1 + b * 311.7 + s * 71.3) * 43758.5453;
-  return n - Math.floor(n);
-};
-function paint(key, w, h, fn) {
-  if (cache.has(key)) return cache.get(key);
-  const K = kit();
-  let out = null;
-  if (K && typeof document !== 'undefined') {
-    const k = K.brush(w, h);
-    if (k.g && k.g.getImageData) {
-      fn(k, K);
-      K.outline(k);
-      out = k.cv;
-    }
-  }
-  cache.set(key, out);
-  return out;
-}
+const paint = painter();
 // Mur de blocs taillés : rangées décalées, chaque bloc modelé (arête claire en haut à gauche, ombre en bas à droite),
 // joints sombres, plus sombre vers la droite du mur.
 function blocks(k, x, y, w, h, ramp = STONE, seed = 0, bh = 6) {
@@ -43,17 +23,17 @@ function blocks(k, x, y, w, h, ramp = STONE, seed = 0, bh = 6) {
       rh = Math.min(bh, y + h - yy);
     let xx = x - (row % 2 ? 5 : 0);
     while (xx < x + w) {
-      const bw = 9 + Math.floor(hsh(xx, row, seed) * 6),
+      const bw = 9 + Math.floor(noise(xx, row, seed) * 6),
         x0 = Math.max(x, xx),
         x1 = Math.min(x + w, xx + bw) - 1;
       if (x1 > x0) {
         const side = (x0 - x) / Math.max(1, w),
           t = side < 0.25 ? 1 : side < 0.75 ? 2 : 3,
-          base = ramp[Math.min(3, t + (hsh(xx, row, seed + 1) > 0.8 ? 1 : 0))];
+          base = ramp[Math.min(3, t + (noise(xx, row, seed + 1) > 0.8 ? 1 : 0))];
         k.rect(x0, yy, x1 - x0, rh - 1, base);
         k.rect(x0, yy, x1 - x0, 1, ramp[t - 1]);
         k.rect(x0, yy, 1, rh - 1, ramp[t - 1]);
-        if (hsh(xx, row, seed + 2) > 0.85) k.px(x0 + 3, yy + 2, ramp[4]);
+        if (noise(xx, row, seed + 2) > 0.85) k.px(x0 + 3, yy + 2, ramp[4]);
       }
       xx += bw;
     }
@@ -65,7 +45,7 @@ function runes(k, x, y, w, ramp = GOLD) {
   k.rect(x, y, w, 1, ramp[2]);
   k.rect(x, y + 4, w, 1, ramp[2]);
   for (let xx = x + 2; xx < x + w - 3; xx += 6) {
-    const r = Math.floor(hsh(xx, y) * 4);
+    const r = Math.floor(noise(xx, y) * 4);
     k.px(xx, y + 2, ramp[0]);
     if (r === 0) k.rect(xx + 1, y + 1, 1, 3, ramp[1]);
     if (r === 1) k.rect(xx, y + 1, 3, 1, ramp[1]);
@@ -74,8 +54,8 @@ function runes(k, x, y, w, ramp = GOLD) {
   }
 }
 // Toit d'ardoise en écailles entre deux versants (polygone), faîtage doré.
-function slateRoof(k, K, pts, ridge) {
-  K.shingles(k, pts, SLATE, { w: 6, h: 5 });
+function slateRoof(k, pts, ridge) {
+  shingles(k, pts, SLATE, { w: 6, h: 5 });
   if (ridge) k.rect(ridge[0], ridge[1], ridge[2], 2, GOLD[2]);
 }
 // Porte ferrée en arc : planches, pentures, clous dorés, linteau de pierre.
@@ -141,7 +121,7 @@ const MODELS = {
   dwarfhall: [
     184,
     136,
-    (k, K) => {
+    k => {
       const W = 184,
         B = 134,
         cx = W / 2;
@@ -150,7 +130,6 @@ const MODELS = {
       runes(k, 12, 44, W - 24);
       slateRoof(
         k,
-        K,
         [
           [2, 46],
           [cx, 4],
@@ -194,13 +173,12 @@ const MODELS = {
   forge: [
     112,
     110,
-    (k, K) => {
+    k => {
       const W = 112,
         B = 108;
       blocks(k, 6, 52, W - 30, B - 52, STONE, 2);
       slateRoof(
         k,
-        K,
         [
           [0, 56],
           [16, 30],
@@ -244,7 +222,7 @@ const MODELS = {
   tavern: [
     136,
     112,
-    (k, K) => {
+    k => {
       const W = 136,
         B = 110,
         cx = W / 2;
@@ -258,7 +236,6 @@ const MODELS = {
       k.rect(4, 70, W - 8, 4, WOOD[3]);
       slateRoof(
         k,
-        K,
         [
           [0, 44],
           [cx, 2],
@@ -289,7 +266,7 @@ const MODELS = {
   vault: [
     112,
     92,
-    (k, K) => {
+    k => {
       const W = 112,
         B = 90,
         cx = W / 2;
@@ -320,7 +297,7 @@ const MODELS = {
   stall: [
     88,
     72,
-    (k, K) => {
+    k => {
       const W = 88,
         B = 70;
       for (const x of [6, W - 10]) k.rect(x, 10, 4, B - 10, WOOD[2]);
@@ -356,7 +333,7 @@ const MODELS = {
   dwarfhouse: [
     88,
     92,
-    (k, K) => {
+    k => {
       const W = 88,
         B = 90,
         cx = W / 2;
@@ -366,7 +343,7 @@ const MODELS = {
         const a = Math.PI + (i / 24) * Math.PI;
         roof.push([cx + Math.cos(a) * 44, 46 + Math.sin(a) * 30]);
       }
-      slateRoof(k, K, roof, null);
+      slateRoof(k, roof, null);
       blocks(k, W - 28, 4, 12, 26, GRANITE, 7, 5);
       k.rect(W - 30, 2, 16, 3, GRANITE[1]);
       runes(k, 10, 44, W - 20);
@@ -389,7 +366,7 @@ const MODELS = {
   kingstatue: [
     64,
     112,
-    (k, K) => {
+    k => {
       const W = 64,
         B = 110,
         cx = W / 2,

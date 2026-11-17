@@ -2,16 +2,11 @@
 (() => {
   const PIXEL_TERRAIN = [],
     PIXEL_DECOR = {};
-  function pixHash(x, y, k = 0) {
-    let z = Math.sin(x * 127.1 + y * 311.7 + k * 73.3) * 43758.5453;
-    return z - Math.floor(z);
-  }
-  function pixCanvas(w, h) {
-    let c = document.createElement('canvas');
-    c.width = w;
-    c.height = h;
-    return c;
-  }
+  // Outils de dessin communs (client/art/pixel-kit.js).
+  const { makeCanvas, sinNoise, tint } = CANAAN_PIXEL_KIT;
+  // Bruits propres aux décors et aux ponts (familles distinctes du bruit commun : mêmes motifs qu'avant le kit).
+  const pixHash = sinNoise(73.3),
+    bridgeNoise = sinNoise(74.7);
   // Feuillage en pixels : grappes rondes empilées, ombrées en quatre tons, et feuilles éparses sur le pourtour.
   function pixDisc(g, cx, cy, r, col) {
     g.fillStyle = col;
@@ -75,7 +70,7 @@
   const BIG_TREES = CANAAN_BIG_TREES;
   function drawPixDecor(type) {
     const big = BIG_TREES.has(type) ? 2 : 1;
-    let c = pixCanvas(64 * big, 76 * big),
+    let c = makeCanvas(64 * big, 76 * big),
       g = c.getContext('2d');
     g.imageSmoothingEnabled = false;
     if (big > 1) g.scale(big, big);
@@ -274,12 +269,6 @@
   ])
     drawPixDecor(type);
   const CANAAN_HERO_SPRITES = new Map();
-  // Teinte plus sombre (f < 1) ou plus claire (f > 1) d'une couleur #rrggbb.
-  function tint(hex, f) {
-    const n = parseInt(hex.slice(1), 16),
-      ch = v => Math.max(0, Math.min(255, Math.round(f > 1 ? v + (255 - v) * (f - 1) : v * f)));
-    return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(v => ch(v).toString(16).padStart(2, '0')).join('');
-  }
   // ---------------------------------------------------------------- Apparences (transmogrification)
   // Pièces d'une tenue complète (shared/data/skins.js), dessinées sur la grille 24 × 30 du héros : dos (ailes, capes,
   // carquois), corps (robe, salopette, kimono…), épaulières et coiffe. stage : 'behind' (avant le corps, de face et de
@@ -1213,11 +1202,9 @@
       key = code + ':' + face + ':' + frame + ':' + (opts.tool || 'sword');
     let spr = CANAAN_HERO_SPRITES.get(key);
     if (!spr) {
-      spr = document.createElement('canvas');
       // Une apparence a de la place autour (ailes, chapeaux) : 12 px de chaque côté et au-dessus.
       const pad = look?.wear ? 12 : 0;
-      spr.width = 48 + pad * 2;
-      spr.height = 60 + pad;
+      spr = makeCanvas(48 + pad * 2, 60 + pad);
       const g = spr.getContext('2d');
       g.translate(pad, pad);
       drawHeroArt(g, face, frame, look, opts);
@@ -1338,9 +1325,7 @@
     const key = 'feral:' + face + ':' + frame;
     let spr = CANAAN_HERO_SPRITES.get(key);
     if (!spr) {
-      spr = document.createElement('canvas');
-      spr.width = 48;
-      spr.height = 60;
+      spr = makeCanvas(48, 60);
       drawFeralArt(spr.getContext('2d'), face, frame);
       spr = canaanOutline(spr, 2);
       CANAAN_HERO_SPRITES.set(key, spr);
@@ -1497,9 +1482,8 @@
     bridgeImgsSize = -1,
     baked = null;
   function bakeBridge(x, y) {
-    const cv = document.createElement('canvas');
-    cv.width = cv.height = TS;
-    const g = cv.getContext?.('2d');
+    const cv = makeCanvas(TS, TS),
+      g = cv.getContext?.('2d');
     if (!g?.fillRect) return null;
     baked = null;
     drawPixelRoads(g, { x, y });
@@ -1520,10 +1504,7 @@
       tile = (x, y) => game.world.overworld[y]?.[x],
       isBridge = (x, y) => BRIDGE_TILES.has(y * MAPW + x),
       wet = (x, y) => [0, 15, 18].includes(tile(x, y)) && !isBridge(x, y),
-      h = (x, y, k) => {
-        const n = Math.sin(x * 127.1 + y * 311.7 + k * 74.7) * 43758.5453;
-        return n - Math.floor(n);
-      };
+      h = bridgeNoise;
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
         if (!isBridge(x, y)) continue;

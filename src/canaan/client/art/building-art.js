@@ -5,8 +5,9 @@
 // accordé à son biome. Le module rend une image (à la taille des pixels d'art) et la liste des effets animés.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 
+import { PIXEL_BARK, bez, branch, brush, hashGrid, outline, shingles } from './pixel-kit.js';
+
 const U = 2;
-const INK = '#2a1810';
 // Rampes de couleurs : [reflet, clair, base, ombre, profond].
 const RAMP = {
   roofRed: ['#f4a070', '#e0704a', '#b84a32', '#86321f', '#561e14'],
@@ -37,89 +38,6 @@ const RAMP = {
   elfLeaf: ['#c8f0a0', '#8ad070', '#5aa850', '#3a7a3c', '#24502a'],
   elfGold: ['#fff4b0', '#f0d060', '#c8a038', '#8a6a1e'],
   jade: ['#b0f0d8', '#6ad0b0', '#3aa088', '#24705e', '#164a40']
-};
-// ---------------------------------------------------------------- Pinceau sur la grille de pixels d'art
-function brush(w, h) {
-  const cv = document.createElement('canvas');
-  cv.width = w;
-  cv.height = h;
-  const g = cv.getContext('2d');
-  const k = {
-    cv,
-    g,
-    w,
-    h,
-    rect(x, y, rw, rh, col) {
-      if (rw <= 0 || rh <= 0) return;
-      g.fillStyle = col;
-      g.fillRect(Math.round(x), Math.round(y), Math.round(rw), Math.round(rh));
-    },
-    px(x, y, col) {
-      g.fillStyle = col;
-      g.fillRect(Math.round(x), Math.round(y), 1, 1);
-    },
-    // Polygone plein (balayage par lignes, sans anticrénelage).
-    poly(pts, col) {
-      let y0 = Infinity,
-        y1 = -Infinity;
-      for (const [, y] of pts) {
-        y0 = Math.min(y0, y);
-        y1 = Math.max(y1, y);
-      }
-      g.fillStyle = col;
-      for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
-        const xs = [];
-        for (let i = 0; i < pts.length; i++) {
-          const [ax, ay] = pts[i],
-            [bx, by] = pts[(i + 1) % pts.length];
-          if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5))
-            xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
-        }
-        xs.sort((a, b) => a - b);
-        for (let i = 0; i + 1 < xs.length; i += 2)
-          g.fillRect(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1);
-      }
-    },
-    line(x0, y0, x1, y1, col, t = 1) {
-      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
-      g.fillStyle = col;
-      for (let i = 0; i <= n; i++)
-        g.fillRect(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), t, t);
-    },
-    disc(cx, cy, r, col) {
-      g.fillStyle = col;
-      for (let y = -r; y <= r; y++) {
-        const hw = Math.round(Math.sqrt(r * r - y * y));
-        g.fillRect(Math.round(cx - hw), Math.round(cy + y), hw * 2 + 1, 1);
-      }
-    }
-  };
-  return k;
-}
-// Contour sombre d'un pixel autour de toutes les formes (pixels transparents qui touchent une forme).
-function outline(k) {
-  const img = k.g.getImageData(0, 0, k.w, k.h),
-    d = img.data,
-    w = k.w,
-    h = k.h,
-    a = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : d[(y * w + x) * 4 + 3]),
-    out = [];
-  for (let y = 0; y < h; y++)
-    for (let x = 0; x < w; x++)
-      if (a(x, y) < 128 && (a(x - 1, y) > 128 || a(x + 1, y) > 128 || a(x, y - 1) > 128 || a(x, y + 1) > 128))
-        out.push(y * w + x);
-  for (const i of out) {
-    d[i * 4] = 42;
-    d[i * 4 + 1] = 24;
-    d[i * 4 + 2] = 16;
-    d[i * 4 + 3] = 255;
-  }
-  k.g.putImageData(img, 0, 0);
-}
-const hash = (a, b) => {
-  let h = (a * 374761393 + b * 668265263) | 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 };
 // ---------------------------------------------------------------- Éléments
 // Pan de toit : quadrilatère (bord d'égout A→B, profondeur vers le haut), tuiles en rangées parallèles à la pente,
@@ -194,7 +112,7 @@ function wallPlaster(k, x, y, w, h, ramp, timber) {
   k.rect(x + w - 3, y, 3, h, ramp[2]);
   k.rect(x, y, w, 2, ramp[3]);
   for (let i = 0; i < 9; i++)
-    k.rect(x + 4 + hash(i, x) * (w - 10), y + 4 + hash(x, i) * (h - 8), 2, 1, ramp[2]);
+    k.rect(x + 4 + hashGrid(i, x) * (w - 10), y + 4 + hashGrid(x, i) * (h - 8), 2, 1, ramp[2]);
   if (timber) {
     k.rect(x, y, 3, h, timber[1]);
     k.rect(x + w - 3, y, 3, h, timber[2]);
@@ -208,13 +126,13 @@ function wallPlanks(k, x, y, w, h, ramp, horizontal) {
     for (let yy = y; yy < y + h; yy += 4) {
       k.rect(x, yy, w, 1, ramp[0]);
       k.rect(x, yy + 3, w, 1, ramp[3]);
-      k.rect(x + Math.floor(hash(yy, x) * (w - 6)), yy + 1, 1, 2, ramp[3]);
+      k.rect(x + Math.floor(hashGrid(yy, x) * (w - 6)), yy + 1, 1, 2, ramp[3]);
     }
   } else {
     for (let xx = x; xx < x + w; xx += 5) {
       k.rect(xx, y, 1, h, ramp[0]);
       k.rect(xx + 4, y, 1, h, ramp[3]);
-      k.px(xx + 2, y + 3 + Math.floor(hash(xx, y) * (h - 6)), ramp[3]);
+      k.px(xx + 2, y + 3 + Math.floor(hashGrid(xx, y) * (h - 6)), ramp[3]);
     }
   }
   k.rect(x + w - 3, y, 3, h, ramp[2]);
@@ -224,12 +142,12 @@ function wallStone(k, x, y, w, h, ramp) {
   for (let r = 0, yy = y; yy < y + h; r++, yy += 5) {
     let xx = x - (r % 2) * 4;
     while (xx < x + w) {
-      const sw = 6 + Math.floor(hash(xx, r) * 5),
+      const sw = 6 + Math.floor(hashGrid(xx, r) * 5),
         a = Math.max(x, xx),
         b = Math.min(x + w, xx + sw - 1),
         hh = Math.min(4, y + h - yy);
       if (b > a) {
-        k.rect(a, yy, b - a, hh, ramp[hash(r, xx) < 0.3 ? 2 : 1]);
+        k.rect(a, yy, b - a, hh, ramp[hashGrid(r, xx) < 0.3 ? 2 : 1]);
         k.rect(a, yy, b - a, 1, ramp[0]);
       }
       xx += sw;
@@ -242,7 +160,7 @@ function wallLogs(k, x, y, w, h, ramp) {
     k.rect(x, yy, w, 5, ramp[1]);
     k.rect(x, yy, w, 1, ramp[0]);
     k.rect(x, yy + 4, w, 1, ramp[3]);
-    k.px(x + 6 + Math.floor(hash(yy, w) * (w - 12)), yy + 2, ramp[3]);
+    k.px(x + 6 + Math.floor(hashGrid(yy, w) * (w - 12)), yy + 2, ramp[3]);
     for (const ex of [x - 3, x + w - 1]) {
       k.rect(ex, yy, 4, 5, ramp[0]);
       k.rect(ex + 1, yy + 1, 2, 3, ramp[2]);
@@ -352,8 +270,8 @@ function bush(k, cx, bot, r, ramp, flowers) {
   if (flowers)
     for (let i = 0; i < 5; i++)
       k.px(
-        cx - r + 1 + hash(i, cx) * (r * 2 - 2),
-        bot - r * 2 + 1 + hash(cx, i) * r * 1.4,
+        cx - r + 1 + hashGrid(i, cx) * (r * 2 - 2),
+        bot - r * 2 + 1 + hashGrid(cx, i) * r * 1.4,
         flowers[i % flowers.length]
       );
 }
@@ -391,9 +309,9 @@ function vines(k, x, y, len, seed) {
 }
 function mossPatch(k, x, y, w, seed) {
   for (let i = 0; i < w; i++) {
-    const hgt = 1 + Math.floor(hash(i + seed, seed) * 3);
-    k.rect(x + i, y - hgt + 1, 1, hgt, RAMP.roofMoss[hash(seed, i) < 0.5 ? 1 : 2]);
-    if (hash(i, seed + 3) > 0.8) k.px(x + i, y - hgt, RAMP.roofMoss[0]);
+    const hgt = 1 + Math.floor(hashGrid(i + seed, seed) * 3);
+    k.rect(x + i, y - hgt + 1, 1, hgt, RAMP.roofMoss[hashGrid(seed, i) < 0.5 ? 1 : 2]);
+    if (hashGrid(i, seed + 3) > 0.8) k.px(x + i, y - hgt, RAMP.roofMoss[0]);
   }
 }
 function shroom(k, x, bot, col) {
@@ -412,110 +330,12 @@ const ELF = {
   mossShingle: ['#a8d878', '#78b058', '#548a42', '#3a6632', '#244222'],
   silverShingle: ['#eef4ff', '#c4d0e4', '#9cacc8', '#6e7c9c', '#4a5674'],
   stucco: ['#fffaf0', '#f2e6ca', '#dccaa4', '#b8a27c'],
-  bark: ['#b08458', '#80583a', '#5a3c24', '#3a2614'],
+  bark: PIXEL_BARK,
   plank: ['#d8a470', '#b8844e', '#94643a', '#6a4426', '#46301c'],
   iron: '#3a3036',
   crystal: ['#e8fffc', '#9af0f0', '#58c8e0', '#3a8ab8', '#2a5a8a'],
   flowers: ['#b08aff', '#8a6ae8', '#f6a0d8', '#ffffff', '#6aa8ff']
 };
-// Courbe de Bézier quadratique (liste de points).
-function bez(a, c, b, n = 12) {
-  const out = [];
-  for (let i = 0; i <= n; i++) {
-    const t = i / n,
-      u = 1 - t;
-    out.push([
-      u * u * a[0] + 2 * u * t * c[0] + t * t * b[0],
-      u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]
-    ]);
-  }
-  return out;
-}
-// Lignes d'un polygone : pour chaque rangée, les segments [x0, x1) à remplir.
-function spans(pts) {
-  let y0 = Infinity,
-    y1 = -Infinity;
-  for (const [, y] of pts) {
-    y0 = Math.min(y0, y);
-    y1 = Math.max(y1, y);
-  }
-  const rows = [];
-  for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
-    const xs = [];
-    for (let i = 0; i < pts.length; i++) {
-      const [ax, ay] = pts[i],
-        [bx, by] = pts[(i + 1) % pts.length];
-      if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5))
-        xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
-    }
-    xs.sort((a, b) => a - b);
-    for (let i = 0; i + 1 < xs.length; i += 2) rows.push([y, Math.round(xs[i]), Math.round(xs[i + 1])]);
-  }
-  return rows;
-}
-// Toit en écailles dans un polygone : bardeaux de bois arrondis (leaf : feuilles pointues à nervure), rangées
-// décalées, éclairage de gauche, reflet en haut de chaque écaille, variations par écaille.
-function shingles(k, pts, ramp, o = {}) {
-  const sw = o.w || 7,
-    sh = o.h || 6,
-    leaf = !!o.leaf,
-    rows = spans(pts);
-  if (!rows.length) return;
-  const minX = Math.min(...rows.map(r => r[1])),
-    maxX = Math.max(...rows.map(r => r[2])),
-    minY = rows[0][0],
-    cx = o.cx ?? (minX + maxX) / 2,
-    half = Math.max(1, (maxX - minX) / 2),
-    step = sh - 1;
-  for (const [y, xa, xb] of rows)
-    for (let x = xa; x < xb; x++) {
-      const ry = y - minY,
-        row = Math.floor(ry / step),
-        ly = ry - row * step,
-        off = (row % 2) * Math.floor(sw / 2),
-        rx = x - minX + off + 64 * sw,
-        col = Math.floor(rx / sw),
-        lx = rx - col * sw,
-        v = hash(col, row + 7);
-      const lit = -(x - cx) / half + (v - 0.5) * 0.6 - (ry / 120) * 0.2,
-        t = lit > 0.55 ? 0 : lit > -0.1 ? 1 : lit > -0.7 ? 2 : 3,
-        dark = n => ramp[Math.min(ramp.length - 1, t + n)],
-        mid = (sw - 1) / 2,
-        d = Math.abs(lx - mid),
-        // Écaille de bois : bas arrondi ; feuille : large en haut, pointue en bas.
-        hw = leaf
-          ? (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow(ly / step, 2.4)))
-          : ly < step - 3
-            ? mid + 0.6
-            : (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow((ly - (step - 4)) / 3.2, 2)));
-      let c = ramp[t];
-      if (d > hw) c = dark(2);
-      else if (d > hw - 1) c = dark(1);
-      else if (ly <= 1 && lx <= mid) c = ramp[Math.max(0, t - 1)];
-      else if (leaf && Math.round(mid) === lx && ly > 0 && ly < step - 2) c = dark(1);
-      else if (!leaf && lx > mid + 1 && ly > 1)
-        c = ramp[Math.min(ramp.length - 1, t + (ly > step - 4 ? 1 : 0))];
-      k.px(x, y, c);
-    }
-}
-// Branche torsadée le long d'un tracé : épaisseur t, modelé (clair à gauche, sombre à droite), nœuds.
-function branch(k, pts, t, ramp = ELF.bark) {
-  let dist = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const [ax, ay] = pts[i - 1],
-      [bx, by] = pts[i],
-      n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay)));
-    for (let s = 0; s <= n; s++, dist++) {
-      const x = ax + ((bx - ax) * s) / n,
-        y = ay + ((by - ay) * s) / n,
-        w = Math.max(1, Math.round(t * (0.85 + 0.15 * Math.sin(dist * 0.4))));
-      k.rect(x - w / 2, y, w, 1, ramp[1]);
-      k.px(x - w / 2, y, ramp[0]);
-      if (w > 2) k.px(x + w / 2 - 1, y, ramp[2]);
-      if (dist % 9 === 4 && w > 2) k.px(x, y, ramp[3]);
-    }
-  }
-}
 // Fenêtre de cristal en arc : cadre de bois, verre bleu-turquoise en losanges, lueur.
 function crystalWindow(k, e, x, y, w, h) {
   k.rect(x - 2, y + 2, w + 4, h, ELF.bark[1]);
@@ -554,7 +374,8 @@ function flowerBasket(k, x, y) {
   k.rect(x, y - 6, 1, 6, ELF.iron);
   k.rect(x - 4, y, 9, 4, '#8a5a34');
   k.rect(x - 4, y, 9, 1, '#b07a48');
-  for (let i = 0; i < 14; i++) k.px(x - 5 + hash(i, x) * 11, y - 3 + hash(x, i) * 4, ELF.flowers[i % 5]);
+  for (let i = 0; i < 14; i++)
+    k.px(x - 5 + hashGrid(i, x) * 11, y - 3 + hashGrid(x, i) * 4, ELF.flowers[i % 5]);
   for (const vx of [x - 4, x + 4])
     for (let i = 0; i < 7; i++) k.px(vx + (i % 2), y + 4 + i, i % 3 ? '#4e8a3a' : '#8ad070');
 }
@@ -580,23 +401,23 @@ function elfStucco(k, x, y, w, h, beams = []) {
   k.rect(x, y, 2, h, ELF.stucco[0]);
   k.rect(x + w - 3, y, 3, h, ELF.stucco[2]);
   for (let i = 0; i < 8; i++)
-    k.rect(x + 3 + hash(i, x + y) * (w - 8), y + 3 + hash(x, i) * (h - 6), 2, 1, ELF.stucco[2]);
+    k.rect(x + 3 + hashGrid(i, x + y) * (w - 8), y + 3 + hashGrid(x, i) * (h - 6), 2, 1, ELF.stucco[2]);
   for (const b of beams) branch(k, b, 3);
 }
 // Socle de pierres moussues.
 function mossBase(k, x, y, w) {
   k.rect(x, y, w, 6, RAMP.stone[2]);
   for (let xx = x; xx < x + w; xx += 6) {
-    k.rect(xx + 1, y + 1, 4, 4, hash(xx, y) > 0.5 ? RAMP.stone[1] : RAMP.stone[2]);
+    k.rect(xx + 1, y + 1, 4, 4, hashGrid(xx, y) > 0.5 ? RAMP.stone[1] : RAMP.stone[2]);
     k.px(xx + 1, y + 1, RAMP.stone[0]);
   }
   for (let xx = x; xx < x + w; xx += 3)
-    if (hash(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hash(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
+    if (hashGrid(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hashGrid(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
 }
 // Feuillage au pied (fougères et buissons).
 function ferns(k, x, bot, n, seed) {
   for (let i = 0; i < n; i++) {
-    const fx = x + i * 5 + Math.round(hash(i, seed) * 3);
+    const fx = x + i * 5 + Math.round(hashGrid(i, seed) * 3);
     for (let j = 0; j < 5; j++) {
       k.line(fx, bot, fx - 3 + j * 1.5, bot - 5 - (j % 2) * 2, j % 2 ? '#5aa448' : '#86c860');
     }
@@ -854,7 +675,7 @@ const MODELS = {
     for (let i = 0; i < 7; i++) mossPatch(k, x - 2 + i * 9, r.top + 3 - i * 2.5, 6, i);
     for (let i = 0; i < 5; i++) mossPatch(k, x + w / 2 + 2 + i * 8, r.apex + 2 + i * 3, 6, i + 9);
     for (let i = 0; i < 6; i++)
-      mossPatch(k, x + w / 2 - 4 + hash(i, 4) * 8, r.roofTop + 4 + i * 4, 4, i + 20);
+      mossPatch(k, x + w / 2 - 4 + hashGrid(i, 4) * 8, r.roofTop + 4 + i * 4, 4, i + 20);
     vines(k, x + 2, r.top + 2, 22, 1);
     vines(k, x + w - 4, r.top + 2, 18, 3);
     vines(k, x + w / 2, r.apex + 4, 10, 5);
@@ -1084,7 +905,7 @@ const MODELS = {
     });
     // Frange de chaume.
     for (let px = x - 4; px < x + w + 4; px += 2)
-      k.rect(px, r.top + 2, 1, 2 + Math.floor(hash(px, 1) * 3), RAMP.roofThatch[2]);
+      k.rect(px, r.top + 2, 1, 2 + Math.floor(hashGrid(px, 1) * 3), RAMP.roofThatch[2]);
     windowRect(k, x + 5, deck - 22, 9, 8, RAMP.darkwood);
     windowRect(k, x + w - 14, deck - 22, 9, 8, RAMP.darkwood);
     e.window(x + 5, deck - 22, 9, 8);
@@ -1987,6 +1808,5 @@ function paint(b, X, base, Wd) {
 export const CANAAN_BUILDING_ART = Object.freeze({
   paint,
   farm,
-  has: id => Object.hasOwn(MODELS, id),
-  kit: Object.freeze({ brush, outline, roofPlane, RAMP, hash, shingles, branch, bez, spans, ELF })
+  has: id => Object.hasOwn(MODELS, id)
 });

@@ -87,25 +87,7 @@
       moss: true
     }
   ];
-  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => v / 16);
-  const bay = (x, y) => BAYER[(y & 3) * 4 + (x & 3)];
-  const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-  const hex = c =>
-    '#' +
-    c
-      .map(v =>
-        Math.max(0, Math.min(255, Math.round(v)))
-          .toString(16)
-          .padStart(2, '0')
-      )
-      .join('');
-  const mixc = (a, b, t) => {
-    const A = rgb(a),
-      B = rgb(b);
-    return hex(A.map((v, i) => v + (B[i] - v) * t));
-  };
-  const kit = () => window.CANAAN_BUILDING_ART && CANAAN_BUILDING_ART.kit;
-  let hash = () => 0.5;
+  const { bayer, brush, hashGrid: hash, makeCanvas, mix, outline, rgb } = CANAAN_PIXEL_KIT;
 
   // ---------------------------------------------------------------- Formes
   // Volume arrondi éclairé en haut à gauche (butte, rocher) ; cap : pelouse ou mousse sur le dessus.
@@ -121,7 +103,7 @@
         if (d > 1 + j) continue;
         const nz = Math.sqrt(Math.max(0, 1 - d)),
           f = o.facet ? (hash((x + rx) >> 3, (y + ry) >> 3) - 0.5) * 0.35 : 0,
-          lit = L[0] * nx + L[1] * ny + L[2] * nz + f + (bay(x, y) - 0.5) * 0.14;
+          lit = L[0] * nx + L[1] * ny + L[2] * nz + f + (bayer(x, y) - 0.5) * 0.14;
         let ramp = R;
         if (o.cap) {
           const top = -ry * Math.sqrt(Math.max(0, 1 - nx * nx));
@@ -147,11 +129,11 @@
         const v = hash(seed + row * 31, rx + 97),
           col = v < 0.2 ? R[0] : v > 0.82 ? R[2] : R[1];
         k.rect(x + x0, y + ry, x1 - x0, y1 - ry, col);
-        k.rect(x + x0, y + ry, x1 - x0, 1, mixc(col, '#ffffff', 0.2));
+        k.rect(x + x0, y + ry, x1 - x0, 1, mix(col, '#ffffff', 0.2));
         if (v > 0.93 && x1 - x0 > 3) k.px(x + x0 + 2, y + ry + 2, R[3]);
       }
     }
-    k.rect(x, y, 1, h, mixc(R[0], '#ffffff', 0.15));
+    k.rect(x, y, 1, h, mix(R[0], '#ffffff', 0.15));
     k.rect(x + w - 1, y, 1, h, R[3]);
   }
   // Colonne : fût cannelé à modelé cylindrique, chapiteau et base.
@@ -161,7 +143,7 @@
         col = t < 0.2 ? R[0] : t < 0.55 ? R[1] : t < 0.85 ? R[2] : R[3];
       k.rect(x + i, y, 1, h, col);
     }
-    for (let i = 2; i < w - 1; i += 3) k.rect(x + i, y + 3, 1, h - 6, mixc(R[2], R[1], 0.3));
+    for (let i = 2; i < w - 1; i += 3) k.rect(x + i, y + 3, 1, h - 6, mix(R[2], R[1], 0.3));
     k.rect(x - 2, y - 3, w + 4, 3, R[1]);
     k.rect(x - 2, y - 3, w + 4, 1, R[0]);
     k.rect(x - 1, y, w + 2, 1, R[2]);
@@ -230,8 +212,8 @@
   function banner(k, x, y, w, h, cols) {
     k.rect(x - 1, y - 1, w + 2, 2, C.wood[3]);
     k.rect(x, y + 1, w, h, cols[0]);
-    k.rect(x, y + 1, 1, h, mixc(cols[0], '#ffffff', 0.2));
-    k.rect(x + w - 1, y + 1, 1, h, mixc(cols[0], '#000000', 0.3));
+    k.rect(x, y + 1, 1, h, mix(cols[0], '#ffffff', 0.2));
+    k.rect(x + w - 1, y + 1, 1, h, mix(cols[0], '#000000', 0.3));
     for (let i = 0; i < w; i++) {
       const d = Math.abs(i - (w - 1) / 2);
       k.rect(x + i, y + 1 + h, 1, Math.max(0, 3 - d), cols[0]);
@@ -756,7 +738,7 @@
         const a = Math.atan2(y / ry, x / rx),
           seg = Math.floor(((a + Math.PI) / (Math.PI * 2)) * 18),
           joint = Math.abs(((a + Math.PI) / (Math.PI * 2)) * 18 - seg - 0.5) > 0.44,
-          lit = -Math.cos(a + 0.8) * 0.5 + (o > 0.88 ? -0.3 : 0.15) + (bay(x, y) - 0.5) * 0.2;
+          lit = -Math.cos(a + 0.8) * 0.5 + (o > 0.88 ? -0.3 : 0.15) + (bayer(x, y) - 0.5) * 0.2;
         k.px(cx + x, cy + y, joint ? R[3] : lit > 0.35 ? R[0] : lit > -0.05 ? R[1] : R[2]);
       }
     }
@@ -870,10 +852,10 @@
           d < 0.45
             ? 0.3
             : d < 0.75
-              ? bay(x, y) > (d - 0.45) / 0.3
+              ? bayer(x, y) > (d - 0.45) / 0.3
                 ? 0.3
                 : 0.16
-              : bay(x, y) > (d - 0.75) / 0.25
+              : bayer(x, y) > (d - 0.75) / 0.25
                 ? 0.16
                 : 0;
         if (!a) continue;
@@ -883,7 +865,7 @@
     // Passage tassé devant l'ouverture.
     for (let y = 2; y < 18; y++)
       for (let x = -14; x <= 14; x++)
-        if (bay(x, y) < 0.35 - y * 0.015 && Math.abs(x) < 14 - y * 0.4) {
+        if (bayer(x, y) < 0.35 - y * 0.015 && Math.abs(x) < 14 - y * 0.4) {
           gk.g.fillStyle = 'rgba(40,28,22,.16)';
           gk.g.fillRect(CX + x, BASE + y, 1, 1);
         }
@@ -906,17 +888,17 @@
     if (D.sand)
       for (let y = BASE + 4; y < AH; y += 5)
         for (let x = 0; x < AW; x++)
-          if (bay(x, y) < 0.12 && Math.abs(Math.sin(x * 0.18 + y)) > 0.6)
+          if (bayer(x, y) < 0.12 && Math.abs(Math.sin(x * 0.18 + y)) > 0.6)
             gk.rect(x, y, 2, 1, 'rgba(255,240,200,.35)');
   }
 
   // ---------------------------------------------------------------- Tourbillon, engrenages, anneau
   const tones = col => [
-    mixc(col, '#05030a', 0.78),
-    mixc(col, '#05030a', 0.5),
+    mix(col, '#05030a', 0.78),
+    mix(col, '#05030a', 0.5),
     col,
-    mixc(col, '#ffffff', 0.5),
-    mixc(col, '#ffffff', 0.85)
+    mix(col, '#ffffff', 0.5),
+    mix(col, '#ffffff', 0.85)
   ];
   function swirl(rx, ry, col) {
     const T = tones(col),
@@ -926,10 +908,8 @@
       N = 12,
       P = T.map(rgb);
     for (let f = 0; f < N; f++) {
-      const cv = document.createElement('canvas');
-      cv.width = w;
-      cv.height = h;
-      const g = cv.getContext('2d'),
+      const cv = makeCanvas(w, h),
+        g = cv.getContext('2d'),
         img = g.createImageData && g.createImageData(w, h);
       if (!img || !img.data) return null;
       const d = img.data,
@@ -942,7 +922,7 @@
           if (r > 1) continue;
           const a = Math.atan2(ny, nx),
             v = 0.5 + 0.5 * Math.sin(3 * a + 9 * r - ph);
-          let t = v * 0.5 + (1 - r) * 0.7 - 0.05 + (bay(x, y) - 0.5) * 0.25;
+          let t = v * 0.5 + (1 - r) * 0.7 - 0.05 + (bayer(x, y) - 0.5) * 0.25;
           if (r > 0.9) t = 0.72;
           else if (r > 0.8) t = Math.max(t, 0.5);
           let idx = Math.max(0, Math.min(4, Math.floor(t * 5)));
@@ -961,27 +941,25 @@
   }
   function gearFrames() {
     const out = [],
-      R = C.gold,
-      B = kit();
+      R = C.gold;
     for (let f = 0; f < 6; f++) {
-      const k = B.brush(23, 23);
+      const k = brush(23, 23);
       for (let y = -11; y <= 11; y++)
         for (let x = -11; x <= 11; x++) {
           const r = Math.hypot(x, y),
             a = Math.atan2(y, x) + (f / 6) * (Math.PI / 4),
             tooth = Math.cos(a * 8) > 0.2;
           if (r > (tooth ? 9.5 : 7.2) || r < 2.2) continue;
-          const lit = (-x - y) / 14 + (bay(x, y) - 0.5) * 0.3;
+          const lit = (-x - y) / 14 + (bayer(x, y) - 0.5) * 0.3;
           k.px(11 + x, 11 + y, r < 4.5 ? R[3] : lit > 0.3 ? R[0] : lit > -0.2 ? R[1] : R[2]);
         }
-      B.outline(k);
+      outline(k);
       out.push(k.cv);
     }
     return out;
   }
   function ringSprite(rx, ry, R, gem) {
-    const B = kit(),
-      k = B.brush(rx * 2 + 5, ry * 2 + 5);
+    const k = brush(rx * 2 + 5, ry * 2 + 5);
     ring(k, rx + 2, ry + 2, rx, ry, rx - 5, ry - 5, R, 0);
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2,
@@ -990,7 +968,7 @@
       k.rect(x - 1, y - 1, 3, 3, gem);
       k.px(x - 1, y - 1, '#ffffff');
     }
-    B.outline(k);
+    outline(k);
     return k.cv;
   }
 
@@ -1005,15 +983,13 @@
     }
   }
   function bake(key, wx, wy) {
-    const B = kit();
-    if (!B || typeof document === 'undefined') return null;
-    hash = B.hash;
+    if (typeof document === 'undefined') return null;
     const model = MODELS[key],
       th = THEME[key];
     if (!model || !th) return null;
-    const k = B.brush(AW, AH),
-      f = B.brush(AW, AH),
-      gk = B.brush(AW, AH);
+    const k = brush(AW, AH),
+      f = brush(AW, AH),
+      gk = brush(AW, AH);
     if (!k.g?.getImageData || !f.g?.getImageData) return null;
     const cx = wx + 24,
       by = wy + 34,
@@ -1051,8 +1027,8 @@
     const top = model(k, e, th, f);
     dress(k, f, gk, zone, marks, seed);
     ground(gk, zone, marks, extra, seed);
-    B.outline(k);
-    B.outline(f);
+    outline(k);
+    outline(f);
     if (!open) return null;
     // Colonnes pleines au pied de l'entrée : elles bloquent le passage (murs, socle, margelle, torches).
     const cols = new Uint8Array(AW);
@@ -1093,12 +1069,11 @@
   const GLOWS = {};
   function glowSprite(col) {
     if (GLOWS[col]) return GLOWS[col];
-    const B = kit(),
-      k = B.brush(64, 20);
+    const k = brush(64, 20);
     for (let y = 0; y < 20; y++)
       for (let x = 0; x < 64; x++) {
         const d = ((x - 32) / 32) ** 2 + ((y - 10) / 10) ** 2;
-        if (d < 1 && bay(x, y) > d) k.px(x, y, col);
+        if (d < 1 && bayer(x, y) > d) k.px(x, y, col);
       }
     return (GLOWS[col] = k.cv);
   }
@@ -1210,7 +1185,7 @@
           for (let i = 0; i < v[4]; i += U) {
             const dy = Math.round(Math.sin(time * 0.12 - i * 0.25) * (i / v[4]) * 1.5) * U;
             R(c, v[1] + i, v[2] + dy, U, U * 5 - (i > v[4] - U * 2 ? U * 2 : 0), v[3]);
-            R(c, v[1] + i, v[2] + dy + U * 4, U, U, mixc(v[3], '#000000', 0.3));
+            R(c, v[1] + i, v[2] + dy + U * 4, U, U, mix(v[3], '#000000', 0.3));
           }
           break;
       }
@@ -1221,7 +1196,7 @@
     }
     // Motes qui montent du portail.
     const o = P.open,
-      col = mixc(o.col, '#ffffff', 0.55);
+      col = mix(o.col, '#ffffff', 0.55);
     c.fillStyle = col;
     for (let i = 0; i < 6; i++) {
       const t = (time * 0.006 + i / 6) % 1,

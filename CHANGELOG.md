@@ -14,6 +14,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - Économie : butin garanti d’une instance, tirage de prestige et bourse des boss mondiaux dans `shared/rules/economy.js` (mêmes tirages dans le même ordre, vérifié sur 5 400 tirages à graine fixe).
 - Maison : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`), le dessin (`render.js`) et le coopératif (`net.js`).
 - Donjons : structure et créatures de chaque instance dans `shared/data/dungeons.js` ; `scripts/dungeons/` sépare les plans, énigmes et boss (`dungeons.js`) du dessin (`render.js`).
+- Pixel art : un kit commun (`client/art/pixel-kit.js` : toile, contour, ombre et reflet, couleurs, bruit et trame, écailles et branches) remplace les copies propres à chaque art (bâtiments, nains, elfes, portails, héros, créatures) ; les icônes SVG partagent une même plume (`client/icons/svg-pen.js`). Chaque outil n’existe plus qu’une fois.
 - Rien ne change à l’écran : chaque étape a été comparée appel de dessin par appel de dessin avec la version précédente.
 
 ### Outillage

@@ -4,49 +4,30 @@
 // (par exemple ⟦rubis_phenix⟧), que canaan-icons remplace par l'icône à l'affichage (interface et canevas).
 // Style commun : formes pleines en deux ou trois tons, contour sombre, reflets clairs.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
+import { svgPen } from './svg-pen.js';
 
-const INK = '#1a1220';
-const O = 'stroke="' + INK + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"';
-const p = (d, f) => '<path d="' + d + '" fill="' + f + '" ' + O + '/>';
-const s = (d, f) => '<path d="' + d + '" fill="' + f + '"/>'; // aplat sans contour (ombres, reflets)
-const c = (x, y, r, f) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + f + '" ' + O + '/>';
-const e = (x, y, rx, ry, f) =>
-  '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + f + '" ' + O + '/>';
-const r = (x, y, w, h, f, rx = 1.5) =>
-  '<rect x="' +
-  x +
-  '" y="' +
-  y +
-  '" width="' +
-  w +
-  '" height="' +
-  h +
-  '" rx="' +
-  rx +
-  '" fill="' +
-  f +
-  '" ' +
-  O +
-  '/>';
-const l = (d, col, w = 1.6) =>
-  '<path d="' +
-  d +
-  '" fill="none" stroke="' +
-  col +
-  '" stroke-width="' +
-  w +
-  '" stroke-linecap="round" stroke-linejoin="round"/>';
-const L = (d, col, w = 2.4) => l(d, INK, w + 2) + l(d, col, w); // trait cerné
-const hi = (d, w = 1.4) => l(d, '#ffffff', w).replace('/>', ' opacity=".7"/>');
-const g = (t, inner) => '<g transform="' + t + '">' + inner + '</g>';
-const star = (n, R, ri, cx = 16, cy = 16, rot = -90) =>
-  'M' +
-  Array.from({ length: n * 2 }, (_, k) => {
-    const a = ((rot + (k * 180) / n) * Math.PI) / 180,
-      d = k % 2 ? ri : R;
-    return (cx + Math.cos(a) * d).toFixed(1) + ' ' + (cy + Math.sin(a) * d).toFixed(1);
-  }).join(' L') +
-  ' Z';
+// Plume commune (contour d'encre, ombres, reflets) réglée pour la grille 32 × 32 des objets.
+const {
+  ink: INK,
+  O,
+  p,
+  s,
+  c,
+  e,
+  r,
+  l,
+  L,
+  hi,
+  g,
+  star
+} = svgPen({
+  width: 1.8,
+  radius: 1.5,
+  line: 1.6,
+  light: 1.4,
+  lightOpacity: '.7',
+  center: 16
+});
 // Palette.
 const ST = '#e3ebf2',
   STM = '#aab6c4',
