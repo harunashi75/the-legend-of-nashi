@@ -32,10 +32,12 @@ const produced = new Set();
 const CACHE_MAX = 20000;
 
 // Valeurs des modèles : {n}, {m}, {s}, {max} et {or} sont des nombres (« 1 234 », « −15 », « 2.5 ») ; les autres, un texte
-// sans séparateur « · — | ».
+// sans séparateur « · — | » ; {qualite}, une qualité d'objet.
 const NUMERIC = new Set(['n', 'm', 's', 'max', 'or']);
 const NUMBER = '([+−-]?\\d[\\d\\s\\u00a0\\u202f.,]*?)';
 const VALUE = '([^·—|\\n]+?)';
+// {qualite} : le nom d'une qualité d'objet, pour séparer « Truite Rare » en un nom et une qualité.
+const QUALITY = '(Commun|Peu commun|Rare|Épique|Légendaire|Mythique|Relique)';
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const PLACEHOLDER = /\{(\w+)\}/g;
 
@@ -56,7 +58,9 @@ function compile(table) {
     // « Niveau {n} » → /^Niveau (\d…)$/ ; une valeur n'est jamais vide et ne traverse pas un séparateur.
     const source = fr
       .split(PLACEHOLDER)
-      .map((part, i) => (i % 2 ? (NUMERIC.has(part) ? NUMBER : VALUE) : escRe(part)))
+      .map((part, i) =>
+        i % 2 ? (NUMERIC.has(part) ? NUMBER : part === 'qualite' ? QUALITY : VALUE) : escRe(part)
+      )
       .join('');
     // Morceaux de texte fixe, dans l'ordre : un filtre rapide avant l'expression régulière, qui sur un long texte
     // sans rapport pourrait essayer un très grand nombre de découpages.
@@ -112,8 +116,8 @@ function exact(text) {
     const m = p.re.exec(text);
     if (!m) continue;
     const values = {};
-    // Une valeur reconnue est traduite à son tour (nom d'un lieu, d'un objet…).
-    p.names.forEach((name, i) => (values[name] = dict.get(m[i + 1]) ?? m[i + 1]));
+    // Une valeur est traduite à son tour (nom d'un lieu, d'un objet, effet d'un repas…), avec son émoji éventuel.
+    p.names.forEach((name, i) => (values[name] = single(m[i + 1]) ?? m[i + 1]));
     return interpolate(p.out, values);
   }
   return null;

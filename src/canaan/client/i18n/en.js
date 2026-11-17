@@ -1996,5 +1996,154 @@ export default {
   'Équipé (emplacement {n})': 'Equipped (slot {n})',
   'clic : retirer': 'click: remove',
   'Clic : équiper': 'Click: equip',
-  'Rangé à la banque : reprends-le pour l’équiper': 'Stored in the bank: take it back to equip it'
+  'Rangé à la banque : reprends-le pour l’équiper': 'Stored in the bank: take it back to equip it',
+  // ------------------------------------------------------------ Panneau des métiers (P), récolte et enchantement
+  'Pêche': 'Fishing',
+  'Cuisine': 'Cooking',
+  'Chasse': 'Hunting',
+  'Minage': 'Mining',
+  'Cueillette': 'Herbalism',
+  'Enchanteur': 'Enchanting',
+  '{metier} niveau {n} !': '{metier} level {n}!',
+  'Qualité {qualite} débloquée.': '{qualite} quality unlocked.',
+  'Aucun banc de poissons à portée : approche-toi des remous dans l’eau profonde.':
+    'No school of fish in range: go up to the ripples in deep water.',
+  'Sac plein : {nom} relâché.': 'Bag full: {nom} released.',
+  '{nom} ({qualite})': '{nom} ({qualite})',
+  '{nom} {qualite} pêché !': '{nom} {qualite} caught!',
+  'Sac plein : impossible de ramasser la viande.': 'Bag full: cannot pick up the meat.',
+  '{nom} : {viande} {qualite}': '{nom}: {viande} {qualite}',
+  'nouvelle espèce dans ton carnet !': 'new species in your logbook!',
+  'Tu remontes ta ligne.': 'You reel in your line.',
+  'Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp ou un refuge).':
+    'Go up to a stove to cook (The Golden Pot at camp, or a shelter).',
+  'Sac plein : impossible de ranger d’autres repas.': 'Bag full: cannot store more meals.',
+  '{n} × {nom} préparé.': '{n} × {nom} prepared.',
+  '{n} × {nom} préparés.': '{n} × {nom} prepared.',
+  'Encore {n} s avant un autre repas rapide.': '{n} s more before another quick meal.',
+  '{nom} ({qualite}) : {effet}.': '{nom} ({qualite}): {effet}.',
+  'Tu as bougé : la ligne est remontée.': 'You moved: the line was reeled in.',
+  'Ça mord ! (E)': 'Got a bite! (E)',
+  'Le poisson s’est échappé… Appuie sur E dès que ça mord.':
+    'The fish got away… Press E as soon as it bites.',
+  '[E] Pêcher': '[E] Fish',
+  'Comment ça marche ?': 'How does it work?',
+  'Maîtrise complète': 'Full mastery',
+  'Meilleure qualité :': 'Best quality:',
+  'Collection · {n} / {max} espèces découvertes': 'Collection · {n} / {max} species discovered',
+  'Où : {lieu}': 'Where: {lieu}',
+  'Banc de poissons +': 'School of fish +',
+  'Ça mord :': 'Bite:',
+  'vite': 'quickly',
+  'Se cuisine': 'Can be cooked',
+  'Les bancs sont des remous dans l’eau profonde (mer et lacs).':
+    'Schools are ripples in deep water (sea and lakes).',
+  'Approche-toi et appuie sur': 'Go up to one and press',
+  'pour lancer ; quand ça mord': 'to cast; when it bites',
+  'appuie vite sur': 'quickly press',
+  'pour ferrer.': 'to hook it.',
+  'Plus ton niveau est haut, meilleure est la qualité des prises.':
+    'The higher your level, the better the quality of your catches.',
+  'Tes poissons sont des objets de ton sac (I), par piles de 100.':
+    'Your fish are items in your bag (I), in stacks of 100.',
+  'Pêchés': 'Caught',
+  'Attaque le gibier': 'Attack the game',
+  'Arc ou bâton pour les craintifs': 'Bow or staff for the skittish ones',
+  'Viande à cuisiner': 'Meat to cook',
+  'Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales.':
+    'Hunt small game with your weapon (normal attack): hares, deer, wild sheep, frogs and astral beasts.',
+  'Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin.':
+    'Skittish animals flee as you approach: a bow or a staff reaches them from afar.',
+  'Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité.':
+    'Each catch gives meat to cook; the higher your level, the better its quality.',
+  'Ta viande est un objet de ton sac (I), par piles de 100.':
+    'Your meat is an item in your bag (I), in stacks of 100.',
+  'Chassés': 'Hunted',
+  'Tu es près d’une cuisinière : tu peux cuisiner.': 'You are near a stove: you can cook.',
+  'Va près d’une cuisinière : Marmite dorée (camp) ou refuge.':
+    'Go near a stove: Golden Pot (camp) or a shelter.',
+  '1 ingrédient = 1 repas': '1 ingredient = 1 meal',
+  'Qualité max :': 'Max quality:',
+  '6 s, reste immobile': '6 s, stand still',
+  'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (':
+    'A fish, meat or herb gives a meal of its quality, capped by your cooking level (',
+  'Il y a donc un bouton par qualité d’ingrédient.': 'So there is one button per ingredient quality.',
+  'Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière.':
+    'Preparing a meal takes 6 s (a bit longer in batches): stand still near the stove.',
+  'Les cuisinières : La Marmite dorée au Camp de l’Aurore et les refuges.':
+    'Stoves: The Golden Pot at the Dawn Camp, and the shelters.',
+  'Pas de {nom} dans ton sac.': 'No {nom} in your bag.',
+  '{nom} ({qualite}) : encore {n} s': '{nom} ({qualite}): {n} s left',
+  'Repas rapide (PV, mana) dans {n} s': 'Quick meal (HP, mana) in {n} s',
+  'PV / mana : 20 s entre deux': 'HP / mana: 20 s between two',
+  'Un seul bonus à la fois': 'Only one bonus at a time',
+  'Manger': 'Eat',
+  'Ton garde-manger est vide : pêche, puis cuisine près d’un feu.':
+    'Your pantry is empty: fish, then cook near a fire.',
+  'Cuisiner': 'Cook',
+  'Enchanteur niveau {n} requis pour le {metal} (tu es niveau {m}).':
+    'Enchanter level {n} required for {metal} (you are level {m}).',
+  'Ce filon est épuisé : il se reforme bientôt.': 'This vein is depleted: it will re-form soon.',
+  'Déjà cueillie : elle repousse bientôt.': 'Already picked: it will grow back soon.',
+  'Sac plein : fais de la place pour récolter.': 'Bag full: make room to gather.',
+  'Les enchantements se fabriquent à une forge : celle du Camp de l’Aurore, ou celle de la Forteresse de Durgrim (Tréfonds).':
+    'Enchantments are made at a forge: the one at the Dawn Camp, or the one in the Fortress of Durgrim (Depths).',
+  'Sac plein : impossible de ranger l’enchantement.': 'Bag full: cannot store the enchantment.',
+  'Il faut {n} {minerai} pour cet enchantement.': 'You need {n} {minerai} for this enchantment.',
+  '{n} × {nom} ({metal}) créé.': '{n} × {nom} ({metal}) created.',
+  '{n} × {nom} ({metal}) créés.': '{n} × {nom} ({metal}) created.',
+  'Choisis une pièce d’équipement (pas un artefact).': 'Choose a piece of gear (not an artifact).',
+  '{objet} : enchantement remplacé, +{n} {stat}.': '{objet}: enchantment replaced, +{n} {stat}.',
+  '{objet} : +{n} {stat}.': '{objet}: +{n} {stat}.',
+  'Termine d’abord ce que tu fais.': 'Finish what you are doing first.',
+  'Va à la forge du Camp de l’Aurore pour fabriquer un enchantement.':
+    'Go to the Dawn Camp forge to make an enchantment.',
+  'Sac plein : libère une case pour ranger l’enchantement.':
+    'Bag full: free a slot to store the enchantment.',
+  'Interrompu : reste immobile pendant le travail.': 'Interrupted: stand still while working.',
+  '[E] Miner': '[E] Mine',
+  '[E] Cueillir': '[E] Gather',
+  'Filon +': 'Ore vein +',
+  '1 à 3 minerais': '1 to 3 ores',
+  'Repousse en 90 s': 'Regrows in 90 s',
+  'Pour l’Enchantement': 'For Enchanting',
+  'Les filons sont des rochers aux éclats colorés. Un métal par biome :':
+    'Ore veins are rocks with colored shards. One metal per biome:',
+  'Les Tréfonds ont aussi des minerais rares, qui ne servent pas aux enchantements mais se vendent très cher.':
+    'The Depths also have rare ores, which are not used for enchantments but sell for a lot.',
+  'Plus ton niveau est haut, meilleure est la qualité.': 'The higher your level, the better the quality.',
+  'Minerais dans ton sac': 'Ores in your bag',
+  'Aucun minerai pour l’instant.': 'No ores yet.',
+  'Herbe +': 'Herb +',
+  'Infusions (Cuisine)': 'Infusions (Cooking)',
+  'Les herbes sauvages sont de petites plantes fleuries. Une herbe par biome :':
+    'Wild herbs are small flowering plants. One herb per biome:',
+  'Herbes dans ton sac': 'Herbs in your bag',
+  'Aucune herbe pour l’instant.': 'No herbs yet.',
+  'Tu es à la forge : tu peux fabriquer.': 'You are at the forge: you can craft.',
+  'Va à une forge pour fabriquer : Camp de l’Aurore (à l’est du feu) ou Forteresse de Durgrim (Tréfonds).':
+    'Go to a forge to craft: Dawn Camp (east of the fire) or Fortress of Durgrim (Depths).',
+  '{n} minerais du même métal = 1 enchantement': '{n} ores of the same metal = 1 enchantment',
+  'Toutes les qualités comptent': 'All qualities count',
+  'Ton niveau : +{n} % de force': 'Your level: +{n}% strength',
+  'Choisis la statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort, mais il demande un niveau d’enchanteur plus haut (':
+    'Choose the stat, then the metal: the rarer the metal, the stronger the enchantment, but it requires a higher enchanting level (',
+  'Les minerais les moins bons partent en premier.': 'The lowest-quality ores are used first.',
+  'Fabriquer prend 10 s (2 s de plus par enchantement en série) : reste immobile.':
+    'Crafting takes 10 s (2 s more per enchantment in a batch): stand still.',
+  'Posé sur une pièce d’équipement (n’importe où), l’enchantement lui ajoute sa statistique en troisième secondaire ; un nouveau remplace l’ancien.':
+    'Applied to a piece of gear (anywhere), the enchantment adds its stat as a third secondary; a new one replaces the old one.',
+  'Ton niveau d’enchanteur renforce de {n} % ceux que tu poses.':
+    'Your enchanting level strengthens the ones you apply by {n}%.',
+  'Enchanteur niv. {n}': 'Enchanter lv. {n}',
+  'Il manque {n} minerai': '{n} ore missing',
+  'Il manque {n} minerais': '{n} ores missing',
+  'Va à la forge': 'Go to the forge',
+  'tu en as {n}': 'you have {n}',
+  'Poser un enchantement': 'Apply an enchantment',
+  'Aucun enchantement dans ton sac.': 'No enchantments in your bag.',
+  'Puis clique la pièce à enchanter': 'Then click the piece to enchant',
+  '(portée)': '(worn)',
+  'actuel : +{n} {stat}': 'current: +{n} {stat}',
+  'deviendra : +{n} {stat}': 'will become: +{n} {stat}'
 };
