@@ -1,0 +1,60 @@
+# Jeu installable (electron-builder) : npm run dist:linux, npm run dist:win (voir README, « Distribuer le jeu »).
+# Chaque système reçoit deux formes :
+#   - un installable pour les joueurs (Windows : installateur .exe ; Linux : AppImage, un seul fichier exécutable) ;
+#   - le dossier du jeu en archive (zip, tar.gz) : c'est ce qu'on envoie à Steam, qui installe et met à jour lui-même.
+appId: io.github.harunashi75.legendofnashi
+productName: The Legend of Nashi
+copyright: Copyright © 2026 harunashi75
+artifactName: Legend-of-Nashi-${version}-${os}-${arch}.${ext}
+
+directories:
+  output: dist
+  buildResources: build
+
+# Contenu du jeu livré : l'application, le HTML assemblé, le relais du coopératif (héberger une partie) et les règles
+# partagées qu'il utilise. Les sources du jeu, les tests et les outils ne sont pas livrés.
+files:
+  - package.json
+  - app/**
+  - CANAAN_ONLINE_V*.html
+  - relay/server.cjs
+  - src/canaan/shared/**
+  - '!src/canaan/shared/jsconfig.json'
+asar: true
+# Seule la langue du jeu est gardée parmi les traductions de Chromium (menus système, boîtes de dialogue).
+electronLanguages: [fr, en-US]
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: The Legend of Nashi
+  # Les sauvegardes (dossier de données) restent quand on désinstalle le jeu.
+  deleteAppDataOnUninstall: false
+
+linux:
+  icon: build/icon.png
+  category: Game
+  executableName: legend-of-nashi
+  # Associe la fenêtre du jeu à son raccourci (icône dans la barre des tâches) : desktopName de package.json.
+  syncDesktopName: true
+  synopsis: RPG d'action en pixel art, solo ou en coopératif
+  description: RPG d'action en pixel art, en vue de dessus, une île à six biomes, des donjons, des raids et un mode coopératif en ligne.
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: tar.gz
+      arch: [x64]
+
+# Aucune publication automatique : la release GitHub joint elle-même les fichiers (release.yml).
+publish: null

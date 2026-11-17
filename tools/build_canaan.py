@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import os
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,7 +23,8 @@ def read_version():
 VERSION = read_version()
 # Nom du HTML généré, déduit de la version.
 OUTPUT = ROOT / ('CANAAN_ONLINE_V' + VERSION.replace('.', '_') + '.html')
-ESBUILD = ROOT / 'node_modules' / '.bin' / 'esbuild'
+# Sous Windows, npm installe le lanceur sous le nom esbuild.cmd (le fichier esbuild est un script shell).
+ESBUILD = ROOT / 'node_modules' / '.bin' / ('esbuild.cmd' if os.name == 'nt' else 'esbuild')
 
 
 def bundle(entry):
@@ -80,7 +82,8 @@ def main():
             parser.exit(1, 'HTML différent des sources. Exécuter python3 tools/build_canaan.py\n')
         print('HTML autonome à jour.')
     else:
-        OUTPUT.write_text(html, encoding='utf-8')
+        # Fins de ligne \n sur tous les systèmes (write_text les changerait en \r\n sous Windows).
+        OUTPUT.write_bytes(html.encode('utf-8'))
         print(f'HTML autonome généré : {OUTPUT.name} ({len(html.encode("utf-8"))} octets)')
 
 

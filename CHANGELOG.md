@@ -4,6 +4,10 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ## [Non publié]
 
+### Ajouté
+- Jeu installable, sans navigateur : installateur `.exe` et `.zip` pour Windows, AppImage et `.tar.gz` pour Linux (`npm run dist:win`, `npm run dist:linux`, electron-builder). Les archives contiennent le dossier du jeu, prêt pour Steam. Icône provisoire en pixel art.
+- La release GitHub construit le jeu pour Windows et Linux, lance chaque version installée pour de vrai (menu, nouvelle aventure, sauvegarde sur disque, relais du coopératif ; `tools/smoke_package.cjs`) puis la publie.
+
 ### Corrigé
 - Trois lectures des anciens noms globaux (`monsters`, `projectiles`, `inventory`) avaient échappé au garde-fou : une expression régulière ignorait `...monsters`. Le garde-fou analyse maintenant les portées de tous les scripts du manifeste, sous-dossiers compris.
 - La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.

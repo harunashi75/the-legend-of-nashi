@@ -4,6 +4,7 @@
   "version": "1.9.7",
   "private": true,
   "description": "The Legend of Nashi — application de bureau (Electron).",
+  "desktopName": "legend-of-nashi.desktop",
   "main": "app/main.js",
   "scripts": {
     "build": "python3 tools/build_canaan.py",
@@ -15,11 +16,14 @@
     "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "start": "python3 tools/build_canaan.py && node tools/run_app.cjs",
     "app": "node tools/run_app.cjs",
+    "dist:linux": "python3 tools/build_canaan.py && electron-builder --linux",
+    "dist:win": "python3 tools/build_canaan.py && electron-builder --win",
     "relay": "node relay/server.cjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "electron": "44.9.3",
+    "electron-builder": "26.18.1",
     "esbuild": "0.28.2",
     "eslint": "10.13.0",
     "eslint-scope": "9.1.2",
@@ -30,5 +34,6 @@
   },
   "dependencies": {
     "ws": "8.22.0"
-  }
+  },
+  "author": "harunashi75"
 }

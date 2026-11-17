@@ -1,6 +1,9 @@
-# Release : pousser un tag vX.Y.Z (identique à CANAAN_VERSION de runtime-config.js) assemble le HTML
-# autonome, relance les régressions, puis publie une release GitHub avec le HTML en pièce jointe.
-#   git tag v1.9.6 && git push origin v1.9.6
+# Release : pousser un tag vX.Y.Z (identique à CANAAN_VERSION de runtime-config.js) vérifie le jeu, construit le jeu
+# installable pour Linux et Windows, lance chacun pour de vrai (test de fumée), puis publie une release GitHub avec :
+#   - le HTML autonome (jouable dans un navigateur) ;
+#   - Windows : l'installateur .exe et le dossier du jeu en .zip (pour Steam) ;
+#   - Linux : l'AppImage et le dossier du jeu en .tar.gz (pour Steam).
+#   git tag v1.9.7 && git push origin v1.9.7
 name: Release
 
 on:
@@ -11,26 +14,22 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  verifier:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 26
           cache: npm
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Dépendances
         run: npm ci
-
       - name: Tag et version du jeu identiques
         run: |
           version=$(node -p "require('./package.json').version")
@@ -38,23 +37,78 @@ jobs:
             echo "Le tag ${GITHUB_REF_NAME} ne correspond pas à la version ${version}." >&2
             exit 1
           fi
-
       - name: Assemblage du HTML autonome
         run: npm run build
-
       - name: Régressions
         run: npm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: html
+          path: CANAAN_ONLINE_V*.html
 
+  installable:
+    needs: verifier
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: --linux
+            exe: dist/linux-unpacked/legend-of-nashi
+            run: xvfb-run -a
+          - os: windows-latest
+            target: --win
+            exe: dist/win-unpacked/The Legend of Nashi.exe
+            run: ''
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      # electron-builder télécharge lui-même l'Electron du jeu livré.
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dépendances
+        run: npm ci
+      - name: Assemblage du HTML autonome
+        run: python tools/build_canaan.py
+      - name: Jeu installable
+        run: npx electron-builder ${{ matrix.target }}
+      - name: Test de fumée du jeu installé
+        shell: bash
+        run: ${{ matrix.run }} node tools/smoke_package.cjs "${{ matrix.exe }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jeu-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.AppImage
+            dist/*.tar.gz
+
+  publier:
+    needs: installable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: fichiers
+          merge-multiple: true
       - name: Publication
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          file=$(ls CANAAN_ONLINE_V*.html)
           notes=$(awk -v v="${GITHUB_REF_NAME#v}" '
             $0 ~ "^## \\[" v "\\]" { on = 1; next }
             on && /^## \[/ { exit }
             on { print }
           ' CHANGELOG.md)
-          gh release create "${GITHUB_REF_NAME}" "${file}" \
+          gh release create "${GITHUB_REF_NAME}" fichiers/* \
             --title "The Legend of Nashi ${GITHUB_REF_NAME}" \
             --notes "${notes:-Voir CHANGELOG.md}"
