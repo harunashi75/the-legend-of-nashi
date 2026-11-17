@@ -1075,13 +1075,15 @@
       (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) +
       '<span class="skill-label">' +
       escape(c.special.name) +
-      '</span><div class="key" data-pad="↑">F</div><div class="cd" style="display:none"></div>';
+      '</span><div class="key" data-pad="↑">' +
+      escape(CANAAN_KEYS.labelOf('special')) +
+      '</div><div class="cd" style="display:none"></div>';
     el.style.setProperty('--skill-element', c.color);
     bar.appendChild(el);
   }
-  // Touche F (et clic sur la case du sort spécial).
+  // Touche du sort de classe (F par défaut, Paramètres → Clavier) et clic sur la case du sort spécial.
   addEventListener('keydown', e => {
-    if (e.repeat || document.activeElement === chatInput || (e.key !== 'f' && e.key !== 'F')) return;
+    if (e.repeat || document.activeElement === chatInput || !CANAAN_KEYS.is(e, 'special')) return;
     if (!started || paused || modalOpen()) return;
     useSpecial();
   });

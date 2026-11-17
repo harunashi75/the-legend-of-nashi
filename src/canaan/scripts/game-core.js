@@ -194,16 +194,16 @@ let particles = [],
 const keys = {};
 // Touches des fenêtres : la même touche ferme sa fenêtre, une autre passe directement à la sienne.
 const CANAAN_PANEL_KEYS = {
-  t: 'toggleTalents',
-  i: 'toggleInventory',
-  c: 'toggleCharacter',
-  m: 'toggleMap',
-  g: 'toggleGroup',
-  j: 'toggleTrade',
-  p: 'toggleProfessions',
-  l: 'toggleJournal',
-  y: 'toggleAchievements',
-  v: 'toggleWardrobe'
+  talents: 'toggleTalents',
+  inventory: 'toggleInventory',
+  character: 'toggleCharacter',
+  map: 'toggleMap',
+  group: 'toggleGroup',
+  trade: 'toggleTrade',
+  professions: 'toggleProfessions',
+  journal: 'toggleJournal',
+  achievements: 'toggleAchievements',
+  wardrobe: 'toggleWardrobe'
 };
 let canaanPanelOpen = null,
   canaanPanelOpening = null,
@@ -234,8 +234,8 @@ function canaanTrackPanels() {
       return r;
     };
 }
-function canaanPanelKey(k) {
-  const name = CANAAN_PANEL_KEYS[k];
+function canaanPanelKey(action) {
+  const name = action && Object.hasOwn(CANAAN_PANEL_KEYS, action) ? CANAAN_PANEL_KEYS[action] : null;
   if (!name || typeof window[name] !== 'function') return false;
   canaanTrackPanels();
   if (!modalOpen()) return false;
@@ -250,6 +250,8 @@ addEventListener('keydown', e => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   let k = e.key.toLowerCase();
   if (!started) return;
+  // Action de la touche selon les Paramètres → Clavier (ou envoyée directement par la manette).
+  const action = CANAAN_KEYS.actionOf(e);
   if (k === 'escape') {
     e.preventDefault();
     if (modalOpen()) {
@@ -273,7 +275,7 @@ addEventListener('keydown', e => {
     !e.ctrlKey &&
     !e.altKey &&
     !e.metaKey &&
-    canaanPanelKey(k)
+    canaanPanelKey(action)
   ) {
     e.preventDefault();
     return;
@@ -281,71 +283,39 @@ addEventListener('keydown', e => {
   if (paused || modalOpen()) return;
   canaanTrackPanels();
   keys[k] = true;
-  // Roulade d'esquive : Maj ou Espace, dans la direction du déplacement (sinon vers la visée).
-  if ((k === 'shift' || k === ' ') && !e.repeat) {
+  if (!action || e.repeat) return;
+  // Roulade d'esquive, dans la direction du déplacement (sinon vers la visée).
+  if (action === 'dodge') {
     e.preventDefault();
-    const dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0),
-      dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['z'] || keys['arrowup'] ? 1 : 0);
+    const [dx, dy] = canaanMoveAxes();
     canaanDodge(dx, dy);
     return;
   }
-  if (k === 'q' && !e.repeat) {
+  if (action === 'switchWeapon') {
     e.preventDefault();
     switchWeapon();
     return;
   }
-  if (k === 'e' && !e.repeat) {
-    interact();
-    return;
-  }
-  if (k === 't' && !e.repeat) {
+  if (action === 'interact') return interact();
+  if (action === 'chat') {
     e.preventDefault();
-    toggleTalents();
-    return;
+    return chatInput.focus();
   }
-  if (k === 'i' && !e.repeat) {
-    toggleInventory();
-    return;
+  if (action === 'housing') return toggleHousing();
+  if (/^skill[1-4]$/.test(action)) return useSkill(+action.slice(5) - 1);
+  if (Object.hasOwn(CANAAN_PANEL_KEYS, action)) {
+    e.preventDefault();
+    window[CANAAN_PANEL_KEYS[action]]();
   }
-  if (k === 'c' && !e.repeat) {
-    toggleCharacter();
-    return;
-  }
-  if (k === 'm' && !e.repeat) {
-    toggleMap();
-    return;
-  }
-  if (k === 'g' && !e.repeat) {
-    toggleGroup();
-    return;
-  }
-  if (k === 'j' && !e.repeat) {
-    toggleTrade();
-    return;
-  }
-  if (k === 'p' && !e.repeat) {
-    toggleProfessions();
-    return;
-  }
-  if (k === 'h' && !e.repeat) {
-    toggleHousing();
-    return;
-  }
-  if (k === 'l' && !e.repeat) {
-    toggleJournal();
-    return;
-  }
-  if (k === 'y' && !e.repeat) {
-    toggleAchievements();
-    return;
-  }
-  if (k === 'v' && !e.repeat) {
-    toggleWardrobe();
-    return;
-  }
-  if (e.key >= '1' && e.key <= '4' && !e.repeat) useSkill(+e.key - 1);
-  if (e.key === 'Enter') chatInput.focus();
 });
+// Direction voulue au clavier : touches choisies dans les Paramètres, et toujours les flèches.
+function canaanMoveAxes() {
+  const on = (id, arrow) => keys[arrow] || CANAAN_KEYS.held(keys, id);
+  return [
+    (on('moveRight', 'arrowright') ? 1 : 0) - (on('moveLeft', 'arrowleft') ? 1 : 0),
+    (on('moveDown', 'arrowdown') ? 1 : 0) - (on('moveUp', 'arrowup') ? 1 : 0)
+  ];
+}
 addEventListener('keyup', e => (keys[e.key.toLowerCase()] = false));
 cv.addEventListener('mousedown', e => {
   // Mode décoration de la maison : le clic pose, déplace ou retire un meuble (pas d'attaque).
@@ -856,8 +826,7 @@ let canaanCampLife = {
 // Entrées du joueur → intention du héros (direction voulue et point visé), lue par la simulation.
 function readInput() {
   const intent = game.hero.intent;
-  intent.dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
-  intent.dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['z'] || keys['arrowup'] ? 1 : 0);
+  [intent.dx, intent.dy] = canaanMoveAxes();
   intent.attack = CANAAN_BASIC_ATTACK.wanted();
   intent.aimX = mouseWorldX;
   intent.aimY = mouseWorldY;

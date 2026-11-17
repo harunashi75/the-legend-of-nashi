@@ -651,7 +651,7 @@
     renderBar();
     return true;
   }
-  // Échap annule le meuble en main avant de mettre le jeu en pause ; R tourne le meuble.
+  // Échap annule le meuble en main avant de mettre le jeu en pause ; R (Paramètres → Clavier) tourne le meuble.
   addEventListener(
     'keydown',
     e => {
@@ -660,7 +660,7 @@
         ui.selected = null;
         ui.moving = false;
         renderBar();
-      } else if (e.key === 'r' || e.key === 'R') turn();
+      } else if (CANAAN_KEYS.is(e, 'houseRotate')) turn();
       else return;
       e.stopImmediatePropagation();
       e.preventDefault();

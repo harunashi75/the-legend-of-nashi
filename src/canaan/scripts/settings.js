@@ -1,7 +1,7 @@
-// Paramètres (écran d'accueil, menu pause, barre du haut) : son (bouton et volumes, gérés par audio.js), affichage
-// (plein écran, résolution de la fenêtre, échelle, synchronisation verticale, limite et compteur d'images par seconde),
-// graphismes et confort (lueurs, particules et vent, secousses de l'écran, chiffres de dégâts), manette (commandes,
-// vibrations), et Quitter le jeu.
+// Paramètres (écran d'accueil, menu pause, barre du haut), rangés en onglets : Audio (bouton et volumes, gérés par
+// audio.js), Affichage (plein écran, résolution de la fenêtre, échelle, synchronisation verticale), Graphismes (lueurs,
+// particules et vent, limite et compteur d'images par seconde), Interface (taille des textes, chiffres de dégâts,
+// secousses de l'écran), Clavier (touches réglables, keybinds.js), Manette (commandes, vibrations), et Quitter le jeu.
 // Dans l'application de bureau, la fenêtre est réglée par Electron (canaanDesktop.display) ; dans un navigateur, seul
 // le plein écran est possible. Les réglages du jeu sont gardés dans les préférences de l'appareil.
 (() => {
@@ -14,8 +14,10 @@
   const TEXT_SCALES = [1, 1.1, 1.25, 1.4, 1.6];
   let textScale = 1.25;
   const prefs = () => CANAAN_PREFERENCES.read('settings', {});
+  const TABS = ['audio', 'display', 'graphics', 'interface', 'keyboard', 'gamepad'];
   let shown = false,
-    state = null;
+    state = null,
+    tab = 'audio';
   const isOpen = () => shown;
   const $ = id => document.getElementById(id);
   const setText = (id, text, on) => {
@@ -92,15 +94,35 @@
     }
     refresh();
   }
+  // Onglets : un seul panneau visible ; le dernier onglet ouvert est gardé jusqu'à la fermeture du jeu.
+  function settingsTab(name) {
+    if (!TABS.includes(name)) return;
+    tab = name;
+    CANAAN_KEYS.stopCapture();
+    for (const button of document.querySelectorAll('#settingsCard .settings-tab')) {
+      const on = button.dataset.tab === name;
+      button.classList.toggle('active', on);
+      button.setAttribute('aria-selected', on ? 'true' : 'false');
+    }
+    for (const pane of document.querySelectorAll('#settingsCard .settings-pane'))
+      pane.hidden = pane.dataset.pane !== name;
+    if (name === 'keyboard') CANAAN_KEYS.render();
+  }
+  function settingsTabStep(dir) {
+    const i = TABS.indexOf(tab);
+    settingsTab(TABS[(i + (dir > 0 ? 1 : -1) + TABS.length) % TABS.length]);
+  }
   function openSettings() {
     if (!screen) return;
     shown = true;
     screen.classList.add('visible');
+    settingsTab(tab);
     refresh();
     pull();
   }
   function closeSettings() {
     shown = false;
+    CANAAN_KEYS.stopCapture();
     screen?.classList.remove('visible');
   }
   function settingsToggle(key) {
@@ -173,14 +195,19 @@
     state = next;
     refresh();
   });
-  // Échap ferme les paramètres (sur l'écran d'accueil comme en jeu), avant tout autre usage de la touche.
+  // Échap ferme les paramètres (sur l'écran d'accueil comme en jeu), avant tout autre usage de la touche ;
+  // Q et E changent d'onglet.
   addEventListener(
     'keydown',
     e => {
-      if (e.key !== 'Escape' || !isOpen()) return;
+      if (!isOpen() || e.target?.closest?.('input:not([type="range"]), textarea')) return;
+      const k = e.key.toLowerCase();
+      if (k === 'escape') closeSettings();
+      else if ((k === 'q' || k === 'e') && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey)
+        settingsTabStep(k === 'e' ? 1 : -1);
+      else return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      closeSettings();
     },
     true
   );
@@ -190,7 +217,9 @@
     settingsToggle,
     settingsStep,
     settingsRestart,
+    settingsTab,
+    settingsTabStep,
     quitGame,
-    CANAAN_SETTINGS: Object.freeze({ isOpen, refresh, state: () => state })
+    CANAAN_SETTINGS: Object.freeze({ isOpen, refresh, state: () => state, tab: () => tab })
   });
 })();

@@ -7,24 +7,25 @@
 // 1 à 4, croix : ↑ sort de classe, ↓ changer d'arme, ← carte, → sac ; Start pause ; View ouvre la barre des menus.
 // Dans les menus : croix ou stick gauche pour choisir, A valider, B retour, stick droit pour faire défiler.
 //
-// Les boutons du jeu passent par les mêmes touches que le clavier (événements keydown / keyup) : chaque action garde
-// une seule implémentation. La manette prend la main dès qu'on la touche ; la souris ou le clavier la reprennent dès
+// Les boutons du jeu passent par les mêmes événements que le clavier (keydown / keyup) et nomment leur action
+// (CANAAN_KEYS) : chaque action garde une seule implémentation, et changer les touches du clavier ne dérègle pas la
+// manette. La manette prend la main dès qu'on la touche ; la souris ou le clavier la reprennent dès
 // qu'on s'en sert.
 (() => {
   'use strict';
   const B = PAD_BUTTONS;
-  // Boutons de jeu → touche du clavier qui fait la même action.
+  // Boutons de jeu → action du clavier (Paramètres → Clavier) ; Start fait Échap.
   const BUTTON_KEYS = {
-    [B.A]: 'e',
-    [B.B]: ' ',
-    [B.X]: '1',
-    [B.Y]: '2',
-    [B.LB]: '3',
-    [B.RB]: '4',
-    [B.UP]: 'f',
-    [B.DOWN]: 'q',
-    [B.LEFT]: 'm',
-    [B.RIGHT]: 'i',
+    [B.A]: 'interact',
+    [B.B]: 'dodge',
+    [B.X]: 'skill1',
+    [B.Y]: 'skill2',
+    [B.LB]: 'skill3',
+    [B.RB]: 'skill4',
+    [B.UP]: 'special',
+    [B.DOWN]: 'switchWeapon',
+    [B.LEFT]: 'map',
+    [B.RIGHT]: 'inventory',
     [B.START]: 'escape'
   };
   const ATTACKS = { [B.RT]: 0, [B.LT]: 2 }; // bouton de souris équivalent : gauche rapide, droit lourde
@@ -79,12 +80,15 @@
   });
 
   // ---------------------------------------------------------------- Touches simulées
+  // key : 'escape' ou une action de CANAAN_KEYS (envoyée avec la touche qui lui est attribuée, s'il y en a une).
   function send(type, key) {
+    const action = key === 'escape' ? null : key;
     const event = new KeyboardEvent(type, {
-      key: key === 'escape' ? 'Escape' : key,
+      key: action ? CANAAN_KEYS.primary(action) || 'Unidentified' : 'Escape',
       bubbles: true,
       cancelable: true
     });
+    if (action) event.canaanAction = action;
     document.dispatchEvent(event);
   }
   function keyDown(key) {
@@ -309,6 +313,9 @@
     for (const b of edges.down) {
       if (b === B.A && focus) activate(focus);
       else if (b === B.B) back(scope);
+      // LB / RB : onglet précédent ou suivant (Paramètres).
+      else if ((b === B.LB || b === B.RB) && scope.querySelector?.('.settings-tabs'))
+        settingsTabStep(b === B.RB ? 1 : -1);
       else if (b === B.START) {
         if (scope.id === 'menuButtons') menuBar = false;
         else {
@@ -368,30 +375,34 @@
     });
   }
   // Texte d'aide avec le bouton de la manette à la place de la touche : « [E] Entrer » → « [A] Entrer ».
+  // Au clavier, la touche choisie dans les Paramètres → Clavier : « [E] Entrer » → « [R] Entrer ».
   function keyText(text) {
-    if (!active) return text;
-    const swap = key => padLabel(key.toLowerCase()) || key;
+    if (!active && !CANAAN_KEYS.customized()) return text;
+    const swap = key => (active ? padLabel(key.toLowerCase()) : CANAAN_KEYS.fromDefault(key)) || key;
     return String(text)
       .replace(/\[([A-Za-z0-9])\]/g, (_, k) => '[' + swap(k) + ']')
       .replace(/\(([A-Z])\)/g, (_, k) => '(' + swap(k) + ')')
       .replace(/(appuie sur |touche )([A-Z])\b/g, (_, w, k) => w + swap(k));
   }
   // Partout où le jeu écrit une touche (libellés « [E] Entrer » sur le canevas, messages, chat), la manette affiche son
-  // bouton : un seul point de passage au lieu de chaque libellé (comme les icônes à la place des émojis).
+  // bouton et le clavier la touche choisie : un seul point de passage au lieu de chaque libellé (comme les icônes à
+  // la place des émojis).
   const mayHaveKey = text =>
-    typeof text === 'string' && (text.includes('[') || text.includes('(') || text.includes(' E'));
+    (active || CANAAN_KEYS.customized()) &&
+    typeof text === 'string' &&
+    (text.includes('[') || text.includes('(') || text.includes(' E'));
   if (typeof CanvasRenderingContext2D === 'function') {
     const proto = CanvasRenderingContext2D.prototype;
     for (const name of ['fillText', 'strokeText', 'measureText']) {
       const original = proto[name];
       proto[name] = function (text, ...rest) {
-        return original.call(this, active && mayHaveKey(text) ? keyText(text) : text, ...rest);
+        return original.call(this, mayHaveKey(text) ? keyText(text) : text, ...rest);
       };
     }
   }
   for (const name of ['notify', 'chat']) {
     const show = game.view[name];
-    game.view[name] = (...args) => show(...args.map(a => (active && mayHaveKey(a) ? keyText(a) : a)));
+    game.view[name] = (...args) => show(...args.map(a => (mayHaveKey(a) ? keyText(a) : a)));
   }
   window.CANAAN_GAMEPAD = Object.freeze({
     poll,

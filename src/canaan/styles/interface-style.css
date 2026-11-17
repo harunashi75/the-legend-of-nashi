@@ -1288,26 +1288,78 @@ body.layout-edit #ui .panel[data-movable='1'] {
 #settingsCard .settings-row[hidden] {
   display: none;
 }
-/* Paramètres : deux colonnes sur grand écran (Son et Graphismes à gauche, Affichage à droite). */
+/* Paramètres : onglets (Audio, Affichage, Graphismes, Interface, Clavier, Manette), un panneau à la fois.
+   La carte garde une hauteur fixe pour ne pas sauter d'un onglet à l'autre. */
 #settingsCard {
-  width: min(900px, 96vw);
+  width: min(760px, 96vw);
+  display: flex;
+  flex-direction: column;
+  height: min(720px, 92vh);
+  overflow: hidden;
   scrollbar-color: #8a6a3a #1a120a;
 }
-#settingsCard .settings-groups {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
-  align-items: start;
+#settingsCard .settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
 }
-#settingsCard .settings-groups .settings-display {
-  grid-row: span 2;
+#settingsCard .settings-tabs .settings-tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: calc(14px * var(--font-scale));
+  cursor: var(--cursor-pointer);
+  opacity: 0.7;
+}
+#settingsCard .settings-tabs .settings-tab.active {
+  opacity: 1;
+}
+#settingsCard .settings-groups {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
+}
+#settingsCard .settings-pane[hidden] {
+  display: none;
 }
 #settingsCard .settings-step b {
   min-width: 150px;
 }
-@media (max-width: 860px) {
-  #settingsCard .settings-groups {
-    grid-template-columns: 1fr;
+/* Onglet Clavier : deux touches par action. */
+#settingsCard #setKeybinds h4 {
+  margin: 14px 0 4px;
+  font-size: calc(14px * var(--font-scale));
+  opacity: 0.85;
+}
+#settingsCard .keybind-row {
+  padding: 4px 0;
+}
+#settingsCard .keybind-keys {
+  display: flex;
+  gap: 8px;
+}
+#settingsCard .keybind-keys .keybind {
+  min-width: 110px;
+}
+#settingsCard .keybind.empty {
+  opacity: 0.55;
+}
+#settingsCard .keybind.listening {
+  animation: keybindBlink 0.9s ease-in-out infinite alternate;
+}
+@keyframes keybindBlink {
+  to {
+    filter: brightness(1.5);
+  }
+}
+@media (max-width: 560px) {
+  #settingsCard .keybind-keys .keybind {
+    min-width: 80px;
+  }
+  #settingsCard .settings-step b {
+    min-width: 100px;
   }
 }
 /* Icônes SVG du jeu (canaan-icons) à la place des émojis : à la taille du texte qui les entoure. */

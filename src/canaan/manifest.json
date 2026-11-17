@@ -112,6 +112,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-keybinds",
+      "file": "scripts/keybinds.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-settings",
       "file": "scripts/settings.js"
     },

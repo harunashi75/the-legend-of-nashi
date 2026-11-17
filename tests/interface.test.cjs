@@ -157,7 +157,7 @@ test('Interface générée : actions autorisées, catalogue officiel, musique et
  const actionCalls=[];g.actionCalls=actionCalls;
  const stubbed=['togglePause','pauseOpenPanel','pauseToTitle','startGame','toggleMap','enterInstance','renderInventory','renderCharacter','unequip','equipReserveWeapon','buyGear'];
  run('globalThis.realActions={'+stubbed.join(',')+',restartFresh:CANAAN_PERSISTENCE.restartFresh}');
- run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','toggleHousing','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','quitGame'])
+ run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','toggleHousing','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','settingsTab','keybindReset','quitGame'])
   globalThis[name]=(...args)=>actionCalls.push([name,...args]);
   togglePause=globalThis.togglePause;pauseOpenPanel=globalThis.pauseOpenPanel;pauseToTitle=globalThis.pauseToTitle;startGame=globalThis.startGame;
   toggleMap=globalThis.toggleMap;enterInstance=globalThis.enterInstance;renderInventory=globalThis.renderInventory;
@@ -322,5 +322,69 @@ test('Icônes illustrées, taille des textes et cases carrées : chaque objet a 
  for(let i=0;i<6;i++)run('settingsStep("textscale",-1)');assert.equal(run('canaanTextScale()'),1);
  // Sac et personnage : objets en cases carrées, nom dans l'info-bulle.
  run('renderInventory()');assert.match(run('document.getElementById("window").innerHTML'),/class="bag-sale"[^>]*>🪙<\/button>/);
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Paramètres en onglets ; touches du clavier réglables, échangées en cas de conflit, gardées, suivies par le jeu et la manette',()=>{
+ const {g,run,fire,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ const html=source.slice(source.indexOf('<body'),source.indexOf('<script',source.indexOf('<body')));
+ // Six onglets, chacun avec son panneau ; seul Audio est visible au départ.
+ for(const tab of ['audio','display','graphics','interface','keyboard','gamepad']){
+  assert.match(html,new RegExp('data-action="settingsTab" data-tab="'+tab+'"'),tab);
+  assert.match(html,new RegExp('data-pane="'+tab+'" id="settingsPane-'+tab+'" role="tabpanel"'+(tab==='audio'?'>':' hidden>')),tab);
+ }
+ assert.ok(html.includes('id="setKeybinds"')&&html.includes('data-action="keybindReset"'));
+ run('openSettings();settingsTab("keyboard")');assert.equal(run('CANAAN_SETTINGS.tab()'),'keyboard');
+ run('settingsTabStep(1)');assert.equal(run('CANAAN_SETTINGS.tab()'),'gamepad');
+ run('settingsTabStep(1)');assert.equal(run('CANAAN_SETTINGS.tab()'),'audio');
+ run('settingsTab("inconnu")');assert.equal(run('CANAAN_SETTINGS.tab()'),'audio');
+ run('settingsTab("keyboard")');
+ assert.match(g.document.getElementById('setKeybinds').innerHTML,/data-action="keybindCapture" data-bind="interact" data-slot="0">E</);
+ run('closeSettings()');
+ // Défauts : ceux d'avant les réglages.
+ assert.equal(run('CANAAN_KEYS.actionOf("e")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("Z")'),'moveUp');
+ assert.equal(run('CANAAN_KEYS.actionOf(" ")'),'dodge');assert.equal(run('CANAAN_KEYS.actionOf("r")'),null);
+ assert.equal(run('CANAAN_KEYS.actionOf("r","house")'),'houseRotate');
+ // Attendre une touche, puis la prendre : R devient Interagir ; E se libère.
+ run('keybindCapture("interact",0)');assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.listening())')),{id:'interact',slot:0});
+ fire(g,'keydown',{key:'R',stopImmediatePropagation(){}});
+ assert.equal(run('CANAAN_KEYS.listening()'),null);
+ assert.equal(run('CANAAN_KEYS.actionOf("r")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("e")'),null);
+ // Tourner le meuble garde R : la maison est une autre situation.
+ assert.equal(run('CANAAN_KEYS.actionOf("r","house")'),'houseRotate');
+ // Conflit : I (Inventaire) donné à Interagir, l'Inventaire reçoit l'ancienne touche (R).
+ run('CANAAN_KEYS.bind("interact",0,"i")');
+ assert.equal(run('CANAAN_KEYS.actionOf("i")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("r")'),'inventory');
+ // Touches réservées refusées ; Échap annule l'attente ; Retour arrière vide la case.
+ assert.equal(run('CANAAN_KEYS.bind("map",0,"escape")'),false);assert.equal(run('CANAAN_KEYS.bind("map",0,"ArrowUp")'),false);
+ run('keybindCapture("map",0)');fire(g,'keydown',{key:'Escape',stopImmediatePropagation(){}});assert.equal(run('CANAAN_KEYS.primary("map")'),'m');
+ run('keybindCapture("chat",0)');fire(g,'keydown',{key:'Backspace',stopImmediatePropagation(){}});assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.keysOf("chat"))')),[]);
+ // Gardé dans les préférences de l'appareil.
+ assert.equal(run('JSON.stringify(CANAAN_PREFERENCES.read("keybinds",{}).interact)'),'["i",""]');
+ // Le jeu suit la nouvelle touche : déplacement (Avancer sur O) et inventaire (R).
+ run('CANAAN_KEYS.bind("moveUp",0,"o")');
+ run('started=true;paused=false;P.dead=false;closePanels();for(const k in keys)keys[k]=false');
+ fire(g,'keydown',{key:'o'});run('readInput()');assert.equal(run('game.hero.intent.dy'),-1);
+ fire(g,'keyup',{key:'o'});run('readInput()');assert.equal(run('game.hero.intent.dy'),0);
+ fire(g,'keydown',{key:'ArrowUp'});run('readInput()');assert.equal(run('game.hero.intent.dy'),-1,'les flèches restent');
+ fire(g,'keyup',{key:'ArrowUp'});
+ fire(g,'keydown',{key:'r'});assert.equal(run('modalOpen()'),true,'R ouvre l’inventaire');run('closePanels()');
+ // La manette envoie l'action : Interagir reste sur A même sans touche.
+ const seen=[];g.__seen=seen;run('{const real=interact;interact=()=>__seen.push("interact");globalThis.__realInteract=real}');
+ fire(g,'keydown',{key:'Unidentified',canaanAction:'interact'});run('interact=__realInteract');
+ assert.deepEqual(seen,['interact']);
+ // Textes du jeu (« [E] » des elfes et des bâtiments, « touche T ») : la touche choisie au clavier.
+ assert.equal(run('CANAAN_KEYS.customized()'),true);
+ assert.equal(run('CANAAN_GAMEPAD.keyText("[E] Parler à Ylvarë")'),'[I] Parler à Ylvarë');
+ assert.equal(run('CANAAN_GAMEPAD.keyText("Choisis ta classe (touche T)")'),'Choisis ta classe (touche T)');
+ run('CANAAN_KEYS.bind("talents",0,"k")');
+ assert.equal(run('CANAAN_GAMEPAD.keyText("Choisis ta classe (touche T)")'),'Choisis ta classe (touche K)');
+ // Étiquettes de l'interface : touche choisie, puis tout revient par défaut.
+ run('keybindReset()');
+ assert.equal(run('CANAAN_KEYS.customized()'),false);
+ assert.equal(run('CANAAN_GAMEPAD.keyText("[E] Entrer")'),'[E] Entrer');
+ assert.equal(run('CANAAN_KEYS.primary("interact")'),'e');assert.equal(run('CANAAN_KEYS.labelOf("dodge")'),'Espace');
+ assert.equal(run('CANAAN_KEYS.actionOf("w")'),'moveUp');
  assert.equal(errors.length,0,errors.join('\n'));
 });

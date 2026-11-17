@@ -30,7 +30,8 @@ function refreshWeaponBar() {
       '</span><div class="key" data-pad="' +
       ['X', 'Y', 'LB', 'RB'][i] +
       '">' +
-      (i + 1) +
+      // Touche choisie dans les Paramètres → Clavier.
+      CANAAN_KEYS.labelOf('skill' + (i + 1)).replace(/[&<>]/g, c => '&#' + c.charCodeAt(0) + ';') +
       '</div><div class="skill-badge" hidden></div><div class="cd" style="display:none"></div>';
     el.dataset.skill = i;
     el.dataset.tooltipSkill = i;

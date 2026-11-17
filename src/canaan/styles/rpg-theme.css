@@ -583,6 +583,15 @@ body {
   background: rgba(10, 6, 4, 0.45);
   border: 1px solid var(--rpg-gold-dark);
 }
+#settingsCard .settings-tab.active {
+  background: linear-gradient(180deg, #9a6e34, #5a3d1c 60%, #3e2a12);
+  color: #fff4d0;
+  box-shadow: 0 0 10px rgba(216, 168, 74, 0.45);
+}
+#settingsCard .keybind.listening {
+  color: #fff4d0;
+  border-color: #fff0a8;
+}
 #settingsCard .settings-row button.on {
   color: #b8f0a0;
 }

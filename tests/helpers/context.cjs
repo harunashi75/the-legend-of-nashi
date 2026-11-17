@@ -61,6 +61,8 @@ function game() {
     CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, elvenCity: {}, bossMechanics: {}, achievements: {}},
     // Cité elfique (elven-city.js, testée à part) : pas de bénédiction.
     CANAAN_CITY: {blessMult: () => 1, blocked: () => false},
+    // Touches du clavier (keybinds.js, testé à part) : étiquettes par défaut.
+    CANAAN_KEYS: {labelOf: id => ({skill1:'1',skill2:'2',skill3:'3',skill4:'4',special:'F'})[id] || '', is: () => false},
     document: {activeElement: null, createElement: element, getElementById: () => ({style: {display:'none'}})},
     skEl: element(), chatInput: {}, performance: {now: () => 100000},
     // Niveau des monstres (monster-scaling.js, non chargé ici) : celui qu'ils portent, 1 sinon.
