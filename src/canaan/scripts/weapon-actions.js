@@ -1,4 +1,4 @@
-/* Armes : neuf familles et le Grimoire lié de l'Invocateur, 40 compétences, ciblage et effets. */
+/* Armes : dix familles (dont le Luth) et le Grimoire lié de l'Invocateur, 44 compétences, ciblage et effets. */
 (() => {
   // Repousse un monstre loin du lanceur courant.
   function pushAway(m, distance) {
@@ -74,6 +74,7 @@
     bow: '#a7e8a0',
     staff: '#b38aff',
     shield: '#ffe4a2',
+    lute: '#ff9ad5',
     grimoire: '#a4e83c'
   };
   const now = () => performance.now() / 1000,
@@ -179,6 +180,18 @@
     } finally {
       castContext = previous;
     }
+  }
+  // Héros du groupe à moins de tiles cases du lanceur (lui compris), vivants et présents.
+  function groupNear(tiles, x = AP.x, y = AP.y) {
+    return game.heroes.filter(
+      h => !h.player.dead && !h.away && Math.hypot(h.player.x - x, h.player.y - y) < tiles * TS
+    );
+  }
+  // Soin d'un héros par le lanceur (ses bonus de soins et ses talents de soutien), avec son chiffre flottant.
+  function healHero(hero, amount, colour = '#ffc2e4') {
+    const h = canaanApplyHeal(Math.max(1, amount), false, hero, actor, true);
+    if (h > 0) float(hero.player.x, hero.player.y - 40, '+' + Math.round(h) + ' PV', colour);
+    return h;
   }
   function lifesteal(amount) {
     const n = healActor(amount * 0.15);
@@ -495,7 +508,7 @@
       a = aim(),
       c = color[type] || '#b7d8ff';
     const r =
-      type === 'bow' || type === 'staff' || type === 'grimoire'
+      type === 'bow' || type === 'staff' || type === 'lute' || type === 'grimoire'
         ? 240
         : type === 'spear'
           ? 175
@@ -645,6 +658,7 @@
         projectile(aim(), m, col, { speed: heavy ? 15 : 13 });
         break;
       case 'staff':
+      case 'lute':
       case 'grimoire':
         projectile(aim(), m, col, { mag: true, speed: heavy ? 10 : 12 });
         break;
@@ -849,7 +863,7 @@
       return true;
     });
   }
-  // Les 40 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
+  // Les 44 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
   // Les valeurs suivent le catalogue (shared/data/equipment.js) : la puissance affichée est celle infligée.
   function castSkill(type, i) {
     const focus = S.focus > 0 && isOffensiveSkill(type, i);
@@ -1075,6 +1089,42 @@
         // Invocations (summons.js) : le lanceur, la compétence, son contexte (élément, bonus) et sa visée.
         window.CANAAN_SUMMONS.cast(actor, i, { ...castContext, magic: true }, { a, ...groundTarget() });
         AP.atk = 0.28;
+        break;
+      case 'lute':
+        if (i === 0) {
+          // Note éclatante : projectile magique, et 4 % des PV max à l'allié le plus blessé à 8 cases.
+          projectile(a, 2.4, col, { mag: true, speed: 13 });
+          const hurt = groupNear(8)
+            .filter(h => h.player.hp < h.player.mhp)
+            .sort((x, y) => x.player.hp / x.player.mhp - y.player.hp / y.player.mhp)[0];
+          if (hurt) healHero(hurt, hurt.player.mhp * 0.04);
+        }
+        if (i === 1)
+          circle(140, 1.9, m => {
+            if (!m.boss && !m.worldBoss) pushAway(m, 40);
+          });
+        if (i === 2) {
+          // Chant de guérison : 12 % tout de suite, puis 2 % par seconde pendant 5 s (autour du lanceur à chaque fois).
+          ring(TS * 6, '#ffc2e4');
+          float(AP.x, AP.y - 48, '💗 CHANT DE GUÉRISON', '#ffc2e4');
+          for (const h of groupNear(6)) healHero(h, h.player.mhp * 0.12);
+          rep(5, 1, () => {
+            for (const h of groupNear(6)) healHero(h, h.player.mhp * 0.02);
+          });
+        }
+        if (i === 3) {
+          // Symphonie : 5 ondes en 2 s là où tu vises ; chacune frappe et soigne les héros dans la zone.
+          const { x, y } = groundTarget(),
+            r = TS * 3;
+          effect('ring', x, y, 0, r, 0, col, 2.2);
+          float(x, y - 60, '🎶 SYMPHONIE', '#ffc2e4');
+          rep(5, 0.5, () => {
+            splash(x, y, r, col);
+            for (const m of game.world.monsters.slice())
+              if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < r + (m.r || 0)) dmg(m, 1, true);
+            for (const h of groupNear(3, x, y)) healHero(h, h.player.mhp * 0.02);
+          });
+        }
         break;
       case 'staff':
         if (i === 0) {

@@ -13,7 +13,8 @@ export const WEAPON_NAMES = {
     'dualdagger': 'Couteaux ébréchés',
     'bow': 'Arc de foire tordu',
     'shield': 'Rondache en bois vermoulu',
-    'dualsword': 'Glaives rouillés'
+    'dualsword': 'Glaives rouillés',
+    'lute': 'Luth de taverne'
   },
   'Peu commun': {
     'sword': "Lame d'acier trempé",
@@ -24,7 +25,8 @@ export const WEAPON_NAMES = {
     'dualdagger': 'Poignards de maraudeur',
     'bow': 'Arc composite de frondeur',
     'shield': 'Pavois de milice',
-    'dualsword': "Lames jumelles d'acier"
+    'dualsword': "Lames jumelles d'acier",
+    'lute': 'Luth du ménestrel'
   },
   'Rare': {
     'sword': 'Trancheuse de mithril',
@@ -35,7 +37,8 @@ export const WEAPON_NAMES = {
     'dualdagger': 'Crocs de givre',
     'bow': 'Arc long de saphir',
     'shield': 'Écu de mithril étincelant',
-    'dualsword': 'Sabres de cristal marin'
+    'dualsword': 'Sabres de cristal marin',
+    'lute': 'Luth des troubadours'
   },
   'Épique': {
     'sword': "Lame d'éclipse",
@@ -46,7 +49,8 @@ export const WEAPON_NAMES = {
     'dualdagger': "Lames de l'assassin",
     'bow': "Grand arc de l'ombre",
     'shield': "Mur de l'éclipse",
-    'dualsword': 'Épées jumelles du crépuscule'
+    'dualsword': 'Épées jumelles du crépuscule',
+    'lute': 'Luth des sirènes'
   },
   'Légendaire': {
     'sword': "Lame de l'étincelle",
@@ -57,7 +61,8 @@ export const WEAPON_NAMES = {
     'dualdagger': 'Griffes de braise',
     'bow': 'Traverseur de flammes',
     'shield': 'Égide de écaille-ardente',
-    'dualsword': 'Trancheuses du désert ardent'
+    'dualsword': 'Trancheuses du désert ardent',
+    'lute': "Luth de l'Aurore chantante"
   },
   'Mythique': {
     'sword': 'Lame du continuum',
@@ -68,7 +73,8 @@ export const WEAPON_NAMES = {
     'dualdagger': 'Dagues de phase',
     'bow': 'Arc des constellations',
     'shield': 'Barrière de singularité',
-    'dualsword': 'Lames stellaires doubles'
+    'dualsword': 'Lames stellaires doubles',
+    'lute': 'Luth des échos éternels'
   }
 };
 /** @type {Record<string, Record<string, any>>} Nom de chaque emplacement par qualité (artifact : trois variantes). */

@@ -307,5 +307,6 @@ export const RUBIS_UTILITY_SKILLS = new Set([
   'axe:2',
   'dualdagger:2',
   'staff:2',
-  'shield:3'
+  'shield:3',
+  'lute:2'
 ]);

@@ -139,12 +139,12 @@ test('Compagnon local : suit l’hôte, combat près de lui, se relève après d
  run('runDrawPipeline()');assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Compétences pour tous les héros : les 36 compétences d’un allié, son mana, ses recharges, ses postures et ses effets différés',()=>{
+test('Compétences pour tous les héros : les 40 compétences d’un allié, son mana, ses recharges, ses postures et ses effets différés',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;game.view={notify:()=>{},chat:()=>{}}');
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-6;a<=6&&ok;a++)for(let b=-6;b<=6&&ok;b++)ok=canWalk((x+a+0.5)*TS,(y+b+0.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}globalThis.spot={x:(s.x+0.5)*TS,y:(s.y+0.5)*TS}}');
  run('P.x=spot.x-20*TS;P.y=spot.y;globalThis.hostCooldowns=JSON.stringify(weaponCooldowns)');
- const types=['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield'];
+ const types=['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield','lute'];
  const report={};
  for(const type of types){
   run('game.heroes.splice(1);globalThis.ally=canaanCreateHero({name:"Test",x:spot.x,y:spot.y,equipment:{weapon:{id:"w",slot:"weapon",ilvl:90,rarity:"Épique",weaponType:"'+type+'"}}});game.heroes.push(ally)');
@@ -159,7 +159,7 @@ test('Compétences pour tous les héros : les 36 compétences d’un allié, son
   }
  }
  // Les compétences offensives frappent (certaines sont des postures ou des soins).
- const utility=new Set(['sword:2','dualsword:2','axe:2','staff:2','shield:3','spear:2','dualdagger:2']);
+ const utility=new Set(['sword:2','dualsword:2','axe:2','staff:2','shield:3','spear:2','dualdagger:2','lute:2']);
  for(const [key,dealt] of Object.entries(report))if(!utility.has(key))assert.ok(dealt>0,key+' inflige des dégâts');
  assert.equal(run('JSON.stringify(weaponCooldowns)'),run('hostCooldowns'),'les recharges de l’hôte ne bougent pas');
  // Recharges de l'allié : elles décroissent, puis la compétence revient.

@@ -87,7 +87,7 @@ test('Sylvaëlle, la cité elfique : palissade sans trou, porte au niveau 60, Gr
  near('elfe_armurerie');run('P.gold=10000;game.hero.inventory=[]');
  assert.equal(run('CANAAN_CITY.nearArmorer(game.hero)&&nearMerchant()'),true,'Thalion achète aussi le butin');
  const view=JSON.parse(run('JSON.stringify(CANAAN_SHOP.view(game.hero))'));
- assert.equal(view.kind,'elfe');assert.equal(view.items.length,34,'(8 pièces + 9 armes) × 2 qualités');
+ assert.equal(view.kind,'elfe');assert.equal(view.items.length,36,'(8 pièces + 10 armes) × 2 qualités');
  assert.deepEqual([...new Set(view.items.map(i=>i.rarity))],['Rare','Épique']);assert.deepEqual([...new Set(view.prices)],[2500,7500]);
  assert.ok(view.items.every(i=>i.level===60&&i.origin==='elfique'));
  const weapons=view.items.filter(i=>i.slot==='weapon'&&i.rarity==='Épique').map(i=>i.weaponType);

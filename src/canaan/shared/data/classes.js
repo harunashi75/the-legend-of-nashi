@@ -1,5 +1,5 @@
 // @ts-check
-// Les cinq classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
+// Les six classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
 // Le joueur équipe 5 talents au plus parmi les 10 de sa classe (un emplacement aux niveaux 1, 10, 20, 30 et 40).
 // Une classe peut avoir une arme liée (weapon) : elle la reçoit en la choisissant et n'en manie aucune autre.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
@@ -16,7 +16,8 @@ export const ELEMENTS = deepFreeze({
   fire: { name: 'Feu', icon: '⟦el_fire⟧', color: '#ff8a3d' },
   ice: { name: 'Glace', icon: '⟦el_ice⟧', color: '#8fdcff' },
   lightning: { name: 'Foudre', icon: '⟦el_lightning⟧', color: '#f4f07a' },
-  poison: { name: 'Poison', icon: '⟦el_poison⟧', color: '#a4e83c' }
+  poison: { name: 'Poison', icon: '⟦el_poison⟧', color: '#a4e83c' },
+  harmony: { name: 'Harmonie', icon: '⟦el_harmony⟧', color: '#ff9ad5' }
 });
 export const CLASSES = deepFreeze([
   {
@@ -290,6 +291,60 @@ export const CLASSES = deepFreeze([
         'Toutes les 12 charges de Peste posées, un squelette se lève gratuitement à tes côtés. Recharge : 10 s.'
       ]
     ]
+  },
+  {
+    id: 'barde',
+    icon: '⟦cls_barde⟧',
+    name: 'Barde',
+    style: 'Soins de groupe, chants de soutien et ondes sonores',
+    spec: 'Le soigneur du groupe : il soigne en frappant et renforce ses alliés',
+    color: '#ff9ad5',
+    elements: ['harmony', 'harmony', 'harmony', 'harmony'],
+    passive: {
+      name: 'Écho mélodieux',
+      desc: 'Tes compétences d’armes résonnent d’harmonie : chaque compétence offensive soigne l’allié le plus blessé à moins de 8 cases (toi compris) de 20 % des dégâts infligés ; chaque compétence utilitaire soigne ton groupe proche de 10 % de ses PV max. Tes soins sont augmentés de 10 %.'
+    },
+    special: {
+      id: 'hymn',
+      icon: '🎶',
+      name: 'Hymne de l’Aurore',
+      desc: 'Soigne toi et tes alliés à moins de 8 cases de 15 % de leurs PV maximum, puis de 3 % par seconde pendant 6 secondes ; pendant ce temps, ils infligent 10 % de dégâts en plus.',
+      mana: 30,
+      cooldown: 40
+    },
+    talents: [
+      [
+        'Crescendo',
+        'Chaque compétence offensive augmente tes dégâts de 3 %, jusqu’à 15 %, pendant 6 secondes.'
+      ],
+      ['Ballade réparatrice', 'Augmente les soins effectués de 15 %.'],
+      [
+        'Contre-chant',
+        'Sous 40 % de PV, te soigne de 10 % des PV maximum et te donne un bouclier de 10 % pendant 5 secondes. Recharge : 40 s.'
+      ],
+      [
+        'Mélodie vivifiante',
+        'Tes soins donnent à leur cible (toi compris) +10 % de vitesse de déplacement et +5 % de dégâts pendant 4 secondes.'
+      ],
+      [
+        'Dissonance',
+        'Les ennemis touchés par tes compétences offensives subissent 8 % de dégâts en plus, de toi et de ton groupe, pendant 4 secondes.'
+      ],
+      ['Chœur', 'Ton Écho mélodieux soigne aussi un deuxième allié blessé.'],
+      [
+        'Note perçante',
+        'Les coups critiques ont 25 % de chance de libérer une onde sonore infligeant 50 % des dégâts du coup aux ennemis à moins de 2,5 cases.'
+      ],
+      ['Inspiration', 'Toutes les 4 compétences lancées, la suivante ne coûte pas de mana.'],
+      [
+        'Ritournelle',
+        'Les soins qui dépassent les PV maximum deviennent un bouclier, jusqu’à 10 % des PV maximum de la cible pendant 5 secondes.'
+      ],
+      [
+        'Grand final',
+        'Toutes les 6 compétences offensives, un accord final inflige 120 % de l’Attaque aux ennemis à moins de 4 cases et soigne ton groupe proche de 8 % de ses PV max. Recharge : 12 s.'
+      ]
+    ]
   }
 ]);
 export const CLASS_IDS = Object.freeze(CLASSES.map(c => c.id));
@@ -301,5 +356,6 @@ export const UTILITY_SKILLS = Object.freeze([
   'axe:2',
   'dualdagger:2',
   'staff:2',
-  'shield:3'
+  'shield:3',
+  'lute:2'
 ]);

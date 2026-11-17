@@ -1,9 +1,10 @@
-// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste, Invocateur.
+// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste, Invocateur, Barde.
 // Chaque héros a une classe et jusqu'à 5 talents équipés parmi les 10 de sa classe (hero.classe, sauvegardé) ;
 // l'état de leurs effets (boucliers, minuteurs, compteurs) n'est pas sauvegardé. Les compétences d'armes prennent
 // l'élément de la classe ; la touche F lance le sort spécial (Forme féline, Lumière divine, Voile d'ombre,
-// Avatar élémentaire, Contagion). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ;
+// Avatar élémentaire, Contagion, Hymne de l'Aurore). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ;
 // l'hôte par défaut. L'Invocateur pose la Peste (charges cumulables) ; ses invocations vivent dans summons.js.
+// Le Barde soigne en frappant (Écho mélodieux) et renforce son groupe (Hymne de l'Aurore).
 (() => {
   'use strict';
   const runtimes = new WeakMap();
@@ -45,10 +46,24 @@
       bloodReady: 0,
       harvest: 0,
       harvestReady: 0,
+      // Barde : Hymne de l'Aurore reçu (soin par seconde et dégâts), Mélodie vivifiante reçue, Crescendo,
+      // Contre-chant, Inspiration et Grand final.
+      hymnUntil: 0,
+      hymnTick: 0,
+      hymnBy: null,
+      vivifyUntil: 0,
+      crescendo: 0,
+      crescendoUntil: 0,
+      counterReady: 0,
+      inspire: 0,
+      finale: 0,
+      finaleReady: 0,
       relentless: new WeakMap(),
       // Recharges par allié : Bénédiction forestière et Gardien divin.
       blessing: new WeakMap(),
-      guardian: new WeakMap()
+      guardian: new WeakMap(),
+      // Ritournelle : un seul message de bouclier par allié toutes les 3 s.
+      refrain: new WeakMap()
     };
   }
   const runtime = hero => {
@@ -135,6 +150,18 @@
       pandemic: 7,
       bloodPact: 8,
       harvest: 9
+    },
+    barde: {
+      crescendo: 0,
+      ballad: 1,
+      counter: 2,
+      vivify: 3,
+      dissonance: 4,
+      choir: 5,
+      piercing: 6,
+      inspiration: 7,
+      refrain: 8,
+      finale: 9
     }
   });
   const on = (cls, key, hero = me()) => classe(hero).id === cls && classe(hero).talents.includes(T[cls][key]);
@@ -197,6 +224,8 @@
     if (t < w.divineUntil) s.guard += 20;
     // Carapace d'os : au moins deux invocations en jeu.
     if (on('invocateur', 'carapace') && CANAAN_SUMMONS.count(me()) >= 2) s.guard += 10;
+    // Mélodie vivifiante reçue (d'un Barde, soi compris).
+    if (t < w.vivifyUntil) s.speed += 10;
     // Aura protectrice : un Paladin à moins de 6 cases (soi compris) ; non cumulable.
     if (
       game.heroes.some(
@@ -216,6 +245,8 @@
       (1 + Math.max(0, st.artifactHealingBonus || 0)) *
       (on('druide', 'touch', hero) ? 1.15 : 1) *
       (on('paladin', 'light', hero) ? 1.12 : 1) *
+      (isClass('barde', hero) ? 1.1 : 1) *
+      (on('barde', 'ballad', hero) ? 1.15 : 1) *
       (feral(hero) ? 0.7 : 1)
     );
   }
@@ -227,25 +258,36 @@
     // Non cumulable : le plus fort bouclier en cours, sa durée repoussée.
     r.shield = t < r.shieldUntil ? Math.max(r.shield, amount) : amount;
     r.shieldUntil = Math.max(r.shieldUntil, t + seconds);
-    float(hero.player.x, hero.player.y - 58, label, '#bfe4ff');
+    if (label) float(hero.player.x, hero.player.y - 58, label, '#bfe4ff');
   }
   // Soin de target par healer (lui-même par défaut). periodic : régénération, rendu tel quel (sans bonus).
   // splash : soin secondaire (Lumière sacrée), qui ne se propage pas à son tour.
   function applyHeal(n, periodic, target, healer, splash) {
     const p = target.player;
     if (!(n > 0) || p.dead || target.away) return 0;
-    let gained = 0;
-    if (p.hp < p.mhp) {
-      // Rubis (Guérisseur, Source vitale) et malédiction des soins de l'Arène.
-      const outside = CANAAN_RUBIS.healFactor(periodic, target) * CANAAN_ARENA.healFactor(target);
-      const amount = periodic
+    // Rubis (Guérisseur, Source vitale) et malédiction des soins de l'Arène.
+    const outside = CANAAN_RUBIS.healFactor(periodic, target) * CANAAN_ARENA.healFactor(target),
+      amount = periodic
         ? n * outside
         : Math.round(n * healingDone(healer) * healingReceived(target) * outside);
+    let gained = 0;
+    if (p.hp < p.mhp) {
       gained = Math.max(0, Math.min(p.mhp - p.hp, amount));
       p.hp += gained;
       if (gained > 0) CANAAN_RUBIS.onHealed(gained, periodic, target);
     }
     if (periodic) return gained;
+    // Barde : le soin en trop devient un bouclier (Ritournelle) ; le soin donne de l'élan (Mélodie vivifiante).
+    const overflow = Math.max(0, amount - gained);
+    if (overflow > 0 && on('barde', 'refrain', healer)) {
+      const r = runtime(target),
+        t = now(),
+        current = t < r.shieldUntil ? r.shield : 0,
+        talk = t >= (runtime(healer).refrain.get(target) || 0);
+      if (talk) runtime(healer).refrain.set(target, t + 3);
+      giveShield(target, Math.min(p.mhp * 0.1, current + overflow), 5, talk ? '🎵 Bouclier' : '');
+    }
+    if (gained > 0 && on('barde', 'vivify', healer)) runtime(target).vivifyUntil = now() + 4;
     // Lumière sacrée (passif du Paladin) : ses soins sur lui-même soignent aussi les alliés proches, à 50 %.
     if (!splash && target === healer && isClass('paladin', healer))
       for (const ally of game.heroes)
@@ -385,6 +427,8 @@
     let cost = base;
     if (on('elementaliste', 'arcane') && isOffensiveSkill(type, i) && (w.arcane + 1) % 3 === 0) cost *= 0.5;
     if (now() < w.elemAvatarUntil) cost *= 0.7;
+    // Inspiration (Barde) : toutes les 4 compétences, la cinquième est gratuite.
+    if (on('barde', 'inspiration') && (w.inspire + 1) % 5 === 0) cost = 0;
     return cost;
   }, 3);
   // Lancement d'une compétence : contexte de ses coups (magique, élément, offensive, multiplicateur) et
@@ -400,6 +444,8 @@
         slot: i,
         element: skillElement(classe().id, i)
       };
+    if (on('barde', 'inspiration') && ++w.inspire % 5 === 0)
+      float(HP.x, HP.y - 74, '🎵 INSPIRATION : GRATUIT', '#ff9ad5');
     if (!offensive) return context;
     w.arcane++;
     // Empreinte de l'Assassin : une compétence utilitaire renforce la prochaine compétence offensive.
@@ -424,6 +470,21 @@
         w.consecrationReady = t + 15;
         zones.push({ x: HP.x, y: HP.y, r: TILES(3), until: t + 5, tick: t, owner: me() });
         float(HP.x, HP.y - 62, '☀️ CONSÉCRATION', '#ffd76a');
+      }
+    }
+    // Barde : Crescendo (+3 % par compétence offensive, 15 % au plus, 6 s) et Grand final (toutes les 6).
+    if (on('barde', 'crescendo')) {
+      w.crescendo = t < w.crescendoUntil ? Math.min(5, w.crescendo + 1) : 1;
+      w.crescendoUntil = t + 6;
+    }
+    if (on('barde', 'finale')) {
+      w.finale = Math.min(6, w.finale + 1);
+      if (w.finale >= 6 && t >= w.finaleReady) {
+        w.finale = 0;
+        w.finaleReady = t + 12;
+        float(HP.x, HP.y - 62, '🎶 GRAND FINAL', '#ff9ad5');
+        blast(HP.x, HP.y, 4, characterStats(me()).attack * 1.2, 'harmony');
+        for (const h of groupAround(6)) healFloat(h, h.player.mhp * 0.08);
       }
     }
     if (on('elementaliste', 'tempest')) {
@@ -455,6 +516,8 @@
         if (n > 0) float(h.player.x, h.player.y - 40, '+' + Math.round(n) + ' PV', '#7ee36a');
       }
     if (id === 'paladin') for (const h of group) giveShield(h, h.player.mhp * 0.1, 5, '☀️ Bouclier');
+    // Écho mélodieux (Barde) : une compétence utilitaire soigne le groupe proche de 10 % des PV max.
+    if (id === 'barde') for (const h of group) healFloat(h, h.player.mhp * 0.1);
     if (id === 'assassin') {
       w.umbra = true;
       float(HP.x, HP.y - 74, '🌑 Embuscade prête', '#c48cff');
@@ -483,6 +546,10 @@
         ? '🌑 Assassin : +12 % de dégâts' +
             (i === 3 ? ', et encore +30 % contre une cible sous 50 % de ses PV.' : '.')
         : '🌑 Assassin : ta prochaine compétence offensive fait +25 % de dégâts (Embuscade).';
+    if (id === 'barde')
+      return offensive
+        ? '🎵 Barde : soigne l’allié le plus blessé à 8 cases (toi compris) de 20 % des dégâts infligés.'
+        : '🎵 Barde : soigne aussi toi et tes alliés à 6 cases de 10 % de leurs PV max.';
     if (id === 'invocateur')
       return '☠️ Invocateur : chaque coup pose une charge de Peste (8 au maximum, 8 % de ton Attaque par charge et par seconde).';
     if (!offensive)
@@ -522,6 +589,11 @@
     // Invocateur : Nécrose (+2 % par charge de Peste), Légion (+10 % pour les invocations).
     if (on('invocateur', 'necrosis')) mult *= 1 + 0.02 * plagueStacks(m);
     if (options.summon && on('invocateur', 'legion')) mult *= 1.1;
+    // Barde : Hymne de l'Aurore et Mélodie vivifiante reçus, Crescendo, Dissonance (de n'importe quel Barde).
+    if (t < w.hymnUntil) mult *= 1.1;
+    if (t < w.vivifyUntil) mult *= 1.05;
+    if (on('barde', 'crescendo') && t < w.crescendoUntil) mult *= 1 + 0.03 * w.crescendo;
+    if (m._dissonant > t) mult *= 1.08;
     // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
     if (options.skill && options.offensive && isClass('assassin'))
       mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
@@ -551,7 +623,18 @@
       for (const hero of game.heroes)
         if (!hero.player.dead && !hero.away && (hero === me() || near(hero.player, HP, 6)))
           applyHeal(dealt * 0.05, false, hero, me(), true);
+    // Écho mélodieux (Barde) : 20 % des dégâts rendus à l'allié le plus blessé à 8 cases (deux avec Chœur).
+    if (skill && dealt > 0 && isClass('barde'))
+      for (const hero of groupAround(8)
+        .sort((a, b) => a.player.hp / a.player.mhp - b.player.hp / b.player.mhp)
+        .slice(0, on('barde', 'choir') ? 2 : 1))
+        healFloat(hero, dealt * 0.2);
     if (dealt > 0 && alive(m)) {
+      // Barde : Dissonance (la cible subit +8 % de dégâts pendant 4 s).
+      if (skill && on('barde', 'dissonance')) {
+        if (!(m._dissonant > t)) float(m.x, m.y - 50, '🎵', '#ff9ad5');
+        m._dissonant = t + 4;
+      }
       // Druide
       if (skill && on('druide', 'thorns') && roll() < 0.2) dot(m, 'thorns', 5, dealt * 0.3, 'nature');
       if (crit && on('druide', 'poison') && roll() < 0.25) dot(m, 'poison', 6, dealt * 0.4, 'nature');
@@ -579,6 +662,8 @@
         float(m.x, m.y - 60, '👻', '#c48cff');
         effectHit(m, dealt * 0.4, 'shadow');
       }
+      // Note perçante (Barde) : onde sonore autour de la cible.
+      if (crit && on('barde', 'piercing') && roll() < 0.25) blast(m.x, m.y, 2.5, dealt * 0.5, 'harmony');
       if (crit && on('elementaliste', 'overload') && roll() < 0.2) {
         CANAAN_SKILLS.fx('beam', m.x, m.y - 90, Math.PI / 2, 90, 6, '#f4f07a', 0.25);
         effectHit(m, dealt * 0.4, 'lightning');
@@ -736,10 +821,32 @@
       burst(HP.x, HP.y, '#7b3fa0', 14);
       float(HP.x, HP.y - 62, '☣️ CONTAGION', '#a4e83c');
       for (const m of game.world.monsters.slice()) if (alive(m) && near(m, HP, 7)) addPlague(m, 4);
+    } else if (s.id === 'hymn') {
+      // Hymne de l'Aurore : 15 % des PV max tout de suite, puis 3 % par seconde pendant 6 s, et +10 % de dégâts.
+      CANAAN_SKILLS.fx('ring', HP.x, HP.y, 0, TILES(8), 0, '#ff9ad5', 0.8);
+      burst(HP.x, HP.y, '#ff9ad5', 30);
+      burst(HP.x, HP.y, '#ffe9f4', 12);
+      float(HP.x, HP.y - 62, '🎶 HYMNE DE L’AURORE', '#ff9ad5');
+      for (const hero of groupAround(8)) {
+        const r = runtime(hero);
+        r.hymnUntil = t + 6;
+        r.hymnTick = t + 1;
+        r.hymnBy = me();
+        healFloat(hero, hero.player.mhp * 0.15);
+      }
     }
     recompute();
     return true;
   }, 0);
+  // Héros du groupe à moins de tiles cases du héros courant (lui compris), vivants et présents.
+  const groupAround = tiles =>
+    game.heroes.filter(h => !h.player.dead && !h.away && (h === me() || near(h.player, HP, tiles)));
+  // Soin d'un allié par le héros courant (sans propagation de la Lumière sacrée), avec son chiffre flottant.
+  function healFloat(hero, amount) {
+    const h = applyHeal(amount, false, hero, me(), true);
+    if (h > 0) float(hero.player.x, hero.player.y - 40, '+' + Math.round(h) + ' PV', '#ffc2e4');
+    return h;
+  }
   // Vitesse d'attaque des invocations d'un héros : Contagion (+30 %).
   const summonHaste = hero => (now() < runtime(hero).contagionUntil ? 1.3 : 1);
   function recompute() {
@@ -803,6 +910,19 @@
       w.bloodReady = t + 40;
       const h = applyHeal(HP.mhp * 0.15, false, me(), me(), true);
       notice('🩸 Pacte de sang !' + (h > 0 ? ' +' + Math.round(h) + ' PV' : ''));
+    }
+    // Contre-chant (Barde) : sous 40 % de PV, 10 % des PV max et un bouclier de 10 % pendant 5 s.
+    if (on('barde', 'counter') && ratio < 0.4 && t >= w.counterReady) {
+      w.counterReady = t + 40;
+      applyHeal(HP.mhp * 0.1, false, me(), me(), true);
+      giveShield(me(), HP.mhp * 0.1, 5, '🎵 CONTRE-CHANT');
+    }
+    // Hymne de l'Aurore reçu : 3 % des PV max par seconde, par le Barde qui l'a chanté.
+    if (w.hymnUntil > 0 && t + 1e-9 >= w.hymnTick && w.hymnTick <= w.hymnUntil + 1e-9) {
+      w.hymnTick += 1;
+      const by = game.heroes.includes(w.hymnBy) ? w.hymnBy : me(),
+        h = applyHeal(HP.mhp * 0.03, false, me(), by, true);
+      if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#ffc2e4');
     }
     if (on('druide', 'avatar') && fighting && t >= w.natureAvatarNext) {
       w.natureAvatarNext = t + 45;
@@ -904,6 +1024,17 @@
         ctx.ellipse(p.x, p.y - 4, 28, 34, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
+      // Hymne de l'Aurore : notes roses qui montent autour du héros.
+      if (now() < runtime(hero).hymnUntil && time % 10 === 0)
+        particles.push({
+          x: p.x + (Math.random() - 0.5) * 34,
+          y: p.y + 6,
+          vx: 0,
+          vy: -0.7,
+          life: 30,
+          c: '#ff9ad5',
+          r: 2.5
+        });
       if (p.form === 'feral' && time % 9 === 0)
         particles.push({
           x: p.x + (Math.random() - 0.5) * 30,
@@ -927,7 +1058,8 @@
         'active',
         game.hero.player.form === 'feral' ||
           !!game.hero.player.veiled ||
-          now() < runtime(game.hero).contagionUntil
+          now() < runtime(game.hero).contagionUntil ||
+          now() < runtime(game.hero).hymnUntil
       );
     }
   };
@@ -983,7 +1115,8 @@
     paladin: [1, 6, 2, 0, 7, 9, 3, 4, 5, 8],
     assassin: [1, 3, 4, 5, 8, 9, 0, 2, 6, 7],
     elementaliste: [0, 3, 7, 1, 9, 4, 6, 2, 5, 8],
-    invocateur: [1, 3, 0, 5, 9, 2, 4, 7, 6, 8]
+    invocateur: [1, 3, 0, 5, 9, 2, 4, 7, 6, 8],
+    barde: [1, 5, 8, 0, 9, 3, 7, 4, 2, 6]
   });
   function autoTalents(hero) {
     const k = classe(hero);

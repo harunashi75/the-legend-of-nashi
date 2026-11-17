@@ -78,6 +78,34 @@
           w.contagionUntil - t
         )
       );
+    // Barde : Hymne de l'Aurore et Mélodie vivifiante reçus, Crescendo.
+    if (on(w.hymnUntil))
+      out.push(
+        E(
+          'cls-hymn',
+          '🎶',
+          'Hymne de l’Aurore',
+          'Soigne 3 % des PV max par seconde, dégâts +10 %.',
+          'buff',
+          w.hymnUntil - t
+        )
+      );
+    if (on(w.vivifyUntil))
+      out.push(
+        E('cls-vivify', '🎵', 'Mélodie vivifiante', 'Vitesse +10 %, dégâts +5 %.', 'buff', w.vivifyUntil - t)
+      );
+    if (c.id === 'barde' && on(w.crescendoUntil) && w.crescendo > 0)
+      out.push(
+        E(
+          'cls-crescendo',
+          '🎵',
+          tal(0)[0],
+          'Dégâts +' + 3 * w.crescendo + ' %.',
+          'buff',
+          w.crescendoUntil - t,
+          w.crescendo
+        )
+      );
     if (hero.player.form === 'feral') out.push(E('cls-feral', '🐆', 'Forme féline', c.special.desc, 'buff'));
   }
   const STANCES = [

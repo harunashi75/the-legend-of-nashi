@@ -1,4 +1,4 @@
-// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (9 armes et le Grimoire × 4)
+// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (10 armes et le Grimoire × 4)
 // et par sort de classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur
 // propre à l'arme, halo doux. CANAAN_SKILL_ICONS.weapon(type, i) et .special(id) renvoient le balisage SVG.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
@@ -26,6 +26,7 @@ const ACCENT = {
   bow: '#9be38e',
   shield: '#ffe08a',
   staff: '#b98cff',
+  lute: '#ff9ad5',
   grimoire: '#a4e83c'
 };
 const at = (x, y, rot = 0, s = 1, inner = '') =>
@@ -132,6 +133,19 @@ const P = {
     '/><circle cx="-1" cy="-11" r="1" fill="' +
     K.white +
     '"/>',
+  // Luth : manche vers le haut, caisse en poire en bas.
+  lute: c =>
+    '<rect x="-1.1" y="-14" width="2.2" height="11" rx="0.6" fill="' +
+    K.woodD +
+    '" ' +
+    st +
+    '/><path d="M0 -4 C4.5 -4 6.5 0 6.5 4 C6.5 8.5 3.5 11 0 11 C-3.5 11 -6.5 8.5 -6.5 4 C-6.5 0 -4.5 -4 0 -4 Z" fill="#c08048" ' +
+    st +
+    '/><circle cx="0" cy="2.5" r="2" fill="#3a2414"/><path d="M-0.5 -14 L-0.5 8 M0.5 -14 L0.5 8" stroke="#f4ead0" stroke-width="0.4"/><rect x="-2.5" y="7" width="5" height="1.4" rx="0.4" fill="' +
+    K.woodD +
+    '"/><path d="M-6 8 L-8.5 11 L-6.5 10.6 L-6 12.6 L-4.6 9.4 Z" fill="' +
+    (c || '#ff9ad5') +
+    '"/>',
   bow: () =>
     '<path d="M-3 -13 C8 -8 8 8 -3 13" fill="none" stroke="' +
     K.ink +
@@ -215,6 +229,31 @@ const E = {
         c +
         '" stroke-width="1.8" stroke-linecap="round" opacity=".85"/>'
     ).join(''),
+  // Note de musique (croche) et double croche.
+  note: c =>
+    '<path d="M-1 6 L-1 -9 C1 -6 6 -5.5 5 -0.5" fill="none" stroke="' +
+    K.ink +
+    '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M-1 6 L-1 -9 C1 -6 6 -5.5 5 -0.5" fill="none" stroke="' +
+    c +
+    '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="-3.4" cy="6" rx="3" ry="2.3" fill="' +
+    c +
+    '" ' +
+    st +
+    '/>',
+  notes: c =>
+    '<path d="M-5 6 L-5 -6 L6 -9 L6 3 M-5 -2 L6 -5" fill="none" stroke="' +
+    K.ink +
+    '" stroke-width="3" stroke-linejoin="round"/><path d="M-5 6 L-5 -6 L6 -9 L6 3 M-5 -2 L6 -5" fill="none" stroke="' +
+    c +
+    '" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="-7.2" cy="6" rx="2.8" ry="2.2" fill="' +
+    c +
+    '" ' +
+    st +
+    '/><ellipse cx="3.8" cy="3" rx="2.8" ry="2.2" fill="' +
+    c +
+    '" ' +
+    st +
+    '/>',
   heart: c =>
     '<path d="M0 5 C-7 0 -7 -6 -3 -6 C-1 -6 0 -4 0 -3 C0 -4 1 -6 3 -6 C7 -6 7 0 0 5 Z" fill="' +
     c +
@@ -563,6 +602,19 @@ ICONS.grimoire = [
   a => SUMMON.ground(a) + SUMMON.totem(a),
   a => SUMMON.ground(a) + at(0, 0, 0, 1, SUMMON.abomination(a))
 ];
+// Luth : note qui file, accord qui repousse, chant qui soigne, symphonie en ondes.
+ICONS.lute = [
+  a =>
+    at(-6, 5, -30, 0.75, P.lute(a)) +
+    at(5, -4, 15, 1, E.note(a)) +
+    at(-1, 1, -35, 1, '<path d="M-3 0 L-10 0" stroke="' + a + '" stroke-width="2" opacity=".6"/>'),
+  a => E.rings(a) + at(0, 0, 0, 0.8, P.lute(a)),
+  a =>
+    at(-5, 2, -20, 0.8, P.lute(a)) +
+    at(5, -3, 0, 1, E.heart('#ff7ab8')) +
+    at(8, 7, 0, 0.45, E.sparkle('#fff')),
+  a => E.waves(a) + at(0, -1, 0, 1, E.notes(a))
+];
 const SPECIALS = {
   feral: () => frame('#7ee36a', E.claw('#7ee36a')),
   divine: () => frame('#ffd76a', E.sun('#ffd76a') + at(0, 0, 0, 0.5, E.sparkle('#fff'))),
@@ -581,6 +633,12 @@ const SPECIALS = {
       E.rings('#a4e83c') +
         [0, 120, 240].map(r => at(0, 0, r, 1, at(0, -9, 0, 0.7, E.drop('#a4e83c')))).join('') +
         at(0, 1, 0, 0.9, E.skull())
+    ),
+  // Hymne de l'Aurore : soleil levant et notes roses dans une onde.
+  hymn: () =>
+    frame(
+      '#ff9ad5',
+      E.rings('#ff9ad5') + at(0, 2, 0, 0.6, E.sun('#ffd76a')) + at(0, -1, 0, 0.95, E.notes('#ff9ad5'))
     )
 };
 const cache = new Map();

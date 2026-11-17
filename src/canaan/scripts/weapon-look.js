@@ -1,8 +1,8 @@
 // Armes tenues en main : chaque héros porte la vraie arme équipée (épée, épées doubles, hache, masse, lance,
-// dagues, arc, égide, bâton, Grimoire), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
+// dagues, arc, égide, bâton, luth, Grimoire), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
 // chaque famille : taille en arc (épée, hache, masse), double taille (épées doubles), estocs (lance, dagues),
-// tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton), livre ouvert vers la mire
-// et lueur de peste (Grimoire).
+// tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton), cordes pincées et notes
+// (luth), livre ouvert vers la mire et lueur de peste (Grimoire).
 // Le héros se tourne vers sa mire à l'arrêt et pendant une attaque. Rien n'est sauvegardé ni simulé ici.
 (() => {
   'use strict';
@@ -18,6 +18,7 @@
     bow: '#a7e8a0',
     staff: '#b38aff',
     shield: '#ffe4a2',
+    lute: '#ff9ad5',
     grimoire: '#a4e83c'
   };
   // ---------------------------------------------------------------- Sprites (pointe vers +x, poignée au point pivot)
@@ -134,6 +135,35 @@
         R(28, 3, 6, 6, '#b38aff');
         R(29, 4, 4, 4, '#d9c2ff');
         R(29, 4, 2, 2, '#ffffff');
+      }
+    },
+    // Luth : caisse en poire au pivot (rosace, chevalet), manche à frettes vers +x, chevillier coudé, ruban rose.
+    lute: {
+      w: 26,
+      h: 12,
+      px: 5,
+      py: 6,
+      draw(R) {
+        R(1, 1, 8, 10, '#c08048');
+        R(0, 2, 10, 8, '#c08048');
+        R(0, 7, 10, 3, WO);
+        R(1, 10, 8, 1, WO);
+        R(2, 2, 3, 1, '#e0a868');
+        R(4, 4, 3, 3, '#3a2414');
+        R(5, 5, 1, 1, GO);
+        R(1, 5, 1, 2, WOD);
+        R(10, 5, 12, 2, WOD);
+        R(13, 5, 1, 2, GO);
+        R(16, 5, 1, 2, GO);
+        R(19, 5, 1, 2, GO);
+        R(1, 6, 21, 1, '#efe6cf');
+        R(22, 4, 4, 3, LE);
+        R(23, 3, 1, 1, GO);
+        R(25, 3, 1, 1, GO);
+        R(23, 7, 1, 1, GO);
+        R(25, 7, 1, 1, GO);
+        R(8, 9, 2, 2, '#ff9ad5');
+        R(9, 10, 1, 2, '#ff7ab8');
       }
     },
     // Arc : vertical (perpendiculaire à la visée), poignée au pivot ; la corde est dessinée à part (tension).
@@ -532,6 +562,31 @@
       c.fillStyle = g;
       c.beginPath();
       c.arc(tipX, tipY, glow, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+      return;
+    }
+    if (type === 'lute') {
+      if (layer !== behind) return;
+      // Luth tenu en travers, manche vers le haut ; au lancer, il se tourne vers la mire, les cordes vibrent et une
+      // lueur rose pulse sur la caisse.
+      const rest = side > 0 ? -0.65 : Math.PI + 0.65,
+        rot = attacking ? rest + (aim - rest) * 0.35 * Math.sin(k * Math.PI) : rest,
+        shake = attacking ? Math.sin(k * Math.PI * 6) * 1.5 : 0,
+        bx = hx + shake,
+        by = hy + 2;
+      piece(c, 'lute', bx, by, rot, side);
+      const glow = attacking
+        ? 10 + 14 * (1 - k)
+        : 5 + Math.sin((typeof time === 'number' ? time : 0) * 0.08) * 1.5;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(bx, by, 0, bx, by, glow);
+      g.addColorStop(0, 'rgba(255,214,236,.8)');
+      g.addColorStop(1, 'rgba(255,154,213,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(bx, by, glow, 0, Math.PI * 2);
       c.fill();
       c.restore();
       return;

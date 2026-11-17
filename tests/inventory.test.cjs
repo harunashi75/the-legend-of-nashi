@@ -162,9 +162,9 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,4);assert.match(inv,/Matériaux — 4\/100/);run('canaanBagSection("main")');
  // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.
  run('const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+30;openShop(m)');
- assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),16);
+ assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),17);
  assert.ok(run('CANAAN_SHOP.stock(game.hero).every(i=>i.rarity==="Peu commun"&&i.level===20)'));
- assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.weaponType||i.slot))])')).length,16);
+ assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.weaponType||i.slot))])')).length,17);
  const panel=run('document.getElementById("window").innerHTML');assert.match(panel,/class="shop-panel shop-columns"/);assert.match(panel,/shop-side bag-side/);
  const want=run('CANAAN_SHOP.stock(game.hero)[2].slot'),gold0=run('P.gold');
  assert.equal(run('CANAAN_SHOP.buy(game.hero,2)'),true);assert.equal(run('game.hero.inventory.at(-1).slot'),want);assert.equal(run('P.gold'),gold0-run('shopPriceAt(20)'));

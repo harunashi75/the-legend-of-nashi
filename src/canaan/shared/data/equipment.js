@@ -420,6 +420,51 @@ export const WEAPON_DEFINITIONS = {
       ]
     ]
   },
+  // Luth : arme de toutes les classes (sauf l'Invocateur, lié à son Grimoire). Notes magiques à distance, soins de
+  // groupe et symphonie qui frappe et soigne ; il utilise la Puissance magique.
+  lute: {
+    name: 'Luth',
+    icon: '⟦w_lute⟧',
+    role: 'Musique : notes à distance, soins de groupe et symphonie qui frappe et soigne.',
+    sp: [
+      [
+        '🎵',
+        'Note éclatante',
+        'Projectile magique · 240 % · soigne 4 % PV',
+        4,
+        10,
+        2.4,
+        'Une note vibrante file vers la souris : 240 % au premier ennemi touché. L’allié le plus blessé à moins de 8 cases (toi compris) récupère 4 % de ses PV max.'
+      ],
+      [
+        '💢',
+        'Accord dissonant',
+        'Cercle autour de toi · 190 % · repousse',
+        8,
+        16,
+        1.9,
+        'Un accord violent frappe tous les ennemis autour de toi et repousse les monstres (pas les boss).'
+      ],
+      [
+        '💗',
+        'Chant de guérison',
+        'Soigne le groupe de 12 % PV, puis 2 %/s pendant 5 s',
+        14,
+        20,
+        0,
+        'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max, puis 2 % par seconde pendant 5 s.'
+      ],
+      [
+        '🎶',
+        'Symphonie',
+        'Zone sous la souris · 5 ondes de 100 % (500 %) · soigne',
+        15,
+        26,
+        5,
+        'Une symphonie résonne là où tu vises : 5 ondes en 2 s, 100 % chacune aux ennemis à moins de 3 cases. Chaque onde soigne de 2 % de leurs PV max les héros dans la zone.'
+      ]
+    ]
+  },
   // Arme liée de l'Invocateur (bound) : jamais lâchée par un monstre ni vendue. Ses quatre compétences sont des
   // invocations ; leur puissance est celle d'un coup de la créature (ou d'une seconde de zone).
   grimoire: {
@@ -479,7 +524,7 @@ export const CRAFT_WEAPONS = Object.entries(WEAPON_DEFINITIONS)
   .filter(([, value]) => !('bound' in value))
   .map(([key]) => key);
 // Armes magiques : leurs coups utilisent la Puissance magique (projectile d'orbe).
-export const MAGIC_WEAPONS = Object.freeze(['staff', 'grimoire']);
+export const MAGIC_WEAPONS = Object.freeze(['staff', 'lute', 'grimoire']);
 
 // Emplacements actifs : l'arme de réserve (weapon2) est équipée mais ne compte ni dans l'iLvl moyen ni dans les statistiques.
 export const ACTIVE_GEAR_SLOTS = Object.freeze([

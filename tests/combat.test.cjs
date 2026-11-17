@@ -143,8 +143,8 @@ test('IA : le coup esquivé n’enlève aucun PV, ne secoue pas l’écran et n�
   assert.ok(labels.includes('ESQUIVE !'));assert.ok(!labels.includes('-0'));
 });
 
-test('Compétences : les 36 actions restent lançables par les neuf familles',()=>{
-  for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield']){
+test('Compétences : les 40 actions restent lançables par les dix familles',()=>{
+  for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield','lute']){
     for(let index=0;index<4;index++){
       const g=game();g.equipment.weapon.weaponType=type;g.refreshWeaponBar();
       const cost=g.SKILLS[index].mp;
@@ -276,13 +276,13 @@ test('Compétences : attaques de base renforcées, info-bulles claires, charges 
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 44 sorts',()=>{
+test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 48 sorts',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Le cercle autour du héros à chaque attaque n'existe plus.
  assert.doesNotMatch(script('canaan-game-core'),/ctx\.arc\(P\.x, P\.y, 65/);
- // Icônes : une par compétence (9 armes et le Grimoire × 4) et par sort de classe, en SVG.
+ // Icônes : une par compétence (10 armes et le Grimoire × 4) et par sort de classe, en SVG.
  const audit=JSON.parse(run('JSON.stringify(CANAAN_SKILL_ICONS.audit())'));
- assert.equal(audit.weapons,10);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','contagion','divine','feral','veil']);
+ assert.equal(audit.weapons,11);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','contagion','divine','feral','hymn','veil']);
  assert.equal(run('Object.keys(WEAPON_DEFINITIONS).every(t=>[0,1,2,3].every(i=>CANAAN_SKILL_ICONS.weapon(t,i).startsWith("<svg")))'),true);
  assert.equal(run('CLASSES.every(c=>CANAAN_SKILL_ICONS.special(c.special.id).startsWith("<svg"))'),true);
  run('started=true;paused=false;refreshWeaponBar()');assert.ok(run('SKILLS[0].el.innerHTML').startsWith('<svg'),'la barre affiche l’icône SVG');

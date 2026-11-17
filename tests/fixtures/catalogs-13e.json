@@ -404,6 +404,10 @@
    "name": "Bâton arcanique",
    "icon": "⟦w_staff⟧"
   },
+  "lute": {
+   "name": "Luth",
+   "icon": "⟦w_lute⟧"
+  },
   "grimoire": {
    "name": "Grimoire",
    "icon": "⟦w_grimoire⟧"
@@ -418,7 +422,8 @@
   "dualdagger",
   "bow",
   "shield",
-  "staff"
+  "staff",
+  "lute"
  ],
  "spells": {
   "sword": [
@@ -761,6 +766,44 @@
     26,
     3.2,
     "Explosion là où tu vises : 320 %, plus 140 % par charge consommée (740 % avec 3 charges). Consomme toutes les charges."
+   ]
+  ],
+  "lute": [
+   [
+    "🎵",
+    "Note éclatante",
+    "Projectile magique · 240 % · soigne 4 % PV",
+    4,
+    10,
+    2.4,
+    "Une note vibrante file vers la souris : 240 % au premier ennemi touché. L’allié le plus blessé à moins de 8 cases (toi compris) récupère 4 % de ses PV max."
+   ],
+   [
+    "💢",
+    "Accord dissonant",
+    "Cercle autour de toi · 190 % · repousse",
+    8,
+    16,
+    1.9,
+    "Un accord violent frappe tous les ennemis autour de toi et repousse les monstres (pas les boss)."
+   ],
+   [
+    "💗",
+    "Chant de guérison",
+    "Soigne le groupe de 12 % PV, puis 2 %/s pendant 5 s",
+    14,
+    20,
+    0,
+    "Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max, puis 2 % par seconde pendant 5 s."
+   ],
+   [
+    "🎶",
+    "Symphonie",
+    "Zone sous la souris · 5 ondes de 100 % (500 %) · soigne",
+    15,
+    26,
+    5,
+    "Une symphonie résonne là où tu vises : 5 ondes en 2 s, 100 % chacune aux ennemis à moins de 3 cases. Chaque onde soigne de 2 % de leurs PV max les héros dans la zone."
    ]
   ],
   "grimoire": [

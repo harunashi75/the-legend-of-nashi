@@ -367,6 +367,11 @@ export default {
   'Dégâts +20 %, mana des compétences −30 %.': 'Damage +20%, skill mana −30%.',
   'Contagion': 'Contagion',
   'Tes invocations frappent 30 % plus vite.': 'Your summons strike 30% faster.',
+  'Hymne de l’Aurore': 'Dawn hymn',
+  'Soigne 3 % des PV max par seconde, dégâts +10 %.': 'Heals 3% of max HP per second, damage +10%.',
+  'Mélodie vivifiante': 'Invigorating melody',
+  'Vitesse +10 %, dégâts +5 %.': 'Speed +10%, damage +5%.',
+  'Dégâts +{n} %.': 'Damage +{n}%.',
   'Forme féline': 'Cat form',
   'Garde': 'Guard',
   'Parade prête : les coups sont bloqués.': 'Parry ready: blows are blocked.',
@@ -820,6 +825,27 @@ export default {
   '{n} % en zone': '{n}% in an area',
   'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).':
     'A stitched-together abomination rises for 15 s: every 1.6 s, it crushes the enemies around it (160%, 2-tile radius).',
+  'Luth': 'Lute',
+  'Musique : notes à distance, soins de groupe et symphonie qui frappe et soigne.':
+    'Music: ranged notes, group healing and a symphony that strikes and heals.',
+  'Note éclatante': 'Bursting note',
+  'soigne {n} % PV': 'heals {n}% HP',
+  'Une note vibrante file vers la souris : 240 % au premier ennemi touché. L’allié le plus blessé à moins de 8 cases (toi compris) récupère 4 % de ses PV max.':
+    'A vibrating note flies toward the mouse: 240% to the first enemy hit. The most wounded ally within 8 tiles (you included) recovers 4% of their max HP.',
+  'Accord dissonant': 'Dissonant chord',
+  'Un accord violent frappe tous les ennemis autour de toi et repousse les monstres (pas les boss).':
+    'A violent chord strikes every enemy around you and pushes monsters back (not bosses).',
+  'Chant de guérison': 'Healing song',
+  'Soigne le groupe de 12 % PV, puis 2 %/s pendant 5 s': 'Heals the group for 12% HP, then 2%/s for 5 s',
+  'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max, puis 2 % par seconde pendant 5 s.':
+    'You and your allies within 6 tiles recover 12% of your max HP, then 2% per second for 5 s.',
+  'Symphonie': 'Symphony',
+  '5 ondes de 100 % (500 %)': '5 waves of 100% (500%)',
+  'soigne': 'heals',
+  'Une symphonie résonne là où tu vises : 5 ondes en 2 s, 100 % chacune aux ennemis à moins de 3 cases. Chaque onde soigne de 2 % de leurs PV max les héros dans la zone.':
+    'A symphony rings out where you aim: 5 waves over 2 s, 100% each to enemies within 3 tiles. Each wave heals the heroes in the area for 2% of their max HP.',
+  'CHANT DE GUÉRISON': 'HEALING SONG',
+  'SYMPHONIE': 'SYMPHONY',
   // ------------------------------------------------------------ Classes et talents (shared/data/classes.js)
   'Nature': 'Nature',
   'Sacré': 'Holy',
@@ -827,6 +853,7 @@ export default {
   'Feu': 'Fire',
   'Glace': 'Ice',
   'Foudre': 'Lightning',
+  'Harmonie': 'Harmony',
   'Druide': 'Druid',
   'Polyvalence, soins, poison et régénération': 'Versatility, healing, poison and regeneration',
   'Nature, poison, régénération et soutien': 'Nature, poison, regeneration and support',
@@ -1013,6 +1040,42 @@ export default {
   'Moisson d’âmes': 'Soul harvest',
   'Toutes les 12 charges de Peste posées, un squelette se lève gratuitement à tes côtés. Recharge : 10 s.':
     'For every 12 Plague charges applied, a skeleton rises for free at your side. Cooldown: 10 s.',
+  'Barde': 'Bard',
+  'Soins de groupe, chants de soutien et ondes sonores': 'Group healing, support songs and sound waves',
+  'Le soigneur du groupe : il soigne en frappant et renforce ses alliés':
+    'The group’s healer: heals by striking and empowers allies',
+  'Écho mélodieux': 'Melodic echo',
+  'Tes compétences d’armes résonnent d’harmonie : chaque compétence offensive soigne l’allié le plus blessé à moins de 8 cases (toi compris) de 20 % des dégâts infligés ; chaque compétence utilitaire soigne ton groupe proche de 10 % de ses PV max. Tes soins sont augmentés de 10 %.':
+    'Your weapon skills resonate with harmony: each offensive skill heals the most wounded ally within 8 tiles (you included) for 20% of the damage dealt; each utility skill heals your nearby group for 10% of their max HP. Your healing is increased by 10%.',
+  'Soigne toi et tes alliés à moins de 8 cases de 15 % de leurs PV maximum, puis de 3 % par seconde pendant 6 secondes ; pendant ce temps, ils infligent 10 % de dégâts en plus.':
+    'Heals you and your allies within 8 tiles for 15% of their maximum HP, then 3% per second for 6 seconds; meanwhile, they deal 10% more damage.',
+  'Crescendo': 'Crescendo',
+  'Chaque compétence offensive augmente tes dégâts de 3 %, jusqu’à 15 %, pendant 6 secondes.':
+    'Each offensive skill increases your damage by 3%, up to 15%, for 6 seconds.',
+  'Ballade réparatrice': 'Restoring ballad',
+  'Contre-chant': 'Countersong',
+  'Sous 40 % de PV, te soigne de 10 % des PV maximum et te donne un bouclier de 10 % pendant 5 secondes. Recharge : 40 s.':
+    'Below 40% HP, heals you for 10% of maximum HP and gives you a 10% shield for 5 seconds. Cooldown: 40 s.',
+  'Tes soins donnent à leur cible (toi compris) +10 % de vitesse de déplacement et +5 % de dégâts pendant 4 secondes.':
+    'Your heals give their target (you included) +10% movement speed and +5% damage for 4 seconds.',
+  'Dissonance': 'Dissonance',
+  'Les ennemis touchés par tes compétences offensives subissent 8 % de dégâts en plus, de toi et de ton groupe, pendant 4 secondes.':
+    'Enemies hit by your offensive skills take 8% more damage, from you and your group, for 4 seconds.',
+  'Chœur': 'Choir',
+  'Ton Écho mélodieux soigne aussi un deuxième allié blessé.':
+    'Your Melodic echo also heals a second wounded ally.',
+  'Note perçante': 'Piercing note',
+  'Les coups critiques ont 25 % de chance de libérer une onde sonore infligeant 50 % des dégâts du coup aux ennemis à moins de 2,5 cases.':
+    'Critical hits have a 25% chance to release a sound wave dealing 50% of the hit’s damage to enemies within 2.5 tiles.',
+  'Inspiration': 'Inspiration',
+  'Toutes les 4 compétences lancées, la suivante ne coûte pas de mana.':
+    'After every 4 skills cast, the next one costs no mana.',
+  'Ritournelle': 'Refrain',
+  'Les soins qui dépassent les PV maximum deviennent un bouclier, jusqu’à 10 % des PV maximum de la cible pendant 5 secondes.':
+    'Healing beyond maximum HP becomes a shield, up to 10% of the target’s maximum HP for 5 seconds.',
+  'Grand final': 'Grand finale',
+  'Toutes les 6 compétences offensives, un accord final inflige 120 % de l’Attaque aux ennemis à moins de 4 cases et soigne ton groupe proche de 8 % de ses PV max. Recharge : 12 s.':
+    'Every 6 offensive skills, a final chord deals 120% of Attack to enemies within 4 tiles and heals your nearby group for 8% of their max HP. Cooldown: 12 s.',
   // ------------------------------------------------------------ Noms des objets (shared/data/item-names.js)
   'Épée émoussée': 'Blunted sword',
   'Hachettes rouillées': 'Rusty hatchets',
@@ -1068,6 +1131,12 @@ export default {
   'Arc des constellations': 'Bow of the constellations',
   'Barrière de singularité': 'Singularity barrier',
   'Lames stellaires doubles': 'Twin stellar blades',
+  'Luth de taverne': 'Tavern lute',
+  'Luth du ménestrel': 'Minstrel’s lute',
+  'Luth des troubadours': 'Troubadours’ lute',
+  'Luth des sirènes': 'Sirens’ lute',
+  "Luth de l'Aurore chantante": 'Lute of the singing Dawn',
+  'Luth des échos éternels': 'Lute of eternal echoes',
   'Capuche trouée': 'Holey hood',
   'Épaulières usées': 'Worn shoulderpads',
   'Tunique en lin': 'Linen tunic',
@@ -1890,6 +1959,14 @@ export default {
     'Assassin: your next offensive skill deals +25% damage (Ambush).',
   'Invocateur : chaque coup pose une charge de Peste (8 au maximum, 8 % de ton Attaque par charge et par seconde).':
     'Summoner: each hit applies a Plague charge (8 at most, 8% of your Attack per charge per second).',
+  'Barde : soigne l’allié le plus blessé à 8 cases (toi compris) de 20 % des dégâts infligés.':
+    'Bard: heals the most wounded ally within 8 tiles (you included) for 20% of the damage dealt.',
+  'Barde : soigne aussi toi et tes alliés à 6 cases de 10 % de leurs PV max.':
+    'Bard: also heals you and your allies within 6 tiles for 10% of their max HP.',
+  'HYMNE DE L’AURORE': 'DAWN HYMN',
+  'GRAND FINAL': 'GRAND FINALE',
+  'CONTRE-CHANT': 'COUNTERSONG',
+  'INSPIRATION : GRATUIT': 'INSPIRATION: FREE',
   '{element} : libère une décharge autour de toi (100 % de l’Attaque, rayon 2,5 cases).':
     '{element}: releases a discharge around you (100% of Attack, 2.5-tile radius).',
   'Feu : brûle les cibles (30 % des dégâts infligés, en plus, sur 4 s).':

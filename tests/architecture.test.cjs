@@ -254,8 +254,8 @@ test('Nettoyage : systèmes morts absents et progression par équipement conserv
  run('started=true');assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(g.localStorage.getItem(g.CANAAN_PERSISTENCE.key));
  assert.equal(saved.schema,10);assert.equal(saved.version,version);
- // Les mêmes 36 compétences avec tous les vrais modules, sans doublure de visée.
- for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield']){
+ // Les mêmes 40 compétences avec tous les vrais modules, sans doublure de visée.
+ for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield','lute']){
   for(let index=0;index<4;index++){
    run("equipment.weapon={id:'live-skill',slot:'weapon',rarity:'Commun',ilvl:1,weaponType:"+JSON.stringify(type)+"};CANAAN_GEAR.normalize(equipment.weapon);for(const key of Object.keys(weaponCooldowns))weaponCooldowns[key]=0;refreshWeaponBar();started=true;paused=false;P.dead=false;P.mp=100000;mouseWorldX=P.x+50;mouseWorldY=P.y;monsters=[{x:P.x+50,y:P.y,hp:1000000,mhp:1000000,r:14,cd:0,t:'Slime'}]");
    assert.doesNotThrow(()=>run('useSkill('+index+')'),type+':'+index);
