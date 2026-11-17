@@ -168,15 +168,21 @@ function lookup(text, level = 0) {
 // Ponctuation française autour d'un texte traduit : pas d'espace avant « : ; ! ? » dans les autres langues.
 const punctuation = trail => trail.replace(/^[\s\u00a0\u202f]+(?=[:;!?])/u, '');
 
+// Nombres à l'anglaise dans un texte traduit : « 220 % » → « 220% », « 2,5 s » → « 2.5 s ».
+const typography = text => text.replace(/(\d)[\s\u00a0\u202f]%/g, '$1%').replace(/(\d),(\d)/g, '$1.$2');
+
 // Texte affiché (interface, info-bulle, canevas) : sa traduction, ou le texte tel quel.
 export function translateText(text) {
   if (dict === null || typeof text !== 'string' || !HAS_LETTER.test(text)) return text;
   let out = cache.get(text);
   if (out !== undefined) return out;
   if (produced.has(text)) return text;
-  const found = lookup(text);
+  let found = lookup(text);
   if (found === null) missing.add(text.trim());
-  else if (produced.size < CACHE_MAX) produced.add(found);
+  else {
+    found = typography(found);
+    if (produced.size < CACHE_MAX) produced.add(found);
+  }
   out = found ?? text;
   if (cache.size >= CACHE_MAX) cache = new Map();
   cache.set(text, out);

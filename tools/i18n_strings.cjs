@@ -119,13 +119,19 @@ function stringsOf(file) {
 (async () => {
   const i18n = await import(path.join(ROOT, 'client', 'i18n', 'i18n.js'));
   if (lang !== 'fr') i18n.CANAAN_I18N.use(lang);
+  // Une entrée identique au français (« Rare », « Grimoire ») compte comme traduite.
+  const dict = lang === 'fr' ? {} : (await import(path.join(ROOT, 'client', 'i18n', lang + '.js'))).default;
   const files = args.length ? args.map(f => path.relative(ROOT, path.resolve(f))) : sourceFiles();
   let total = 0,
     done = 0;
   for (const file of files) {
     const seen = new Map();
     for (const s of stringsOf(file)) if (!seen.has(s.text)) seen.set(s.text, s.line);
-    const list = [...seen].map(([text, line]) => ({ text, line, ok: i18n.translateText(text) !== text }));
+    const list = [...seen].map(([text, line]) => ({
+      text,
+      line,
+      ok: Object.hasOwn(dict, text) || i18n.translateText(text) !== text
+    }));
     const ok = list.filter(s => s.ok).length;
     total += list.length;
     done += ok;
