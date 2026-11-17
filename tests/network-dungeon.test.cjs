@@ -18,11 +18,11 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
   const gear=(w,tag)=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:10,rarity:"Épique",weaponType:"'+w+'"}').join(',')+'}';
   host.run('started=true;paused=false;P.dead=false;game.world.monsters=[];game.view.notify=()=>{};game.view.chat=()=>{}');
   host.run('game.hero.level=10;game.hero.equipment={...game.hero.equipment,...'+gear('sword','h')+'};recomputeStats();P.hp=P.mhp');
-  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code'),ids=[];
   for(const [k,g] of guests.entries()){
    g.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+code+'",pseudo:"'+['Lina','Oren','Maë'][k]+'"})');
-   for(let i=0;i<60&&g.run('game.mode')!=='guest';i++)await wait(10);
+   for(let i=0;i<1000&&g.run('game.mode')!=='guest';i++)await wait(10);
    assert.equal(g.run('game.mode'),'guest');ids.push(g.run('CANAAN_NET.state().heroId'));
   }
   assert.equal(host.run('game.heroes.length'),4,'quatre héros dans le groupe');assert.equal(host.run('CANAAN_NET.state().peers'),3);

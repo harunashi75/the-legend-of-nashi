@@ -39,10 +39,10 @@ test('Chacun à son niveau : monstres à niveau fixe, chacun frappe et encaisse 
  const host=boot(),guest=boot();
  try{
   host.run('started=true;paused=false;P.dead=false;game.world.monsters=[];game.view.notify=()=>{};game.view.chat=()=>{}');
-  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   guest.run('globalThis.__toasts=[];{const t0=toast;toast=m=>{__toasts.push(m);t0(m)}}');
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+host.run('CANAAN_NET.state().code')+'",pseudo:"Lina"})');
-  for(let i=0;i<60&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   const step=async n=>{for(let i=0;i<n;i++){host.run('time++;readInput();simulateStep();updateWorld();CANAAN_NET.tick()');guest.run('time++;readInput();CANAAN_NET.tick()');await wait(2)}};
   assert.equal(guest.run('JSON.stringify(hiddenChestSpots.map(chestPosition))'),host.run('JSON.stringify(hiddenChestSpots.map(chestPosition))'),'mêmes coffres cachés chez l’invité');

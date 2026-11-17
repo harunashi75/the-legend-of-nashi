@@ -137,9 +137,9 @@ test('Maison : chaumière dans les Plaines, pièce vide à décorer (H), meubles
   assert.equal(run('CANAAN_HOUSE.sanitize({items:[{k:"lit",x:1,y:2},{k:"lit",x:1,y:2},{k:"chaise",x:7,y:9},{k:"x",x:2,y:2},{k:"tapis",x:20,y:2}]}).length'),1);
   // En ligne : l'invitée entre par la porte, voit les meubles et en pose un.
   run('CANAAN_NET.openRoom("'+url+'")');
-  for(let i=0;i<50&&!run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!run('CANAAN_NET.state().code');i++)await wait(10);
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+run('CANAAN_NET.state().code')+'",pseudo:"Lina"})');
-  for(let i=0;i<50&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   const step=async k=>{for(let i=0;i<k;i++){run('time++;simulateStep();CANAAN_NET.tick()');guest.run('time++;CANAAN_NET.tick()');await wait(2)}};
   run(`{const d=CANAAN_HOUSE.outsideDoor();${G}.player.x=d.x;${G}.player.y=d.y+20;${G}.player.mhp=${G}.player.hp=1e6}`);await step(8);

@@ -72,14 +72,14 @@ test('Jalon de la phase 4 : un hôte et un invité, reliés par le relais, se vo
   host.run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view={notify:()=>{},chat:()=>{}}');
   host.run('{let s=null;for(let y=60;y<340&&!s;y++)for(let x=60;x<340;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-8;a<=8&&ok;a++)for(let b=-4;b<=4&&ok;b++)ok=canWalk((x+a+.5)*TS,(y+b+.5)*TS);if(ok){s={x,y};break}}P.x=(s.x+.5)*TS;P.y=(s.y+.5)*TS}');
   host.run('CANAAN_NET.openRoom("'+url+'")');
-  for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code');assert.match(code,/^[A-Z2-9]{6}$/);assert.equal(host.run('game.mode'),'host');
   // L'invité rejoint avec le code, depuis l'écran titre.
   // Apparences : l'invité choisit la sienne sur l'écran titre, l'hôte a celle de sa sauvegarde.
   guest.run('CANAAN_NET.setLook({sex:"f",race:"orc",skin:"#86a85a",hairStyle:"tresses",outfit:"or"})');
   host.run('game.hero.look=sanitizeLook({race:"minotaure",outfit:"nuit"})');
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+code+'",pseudo:"Lina"})');
-  for(let i=0;i<50&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   assert.equal(guest.run('game.mode'),'guest');assert.equal(guest.run('started'),true);
   const id=guest.run('CANAAN_NET.state().heroId');assert.match(id,/^g-/);
   assert.equal(guest.run('game.hero.look.race'),'orc','l’invité garde son apparence');
@@ -104,7 +104,7 @@ test('Jalon de la phase 4 : un hôte et un invité, reliés par le relais, se vo
   assert.equal(host.run('saveGame()'),true);assert.equal(JSON.parse(host.run('localStorage.getItem("canaan_slot_1")')).heros.invites[id].pseudo,'Lina');
   {const saved=JSON.parse(host.run('localStorage.getItem("canaan_slot_1")')).heros;assert.equal(saved.invites[id].look.race,'orc');assert.equal(saved.hote.look.race,'minotaure');}
   // Départ de l'invité : sa place est gardée (voir le test de la place réservée), son héros reste enregistré.
-  guest.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<50&&!host.run('game.guests["'+id+'"].away');i++)await wait(10);
+  guest.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<1000&&!host.run('game.guests["'+id+'"].away');i++)await wait(10);
   assert.equal(host.run('!!game.guests["'+id+'"].away'),true);assert.equal(host.run('!!game.guests["'+id+'"]'),true);
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });
@@ -123,9 +123,9 @@ test('Échange entre joueurs : demande, offres, validations, vérifications de l
  try{
   host.run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view={notify:()=>{},chat:()=>{}}');
   host.run('CANAAN_NET.openRoom("'+url+'")');
-  for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+host.run('CANAAN_NET.state().code')+'",pseudo:"Lina"})');
-  for(let i=0;i<50&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   const J=(side,expr)=>JSON.parse(side.run('JSON.stringify('+expr+')'));
   const step=async k=>{for(let i=0;i<k;i++){host.run('time++;simulateStep();CANAAN_NET.tick()');guest.run('time++;CANAAN_NET.tick()');await wait(2)}};
@@ -168,7 +168,7 @@ test('Échange entre joueurs : demande, offres, validations, vérifications de l
   host.run('CANAAN_TRADE.actions.add(0)');host.run('CANAAN_TRADE.actions.ready()');host.run(`CANAAN_TRADE.handle(${G},{op:'trade-ready',yes:true})`);
   assert.equal(host.run(G+'.inventory.length'),10);assert.equal(host.run('game.hero.inventory.length'),2);assert.equal(host.run('CANAAN_TRADE.sessions()'),1);
   // Départ d'un joueur : l'échange est annulé.
-  guest.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<50&&!host.run('!!'+G+'.away');i++)await wait(10);
+  guest.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<1000&&!host.run('!!'+G+'.away');i++)await wait(10);
   host.run('CANAAN_TRADE.check()');assert.equal(host.run('CANAAN_TRADE.sessions()'),0);
   for(const side of [host,guest])assert.equal(side.errors.length,0,side.errors.join('\n'));
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}

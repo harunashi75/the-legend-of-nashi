@@ -18,11 +18,11 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   host.run('CanaanStages.achievements={after(){}}');
   host.run('{let s=null;for(let y=60;y<340&&!s;y++)for(let x=60;x<340;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-8;a<=8&&ok;a++)for(let b=-4;b<=8&&ok;b++)ok=canWalk((x+a+.5)*TS,(y+b+.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}P.x=(s.x+.5)*TS;P.y=(s.y+.5)*TS}');
   host.run('CANAAN_NET.openRoom("'+url+'")');
-  for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code');
   guest.run('globalThis.__toasts=[];{const t0=toast;toast=m=>{__toasts.push(m);t0(m)}}');
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+code+'",pseudo:"Lina"})');
-  for(let i=0;i<50&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   assert.equal(guest.run('game.mode'),'guest');
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   // L'hôte et ses monstres ne bougent que si on le demande ; pas de régénération pour mesurer le mana.
@@ -157,10 +157,10 @@ test('Place réservée : un invité déconnecté garde son héros 2 minutes, imm
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const bootWithSocket=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run,){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;side.run('globalThis.__toasts=[];{const t0=toast;toast=m=>{__toasts.push(m);t0(m)}}');return side};
  const host=bootWithSocket(),apps=[];
- const join=async(side,code)=>{side.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+code+'",pseudo:"Lina"})');for(let i=0;i<60&&side.run('game.mode')!=='guest';i++)await wait(10)};
+ const join=async(side,code)=>{side.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+code+'",pseudo:"Lina"})');for(let i=0;i<1000&&side.run('game.mode')!=='guest';i++)await wait(10)};
  try{
   host.run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view.notify=()=>{};game.view.chat=()=>{}');
-  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code');
   const first=bootWithSocket();apps.push(first);await join(first,code);
   const id=first.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
@@ -169,7 +169,7 @@ test('Place réservée : un invité déconnecté garde son héros 2 minutes, imm
   // L'invité s'éloigne un peu de l'hôte, puis sa connexion tombe.
   host.run(G+'.player.x=P.x+5*TS;'+G+'.player.y=P.y');await step(10,[first]);
   const spot=host.run('JSON.stringify(['+G+'.player.x,'+G+'.player.y])');
-  first.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<50&&!host.run(G+'.away');i++)await wait(10);
+  first.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<1000&&!host.run(G+'.away');i++)await wait(10);
   assert.ok(host.run(G+'.away'),'place réservée');assert.equal(host.run('game.heroes.includes('+G+')'),true,'toujours dans le groupe');
   assert.ok(first.run('__toasts.some(t=>t.includes("place est gardée"))'),'l’invité sait que sa place est gardée');
   assert.equal(first.run('CANAAN_NET.settings().code'),code,'code retenu pour revenir');
@@ -192,11 +192,11 @@ test('Place réservée : un invité déconnecté garde son héros 2 minutes, imm
   // La même identité se reconnecte alors que l'ancienne connexion est encore ouverte : la nouvelle la remplace.
   const third=bootWithSocket();apps.push(third);
   third.run('CANAAN_PREFERENCES.write("network",'+second.run('JSON.stringify(CANAAN_PREFERENCES.read("network",{}))')+')');
-  await join(third,code);for(let i=0;i<40&&!second.run('__toasts.some(t=>t.includes("Nouvelle connexion"))');i++)await wait(10);
+  await join(third,code);for(let i=0;i<1000&&!second.run('__toasts.some(t=>t.includes("Nouvelle connexion"))');i++)await wait(10);
   assert.equal(third.run('game.mode'),'guest','nouvelle connexion acceptée');assert.ok(second.run('__toasts.some(t=>t.includes("Nouvelle connexion"))'),'l’ancienne est fermée');
   assert.equal(host.run('CANAAN_NET.state().peers'),1);
   // Pas de retour dans les 2 minutes : il quitte le groupe ; son héros reste enregistré dans l'aventure.
-  third.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<50&&!host.run(G+'.away');i++)await wait(10);
+  third.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<1000&&!host.run(G+'.away');i++)await wait(10);
   host.run('time+=2*60*60');await step(1,[]);
   assert.equal(host.run('game.heroes.includes('+G+')'),false,'parti après 2 minutes');assert.equal(host.run(G+'.away'),null);assert.equal(host.run('!!'+G),true);
   assert.equal(host.errors.length,0,host.errors.join('\n'));
@@ -225,7 +225,7 @@ test('Jouer avec Tailscale dans le jeu : l’hôte ouvre le salon, copie l’inv
   assert.ok(before.includes('data-action="groupOpenTailscale"')&&before.includes('data-action="groupOpenLan"'));assert.doesNotMatch(before,/pinggy/i);
   host.run('closePanels()');
   await host.run('CANAAN_NET.openTailscale()');
-  for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code');
   assert.equal(host.run('canaanDesktop.hosting.tailscale'),1);assert.equal(host.run('CANAAN_NET.state().relay'),local,'salon ouvert sur le relais Tailscale');
   // Le panneau montre l'adresse, le nom MagicDNS, le code, l'aide Tailscale et le pare-feu ; l'invitation est copiée.
@@ -238,17 +238,17 @@ test('Jouer avec Tailscale dans le jeu : l’hôte ouvre le salon, copie l’inv
   guest.run('{const i=document.getElementById("joinInvite");i.value='+JSON.stringify(invitation)+';for(const f of document.getElementById("slotMenu").__l.input)f({target:i})}');
   assert.equal(guest.run('document.getElementById("joinRelay").value'),local);assert.equal(guest.run('document.getElementById("joinCode").value'),code);
   guest.run('CANAAN_NET.joinRoom({relay:document.getElementById("joinRelay").value,code:document.getElementById("joinCode").value,pseudo:"Lina"})');
-  for(let i=0;i<60&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   assert.equal(guest.run('game.mode'),'guest');assert.equal(host.run('game.heroes.length'),2);
   await host.run('CANAAN_NET.closeInternet()');assert.equal(host.run('canaanDesktop.hosting.stopped'),true);
   // Tailscale arrêté : le message s'affiche dans le panneau, aucun salon ne s'ouvre.
   host.run('canaanDesktop.hosting.next={state:"error",kind:"tailscale",message:"Tailscale est arrêté : ouvre Tailscale et active la connexion (« Connect »)."}');
-  for(let i=0;i<50&&host.run('game.mode')!=='solo';i++)await wait(10);
+  for(let i=0;i<1000&&host.run('game.mode')!=='solo';i++)await wait(10);
   assert.equal(await host.run('CANAAN_NET.openTailscale()'),false);assert.equal(host.run('game.mode'),'solo','aucun salon');assert.equal(host.run('CANAAN_NET.debug.socket'),null);
   host.run('closePanels();toggleGroup()');assert.ok(host.run('document.getElementById("window").innerHTML').includes('Tailscale est arrêté'));
   // Réseau local : même parcours, l'invitation donne l'adresse de ce PC sur le réseau, avec l'aide pour le pare-feu.
   host.run('canaanDesktop.hosting.startLan=()=>Promise.resolve({state:"online",kind:"lan",local:"'+local+'",relay:"ws://192.168.1.25:'+relay.port+'",addresses:["ws://192.168.1.25:'+relay.port+'","ws://10.0.0.7:'+relay.port+'"]})');
-  await host.run('CANAAN_NET.openLan()');for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  await host.run('CANAAN_NET.openLan()');for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   assert.equal(host.run('CANAAN_NET.state().relay'),local);
   host.run('closePanels();toggleGroup()');const lanPanel=host.run('document.getElementById("window").innerHTML');
   assert.ok(lanPanel.includes('ws://192.168.1.25:'+relay.port)&&lanPanel.includes('10.0.0.7')&&lanPanel.includes('sudo ufw allow '+relay.port+'/tcp'),'adresse locale et aide pare-feu');

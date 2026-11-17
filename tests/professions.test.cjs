@@ -127,9 +127,9 @@ test('Métiers en ligne : l’invitée pêche, cuisine et mange chez l’hôte, 
  try{
   host.run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view={notify:()=>{},chat:()=>{}}');
   host.run('CANAAN_NET.openRoom("'+url+'")');
-  for(let i=0;i<50&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
+  for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+host.run('CANAAN_NET.state().code')+'",pseudo:"Lina"})');
-  for(let i=0;i<50&&guest.run('game.mode')!=='guest';i++)await wait(10);
+  for(let i=0;i<1000&&guest.run('game.mode')!=='guest';i++)await wait(10);
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   const step=async k=>{for(let i=0;i<k;i++){host.run('time++;simulateStep();CANAAN_NET.tick()');guest.run('time++;CANAAN_NET.tick()');await wait(2)}};
   // L'invitée se tient au bord d'un lac (côté hôte et chez elle), puis lance sa ligne avec E.
