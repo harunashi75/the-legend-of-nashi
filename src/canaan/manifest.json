@@ -72,8 +72,13 @@
     },
     {
       "kind": "script",
+      "id": "canaan-dungeons-render",
+      "file": "scripts/dungeons/render.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-dungeons",
-      "file": "scripts/dungeons.js"
+      "file": "scripts/dungeons/dungeons.js"
     },
     {
       "kind": "script",

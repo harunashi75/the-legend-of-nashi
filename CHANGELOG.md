@@ -7,6 +7,11 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 ### Corrigé
 - La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.
 
+### Refactorisation
+- Maison : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`), le dessin (`render.js`) et le coopératif (`net.js`).
+- Donjons : structure et créatures de chaque instance dans `shared/data/dungeons.js` ; `scripts/dungeons/` sépare les plans, énigmes et boss (`dungeons.js`) du dessin (`render.js`).
+- Rien ne change à l’écran : chaque étape a été comparée appel de dessin par appel de dessin avec la version précédente.
+
 ### Outillage
 - Le HTML autonome n’est plus versionné : il est assemblé par `npm run build` et joint à chaque release GitHub.
 - Version unique : le template reçoit `{{VERSION}}` à l’assemblage ; `package.json` est vérifié par les tests.
@@ -14,6 +19,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - Intégration continue GitHub Actions (lint, assemblage, régressions) et publication automatique sur tag `vX.Y.Z`.
 - Le README est raccourci ; la documentation détaillée est dans `docs/GAMEPLAY.md` et `docs/ARCHITECTURE.md`.
 - Tests rangés par système (`tests/*.test.cjs`) et lancés en parallèle ; démarrage du jeu dans les tests 10× plus rapide (contexte `vm` sans intercepteurs). La suite complète passe de 12 min à une vingtaine de secondes.
+- Deux tests instables stabilisés : attentes de connexion au relais (10 s au lieu de 0,5 s) et doublon de Rubis tiré au hasard.
 - Tests de comportement à la place des recherches de texte dans le code : vrais clics (`click`) et vraies touches (`fire`) dans le jeu simulé, vitesse mesurée, dessin du marchand, HUD, validation du démarrage ; chacun vérifié en cassant le comportement.
 
 ## [1.9.7] - 2026-11-16

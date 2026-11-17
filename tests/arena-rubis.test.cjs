@@ -30,7 +30,8 @@ test('Rubis : 48 effets en six familles, six emplacements, collection, verrous e
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_RUBIS.equipped())')),['berserker',null,null,null,null,null]);
  const fresh=JSON.parse(run('JSON.stringify(Array.from({length:47},()=>CANAAN_RUBIS.grant()).map(x=>x.fresh))'));
  assert.ok(fresh.every(Boolean));assert.equal(run('CANAAN_RUBIS.discovered()'),48);
- assert.equal(run('CANAAN_RUBIS.grant().fresh'),false);
+ // Doublon nommé (non équipé) : un doublon tiré au hasard tombait une fois sur 48 sur le Rubis équipé, qui passait alors dans le sac.
+ assert.equal(run('CANAAN_RUBIS.grant("colosse").fresh'),false);
  // Fiche du personnage : six emplacements sous le personnage, puis la collection des 48.
  run('renderCharacter()');const html=g.document.getElementById('window').innerHTML;
  assert.match(html,/class="character-left"[\s\S]*rubis-paper/);
