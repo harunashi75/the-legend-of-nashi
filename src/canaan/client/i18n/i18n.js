@@ -31,9 +31,9 @@ const missing = new Set();
 const produced = new Set();
 const CACHE_MAX = 20000;
 
-// Valeurs des modèles : {n}, {max} et {or} sont des nombres (« 1 234 », « −15 », « 2.5 ») ; les autres, un texte
+// Valeurs des modèles : {n}, {m}, {s}, {max} et {or} sont des nombres (« 1 234 », « −15 », « 2.5 ») ; les autres, un texte
 // sans séparateur « · — | ».
-const NUMERIC = new Set(['n', 'max', 'or']);
+const NUMERIC = new Set(['n', 'm', 's', 'max', 'or']);
 const NUMBER = '([+−-]?\\d[\\d\\s\\u00a0\\u202f.,]*?)';
 const VALUE = '([^·—|\\n]+?)';
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
