@@ -176,14 +176,14 @@
   padding: 4px 7px;
   margin: 0;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window#window .bag-sale:hover {
   background: #c83e4d;
 }
 #window#window .bag-sale:disabled {
   opacity: 0.45;
-  cursor: not-allowed;
+  cursor: var(--cursor-blocked);
 }
 #window .bag-sale-wrap .weapon-reserve {
   bottom: 5px;
@@ -230,7 +230,7 @@
   border-radius: 8px;
   background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rarity) 22%, transparent), rgba(16, 12, 10, 0.55) 70%);
   color: #f3e6c4;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window .skin-card img {
   width: 76px;
@@ -241,7 +241,7 @@
   box-shadow: 0 0 0 2px #fff2cb, 0 0 14px var(--rarity);
 }
 #window .skin-card.locked {
-  cursor: default;
+  cursor: var(--cursor-default);
   opacity: 0.55;
   filter: grayscale(0.7);
 }

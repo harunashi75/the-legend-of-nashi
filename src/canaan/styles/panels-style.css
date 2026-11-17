@@ -126,7 +126,7 @@
   border-radius: 11px;
   background: linear-gradient(145deg, #23384a, #111d2e);
   padding: 8px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: center;
   color: #f2e9d7;
   overflow: hidden;
@@ -137,7 +137,7 @@
 }
 #window .bag-cell.empty {
   opacity: 0.5;
-  cursor: default;
+  cursor: var(--cursor-default);
 }
 #window .bag-cell .bag-icon {
   font-size: calc(26px * var(--font-scale));
@@ -205,7 +205,7 @@
   justify-content: center;
   text-align: center;
   gap: 3px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   overflow: hidden;
 }
 #window .equip-square:hover {

@@ -862,9 +862,20 @@
   }
 
   // ---------------------------------------------------------------- Fenêtre des métiers (touche P)
-  const ui = { tab: 'peche', codex: null };
+  const ui = { tab: 'peche', codex: null, more: false };
   const esc = text => safeGearText(text);
   const myProf = () => profOf(game.hero);
+  // Aide d'un onglet : quelques repères courts toujours visibles, et le détail dans un encadré repliable
+  // (fermé par défaut ; son état est gardé quand le panneau se redessine). Contenu écrit par le jeu (HTML sûr).
+  function tips(items, more = '') {
+    return (
+      '<div class="prof-tips">' + items.map(t => '<span>' + t + '</span>').join('') + '</div>' +
+      (more ? '<details class="prof-more"' + (ui.more ? ' open' : '') + '><summary>Comment ça marche ?</summary><div>' + more + '</div></details>' : '')
+    );
+  }
+  document.addEventListener('toggle', e => e.target.matches?.('.prof-more') && (ui.more = e.target.open), true);
+  // Où l'on en est (près de la forge, de la cuisinière…) : une ligne, verte si c'est bon, orange sinon.
+  const status = (ok, text) => '<p class="prof-status' + (ok ? '' : ' warn') + '">' + text + '</p>';
   function bar(skill) {
     const s = myProf()[skill],
       need = xpNeeded(s.level),
@@ -980,17 +991,21 @@
   function tabFishing() {
     return (
       bar('fishing') +
-      '<p class="prof-help">Approche-toi d’un banc de poissons (remous dans l’eau profonde : mer et lacs) et appuie sur <b>E</b>. Quand ça mord ❗, appuie vite sur <b>E</b> pour ferrer. Plus ton niveau est haut, meilleure est la qualité des prises.</p>' +
-      codex(Object.entries(FISH), fishIcon, 'Pêchés') +
-      '<p class="prof-help">⟦menu_inventory⟧ Tes poissons sont des objets de ton sac (I), par piles de 100.</p>'
+      tips(
+        ['🎣 Banc de poissons + <b>E</b>', '❗ Ça mord : <b>E</b> vite', '🍳 Se cuisine'],
+        'Les bancs sont des remous dans l’eau profonde (mer et lacs). Approche-toi et appuie sur <b>E</b> pour lancer ; quand ça mord ❗, appuie vite sur <b>E</b> pour ferrer. Plus ton niveau est haut, meilleure est la qualité des prises. Tes poissons sont des objets de ton sac (I), par piles de 100.'
+      ) +
+      codex(Object.entries(FISH), fishIcon, 'Pêchés')
     );
   }
   function tabHunting() {
     return (
       bar('hunting') +
-      '<p class="prof-help">Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales. Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin. Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité.</p>' +
-      codex(Object.entries(GAME), gameIcon, 'Chassés') +
-      '<p class="prof-help">⟦menu_inventory⟧ Ta viande est un objet de ton sac (I), par piles de 100.</p>'
+      tips(
+        ['⚔️ Attaque le gibier', '🏹 Arc ou bâton pour les craintifs', '🍖 Viande à cuisiner'],
+        'Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales. Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin. Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité. Ta viande est un objet de ton sac (I), par piles de 100.'
+      ) +
+      codex(Object.entries(GAME), gameIcon, 'Chassés')
     );
   }
   function tabCooking() {
@@ -999,8 +1014,11 @@
       cap = capOf(prof.cooking.level);
     return (
       bar('cooking') +
-      '<p class="prof-help">' + (fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Approche-toi d’une cuisinière pour cuisiner : La Marmite dorée au Camp de l’Aurore, un refuge, ou ta maison si tu en as posé une.') +
-      ' Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière.</p>' +
+      status(fire, fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Va près d’une cuisinière : Marmite dorée (camp), refuge ou ta maison.') +
+      tips(
+        ['1 ingrédient = 1 repas', 'Qualité max : <b style="color:' + qualityColor(cap) + '">' + esc(qualityName(cap)) + '</b>', '⏳ 6 s, reste immobile'],
+        'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore, les refuges, et ta maison si tu en as posé une.'
+      ) +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)
         .filter(([id]) => knows(game.hero, id))
@@ -1037,7 +1055,7 @@
     if (live.cd) active.push('⏳ Repas rapide (PV, mana) dans ' + live.cd + ' s');
     return (
       (active.length ? '<div class="prof-active">' + active.map(a => '<p>' + esc(a) + '</p>').join('') + '</div>' : '') +
-      '<p class="prof-help">Les repas qui rendent des PV ou du mana tout de suite partagent un délai de 20 s. Un seul bonus (dégâts, protection, vitesse) à la fois : un nouveau remplace l’ancien.</p>' +
+      tips(['⏳ PV / mana : 20 s entre deux', '✨ Un seul bonus à la fois']) +
       (meals.length
         ? '<div class="prof-grid meals">' +
           meals
@@ -1063,7 +1081,7 @@
       ['enchant', '⟦prof_enchanting⟧ Enchantement'],
       ['repas', '🍽️ Repas']
     ];
-    const helpers = { bar, esc };
+    const helpers = { bar, esc, tips, status };
     shown = signature();
     showPanel(
       '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +

@@ -56,23 +56,30 @@
   function ownedCount(id) {
     return Math.max(0, Math.floor(Number(gems().owned[id]) || 0));
   }
+  // Rubis rangés à la banque du héros : ils restent à lui (découverts), mais ne s'équipent pas depuis la banque.
+  function bankedCount(id) {
+    // Un invité ne connaît sa banque que par le message de l'hôte (près du banquier).
+    const bank = game.mode === 'guest' && me() === game.hero ? CANAAN_BANK.remote() : me().bank;
+    return Math.max(0, Math.floor(Number(bank?.stacks?.['rubis:' + id + ':0']) || 0));
+  }
+  const known = id => ownedCount(id) + bankedCount(id) > 0;
   function discovered() {
-    return RUBIS.filter(r => ownedCount(r.id) > 0).length;
+    return RUBIS.filter(r => known(r.id)).length;
   }
   // Un Rubis gagné : priorité aux Rubis non possédés ; un doublon est conservé dans la collection.
   function grant(id = null) {
     let rubis = id ? BY_ID.get(id) : null;
     if (!rubis) {
-      const missing = RUBIS.filter(r => !ownedCount(r.id)),
+      const missing = RUBIS.filter(r => !known(r.id)),
         pool = missing.length ? missing : RUBIS;
       rubis = pool[Math.floor(Math.random() * pool.length)];
     }
-    const fresh = !ownedCount(rubis.id);
+    const fresh = !known(rubis.id);
     gems().owned[rubis.id] = ownedCount(rubis.id) + 1;
     return { rubis, fresh };
   }
   function missingRubis() {
-    return RUBIS.filter(r => !ownedCount(r.id));
+    return RUBIS.filter(r => !known(r.id));
   }
   window.CANAAN_RUBIS_STATE = {
     export: () => ({ owned: { ...gems().owned }, equipped: [...gems().equipped] }),
@@ -171,6 +178,8 @@
     slots: SLOTS,
     get: id => BY_ID.get(id) || null,
     owned: ownedCount,
+    banked: bankedCount,
+    known,
     equipped: () => [...gems().equipped],
     discovered,
     missing: missingRubis,
@@ -690,8 +699,9 @@
     if (!r) return '';
     const f = FAMILIES[r.family],
       n = ownedCount(id),
+      banked = bankedCount(id),
       slot = gems().equipped.indexOf(id);
-    if (!n)
+    if (!n && !banked)
       return (
         '<div class="tooltip-name rubis-unknown">Rubis inconnu · N°' +
         String(r.n).padStart(2, '0') +
@@ -711,6 +721,7 @@
       ' · N°' +
       String(r.n).padStart(2, '0') +
       (n > 1 ? ' · possédé ×' + n : '') +
+      (banked ? ' · 🏦 banque ×' + banked : '') +
       '</div></div></div><div class="rubis-tip-desc">' +
       esc(r.desc) +
       '</div>' +
@@ -718,7 +729,7 @@
         ? '<div class="rubis-tip-note">👥 Effet de groupe : s’active en coopération.</div>'
         : '') +
       '<div class="rubis-tip-note">' +
-      (slot >= 0 ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer' : 'Clic : équiper') +
+      (slot >= 0 ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer' : n ? 'Clic : équiper' : '🏦 Rangé à la banque : reprends-le pour l’équiper') +
       '</div>'
     );
   }

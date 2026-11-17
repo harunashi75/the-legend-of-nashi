@@ -46,7 +46,7 @@
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   color: #e8d9b8;
   font: 600 calc(12px * var(--font-scale)) system-ui, sans-serif;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #housingBar button.on {
   background: linear-gradient(180deg, #8a6420, #5a3e12);

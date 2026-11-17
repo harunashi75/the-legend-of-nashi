@@ -11,7 +11,7 @@
 #window #bigMap {
   width: 100%;
   max-width: 680px;
-  cursor: grab;
+  cursor: var(--cursor-pointer);
   touch-action: none;
   aspect-ratio: 1;
   image-rendering: pixelated;
@@ -85,7 +85,7 @@
   border-color: #52476d;
 }
 #window #bigMap.dragging {
-  cursor: grabbing;
+  cursor: var(--cursor-pointer);
 }
 /* Outils de la carte : zoom, centrer, vue d'ensemble. */
 #window .map-tools {

@@ -209,6 +209,7 @@
     render,
     isOpen,
     showTooltip,
+    remote: () => remote,
     applyRemote(v) {
       remote = v && Array.isArray(v.items) && v.stacks && typeof v.stacks === 'object' ? v : null;
       render();

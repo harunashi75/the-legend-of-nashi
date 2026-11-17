@@ -164,14 +164,14 @@
   text-align: center;
   color: #f6dc98;
   font: inherit;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window .prof-card.on {
   border-color: #f6dc98;
   box-shadow: 0 0 0 1px #f6dc98;
 }
 #window .prof-card.unknown {
-  cursor: default;
+  cursor: var(--cursor-default);
   opacity: 0.75;
 }
 #window .prof-card b {
@@ -541,4 +541,57 @@
   margin: 12px 0 6px;
   color: #f6dc98;
   font-size: calc(14px * var(--font-scale));
+}
+/* Repères courts d'un onglet de métier, et le détail dans un encadré repliable. */
+#window .prof-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#window .prof-tips span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 170, 90, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  color: #e8d9b8;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .prof-more summary {
+  cursor: var(--cursor-pointer);
+  width: fit-content;
+  color: #d4aa5a;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .prof-more > div {
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-left: 2px solid rgba(212, 170, 90, 0.4);
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.45;
+}
+/* Où l'on en est (forge, cuisinière, sac) : vert si c'est bon, orange sinon. */
+#window .prof-status {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #8fe3ae;
+  background: rgba(30, 60, 40, 0.35);
+  color: #d8f8e0;
+  font-size: calc(13px * var(--font-scale));
+}
+#window .prof-status.warn {
+  border-color: #e0a050;
+  background: rgba(70, 45, 15, 0.4);
+  color: #f6dcb0;
+}
+/* Recettes d'enchantement : ce qu'on a (vert / rouge), et celles qu'on peut créer tout de suite. */
+#window .prof-recipe b.ok {
+  color: #8fe3ae;
+}
+#window .prof-recipe b.ko {
+  color: #f08a7a;
+}
+#window .prof-recipe.ready {
+  border-color: #8fe3ae;
 }

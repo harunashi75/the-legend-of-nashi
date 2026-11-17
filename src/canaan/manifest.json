@@ -427,6 +427,11 @@
     },
     {
       "kind": "style",
+      "id": "canaan-ui-overlay-style",
+      "file": "styles/ui-overlay.css"
+    },
+    {
+      "kind": "style",
       "id": "canaan-rpg-theme",
       "file": "styles/rpg-theme.css"
     },
@@ -434,6 +439,11 @@
       "kind": "script",
       "id": "canaan-controls",
       "file": "scripts/controls.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ui-overlay",
+      "file": "scripts/ui-overlay.js"
     },
     {
       "kind": "script",

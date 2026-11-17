@@ -1785,7 +1785,7 @@
   }
   function claimArenaRubis(id) {
     const r = CANAAN_RUBIS.get(id);
-    if (!records().pendingChoice || !r || CANAAN_RUBIS.owned(id)) return false;
+    if (!records().pendingChoice || !r || CANAAN_RUBIS.known(id)) return false;
     CANAAN_RUBIS.grant(id);
     records().pendingChoice = false;
     hideGearTooltip();

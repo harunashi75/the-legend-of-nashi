@@ -88,7 +88,7 @@
   font-size: calc(14px * var(--font-scale));
   letter-spacing: 1px;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #title #slotMenu button.slot-secondary {
   background: linear-gradient(180deg, #3a2a1c, #22170e);

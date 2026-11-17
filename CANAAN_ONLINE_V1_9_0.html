@@ -132,7 +132,7 @@ body {
   justify-content: center;
   font-size: calc(26px * var(--font-scale));
   position: relative;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: 0.15s;
 }
 .skill:hover {
@@ -212,7 +212,7 @@ body {
   color: #fff;
   padding: 9px 20px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
   margin-right: 8px;
 }
@@ -256,7 +256,7 @@ body {
   font-weight: 800;
   padding: 16px 54px;
   border-radius: 50px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   letter-spacing: 2px;
   box-shadow: 0 0 40px rgba(160, 90, 255, 0.5);
   transition: 0.2s;
@@ -297,7 +297,7 @@ body {
   border: 1px solid #8d79dd;
   border-radius: 9px;
   padding: 10px 13px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #overlay {
   position: fixed;
@@ -330,7 +330,7 @@ body {
   padding: 8px 12px;
   border-radius: 8px;
   margin: 4px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window button:disabled {
   opacity: 0.4;
@@ -452,7 +452,7 @@ body {
   border-radius: 20px;
   color: #f8e3b6;
   padding: 9px 16px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
 }
 #pauseScreen {
@@ -500,7 +500,7 @@ body {
   color: white;
   font-size: calc(15px * var(--font-scale));
   font-weight: 700;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #pauseCard button:first-of-type {
   background: linear-gradient(90deg, #5369b9, #8861b6);
@@ -789,7 +789,7 @@ body {
   background: #1a2036e8;
   color: #fff;
   padding: 8px 11px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: calc(12px * var(--font-scale));
   font-weight: 700;
 }
@@ -813,7 +813,7 @@ body {
 body.layout-edit #ui .panel[data-movable='1'] {
   outline: 2px dashed #ffd47d;
   outline-offset: 3px;
-  cursor: move;
+  cursor: var(--cursor-pointer);
   touch-action: none;
 }
 body.layout-edit #ui .panel[data-movable='1']:before {
@@ -1161,7 +1161,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border: 1px solid #dfa875;
   border-radius: 8px;
   color: #fff;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
 }
 #saveRecovery #saveRecoveryStatus {
@@ -1223,7 +1223,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   min-width: 130px;
   padding: 7px 12px;
   font-size: calc(14px * var(--font-scale));
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #settingsCard .settings-actions {
   display: flex;
@@ -1234,7 +1234,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   flex: 1;
   padding: 12px;
   font-size: calc(15px * var(--font-scale));
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #settingsCard .settings-hint {
   text-align: center;
@@ -1374,7 +1374,7 @@ svg.ico.solo {
     0 3px 8px rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
-  cursor: help;
+  cursor: var(--cursor-pointer);
 }
 #buffbar .buff.debuff {
   --edge: #e5484d;
@@ -1621,7 +1621,7 @@ svg.ico.solo {
   border-radius: 11px;
   background: linear-gradient(145deg, #23384a, #111d2e);
   padding: 8px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   text-align: center;
   color: #f2e9d7;
   overflow: hidden;
@@ -1632,7 +1632,7 @@ svg.ico.solo {
 }
 #window .bag-cell.empty {
   opacity: 0.5;
-  cursor: default;
+  cursor: var(--cursor-default);
 }
 #window .bag-cell .bag-icon {
   font-size: calc(26px * var(--font-scale));
@@ -1700,7 +1700,7 @@ svg.ico.solo {
   justify-content: center;
   text-align: center;
   gap: 3px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   overflow: hidden;
 }
 #window .equip-square:hover {
@@ -20791,14 +20791,14 @@ function openPortal(n) {
   padding: 4px 7px;
   margin: 0;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window#window .bag-sale:hover {
   background: #c83e4d;
 }
 #window#window .bag-sale:disabled {
   opacity: 0.45;
-  cursor: not-allowed;
+  cursor: var(--cursor-blocked);
 }
 #window .bag-sale-wrap .weapon-reserve {
   bottom: 5px;
@@ -20845,7 +20845,7 @@ function openPortal(n) {
   border-radius: 8px;
   background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rarity) 22%, transparent), rgba(16, 12, 10, 0.55) 70%);
   color: #f3e6c4;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window .skin-card img {
   width: 76px;
@@ -20856,7 +20856,7 @@ function openPortal(n) {
   box-shadow: 0 0 0 2px #fff2cb, 0 0 14px var(--rarity);
 }
 #window .skin-card.locked {
-  cursor: default;
+  cursor: var(--cursor-default);
   opacity: 0.55;
   filter: grayscale(0.7);
 }
@@ -22479,24 +22479,24 @@ function openPortal(n) {
       toast('💰 Va voir un marchand pour vendre !');
       return false;
     }
-    if (
-      rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult &&
-      !confirm(
-        'Vendre ' +
-          gearDisplayName(item) +
-          ' (' +
-          item.rarity +
-          ', niveau ' +
-          itemLevel(item) +
-          ') pour ' +
-          gearSellValue(item) +
-          ' or ?'
-      )
-    )
+    // Vente : l'objet doit toujours être à sa place (le sac a pu changer pendant la confirmation).
+    const sell = () => {
+      const now = game.hero.inventory[index];
+      if (!now || String(now.id) !== id || !nearMerchant()) return false;
+      hideGearTooltip();
+      sellBagIndex(index);
+      return true;
+    };
+    // Légendaire ou mieux : la fenêtre de confirmation du jeu demande d'abord.
+    if (rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult) {
+      canaanConfirm(
+        'Vendre ' + gearDisplayName(item) + ' (' + item.rarity + ', niveau ' + itemLevel(item) + ') pour ' + gearSellValue(item) + ' or ?',
+        sell,
+        { title: '💰 Vendre un objet précieux', yes: 'Vendre', no: 'Garder' }
+      );
       return false;
-    hideGearTooltip();
-    sellBagIndex(index);
-    return true;
+    }
+    return sell();
   };
   window.CANAAN_EQUIPMENT = Object.freeze({
     equip: equipItem,
@@ -22544,7 +22544,7 @@ function openPortal(n) {
 #window #bigMap {
   width: 100%;
   max-width: 680px;
-  cursor: grab;
+  cursor: var(--cursor-pointer);
   touch-action: none;
   aspect-ratio: 1;
   image-rendering: pixelated;
@@ -22618,7 +22618,7 @@ function openPortal(n) {
   border-color: #52476d;
 }
 #window #bigMap.dragging {
-  cursor: grabbing;
+  cursor: var(--cursor-pointer);
 }
 /* Outils de la carte : zoom, centrer, vue d'ensemble. */
 #window .map-tools {
@@ -27330,60 +27330,68 @@ function openPortal(n) {
   function stockOf(kind) {
     return CANAAN_BAG.piles(game.hero).filter(p => p.kind === kind);
   }
+  // Matériaux du sac (minerais, herbes) : une case par sorte et qualité.
+  function stockGrid(list, cat, empty) {
+    return list.length
+      ? '<div class="prof-grid">' + list.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + cat[p.id].icon + ' ' + esc(cat[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>'
+      : '<p class="prof-empty">' + empty + '</p>';
+  }
   function tabMining(h) {
-    const ores = stockOf('ore');
     return (
       h.bar('mining') +
-      '<p class="prof-help">Repère les filons (rochers aux éclats colorés) et appuie sur <b>E</b> : chaque filon donne 1 à 3 minerais, puis se reforme au bout de 90 s. Un métal par biome : ' +
-      Object.values(ORES).filter(o => !o.rare).map(o => o.icon + ' ' + esc(o.metal)).join(' · ') + '. Plus ton niveau est haut, meilleure est la qualité.</p>' +
-      '<h3>Minerais dans ton sac</h3>' + (ores.length ? '<div class="prof-grid">' + ores.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + ORES[p.id].icon + ' ' + esc(ORES[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>' : '<p class="prof-empty">Aucun minerai pour l’instant.</p>') +
-      '<p class="prof-help">Les minerais servent à l’enchanteur (onglet Enchantement).</p>'
+      h.tips(
+        ['⛏️ Filon + <b>E</b>', '1 à 3 minerais', '⏳ Repousse en 90 s', '✨ Pour l’Enchantement'],
+        'Les filons sont des rochers aux éclats colorés. Un métal par biome : ' +
+          Object.values(ORES).filter(o => !o.rare).map(o => o.icon + ' ' + esc(o.metal)).join(' · ') +
+          '. Les Tréfonds ont aussi des minerais rares, qui ne servent pas aux enchantements mais se vendent très cher. Plus ton niveau est haut, meilleure est la qualité.'
+      ) +
+      '<h3>Minerais dans ton sac</h3>' + stockGrid(stockOf('ore'), ORES, 'Aucun minerai pour l’instant.')
     );
   }
   function tabHerbalism(h) {
-    const herbs = stockOf('herb');
     return (
       h.bar('herbalism') +
-      '<p class="prof-help">Cueille les herbes sauvages (petites plantes fleuries) avec <b>E</b> : elles repoussent au bout de 90 s. Une herbe par biome : ' +
-      Object.values(HERBS).map(o => o.icon + ' ' + esc(o.name) + ' (' + esc(o.where) + ')').join(' · ') + '. On les cuisine en infusions (onglet Cuisine).</p>' +
-      '<h3>Herbes dans ton sac</h3>' + (herbs.length ? '<div class="prof-grid">' + herbs.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + HERBS[p.id].icon + ' ' + esc(HERBS[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>' : '<p class="prof-empty">Aucune herbe pour l’instant.</p>')
+      h.tips(
+        ['🌿 Herbe + <b>E</b>', '⏳ Repousse en 90 s', '🍳 Infusions (Cuisine)'],
+        'Les herbes sauvages sont de petites plantes fleuries. Une herbe par biome : ' + Object.values(HERBS).map(o => o.icon + ' ' + esc(o.name) + ' (' + esc(o.where) + ')').join(' · ') + '.'
+      ) +
+      '<h3>Herbes dans ton sac</h3>' + stockGrid(stockOf('herb'), HERBS, 'Aucune herbe pour l’instant.')
     );
   }
   function tabEnchanting(h) {
     const prof = CANAAN_PROF.profOf(game.hero),
       level = prof.enchanting.level,
-      stats = Object.keys(ENCHANTS);
+      stats = Object.keys(ENCHANTS),
+      forge = nearForge(game.hero),
+      full = canaanBagUsed(game.hero) >= canaanBagLimit(game.hero);
     let html =
       h.bar('enchanting') +
-      '<p class="prof-help">' + ORES_PER_ENCHANT + ' minerais d’un même métal donnent un enchantement. Choisis sa statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort.' +
-      ' Chaque métal demande un niveau d’enchanteur (cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25) : commence par le cuivre pour progresser. Ton niveau (' + level + ') renforce aussi les enchantements que tu poses de ' + level + ' %. Posé sur une pièce d’équipement, il lui ajoute cette statistique en troisième secondaire (un nouvel enchantement remplace l’ancien).</p>' +
-      (nearForge(game.hero)
-        ? '<p class="prof-active"><b>⚒️ Tu es à la forge</b> : fabriquer un enchantement prend 10 s (2 s de plus par enchantement en série). Reste immobile pendant le travail.</p>'
-        : '<p class="prof-active warn">⚒️ Les enchantements se fabriquent à la <b>forge du Camp de l’Aurore</b> (à l’est du feu de camp). Tu peux poser ceux que tu as n’importe où.</p>') +
-      (canaanBagUsed(game.hero) >= canaanBagLimit(game.hero) ? '<p class="prof-active warn">🎒 Ton sac est plein : libère une case pour ranger l’enchantement (sauf s’il complète une pile).</p>' : '') +
+      h.status(forge, forge ? '⚒️ Tu es à la forge : tu peux fabriquer.' : '⚒️ Va à une forge pour fabriquer : Camp de l’Aurore (à l’est du feu) ou Forteresse de Durgrim (Tréfonds).') +
+      (full ? h.status(false, '🎒 Sac plein : libère une case pour ranger l’enchantement.') : '') +
+      h.tips(
+        [ORES_PER_ENCHANT + ' minerais du même métal = 1 enchantement', 'Toutes les qualités comptent', 'Ton niveau : +' + level + ' % de force'],
+        'Choisis la statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort, mais il demande un niveau d’enchanteur plus haut (' +
+          METALS.map((m, t) => esc(ORES[m].metal) + ' ' + ENCH_LEVEL[t]).join(', ') +
+          '). Les minerais les moins bons partent en premier. Fabriquer prend 10 s (2 s de plus par enchantement en série) : reste immobile. Posé sur une pièce d’équipement (n’importe où), l’enchantement lui ajoute sa statistique en troisième secondaire ; un nouveau remplace l’ancien. Ton niveau d’enchanteur renforce de ' + level + ' % ceux que tu poses.'
+      ) +
       '<div class="prof-tabs ench-stats">' + stats.map(s => '<button type="button" class="' + (ui.stat === s ? 'on' : '') + '" data-action="enchantStat" data-stat="' + s + '">' + ENCHANTS[s].icon + ' ' + esc(SECONDARY_STATS[s].name) + '</button>').join('') + '</div>' +
       '<div class="prof-recipes">' +
       METALS.map((metal, tier) => {
         const o = ORES[metal],
           have = Array.from({ length: 8 }, (_, q) => CANAAN_BAG.count(game.hero, 'ore', metal, q)).reduce((a, b) => a + b, 0),
-          forge = nearForge(game.hero),
           locked = levelTooLow(game.hero, tier),
-          ok = forge && have >= ORES_PER_ENCHANT && !locked,
+          enough = have >= ORES_PER_ENCHANT,
+          ok = forge && enough && !locked,
           pct = Math.round(ENCH_MULT[tier] * levelBonus(game.hero) * 100),
-          // Pourquoi on ne peut pas encore forger : la raison, en clair.
-          why = locked
-            ? levelText(game.hero, tier)
-            : have < ORES_PER_ENCHANT
-              ? 'Il te manque ' + (ORES_PER_ENCHANT - have) + ' ' + o.name.toLowerCase() + '.'
-              : !forge
-                ? 'Va à la forge du camp.'
-                : '';
+          batch = Math.min(20, Math.floor(have / ORES_PER_ENCHANT)),
+          // La raison du blocage est écrite sur le bouton lui-même.
+          label = locked ? '🔒 Enchanteur niv. ' + ENCH_LEVEL[tier] : !enough ? 'Il manque ' + (ORES_PER_ENCHANT - have) + ' minerai' + (ORES_PER_ENCHANT - have > 1 ? 's' : '') : !forge ? 'Va à la forge' : 'Créer';
         return (
-          '<article class="prof-recipe' + (locked ? ' locked' : '') + '"><h4>' + ENCHANTS[ui.stat].icon + ' ' + esc(SECONDARY_STATS[ui.stat].name) + ' · ' + esc(o.metal) + ' <small>niv. ' + ENCH_LEVEL[tier] + '</small></h4>' +
-          '<p>' + o.icon + ' ' + ORES_PER_ENCHANT + ' × ' + esc(o.name) + ' (tu en as ' + have + ') · force ' + pct + ' % de la base de l’objet</p>' +
-          (why ? '<p class="prof-empty">' + esc(why) + '</p>' : '') +
-          '<div class="prof-actions"><button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '"' + (ok ? '' : ' disabled') + '>Créer</button>' +
-          (have >= ORES_PER_ENCHANT * 2 && ok ? '<button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '" data-count="' + Math.min(20, Math.floor(have / ORES_PER_ENCHANT)) + '">× ' + Math.min(20, Math.floor(have / ORES_PER_ENCHANT)) + '</button>' : '') +
+          '<article class="prof-recipe' + (locked ? ' locked' : ok ? ' ready' : '') + '">' +
+          '<h4>' + o.icon + ' ' + esc(o.metal.charAt(0).toUpperCase() + o.metal.slice(1)) + ' <small>+' + pct + ' %</small></h4>' +
+          '<p>' + ORES_PER_ENCHANT + ' × ' + esc(o.name) + ' · <b class="' + (enough ? 'ok' : 'ko') + '">tu en as ' + have + '</b></p>' +
+          '<div class="prof-actions"><button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '"' + (ok ? '' : ' disabled') + '>' + esc(label) + '</button>' +
+          (ok && batch > 1 ? '<button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '" data-count="' + batch + '">× ' + batch + '</button>' : '') +
           '</div></article>'
         );
       }).join('') +
@@ -27396,7 +27404,7 @@ function openPortal(n) {
     html +=
       '<div class="modern-bag ench-pick">' +
       owned.map(p => '<div class="bag-sale-wrap' + (CANAAN_BAG.token({ ...p, n: 1 }) === ui.apply ? ' picked' : '') + '">' + CANAAN_BAG.cell(p, 'data-action="enchantPick" data-token="' + esc(CANAAN_BAG.token({ ...p, n: 1 })) + '"') + '</div>').join('') +
-      '</div><p class="prof-help">Puis clique la pièce à enchanter (portée ou dans ton sac) :</p>';
+      '</div><h3>Puis clique la pièce à enchanter</h3>';
     const pick = CANAAN_BAG.parse(ui.apply),
       gear = [
         ...Object.entries(game.hero.equipment).filter(([slot, it]) => it && it.slot !== 'artifact').map(([slot, it]) => [it, slot, true]),
@@ -28344,9 +28352,20 @@ function openPortal(n) {
   }
 
   // ---------------------------------------------------------------- Fenêtre des métiers (touche P)
-  const ui = { tab: 'peche', codex: null };
+  const ui = { tab: 'peche', codex: null, more: false };
   const esc = text => safeGearText(text);
   const myProf = () => profOf(game.hero);
+  // Aide d'un onglet : quelques repères courts toujours visibles, et le détail dans un encadré repliable
+  // (fermé par défaut ; son état est gardé quand le panneau se redessine). Contenu écrit par le jeu (HTML sûr).
+  function tips(items, more = '') {
+    return (
+      '<div class="prof-tips">' + items.map(t => '<span>' + t + '</span>').join('') + '</div>' +
+      (more ? '<details class="prof-more"' + (ui.more ? ' open' : '') + '><summary>Comment ça marche ?</summary><div>' + more + '</div></details>' : '')
+    );
+  }
+  document.addEventListener('toggle', e => e.target.matches?.('.prof-more') && (ui.more = e.target.open), true);
+  // Où l'on en est (près de la forge, de la cuisinière…) : une ligne, verte si c'est bon, orange sinon.
+  const status = (ok, text) => '<p class="prof-status' + (ok ? '' : ' warn') + '">' + text + '</p>';
   function bar(skill) {
     const s = myProf()[skill],
       need = xpNeeded(s.level),
@@ -28462,17 +28481,21 @@ function openPortal(n) {
   function tabFishing() {
     return (
       bar('fishing') +
-      '<p class="prof-help">Approche-toi d’un banc de poissons (remous dans l’eau profonde : mer et lacs) et appuie sur <b>E</b>. Quand ça mord ❗, appuie vite sur <b>E</b> pour ferrer. Plus ton niveau est haut, meilleure est la qualité des prises.</p>' +
-      codex(Object.entries(FISH), fishIcon, 'Pêchés') +
-      '<p class="prof-help">⟦menu_inventory⟧ Tes poissons sont des objets de ton sac (I), par piles de 100.</p>'
+      tips(
+        ['🎣 Banc de poissons + <b>E</b>', '❗ Ça mord : <b>E</b> vite', '🍳 Se cuisine'],
+        'Les bancs sont des remous dans l’eau profonde (mer et lacs). Approche-toi et appuie sur <b>E</b> pour lancer ; quand ça mord ❗, appuie vite sur <b>E</b> pour ferrer. Plus ton niveau est haut, meilleure est la qualité des prises. Tes poissons sont des objets de ton sac (I), par piles de 100.'
+      ) +
+      codex(Object.entries(FISH), fishIcon, 'Pêchés')
     );
   }
   function tabHunting() {
     return (
       bar('hunting') +
-      '<p class="prof-help">Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales. Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin. Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité.</p>' +
-      codex(Object.entries(GAME), gameIcon, 'Chassés') +
-      '<p class="prof-help">⟦menu_inventory⟧ Ta viande est un objet de ton sac (I), par piles de 100.</p>'
+      tips(
+        ['⚔️ Attaque le gibier', '🏹 Arc ou bâton pour les craintifs', '🍖 Viande à cuisiner'],
+        'Chasse le petit gibier avec ton arme (attaque normale) : lièvres, cerfs, moutons sauvages, grenouilles et bêtes astrales. Les animaux craintifs fuient quand tu approches : un arc ou un bâton les atteint de loin. Chaque prise donne de la viande à cuisiner ; plus ton niveau est haut, meilleure est sa qualité. Ta viande est un objet de ton sac (I), par piles de 100.'
+      ) +
+      codex(Object.entries(GAME), gameIcon, 'Chassés')
     );
   }
   function tabCooking() {
@@ -28481,8 +28504,11 @@ function openPortal(n) {
       cap = capOf(prof.cooking.level);
     return (
       bar('cooking') +
-      '<p class="prof-help">' + (fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Approche-toi d’une cuisinière pour cuisiner : La Marmite dorée au Camp de l’Aurore, un refuge, ou ta maison si tu en as posé une.') +
-      ' Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière.</p>' +
+      status(fire, fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Va près d’une cuisinière : Marmite dorée (camp), refuge ou ta maison.') +
+      tips(
+        ['1 ingrédient = 1 repas', 'Qualité max : <b style="color:' + qualityColor(cap) + '">' + esc(qualityName(cap)) + '</b>', '⏳ 6 s, reste immobile'],
+        'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore, les refuges, et ta maison si tu en as posé une.'
+      ) +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)
         .filter(([id]) => knows(game.hero, id))
@@ -28519,7 +28545,7 @@ function openPortal(n) {
     if (live.cd) active.push('⏳ Repas rapide (PV, mana) dans ' + live.cd + ' s');
     return (
       (active.length ? '<div class="prof-active">' + active.map(a => '<p>' + esc(a) + '</p>').join('') + '</div>' : '') +
-      '<p class="prof-help">Les repas qui rendent des PV ou du mana tout de suite partagent un délai de 20 s. Un seul bonus (dégâts, protection, vitesse) à la fois : un nouveau remplace l’ancien.</p>' +
+      tips(['⏳ PV / mana : 20 s entre deux', '✨ Un seul bonus à la fois']) +
       (meals.length
         ? '<div class="prof-grid meals">' +
           meals
@@ -28545,7 +28571,7 @@ function openPortal(n) {
       ['enchant', '⟦prof_enchanting⟧ Enchantement'],
       ['repas', '🍽️ Repas']
     ];
-    const helpers = { bar, esc };
+    const helpers = { bar, esc, tips, status };
     shown = signature();
     showPanel(
       '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +
@@ -42602,23 +42628,30 @@ function runDrawPipeline() {
   function ownedCount(id) {
     return Math.max(0, Math.floor(Number(gems().owned[id]) || 0));
   }
+  // Rubis rangés à la banque du héros : ils restent à lui (découverts), mais ne s'équipent pas depuis la banque.
+  function bankedCount(id) {
+    // Un invité ne connaît sa banque que par le message de l'hôte (près du banquier).
+    const bank = game.mode === 'guest' && me() === game.hero ? CANAAN_BANK.remote() : me().bank;
+    return Math.max(0, Math.floor(Number(bank?.stacks?.['rubis:' + id + ':0']) || 0));
+  }
+  const known = id => ownedCount(id) + bankedCount(id) > 0;
   function discovered() {
-    return RUBIS.filter(r => ownedCount(r.id) > 0).length;
+    return RUBIS.filter(r => known(r.id)).length;
   }
   // Un Rubis gagné : priorité aux Rubis non possédés ; un doublon est conservé dans la collection.
   function grant(id = null) {
     let rubis = id ? BY_ID.get(id) : null;
     if (!rubis) {
-      const missing = RUBIS.filter(r => !ownedCount(r.id)),
+      const missing = RUBIS.filter(r => !known(r.id)),
         pool = missing.length ? missing : RUBIS;
       rubis = pool[Math.floor(Math.random() * pool.length)];
     }
-    const fresh = !ownedCount(rubis.id);
+    const fresh = !known(rubis.id);
     gems().owned[rubis.id] = ownedCount(rubis.id) + 1;
     return { rubis, fresh };
   }
   function missingRubis() {
-    return RUBIS.filter(r => !ownedCount(r.id));
+    return RUBIS.filter(r => !known(r.id));
   }
   window.CANAAN_RUBIS_STATE = {
     export: () => ({ owned: { ...gems().owned }, equipped: [...gems().equipped] }),
@@ -42717,6 +42750,8 @@ function runDrawPipeline() {
     slots: SLOTS,
     get: id => BY_ID.get(id) || null,
     owned: ownedCount,
+    banked: bankedCount,
+    known,
     equipped: () => [...gems().equipped],
     discovered,
     missing: missingRubis,
@@ -43236,8 +43271,9 @@ function runDrawPipeline() {
     if (!r) return '';
     const f = FAMILIES[r.family],
       n = ownedCount(id),
+      banked = bankedCount(id),
       slot = gems().equipped.indexOf(id);
-    if (!n)
+    if (!n && !banked)
       return (
         '<div class="tooltip-name rubis-unknown">Rubis inconnu · N°' +
         String(r.n).padStart(2, '0') +
@@ -43257,6 +43293,7 @@ function runDrawPipeline() {
       ' · N°' +
       String(r.n).padStart(2, '0') +
       (n > 1 ? ' · possédé ×' + n : '') +
+      (banked ? ' · 🏦 banque ×' + banked : '') +
       '</div></div></div><div class="rubis-tip-desc">' +
       esc(r.desc) +
       '</div>' +
@@ -43264,7 +43301,7 @@ function runDrawPipeline() {
         ? '<div class="rubis-tip-note">👥 Effet de groupe : s’active en coopération.</div>'
         : '') +
       '<div class="rubis-tip-note">' +
-      (slot >= 0 ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer' : 'Clic : équiper') +
+      (slot >= 0 ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer' : n ? 'Clic : équiper' : '🏦 Rangé à la banque : reprends-le pour l’équiper') +
       '</div>'
     );
   }
@@ -44005,6 +44042,7 @@ function runDrawPipeline() {
     render,
     isOpen,
     showTooltip,
+    remote: () => remote,
     applyRemote(v) {
       remote = v && Array.isArray(v.items) && v.stacks && typeof v.stacks === 'object' ? v : null;
       render();
@@ -45801,7 +45839,7 @@ function runDrawPipeline() {
   }
   function claimArenaRubis(id) {
     const r = CANAAN_RUBIS.get(id);
-    if (!records().pendingChoice || !r || CANAAN_RUBIS.owned(id)) return false;
+    if (!records().pendingChoice || !r || CANAAN_RUBIS.known(id)) return false;
     CANAAN_RUBIS.grant(id);
     records().pendingChoice = false;
     hideGearTooltip();
@@ -50430,7 +50468,9 @@ function drawCharacterPreview() {
         seen.add(b.key);
         out.push(b);
       };
-    for (const t of MOB_TYPES)
+    // Seules les espèces qui apparaissent vraiment : celles d'une région de l'île, et toutes celles des Tréfonds.
+    const roaming = new Set(ZONES.flatMap(z => z.mobs || []));
+    for (const t of MOB_TYPES.filter(t => t.under !== undefined || roaming.has(t.name)))
       push({
         key: 'm:' + t.name,
         group: t.under === undefined ? 'mob' : 'under',
@@ -52155,7 +52195,7 @@ function loadGame() {
   color: var(--rpg-ink, #f3e6c8);
 }
 #window button.rubis-slot {
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font: inherit;
 }
 #window button.rubis-slot:hover {
@@ -52228,7 +52268,7 @@ function loadGame() {
   font: 700 calc(14px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
 }
 #window button.rubis-cell {
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   box-shadow: none;
   text-shadow: none;
 }
@@ -52472,7 +52512,7 @@ function loadGame() {
   font-size: calc(14px * var(--font-scale));
   letter-spacing: 1px;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #title #slotMenu button.slot-secondary {
   background: linear-gradient(180deg, #3a2a1c, #22170e);
@@ -53158,14 +53198,14 @@ function loadGame() {
   text-align: center;
   color: #f6dc98;
   font: inherit;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window .prof-card.on {
   border-color: #f6dc98;
   box-shadow: 0 0 0 1px #f6dc98;
 }
 #window .prof-card.unknown {
-  cursor: default;
+  cursor: var(--cursor-default);
   opacity: 0.75;
 }
 #window .prof-card b {
@@ -53536,6 +53576,59 @@ function loadGame() {
   color: #f6dc98;
   font-size: calc(14px * var(--font-scale));
 }
+/* Repères courts d'un onglet de métier, et le détail dans un encadré repliable. */
+#window .prof-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#window .prof-tips span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 170, 90, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  color: #e8d9b8;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .prof-more summary {
+  cursor: var(--cursor-pointer);
+  width: fit-content;
+  color: #d4aa5a;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .prof-more > div {
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-left: 2px solid rgba(212, 170, 90, 0.4);
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.45;
+}
+/* Où l'on en est (forge, cuisinière, sac) : vert si c'est bon, orange sinon. */
+#window .prof-status {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #8fe3ae;
+  background: rgba(30, 60, 40, 0.35);
+  color: #d8f8e0;
+  font-size: calc(13px * var(--font-scale));
+}
+#window .prof-status.warn {
+  border-color: #e0a050;
+  background: rgba(70, 45, 15, 0.4);
+  color: #f6dcb0;
+}
+/* Recettes d'enchantement : ce qu'on a (vert / rouge), et celles qu'on peut créer tout de suite. */
+#window .prof-recipe b.ok {
+  color: #8fe3ae;
+}
+#window .prof-recipe b.ko {
+  color: #f08a7a;
+}
+#window .prof-recipe.ready {
+  border-color: #8fe3ae;
+}
 </style>
 <style id="canaan-house-style">
 /* Mode décoration de la maison (touche H) : barre du catalogue en bas de l'écran. */
@@ -53586,7 +53679,7 @@ function loadGame() {
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   color: #e8d9b8;
   font: 600 calc(12px * var(--font-scale)) system-ui, sans-serif;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #housingBar button.on {
   background: linear-gradient(180deg, #8a6420, #5a3e12);
@@ -53633,6 +53726,167 @@ function loadGame() {
   background: linear-gradient(180deg, #6a4a28, #3e2a16);
   border: 1px solid var(--rpg-gold-dark, #8a6420);
   border-radius: 4px;
+}
+</style>
+<style id="canaan-ui-overlay-style">
+/* Curseur du jeu : flèche dorée (par défaut), flèche de laiton clair étoilée (élément cliquable), flèche grise barrée
+   (action impossible) et barre de saisie dorée (champs de texte). Le curseur du système ne reste qu'en secours. */
+:root {
+  --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff4c8'/%3E%3Cstop offset='.55' stop-color='%23e8b84a'/%3E%3Cstop offset='1' stop-color='%239a6418'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' transform='translate(1.4 1.6)' fill='%23000' opacity='.35'/%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' fill='url(%23g)' stroke='%232a1606' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M5.3 7.6 L5.3 19.4 L8.7 16.3' fill='none' stroke='%23fffbe6' stroke-width='1.1' stroke-linecap='round' opacity='.85'/%3E%3C/svg%3E") 3 3, default;
+  --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fffbe8'/%3E%3Cstop offset='.55' stop-color='%23f6dc98'/%3E%3Cstop offset='1' stop-color='%23c8902e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' fill='none' stroke='%23f0be5a' stroke-width='4.5' stroke-linejoin='round' opacity='.35'/%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' transform='translate(1.4 1.6)' fill='%23000' opacity='.35'/%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' fill='url(%23g)' stroke='%233a2208' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M5.3 7.6 L5.3 19.4 L8.7 16.3' fill='none' stroke='%23fffbe6' stroke-width='1.1' stroke-linecap='round' opacity='.85'/%3E%3Cpath d='M24 2.5 L25.3 6.7 L29.5 8 L25.3 9.3 L24 13.5 L22.7 9.3 L18.5 8 L22.7 6.7 Z' fill='%23fff2c0' stroke='%237a5a2a' stroke-width='.9' stroke-linejoin='round'/%3E%3C/svg%3E") 3 3, pointer;
+  --cursor-blocked: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e4e4ea'/%3E%3Cstop offset='.55' stop-color='%239a9aa8'/%3E%3Cstop offset='1' stop-color='%2355556a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' transform='translate(1.4 1.6)' fill='%23000' opacity='.35'/%3E%3Cpath d='M3 3 L3 25 L9 19.5 L13 28.5 L17.5 26.5 L13.6 17.8 L21.5 17.8 Z' fill='url(%23g)' stroke='%231e1e26' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='23' cy='23' r='6.5' fill='%232a0c10' stroke='%23ff5a5a' stroke-width='2.2'/%3E%3Cpath d='M18.6 27.4 L27.4 18.6' stroke='%23ff5a5a' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 3 3, not-allowed;
+  --cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M11 5 H21 M16 5 V27 M11 27 H21' fill='none' stroke='%232a1606' stroke-width='4.2' stroke-linecap='round'/%3E%3Cpath d='M11 5 H21 M16 5 V27 M11 27 H21' fill='none' stroke='%23f2cc6a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 16 16, text;
+}
+html,
+body,
+canvas {
+  cursor: var(--cursor-default);
+}
+a,
+button,
+select,
+summary,
+label,
+[data-action],
+[role='button'],
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+input[type='color'],
+input[type='button'],
+input[type='submit'] {
+  cursor: var(--cursor-pointer);
+}
+input:not([type]),
+input[type='text'],
+input[type='search'],
+input[type='number'],
+input[type='password'],
+textarea,
+[contenteditable='true'] {
+  cursor: var(--cursor-text);
+}
+button:disabled,
+[aria-disabled='true'] {
+  cursor: var(--cursor-blocked);
+}
+
+/* Bulle d'aide du jeu : remplace les infobulles blanches du navigateur (attribut title).
+   Même habillage que les info-bulles d'objets du thème RPG : bois sombre, liseré de laiton, encre parchemin. */
+#uiTip {
+  position: fixed;
+  z-index: 140;
+  display: none;
+  pointer-events: none;
+  max-width: min(320px, calc(100vw - 28px));
+  padding: 6px 11px;
+  border: 2px solid var(--rpg-gold-dark);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #221810, #120c08);
+  box-shadow:
+    0 0 0 1px #0c0805,
+    inset 0 0 0 1px rgba(255, 226, 160, 0.15),
+    0 8px 26px rgba(0, 0, 0, 0.8);
+  color: var(--rpg-ink);
+  font-family: var(--rpg-serif);
+  font-size: calc(12.5px * var(--font-scale));
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 0 #000;
+  white-space: pre-line;
+}
+#uiTip.on {
+  display: block;
+  animation: uiTipIn 0.12s ease-out;
+}
+@keyframes uiTipIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+/* Fenêtre de confirmation du jeu : remplace la boîte de dialogue du navigateur (carte de bois riveté). */
+#uiConfirm {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(10, 6, 3, 0.55), rgba(3, 2, 1, 0.88));
+}
+#uiConfirm.on {
+  display: flex;
+}
+#uiConfirm .ui-confirm-box {
+  width: min(420px, 100%);
+  padding: 22px 24px 20px;
+  border: 3px double var(--rpg-gold);
+  border-radius: 6px;
+  background: var(--rpg-rivets), var(--rpg-grain), linear-gradient(180deg, #2a1f16, #150e09);
+  box-shadow:
+    0 0 0 2px #0c0805,
+    inset 0 0 30px rgba(0, 0, 0, 0.6),
+    0 16px 50px rgba(0, 0, 0, 0.85);
+  color: var(--rpg-ink);
+  text-align: center;
+  animation: uiTipIn 0.15s ease-out;
+}
+#uiConfirm h3 {
+  margin: 0 0 8px;
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
+  font-size: calc(18px * var(--font-scale));
+  letter-spacing: 1px;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 8px rgba(212, 170, 90, 0.35);
+}
+#uiConfirm p {
+  margin: 0 0 18px;
+  color: var(--rpg-ink);
+  font-family: var(--rpg-serif);
+  font-size: calc(13.5px * var(--font-scale));
+  line-height: 1.5;
+  white-space: pre-line;
+}
+#uiConfirm .ui-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+#uiConfirm button {
+  min-width: 120px;
+  padding: 8px 16px;
+  border: 1px solid var(--rpg-gold-dark);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #3a2a1c, #22170e);
+  color: #e8d9b8;
+  font-family: var(--rpg-serif);
+  font-size: calc(14px * var(--font-scale));
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 0 #000;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition:
+    filter 0.15s,
+    box-shadow 0.15s;
+}
+#uiConfirm button.ui-confirm-yes {
+  border-color: var(--rpg-gold);
+  background: linear-gradient(180deg, #6a4a28, #3e2a16 60%, #2c1d0f);
+  color: var(--rpg-gold-light);
+}
+#uiConfirm button:hover,
+#uiConfirm button:focus-visible {
+  outline: none;
+  filter: brightness(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.4),
+    0 0 12px rgba(240, 190, 90, 0.45);
 }
 </style>
 <style id="canaan-rpg-theme">
@@ -54096,6 +54350,20 @@ body {
     0 0 0 2px #0c0805,
     inset 0 1px 0 rgba(255, 240, 200, 0.4),
     0 0 36px rgba(240, 170, 70, 0.4);
+}
+#title button:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 0 2px #0c0805,
+    inset 0 1px 0 rgba(255, 240, 200, 0.5),
+    0 0 48px rgba(240, 170, 70, 0.6);
+}
+#title #slotMenu button:hover:not(:disabled),
+#titleTools button:hover {
+  filter: brightness(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.4),
+    0 0 12px rgba(240, 190, 90, 0.45);
 }
 #pauseScreen {
   background: radial-gradient(ellipse at center, rgba(10, 6, 3, 0.5), rgba(3, 2, 1, 0.85));
@@ -54881,6 +55149,156 @@ body {
   });
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, { dispatchCanaanAction, clearTouchControls });
+})();
+</script>
+<script id="canaan-ui-overlay">
+// Fenêtres du jeu à la place de celles du navigateur :
+// - bulle d'aide (#uiTip) : chaque attribut title posé dans l'interface devient data-tip, si bien que l'infobulle
+//   blanche du système n'apparaît plus ; la bulle du jeu s'affiche au survol à la souris, près du pointeur ;
+// - confirmation (#uiConfirm) : canaanConfirm(message, siOui, options) ouvre une fenêtre Oui / Non
+//   (Entrée : oui, Échap : non) et appelle siOui seulement après un clic sur Oui.
+(() => {
+  'use strict';
+  // Les cases qui ont déjà leur info-bulle détaillée (objets, Rubis, compétences…) n'affichent pas la bulle simple.
+  const RICH = '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]';
+  const DELAY = 280;
+
+  // ---------------------------------------------------------------- title → data-tip
+  function adopt(el) {
+    if (!el || el.nodeType !== 1 || !el.hasAttribute('title')) return;
+    const text = el.getAttribute('title');
+    el.removeAttribute('title');
+    if (!text) return;
+    el.setAttribute('data-tip', text);
+    if (!el.hasAttribute('aria-label') && !el.textContent.trim()) el.setAttribute('aria-label', text);
+  }
+  function adoptTree(root) {
+    if (!root || root.nodeType !== 1) return;
+    adopt(root);
+    for (const el of root.querySelectorAll('[title]')) adopt(el);
+  }
+  adoptTree(document.body);
+  if (typeof MutationObserver === 'function')
+    new MutationObserver(list => {
+      for (const m of list) {
+        if (m.type === 'attributes') adopt(m.target);
+        else for (const n of m.addedNodes) adoptTree(n);
+      }
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
+
+  // ---------------------------------------------------------------- Bulle d'aide
+  const tip = document.createElement('div');
+  tip.id = 'uiTip';
+  tip.setAttribute('role', 'tooltip');
+  document.body.appendChild(tip);
+  let target = null,
+    timer = 0,
+    lastX = 0,
+    lastY = 0;
+  function place() {
+    const margin = 12,
+      w = tip.offsetWidth,
+      h = tip.offsetHeight;
+    let x = lastX + 16,
+      y = lastY + 20;
+    if (x + w > innerWidth - margin) x = lastX - w - 12;
+    if (y + h > innerHeight - margin) y = lastY - h - 12;
+    tip.style.left = Math.max(margin, x) + 'px';
+    tip.style.top = Math.max(margin, y) + 'px';
+  }
+  function hide() {
+    clearTimeout(timer);
+    target = null;
+    tip.classList.remove('on');
+  }
+  function show() {
+    if (!target || !target.isConnected) return hide();
+    const text = target.getAttribute('data-tip');
+    if (!text) return hide();
+    tip.textContent = text;
+    tip.classList.add('on');
+    place();
+  }
+  document.addEventListener('pointerover', event => {
+    if (event.pointerType && event.pointerType !== 'mouse') return;
+    const el = event.target?.closest?.('[data-tip]');
+    if (el === target) return;
+    hide();
+    if (!el || el.closest(RICH)) return;
+    target = el;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    timer = setTimeout(show, DELAY);
+  });
+  document.addEventListener('pointermove', event => {
+    lastX = event.clientX;
+    lastY = event.clientY;
+    if (target && !target.contains(event.target)) hide();
+    else if (tip.classList.contains('on')) place();
+  });
+  document.addEventListener('pointerout', event => {
+    if (target && !(event.relatedTarget && target.contains(event.relatedTarget))) hide();
+  });
+  for (const name of ['pointerdown', 'wheel', 'keydown']) document.addEventListener(name, hide, true);
+  addEventListener('blur', hide);
+  // Un panneau redessiné retire la case survolée : la bulle ne reste pas orpheline.
+  setInterval(() => {
+    if (target && !target.isConnected) hide();
+  }, 300);
+
+  // ---------------------------------------------------------------- Confirmation
+  const box = document.createElement('div');
+  box.id = 'uiConfirm';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.innerHTML =
+    '<div class="ui-confirm-box"><h3></h3><p></p><div class="ui-confirm-actions">' +
+    '<button type="button" class="ui-confirm-no"></button><button type="button" class="ui-confirm-yes"></button></div></div>';
+  document.body.appendChild(box);
+  const head = box.querySelector('h3'),
+    body = box.querySelector('p'),
+    yesButton = box.querySelector('.ui-confirm-yes'),
+    noButton = box.querySelector('.ui-confirm-no');
+  let pending = null;
+  function close(ok) {
+    if (!pending) return;
+    const done = pending;
+    pending = null;
+    box.classList.remove('on');
+    if (ok) done();
+  }
+  function canaanConfirm(message, onYes, { title = 'Confirmer', yes = 'Oui', no = 'Annuler' } = {}) {
+    hide();
+    hideGearTooltip();
+    pending = typeof onYes === 'function' ? onYes : () => {};
+    head.textContent = title;
+    body.textContent = message;
+    yesButton.textContent = yes;
+    noButton.textContent = no;
+    box.classList.add('on');
+    yesButton.focus();
+    return false;
+  }
+  yesButton.addEventListener('click', () => close(true));
+  noButton.addEventListener('click', () => close(false));
+  box.addEventListener('pointerdown', event => {
+    if (event.target === box) close(false);
+  });
+  // Tant que la fenêtre est ouverte, le clavier ne joue pas : Entrée confirme, Échap annule.
+  addEventListener(
+    'keydown',
+    event => {
+      if (!pending) return;
+      if (event.key === 'Enter' && document.activeElement !== noButton) close(true);
+      else if (event.key === 'Escape') close(false);
+      else if (event.key !== 'Tab' && event.key !== 'Enter') event.preventDefault();
+      if (event.key !== 'Tab') event.stopImmediatePropagation();
+    },
+    true
+  );
+
+  window.canaanConfirm = canaanConfirm;
+  window.CANAAN_UI_OVERLAY = Object.freeze({ confirm: canaanConfirm, isConfirmOpen: () => !!pending, accept: () => close(true), cancel: () => close(false), hideTip: hide });
 })();
 </script>
 <script id="canaan-bootstrap">

@@ -124,7 +124,7 @@ body {
   justify-content: center;
   font-size: calc(26px * var(--font-scale));
   position: relative;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: 0.15s;
 }
 .skill:hover {
@@ -204,7 +204,7 @@ body {
   color: #fff;
   padding: 9px 20px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
   margin-right: 8px;
 }
@@ -248,7 +248,7 @@ body {
   font-weight: 800;
   padding: 16px 54px;
   border-radius: 50px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   letter-spacing: 2px;
   box-shadow: 0 0 40px rgba(160, 90, 255, 0.5);
   transition: 0.2s;
@@ -289,7 +289,7 @@ body {
   border: 1px solid #8d79dd;
   border-radius: 9px;
   padding: 10px 13px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #overlay {
   position: fixed;
@@ -322,7 +322,7 @@ body {
   padding: 8px 12px;
   border-radius: 8px;
   margin: 4px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #window button:disabled {
   opacity: 0.4;
@@ -444,7 +444,7 @@ body {
   border-radius: 20px;
   color: #f8e3b6;
   padding: 9px 16px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
 }
 #pauseScreen {
@@ -492,7 +492,7 @@ body {
   color: white;
   font-size: calc(15px * var(--font-scale));
   font-weight: 700;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #pauseCard button:first-of-type {
   background: linear-gradient(90deg, #5369b9, #8861b6);
@@ -781,7 +781,7 @@ body {
   background: #1a2036e8;
   color: #fff;
   padding: 8px 11px;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-size: calc(12px * var(--font-scale));
   font-weight: 700;
 }
@@ -805,7 +805,7 @@ body {
 body.layout-edit #ui .panel[data-movable='1'] {
   outline: 2px dashed #ffd47d;
   outline-offset: 3px;
-  cursor: move;
+  cursor: var(--cursor-pointer);
   touch-action: none;
 }
 body.layout-edit #ui .panel[data-movable='1']:before {
@@ -1153,7 +1153,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   border: 1px solid #dfa875;
   border-radius: 8px;
   color: #fff;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   font-weight: 700;
 }
 #saveRecovery #saveRecoveryStatus {
@@ -1215,7 +1215,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   min-width: 130px;
   padding: 7px 12px;
   font-size: calc(14px * var(--font-scale));
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #settingsCard .settings-actions {
   display: flex;
@@ -1226,7 +1226,7 @@ body.layout-edit #ui .panel[data-movable='1'] {
   flex: 1;
   padding: 12px;
   font-size: calc(15px * var(--font-scale));
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 #settingsCard .settings-hint {
   text-align: center;
@@ -1366,7 +1366,7 @@ svg.ico.solo {
     0 3px 8px rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
-  cursor: help;
+  cursor: var(--cursor-pointer);
 }
 #buffbar .buff.debuff {
   --edge: #e5484d;

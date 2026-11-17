@@ -46,7 +46,9 @@
         seen.add(b.key);
         out.push(b);
       };
-    for (const t of MOB_TYPES)
+    // Seules les espèces qui apparaissent vraiment : celles d'une région de l'île, et toutes celles des Tréfonds.
+    const roaming = new Set(ZONES.flatMap(z => z.mobs || []));
+    for (const t of MOB_TYPES.filter(t => t.under !== undefined || roaming.has(t.name)))
       push({
         key: 'm:' + t.name,
         group: t.under === undefined ? 'mob' : 'under',

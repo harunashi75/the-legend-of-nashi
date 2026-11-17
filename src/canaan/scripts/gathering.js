@@ -456,60 +456,68 @@
   function stockOf(kind) {
     return CANAAN_BAG.piles(game.hero).filter(p => p.kind === kind);
   }
+  // Matériaux du sac (minerais, herbes) : une case par sorte et qualité.
+  function stockGrid(list, cat, empty) {
+    return list.length
+      ? '<div class="prof-grid">' + list.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + cat[p.id].icon + ' ' + esc(cat[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>'
+      : '<p class="prof-empty">' + empty + '</p>';
+  }
   function tabMining(h) {
-    const ores = stockOf('ore');
     return (
       h.bar('mining') +
-      '<p class="prof-help">Repère les filons (rochers aux éclats colorés) et appuie sur <b>E</b> : chaque filon donne 1 à 3 minerais, puis se reforme au bout de 90 s. Un métal par biome : ' +
-      Object.values(ORES).filter(o => !o.rare).map(o => o.icon + ' ' + esc(o.metal)).join(' · ') + '. Plus ton niveau est haut, meilleure est la qualité.</p>' +
-      '<h3>Minerais dans ton sac</h3>' + (ores.length ? '<div class="prof-grid">' + ores.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + ORES[p.id].icon + ' ' + esc(ORES[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>' : '<p class="prof-empty">Aucun minerai pour l’instant.</p>') +
-      '<p class="prof-help">Les minerais servent à l’enchanteur (onglet Enchantement).</p>'
+      h.tips(
+        ['⛏️ Filon + <b>E</b>', '1 à 3 minerais', '⏳ Repousse en 90 s', '✨ Pour l’Enchantement'],
+        'Les filons sont des rochers aux éclats colorés. Un métal par biome : ' +
+          Object.values(ORES).filter(o => !o.rare).map(o => o.icon + ' ' + esc(o.metal)).join(' · ') +
+          '. Les Tréfonds ont aussi des minerais rares, qui ne servent pas aux enchantements mais se vendent très cher. Plus ton niveau est haut, meilleure est la qualité.'
+      ) +
+      '<h3>Minerais dans ton sac</h3>' + stockGrid(stockOf('ore'), ORES, 'Aucun minerai pour l’instant.')
     );
   }
   function tabHerbalism(h) {
-    const herbs = stockOf('herb');
     return (
       h.bar('herbalism') +
-      '<p class="prof-help">Cueille les herbes sauvages (petites plantes fleuries) avec <b>E</b> : elles repoussent au bout de 90 s. Une herbe par biome : ' +
-      Object.values(HERBS).map(o => o.icon + ' ' + esc(o.name) + ' (' + esc(o.where) + ')').join(' · ') + '. On les cuisine en infusions (onglet Cuisine).</p>' +
-      '<h3>Herbes dans ton sac</h3>' + (herbs.length ? '<div class="prof-grid">' + herbs.map(p => '<div class="prof-item"><span style="color:' + qualityColor(p.q) + '">' + HERBS[p.id].icon + ' ' + esc(HERBS[p.id].name) + '</span><small>' + esc(qualityName(p.q)) + '</small><b>× ' + p.n + '</b></div>').join('') + '</div>' : '<p class="prof-empty">Aucune herbe pour l’instant.</p>')
+      h.tips(
+        ['🌿 Herbe + <b>E</b>', '⏳ Repousse en 90 s', '🍳 Infusions (Cuisine)'],
+        'Les herbes sauvages sont de petites plantes fleuries. Une herbe par biome : ' + Object.values(HERBS).map(o => o.icon + ' ' + esc(o.name) + ' (' + esc(o.where) + ')').join(' · ') + '.'
+      ) +
+      '<h3>Herbes dans ton sac</h3>' + stockGrid(stockOf('herb'), HERBS, 'Aucune herbe pour l’instant.')
     );
   }
   function tabEnchanting(h) {
     const prof = CANAAN_PROF.profOf(game.hero),
       level = prof.enchanting.level,
-      stats = Object.keys(ENCHANTS);
+      stats = Object.keys(ENCHANTS),
+      forge = nearForge(game.hero),
+      full = canaanBagUsed(game.hero) >= canaanBagLimit(game.hero);
     let html =
       h.bar('enchanting') +
-      '<p class="prof-help">' + ORES_PER_ENCHANT + ' minerais d’un même métal donnent un enchantement. Choisis sa statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort.' +
-      ' Chaque métal demande un niveau d’enchanteur (cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25) : commence par le cuivre pour progresser. Ton niveau (' + level + ') renforce aussi les enchantements que tu poses de ' + level + ' %. Posé sur une pièce d’équipement, il lui ajoute cette statistique en troisième secondaire (un nouvel enchantement remplace l’ancien).</p>' +
-      (nearForge(game.hero)
-        ? '<p class="prof-active"><b>⚒️ Tu es à la forge</b> : fabriquer un enchantement prend 10 s (2 s de plus par enchantement en série). Reste immobile pendant le travail.</p>'
-        : '<p class="prof-active warn">⚒️ Les enchantements se fabriquent à la <b>forge du Camp de l’Aurore</b> (à l’est du feu de camp). Tu peux poser ceux que tu as n’importe où.</p>') +
-      (canaanBagUsed(game.hero) >= canaanBagLimit(game.hero) ? '<p class="prof-active warn">🎒 Ton sac est plein : libère une case pour ranger l’enchantement (sauf s’il complète une pile).</p>' : '') +
+      h.status(forge, forge ? '⚒️ Tu es à la forge : tu peux fabriquer.' : '⚒️ Va à une forge pour fabriquer : Camp de l’Aurore (à l’est du feu) ou Forteresse de Durgrim (Tréfonds).') +
+      (full ? h.status(false, '🎒 Sac plein : libère une case pour ranger l’enchantement.') : '') +
+      h.tips(
+        [ORES_PER_ENCHANT + ' minerais du même métal = 1 enchantement', 'Toutes les qualités comptent', 'Ton niveau : +' + level + ' % de force'],
+        'Choisis la statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort, mais il demande un niveau d’enchanteur plus haut (' +
+          METALS.map((m, t) => esc(ORES[m].metal) + ' ' + ENCH_LEVEL[t]).join(', ') +
+          '). Les minerais les moins bons partent en premier. Fabriquer prend 10 s (2 s de plus par enchantement en série) : reste immobile. Posé sur une pièce d’équipement (n’importe où), l’enchantement lui ajoute sa statistique en troisième secondaire ; un nouveau remplace l’ancien. Ton niveau d’enchanteur renforce de ' + level + ' % ceux que tu poses.'
+      ) +
       '<div class="prof-tabs ench-stats">' + stats.map(s => '<button type="button" class="' + (ui.stat === s ? 'on' : '') + '" data-action="enchantStat" data-stat="' + s + '">' + ENCHANTS[s].icon + ' ' + esc(SECONDARY_STATS[s].name) + '</button>').join('') + '</div>' +
       '<div class="prof-recipes">' +
       METALS.map((metal, tier) => {
         const o = ORES[metal],
           have = Array.from({ length: 8 }, (_, q) => CANAAN_BAG.count(game.hero, 'ore', metal, q)).reduce((a, b) => a + b, 0),
-          forge = nearForge(game.hero),
           locked = levelTooLow(game.hero, tier),
-          ok = forge && have >= ORES_PER_ENCHANT && !locked,
+          enough = have >= ORES_PER_ENCHANT,
+          ok = forge && enough && !locked,
           pct = Math.round(ENCH_MULT[tier] * levelBonus(game.hero) * 100),
-          // Pourquoi on ne peut pas encore forger : la raison, en clair.
-          why = locked
-            ? levelText(game.hero, tier)
-            : have < ORES_PER_ENCHANT
-              ? 'Il te manque ' + (ORES_PER_ENCHANT - have) + ' ' + o.name.toLowerCase() + '.'
-              : !forge
-                ? 'Va à la forge du camp.'
-                : '';
+          batch = Math.min(20, Math.floor(have / ORES_PER_ENCHANT)),
+          // La raison du blocage est écrite sur le bouton lui-même.
+          label = locked ? '🔒 Enchanteur niv. ' + ENCH_LEVEL[tier] : !enough ? 'Il manque ' + (ORES_PER_ENCHANT - have) + ' minerai' + (ORES_PER_ENCHANT - have > 1 ? 's' : '') : !forge ? 'Va à la forge' : 'Créer';
         return (
-          '<article class="prof-recipe' + (locked ? ' locked' : '') + '"><h4>' + ENCHANTS[ui.stat].icon + ' ' + esc(SECONDARY_STATS[ui.stat].name) + ' · ' + esc(o.metal) + ' <small>niv. ' + ENCH_LEVEL[tier] + '</small></h4>' +
-          '<p>' + o.icon + ' ' + ORES_PER_ENCHANT + ' × ' + esc(o.name) + ' (tu en as ' + have + ') · force ' + pct + ' % de la base de l’objet</p>' +
-          (why ? '<p class="prof-empty">' + esc(why) + '</p>' : '') +
-          '<div class="prof-actions"><button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '"' + (ok ? '' : ' disabled') + '>Créer</button>' +
-          (have >= ORES_PER_ENCHANT * 2 && ok ? '<button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '" data-count="' + Math.min(20, Math.floor(have / ORES_PER_ENCHANT)) + '">× ' + Math.min(20, Math.floor(have / ORES_PER_ENCHANT)) + '</button>' : '') +
+          '<article class="prof-recipe' + (locked ? ' locked' : ok ? ' ready' : '') + '">' +
+          '<h4>' + o.icon + ' ' + esc(o.metal.charAt(0).toUpperCase() + o.metal.slice(1)) + ' <small>+' + pct + ' %</small></h4>' +
+          '<p>' + ORES_PER_ENCHANT + ' × ' + esc(o.name) + ' · <b class="' + (enough ? 'ok' : 'ko') + '">tu en as ' + have + '</b></p>' +
+          '<div class="prof-actions"><button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '"' + (ok ? '' : ' disabled') + '>' + esc(label) + '</button>' +
+          (ok && batch > 1 ? '<button type="button" data-action="enchantCraft" data-stat="' + ui.stat + '" data-tier="' + tier + '" data-count="' + batch + '">× ' + batch + '</button>' : '') +
           '</div></article>'
         );
       }).join('') +
@@ -522,7 +530,7 @@
     html +=
       '<div class="modern-bag ench-pick">' +
       owned.map(p => '<div class="bag-sale-wrap' + (CANAAN_BAG.token({ ...p, n: 1 }) === ui.apply ? ' picked' : '') + '">' + CANAAN_BAG.cell(p, 'data-action="enchantPick" data-token="' + esc(CANAAN_BAG.token({ ...p, n: 1 })) + '"') + '</div>').join('') +
-      '</div><p class="prof-help">Puis clique la pièce à enchanter (portée ou dans ton sac) :</p>';
+      '</div><h3>Puis clique la pièce à enchanter</h3>';
     const pick = CANAAN_BAG.parse(ui.apply),
       gear = [
         ...Object.entries(game.hero.equipment).filter(([slot, it]) => it && it.slot !== 'artifact').map(([slot, it]) => [it, slot, true]),

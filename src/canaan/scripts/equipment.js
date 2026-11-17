@@ -138,24 +138,24 @@
       toast('💰 Va voir un marchand pour vendre !');
       return false;
     }
-    if (
-      rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult &&
-      !confirm(
-        'Vendre ' +
-          gearDisplayName(item) +
-          ' (' +
-          item.rarity +
-          ', niveau ' +
-          itemLevel(item) +
-          ') pour ' +
-          gearSellValue(item) +
-          ' or ?'
-      )
-    )
+    // Vente : l'objet doit toujours être à sa place (le sac a pu changer pendant la confirmation).
+    const sell = () => {
+      const now = game.hero.inventory[index];
+      if (!now || String(now.id) !== id || !nearMerchant()) return false;
+      hideGearTooltip();
+      sellBagIndex(index);
+      return true;
+    };
+    // Légendaire ou mieux : la fenêtre de confirmation du jeu demande d'abord.
+    if (rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult) {
+      canaanConfirm(
+        'Vendre ' + gearDisplayName(item) + ' (' + item.rarity + ', niveau ' + itemLevel(item) + ') pour ' + gearSellValue(item) + ' or ?',
+        sell,
+        { title: '💰 Vendre un objet précieux', yes: 'Vendre', no: 'Garder' }
+      );
       return false;
-    hideGearTooltip();
-    sellBagIndex(index);
-    return true;
+    }
+    return sell();
   };
   window.CANAAN_EQUIPMENT = Object.freeze({
     equip: equipItem,

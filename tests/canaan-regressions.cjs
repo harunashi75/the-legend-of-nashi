@@ -538,10 +538,10 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   run('nearMerchant=function(){return false}');
   assert.equal(g.sellInventoryCell(0,run('String(inventory[0].id)')),false);
   run('nearMerchant=function(){return true};inventory.push({id:"confirm-sale",name:"Rare",slot:"armor",ilvl:120,rarity:"Légendaire"})');
-  g.confirm=()=>false;
-  assert.equal(g.sellInventoryCell(run('inventory.length-1'),'confirm-sale'),false);assert.equal(counters.saves,savesBefore);
-  g.confirm=()=>true;
-  assert.equal(g.sellInventoryCell(run('inventory.length-1'),'confirm-sale'),true);assert.equal(counters.saves,savesBefore+1);
+  // Légendaire : la fenêtre de confirmation du jeu (canaanConfirm) vend seulement après « Vendre ».
+  let asked=null;g.canaanConfirm=(text,yes)=>{asked={text,yes};return false};
+  assert.equal(g.sellInventoryCell(run('inventory.length-1'),'confirm-sale'),false);assert.equal(counters.saves,savesBefore);assert.match(asked.text,/Vendre .* or \?/);
+  assert.equal(asked.yes(),true);assert.equal(counters.saves,savesBefore+1);assert.equal(asked.yes(),false);
   run('nearMerchant=testMerchant');
   // Le texte passe par l'échappement HTML même sans normalisation préalable.
   run("inventory[0].name='<img src=x onerror=alert(1)>';showGearTooltip(0,{clientX:1,clientY:1})");
@@ -4328,11 +4328,11 @@ test('Minage, cueillette et enchanteur : filons et herbes dans chaque biome, enc
  run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y+30}');
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),2);assert.equal(run('game.hero.prof.ore["fer:1"]'),1);
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",4,1)'),false,'pas de pépites d’or');
- // Niveaux requis : cuivre 1, étain 5, fer 10, argent 15, or 20, mithril 25.
+ // Niveaux requis : cuivre 1, étain 6, fer 12, argent 20, or 28, mithril 35.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_GATHER.ENCH_LEVEL)')),[1,6,12,20,28,35]);
  run('game.hero.prof.ore["mithril:0"]=3;game.hero.prof.enchanting.level=34');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 35');
  run('game.hero.prof.enchanting.level=35');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),true);
- run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Enchanteur niveau 12 requis pour le fer \(tu es niveau 1\)/);
+ run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Fer <small>[^<]*<\/small><\/h4><p>[^<]*<b class="ko">tu en as 1<\/b><\/p><div class="prof-actions"><button[^>]*disabled>🔒 Enchanteur niv\. 12</);
  run('closePanels();game.hero.prof.enchanting.level=12');
  // Poser : l'objet porté gagne une troisième secondaire, comptée dans les statistiques du héros.
  run('let it;do{giveGear(30,"normal","Rare");it=game.hero.inventory.at(-1)}while(it.slot==="artifact");globalThis.slot=it.slot;equipItem(it.id)');
@@ -4389,7 +4389,7 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  for(const c of ['combat','explore','eco','magic','defi'])assert.equal(list.filter(a=>a.cat===c).length,20,c);
  assert.match(source,/data-action="toggleAchievements"[^>]*>.*?menu-shortcut">Y</);assert.match(source,/k === 'y'/);
  // Bestiaire : monstres du monde, créatures des instances, boss mondiaux, boss d'instance et de l'Arène.
- assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[31,16,27,12,72,12]');
+ assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[22,16,27,12,72,12]');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Loup"})'),'m:Loup');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"x",worldBoss:true,worldBossId:"fenrir"})'),'w:fenrir');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Le Roi Sanglant",boss:true})'),'b:Le Roi Sanglant');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Clone",arenaClone:true})'),null);
  run('started=true;paused=false;game.hero.level=5;game.hero.kills=0;P.gold=0;game.hero.inventory=[];game.hero.equipment.weapon={id:"w",slot:"weapon",level:5,rarity:"Commun",weaponType:"bow"};toast=()=>{}');
@@ -4411,7 +4411,7 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  run('globalThis.ally=CANAAN_GROUP.create("Ami");CANAAN_GROUP.join(ally.id);game.world.instance={index:6,group:2};canaanAchieve(game.hero,"kill",{t:"Le Roi Sanglant",boss:true,x:P.x,y:P.y});game.world.instance=null');
  assert.equal(run('ally.succes.best["b:Le Roi Sanglant"][1]'),1);assert.equal(run('game.hero.succes.best["b:Le Roi Sanglant"][1]'),1);
  // Découverte : une créature croisée de près entre au bestiaire.
- run('game.world.monsters=[{t:"Golem",x:P.x+100,y:P.y,hp:10,mhp:10}];CANAAN_ACHIEVEMENTS.sample(game.hero)');assert.deepEqual(st().best['m:Golem'],[1,0,0]);
+ run('game.world.monsters=[{t:"Ours",x:P.x+100,y:P.y,hp:10,mhp:10}];CANAAN_ACHIEVEMENTS.sample(game.hero)');assert.deepEqual(st().best['m:Ours'],[1,0,0]);
  // Titres : seulement ceux des succès débloqués ; affiché au-dessus du héros.
  assert.equal(run('CANAAN_ACHIEVEMENTS.setTitle(game.hero,"c3")'),false);
  run('game.hero.kills=1000');for(let i=0;i<60;i++)run('CanaanStages.achievements.after()');
@@ -4420,7 +4420,7 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  const clean=JSON.parse(run('JSON.stringify(CANAAN_ACHIEVEMENTS.sanitize({done:{c1:5,zz:1},s:{kills:"9",bad:-1,"x y":3},sets:{biomes:[0,0,1],evil:[1]},best:{"m:Loup":[1,"4",2],"m:Dragon":[1,1,1]},title:"c4"}))'));
  assert.deepEqual(clean,{done:{c1:5},s:{kills:9},sets:{biomes:[0,1]},best:{'m:Loup':[1,4,2]},title:''});
  run('saveGame()');const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.succes;
- assert.ok(saved.done.c3);assert.equal(saved.title,'c3');assert.equal(saved.best['m:Golem'][0],1);
+ assert.ok(saved.done.c3);assert.equal(saved.title,'c3');assert.equal(saved.best['m:Ours'][0],1);
  // Réseau : carnet envoyé à l'invité au plus toutes les 3 s, sauf déblocage.
  assert.ok(run('CANAAN_ACHIEVEMENTS.netView(ally)'));assert.equal(run('CANAAN_ACHIEVEMENTS.netView(ally)'),undefined);
  assert.equal(run('CANAAN_ACHIEVEMENTS.handle(ally,{op:"ach-title",id:"c3"})'),false,'pas débloqué par l’allié');
