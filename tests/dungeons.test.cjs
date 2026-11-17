@@ -164,3 +164,28 @@ test('Donjons et raids : boss bien plus robustes qu’une élite, élites plus r
  assert.ok(r.boss>r.elite*5,'boss : '+JSON.stringify(r));
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Données partagées des donjons : une structure et des créatures par instance, chaque boss et boss secret a son apparence',async()=>{
+ const path=require('node:path'),{pathToFileURL}=require('node:url');
+ const shared=f=>import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href);
+ const D=await shared('data/dungeons.js'),W=await shared('data/world.js');
+ assert.equal(D.DUNGEON_LAYOUTS.length,W.INSTANCE_DEFS.length,'une structure par instance');
+ assert.equal(D.DUNGEON_ACTORS.length,W.INSTANCE_DEFS.length,'des créatures par instance');
+ assert.ok(Object.isFrozen(D.DUNGEON_LAYOUTS[0])&&Object.isFrozen(D.DUNGEON_ACTORS[0].mobs[0].pal));
+ const keys=new Set();
+ W.INSTANCE_DEFS.forEach((def,i)=>{
+  const L=D.DUNGEON_LAYOUTS[i],A=D.DUNGEON_ACTORS[i],who=def.name;
+  assert.ok(!keys.has(L.key),'clé unique '+L.key);keys.add(L.key);
+  assert.ok(['cave','hall','pit','void'].includes(L.shape),who+' : forme');
+  assert.ok(Number.isInteger(L.hazard.pools)&&typeof L.hazard.style==='string',who+' : danger');
+  assert.ok(['portcullis','barrier'].includes(L.gate),who+' : porte');
+  assert.ok(Array.isArray(L.wallProps)&&Array.isArray(L.floorProps),who+' : décors');
+  assert.ok(A.mobs.length>0&&A.mobs.every(m=>m.name&&m.look&&m.pal.length===5),who+' : monstres');
+  assert.ok(A.bosses.length>=(def.bosses||[def.boss]).length,who+' : une apparence par boss');
+  assert.ok((A.secrets||[]).length>=(def.secrets||[]).length,who+' : une apparence par boss secret');
+  assert.ok([...A.bosses,...(A.secrets||[])].every(b=>b.look&&b.pal.length===5),who+' : palettes des boss');
+ });
+ assert.equal(D.DUNGEON_ARENA_LAYOUT.shape,'hall');
+ assert.ok(D.DUNGEON_SOLID_PROPS.every(p=>typeof p==='string')&&D.DUNGEON_SOLID_PROPS.includes('pillar'));
+ assert.ok(D.DUNGEON_BOSS_DROP_CHANCE>0&&D.DUNGEON_BOSS_DROP_CHANCE<1);
+});

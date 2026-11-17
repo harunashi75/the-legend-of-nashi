@@ -23,6 +23,7 @@ import * as looks from './shared/data/looks.js';
 import * as skins from './shared/data/skins.js';
 import * as houseData from './shared/data/house.js';
 import * as houseRules from './shared/rules/house.js';
+import * as dungeonData from './shared/data/dungeons.js';
 
 Object.assign(
   globalThis,
@@ -46,5 +47,6 @@ Object.assign(
   looks,
   skins,
   houseData,
-  houseRules
+  houseRules,
+  dungeonData
 );

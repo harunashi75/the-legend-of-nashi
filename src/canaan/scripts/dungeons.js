@@ -11,653 +11,226 @@
     HAZARD = 22,
     // Mur fissuré d'un passage secret : bloque jusqu'à ce qu'un héros le découvre (E).
     SECRET = 23;
-  // Le héros entre toujours sur cette case (enterInstance).
-  const ENTRY = { x: 120, y: 133 };
+
   const WALKABLE = t => t === FLOOR || t === ACCENT;
 
   // Thèmes, dans l'ordre de `instances`. Palettes d'acteurs : [principale, sombre, claire, accent, yeux].
-  const THEMES = [
+  // Apparence de chaque instance, dans l’ordre de INSTANCE_DEFS : sol, allées, murs, danger, lumière, flammes,
+  // runes, bannières, piliers, particules. Palettes d’acteurs : [principale, sombre, claire, accent, yeux].
+  const PALETTES = [
     {
       key: 'terriers',
-      shape: 'cave',
       floor: { style: 'dirt', a: '#5b4733', b: '#3e2f21', c: '#7d6449' },
-      accent: { style: 'gravel', a: '#54412f', b: '#3a2c1f', c: '#7a6450', width: 1 },
+      accent: { style: 'gravel', a: '#54412f', b: '#3a2c1f', c: '#7a6450' },
       wall: { style: 'rock', top: '#17110c', face: '#4d3b2b', dark: '#2e231a', light: '#6d5640' },
-      hazard: { style: 'water', a: '#1d3640', b: '#2c5563', c: '#7fb3c0', pools: 2 },
+      hazard: { a: '#1d3640', b: '#2c5563', c: '#7fb3c0' },
       light: { dark: 0.66, tint: '20,12,4' },
       flame: ['#e5522e', '#f9a640', '#fff1b5'],
       rune: '#a3c7ff',
       banner: ['#6b4a2e', '#c9a46e'],
       pillar: ['#5b4836', '#3b2d21', '#7d6650'],
-      wallProps: ['torch', 'roots', 'beam', 'roots'],
-      floorProps: ['bones', 'mushroom', 'burrow', 'crate', 'rubble', 'bones', 'mushroom'],
-      centerpiece: 'bonethrone',
-      gate: 'portcullis',
-      particles: 'dust',
-      mobs: [
-        { name: 'Osselet', look: 'skeleton', pal: ['#ddd6be', '#8f8670', '#fff8e0', '#6a5a40', '#7fd0ff'] },
-        {
-          name: 'Rat des terriers',
-          look: 'beast',
-          pal: ['#7a5d44', '#4b3828', '#a3846a', '#e6a7a7', '#ff5040']
-        }
-      ],
-      bosses: [
-        { look: 'skeleton', pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'], crown: true }
-      ]
+      particles: 'dust'
     },
     {
       key: 'mine',
-      shape: 'hall',
       floor: { style: 'stone', a: '#4a4a52', b: '#34343b', c: '#686872' },
-      accent: { style: 'rails', a: '#4a4a52', b: '#5e4430', c: '#a7aab4', width: 0 },
+      accent: { style: 'rails', a: '#4a4a52', b: '#5e4430', c: '#a7aab4' },
       wall: { style: 'rock', top: '#101218', face: '#3d434d', dark: '#262a32', light: '#5d6673' },
-      hazard: { style: 'chasm', a: '#06070a', b: '#12141a', c: '#2a2e38', pools: 1 },
+      hazard: { a: '#06070a', b: '#12141a', c: '#2a2e38' },
       light: { dark: 0.62, tint: '6,10,20' },
       flame: ['#e5822e', '#f9c640', '#fff6c5'],
       rune: '#67d8ee',
       banner: ['#3d4652', '#9fe8ff'],
       pillar: ['#5e4430', '#3b2a1d', '#80614a'],
-      wallProps: ['lantern', 'mithril', 'beam', 'mithril'],
-      floorProps: ['minecart', 'crate', 'ore', 'pickaxe', 'rubble', 'ore'],
-      centerpiece: 'mithrilcluster',
-      gate: 'portcullis',
-      particles: 'dust',
-      mobs: [
-        {
-          name: 'Mineur maudit',
-          look: 'brute',
-          pal: ['#6b7a8c', '#3d4652', '#93a3b5', '#c9a24a', '#9fe8ff']
-        },
-        {
-          name: 'Kobold des galeries',
-          look: 'imp',
-          pal: ['#a67c4f', '#6e5033', '#c9a074', '#e0d060', '#ffd23f']
-        }
-      ],
-      bosses: [{ look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'] }]
+      particles: 'dust'
     },
     {
       key: 'eclipse',
-      shape: 'hall',
       floor: { style: 'tiles', a: '#2f2a3d', b: '#211d2c', c: '#4a4360' },
-      accent: { style: 'runes', a: '#3a2f22', b: '#271f16', c: '#e0b04a', width: 0 },
+      accent: { style: 'runes', a: '#3a2f22', b: '#271f16', c: '#e0b04a' },
       wall: { style: 'brick', top: '#0d0b14', face: '#3a3350', dark: '#262036', light: '#5a5078' },
-      hazard: { style: 'void', a: '#0b0614', b: '#1c1030', c: '#7a4ab0', pools: 0 },
+      hazard: { a: '#0b0614', b: '#1c1030', c: '#7a4ab0' },
       light: { dark: 0.6, tint: '12,4,24' },
       flame: ['#7a3ad8', '#b47aff', '#f0e0ff'],
       rune: '#ff9955',
       banner: ['#2a1e40', '#e0b04a'],
       pillar: ['#4a4262', '#2a2438', '#6e6490'],
-      wallProps: ['sconce', 'banner', 'sconce'],
-      floorProps: ['pillar', 'brazier', 'statue', 'candles', 'candles'],
-      centerpiece: 'altar',
-      decal: 'eclipse',
-      gate: 'barrier',
-      particles: 'motes',
-      mobs: [
-        {
-          name: 'Acolyte de l’Éclipse',
-          look: 'robed',
-          pal: ['#3b2d55', '#22193a', '#5d4a80', '#e0b04a', '#ffb347']
-        },
-        {
-          name: 'Ombre éclipsée',
-          look: 'spirit',
-          pal: ['#6a4f9a', '#3a2a5a', '#a58ad8', '#ffd36d', '#ffe9a0']
-        }
-      ],
-      bosses: [{ look: 'robed', pal: ['#1e1530', '#0f0a1c', '#4a3670', '#ffcc55', '#ffdd88'], halo: true }]
+      particles: 'motes'
     },
     {
       key: 'penitents',
-      shape: 'hall',
       floor: { style: 'flagstone', a: '#56565c', b: '#3c3c42', c: '#77777e' },
-      accent: { style: 'carpet', a: '#6e1c22', b: '#521418', c: '#c9a24a', width: 1 },
+      accent: { style: 'carpet', a: '#6e1c22', b: '#521418', c: '#c9a24a' },
       wall: { style: 'brick', top: '#111115', face: '#4b4a52', dark: '#303036', light: '#6c6b74' },
-      hazard: { style: 'chasm', a: '#050506', b: '#101014', c: '#26262c', pools: 0 },
+      hazard: { a: '#050506', b: '#101014', c: '#26262c' },
       light: { dark: 0.54, tint: '10,8,16' },
       flame: ['#e5522e', '#f9a640', '#fff1b5'],
       rune: '#b79cff',
       banner: ['#5a161a', '#d6ccff'],
       pillar: ['#5c5b63', '#3a3a40', '#807f88'],
-      wallProps: ['torch', 'banner', 'chains', 'banner'],
-      floorProps: ['pillar', 'candles', 'cage', 'statue', 'brazier', 'candles'],
-      centerpiece: 'altar',
-      gate: 'portcullis',
-      particles: 'dust',
-      mobs: [
-        {
-          name: 'Pénitent flagellant',
-          look: 'robed',
-          pal: ['#6b5a48', '#463a2e', '#8f7b64', '#a03030', '#ff6040']
-        },
-        {
-          name: 'Chevalier spectral',
-          look: 'knight',
-          pal: ['#8d9ac4', '#56608a', '#c9d3f0', '#ab94ee', '#d6ccff']
-        }
-      ],
-      bosses: [{ look: 'knight', pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'], hood: true }]
+      particles: 'dust'
     },
     {
       key: 'forge',
-      shape: 'hall',
       floor: { style: 'basalt', a: '#3a2a26', b: '#261a17', c: '#5a3d33' },
-      accent: { style: 'grate', a: '#2e2e33', b: '#1c1c20', c: '#ff8a3c', width: 1 },
+      accent: { style: 'grate', a: '#2e2e33', b: '#1c1c20', c: '#ff8a3c' },
       wall: { style: 'rock', top: '#120806', face: '#3d2620', dark: '#25150f', light: '#5e3a2c' },
-      hazard: { style: 'lava', a: '#b8360f', b: '#ff6a1f', c: '#ffd36b', pools: 3, glow: '#ff6a1f' },
+      hazard: { a: '#b8360f', b: '#ff6a1f', c: '#ffd36b' },
       light: { dark: 0.44, tint: '30,6,0' },
       flame: ['#e5522e', '#f9a640', '#fff1b5'],
       rune: '#ff7a2a',
       banner: ['#3a1408', '#ff8a3c'],
       pillar: ['#4a302a', '#2a1a16', '#6e4a3c'],
-      wallProps: ['furnace', 'chains', 'torch', 'chains'],
-      floorProps: ['anvil', 'rack', 'brazier', 'ingots', 'dragonskull', 'ingots'],
-      centerpiece: 'greatforge',
-      gate: 'portcullis',
-      particles: 'embers',
-      mobs: [
-        {
-          name: 'Diablotin des forges',
-          look: 'imp',
-          pal: ['#e2652a', '#9c3a14', '#ffa05a', '#ffd36b', '#fff0a0']
-        },
-        {
-          name: 'Dragonnet ardent',
-          look: 'dragon',
-          pal: ['#c4462a', '#7c2412', '#f08050', '#ffcf5a', '#fff09a']
-        }
-      ],
-      bosses: [{ look: 'dragon', pal: ['#d0401c', '#7a1e0c', '#ff8a4a', '#ffd36b', '#fff6b0'] }]
+      particles: 'embers'
     },
     {
       key: 'fosse',
-      shape: 'pit',
       floor: { style: 'flagstone', a: '#3a2c34', b: '#271d23', c: '#56424c' },
-      accent: { style: 'grate', a: '#2a2228', b: '#18121a', c: '#9a3ad8', width: 0 },
+      accent: { style: 'grate', a: '#2a2228', b: '#18121a', c: '#9a3ad8' },
       wall: { style: 'rock', top: '#0a0709', face: '#33262c', dark: '#1f171b', light: '#4d3a42' },
-      hazard: { style: 'chasm', a: '#040206', b: '#120a16', c: '#3a2048', pools: 1 },
+      hazard: { a: '#040206', b: '#120a16', c: '#3a2048' },
       light: { dark: 0.68, tint: '16,4,20' },
       flame: ['#8a2ad8', '#c47aff', '#f4d0ff'],
       rune: '#e88aff',
       banner: ['#2a1420', '#e88aff'],
       pillar: ['#4a3a42', '#2a2026', '#6a5560'],
-      wallProps: ['chains', 'sconce', 'chains', 'skulls'],
-      floorProps: ['bonepile', 'cage', 'spikes', 'rack', 'brazier', 'bones'],
-      centerpiece: 'block',
-      gate: 'portcullis',
-      particles: 'motes',
-      mobs: [
-        { name: 'Âme damnée', look: 'spirit', pal: ['#8a6ab0', '#4a3a68', '#c4a8ec', '#e88aff', '#f4d0ff'] },
-        {
-          name: 'Geôlier de la Fosse',
-          look: 'brute',
-          pal: ['#5a4a4a', '#352a2a', '#7c6a6a', '#8a2a2a', '#ff4a4a']
-        }
-      ],
-      bosses: [{ look: 'brute', pal: ['#4a3438', '#2a1c20', '#6e5056', '#c03040', '#ff5050'] }]
+      particles: 'motes'
     },
     {
       key: 'bastion',
-      shape: 'hall',
       floor: { style: 'flagstone', a: '#4a2a2a', b: '#331c1c', c: '#6a3c3a' },
-      accent: { style: 'carpet', a: '#8a1420', b: '#5e0c16', c: '#d4a44a', width: 1 },
+      accent: { style: 'carpet', a: '#8a1420', b: '#5e0c16', c: '#d4a44a' },
       wall: { style: 'brick', top: '#120707', face: '#4a2626', dark: '#2e1616', light: '#6e3a36' },
-      hazard: { style: 'blood', a: '#4a060c', b: '#7a1018', c: '#c8303a', pools: 2 },
+      hazard: { a: '#4a060c', b: '#7a1018', c: '#c8303a' },
       light: { dark: 0.52, tint: '30,4,4' },
       flame: ['#c4221a', '#f46a32', '#ffd3a0'],
       rune: '#ffd36d',
       banner: ['#7a0e18', '#d4a44a'],
       pillar: ['#5a3030', '#341a1a', '#7e4844'],
-      wallProps: ['banner', 'torch', 'skulls', 'torch'],
-      floorProps: ['pillar', 'brazier', 'pike', 'statue', 'candles'],
-      centerpiece: 'throne',
-      gate: 'portcullis',
-      particles: 'embers',
-      mobs: [
-        {
-          name: 'Garde sanglant',
-          look: 'knight',
-          pal: ['#7a2a2a', '#4a1616', '#a84a44', '#d4a44a', '#ffcc66']
-        },
-        {
-          name: 'Vampire écarlate',
-          look: 'robed',
-          pal: ['#5a1420', '#330a12', '#8a2a36', '#e0c060', '#ff3040']
-        }
-      ],
-      bosses: [
-        { look: 'knight', pal: ['#6a1c1c', '#3a0e0e', '#9a3a34', '#c0c0c8', '#ff6040'] },
-        { look: 'robed', pal: ['#8a1428', '#4a0a16', '#c03a50', '#ffd36d', '#ff3050'], crown: true },
-        { look: 'knight', pal: ['#9a1a1a', '#550c0c', '#d04040', '#ffd36d', '#ffee88'], crown: true }
-      ]
+      particles: 'embers'
     },
     {
       key: 'continuum',
-      shape: 'void',
       floor: { style: 'arcane', a: '#343954', b: '#22263a', c: '#4c5478', glow: '#7de0ff' },
-      accent: { style: 'runes', a: '#4a4220', b: '#2e2812', c: '#7de0ff', width: 0 },
+      accent: { style: 'runes', a: '#4a4220', b: '#2e2812', c: '#7de0ff' },
       wall: { style: 'brick', top: '#0b0c18', face: '#40405e', dark: '#2a2a40', light: '#5e5e86' },
-      hazard: { style: 'stars', a: '#05040f', b: '#1a1238', c: '#9fd8ff', pools: 0 },
+      hazard: { a: '#05040f', b: '#1a1238', c: '#9fd8ff' },
       light: { dark: 0.46, tint: '10,6,30' },
       flame: ['#3a8ad8', '#7ad0ff', '#e0f8ff'],
       rune: '#ff7fa7',
       banner: ['#262a40', '#7de0ff'],
       pillar: ['#8a7034', '#54421c', '#c0a050'],
-      wallProps: [],
-      floorProps: ['gear', 'hourglass', 'crystal', 'pillar', 'crystal', 'gear'],
-      centerpiece: 'orrery',
-      gate: 'barrier',
-      particles: 'sparks',
-      mobs: [
-        { name: 'Rouage animé', look: 'golem', pal: ['#b08a3a', '#6e5420', '#e0c070', '#7de0ff', '#c8f7ff'] },
-        {
-          name: 'Ombre astrale',
-          look: 'spirit',
-          pal: ['#ed8bc1', '#8a4a7a', '#ffc0e4', '#9fd8ff', '#ffffff']
-        }
-      ],
-      bosses: [
-        { look: 'golem', pal: ['#c09a40', '#705a22', '#f0d080', '#7de0ff', '#d0faff'] },
-        { look: 'robed', pal: ['#3a4a9a', '#1e2860', '#6a7ad8', '#ffd36d', '#9fe8ff'], halo: true },
-        { look: 'horror', pal: ['#2a1a4a', '#140a2a', '#5a3a8a', '#ff7fa7', '#ffd0e0'] }
-      ]
+      particles: 'sparks'
     },
     {
       key: 'seraphin',
-      shape: 'void',
       floor: { style: 'marble', a: '#e4ddd0', b: '#c4bba8', c: '#d4aa3a' },
-      accent: { style: 'carpet', a: '#d4aa3a', b: '#a8822a', c: '#fff4c0', width: 1 },
+      accent: { style: 'carpet', a: '#d4aa3a', b: '#a8822a', c: '#fff4c0' },
       wall: { style: 'marble', top: '#cfc6b4', face: '#e8e0d0', dark: '#b8ae98', light: '#fffaf0' },
-      hazard: { style: 'clouds', a: '#9fb8e0', b: '#c8d8f4', c: '#ffffff', pools: 0 },
+      hazard: { a: '#9fb8e0', b: '#c8d8f4', c: '#ffffff' },
       light: { dark: 0.16, tint: '40,24,60' },
       flame: ['#f0b030', '#ffe070', '#ffffff'],
       rune: '#c4a0ff',
       banner: ['#f4f0e4', '#d4aa3a'],
       pillar: ['#efe8da', '#c8bea8', '#ffffff'],
-      wallProps: [],
-      floorProps: ['pillar', 'angelstatue', 'brazier', 'feathers', 'pillar'],
-      centerpiece: 'throne',
-      gate: 'barrier',
-      particles: 'feathers',
-      mobs: [
-        {
-          name: 'Séraphin corrompu',
-          look: 'angel',
-          pal: ['#c4a0ff', '#7a5ab0', '#efe0ff', '#ffd36d', '#ffffff']
-        },
-        {
-          name: 'Sentinelle solaire',
-          look: 'golem',
-          pal: ['#e8c860', '#a8862a', '#fff0a8', '#ffffff', '#ffffff']
-        }
-      ],
-      bosses: [
-        { look: 'angel', pal: ['#f0e6c8', '#b8a878', '#ffffff', '#ffd36d', '#fff6c0'] },
-        { look: 'golem', pal: ['#f4f0e4', '#c4baa0', '#ffffff', '#ffd36d', '#ffe680'], halo: true },
-        { look: 'angel', pal: ['#ffffff', '#d8cfa8', '#ffffff', '#ffcf40', '#fff0a0'], wings6: true }
-      ]
+      particles: 'feathers'
     },
     {
       key: 'celestia',
-      shape: 'void',
       floor: { style: 'starstone', a: '#1c2148', b: '#121633', c: '#fff0a8' },
-      accent: { style: 'runes', a: '#2a2a5a', b: '#1a1a40', c: '#fff0a8', width: 0 },
+      accent: { style: 'runes', a: '#2a2a5a', b: '#1a1a40', c: '#fff0a8' },
       wall: { style: 'marble', top: '#06061a', face: '#2a2e60', dark: '#1a1c40', light: '#4a50a0' },
-      hazard: { style: 'stars', a: '#020208', b: '#14123a', c: '#fff0a8', pools: 0 },
+      hazard: { a: '#020208', b: '#14123a', c: '#fff0a8' },
       light: { dark: 0.38, tint: '4,6,30' },
       flame: ['#d4aa3a', '#fff0a8', '#ffffff'],
       rune: '#fff0a8',
       banner: ['#1a1c40', '#fff0a8'],
       pillar: ['#d8d4f0', '#9a96c0', '#ffffff'],
-      wallProps: [],
-      floorProps: ['pillarlight', 'orb', 'pillar', 'crystal', 'statue'],
-      centerpiece: 'scales',
-      gate: 'barrier',
-      particles: 'sparks',
-      mobs: [
-        { name: 'Juge céleste', look: 'angel', pal: ['#fff0a8', '#c4aa50', '#ffffff', '#9fd8ff', '#ffffff'] },
-        {
-          name: 'Héraut stellaire',
-          look: 'spirit',
-          pal: ['#9fd8ff', '#4a7ab0', '#e0f4ff', '#fff0a8', '#ffffff']
-        }
-      ],
-      bosses: [
-        { look: 'angel', pal: ['#c8d8ff', '#7a8ac0', '#ffffff', '#9fd8ff', '#e0f4ff'] },
-        { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'], halo: true },
-        { look: 'angel', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'], wings6: true }
-      ]
+      particles: 'sparks'
     },
-    // ---------------------------------------------------------------- Donjons des Tréfonds (sous l'île)
     {
       key: 'durgrim',
       entrance: 'mine',
-      shape: 'cave',
       floor: { style: 'dirt', a: '#5e4632', b: '#3e2e20', c: '#84664a' },
-      accent: { style: 'rails', a: '#5e4632', b: '#5a3e28', c: '#a8a2a0', width: 0 },
+      accent: { style: 'rails', a: '#5e4632', b: '#5a3e28', c: '#a8a2a0' },
       wall: { style: 'rock', top: '#140e0a', face: '#4e3a2a', dark: '#2e2218', light: '#70543e' },
-      hazard: { style: 'water', a: '#3a2a1a', b: '#5a4026', c: '#8a6a44', pools: 3 },
+      hazard: { a: '#3a2a1a', b: '#5a4026', c: '#8a6a44' },
       light: { dark: 0.7, tint: '22,12,4' },
       flame: ['#e5822e', '#f9c640', '#fff6c5'],
       rune: '#e0a060',
       banner: ['#4a3420', '#e0a060'],
       pillar: ['#5e4430', '#3b2a1d', '#80614a'],
-      wallProps: ['lantern', 'beam', 'roots', 'beam'],
-      floorProps: ['minecart', 'crate', 'ore', 'pickaxe', 'rubble', 'bones', 'ore'],
-      centerpiece: 'mithrilcluster',
-      gate: 'portcullis',
-      particles: 'dust',
-      mobs: [
-        {
-          name: 'Mineur maudit',
-          look: 'skeleton',
-          pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040']
-        },
-        {
-          name: 'Taupe des galeries',
-          look: 'beast',
-          pal: ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a']
-        }
-      ],
-      bosses: [{ look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }]
+      particles: 'dust'
     },
     {
       key: 'ombral',
       entrance: 'penitents',
-      shape: 'hall',
       floor: { style: 'flagstone', a: '#4a5058', b: '#33383e', c: '#6a727c' },
-      accent: { style: 'carpet', a: '#2a4a6a', b: '#1a3450', c: '#c9a24a', width: 1 },
+      accent: { style: 'carpet', a: '#2a4a6a', b: '#1a3450', c: '#c9a24a' },
       wall: { style: 'brick', top: '#0c1016', face: '#454c56', dark: '#2a3038', light: '#68707c' },
-      hazard: { style: 'water', a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0', pools: 2 },
+      hazard: { a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0' },
       light: { dark: 0.6, tint: '4,12,22' },
       flame: ['#3a8ad8', '#7ac8ff', '#e0f4ff'],
       rune: '#8ac8e8',
       banner: ['#1e3a5a', '#c9a24a'],
       pillar: ['#5a626c', '#3a4048', '#7e8894'],
-      wallProps: ['sconce', 'banner', 'chains', 'banner'],
-      floorProps: ['pillar', 'statue', 'rubble', 'candles', 'brazier', 'statue'],
-      centerpiece: 'throne',
-      gate: 'portcullis',
-      particles: 'motes',
-      mobs: [
-        {
-          name: 'Garde de pierre',
-          look: 'golem',
-          pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff']
-        },
-        {
-          name: 'Esprit d’Ombral',
-          look: 'spirit',
-          pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff']
-        }
-      ],
-      bosses: [{ look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }]
+      particles: 'motes'
     },
     {
       key: 'mille_tombes',
       entrance: 'fosse',
-      shape: 'pit',
       floor: { style: 'flagstone', a: '#3c3a36', b: '#282624', c: '#58544e' },
-      accent: { style: 'gravel', a: '#34322e', b: '#22201e', c: '#4e4a44', width: 1 },
+      accent: { style: 'gravel', a: '#34322e', b: '#22201e', c: '#4e4a44' },
       wall: { style: 'brick', top: '#08090a', face: '#3a3c3a', dark: '#222422', light: '#5a5c58' },
-      hazard: { style: 'chasm', a: '#030404', b: '#0c100e', c: '#1e2a24', pools: 1 },
+      hazard: { a: '#030404', b: '#0c100e', c: '#1e2a24' },
       light: { dark: 0.72, tint: '4,14,10' },
       flame: ['#3ad87a', '#8affb0', '#e0fff0'],
       rune: '#a8f0c0',
       banner: ['#1a2a22', '#a8f0c0'],
       pillar: ['#4a4c48', '#2c2e2a', '#6c6e68'],
-      wallProps: ['skulls', 'sconce', 'chains', 'skulls'],
-      floorProps: ['bonepile', 'candles', 'bones', 'cage', 'statue', 'candles'],
-      centerpiece: 'altar',
-      gate: 'portcullis',
-      particles: 'motes',
-      mobs: [
-        {
-          name: 'Goule des cryptes',
-          look: 'brute',
-          pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0']
-        },
-        {
-          name: 'Âme sans repos',
-          look: 'spirit',
-          pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff']
-        }
-      ],
-      bosses: [{ look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }]
+      particles: 'motes'
     },
     {
       key: 'fongique',
       entrance: 'terriers',
-      shape: 'cave',
       floor: { style: 'dirt', a: '#3e4a2e', b: '#2a3420', c: '#5e6e40' },
-      accent: { style: 'gravel', a: '#4a3a46', b: '#322630', c: '#6a5664', width: 1 },
+      accent: { style: 'gravel', a: '#4a3a46', b: '#322630', c: '#6a5664' },
       wall: { style: 'rock', top: '#0c0a10', face: '#3e3446', dark: '#241e2a', light: '#5e5068' },
-      hazard: { style: 'water', a: '#2e3818', b: '#4a5a24', c: '#a8c060', pools: 3 },
+      hazard: { a: '#2e3818', b: '#4a5a24', c: '#a8c060' },
       light: { dark: 0.66, tint: '16,4,20' },
       flame: ['#d84ac0', '#ff8ae8', '#ffe0f8'],
       rune: '#e870c0',
       banner: ['#3a1a34', '#e870c0'],
       pillar: ['#4e4258', '#302838', '#6e6080'],
-      wallProps: ['roots', 'lantern', 'roots', 'roots'],
-      floorProps: ['mushroom', 'crystal', 'mushroom', 'bones', 'rubble', 'mushroom'],
-      centerpiece: 'mithrilcluster',
-      gate: 'barrier',
-      particles: 'motes',
-      mobs: [
-        {
-          name: 'Porte-spores',
-          look: 'golem',
-          pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'],
-          leafy: true
-        },
-        {
-          name: 'Larve des fanges',
-          look: 'slime',
-          pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010']
-        }
-      ],
-      bosses: [{ look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }]
+      particles: 'motes'
     }
   ];
-  // Apparence de chaque boss, dans l'ordre des noms de l'instance (trois en donjon, six en raid ; le dernier est le
-  // boss final), et des boss cachés derrière les passages secrets.
-  const LOOKS = {
-    terriers: {
-      bosses: [
-        { look: 'beast', pal: ['#8a6a50', '#4e3a2a', '#b89878', '#e6a7a7', '#ff5040'], crown: true },
-        { look: 'robed', pal: ['#5a4a3a', '#2e241a', '#80705a', '#c9a46e', '#a3c7ff'], hood: true },
-        { look: 'skeleton', pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'], crown: true }
-      ],
-      secrets: [
-        {
-          look: 'beast',
-          pal: ['#4a3a30', '#2a1e16', '#7a6050', '#d0a040', '#ffd040'],
-          horns: true,
-          crown: true
-        }
-      ]
-    },
-    mine: {
-      bosses: [
-        {
-          look: 'imp',
-          pal: ['#8a7a5a', '#4e4430', '#b0a07a', '#c9a24a', '#9fe8ff'],
-          nowings: true,
-          crown: true
-        },
-        { look: 'spider', pal: ['#3d4652', '#22282e', '#6a7a8c', '#9fe8ff', '#c8f7ff'] },
-        { look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'] }
-      ],
-      secrets: [{ look: 'robed', pal: ['#2a2e36', '#14161a', '#4a5260', '#ffcf6a', '#ffffff'], hood: true }]
-    },
-    eclipse: {
-      bosses: [
-        { look: 'robed', pal: ['#3a2a5a', '#1e1530', '#6a5090', '#ff9955', '#ffcc88'], hood: true },
-        { look: 'golem', pal: ['#c89a40', '#7a5a22', '#f0d080', '#ffcc55', '#fff0b0'], halo: true },
-        { look: 'robed', pal: ['#1e1530', '#0f0a1c', '#4a3670', '#ffcc55', '#ffdd88'], halo: true }
-      ],
-      secrets: [{ look: 'spirit', pal: ['#120a1c', '#06040c', '#3a2a5a', '#ff7a3a', '#ffb080'] }]
-    },
-    penitents: {
-      bosses: [
-        { look: 'brute', pal: ['#5a5560', '#33303a', '#807a8a', '#b79cff', '#e2d4ff'], hood: true },
-        { look: 'robed', pal: ['#e8e4f0', '#a8a0b8', '#ffffff', '#5a161a', '#b79cff'], hood: true },
-        { look: 'knight', pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'], hood: true }
-      ],
-      secrets: [
-        { look: 'skeleton', pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'], hood: true }
-      ]
-    },
-    forge: {
-      bosses: [
-        { look: 'brute', pal: ['#7a4a30', '#4a2a18', '#a87050', '#ff8a3c', '#ffd36b'], heavy: true },
-        { look: 'golem', pal: ['#3a2a26', '#1e1412', '#5a3d33', '#ff6a1f', '#ffd36b'] },
-        { look: 'dragon', pal: ['#d0401c', '#7a1e0c', '#ff8a4a', '#ffd36b', '#fff6b0'] }
-      ],
-      secrets: [{ look: 'scorpion', pal: ['#1e1a22', '#0c0a10', '#3e3446', '#ff6a1f', '#ffd36b'] }]
-    },
-    fosse: {
-      bosses: [
-        { look: 'knight', pal: ['#3a3a40', '#1e1e22', '#5e5e66', '#e88aff', '#f4d0ff'], heavy: true },
-        { look: 'spirit', pal: ['#6a5070', '#3a2840', '#a080b0', '#e88aff', '#ffffff'] },
-        { look: 'brute', pal: ['#4a3438', '#2a1c20', '#6e5056', '#c03040', '#ff5050'] }
-      ],
-      secrets: [{ look: 'horror', pal: ['#1e1420', '#0c080e', '#3e2a42', '#e88aff', '#ffd0ff'] }]
-    },
-    bastion: {
-      bosses: [
-        { look: 'quad', pal: ['#5a2020', '#300e0e', '#8a3a34', '#d4a44a', '#ff6040'] },
-        { look: 'knight', pal: ['#6a1c1c', '#3a0e0e', '#9a3a34', '#c0c0c8', '#ff6040'] },
-        { look: 'robed', pal: ['#4a0a16', '#24040a', '#7a1a2a', '#d4a44a', '#ff3050'], hood: true },
-        { look: 'robed', pal: ['#8a1428', '#4a0a16', '#c03a50', '#ffd36d', '#ff3050'], crown: true },
-        { look: 'brute', pal: ['#7a1a1a', '#420a0a', '#b03a34', '#ffd36d', '#ff8060'], heavy: true },
-        { look: 'knight', pal: ['#9a1a1a', '#550c0c', '#d04040', '#ffd36d', '#ffee88'], crown: true }
-      ],
-      secrets: [
-        { look: 'rogue', pal: ['#2a1a1a', '#140a0a', '#4a2a2a', '#c8303a', '#ff5050'] },
-        { look: 'spirit', pal: ['#f4f0f0', '#c8b8b8', '#ffffff', '#c8303a', '#ffd0d0'] }
-      ]
-    },
-    continuum: {
-      bosses: [
-        { look: 'imp', pal: ['#a07a3a', '#5a4220', '#d0aa60', '#7de0ff', '#d0faff'], nowings: true },
-        { look: 'golem', pal: ['#c09a40', '#705a22', '#f0d080', '#7de0ff', '#d0faff'] },
-        { look: 'golem', pal: ['#e8d0a0', '#a08a60', '#fff4d8', '#ff7fa7', '#ffd0e0'], halo: true },
-        { look: 'robed', pal: ['#3a4a9a', '#1e2860', '#6a7ad8', '#ffd36d', '#9fe8ff'], halo: true },
-        { look: 'spirit', pal: ['#5a6ac8', '#2a3470', '#9aa8ff', '#7de0ff', '#ffffff'] },
-        { look: 'horror', pal: ['#2a1a4a', '#140a2a', '#5a3a8a', '#ff7fa7', '#ffd0e0'] }
-      ],
-      secrets: [
-        { look: 'flyer', pal: ['#7a5ad8', '#3a2a70', '#b8a0ff', '#7de0ff', '#ffffff'] },
-        { look: 'spirit', pal: ['#fff0d8', '#c8b090', '#ffffff', '#ff7fa7', '#7de0ff'] }
-      ]
-    },
-    seraphin: {
-      bosses: [
-        { look: 'angel', pal: ['#ffe8d0', '#c8a888', '#ffffff', '#ffd36d', '#fff6c0'] },
-        { look: 'angel', pal: ['#f0e6c8', '#b8a878', '#ffffff', '#ffd36d', '#fff6c0'] },
-        { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#ffffff', '#fff6c0'], halo: true },
-        { look: 'golem', pal: ['#f4f0e4', '#c4baa0', '#ffffff', '#ffd36d', '#ffe680'], halo: true },
-        { look: 'robed', pal: ['#f8f4ec', '#c8c0b0', '#ffffff', '#c4a0ff', '#fff6c0'], halo: true },
-        { look: 'angel', pal: ['#ffffff', '#d8cfa8', '#ffffff', '#ffcf40', '#fff0a0'], wings6: true }
-      ],
-      secrets: [
-        { look: 'angel', pal: ['#3a3040', '#1a141e', '#6a5a72', '#c4a0ff', '#ff5070'] },
-        { look: 'angel', pal: ['#c8e0ff', '#7a90c0', '#ffffff', '#c4a0ff', '#ffffff'], wings6: true }
-      ]
-    },
-    celestia: {
-      bosses: [
-        { look: 'spirit', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'] },
-        { look: 'angel', pal: ['#c8d8ff', '#7a8ac0', '#ffffff', '#9fd8ff', '#e0f4ff'] },
-        { look: 'golem', pal: ['#2a2e60', '#1a1c40', '#4a50a0', '#fff0a8', '#ffffff'], halo: true },
-        { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'], halo: true },
-        { look: 'robed', pal: ['#1a1c40', '#0c0e24', '#3a3e80', '#fff0a8', '#ffffff'], crown: true },
-        { look: 'angel', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'], wings6: true }
-      ],
-      secrets: [
-        { look: 'dragon', pal: ['#c8303a', '#7a1018', '#ff7060', '#fff0a8', '#ffffff'] },
-        { look: 'spirit', pal: ['#ffffff', '#d8d4f0', '#ffffff', '#fff0a8', '#9fd8ff'] }
-      ]
-    },
-    durgrim: {
-      bosses: [
-        { look: 'brute', pal: ['#7a6048', '#4a3a2a', '#a0866a', '#e0a060', '#ffd080'], tusks: true },
-        { look: 'golem', pal: ['#5e5a5a', '#3a3636', '#86807a', '#e0a060', '#ffd080'] },
-        { look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }
-      ],
-      secrets: [
-        { look: 'skeleton', pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'], crown: true }
-      ]
-    },
-    ombral: {
-      bosses: [
-        { look: 'robed', pal: ['#3a4a5a', '#1e2834', '#5a6e84', '#8ac8e8', '#d8f0ff'], hood: true },
-        { look: 'golem', pal: ['#2a3038', '#14181e', '#4a5260', '#8ac8e8', '#d8f0ff'], heavy: true },
-        { look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }
-      ],
-      secrets: [{ look: 'spirit', pal: ['#4a7a8a', '#2a4a54', '#7ab0c0', '#8ac8e8', '#ffffff'], crown: true }]
-    },
-    mille_tombes: {
-      bosses: [
-        { look: 'rogue', pal: ['#4a4a40', '#2a2a22', '#6e6e60', '#a8f0c0', '#d8fff0'] },
-        { look: 'spirit', pal: ['#2a2e2a', '#141614', '#4a524a', '#a8f0c0', '#ffffff'] },
-        { look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }
-      ],
-      secrets: [
-        { look: 'skeleton', pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'], crown: true }
-      ]
-    },
-    fongique: {
-      bosses: [
-        { look: 'golem', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], leafy: true },
-        { look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] },
-        { look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }
-      ],
-      secrets: [{ look: 'horror', pal: ['#4a5a26', '#2a3414', '#7a8a40', '#e870c0', '#ffe0f8'], leafy: true }]
-    }
-  };
-  for (const th of THEMES) Object.assign(th, LOOKS[th.key]);
-  // Arène des Épreuves : colisée de sable chaud, gradins de grès, bannières pourpres et or.
-  THEMES.arena = {
+  const ARENA_PALETTE = {
     key: 'arene',
-    shape: 'hall',
     floor: { style: 'dirt', a: '#c2a272', b: '#a5865a', c: '#dcc095' },
-    accent: { style: 'gravel', a: '#9a7c52', b: '#7a6040', c: '#b8986a', width: 0 },
+    accent: { style: 'gravel', a: '#9a7c52', b: '#7a6040', c: '#b8986a' },
     wall: { style: 'brick', top: '#24180e', face: '#9a7a54', dark: '#5a4430', light: '#c8a676' },
-    hazard: { style: 'chasm', a: '#050506', b: '#101014', c: '#26262c', pools: 0 },
+    hazard: { a: '#050506', b: '#101014', c: '#26262c' },
     light: { dark: 0.16, tint: '34,18,6' },
     flame: ['#e5522e', '#f9a640', '#fff1b5'],
     rune: '#ffc65a',
     banner: ['#7a1424', '#ffd36d'],
     pillar: ['#d4bc94', '#8e7658', '#f2e4c4'],
-    wallProps: ['banner', 'torch'],
-    floorProps: [],
-    centerpiece: null,
-    gate: 'portcullis',
-    particles: 'embers',
-    mobs: [],
-    bosses: []
+    particles: 'embers'
   };
-  // Piste : centre et rayon en cases ; le héros entre par l'antichambre au sud (ENTRY).
-  const ARENA = Object.freeze({ cx: 120, cy: 111, r: 12.6, gateY: 125 });
+  // Thème complet d'une instance : structure et créatures (shared/data/dungeons.js) avec leur palette.
+  const theme = (layout, actors, palette) => ({
+    ...layout,
+    ...actors,
+    ...palette,
+    hazard: { ...layout.hazard, ...palette.hazard },
+    accent: { ...layout.accent, ...palette.accent }
+  });
+  const THEMES = DUNGEON_LAYOUTS.map((layout, i) => theme(layout, DUNGEON_ACTORS[i], PALETTES[i]));
+  THEMES.arena = theme(DUNGEON_ARENA_LAYOUT, { mobs: [], bosses: [] }, ARENA_PALETTE);
+
   // Objets posés au sol qui bloquent le passage ; les autres sont décoratifs.
-  const SOLID_PROPS = new Set([
-    'pillar',
-    'statue',
-    'angelstatue',
-    'brazier',
-    'anvil',
-    'minecart',
-    'cage',
-    'rack',
-    'gear',
-    'hourglass',
-    'pillarlight',
-    'dragonskull'
-  ]);
+  const SOLID_PROPS = new Set(DUNGEON_SOLID_PROPS);
 
   // ---------------------------------------------------------------- Plans d'exploration
   // Chaque instance est un réseau de salles : l'entrée, puis une aile par boss (salle de passage, salles annexes,
@@ -817,7 +390,7 @@
       B = d.raid ? 6 : 3;
     for (const room of rooms) {
       if (room.kind === 'entry') {
-        Object.assign(room, { w: 11, h: 9, cx: ENTRY.x, cy: ENTRY.y - 2 });
+        Object.assign(room, { w: 11, h: 9, cx: DUNGEON_ENTRY.x, cy: DUNGEON_ENTRY.y - 2 });
         continue;
       }
       const final = room.kind === 'boss' && room.stage === B - 1;
@@ -911,8 +484,8 @@
   // ouvert sa porte, les salles cachées restent fermées tant que leur mur n'est pas découvert.
   function reachFrom(plan, open) {
     const grid = plan.grid,
-      seen = new Set([ENTRY.y * MAPW + ENTRY.x]),
-      queue = [[ENTRY.x, ENTRY.y]];
+      seen = new Set([DUNGEON_ENTRY.y * MAPW + DUNGEON_ENTRY.x]),
+      queue = [[DUNGEON_ENTRY.x, DUNGEON_ENTRY.y]];
     while (queue.length) {
       const [x, y] = queue.pop();
       for (const [dx, dy] of [
@@ -1199,7 +772,7 @@
             for (const x of [b.x0 + 3, b.x1 - 3]) if (free(x, y) && grid[y][x] === FLOOR) addProp(x, y, kind);
       }
       if (room.kind === 'entry') {
-        plan.decals.push({ x: ENTRY.x, y: ENTRY.y, kind: 'portal' });
+        plan.decals.push({ x: DUNGEON_ENTRY.x, y: DUNGEON_ENTRY.y, kind: 'portal' });
         plan.title = { x: room.cx, y: b.y0 - 0.6 };
         return;
       }
@@ -1293,7 +866,7 @@
   function planArena() {
     if (PLANS.arena) return PLANS.arena;
     const th = THEMES.arena,
-      { cx, cy, r, gateY } = ARENA,
+      { cx, cy, r, gateY } = DUNGEON_ARENA,
       grid = Array.from({ length: MAPH }, () => Array(MAPW).fill(WALL)),
       solid = new Set(),
       plan = {
@@ -1315,8 +888,9 @@
         const d = Math.hypot(x - cx, y - cy);
         if (d <= r) grid[y][x] = d > r - 1.1 ? ACCENT : FLOOR;
       }
-    for (let y = cy + 11; y <= ENTRY.y - 3; y++) for (let x = cx - 2; x <= cx + 2; x++) grid[y][x] = FLOOR;
-    for (let y = ENTRY.y - 3; y <= ENTRY.y + 3; y++)
+    for (let y = cy + 11; y <= DUNGEON_ENTRY.y - 3; y++)
+      for (let x = cx - 2; x <= cx + 2; x++) grid[y][x] = FLOOR;
+    for (let y = DUNGEON_ENTRY.y - 3; y <= DUNGEON_ENTRY.y + 3; y++)
       for (let x = cx - 5; x <= cx + 5; x++) grid[y][x] = FLOOR;
     const solidProp = (x, y, kind) => {
       plan.props.push({ x, y, kind });
@@ -1343,13 +917,13 @@
       [1, 1]
     ])
       solidProp(cx + sx * 8, cy + sy * 8, 'brazier');
-    solidProp(cx - 5, ENTRY.y - 3, 'rack');
-    solidProp(cx + 5, ENTRY.y - 3, 'rack');
-    plan.props.push({ x: cx - 5, y: ENTRY.y + 2, kind: 'crate' });
-    plan.decals.push({ x: ENTRY.x, y: ENTRY.y, kind: 'portal' });
+    solidProp(cx - 5, DUNGEON_ENTRY.y - 3, 'rack');
+    solidProp(cx + 5, DUNGEON_ENTRY.y - 3, 'rack');
+    plan.props.push({ x: cx - 5, y: DUNGEON_ENTRY.y + 2, kind: 'crate' });
+    plan.decals.push({ x: DUNGEON_ENTRY.x, y: DUNGEON_ENTRY.y, kind: 'portal' });
     plan.decals.push({ x: cx, y: cy, kind: 'runecircle' });
     plan.lights.push({ x: cx + 0.5, y: cy + 0.5, r: 520, col: '#ffe2b0' });
-    plan.title = { x: cx, y: ENTRY.y - 4.4 };
+    plan.title = { x: cx, y: DUNGEON_ENTRY.y - 4.4 };
     // Herse de la piste : ouverte entre les vagues, fermée pendant les combats (canaan-arena).
     const cells = [];
     for (let x = cx - 2; x <= cx + 2; x++) cells.push([x, gateY]);
@@ -1362,17 +936,17 @@
   function arenaLayout() {
     const plan = planArena();
     return {
-      x: (ARENA.cx + 0.5) * TS,
-      y: (ARENA.cy + 0.5) * TS,
-      r: ARENA.r * TS,
+      x: (DUNGEON_ARENA.cx + 0.5) * TS,
+      y: (DUNGEON_ARENA.cy + 0.5) * TS,
+      r: DUNGEON_ARENA.r * TS,
       gate: plan.gates[0].cells.map(([x, y]) => [x, y]),
-      entry: { x: ENTRY.x * TS, y: ENTRY.y * TS }
+      entry: { x: DUNGEON_ENTRY.x * TS, y: DUNGEON_ENTRY.y * TS }
     };
   }
   // Gradins du colisée : rangées de grès et public animé, sur l'anneau de murs autour de la piste.
   const CROWD = ['#7a1424', '#2a4a7a', '#c8a050', '#3a6a3a', '#6a3a7a', '#a85a2a', '#d8d0c0', '#4a4a52'];
   function drawArenaStands(c) {
-    const { cx, cy, r } = ARENA,
+    const { cx, cy, r } = DUNGEON_ARENA,
       cheer = CANAAN_ARENA.cheer();
     for (let y = cy - 20; y <= cy + 15; y++)
       for (let x = cx - 20; x <= cx + 20; x++) {
@@ -1401,9 +975,6 @@
       }
   }
 
-  // ---------------------------------------------------------------- Ennemis et boss
-  // Chance, pour chaque héros du groupe, qu'un boss (hors boss cachés) lâche un équipement de l'instance.
-  const BOSS_DROP_CHANCE = 0.3;
   function spawnInstanceBoss(i) {
     const d = instances[i],
       th = THEMES[i],
@@ -1537,7 +1108,7 @@
       return false;
     }
     for (const h of members()) {
-      if (Math.random() < BOSS_DROP_CHANCE) dropTierGear(i, h);
+      if (Math.random() < DUNGEON_BOSS_DROP_CHANCE) dropTierGear(i, h);
       else canaanLootNotice(h, '🎲 ' + m.t + ' : pas d’équipement cette fois.');
       // Apparence : chance propre à chaque héros (plus haute et plus belle en raid).
       CANAAN_WARDROBE.drop(instances[i].raid ? 'raid' : 'dungeon', h);
@@ -1687,7 +1258,7 @@
   function dungeonChestSpot(index) {
     const plan = planFor(index),
       room = plan?.rooms.filter(r => r.kind === 'boss').pop();
-    return room ? room.chest : { x: ENTRY.x, y: ENTRY.y - 6 };
+    return room ? room.chest : { x: DUNGEON_ENTRY.x, y: DUNGEON_ENTRY.y - 6 };
   }
 
   // ---------------------------------------------------------------- Énigmes, portes scellées et passages secrets
@@ -4048,7 +3619,7 @@
     arenaLayout,
     CANAAN_DUNGEON_AUDIT: auditDungeon,
     // Chance d'équipement de chaque boss, pour chaque héros (fiche des portails).
-    CANAAN_BOSS_DROP_CHANCE: BOSS_DROP_CHANCE,
+    CANAAN_BOSS_DROP_CHANCE: DUNGEON_BOSS_DROP_CHANCE,
     // Exploration : interaction (E), ce qui est à portée, état copié chez les invités.
     CANAAN_DUNGEON_EXPLORE: Object.freeze({
       exitSpot,
