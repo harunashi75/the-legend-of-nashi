@@ -21,6 +21,10 @@ const MODULES = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'ut
 // Noms fournis par le navigateur ou le langage : jamais des dépendances entre scripts.
 const BROWSER = new Set([
   ...Object.getOwnPropertyNames(globalThis),
+  // Noms du navigateur absents de Node, et canaanDesktop (application de bureau : app/preload.js, contextBridge).
+  'DOMMatrix',
+  'dispatchEvent',
+  'canaanDesktop',
   'window',
   'document',
   'navigator',
@@ -289,4 +293,10 @@ if (args[0] === '--json') {
     );
   }
   console.log("\n* : au moins un nom lu au chargement (le script dépendu doit s'exécuter avant).");
+  const unknown = info.flatMap(s => s.unknown.map(n => short(s.id) + ' : ' + n));
+  console.log(
+    unknown.length
+      ? '\nNoms lus que personne ne définit : ' + unknown.join(', ')
+      : '\nAucun nom lu sans définition.'
+  );
 }

@@ -27,6 +27,8 @@ import * as houseRules from './shared/rules/house.js';
 import * as dungeonData from './shared/data/dungeons.js';
 import * as professionData from './shared/data/professions.js';
 import * as professionRules from './shared/rules/professions.js';
+import * as puzzleData from './shared/data/puzzles.js';
+import * as puzzleRules from './shared/rules/puzzles.js';
 // Modules client convertis (src/canaan/client/) : navigateur, sans variable globale implicite.
 import * as iconArt from './client/icons/icon-art.js';
 import * as icons from './client/icons/icons.js';
@@ -61,6 +63,8 @@ Object.assign(
   dungeonData,
   professionData,
   professionRules,
+  puzzleData,
+  puzzleRules,
   iconArt,
   icons,
   skillIcons,

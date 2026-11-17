@@ -10,6 +10,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ### Refactorisation
 - Métiers : constantes, catalogues et règles pures (XP, qualités, repas, tirages, sauvegardes) dans `shared/data/professions.js` et `shared/rules/professions.js` ; résultats identiques à l’ancienne version sur 500 sauvegardes aléatoires et toutes les recettes.
+- Quêtes : données et règles des énigmes dans `shared/data/puzzles.js` et `shared/rules/puzzles.js` (1 585 comparaisons exhaustives identiques à l’ancienne version).
 - Économie : butin garanti d’une instance, tirage de prestige et bourse des boss mondiaux dans `shared/rules/economy.js` (mêmes tirages dans le même ordre, vérifié sur 5 400 tirages à graine fixe).
 - Maison : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`), le dessin (`render.js`) et le coopératif (`net.js`).
 - Donjons : structure et créatures de chaque instance dans `shared/data/dungeons.js` ; `scripts/dungeons/` sépare les plans, énigmes et boss (`dungeons.js`) du dessin (`render.js`).

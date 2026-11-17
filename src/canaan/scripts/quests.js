@@ -152,38 +152,11 @@
   const WAYSTONE = { camp: null, forest: null };
 
   // ---------------------------------------------------------------- Lieux et énigmes
-  const ORDER_Q1 = ['soleil', 'pluie', 'vent', 'lune'];
-  const SYMBOLS_Q2 = ['étoile', 'lune', 'flamme'];
-  const SCENES_Q12 = [
-    ['☀️', 'La paix', 'Les anciens chantent autour du Cœur de l’Aurore.'],
-    ['🌑', 'La menace', 'Une ombre immense monte de la mer.'],
-    ['✦', 'Le sacrifice', 'Le Cœur se brise en six étoiles.'],
-    ['🕯️', 'L’espoir', 'Six sanctuaires s’allument sur l’île.'],
-    ['🏃', 'La fuite', 'Les anciens s’enfuient et abandonnent l’île.']
-  ];
-  const SOLVED_STATE = {
-    q2: () => ({ p: [0, 1, 2] }),
-    q3: () => ({ g: [0, 0, 1], run: null, top: true }),
-    q7: () => ({ m: [2, 2, 0] }),
-    q11: () => ({ v: [2, 0, 1] }),
-    q12: () => ({ f: [0, 1, 2, 3] }),
-    q13: () => ({ pl: [1, 0, 2, 1] })
-  };
-  function freshStates() {
-    return {
-      q1: { seq: [] },
-      q2: { p: [1, 2, 0] },
-      q3: { g: [1, 1, 0], run: null, top: false },
-      q5: { gold: -1, until: 0, next: 0 },
-      q6: { seq: [] },
-      q7: { m: [0, 0, 0] },
-      q11: { v: [0, 0, 0] },
-      q12: { f: [3, 4, 0, 2] },
-      q13: { pl: [3, 3, 3, 3] },
-      q15: { pads: [] }
-    };
-  }
-  ST = freshStates();
+  const ORDER_Q1 = PUZZLE_ORDER_Q1;
+  const SYMBOLS_Q2 = PUZZLE_SYMBOLS_Q2;
+  const SCENES_Q12 = PUZZLE_SCENES_Q12;
+
+  ST = puzzleFreshStates();
   const BUILD = {
     q1(site) {
       [
@@ -293,7 +266,7 @@
     },
     q8(site) {
       // Labyrinthe de 7 × 7 cellules (15 × 15 cases), le même chez chacun.
-      const rng = seededRng(4242),
+      const rng = seededRandom(4242),
         N = 15,
         maze = Array.from({ length: N }, () => Array(N).fill(true)),
         seen = new Set(),
@@ -455,15 +428,7 @@
     addObj(site, 'door', 'door', 0, -4, { solid: () => !!qworld.flags['sanct_' + id], sanct: id });
     addObj(site, 'shrine', 'shrine', 0, -6, { solid: true, sanct: id, name: s.name });
   }
-  function seededRng(n) {
-    let h = n >>> 0;
-    return () => {
-      h += 0x6d2b79f5;
-      let r = Math.imul(h ^ (h >>> 15), 1 | h);
-      r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-    };
-  }
+
   canaanQuestWalk = (x, y) => {
     if (game.world.instance) return null;
     const f = WALK.get(tileKey(Math.floor(x / T), Math.floor(y / T)));
@@ -471,158 +436,25 @@
   };
 
   // ---------------------------------------------------------------- Chapitres IV à VI : lieux et énigmes
-  const VILLAGE_OBJS = [
-    ['enclume', '⚒️'],
-    ['cloche', '🔔'],
-    ['berceau', '🧺'],
-    ['harpe', '🎵']
-  ];
-  const HOUSES = ['puits', 'four', 'jardin', 'tour'];
-  const SEASONS = [
-    ['🌸', 'Printemps'],
-    ['☀️', 'Été'],
-    ['🍂', 'Automne'],
-    ['❄️', 'Hiver']
-  ];
-  const GEARS = ['vide', 'petit', 'grand'];
+  const VILLAGE_OBJS = PUZZLE_VILLAGE_OBJS;
+  const HOUSES = PUZZLE_HOUSES;
+  const SEASONS = PUZZLE_SEASONS;
+  const GEARS = PUZZLE_GEARS;
   // Héros d'un objet porté (quête 16) : l'hôte, ou l'identifiant d'un invité.
   const keyOf = h => (h === game.hero ? (guest() ? CANAAN_NET.state().heroId : 'host') : h.id || 'host');
   const heroOfKey = k => game.heroes.find(h => keyOf(h) === k) || null;
   // Lieux de la fin de l'histoire : la clé de leur solution.
-  const ANSWER = {
-    q17: [3, 0, 1, 2],
-    q19: [2, 1, 2],
-    q21: [1, 3, 0],
-    q25: [1, 0, 1],
-    q29: [0, 1, 2, 3]
-  };
+  const ANSWER = PUZZLE_ANSWER;
   // Constellation du lac (quête 30) : pierres dans l'ordre où leurs étoiles s'allument.
-  const CONSTELLATION = [
-    [-2, -1],
-    [0, -2],
-    [1, 0],
-    [0, 1],
-    [2, 1]
-  ];
-  // Leviers du monde à l'envers (quête 28) : chaque levier bascule des rochers de l'autre clairière (inversés).
-  const MIRROR_LEVERS = [
-    [
-      [4, 1],
-      [4, -2],
-      [3, 0],
-      [5, 1]
-    ],
-    [
-      [4, 1],
-      [5, 2],
-      [5, 0]
-    ],
-    [
-      [5, -2],
-      [3, 1],
-      [4, 2],
-      [5, 1]
-    ]
-  ];
-  const MIRROR_ROCKS = [];
-  for (const x of [3, 4, 5]) for (let y = -2; y <= 2; y++) MIRROR_ROCKS.push([x, y]);
-  // Rochers présents selon les leviers : tous au départ, chaque levier abaissé bascule les siens.
-  function mirrorRocks(levers) {
-    const on = new Set(MIRROR_ROCKS.map(p => p.join()));
-    levers.forEach((down, i) => {
-      if (down) for (const p of MIRROR_LEVERS[i]) on.has(p.join()) ? on.delete(p.join()) : on.add(p.join());
-    });
-    return on;
-  }
+  const CONSTELLATION = PUZZLE_CONSTELLATION;
+
   // Bassin du bateau (quête 23) : x de -3 à 2, y de -2 à 1 ; rochers ; quai en bas à droite.
-  const BASIN = {
-    x0: -3,
-    x1: 2,
-    y0: -2,
-    y1: 1,
-    rocks: [
-      [-1, -2],
-      [1, -1],
-      [-2, 1],
-      [0, 1]
-    ],
-    dock: [2, 1],
-    start: [-3, -2]
-  };
-  function slide(b, dir) {
-    let [x, y] = b;
-    const [dx, dy] = dir;
-    for (let n = 0; n < 8; n++) {
-      const nx = x + dx,
-        ny = y + dy;
-      if (
-        nx < BASIN.x0 ||
-        nx > BASIN.x1 ||
-        ny < BASIN.y0 ||
-        ny > BASIN.y1 ||
-        BASIN.rocks.some(([rx, ry]) => rx === nx && ry === ny)
-      )
-        break;
-      x = nx;
-      y = ny;
-    }
-    return [x, y];
-  }
-  // Aqueduc de l'oasis (quête 25) : où va l'eau selon les trois portes.
-  function aqueduct(g) {
-    const path = ['src', 'a'];
-    if (!g[0]) return [...path, 'leakA'];
-    path.push('b');
-    if (g[1]) return [...path, 'leakB'];
-    path.push('c');
-    return g[2] ? [...path, 'basin'] : [...path, 'leakC'];
-  }
-  const AQ = {
-    src: [-5, -3],
-    a: [-3, -3],
-    leakA: [-3, 0],
-    b: [0, -3],
-    leakB: [0, -5],
-    c: [0, 0],
-    leakC: [-2, 2],
-    basin: [3, 2]
-  };
+  const BASIN = PUZZLE_BASIN;
+
+  const AQ = PUZZLE_AQUEDUCT;
   // Rayon des miroirs : quête 7 (pierre solaire → arbre gardien) et quête 24 (→ porte du temple).
-  const BEAMS = {
-    q7: { sun: [-4, -2], dir: [1, 0], target: [2, -2], key: 'm', bound: [6, 5] },
-    q24: { sun: [-4, 2], dir: [1, 0], target: [2, -4], key: 'm', bound: [6, 5] }
-  };
-  Object.assign(SOLVED_STATE, {
-    q16: () => ({ pos: [0, 1, 2, 3], hold: {} }),
-    q17: () => ({ p: [...ANSWER.q17] }),
-    q19: () => ({ g: [...ANSWER.q19] }),
-    q21: () => ({ o: [...ANSWER.q21] }),
-    q22: () => ({ r: [0, 0, 0] }),
-    q23: () => ({ b: [...BASIN.dock] }),
-    q24: () => ({ m: [0, 0, 0, 1] }),
-    q25: () => ({ g: [...ANSWER.q25] }),
-    q28: () => ({ l: [0, 1, 1] }),
-    q29: () => ({ h: [...ANSWER.q29], fly: null }),
-    q30: () => ({ seq: CONSTELLATION.length })
-  });
-  function freshMore() {
-    return {
-      q16: { pos: [-1, -1, -1, -1], hold: {} },
-      q17: { p: [0, 0, 0, 0] },
-      q18: { t: 0 },
-      q19: { g: [0, 0, 0] },
-      q21: { o: [2, 0, 1] },
-      q22: { r: [3, 1, 4] },
-      q23: { b: [...BASIN.start] },
-      q24: { m: [2, 2, 2, 1] },
-      q25: { g: [0, 0, 0] },
-      q27: { on: false, wave: 0, hp: [100, 100, 100, 100, 100, 100], next: 0 },
-      q28: { l: [0, 0, 0] },
-      q29: { h: [2, 0, 3, 1], fly: null },
-      q30: { seq: 0, last: {} }
-    };
-  }
-  Object.assign(ST, freshMore());
+  const BEAMS = PUZZLE_BEAMS;
+
   Object.assign(BUILD, {
     q16(site) {
       [
@@ -781,9 +613,9 @@
         [-4, 0],
         [-5, 2]
       ].forEach(([dx, dy], i) => addObj(site, 'lever' + i, 'lever', dx, dy, { i, solid: true }));
-      for (const [dx, dy] of MIRROR_ROCKS) {
+      for (const [dx, dy] of PUZZLE_MIRROR_ROCKS) {
         addObj(site, 'mrock' + dx + '_' + (dy + 2), 'mrock', dx, dy);
-        solid(site, dx, dy, () => !mirrorRocks(ST.q28.l).has(dx + ',' + dy));
+        solid(site, dx, dy, () => !puzzleMirrorRocks(ST.q28.l).has(dx + ',' + dy));
       }
       addObj(site, 'echest', 'echest', 6, 0, { solid: true });
       // Enceinte de la seconde clairière : on n'atteint le coffre qu'en traversant les rochers.
@@ -819,29 +651,8 @@
   });
   // Rayon de miroirs : la quête 7 et le temple des miroirs (24) ont le même moteur.
   function beamOf(site) {
-    const cfg = BEAMS[site.id],
-      S = ST[site.id],
-      mirrors = site.objs.filter(o => o.kind === 'mirror'),
-      pts = [[...cfg.sun]];
-    let [x, y] = cfg.sun,
-      [dx, dy] = cfg.dir;
-    for (let n = 0; n < 24; n++) {
-      x += dx;
-      y += dy;
-      if (Math.abs(x) > cfg.bound[0] || Math.abs(y) > cfg.bound[1]) break;
-      if (x === cfg.target[0] && y === cfg.target[1]) {
-        pts.push([x, y]);
-        return { pts, lit: true };
-      }
-      const m = mirrors.find(o => o.dx === x && o.dy === y);
-      if (!m) continue;
-      pts.push([x, y]);
-      const s = S.m[m.i];
-      if (s === 1 || s === 3) return { pts, lit: false };
-      [dx, dy] = s === 0 ? [-dy, -dx] : [dy, dx];
-    }
-    pts.push([x, y]);
-    return { pts, lit: false };
+    const mirrors = site.objs.filter(o => o.kind === 'mirror');
+    return puzzleBeam(BEAMS[site.id], mirrors, ST[site.id].m);
   }
   // Position de la feuille dorée (quête 18) : elle tourne dans le vent et descend de temps en temps.
   function leafAt(site, t) {
@@ -997,7 +808,7 @@
         );
       case 'fan': {
         if (qworld.solved.q23) return creditSolved(hero, site);
-        S.b = slide(S.b, o.push);
+        S.b = puzzleBasinSlide(S.b, o.push);
         float(o.x, o.y - 40, '💨', '#dff4ff');
         if (S.b[0] === BASIN.dock[0] && S.b[1] === BASIN.dock[1]) {
           tell(hero, '⛵ Le bateau accoste au quai !');
@@ -1031,7 +842,7 @@
       case 'agate':
         if (qworld.solved.q25) return creditSolved(hero, site);
         S.g[o.i] = S.g[o.i] ? 0 : 1;
-        if (aqueduct(S.g).at(-1) === 'basin') {
+        if (puzzleAqueduct(S.g).at(-1) === 'basin') {
           qworld.flags.oasis = true;
           tell(hero, '💧 L’eau coule jusqu’au bassin : l’oasis revit !');
           solve(site);
@@ -1576,7 +1387,7 @@
         if (qworld.solved.q11) return creditSolved(hero, site);
         S.v[o.i] = (S.v[o.i] + 1) % 3;
         cue(hero, 'note' + (S.v[o.i] + 1));
-        if (lanterns(S.v).every(Boolean)) {
+        if (puzzleLanterns(S.v).every(Boolean)) {
           qworld.flags.lanterns = true;
           qworld.flags.sanct_reflets = true;
           tell(
@@ -1679,22 +1490,10 @@
   // Mouton de Milo : il suit le chemin ouvert à chaque carrefour.
   function sheepRoute(site, g) {
     const N = site.nodes,
-      r = ['pen', 'j1'];
-    if (g[0]) r.push('d1');
-    else {
-      r.push('j2');
-      if (g[1]) r.push('d2');
-      else if (g[2]) r.push('t1', 'top');
-    }
-    return r.map(n => [px(site, N[n][0]), py(site, N[n][1])]).concat([[r.at(-1) === 'top' ? 1 : 0, 0]]);
+      { nodes, top } = puzzleSheepPath(g);
+    return nodes.map(n => [px(site, N[n][0]), py(site, N[n][1])]).concat([[top ? 1 : 0, 0]]);
   }
-  // Lanternes du marais selon les trois vannes.
-  const lanterns = v => [
-    v[0] === 2,
-    (v[0] + v[1]) % 3 === 2,
-    (v[1] + v[2]) % 3 === 1,
-    (v[2] * 2 + v[0]) % 3 === 1
-  ];
+
   // ---------------------------------------------------------------- Étape de simulation (hôte)
   function stepTrails(hero) {
     for (const [id, st] of Object.entries(stateOf(hero).active)) {
@@ -2631,7 +2430,7 @@
         return;
       }
       case 'lantern': {
-        const lit = qworld.flags.lanterns || lanterns(ST.q11.v)[o.i];
+        const lit = qworld.flags.lanterns || puzzleLanterns(ST.q11.v)[o.i];
         shadowAt(c, x, y + 12, 10, 3);
         block(c, x - 3, y - 36, 6, 48, PAL.iron);
         block(c, x - 10, y - 50, 20, 16, lit ? ['#ffd890', '#fff0c0', '#c8a050'] : PAL.iron);
@@ -2930,8 +2729,8 @@
         block(c, x - 22, y - 34, 44, 52, PAL.sand);
         return rune(c, x, y - 4, '☀', '#8a6418', 22);
       case 'aqueduct': {
-        const path = aqueduct(S.g),
-          wet = qworld.solved.q25 ? aqueduct(ANSWER.q25) : path;
+        const path = puzzleAqueduct(S.g),
+          wet = qworld.solved.q25 ? puzzleAqueduct(ANSWER.q25) : path;
         const edges = [
           ['src', 'a'],
           ['a', 'leakA'],
@@ -3024,7 +2823,7 @@
         return;
       }
       case 'mrock':
-        if (!mirrorRocks(ST.q28.l).has(o.dx + ',' + o.dy)) return R(c, x - 14, y + 6, 28, 6, '#3a3048');
+        if (!puzzleMirrorRocks(ST.q28.l).has(o.dx + ',' + o.dy)) return R(c, x - 14, y + 6, 28, 6, '#3a3048');
         shadowAt(c, x, y + 14, 18, 5);
         return block(c, x - 18, y - 16, 36, 30, PAL.lilac);
       case 'echest':
@@ -3487,10 +3286,12 @@
       for (const f of flags) if (d.flags?.[f]) qworld.flags[f] = true;
       for (const id of Object.keys(SITES)) if (d.solved?.[id]) qworld.solved[id] = true;
     }
-    ST = { ...freshStates(), ...freshMore() };
+    ST = puzzleFreshStates();
     if (SITES.q15) ST.q15.pads = SITES.q15.pads.map(() => ({ t: 0, sunk: 0 }));
-    for (const id of Object.keys(qworld.solved))
-      if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
+    for (const id of Object.keys(qworld.solved)) {
+      const solved = puzzleSolvedState(id);
+      if (solved) Object.assign(ST[id], solved);
+    }
     changed();
   }
   // État des lieux envoyé aux invités quand il change (et de temps en temps pour un invité qui arrive).
@@ -3545,8 +3346,10 @@
       for (const f of Object.keys(v.w.flags || {})) if (/^[a-z_]{2,24}$/.test(f)) qworld.flags[f] = true;
       for (const id of Object.keys(v.w.solved || {})) if (SITES[id]) qworld.solved[id] = true;
       if (before !== JSON.stringify(qworld.solved))
-        for (const id of Object.keys(qworld.solved))
-          if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
+        for (const id of Object.keys(qworld.solved)) {
+          const solved = puzzleSolvedState(id);
+          if (solved) Object.assign(ST[id], solved);
+        }
     }
     const s = v.s;
     if (!s) return;
@@ -3646,7 +3449,7 @@
     interact,
     nearest,
     beam: () => beamOf(SITES.q7),
-    lanterns,
+    puzzleLanterns,
     exportWorld,
     importWorld,
     netView,

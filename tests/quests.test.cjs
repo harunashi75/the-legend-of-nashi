@@ -178,3 +178,32 @@ test('Quêtes : les chapitres IV à VI (quêtes 16 à 30) se jouent de bout en b
  run('globalThis.__p=[];modernPanel=h=>__p.push(h);CANAAN_QUESTS.render("main")');assert.match(run('__p[0]'),/★★★★★★/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Règles partagées des énigmes : chaque état résolu mène à la solution, l’état de départ non',async()=>{
+ const path=require('node:path'),{pathToFileURL}=require('node:url');
+ const shared=f=>import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href);
+ const D=await shared('data/puzzles.js'),R=await shared('rules/puzzles.js');
+ const fresh=R.puzzleFreshStates(),solved=id=>R.puzzleSolvedState(id);
+ assert.notEqual(fresh.q23.b,D.PUZZLE_BASIN.start,'état de départ copié, pas partagé');assert.equal(R.puzzleSolvedState('inconnu'),null);
+ // Aqueduc : la réponse remplit le bassin, l'état de départ fuit.
+ assert.equal(R.puzzleAqueduct(D.PUZZLE_ANSWER.q25).at(-1),'basin');assert.notEqual(R.puzzleAqueduct(fresh.q25.g).at(-1),'basin');
+ // Lanternes : toutes allumées une fois résolu.
+ assert.ok(R.puzzleLanterns(solved('q11').v).every(Boolean));assert.ok(!R.puzzleLanterns(fresh.q11.v).every(Boolean));
+ // Rayon : la cible est atteinte avec les miroirs résolus (positions réelles des miroirs ci-dessous non requises : le moteur est générique).
+ const mirrors=[{dx:-1,dy:-2,i:0},{dx:0,dy:-2,i:1},{dx:1,dy:-2,i:2}];
+ assert.equal(R.puzzleBeam({sun:[-4,-2],dir:[1,0],target:[2,-2],bound:[6,5]},mirrors,[1,0,0]).lit,false,'miroir bloquant');
+ assert.equal(R.puzzleBeam({sun:[-4,-2],dir:[1,0],target:[2,-2],bound:[6,5]},[],[]).lit,true,'rayon droit');
+ // Bassin : le bateau glisse jusqu'au bord ou au rocher, jamais à travers.
+ const [x0,y0]=D.PUZZLE_BASIN.start,end=R.puzzleBasinSlide([x0,y0],[1,0]);
+ assert.ok(end[0]>x0&&end[0]<=D.PUZZLE_BASIN.x1&&!D.PUZZLE_BASIN.rocks.some(([rx,ry])=>rx===end[0]&&ry===end[1]));
+ // Le quai est atteignable depuis le départ (recherche en largeur sur les glissements).
+ const seen=new Set([String(D.PUZZLE_BASIN.start)]),queue=[D.PUZZLE_BASIN.start];
+ while(queue.length){const p=queue.shift();for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){const q=R.puzzleBasinSlide(p,d);if(!seen.has(String(q))){seen.add(String(q));queue.push(q)}}}
+ assert.ok(seen.has(String(D.PUZZLE_BASIN.dock)),'quai atteignable');
+ // Monde à l'envers : les leviers résolus changent les rochers ; aucun levier : tous les rochers.
+ assert.equal(R.puzzleMirrorRocks([0,0,0]).size,R.PUZZLE_MIRROR_ROCKS.length);assert.notDeepEqual([...R.puzzleMirrorRocks(solved('q28').l)],[...R.puzzleMirrorRocks([0,0,0])]);
+ // Mouton : un seul chemin mène au sommet.
+ const tops=[0,1].flatMap(a=>[0,1].flatMap(b=>[0,1].map(c=>R.puzzleSheepPath([a,b,c]).top)));assert.equal(tops.filter(Boolean).length,1);
+ // Générateur à graine : reproductible, dans [0, 1[.
+ const a=R.seededRandom(4242),b=R.seededRandom(4242);for(let i=0;i<50;i++){const v=a();assert.equal(v,b());assert.ok(v>=0&&v<1)}
+});
