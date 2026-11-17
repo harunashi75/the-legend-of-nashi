@@ -178,7 +178,7 @@ test('Modules réellement absents : une erreur agrégée visible et aucun démar
 
 test('Sources modulaires : HTML généré à jour et identifiants descriptifs',()=>{
   const {spawnSync}=require('node:child_process');
-  const result=spawnSync('python3',['tools/build_canaan.py','--check'],{cwd:path.join(__dirname,'..'),encoding:'utf8'});
+  const result=spawnSync(process.execPath,['tools/build.cjs','--check'],{cwd:path.join(__dirname,'..'),encoding:'utf8'});
   assert.equal(result.status,0,result.stdout+result.stderr);
   assert.equal(/<(?:script|style)\b[^>]*id="[^"]*v\d/.test(source),false);
   for(const name of ['hit','useSkill','drawBigMap','applyItemName']){
@@ -399,7 +399,7 @@ test('Application de bureau : Electron épinglé, version unique, fenêtre isol�
  const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
  assert.equal(pkg.version,version);assert.equal(pkg.main,'app/main.js');
  assert.match(pkg.devDependencies.electron,/^\d+\.\d+\.\d+$/,'version exacte');
- assert.match(pkg.scripts.start,/build_canaan\.py && node tools\/run_app\.cjs/);
+ assert.match(pkg.scripts.start,/tools\/build\.cjs && node tools\/run_app\.cjs/);
  const main=fs.readFileSync(path.join(root,'app','main.js'),'utf8'),preload=fs.readFileSync(path.join(root,'app','preload.js'),'utf8');
  for(const flag of ['contextIsolation: true','sandbox: true','nodeIntegration: false'])assert.ok(main.includes(flag),flag);
  assert.match(main,/will-navigate/);assert.ok(main.includes("if (url.split('#')[0] !== page) event.preventDefault();"),'seul le rechargement du jeu est permis');assert.match(main,/setWindowOpenHandler/);assert.match(main,/setPermissionRequestHandler/);

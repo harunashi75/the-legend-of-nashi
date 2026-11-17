@@ -1,6 +1,6 @@
 # Contrat d’initialisation de CANAAN
 
-Les sources de référence sont dans `src/canaan/`. Après modification, `python3 tools/build_canaan.py` génère le HTML autonome ; `--check` vérifie sa synchronisation. L’ordre des modules est déclaré dans `template.html` et `manifest.json`, et l’assembleur refuse toute divergence.
+Les sources de référence sont dans `src/canaan/`. Après modification, `npm run build` génère le HTML autonome ; `--check` vérifie sa synchronisation. L’ordre des modules est déclaré dans `template.html` et `manifest.json`, et l’assembleur refuse toute divergence.
 
 Les scripts classiques du HTML généré s’exécutent dans l’ordre du document. Les fonctions partagées ne deviennent pas toutes disponibles en même temps.
 

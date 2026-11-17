@@ -43,7 +43,7 @@ function adoptOldData() {
 adoptOldData();
 
 // Nom du HTML assemblé. En développement, il est déduit de la version unique déclarée dans runtime-config.js
-// (comme tools/build_canaan.py). Dans le jeu installé, les sources ne sont pas livrées : la version vient de
+// (comme tools/build.cjs). Dans le jeu installé, les sources ne sont pas livrées : la version vient de
 // package.json, que les tests gardent identique à CANAAN_VERSION.
 function gameFile() {
   if (app.isPackaged)

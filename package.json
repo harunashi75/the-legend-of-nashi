@@ -7,17 +7,17 @@
   "desktopName": "legend-of-nashi.desktop",
   "main": "app/main.js",
   "scripts": {
-    "build": "python3 tools/build_canaan.py",
-    "check": "python3 tools/check_canaan.py",
+    "build": "node tools/build.cjs",
+    "check": "node tools/check.cjs",
     "test": "node --test --test-timeout=120000 \"tests/*.test.cjs\"",
     "lint": "eslint .",
     "typecheck": "tsc -p src/canaan/shared/jsconfig.json",
     "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
-    "start": "python3 tools/build_canaan.py && node tools/run_app.cjs",
+    "start": "node tools/build.cjs && node tools/run_app.cjs",
     "app": "node tools/run_app.cjs",
-    "dist:linux": "python3 tools/build_canaan.py && electron-builder --linux",
-    "dist:win": "python3 tools/build_canaan.py && electron-builder --win",
+    "dist:linux": "node tools/build.cjs && electron-builder --linux",
+    "dist:win": "node tools/build.cjs && electron-builder --win",
     "relay": "node relay/server.cjs"
   },
   "devDependencies": {

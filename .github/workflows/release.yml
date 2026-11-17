@@ -25,9 +25,6 @@ jobs:
         with:
           node-version: 26
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Dépendances
         run: npm ci
       - name: Tag et version du jeu identiques
@@ -70,13 +67,10 @@ jobs:
         with:
           node-version: 26
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Dépendances
         run: npm ci
       - name: Assemblage du HTML autonome
-        run: python tools/build_canaan.py
+        run: npm run build
       - name: Jeu installable
         run: npx electron-builder ${{ matrix.target }}
       - name: Test de fumée du jeu installé

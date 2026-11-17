@@ -49,7 +49,7 @@ test('Jeu installable : chaque fichier chargé par l’application est livré, s
   // Le HTML assemblé est livré sous le nom que cherche le jeu installé (version de package.json).
   assert.ok(shipped(path.join(ROOT, 'CANAAN_ONLINE_V' + pkg.version.replace(/\./g, '_') + '.html')));
   // Rien des sources du jeu, des tests ni des outils.
-  for (const f of ['src/canaan/scripts/game-core.js', 'tests/art.test.cjs', 'tools/build_canaan.py', 'src/canaan/template.html'])
+  for (const f of ['src/canaan/scripts/game-core.js', 'tests/art.test.cjs', 'tools/build.cjs', 'src/canaan/template.html'])
     assert.ok(!shipped(path.join(ROOT, f)), f + ' ne doit pas être livré');
 });
 

@@ -14,7 +14,7 @@ Chaque [release GitHub](https://github.com/harunashi75/the-legend-of-nashi/relea
 
 ## Développer
 
-Prérequis : Node.js (les tests utilisent `node:test`) et Python 3.9 ou plus récent (assemblage).
+Prérequis : Node.js seulement (assemblage avec esbuild, tests avec `node:test`).
 
 ```sh
 npm install        # une seule fois : esbuild, Electron, electron-builder, ESLint, Prettier (versions épinglées)
@@ -51,7 +51,7 @@ npm run dist:win       # dist/ : installateur .exe et dossier du jeu en .zip (so
 node tools/smoke_package.cjs dist/linux-unpacked/legend-of-nashi   # lance le jeu installé et le vérifie
 ```
 
-Le jeu installé embarque son propre Electron : le joueur n’a besoin d’aucun navigateur. Il ne contient que l’application (`app/`), le HTML assemblé, le relais du coopératif et les règles partagées (configuration : `electron-builder.yml` ; un test vérifie que tout ce que l’application charge y est). Les sauvegardes restent dans le dossier de données du joueur, partagé avec `npm start`, et ne sont pas effacées à la désinstallation. Le dossier du jeu (`.zip`, `.tar.gz`, ou `dist/*-unpacked/`) est ce qu’on envoie à Steam, qui installe et met à jour lui-même. L’icône provisoire `build/icon.png` est produite par `python3 tools/make_icon.py` ; la remplacer par un PNG carré de 512 × 512 au moins. Sans certificat de signature, Windows affiche « Éditeur inconnu » à l’installation hors Steam.
+Le jeu installé embarque son propre Electron : le joueur n’a besoin d’aucun navigateur. Il ne contient que l’application (`app/`), le HTML assemblé, le relais du coopératif et les règles partagées (configuration : `electron-builder.yml` ; un test vérifie que tout ce que l’application charge y est). Les sauvegardes restent dans le dossier de données du joueur, partagé avec `npm start`, et ne sont pas effacées à la désinstallation. Le dossier du jeu (`.zip`, `.tar.gz`, ou `dist/*-unpacked/`) est ce qu’on envoie à Steam, qui installe et met à jour lui-même. L’icône provisoire `build/icon.png` est produite par `node tools/make_icon.cjs` ; la remplacer par un PNG carré de 512 × 512 au moins. Sans certificat de signature, Windows affiche « Éditeur inconnu » à l’installation hors Steam.
 
 ### Publier une version
 

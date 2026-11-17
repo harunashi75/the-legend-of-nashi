@@ -66,4 +66,4 @@ L’ancienne sauvegarde unique du navigateur (clé `canaan_dev_18999_state`, sch
 
 ## Changer de format
 
-Pour une future version : augmenter `CANAAN_SAVE_SCHEMA` et `SAVE_SCHEMA`, puis ajouter au chargement une conversion du schéma précédent, en gardant une copie avant d’écrire. Tester avec `python3 tools/check_canaan.py`.
+Pour une future version : augmenter `CANAAN_SAVE_SCHEMA` et `SAVE_SCHEMA`, puis ajouter au chargement une conversion du schéma précédent, en gardant une copie avant d’écrire. Tester avec `npm run check`.
