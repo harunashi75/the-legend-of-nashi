@@ -6,7 +6,7 @@
 // arrêté, aucune erreur JavaScript.
 //
 //   node tools/smoke_package.cjs dist/linux-unpacked/legend-of-nashi
-//   node tools/smoke_package.cjs dist/Legend-of-Nashi-1.9.7-linux-x86_64.AppImage
+//   node tools/smoke_package.cjs dist/Legend-of-Nashi-0.9.8-linux-x86_64.AppImage
 'use strict';
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');

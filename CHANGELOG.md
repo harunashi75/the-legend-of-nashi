@@ -2,7 +2,9 @@
 
 Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ; la version unique est `CANAAN_VERSION` dans `src/canaan/scripts/runtime-config.js`. Le détail du contenu est dans [docs/GAMEPLAY.md](docs/GAMEPLAY.md).
 
-## [Non publié]
+## [0.9.8] — en préparation
+
+Première version officielle avant la sortie sur Steam : la numérotation repart de 0.9.8 (les versions 1.9.x étaient des versions de développement). Les sauvegardes des versions 1.9.x restent lisibles : seul le format des sauvegardes compte, et il ne change pas. Prochaine étape : tests en jeu, puis 0.10.0, première version publique.
 
 ### Ajouté
 - Jeu installable, sans navigateur : installateur `.exe` et `.zip` pour Windows, AppImage et `.tar.gz` pour Linux (`npm run dist:win`, `npm run dist:linux`, electron-builder). Les archives contiennent le dossier du jeu, prêt pour Steam. Icône provisoire en pixel art.

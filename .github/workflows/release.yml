@@ -3,7 +3,7 @@
 #   - le HTML autonome (jouable dans un navigateur) ;
 #   - Windows : l'installateur .exe et le dossier du jeu en .zip (pour Steam) ;
 #   - Linux : l'AppImage et le dossier du jeu en .tar.gz (pour Steam).
-#   git tag v1.9.7 && git push origin v1.9.7
+#   git tag v0.9.8 && git push origin v0.9.8
 name: Release
 
 on:
