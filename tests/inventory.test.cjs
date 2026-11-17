@@ -4,7 +4,6 @@ const {
   assert,
   path,
   source,
-  script,
   game
 } = require('./helpers/context.cjs');
 

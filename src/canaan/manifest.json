@@ -103,7 +103,7 @@
     {
       "kind": "script",
       "id": "canaan-preferences",
-      "file": "scripts/preferences.js"
+      "file": "client/preferences.js"
     },
     {
       "kind": "script",

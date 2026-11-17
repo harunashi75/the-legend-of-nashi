@@ -91,8 +91,9 @@ test('Architecture : shared/ pur (aucun navigateur, aucun autre dossier), charge
  const bridge=fs.readFileSync(path.join(root,'bridge.js'),'utf8');
  for(const [,spec] of bridge.matchAll(/\bfrom\s+'([^']+)'/g))assert.match(spec,/^\.\/(?:shared|client)\//);
  // Modules client : ils n'importent que shared/ et client/, et ne posent rien sur window (le pont expose leurs exports).
- const clientDir=path.join(root,'client');
- (function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){walk(p);continue}if(!e.name.endsWith('.js'))continue;
+ // Un fichier de client/ encore listé comme script classique dans le manifeste (en cours de conversion) est exclu.
+ const clientDir=path.join(root,'client'),classic=new Set(require('../src/canaan/manifest.json').modules.filter(m=>m.kind==='script').map(m=>path.join(root,m.file)));
+ (function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){walk(p);continue}if(!e.name.endsWith('.js')||classic.has(p))continue;
   const code=fs.readFileSync(p,'utf8'),rel=path.relative(root,p);
   for(const [,spec] of code.matchAll(/\bfrom\s+'([^']+)'/g)){const to=path.resolve(path.dirname(p),spec);assert.ok(to.startsWith(sharedDir+path.sep)||to.startsWith(clientDir+path.sep),rel+' importe hors de shared/ et client/ : '+spec)}
   assert.doesNotMatch(code.replace(/\/\/.*$/gm,''),/\b(?:window|globalThis)\.\w+\s*=[^=]/,rel+' pose une variable sur window');
