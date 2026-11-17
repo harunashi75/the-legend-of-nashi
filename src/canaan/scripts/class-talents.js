@@ -1,8 +1,9 @@
-// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste.
+// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste, Invocateur.
 // Chaque héros a une classe et jusqu'à 5 talents équipés parmi les 10 de sa classe (hero.classe, sauvegardé) ;
 // l'état de leurs effets (boucliers, minuteurs, compteurs) n'est pas sauvegardé. Les compétences d'armes prennent
 // l'élément de la classe ; la touche F lance le sort spécial (Forme féline, Lumière divine, Voile d'ombre,
-// Avatar élémentaire). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ; l'hôte par défaut.
+// Avatar élémentaire, Contagion). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ;
+// l'hôte par défaut. L'Invocateur pose la Peste (charges cumulables) ; ses invocations vivent dans summons.js.
 (() => {
   'use strict';
   const runtimes = new WeakMap();
@@ -39,6 +40,11 @@
       tempestReady: 0,
       arcane: 0,
       umbra: false,
+      // Invocateur : Contagion, Pacte de sang et Moisson d'âmes.
+      contagionUntil: 0,
+      bloodReady: 0,
+      harvest: 0,
+      harvestReady: 0,
       relentless: new WeakMap(),
       // Recharges par allié : Bénédiction forestière et Gardien divin.
       blessing: new WeakMap(),
@@ -117,6 +123,18 @@
       deepFreeze: 7,
       arcane: 8,
       tempest: 9
+    },
+    invocateur: {
+      virulence: 0,
+      necrosis: 1,
+      eternal: 2,
+      legion: 3,
+      corpse: 4,
+      siphon: 5,
+      carapace: 6,
+      pandemic: 7,
+      bloodPact: 8,
+      harvest: 9
     }
   });
   const on = (cls, key, hero = me()) => classe(hero).id === cls && classe(hero).talents.includes(T[cls][key]);
@@ -139,12 +157,15 @@
   function setClasse(hero, raw) {
     hero.classe = sanitizeClasse(raw, clampLevel(hero.level));
   }
+  // Arme liée (Grimoire de l'Invocateur) : summons.js la donne, la retire et la fait grandir avec le héros.
+  const pact = hero => CANAAN_SUMMONS.syncPact(hero);
   window.CANAAN_CLASS_STATE = {
     export: () => ({ id: classe(game.hero).id, talents: [...classe(game.hero).talents] }),
     import(d) {
       setClasse(game.hero, d);
       game.hero.player.form = null;
       runtimes.set(game.hero, fresh());
+      pact(game.hero);
     }
   };
 
@@ -174,6 +195,8 @@
     if (t < w.veilUntil) s.speed += 30;
     // Lumière divine reçue (d'un Paladin, soi compris).
     if (t < w.divineUntil) s.guard += 20;
+    // Carapace d'os : au moins deux invocations en jeu.
+    if (on('invocateur', 'carapace') && CANAAN_SUMMONS.count(me()) >= 2) s.guard += 10;
     // Aura protectrice : un Paladin à moins de 6 cases (soi compris) ; non cumulable.
     if (
       game.heroes.some(
@@ -288,6 +311,48 @@
     m._clsSlow && m._clsSlow.until > now() && m._clsSlow.by === hero && m._clsSlow.element === element;
   // Fureur sauvage : poisons, ronces ou ralentissement de nature du Druide.
   const natureMarked = m => hasDot(m, ['thorns', 'sap', 'poison']) || slowedBy(m, 'nature');
+  // ---------------------------------------------------------------- Peste (Invocateur)
+  // Charges cumulables d'un même héros sur un monstre : 8 au maximum (12 avec Virulence), 5 s (7 s) renouvelées à
+  // chaque charge ; chaque charge inflige 8 % de l'Attaque du héros par seconde. Plusieurs Invocateurs ont chacun
+  // leur Peste.
+  const PLAGUE = Object.freeze({ stacks: 8, seconds: 5, perStack: 0.08, harvest: 12 });
+  const plagueOf = (m, hero = me()) => (m?._plague || []).find(p => p.by === hero && p.until > now()) || null;
+  const plagueStacks = (m, hero = me()) => plagueOf(m, hero)?.stacks || 0;
+  function addPlague(m, n) {
+    if (!alive(m) || !(n > 0)) return;
+    const t = now(),
+      list = (m._plague ??= []),
+      virulent = on('invocateur', 'virulence'),
+      cap = virulent ? 12 : PLAGUE.stacks;
+    let p = list.find(x => x.by === me());
+    if (p && p.until <= t) {
+      list.splice(list.indexOf(p), 1);
+      p = null;
+    }
+    if (!p) list.push((p = { by: me(), stacks: 0, until: 0, tick: t + 1 }));
+    const before = p.stacks;
+    p.stacks = Math.min(cap, p.stacks + n);
+    p.until = t + PLAGUE.seconds + (virulent ? 2 : 0);
+    if (p.stacks !== before) float(m.x, m.y - 50, '☠️ ' + p.stacks, '#a4e83c');
+    // Moisson d'âmes : toutes les 12 charges posées, un squelette gratuit (recharge 10 s).
+    if (on('invocateur', 'harvest')) {
+      w.harvest = Math.min(PLAGUE.harvest, w.harvest + n);
+      if (w.harvest >= PLAGUE.harvest && t >= w.harvestReady) {
+        w.harvest = 0;
+        w.harvestReady = t + 10;
+        if (CANAAN_SUMMONS.free(me(), 0)) float(HP.x, HP.y - 66, '💀 MOISSON D’ÂMES', '#a4e83c');
+      }
+    }
+  }
+  // Pandémie : un ennemi qui meurt sous la Peste en transmet la moitié des charges aux ennemis à 3 cases.
+  function spreadPlague(m) {
+    const p = (m._plague || []).find(x => x.by === me() && x.until > now() - 1e-9);
+    if (!p || m._clsSpread || !on('invocateur', 'pandemic')) return;
+    m._clsSpread = true;
+    const n = Math.ceil(p.stacks / 2);
+    CANAAN_SKILLS.fx('ring', m.x, m.y, 0, TILES(3), 0, '#a4e83c', 0.5);
+    for (const o of game.world.monsters.slice()) if (o !== m && alive(o) && near(o, m, 3)) addPlague(o, n);
+  }
   // Dégâts d'un effet (sur la durée, éclair, explosion) : ne redéclenchent pas les talents (aucune récursion).
   function effectHit(m, amount, element) {
     if (!alive(m)) return 0;
@@ -306,6 +371,7 @@
         effectHit(m, amount, element);
   }
   function onKill(m, burned) {
+    spreadPlague(m);
     // Explosion ardente : un ennemi brûlé par l'Élémentaliste explose (une seule fois).
     if (burned && on('elementaliste', 'blaze') && !m._clsExploded) {
       m._clsExploded = true;
@@ -327,7 +393,7 @@
     const offensive = isOffensiveSkill(type, i),
       t = now(),
       context = {
-        magic: type === 'staff',
+        magic: MAGIC_WEAPONS.includes(type),
         multiplier: 1,
         skill: true,
         offensive,
@@ -417,6 +483,8 @@
         ? '🌑 Assassin : +12 % de dégâts' +
             (i === 3 ? ', et encore +30 % contre une cible sous 50 % de ses PV.' : '.')
         : '🌑 Assassin : ta prochaine compétence offensive fait +25 % de dégâts (Embuscade).';
+    if (id === 'invocateur')
+      return '☠️ Invocateur : chaque coup pose une charge de Peste (8 au maximum, 8 % de ton Attaque par charge et par seconde).';
     if (!offensive)
       return (
         el.icon +
@@ -451,6 +519,9 @@
     )
       mult *= 1.12;
     if (on('elementaliste', 'deepFreeze') && slowedBy(m, 'ice')) mult *= 1.15;
+    // Invocateur : Nécrose (+2 % par charge de Peste), Légion (+10 % pour les invocations).
+    if (on('invocateur', 'necrosis')) mult *= 1 + 0.02 * plagueStacks(m);
+    if (options.summon && on('invocateur', 'legion')) mult *= 1.1;
     // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
     if (options.skill && options.offensive && isClass('assassin'))
       mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
@@ -495,6 +566,8 @@
       if (skill && options.element === 'ice' && isClass('elementaliste')) slow(m, 0.3, 2.5, 'ice');
       if (skill && on('elementaliste', 'flames') && roll() < 0.2) dot(m, 'burn', 5, dealt * 0.35, 'fire');
       if (skill && on('elementaliste', 'iceHeart') && roll() < 0.2) slow(m, 0.3, 3, 'ice');
+      // Peste noire (Invocateur) : chaque attaque et chaque coup d'invocation pose une charge.
+      if ((skill || basic) && isClass('invocateur')) addPlague(m, 1);
     }
     if (dealt > 0) {
       // Frappes supplémentaires (sans nouveaux déclencheurs).
@@ -656,10 +729,19 @@
       burst(HP.x, HP.y, '#8fdcff', 14);
       burst(HP.x, HP.y, '#f4f07a', 14);
       float(HP.x, HP.y - 62, '🌋 AVATAR ÉLÉMENTAIRE', '#ff8a3d');
+    } else if (s.id === 'contagion') {
+      w.contagionUntil = t + 8;
+      CANAAN_SKILLS.fx('ring', HP.x, HP.y, 0, TILES(7), 0, '#a4e83c', 0.8);
+      burst(HP.x, HP.y, '#a4e83c', 30);
+      burst(HP.x, HP.y, '#7b3fa0', 14);
+      float(HP.x, HP.y - 62, '☣️ CONTAGION', '#a4e83c');
+      for (const m of game.world.monsters.slice()) if (alive(m) && near(m, HP, 7)) addPlague(m, 4);
     }
     recompute();
     return true;
   }, 0);
+  // Vitesse d'attaque des invocations d'un héros : Contagion (+30 %).
+  const summonHaste = hero => (now() < runtime(hero).contagionUntil ? 1.3 : 1);
   function recompute() {
     if (me() === game.hero) recomputeStats();
     else recomputeHeroStats(me());
@@ -711,6 +793,17 @@
       w.frostReady = t + 40;
       giveShield(me(), HP.mhp * 0.15, 5, '❄️ BARRIÈRE DE GIVRE');
     }
+    // Pacte de sang : sous 35 % de PV, la plus ancienne invocation est sacrifiée pour 15 % des PV max.
+    if (
+      on('invocateur', 'bloodPact') &&
+      ratio < 0.35 &&
+      t >= w.bloodReady &&
+      CANAAN_SUMMONS.sacrifice(me())
+    ) {
+      w.bloodReady = t + 40;
+      const h = applyHeal(HP.mhp * 0.15, false, me(), me(), true);
+      notice('🩸 Pacte de sang !' + (h > 0 ? ' +' + Math.round(h) + ' PV' : ''));
+    }
     if (on('druide', 'avatar') && fighting && t >= w.natureAvatarNext) {
       w.natureAvatarNext = t + 45;
       w.natureAvatarUntil = t + 8;
@@ -736,6 +829,17 @@
         if (t >= d.until) m._clsDots.splice(m._clsDots.indexOf(d), 1);
       }
     }
+    // Peste de ce héros : une fois par seconde, 8 % de son Attaque par charge (Siphon pestilentiel : 10 % rendus).
+    for (const m of game.world.monsters.slice()) {
+      const p = m._plague?.find(x => x.by === me());
+      if (!p) continue;
+      if (t + 1e-9 >= p.tick && p.tick <= p.until + 1e-9 && alive(m)) {
+        p.tick += 1;
+        const done = effectHit(m, characterStats(me()).attack * PLAGUE.perStack * p.stacks, 'poison');
+        if (done > 0 && on('invocateur', 'siphon')) applyHeal(done * 0.1, true, me(), me());
+      }
+      if (t >= p.until && m._plague.includes(p)) m._plague.splice(m._plague.indexOf(p), 1);
+    }
   }
   window.CanaanStages.classes = {
     before() {
@@ -751,8 +855,10 @@
         m.y = p.y + (m.y - p.y) * (1 - p.pct);
       }
       // Les héros retirés du groupe gardent un monstre à moitié dans un effet orphelin : il se termine seul.
-      for (const m of game.world.monsters)
+      for (const m of game.world.monsters) {
         if (m._clsDots) m._clsDots = m._clsDots.filter(d => game.heroes.includes(d.by) && d.until > t - 1);
+        if (m._plague) m._plague = m._plague.filter(p => game.heroes.includes(p.by) && p.until > t - 1);
+      }
       for (const hero of game.heroes) within(hero, () => stepHero(t));
       for (let i = zones.length - 1; i >= 0; i--) {
         const z = zones[i];
@@ -817,7 +923,12 @@
         text = left > 0 ? String(Math.ceil(left)) : '';
       if (cd.textContent !== text) cd.textContent = text;
       cd.style.display = left > 0 ? 'flex' : 'none';
-      el.classList.toggle('active', game.hero.player.form === 'feral' || !!game.hero.player.veiled);
+      el.classList.toggle(
+        'active',
+        game.hero.player.form === 'feral' ||
+          !!game.hero.player.veiled ||
+          now() < runtime(game.hero).contagionUntil
+      );
     }
   };
 
@@ -830,10 +941,13 @@
     const c = classById(id);
     if (!c || classe().id === id) return false;
     if (classe().id && !atCamp()) return false;
+    // Arme liée : il faut de la place dans le sac pour ranger les armes portées (summons.js prévient le joueur).
+    if (!CANAAN_SUMMONS.canSwitch(me(), id)) return false;
     me().classe = { id, talents: [] };
     HP.form = null;
     endVeil();
     runtimes.set(me(), fresh());
+    pact(me());
     // Un compagnon choisit lui-même ses talents.
     if (me().local) autoTalents(me());
     recompute();
@@ -868,7 +982,8 @@
     druide: [0, 1, 3, 8, 9, 7, 2, 4, 5, 6],
     paladin: [1, 6, 2, 0, 7, 9, 3, 4, 5, 8],
     assassin: [1, 3, 4, 5, 8, 9, 0, 2, 6, 7],
-    elementaliste: [0, 3, 7, 1, 9, 4, 6, 2, 5, 8]
+    elementaliste: [0, 3, 7, 1, 9, 4, 6, 2, 5, 8],
+    invocateur: [1, 3, 0, 5, 9, 2, 4, 7, 6, 8]
   });
   function autoTalents(hero) {
     const k = classe(hero);
@@ -885,7 +1000,7 @@
   }, 0);
 
   // ---------------------------------------------------------------- Interface
-  const ui = { picking: false };
+  const ui = { picking: false, page: 0 };
   window.chooseClass = function (id) {
     if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'class-choose', cls: id });
     if (classe(game.hero).id && !atCamp(game.hero)) return toast('Change de classe au Camp de l’Aurore.');
@@ -910,8 +1025,23 @@
     saveGame();
     renderTalents();
   };
+  // Ouvre le choix des classes sur la page de la classe actuelle.
+  function startPage() {
+    const at = CLASSES.findIndex(c => c.id === classe(game.hero).id);
+    ui.page = at < 0 ? 0 : at;
+  }
   window.pickClass = function (open) {
     ui.picking = !!open;
+    if (ui.picking) startPage();
+    renderTalents();
+  };
+  window.classPage = function (step) {
+    ui.page = (((ui.page + Math.sign(step)) % CLASSES.length) + CLASSES.length) % CLASSES.length;
+    renderTalents();
+  };
+  window.classPageTo = function (page) {
+    if (!Number.isInteger(page) || page < 0 || page >= CLASSES.length) return;
+    ui.page = page;
     renderTalents();
   };
   const escape = s =>
@@ -919,46 +1049,105 @@
       /[&<>"']/g,
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
     );
-  function classCard(c, current) {
+  // Choix de la classe : une page par classe, flèches gauche et droite (et touches ← →), points en dessous.
+  // La page s'ouvre sur la classe actuelle du héros.
+  function classPageHtml(c, current) {
+    const weapon = boundWeaponOf(c.id),
+      def = weapon ? WEAPON_DEFINITIONS[weapon] : null;
     return (
-      '<div class="class-card" style="--class-color:' +
+      '<div class="class-page" style="--class-color:' +
       c.color +
-      '"><div class="class-icon">' +
+      '"><div class="class-page-hero"><div class="class-icon">' +
       c.icon +
       '</div><h3>' +
       escape(c.name) +
-      '</h3>' +
-      '<p class="class-style">' +
+      '</h3><p class="class-style">' +
       escape(c.style) +
-      '</p>' +
-      '<p class="class-line"><b>' +
-      escape(c.passive.name) +
-      '</b> · ' +
-      escape(c.passive.desc) +
-      '</p>' +
-      '<p class="class-line"><b>' +
-      c.special.icon +
-      ' ' +
-      escape(c.special.name) +
-      ' (F)</b> · ' +
-      escape(c.special.desc) +
-      '</p>' +
-      '<button ' +
+      '</p><p class="class-spec">' +
+      escape(c.spec) +
+      '</p><button ' +
       (current ? 'disabled' : 'data-action="chooseClass" data-class="' + c.id + '"') +
       '>' +
       (current ? '✓ Ta classe' : 'Choisir ' + escape(c.name)) +
-      '</button></div>'
+      '</button></div><div class="class-page-body"><p class="class-line"><b>Passif · ' +
+      escape(c.passive.name) +
+      '</b>' +
+      escape(c.passive.desc) +
+      '</p><p class="class-line"><b>' +
+      c.special.icon +
+      ' Sort de classe (F) · ' +
+      escape(c.special.name) +
+      '</b>' +
+      escape(c.special.desc) +
+      ' <small>Mana ' +
+      c.special.mana +
+      (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') +
+      '</small></p>' +
+      (def
+        ? '<div class="class-line class-pact"><b>' +
+          def.icon +
+          ' Arme liée · ' +
+          escape(def.name) +
+          ' <span class="relic-tag">' +
+          escape(BOUND_RARITY.name) +
+          '</span></b>' +
+          escape(def.role) +
+          ' Il prend ton niveau et grandit avec toi ; aucune autre arme ne peut s’équiper.<ul class="class-pact-spells">' +
+          def.sp
+            .map(
+              (spec, i) =>
+                '<li title="' +
+                escape(spec[6]) +
+                '">' +
+                (CANAAN_SKILL_ICONS.weapon(weapon, i) || spec[0]) +
+                '<span>' +
+                escape(spec[1]) +
+                '</span></li>'
+            )
+            .join('') +
+          '</ul></div>'
+        : '<p class="class-line"><b>⚔️ Armes</b>Toutes les armes restent utilisables : leurs compétences prennent l’élément de la classe (' +
+          [...new Set(c.elements)].map(e => ELEMENTS[e].icon + ' ' + escape(ELEMENTS[e].name)).join(', ') +
+          ').</p>') +
+      '<div class="class-line"><b>Talents</b><ul class="class-talent-names">' +
+      c.talents.map(([name, desc]) => '<li title="' + escape(desc) + '">' + escape(name) + '</li>').join('') +
+      '</ul></div></div></div>'
     );
   }
   function renderPicker(current) {
+    const n = CLASSES.length,
+      page = ((ui.page % n) + n) % n,
+      c = CLASSES[page];
     return (
-      '<div class="classes"><h2>⚔️ Choisis ta classe</h2><p class="class-foot">Chaque classe a 10 talents ; tu en équipes 5 au plus (un emplacement aux niveaux ' +
+      '<div class="classes class-picker"><h2>⚔️ Choisis ta classe <small>· ' +
+      (page + 1) +
+      ' / ' +
+      n +
+      '</small></h2><div class="class-pager"><button class="class-arrow" data-action="classPage" data-step="-1" aria-label="Classe précédente" title="Classe précédente (←)">‹</button>' +
+      classPageHtml(c, c.id === current) +
+      '<button class="class-arrow" data-action="classPage" data-step="1" aria-label="Classe suivante" title="Classe suivante (→)">›</button></div><div class="class-dots">' +
+      CLASSES.map(
+        (k, i) =>
+          '<button class="class-dot' +
+          (i === page ? ' on' : '') +
+          (k.id === current ? ' mine' : '') +
+          '" style="--class-color:' +
+          k.color +
+          '" data-action="classPageTo" data-page="' +
+          i +
+          '" title="' +
+          escape(k.name) +
+          '" aria-label="' +
+          escape(k.name) +
+          '">' +
+          k.icon +
+          '</button>'
+      ).join('') +
+      '</div><p class="class-foot">Chaque classe a 10 talents ; tu en équipes 5 au plus (un emplacement aux niveaux ' +
       TALENT_SLOT_LEVELS.join(', ') +
-      '). Toutes les armes restent utilisables : leurs compétences prennent l’élément de ta classe.' +
+      ').' +
       (current ? ' Changer de classe est gratuit au Camp de l’Aurore ; tes talents sont retirés.' : '') +
-      '</p><div class="class-grid">' +
-      CLASSES.map(c => classCard(c, c.id === current)).join('') +
-      '</div>' +
+      '</p>' +
       (current
         ? '<button class="class-back" data-action="pickClass" data-open="0">↩ Retour aux talents</button>'
         : '') +
@@ -998,6 +1187,7 @@
       c.special.mana +
       (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') +
       '.</span></div></div>' +
+      pactLine(hero) +
       '<div class="talent-slots">';
     for (let s = 0; s < TALENT_SLOT_LEVELS.length; s++) {
       const i = k.talents[s];
@@ -1049,6 +1239,24 @@
       '</button></div>';
     return html;
   }
+  // Arme liée portée (Grimoire) : nom du palier, qualité Relique et niveau, sous le passif.
+  function pactLine(hero) {
+    const item = hero.equipment?.weapon;
+    if (!isBoundItem(item)) return '';
+    return (
+      '<p class="class-foot class-pact-line">' +
+      weaponIcon(item) +
+      ' Arme liée : <strong style="color:' +
+      rarityInfo(item).color +
+      '">' +
+      escape(gearDisplayName(item)) +
+      '</strong> · ' +
+      escape(rarityInfo(item).name) +
+      ' niveau ' +
+      itemLevel(item) +
+      ' · elle grandit avec toi et change de nom tous les 10 niveaux.</p>'
+    );
+  }
   function renderTalents() {
     modernPanel(renderTalentsHtml());
   }
@@ -1090,6 +1298,13 @@
   addEventListener('click', e => {
     if (e.target && e.target.closest && e.target.closest('#specialSkill')) useSpecial();
   });
+  // Flèches ← → : page précédente ou suivante du choix des classes, quand il est ouvert.
+  addEventListener('keydown', e => {
+    if (e.repeat || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+    if (!document.querySelector('#window .class-picker') || document.activeElement === chatInput) return;
+    e.preventDefault?.();
+    window.classPage(e.key === 'ArrowLeft' ? -1 : 1);
+  });
   // Un héros sans classe (aventure d'avant les classes, invité) est invité à la choisir, une fois par partie :
   // message, et le bouton des talents brille jusqu'au choix.
   let prompted = false;
@@ -1098,7 +1313,16 @@
     if (button) button.classList.toggle('attention', started && !classe(game.hero).id);
     if (prompted || !started || classe(game.hero).id) return;
     prompted = true;
-    chat('Système', 'Choisis ta classe : Druide, Paladin, Assassin ou Élémentaliste (touche T).');
+    chat(
+      'Système',
+      'Choisis ta classe : ' +
+        CLASSES.slice(0, -1)
+          .map(c => c.name)
+          .join(', ') +
+        ' ou ' +
+        CLASSES[CLASSES.length - 1].name +
+        ' (touche T).'
+    );
     toast('⚔️ Choisis ta classe (T)');
   }
 
@@ -1119,6 +1343,12 @@
     skillRider,
     promptClass,
     giveShield,
+    // Invocateur (summons.js) : Peste, talents, vitesse des invocations (Contagion) et explosions.
+    summonHaste,
+    talent: (hero, cls, key) => on(cls, key, hero),
+    plague: (hero, m, n) => within(hero, () => addPlague(m, n)),
+    plagueStacks: (m, hero = game.hero) => plagueStacks(m, hero),
+    blast: (hero, x, y, tiles, amount, element) => within(hero, () => blast(x, y, tiles, amount, element)),
     audit: (hero = game.hero) => ({
       id: classe(hero).id,
       talents: [...classe(hero).talents],

@@ -242,6 +242,10 @@
         ' ' +
         label(st.enchant.stat) +
         ' <small>(enchantement)</small></div>';
+    // Arme liée (Relique) : elle suit le niveau du héros et ne le quitte pas.
+    if (isBoundItem(item))
+      html +=
+        '<div class="tooltip-relic">📕 Arme liée à l’Invocateur : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.</div>';
     return html + requirement(item);
   }
   // Ce que fait une statistique (fiche du personnage).

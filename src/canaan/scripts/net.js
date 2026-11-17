@@ -310,6 +310,8 @@
         k: p.kind === 'arrow' ? 1 : 0
       })),
       fx: net.fx.splice(0),
+      // Invocations de l'Invocateur (squelettes, rats, totem, abomination), dessinées chez chacun.
+      summons: CANAAN_SUMMONS.view(),
       // Coffres : coffre de fin d'instance (position, ouvert), et coffres secrets déjà ouverts du monde
       // (envoyés quand la liste change, et toutes les 5 secondes pour un invité qui vient d'arriver).
       chests: game.world.instance
@@ -701,6 +703,7 @@
       kind: p.k ? 'arrow' : 'orb'
     }));
     if (Array.isArray(state.fx)) playEffects(state.fx);
+    CANAAN_SUMMONS.applyView(state.summons);
     if (game.world.instance && Array.isArray(state.chests))
       game.world.chests = state.chests
         .filter(c => c && Number.isFinite(c.x) && Number.isFinite(c.y))

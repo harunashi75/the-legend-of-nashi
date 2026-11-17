@@ -217,6 +217,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-summons",
+      "file": "scripts/summons.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-merchants",
       "file": "scripts/merchants.js"
     },

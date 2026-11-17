@@ -1,5 +1,5 @@
-// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (9 armes × 4) et par sort de
-// classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur
+// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (9 armes et le Grimoire × 4)
+// et par sort de classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur
 // propre à l'arme, halo doux. CANAAN_SKILL_ICONS.weapon(type, i) et .special(id) renvoient le balisage SVG.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 
@@ -25,7 +25,8 @@ const ACCENT = {
   dualdagger: '#e38cff',
   bow: '#9be38e',
   shield: '#ffe08a',
-  staff: '#b98cff'
+  staff: '#b98cff',
+  grimoire: '#a4e83c'
 };
 const at = (x, y, rot = 0, s = 1, inner = '') =>
   '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ') scale(' + s + ')">' + inner + '</g>';
@@ -514,6 +515,54 @@ const ICONS = {
         .join('')
   ]
 };
+// Invocations du Grimoire : rat, totem d'os, tête d'abomination (repère centré, tête en haut).
+const SUMMON = {
+  ground: c =>
+    '<ellipse cx="0" cy="10" rx="11" ry="3" fill="' +
+    c +
+    '" opacity=".45" stroke="' +
+    c +
+    '" stroke-width="1"/>',
+  rat: () =>
+    '<path d="M-7 3 C-7 -2 1 -3 5 0 L8 1.5 L5 3 C3 5 -5 5.5 -7 3 Z" fill="#6e5c4c" ' +
+    st +
+    '/><path d="M-7 3 C-10 3 -12 1 -12 -1" fill="none" stroke="#c89a8a" stroke-width="1.2"/>' +
+    '<circle cx="4" cy="0.5" r="0.9" fill="#a4e83c"/><circle cx="1.5" cy="-1.8" r="1.4" fill="#c8b0a0" ' +
+    st +
+    '/>',
+  totem: c =>
+    '<rect x="-1.4" y="-2" width="2.8" height="14" fill="' +
+    K.woodD +
+    '" ' +
+    st +
+    '/>' +
+    at(0, -6, 0, 0.8, E.skull()) +
+    '<path d="M-6 6 L6 2 M-6 2 L6 6" stroke="#efe8dc" stroke-width="1.8" ' +
+    st +
+    '/><path d="M0 -14 C2 -12 2.5 -10.5 0 -9.5 C-2.5 -10.5 -2 -12 0 -14 Z" fill="' +
+    c +
+    '"/>',
+  abomination: c =>
+    '<path d="M-10 9 C-12 -2 -7 -10 0 -10 C7 -10 12 -2 10 9 Z" fill="#8d9a6a" ' +
+    st +
+    '/><path d="M-2 -9 L-2 8 M-4.5 -5 L0.5 -5 M-4.5 -1 L0.5 -1 M-4.5 3 L0.5 3" stroke="' +
+    K.ink +
+    '" stroke-width="1"/><circle cx="4.5" cy="-2" r="2.6" fill="' +
+    c +
+    '" ' +
+    st +
+    '/><circle cx="5" cy="-2.4" r="0.9" fill="' +
+    K.ink +
+    '"/><path d="M1 5 L8 5" stroke="' +
+    K.ink +
+    '" stroke-width="1.4"/>'
+};
+ICONS.grimoire = [
+  a => SUMMON.ground(a) + at(0, -1, 0, 1.45, E.skull()) + at(-8, 8, 0, 0.35, E.sparkle(a)),
+  () => at(-4, -4, 0, 0.85, SUMMON.rat()) + at(4, 3, 0, 0.95, SUMMON.rat()) + at(-5, 8, 0, 0.8, SUMMON.rat()),
+  a => SUMMON.ground(a) + SUMMON.totem(a),
+  a => SUMMON.ground(a) + at(0, 0, 0, 1, SUMMON.abomination(a))
+];
 const SPECIALS = {
   feral: () => frame('#7ee36a', E.claw('#7ee36a')),
   divine: () => frame('#ffd76a', E.sun('#ffd76a') + at(0, 0, 0, 0.5, E.sparkle('#fff'))),
@@ -524,6 +573,14 @@ const SPECIALS = {
       at(-5, 3, 0, 0.75, E.flame('#ff8a3d')) +
         at(6, 4, 0, 0.6, E.snow('#8fdcff')) +
         at(1, -6, 0, 0.6, E.bolt('#f4f07a'))
+    ),
+  // Contagion : trois gouttes de peste autour d'un crâne, dans une onde.
+  contagion: () =>
+    frame(
+      '#a4e83c',
+      E.rings('#a4e83c') +
+        [0, 120, 240].map(r => at(0, 0, r, 1, at(0, -9, 0, 0.7, E.drop('#a4e83c')))).join('') +
+        at(0, 1, 0, 0.9, E.skull())
     )
 };
 const cache = new Map();

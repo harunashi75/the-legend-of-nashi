@@ -1,4 +1,4 @@
-/* Armes : neuf familles, 36 compétences, ciblage et effets. */
+/* Armes : neuf familles et le Grimoire lié de l'Invocateur, 40 compétences, ciblage et effets. */
 (() => {
   // Repousse un monstre loin du lanceur courant.
   function pushAway(m, distance) {
@@ -73,7 +73,8 @@
     dualdagger: '#e5a7ff',
     bow: '#a7e8a0',
     staff: '#b38aff',
-    shield: '#ffe4a2'
+    shield: '#ffe4a2',
+    grimoire: '#a4e83c'
   };
   const now = () => performance.now() / 1000,
     // Visée : la souris pour l'hôte, le point de son intention pour un allié.
@@ -494,7 +495,7 @@
       a = aim(),
       c = color[type] || '#b7d8ff';
     const r =
-      type === 'bow' || type === 'staff'
+      type === 'bow' || type === 'staff' || type === 'grimoire'
         ? 240
         : type === 'spear'
           ? 175
@@ -644,6 +645,7 @@
         projectile(aim(), m, col, { speed: heavy ? 15 : 13 });
         break;
       case 'staff':
+      case 'grimoire':
         projectile(aim(), m, col, { mag: true, speed: heavy ? 10 : 12 });
         break;
       case 'spear':
@@ -718,12 +720,13 @@
       a = Math.atan2(hero.intent.aimY - p.y, hero.intent.aimX - p.x),
       st = characterStats(hero),
       stance = skillStateOf(hero),
+      magic = MAGIC_WEAPONS.includes(type),
       base = Math.round(
-        (type === 'staff' ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) *
+        (magic ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) *
           spec.mult *
           stanceMult(stance, true)
       ),
-      context = { magic: type === 'staff', basic: true };
+      context = { magic, basic: true };
     stance.shadow = 0;
     p.basicLock =
       spec.lock *
@@ -731,7 +734,7 @@
       window.CANAAN_CLASS_BASIC_LOCK(hero) *
       (stance.flurry > 0 ? 0.7 : 1);
     p.atk = 0.28;
-    if (type === 'bow' || type === 'staff') {
+    if (type === 'bow' || magic) {
       const speed = type === 'bow' ? (heavy ? 15 : 13) : heavy ? 10 : 12;
       game.world.projectiles.push({
         x: p.x,
@@ -846,7 +849,7 @@
       return true;
     });
   }
-  // Les 36 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
+  // Les 40 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
   // Les valeurs suivent le catalogue (shared/data/equipment.js) : la puissance affichée est celle infligée.
   function castSkill(type, i) {
     const focus = S.focus > 0 && isOffensiveSkill(type, i);
@@ -1067,6 +1070,11 @@
           ring(110, '#ffe4a2');
           float(AP.x, AP.y - 65, 'SERMENT DU GARDIEN', '#ffe4a2');
         }
+        break;
+      case 'grimoire':
+        // Invocations (summons.js) : le lanceur, la compétence, son contexte (élément, bonus) et sa visée.
+        window.CANAAN_SUMMONS.cast(actor, i, { ...castContext, magic: true }, { a, ...groundTarget() });
+        AP.atk = 0.28;
         break;
       case 'staff':
         if (i === 0) {

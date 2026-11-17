@@ -6,6 +6,7 @@ import {
   MAX_LEVEL,
   PRIMARY_KEYS,
   QUALITY_FACTOR,
+  RELIC_QUALITY,
   SECONDARY_KEYS,
   SLOT_PROFILE,
   XP_BRACKETS,
@@ -20,8 +21,20 @@ import {
 /** @type {(level: unknown) => number} Niveau borné à [1, 60], entier. */
 const clampLevel = level => Math.max(1, Math.min(MAX_LEVEL, Math.round(Number(level) || 1)));
 export { clampLevel };
-/** @type {(rarity: string | undefined) => number} */
-const quality = rarity => QUALITY_FACTOR[rarity ?? ''] || 1;
+// Force d'une qualité ; celle d'une Relique dépend de son niveau.
+/**
+ * @param {string | undefined} rarity
+ * @param {number} level
+ * @returns {number}
+ */
+export function qualityFactor(rarity, level) {
+  if (rarity === RELIC_QUALITY.name)
+    return (
+      RELIC_QUALITY.from +
+      ((RELIC_QUALITY.to - RELIC_QUALITY.from) * (clampLevel(level) - 1)) / (MAX_LEVEL - 1)
+    );
+  return QUALITY_FACTOR[rarity ?? ''] || 1;
+}
 // Base des points d'un objet : grandit avec le niveau, multipliée par la qualité.
 /**
  * @param {number} level
@@ -29,7 +42,7 @@ const quality = rarity => QUALITY_FACTOR[rarity ?? ''] || 1;
  * @returns {number}
  */
 export function statBase(level, rarity) {
-  return (6 + 2.2 * clampLevel(level)) * quality(rarity);
+  return (6 + 2.2 * clampLevel(level)) * qualityFactor(rarity, level);
 }
 // Statistiques principales d'un équipement classique : fixées par son niveau, sa qualité et son emplacement.
 // L'artéfact n'en a pas (seul son passif agit).

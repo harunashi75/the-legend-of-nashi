@@ -1,6 +1,6 @@
 # The Legend of Nashi
 
-RPG d’action en pixel art, en vue de dessus : une île à six biomes, un monde souterrain, des donjons et des raids, quatre classes, des métiers et un mode coopératif en ligne. Le jeu tient en un seul fichier HTML autonome, jouable dans le navigateur ou dans l’application de bureau (Electron).
+RPG d’action en pixel art, en vue de dessus : une île à six biomes, un monde souterrain, des donjons et des raids, cinq classes, des métiers et un mode coopératif en ligne. Le jeu tient en un seul fichier HTML autonome, jouable dans le navigateur ou dans l’application de bureau (Electron).
 
 - **Contenu du jeu** : [docs/GAMEPLAY.md](docs/GAMEPLAY.md)
 - **Architecture et code** : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

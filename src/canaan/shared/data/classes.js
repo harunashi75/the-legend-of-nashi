@@ -1,6 +1,7 @@
 // @ts-check
-// Les quatre classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
+// Les cinq classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
 // Le joueur équipe 5 talents au plus parmi les 10 de sa classe (un emplacement aux niveaux 1, 10, 20, 30 et 40).
+// Une classe peut avoir une arme liée (weapon) : elle la reçoit en la choisissant et n'en manie aucune autre.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 
@@ -14,7 +15,8 @@ export const ELEMENTS = deepFreeze({
   shadow: { name: 'Ombre', icon: '⟦el_shadow⟧', color: '#c48cff' },
   fire: { name: 'Feu', icon: '⟦el_fire⟧', color: '#ff8a3d' },
   ice: { name: 'Glace', icon: '⟦el_ice⟧', color: '#8fdcff' },
-  lightning: { name: 'Foudre', icon: '⟦el_lightning⟧', color: '#f4f07a' }
+  lightning: { name: 'Foudre', icon: '⟦el_lightning⟧', color: '#f4f07a' },
+  poison: { name: 'Poison', icon: '⟦el_poison⟧', color: '#a4e83c' }
 });
 export const CLASSES = deepFreeze([
   {
@@ -232,6 +234,60 @@ export const CLASSES = deepFreeze([
       [
         'Tempête élémentaire',
         'Toutes les 5 compétences offensives, déclenche une explosion infligeant 80 % de l’Attaque aux ennemis dans un rayon de 4 cases. Recharge : 12 s.'
+      ]
+    ]
+  },
+  {
+    id: 'invocateur',
+    icon: '⟦cls_invocateur⟧',
+    name: 'Invocateur',
+    style: 'Invocations, peste et nécromancie',
+    spec: 'Morts-vivants, poison qui s’accumule et armée d’os',
+    color: '#a4e83c',
+    // Arme liée : le Grimoire, reçu en choisissant la classe ; il suit le niveau du héros. Ses quatre compétences
+    // sont des invocations.
+    weapon: 'grimoire',
+    elements: ['poison', 'poison', 'poison', 'poison'],
+    passive: {
+      name: 'Peste noire',
+      desc: 'Tes attaques et chaque coup de tes invocations posent une charge de Peste (8 au maximum, 5 s, durée renouvelée à chaque charge) : chaque charge inflige 8 % de ton Attaque par seconde. Tu ne manies que ton Grimoire, qui grandit avec toi.'
+    },
+    special: {
+      id: 'contagion',
+      icon: '☣️',
+      name: 'Contagion',
+      desc: 'Une vague de peste : les ennemis à moins de 7 cases reçoivent 4 charges de Peste et, pendant 8 secondes, tes invocations frappent 30 % plus vite.',
+      mana: 30,
+      cooldown: 40
+    },
+    talents: [
+      ['Virulence', 'La Peste monte jusqu’à 12 charges et dure 2 secondes de plus.'],
+      [
+        'Nécrose',
+        'Toi et tes invocations infligez 2 % de dégâts supplémentaires par charge de Peste sur la cible.'
+      ],
+      ['Os éternels', 'Tes invocations durent 30 % plus longtemps.'],
+      [
+        'Légion',
+        'Un squelette de plus (4 au maximum) ; tes invocations infligent 10 % de dégâts supplémentaires.'
+      ],
+      [
+        'Cadavres explosifs',
+        'Une invocation qui disparaît explose : 60 % de l’Attaque et 3 charges de Peste aux ennemis à moins de 2,5 cases.'
+      ],
+      ['Siphon pestilentiel', 'Les dégâts de ta Peste te soignent de 10 % de leur montant.'],
+      ['Carapace d’os', 'Avec au moins 2 invocations en jeu, tu subis 10 % de dégâts en moins.'],
+      [
+        'Pandémie',
+        'Un ennemi qui meurt sous ta Peste la transmet : la moitié de ses charges passe aux ennemis à moins de 3 cases.'
+      ],
+      [
+        'Pacte de sang',
+        'Sous 35 % de PV, sacrifie ta plus ancienne invocation pour récupérer 15 % de tes PV maximum. Recharge : 40 s.'
+      ],
+      [
+        'Moisson d’âmes',
+        'Toutes les 12 charges de Peste posées, un squelette se lève gratuitement à tes côtés. Recharge : 10 s.'
       ]
     ]
   }

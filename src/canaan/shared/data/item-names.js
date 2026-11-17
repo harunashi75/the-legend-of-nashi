@@ -194,3 +194,18 @@ export const ARTIFACT_BUFFS = [
     percent: 7
   }
 ];
+
+// Noms d'une arme liée (qualité Relique) : elle change de nom en grandissant, à partir de chacun de ces niveaux.
+/** @type {Readonly<Record<string, ReadonlyArray<readonly [number, string]>>>} */
+export const RELIC_NAMES = Object.freeze({
+  grimoire: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Grimoire de l’apprenti'],
+      [10, 'Grimoire des sépultures'],
+      [20, 'Codex putride'],
+      [30, 'Codex de la peste noire'],
+      [40, 'Tome des légions mortes'],
+      [50, 'Évangile du Fléau éternel']
+    ])
+  )
+});

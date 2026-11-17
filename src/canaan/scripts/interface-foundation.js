@@ -9,14 +9,17 @@ const itemIcon = {
   ring: '⟦slot_ring⟧',
   artifact: '⟦slot_artifact⟧'
 };
-// Objet de prestige (Légendaire, Mythique) : attribut des cases du sac et de la fiche, pour leur brillance animée.
+// Objet de prestige (Légendaire, Mythique, Relique) : attribut des cases du sac et de la fiche, pour leur brillance
+// animée.
 function canaanPrestige(item) {
   const name = item ? rarityInfo(item).name : '';
   return name === 'Légendaire'
     ? ' data-prestige="legendaire"'
     : name === 'Mythique'
       ? ' data-prestige="mythique"'
-      : '';
+      : name === BOUND_RARITY.name
+        ? ' data-prestige="relique"'
+        : '';
 }
 function rpgHeader(title) {
   return (

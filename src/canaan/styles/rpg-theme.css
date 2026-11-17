@@ -522,7 +522,7 @@ body {
 }
 #window .rpg-slot,
 #window .equip-square,
-#window .class-card,
+#window .class-page,
 #window .talent-row,
 #window .raid-mode,
 #window .rpg-tabs button,
@@ -928,6 +928,12 @@ body {
   --wave: #7af0ff2a;
   animation: prestige-pulse-myth 2.4s ease-in-out infinite;
 }
+#window#window [data-prestige='relique'] {
+  --glow-a: #b8f04088;
+  --glow-b: #9b6ae077;
+  --wave: #c8ff6a2a;
+  animation: prestige-pulse-relic 2.4s ease-in-out infinite;
+}
 #window#window [data-prestige] .bag-icon,
 #window#window [data-prestige] .eq-icon {
   position: relative;
@@ -979,6 +985,26 @@ body {
       0 0 18px #7af0ffcc,
       inset 0 0 14px #c890ff88;
   }
+}
+@keyframes prestige-pulse-relic {
+  0%,
+  100% {
+    box-shadow:
+      0 0 6px #b8f04088,
+      inset 0 0 8px #b8f04055;
+  }
+  50% {
+    box-shadow:
+      0 0 18px #c8ff6acc,
+      inset 0 0 14px #9b6ae088;
+  }
+}
+/* Info-bulle d'une arme liée (Relique). */
+.tooltip-relic {
+  margin-top: 6px;
+  color: #c8f07a;
+  font-size: calc(11.5px * var(--font-scale));
+  line-height: 1.45;
 }
 @media (prefers-reduced-motion: reduce) {
   #window#window [data-prestige],

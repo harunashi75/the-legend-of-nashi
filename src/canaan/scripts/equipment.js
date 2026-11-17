@@ -36,6 +36,14 @@
     canaanLootNotice(hero, '🔒 Niveau ' + need + ' requis pour ' + gearDisplayName(item) + '.');
     return true;
   }
+  // Arme liée (le Grimoire de l'Invocateur) : elle ne quitte jamais sa main, et aucune autre arme ne s'équipe.
+  function boundLock(hero, slot) {
+    if (slot !== 'weapon' && slot !== 'weapon2') return false;
+    const pact = hero.equipment.weapon;
+    if (!isBoundItem(pact)) return false;
+    canaanLootNotice(hero, '📕 ' + gearDisplayName(pact) + ' est lié à ton âme : aucune autre arme.');
+    return true;
+  }
   function equipItem(id, hero = game.hero) {
     if (hero === game.hero && remote({ op: 'equip', id: String(id) })) return true;
     if (locked(hero)) return false;
@@ -45,7 +53,7 @@
       mana = hero.player.mp,
       previous = hero.equipment[item.slot];
     window.CANAAN_GEAR.normalize(item);
-    if (tooHigh(item, hero)) return false;
+    if (boundLock(hero, item.slot) || tooHigh(item, hero)) return false;
     hero.inventory.splice(index, 1);
     if (previous) hero.inventory.splice(index, 0, previous);
     hero.equipment[item.slot] = item;
@@ -56,7 +64,7 @@
     if (hero === game.hero && remote({ op: 'unequip', slot })) return true;
     if (locked(hero)) return false;
     const item = hero.equipment[slot];
-    if (!item) return false;
+    if (!item || (slot === 'weapon' && boundLock(hero, slot))) return false;
     if (hero === game.hero) updateCapacity();
     if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       canaanLootNotice(hero, '🎒 Sac plein ! Vends un objet au marchand.');
@@ -75,7 +83,7 @@
     }
     if (locked(hero)) return false;
     const item = hero.inventory[index];
-    if (!item || item.slot !== 'weapon' || tooHigh(item, hero)) return false;
+    if (!item || item.slot !== 'weapon' || boundLock(hero, 'weapon2') || tooHigh(item, hero)) return false;
     const mana = hero.player.mp,
       previous = hero.equipment.weapon2;
     hero.inventory.splice(index, 1);
@@ -104,7 +112,7 @@
     return switchHeroWeapon(game.hero);
   }
   function switchHeroWeapon(hero) {
-    if (hero.player.dead || !hero.equipment.weapon2) return false;
+    if (hero.player.dead || !hero.equipment.weapon2 || boundLock(hero, 'weapon')) return false;
     const mana = hero.player.mp,
       previous = hero.equipment.weapon;
     hero.equipment.weapon = hero.equipment.weapon2;

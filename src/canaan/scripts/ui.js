@@ -181,7 +181,12 @@
         CANAAN_ICONS.strip(gearSlots[slot]) +
           ' — ' +
           (item
-            ? gearDisplayName(item) + (slot === 'weapon2' ? ' · Q pour changer' : ' · cliquer pour retirer')
+            ? gearDisplayName(item) +
+              (isBoundItem(item)
+                ? ' · arme liée, elle grandit avec toi'
+                : slot === 'weapon2'
+                  ? ' · Q pour changer'
+                  : ' · cliquer pour retirer')
             : 'emplacement libre')
       ) +
       '">' +

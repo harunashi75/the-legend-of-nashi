@@ -119,6 +119,8 @@
     if (!hero) return 0;
     let changed = 0;
     for (const slot of ACTIVE_GEAR_SLOTS) {
+      // Arme liée (Invocateur) : jamais remplacée.
+      if (slot === 'weapon' && isBoundItem(hero.equipment.weapon)) continue;
       const best = hero.inventory
         .filter(it => it.slot === slot && itemLevel(it) <= clampLevel(hero.level))
         .sort((a, b) => gearScore(b) - gearScore(a))[0];

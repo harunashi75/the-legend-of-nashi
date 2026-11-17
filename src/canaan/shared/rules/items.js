@@ -4,6 +4,7 @@
 // Chaque fonction reçoit ses données en paramètres ; aucune ne lit l'état d'une partie.
 import {
   ACTIVE_GEAR_SLOTS,
+  BOUND_RARITY,
   GEAR_RARITIES,
   LEGACY_RARITY,
   JEWEL_ICON,
@@ -11,7 +12,8 @@ import {
   RARITY_WEIGHTS,
   WEAPON_TYPES
 } from '../data/equipment.js';
-import { GEAR_NAMES, WEAPON_NAMES } from '../data/item-names.js';
+import { GEAR_NAMES, RELIC_NAMES, WEAPON_NAMES } from '../data/item-names.js';
+import { clampLevel, secondaryRange } from './stats.js';
 /** @typedef {import('../types.js').Item} Item */
 
 // Qualité d'un objet ; une qualité absente ou inconnue vaut Commun.
@@ -20,6 +22,7 @@ import { GEAR_NAMES, WEAPON_NAMES } from '../data/item-names.js';
  */
 export function rarityInfo(item) {
   const name = LEGACY_RARITY[item?.rarity ?? ''] || item?.rarity;
+  if (name === BOUND_RARITY.name) return BOUND_RARITY;
   return GEAR_RARITIES.find(r => r.name === name) || GEAR_RARITIES[0];
 }
 // Tirage libre d'une qualité ; rng renvoie un nombre dans [0, 1[.
@@ -94,6 +97,10 @@ export function ensureArtifact(item) {
 export function applyItemName(item) {
   if (!item?.slot) return item;
   const rarity = rarityInfo(item).name;
+  if (item.slot === 'weapon' && rarity === BOUND_RARITY.name) {
+    item.name = relicName(item.weaponType ?? '', item.level);
+    return item;
+  }
   if (item.slot === 'weapon') {
     ensureWeaponType(item);
     item.name = WEAPON_NAMES[rarity][item.weaponType ?? 'sword'];
@@ -105,4 +112,51 @@ export function applyItemName(item) {
     } else if (entry[item.slot]) item.name = entry[item.slot];
   }
   return item;
+}
+
+// ---------------------------------------------------------------- Armes liées (qualité Relique)
+// Nom d'une arme liée selon son niveau (palier de RELIC_NAMES).
+/**
+ * @param {string} type famille d'arme
+ * @param {unknown} level
+ * @returns {string}
+ */
+export function relicName(type, level) {
+  const tiers = RELIC_NAMES[type];
+  if (!tiers) return 'Relique';
+  const lv = clampLevel(level);
+  let name = tiers[0][1];
+  for (const [from, label] of tiers) if (lv >= from) name = label;
+  return name;
+}
+// Un objet lié à une classe (le Grimoire) : il ne quitte jamais l'emplacement de l'arme.
+/**
+ * @param {(Item & { bound?: string }) | null | undefined} item
+ * @returns {boolean}
+ */
+export function isBoundItem(item) {
+  return !!item && typeof item.bound === 'string' && item.bound.length > 0;
+}
+// Arme liée d'une classe au niveau du héros : identité fixe, Relique, et deux secondaires fixes (Maîtrise et
+// Célérité, aux deux tiers de leur plage) qui grandissent avec elle.
+/**
+ * @param {string} classId classe propriétaire
+ * @param {string} type famille d'arme
+ * @param {unknown} level niveau du héros
+ * @returns {Item & { bound: string }}
+ */
+export function makeBoundWeapon(classId, type, level) {
+  const lv = clampLevel(level),
+    [lo, hi] = secondaryRange(lv, BOUND_RARITY.name),
+    value = Math.round(lo + (hi - lo) * 0.66);
+  return {
+    id: 'lie-' + classId,
+    slot: 'weapon',
+    weaponType: type,
+    rarity: BOUND_RARITY.name,
+    level: lv,
+    bound: classId,
+    name: relicName(type, lv),
+    sec: { mastery: value, haste: value }
+  };
 }

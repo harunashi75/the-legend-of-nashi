@@ -118,7 +118,9 @@ function canaanSkillTooltip(i) {
   if (!spec) return '';
   const [icon, name, summary, cd, mana, mult, detail] = spec,
     offensive = isOffensiveSkill(type, i),
-    magic = type === 'staff',
+    magic = MAGIC_WEAPONS.includes(type),
+    // Invocations : la puissance est celle d'un coup de la créature (ou d'une seconde de zone du totem).
+    summon = type === 'grimoire',
     st = canaanStanceOf();
   let lines =
     '<div class="tooltip-name skill-tip-head"><span class="skill-tip-icon">' +
@@ -131,7 +133,7 @@ function canaanSkillTooltip(i) {
     ' · ' +
     esc(weapon.name) +
     ' · ' +
-    (offensive ? 'offensive' : 'utilitaire') +
+    (summon ? 'invocation' : offensive ? 'offensive' : 'utilitaire') +
     '</div>' +
     '<div class="skill-tip-desc">' +
     esc(detail || summary) +
@@ -142,7 +144,7 @@ function canaanSkillTooltip(i) {
     lines +=
       '<div class="skill-tip-dmg">≈ ' +
       Math.round(power * (mult + extra)) +
-      ' dégâts par cible' +
+      (summon ? (i === 2 ? ' dégâts par seconde' : ' dégâts par coup') : ' dégâts par cible') +
       (extra ? ' (avec ' + (st.arcane | 0) + ' charge' + ((st.arcane | 0) > 1 ? 's' : '') + ')' : '') +
       ' · ' +
       Math.round((mult + extra) * 100) +

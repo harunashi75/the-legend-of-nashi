@@ -118,6 +118,17 @@
       }
     },
     {
+      name: 'invocations',
+      exports: {
+        'CANAAN_SUMMONS.cast': 'function',
+        'CANAAN_SUMMONS.syncPact': 'function',
+        'CANAAN_SUMMONS.view': 'function',
+        'CANAAN_SUMMONS.applyView': 'function',
+        'CanaanStages.summons.after': 'function',
+        'CanaanStages.drawSummons': 'function'
+      }
+    },
+    {
       name: 'combat',
       exports: {
         'CANAAN_COMBAT.hurt': 'function',
@@ -512,15 +523,15 @@
         draw: !!draw,
         save: !!saveGame,
         load: !!loadGame,
-        weaponTypes: Object.keys(WEAPON_SPELLS).length === 9,
+        weaponTypes: Object.keys(WEAPON_SPELLS).length === 10 && CRAFT_WEAPONS.length === 9,
         classes: !!window.CANAAN_CLASS,
         talentMenu: !!document.querySelector('#menuButtons button[data-action="toggleTalents"]'),
         talentShortcut: !!toggleTalents,
         offensiveCore: !!window.CANAAN_STATS_ATTACK && !!window.CANAAN_COMBAT.rawAttack,
-        fourClasses:
+        fiveClasses:
           !!window.CANAAN_CLASS &&
-          window.CANAAN_CLASS.audit().classes === 4 &&
-          window.CANAAN_CLASS.audit().talentCount === 40,
+          window.CANAAN_CLASS.audit().classes === 5 &&
+          window.CANAAN_CLASS.audit().talentCount === 50,
         clock: !!window.CANAAN_CLOCK && window.CANAAN_CLOCK.tickMs === 1000 / 60,
         randomStreams: worldRnd !== visualRnd,
         version: window.CANAAN_VERSION === CANAAN_VERSION,

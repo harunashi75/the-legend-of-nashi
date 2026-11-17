@@ -11,6 +11,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'weaponVfx',
     'facing',
     'classes',
+    'summons',
     'dodge',
     'basicAttack',
     'rubis',
@@ -23,6 +24,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'achievements'
   ]),
   draw: Object.freeze([
+    'drawSummons',
     'drawWeaponEffects',
     'drawClassEffects',
     'drawQuests',

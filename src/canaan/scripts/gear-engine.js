@@ -3,20 +3,13 @@
 // Moteur des objets : normalisation, création, dépôt et conversion en or si le sac est plein.
 (function () {
   'use strict';
-  const WEAPONS = new Set([
-    'sword',
-    'dualsword',
-    'axe',
-    'mace',
-    'spear',
-    'dualdagger',
-    'bow',
-    'staff',
-    'shield'
-  ]);
+  // Familles du butin et des marchands ; une arme liée (le Grimoire) garde aussi sa famille.
+  const WEAPONS = new Set(CRAFT_WEAPONS);
+  const knownWeapon = (item, type) =>
+    WEAPONS.has(type) || (isBoundItem(item) && Object.hasOwn(WEAPON_DEFINITIONS, type));
   function normalizeWeapon(item) {
     if (item.slot !== 'weapon') return;
-    if (!WEAPONS.has(item.weaponType)) item.weaponType = 'sword';
+    if (!knownWeapon(item, item.weaponType)) item.weaponType = 'sword';
   }
   // Normalisation unique : identité, qualité, niveau (1 à 60) et deux secondaires tirées une seule fois.
   // Anciennes sauvegardes : l'iLvl devient un niveau (levelFromIlvl) et les points Ratings52 disparaissent.
@@ -42,9 +35,16 @@
     item.level = itemLevel(item);
     const weapon = item.slot === 'weapon';
     // Les noms choisis sont des propriétés persistantes.
-    if (weapon && WEAPONS.has(originalType)) item.weaponType = originalType;
+    if (weapon && knownWeapon(item, originalType)) item.weaponType = originalType;
     applyItemName(item);
-    if (weapon && WEAPONS.has(originalType) && originalName && !/^Lame\s/.test(originalName))
+    // Une arme liée prend le nom de son palier (il change en grandissant).
+    if (
+      weapon &&
+      !isBoundItem(item) &&
+      WEAPONS.has(originalType) &&
+      originalName &&
+      !/^Lame\s/.test(originalName)
+    )
       item.name = originalName;
     window.CANAAN_STATS_PREPARE(item);
     // Enchantement enregistré : vérifié (sinon retiré).

@@ -47,6 +47,15 @@ export function sanitizeClasse(raw, level) {
         talents.push(t);
   return { id, talents };
 }
+// Arme liée d'une classe (famille d'arme), ou null : la classe la reçoit en la choisissant et n'en manie pas d'autre.
+/**
+ * @param {unknown} classId
+ * @returns {string | null}
+ */
+export function boundWeaponOf(classId) {
+  const c = classById(classId);
+  return c && 'weapon' in c && typeof c.weapon === 'string' ? c.weapon : null;
+}
 // Une compétence d'arme est offensive si elle inflige des dégâts (les postures et ruées ne comptent pas).
 /**
  * @param {string} type famille d'arme

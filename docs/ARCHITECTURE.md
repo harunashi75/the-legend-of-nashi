@@ -20,7 +20,7 @@ Le code passe progressivement en modules ES (`import`/`export`), comme prévu pa
   - `shared/data/arena.js` : vagues, multiplicateurs, coopératif et les douze boss ;
   - `shared/data/world.js` : donjons et raids (`INSTANCE_DEFS`, et `createInstances()` qui donne à chaque partie sa propre copie, où l’île place les portails), monstres, boss de monde et délai de réapparition ;
   - `shared/data/economy.js` : récompenses par source, prix du sac, prix de rachat des anciens matériaux (`LEGACY_MATERIAL_GOLD`) ;
-  - `shared/data/classes.js` : les quatre classes (élément, passif, sort spécial, dix talents) et les niveaux des emplacements de talents ;
+  - `shared/data/classes.js` : les cinq classes (élément, passif, sort spécial, dix talents, arme liée de l’Invocateur) et les niveaux des emplacements de talents ;
   - `shared/data/stats.js` : niveau maximum (60), les trois statistiques principales et les six secondaires, force de chaque qualité, profil de chaque emplacement, niveaux des six zones et courbe d’XP.
 - Règles pures, dans `shared/rules/` ; elles reçoivent leurs données en paramètres et ne lisent jamais l’état d’une partie :
   - `items.js` : qualité, niveau d’un objet (`itemLevel`), tirage de qualité (avec un générateur aléatoire en paramètre), type d’arme, nom affiché, icônes, variantes d’artéfact ;

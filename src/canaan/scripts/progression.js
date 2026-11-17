@@ -22,6 +22,8 @@
     return gained;
   }
   function levelUp(hero) {
+    // Arme liée (Grimoire de l'Invocateur) : elle prend le nouveau niveau avant le calcul des statistiques.
+    CANAAN_SUMMONS.syncPact(hero);
     recomputeHeroStats(hero);
     hero.player.hp = hero.player.mhp;
     hero.player.mp = hero.player.mmp;

@@ -9,9 +9,9 @@ const {
   basicHit
 } = require('./helpers/context.cjs');
 
-test('Classes : quatre classes de dix talents, cinq emplacements selon le niveau, état vérifié',()=>{
+test('Classes : cinq classes de dix talents, cinq emplacements selon le niveau, état vérifié',()=>{
   const g=game();
-  assert.equal(g.CLASSES.length,4);same(g.CLASSES.map(c=>c.name),['Druide','Paladin','Assassin','Élémentaliste']);
+  assert.equal(g.CLASSES.length,5);same(g.CLASSES.map(c=>c.name),['Druide','Paladin','Assassin','Élémentaliste','Invocateur']);
   for(const c of g.CLASSES){assert.equal(c.talents.length,10,c.id);assert.ok(c.special.name&&c.passive.name,c.id)}
   same([1,9,10,19,20,30,40,60].map(g.talentSlotsAt),[1,1,2,2,3,4,5,5]);
   // Classe inconnue, doublons, numéros invalides et emplacements en trop sont retirés.

@@ -276,13 +276,13 @@ test('Compétences : attaques de base renforcées, info-bulles claires, charges 
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 40 sorts',()=>{
+test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 44 sorts',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Le cercle autour du héros à chaque attaque n'existe plus.
  assert.doesNotMatch(script('canaan-game-core'),/ctx\.arc\(P\.x, P\.y, 65/);
- // Icônes : une par compétence (9 armes × 4) et par sort de classe, en SVG.
+ // Icônes : une par compétence (9 armes et le Grimoire × 4) et par sort de classe, en SVG.
  const audit=JSON.parse(run('JSON.stringify(CANAAN_SKILL_ICONS.audit())'));
- assert.equal(audit.weapons,9);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','divine','feral','veil']);
+ assert.equal(audit.weapons,10);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','contagion','divine','feral','veil']);
  assert.equal(run('Object.keys(WEAPON_DEFINITIONS).every(t=>[0,1,2,3].every(i=>CANAAN_SKILL_ICONS.weapon(t,i).startsWith("<svg")))'),true);
  assert.equal(run('CLASSES.every(c=>CANAAN_SKILL_ICONS.special(c.special.id).startsWith("<svg"))'),true);
  run('started=true;paused=false;refreshWeaponBar()');assert.ok(run('SKILLS[0].el.innerHTML').startsWith('<svg'),'la barre affiche l’icône SVG');

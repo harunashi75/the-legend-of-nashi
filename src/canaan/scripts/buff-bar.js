@@ -67,6 +67,17 @@
           w.elemAvatarUntil - t
         )
       );
+    if (on(w.contagionUntil))
+      out.push(
+        E(
+          'cls-contagion',
+          '☣',
+          'Contagion',
+          'Tes invocations frappent 30 % plus vite.',
+          'buff',
+          w.contagionUntil - t
+        )
+      );
     if (hero.player.form === 'feral') out.push(E('cls-feral', '🐆', 'Forme féline', c.special.desc, 'buff'));
   }
   const STANCES = [
@@ -315,6 +326,7 @@
     slow: ['❄', 'Ralenti', 'debuff'],
     bleed: ['🩸', 'Saignement', 'debuff'],
     poison: ['☠', 'Poison', 'debuff'],
+    plague: ['☣', 'Peste', 'debuff'],
     burn: ['🔥', 'Brûlure', 'debuff'],
     thorns: ['🌿', 'Ronces', 'debuff'],
     sap: ['🌱', 'Sève', 'debuff'],
@@ -341,6 +353,8 @@
     for (const k of ['stun', 'root', 'slow', 'bleed', 'vulnerable']) add(k, m['spell_' + k] || 0);
     for (const k of ['armor', 'slow', 'weak', 'mark', 'bleed']) add(k, m['v1746_' + k] || 0);
     for (const d of m._clsDots || []) add(MON[d.kind] ? d.kind : 'poison', d.until - t);
+    // Peste de l'Invocateur (charges cumulables).
+    for (const p of m._plague || []) add('plague', p.until - t);
     if (m._clsSlow) add('slow', m._clsSlow.until - t);
     add('slow', (m._rubisSlowUntil || 0) - t);
     add('focus', (m._rubisFocusUntil || 0) - t);

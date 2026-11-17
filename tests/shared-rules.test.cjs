@@ -119,7 +119,7 @@ test('Catalogues partagés gelés : donjons copiés pour chaque partie, monstres
  const a=world.createInstances(),b=world.createInstances();
  a[0].x=42;a[9].difficulties.normal.hp=9;assert.equal(b[0].x,0);assert.equal(world.INSTANCE_DEFS[9].difficulties.normal.hp,1);
  assert.equal(Object.isFrozen(a[0]),false);assert.equal(a.length,14);assert.equal(world.WORLD_BOSS_DEFS.length,8);assert.equal(world.MOB_TYPES.length,47);
- assert.equal(world.BOSS_RESPAWN_MS,180000);assert.equal(economy.BAG_PRICES.length,9);assert.equal(classes.CLASSES.length,4);assert.deepEqual(classes.TALENT_SLOT_LEVELS,[1,10,20,30,40]);
+ assert.equal(world.BOSS_RESPAWN_MS,180000);assert.equal(economy.BAG_PRICES.length,9);assert.equal(classes.CLASSES.length,5);assert.deepEqual(classes.TALENT_SLOT_LEVELS,[1,10,20,30,40]);
  assert.equal(stats.PRIMARY_KEYS.length,3);assert.equal(stats.SECONDARY_KEYS.length,6);assert.equal(stats.MAX_LEVEL,60);
  assert.deepEqual(stats.ZONE_LEVELS.map(z=>z.join('-')),['1-10','10-20','20-30','30-40','40-50','50-60']);assert.equal(rules.xpToNext(60),0);
  // Dans le jeu, les portails sont placés sur la copie, jamais sur le catalogue.

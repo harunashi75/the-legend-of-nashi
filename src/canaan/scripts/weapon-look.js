@@ -1,7 +1,8 @@
 // Armes tenues en main : chaque héros porte la vraie arme équipée (épée, épées doubles, hache, masse, lance,
-// dagues, arc, égide, bâton), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
+// dagues, arc, égide, bâton, Grimoire), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
 // chaque famille : taille en arc (épée, hache, masse), double taille (épées doubles), estocs (lance, dagues),
-// tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton).
+// tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton), livre ouvert vers la mire
+// et lueur de peste (Grimoire).
 // Le héros se tourne vers sa mire à l'arrêt et pendant une attaque. Rien n'est sauvegardé ni simulé ici.
 (() => {
   'use strict';
@@ -16,7 +17,8 @@
     dualdagger: '#e5a7ff',
     bow: '#a7e8a0',
     staff: '#b38aff',
-    shield: '#ffe4a2'
+    shield: '#ffe4a2',
+    grimoire: '#a4e83c'
   };
   // ---------------------------------------------------------------- Sprites (pointe vers +x, poignée au point pivot)
   // Chaque dessin renvoie {w, h, px, py, draw(R)} : taille en pixels du sprite, pivot (main), et ses rectangles.
@@ -225,6 +227,26 @@
         R(12, 1, 5, 6, STD);
         R(13, 2, 3, 4, ST);
         R(13, 2, 3, 1, STL);
+      }
+    },
+    // Grimoire : livre relié de cuir sombre, vu de face, crâne d'os et fermoir doré (ne tourne pas).
+    grimoire: {
+      w: 12,
+      h: 14,
+      px: 6,
+      py: 7,
+      draw(R) {
+        R(0, 0, 12, 14, '#2a1c36');
+        R(1, 1, 10, 12, '#5a3f70');
+        R(1, 1, 10, 1, '#7a5a94');
+        R(11, 1, 1, 12, '#e8e0cc');
+        R(1, 2, 10, 1, '#a4e83c');
+        R(1, 11, 10, 1, '#a4e83c');
+        R(4, 4, 4, 3, '#e9e3cf');
+        R(5, 7, 2, 2, '#e9e3cf');
+        R(4, 5, 1, 1, '#a4e83c');
+        R(7, 5, 1, 1, '#a4e83c');
+        R(11, 6, 1, 3, '#e2b85a');
       }
     },
     // Égide : bouclier vu de face, tenu devant soi (ne tourne pas).
@@ -510,6 +532,29 @@
       c.fillStyle = g;
       c.beginPath();
       c.arc(tipX, tipY, glow, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+      return;
+    }
+    if (type === 'grimoire') {
+      if (layer !== behind) return;
+      // Livre tenu devant soi, poussé vers la mire au lancer ; lueur de peste qui pulse au-dessus des pages.
+      const d = attacking ? Math.sin(k * Math.PI) * 10 : 0,
+        bx = hx + Math.cos(aim) * d,
+        by = hy - 2 + Math.sin(aim) * d * 0.6,
+        tilt = attacking ? Math.sin(k * Math.PI) * 0.3 * side : side * 0.12;
+      piece(c, 'grimoire', bx, by, tilt, 1);
+      const glow = attacking
+        ? 12 + 16 * (1 - k)
+        : 7 + Math.sin((typeof time === 'number' ? time : 0) * 0.08) * 2;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(bx, by - 6, 0, bx, by - 6, glow);
+      g.addColorStop(0, 'rgba(210,255,140,.75)');
+      g.addColorStop(1, 'rgba(164,232,60,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(bx, by - 6, glow, 0, Math.PI * 2);
       c.fill();
       c.restore();
       return;

@@ -168,6 +168,8 @@
     equipTalent: element => equipTalent(actionInteger(element, 'talent')),
     unequipTalent: element => unequipTalent(actionInteger(element, 'talent')),
     pickClass: element => pickClass(actionInteger(element, 'open')),
+    classPage: element => classPage(actionInteger(element, 'step')),
+    classPageTo: element => classPageTo(actionInteger(element, 'page')),
     buyGear: () => buyGear(),
     equipRubis: element => equipRubis(actionText(element, 'rubis')),
     toggleRubis: element => {

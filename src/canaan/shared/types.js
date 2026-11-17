@@ -26,6 +26,7 @@
  * @property {{ stat: string, value: number }} [ench] enchantement (troisième secondaire)
  * @property {number} [ilvl] ancien iLvl (sauvegardes du schéma 9)
  * @property {string} [origin] donjon, raid…
+ * @property {string} [bound] classe à laquelle l'objet est lié (arme liée, qualité Relique)
  */
 
 /**

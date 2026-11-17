@@ -34,6 +34,9 @@ export const GEAR_RARITIES = [
     'mult': 1.7
   }
 ];
+// Qualité à part des armes liées à une classe (le Grimoire de l'Invocateur) : jamais tirée, jamais vendue,
+// elle grandit avec le héros. Hors de GEAR_RARITIES : elle ne compte pas dans le rang des qualités.
+export const BOUND_RARITY = Object.freeze({ name: 'Relique', color: '#b8f040', mult: 1.3 });
 // Compétences d'armes : [icône, nom, résumé, recharge (s), mana, puissance, explication].
 // puissance : dégâts totaux sur une cible, en multiple de la Puissance d'attaque (0 = pas de dégâts directs) ;
 // l'info-bulle l'affiche en dégâts estimés. Les attaques de base font 75 % (clic gauche) et 160 % (clic droit).
@@ -416,6 +419,52 @@ export const WEAPON_DEFINITIONS = {
         'Explosion là où tu vises : 320 %, plus 140 % par charge consommée (740 % avec 3 charges). Consomme toutes les charges.'
       ]
     ]
+  },
+  // Arme liée de l'Invocateur (bound) : jamais lâchée par un monstre ni vendue. Ses quatre compétences sont des
+  // invocations ; leur puissance est celle d'un coup de la créature (ou d'une seconde de zone).
+  grimoire: {
+    name: 'Grimoire',
+    icon: '⟦w_grimoire⟧',
+    role: 'Invocations : lève des morts-vivants qui empoisonnent tes ennemis.',
+    bound: 'invocateur',
+    sp: [
+      [
+        '💀',
+        'Squelette putride',
+        'Invocation · 3 au maximum · 18 s · 60 % par coup',
+        4,
+        14,
+        0.6,
+        'Un squelette sort de terre près de toi et attaque tes ennemis pendant 18 s (60 % de ta Puissance magique toutes les 1,2 s). 3 squelettes au maximum : un nouveau remplace le plus ancien.'
+      ],
+      [
+        '🐀',
+        'Nuée de rats',
+        '4 rats pestiférés · 6 s · 45 % par morsure, puis éclatent',
+        10,
+        20,
+        0.45,
+        '4 rats foncent vers la souris et mordent les ennemis (45 % toutes les 0,6 s). Au bout de 6 s, chacun éclate en un nuage toxique (90 % aux ennemis autour de lui).'
+      ],
+      [
+        '🪦',
+        'Totem de peste',
+        'Totem 10 s sous la souris · 50 %/s en zone',
+        16,
+        22,
+        0.5,
+        'Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Tes invocations proches de lui frappent 25 % plus vite.'
+      ],
+      [
+        '🧟',
+        'Abomination',
+        'Invocation · 1 au maximum · 15 s · 160 % en zone',
+        28,
+        32,
+        1.6,
+        'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).'
+      ]
+    ]
   }
 };
 
@@ -425,7 +474,12 @@ export const WEAPON_TYPES = Object.fromEntries(
 export const WEAPON_SPELLS = Object.fromEntries(
   Object.entries(WEAPON_DEFINITIONS).map(([key, value]) => [key, value.sp])
 );
-export const CRAFT_WEAPONS = Object.keys(WEAPON_DEFINITIONS);
+// Familles qui se trouvent sur les monstres et chez les marchands : toutes, sauf les armes liées à une classe.
+export const CRAFT_WEAPONS = Object.entries(WEAPON_DEFINITIONS)
+  .filter(([, value]) => !('bound' in value))
+  .map(([key]) => key);
+// Armes magiques : leurs coups utilisent la Puissance magique (projectile d'orbe).
+export const MAGIC_WEAPONS = Object.freeze(['staff', 'grimoire']);
 
 // Emplacements actifs : l'arme de réserve (weapon2) est équipée mais ne compte ni dans l'iLvl moyen ni dans les statistiques.
 export const ACTIVE_GEAR_SLOTS = Object.freeze([

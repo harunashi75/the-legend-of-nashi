@@ -88,7 +88,8 @@ function game() {
   vm.runInContext(section("// Étape du pipeline : effets des sorts d'armes sur les monstres.", "// Fin des effets d'armes. Les PV des monstres viennent de leur niveau (monster-scaling.js)."), g);
   vm.runInContext(script('canaan-weapon-actions'), g);
   vm.runInContext(script('canaan-stats'), g);
-  vm.runInContext(script('canaan-class-talents'), g);g.refreshWeaponBar();
+  vm.runInContext(script('canaan-class-talents'), g);
+  vm.runInContext(script('canaan-summons'), g);g.refreshWeaponBar();
   vm.runInContext(script('canaan-combat'), g);
   vm.runInContext(script('canaan-rubis'), g);
   vm.runInContext(script('canaan-arena'), g);

@@ -45,6 +45,8 @@ export const QUALITY_FACTOR = Object.freeze({
   Légendaire: 1.87,
   Mythique: 2.1
 });
+// Relique (arme liée à une classe) : sa force grandit avec son niveau, de Rare au niveau 1 à Légendaire au niveau 60.
+export const RELIC_QUALITY = Object.freeze({ name: 'Relique', from: 1.27, to: 1.87 });
 // Part de chaque statistique principale selon l'emplacement [Attaque, Défense, Vitalité].
 /** @type {Readonly<Record<string, readonly number[]>>} */
 export const SLOT_PROFILE = deepFreeze({
