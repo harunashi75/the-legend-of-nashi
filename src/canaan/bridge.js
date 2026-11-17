@@ -31,6 +31,7 @@ import * as icons from './client/icons/icons.js';
 import * as skillIcons from './client/icons/skill-icons.js';
 import * as buildingArt from './client/art/building-art.js';
 import * as dwarfArt from './client/art/dwarf-art.js';
+import * as preferences from './client/preferences.js';
 
 Object.assign(
   globalThis,
@@ -60,5 +61,6 @@ Object.assign(
   icons,
   skillIcons,
   buildingArt,
-  dwarfArt
+  dwarfArt,
+  preferences
 );

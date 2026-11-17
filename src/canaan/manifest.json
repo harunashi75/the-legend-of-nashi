@@ -102,11 +102,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-preferences",
-      "file": "client/preferences.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-audio-layout",
       "file": "scripts/audio-layout.js"
     },

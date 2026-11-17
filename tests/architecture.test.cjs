@@ -340,16 +340,23 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  }
 });
 
-test('Préférences : stockage centralisé, valeurs illisibles ignorées et écriture refusée sans erreur',()=>{
+test('Préférences : stockage centralisé, valeurs illisibles ignorées et écriture refusée sans erreur',async()=>{
  assert.doesNotMatch(source,/\.on(?:click|input|change|keydown|keyup|mouse\w+|pointer\w+|touch\w+)\s*=/);
- for(const id of ['canaan-audio-layout','canaan-preferences','canaan-controls','canaan-game-core','canaan-weapon-state'])assert.ok(script(id),id);
+ for(const id of ['canaan-audio-layout','canaan-controls','canaan-game-core','canaan-weapon-state'])assert.ok(script(id),id);
  assert.doesNotMatch(script('canaan-audio-layout'),/localStorage/);
+ // Stockage de l'appareil : la sauvegarde (canaan-persistence) et, parmi les modules ES, client/preferences.js seul.
  const scriptsWithStorage=scripts.filter(m=>/localStorage/.test(m[2])).map(m=>/id="([^"]+)"/.exec(m[1])[1]).sort();
- assert.deepEqual(scriptsWithStorage,['canaan-persistence','canaan-preferences']);
+ assert.deepEqual(scriptsWithStorage,['canaan-modules','canaan-persistence']);
+ const esRoot=path.join(__dirname,'..','src','canaan'),esWithStorage=[];
+ for(const dir of ['shared','client'])(function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=path.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js')&&/localStorage/.test(fs.readFileSync(f,'utf8')))esWithStorage.push(path.relative(esRoot,f))}})(path.join(esRoot,dir));
+ assert.deepEqual(esWithStorage,[path.join('client','preferences.js')]);
  const db=new Map();let refuse=false;
- const g={Object,JSON,Array,Error,localStorage:{getItem:k=>db.get(k)??null,setItem:(k,v)=>{if(refuse)throw new Error('quota');db.set(k,v)}}};g.window=g;
- vm.createContext(g);vm.runInContext(script('canaan-preferences'),g);
- const prefs=g.CANAAN_PREFERENCES;
+ // Le module lit localStorage au moment de l'appel : un faux stockage global le remplace le temps du test.
+ const g={localStorage:{getItem:k=>db.get(k)??null,setItem:(k,v)=>{if(refuse)throw new Error('quota');db.set(k,v)}}};
+ const saved=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+ Object.defineProperty(globalThis,'localStorage',{configurable:true,get:()=>g.localStorage});
+ try{
+ const prefs=(await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','client','preferences.js')).href)).CANAAN_PREFERENCES;
  assert.deepEqual(prefs.read('audio',{on:false}),{on:false});
  assert.equal(prefs.write('audio',{on:true,music:40}),true);
  assert.equal(db.get('canaan_audio_v1729'),'{"on":true,"music":40}');
@@ -358,9 +365,10 @@ test('Préférences : stockage centralisé, valeurs illisibles ignorées et écr
  refuse=true;assert.equal(prefs.write('layout',{a:1}),false);assert.equal(db.get('canaan_layout_v1729'),'[1,2]');
  g.localStorage.getItem=()=>{throw new Error('bloqué')};assert.deepEqual(prefs.read('audio',{on:false}),{on:false});
  assert.throws(()=>prefs.read('inconnue',{}),/Préférence inconnue/);
+ }finally{if(saved)Object.defineProperty(globalThis,'localStorage',saved);else delete globalThis.localStorage}
  // Chargement complet : la barre reçoit ses cases avec data-skill et les réglages audio restent lisibles.
  const boot=require('./helpers/canaan-runtime.cjs');
- const {run,errors}=boot(source,{beforeScript(part,run){if(part[1].includes('id="canaan-preferences"'))run("localStorage.setItem('canaan_audio_v1729','{\"on\":false,\"music\":61,\"fx\":12}')")}});
+ const {run,errors}=boot(source,{beforeScript(part,run){if(part[1].includes('id="canaan-modules"'))run("localStorage.setItem('canaan_audio_v1729','{\"on\":false,\"music\":61,\"fx\":12}')")}});
  assert.equal(errors.length,0,errors.join('\n'));
  assert.equal(run('JSON.stringify(Array.from(skEl.children,el=>el.dataset.skill))'),'[0,1,2,3]');
  assert.equal(run("document.getElementById('musicVolume').value"),61);
