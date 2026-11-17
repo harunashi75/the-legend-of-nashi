@@ -2857,5 +2857,207 @@ export default {
   '[E] Armurerie': '[E] Armory',
   '[E] Demander à entrer (niveau {n})': '[E] Ask to enter (level {n})',
   '[E] Sortir de Sylvaëlle': '[E] Leave Sylvaëlle',
-  '[E] Parler à Ylvarë': '[E] Talk to Ylvarë'
+  '[E] Parler à Ylvarë': '[E] Talk to Ylvarë',
+  // ------------------------------------------------------------ Tréfonds, forteresse de Durgrim, donjons et énigmes
+  'Galeries d’Argile': 'Clay Tunnels',
+  'Galeries de terre battue, rivières de boue, racines et vieilles mines abandonnées par les nains.':
+    'Packed-earth tunnels, rivers of mud, roots and old mines abandoned by the dwarves.',
+  'Cité Engloutie de Khaz-Ombral': 'Sunken City of Khaz-Ombral',
+  'Une ancienne cité naine abandonnée : rues dallées, maisons effondrées, statues sans tête et lacs noirs.':
+    'An ancient abandoned dwarven city: paved streets, collapsed houses, headless statues and black lakes.',
+  'Nécropole des Oubliés': 'Necropolis of the Forgotten',
+  'Cimetières sans fin, arbres morts, mausolées et brumes vertes où rôdent goules et âmes errantes.':
+    'Endless graveyards, dead trees, mausoleums and green mists where ghouls and wandering souls prowl.',
+  'Fangeval, le Marais Fongique': 'Fangeval, the Fungal Marsh',
+  'Un marais de boue tiède sous la roche : champignons géants luisants, spores, lacs troubles et mille-pattes.':
+    'A marsh of warm mud beneath the rock: giant glowing mushrooms, spores, murky lakes and centipedes.',
+  'Forteresse de Durgrim': 'Fortress of Durgrim',
+  'Gorgrath, le Ver-Roi des Boues': 'Gorgrath, the Mud Worm King',
+  'Le Gardien d’Argent de Khaz-Ombral': 'The Silver Guardian of Khaz-Ombral',
+  'Morvane, la Reine-Liche': 'Morvane, the Lich Queen',
+  'Sporemère, la Myconide Ancestrale': 'Sporemother, the Ancestral Myconid',
+  'Gouffre des Plaines': 'Plains Chasm',
+  'Puits des Racines': 'Root Well',
+  'Grotte des Brumes': 'Mist Cave',
+  'Crevasse Rousse': 'Russet Crevasse',
+  'Escalier des Sables': 'Sand Stairway',
+  'Faille Étoilée': 'Starry Rift',
+  'Roi Thrain Barbe-de-Fer': 'King Thrain Ironbeard',
+  'Bienvenue à Durgrim, voyageur de la surface. Mon peuple garde ces profondeurs depuis mille ans.':
+    'Welcome to Durgrim, traveler from the surface. My people have guarded these depths for a thousand years.',
+  'Khaz-Ombral était notre plus belle cité… jusqu’à ce que la pierre se réveille. Ne t’y aventure pas sans arme.':
+    'Khaz-Ombral was our finest city… until the stone awoke. Do not venture there unarmed.',
+  'Morvane, la Reine-Liche, règne sur la Nécropole. Les nôtres qui y sont tombés ne reposent plus en paix.':
+    'Morvane, the Lich Queen, rules the Necropolis. Those of ours who fell there no longer rest in peace.',
+  'Quatre donjons se cachent dans les Tréfonds. Ils s’adaptent à la force de qui y entre : aucun n’est trop tôt pour toi.':
+    'Four dungeons hide in the Depths. They adapt to the strength of whoever enters: none is too early for you.',
+  'Hilda Fonte-Rune': 'Hilda Runecaster',
+  'Ma forge vaut bien celle du Camp de l’Aurore : fabrique tes enchantements ici (panneau P, onglet Enchantement).':
+    'My forge is as good as the Dawn Camp’s: make your enchantments here (P panel, Enchanting tab).',
+  'Le fer noir des Galeries chante sous le marteau. Les marchands le paient très cher.':
+    'The black iron of the Tunnels sings under the hammer. Merchants pay a lot for it.',
+  'Un bon nain ne sort jamais sans sa pioche. Toi, tu sors sans ? Étrange peuple, celui de la surface.':
+    'A good dwarf never goes out without a pickaxe. You go out without one? Strange folk, the surface people.',
+  'Dorn le Tavernier': 'Dorn the Innkeeper',
+  'L’âtre de ma taverne est toujours chaud : cuisine tes prises ici, comme à La Marmite dorée.':
+    'My tavern’s hearth is always warm: cook your catches here, just like at The Golden Pot.',
+  'Le poisson aveugle des lacs noirs ? Délicieux en papillote. Fais-moi confiance.':
+    'The blind fish of the black lakes? Delicious en papillote. Trust me.',
+  'Une chope de bière de champignon ? Non ? Tant pis pour toi.': 'A mug of mushroom beer? No? Your loss.',
+  'Borin le Marchand': 'Borin the Merchant',
+  'Gimra la Banquière': 'Gimra the Banker',
+  'banquière': 'banker',
+  'Halte ! Ah, un ami de la surface. Passe, mais garde ta lanterne allumée.':
+    'Halt! Ah, a friend from the surface. Go ahead, but keep your lantern lit.',
+  'Au sud, la Nécropole. Au nord, Khaz-Ombral. Ne confonds pas, l’un est plus sinistre que l’autre.':
+    'To the south, the Necropolis. To the north, Khaz-Ombral. Don’t mix them up, one is grimmer than the other.',
+  'Les gargouilles de Khaz-Ombral ne dorment jamais. Moi non plus, d’ailleurs.':
+    'The gargoyles of Khaz-Ombral never sleep. Neither do I, come to think of it.',
+  'Un ver gros comme une maison creuse les Galeries d’Argile. Gorgrath, qu’on l’appelle.':
+    'A worm as big as a house digs through the Clay Tunnels. Gorgrath, they call it.',
+  'Mineur Gloin': 'Miner Gloin',
+  'Il y a de l’obsidienne dans la Nécropole… si tu oses creuser entre les tombes.':
+    'There is obsidian in the Necropolis… if you dare to dig between the graves.',
+  'Les géodes de Fangeval brillent comme des étoiles. Elles valent une fortune !':
+    'The geodes of Fangeval shine like stars. They are worth a fortune!',
+  'Ancienne Brunhild': 'Elder Brunhild',
+  'Ma grand-mère disait que l’île de là-haut repose sur le dos des Tréfonds.':
+    'My grandmother used to say the island up there rests on the back of the Depths.',
+  'Écoute les âmes errantes : elles pleurent les noms qu’on a oubliés.':
+    'Listen to the wandering souls: they mourn the names that were forgotten.',
+  'Tu viens vraiment de là-haut ? C’est vrai que le plafond est bleu ?':
+    'You really come from up there? Is it true the ceiling is blue?',
+  'Un jour, j’irai voir le soleil. Il paraît qu’il brûle les yeux !':
+    'One day, I’ll go see the sun. They say it burns your eyes!',
+  'Conseillère Dagny': 'Councilor Dagny',
+  'conseillère': 'councilor',
+  'Le Roi tient conseil sur la place, mais c’est ici que se décide l’avenir de Durgrim.':
+    'The King holds council in the square, but it is here that Durgrim’s future is decided.',
+  'Ces piliers portent les noms des vingt rois. Le vingt-et-unième attend encore le sien.':
+    'These pillars bear the names of the twenty kings. The twenty-first is still waiting for his.',
+  'Personne ne s’assied sur le trône de pierre. Personne.': 'No one sits on the stone throne. No one.',
+  'Sigrun la Forgeronne': 'Sigrun the Smith',
+  'Le fer se plie à qui sait l’écouter. Le reste n’est que du bruit.':
+    'Iron bends to those who know how to listen to it. The rest is just noise.',
+  'Hilda t’enchantera tes armes dehors, à la grande forge. Ici, on forge les haches de la garde.':
+    'Hilda will enchant your weapons outside, at the great forge. In here, we forge the guards’ axes.',
+  'Apprenti Kili': 'Apprentice Kili',
+  'Trois cents coups de marteau par lame. J’en suis à deux cent douze… je crois.':
+    'Three hundred hammer blows per blade. I’m at two hundred and twelve… I think.',
+  'Helga la Brasseuse': 'Helga the Brewer',
+  'Bière de champignon, hydromel de mousse ou eau de roche ? Choisis bien, la surface.':
+    'Mushroom beer, moss mead or rock water? Choose wisely, surface dweller.',
+  'Dorn dit que c’est sa taverne. Moi, je dis que c’est ma bière.':
+    'Dorn says it’s his tavern. I say it’s my beer.',
+  'Oin le Buveur': 'Oin the Drinker',
+  'Hic ! Les gargouilles… elles m’ont souri. Je le jure sur ma barbe.':
+    'Hic! The gargoyles… they smiled at me. I swear on my beard.',
+  'Frida Chope-Pleine': 'Frida Fullmug',
+  'Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.':
+    'A dwarf woman who drinks more than Oin? That’s me. And I sing better, too.',
+  'Gardien Thror': 'Warden Thror',
+  'L’or de Durgrim dort ici. Gimra compte, moi je garde. Chacun son métier.':
+    'Durgrim’s gold sleeps here. Gimra counts, I guard. To each their trade.',
+  'Ylva Pied-de-Roc': 'Ylva Rockfoot',
+  'mère': 'mother',
+  'Essuie tes bottes, voyageur ! La boue des Galeries, ça ne part jamais.':
+    'Wipe your boots, traveler! Tunnel mud never comes off.',
+  'Mon mari est mineur. Il rentre quand la lanterne s’éteint.':
+    'My husband is a miner. He comes home when the lantern goes out.',
+  'Quand je serai grande, j’aurai les plus longues tresses de Durgrim !':
+    'When I grow up, I’ll have the longest braids in Durgrim!',
+  'Bombur Marteau-d’Or': 'Bombur Goldhammer',
+  'père': 'father',
+  'Ma famille forge des marteaux depuis six générations. Le mien est accroché là-haut.':
+    'My family has forged hammers for six generations. Mine hangs up there.',
+  'Grand-mère Astrid': 'Grandmother Astrid',
+  'Assieds-toi, petit. Je vais te raconter la Grande Chute de Khaz-Ombral.':
+    'Sit down, little one. I’ll tell you about the Great Fall of Khaz-Ombral.',
+  'Les tresses d’une naine racontent sa vie : une par victoire, une par deuil.':
+    'A dwarf woman’s braids tell her life: one for each victory, one for each loss.',
+  'Éclaireur Nori': 'Scout Nori',
+  'Les Galeries d’Argile : terre, boue et vieilles mines. Attention aux taupes-garous.':
+    'The Clay Tunnels: earth, mud and old mines. Watch out for weremoles.',
+  'La Mine Effondrée de Durgrim est au bout de la route. Grumbar y hante encore ses galeries.':
+    'The Collapsed Mine of Durgrim is at the end of the road. Grumbar still haunts its tunnels.',
+  'Khaz-Ombral, notre cité perdue. Les sentinelles de pierre gardent encore ses rues.':
+    'Khaz-Ombral, our lost city. The stone sentinels still guard its streets.',
+  'Les Halls Engloutis abritent le Roi Ombral. Il ne reconnaît plus les siens.':
+    'The Sunken Halls shelter King Ombral. He no longer recognizes his own people.',
+  'Éclaireur Óin': 'Scout Óin',
+  'La Nécropole des Oubliés… Restez sur les dalles, les tombes ont faim.':
+    'The Necropolis of the Forgotten… Stay on the flagstones, the graves are hungry.',
+  'La Crypte des Mille Tombes : le Fossoyeur Éternel y creuse sans fin.':
+    'The Crypt of a Thousand Tombs: the Eternal Gravedigger digs there endlessly.',
+  'Fangeval : la boue est tiède et les champignons brillent. Les spores, elles, piquent.':
+    'Fangeval: the mud is warm and the mushrooms glow. The spores, though, sting.',
+  'Les Tréfonds Fongiques cachent la Reine des Spores. Brûle-la, si tu peux.':
+    'The Fungal Depths hide the Spore Queen. Burn her, if you can.',
+  'éclaireur': 'scout',
+  '[E] Commercer': '[E] Trade',
+  '[E] Descendre dans les Tréfonds': '[E] Descend into the Depths',
+  '[E] Remonter à la surface': '[E] Return to the surface',
+  'Seul l’hôte peut mener le groupe dans les Tréfonds ou à la surface.':
+    'Only the host can lead the group into the Depths or to the surface.',
+  'Les Tréfonds de Canaan': 'The Depths of Canaan',
+  'Retour à la surface': 'Back to the surface',
+  'Tu descends dans les Tréfonds : créatures, élites et boss y ont ton niveau. Remonte par n’importe quelle entrée (touche E).':
+    'You descend into the Depths: creatures, elites and bosses there match your level. Go back up through any entrance (E key).',
+  'à ton niveau': 'at your level',
+  'Quatre biomes sous l’île': 'Four biomes beneath the island',
+  'Forteresse de Durgrim (zone sûre)': 'Fortress of Durgrim (safe zone)',
+  'Entrées vers la surface': 'Entrances to the surface',
+  'créatures et boss à ton niveau ({n})': 'creatures and bosses at your level ({n})',
+  'Boss : {nom}': 'Boss: {nom}',
+  'entrée': 'entrance',
+  'le Soleil': 'the Sun',
+  'la Lune': 'the Moon',
+  'l’Étoile': 'the Star',
+  'le Cristal': 'the Crystal',
+  'Abaisse les leviers': 'Pull the levers',
+  'Foule les dalles': 'Step on the tiles',
+  '{nom} ouvre la marche': '{nom} leads the way',
+  '{nom} le suit': '{nom} follows',
+  'puis {nom}': 'then {nom}',
+  'et {nom} ferme le cortège': 'and {nom} closes the procession',
+  '« {texte}. » — {verbe} dans cet ordre.': '“{texte}.” — {verbe} in this order.',
+  'réservée': 'reserved',
+  'Gardien du sceau': 'Seal guardian',
+  'Sac plein : clé des secrets non récupérée.': 'Bag full: key of secrets not collected.',
+  '{nom} vaincu : clé des secrets dans ton sac ! Elle ouvre un coffre secret de l’île ({n}).':
+    '{nom} defeated: key of secrets in your bag! It opens a secret chest on the island ({n}).',
+  '{nom} : pas d’équipement cette fois.': '{nom}: no gear this time.',
+  '{nom} vaincu ({n}/{m}) — la barrière se dissipe.': '{nom} defeated ({n}/{m}) — the barrier fades.',
+  '{nom} vaincu ({n}/{m}) — la herse se lève.': '{nom} defeated ({n}/{m}) — the portcullis rises.',
+  'Ouvre d’abord le coffre des boss, juste à côté !': 'Open the bosses’ chest first, right next to it!',
+  'C’est l’hôte qui prend le portail : tout le groupe sort avec lui.':
+    'The host takes the portal: the whole group leaves with them.',
+  'Le sceau se brise : la porte de {nom} s’ouvre !': 'The seal breaks: {nom}’s door opens!',
+  'Un passage secret ! Le mur s’effondre… quelque chose rôde derrière.':
+    'A secret passage! The wall collapses… something lurks behind it.',
+  'Le levier s’abaisse ({n}/{m}).': 'The lever goes down ({n}/{m}).',
+  'La dalle s’illumine ({n}/{m}).': 'The tile lights up ({n}/{m}).',
+  'Mauvais ordre : les leviers se relèvent. Relis la stèle.':
+    'Wrong order: the levers go back up. Read the stele again.',
+  'Mauvais ordre : les dalles s’éteignent. Relis la stèle.':
+    'Wrong order: the tiles go dark. Read the stele again.',
+  'allume les {n} braseros éteints de cette aile': 'light the {n} unlit braziers in this wing',
+  'abaisse les {n} leviers de cette aile dans l’ordre gravé sur la stèle':
+    'pull the {n} levers in this wing in the order carved on the stele',
+  'foule les 4 dalles gravées dans l’ordre donné par la stèle':
+    'step on the 4 engraved tiles in the order given by the stele',
+  'vaincs les gardiens du sceau dans les salles voisines':
+    'defeat the seal guardians in the neighboring rooms',
+  'La porte de {nom} est scellée : {indice}.': '{nom}’s door is sealed: {indice}.',
+  'Brasero allumé ({n}/{m}).': 'Brazier lit ({n}/{m}).',
+  '[E] Sortir de l’instance': '[E] Leave the instance',
+  'Portail de retour': 'Return portal',
+  '[E] Examiner le mur fissuré': '[E] Examine the cracked wall',
+  '[E] Porte scellée': '[E] Sealed door',
+  '[E] Lire la stèle': '[E] Read the stele',
+  '[E] Allumer le brasero': '[E] Light the brazier',
+  '[E] Actionner le levier': '[E] Pull the lever',
+  '↟ SORTIE [E] ↟': '↟ EXIT [E] ↟',
+  '✦ ARÈNE ✦': '✦ ARENA ✦',
+  '✦ RAID ✦': '✦ RAID ✦'
 };

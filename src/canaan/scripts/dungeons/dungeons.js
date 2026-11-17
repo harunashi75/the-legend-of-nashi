@@ -1042,15 +1042,16 @@
     }
   }
   // Texte de la stèle : l'ordre des symboles, en énigme.
+  // Assemblée morceau par morceau dans la langue du jeu (tt) : une phrase à trous ne se traduit pas à l'affichage.
   function riddle(lock) {
-    const names = lock.order.map(id => SIGILS[id].name),
-      verb = lock.type === 'levers' ? 'Abaisse les leviers' : 'Foule les dalles';
+    const names = lock.order.map(id => tt(SIGILS[id].name)),
+      verb = lock.type === 'levers' ? tt('Abaisse les leviers') : tt('Foule les dalles');
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-    const lines = [cap(names[0]) + ' ouvre la marche'];
+    const lines = [tt('{nom} ouvre la marche', { nom: cap(names[0]) })];
     for (let k = 1; k < names.length - 1; k++)
-      lines.push(k === 1 ? names[k] + ' le suit' : 'puis ' + names[k]);
-    lines.push('et ' + names[names.length - 1] + ' ferme le cortège');
-    return '📜 « ' + lines.join(', ') + '. » — ' + verb + ' dans cet ordre.';
+      lines.push(k === 1 ? tt('{nom} le suit', { nom: names[k] }) : tt('puis {nom}', { nom: names[k] }));
+    lines.push(tt('et {nom} ferme le cortège', { nom: names[names.length - 1] }));
+    return '📜 ' + tt('« {texte}. » — {verbe} dans cet ordre.', { texte: lines.join(', '), verbe: verb });
   }
   function lockHint(i, s) {
     const lock = planFor(i).locks[s],
