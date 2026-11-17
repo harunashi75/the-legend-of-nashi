@@ -6,10 +6,12 @@
 // network : identifiant d'invité (créé une fois), pseudo et adresse du relais du coopératif.
 // settings : réglages d'affichage du menu Paramètres (secousses de l'écran).
 // keybinds : touches du clavier choisies pour chaque action (Paramètres → Clavier).
+// language : langue du jeu choisie dans Paramètres → Interface ({ lang: 'fr' | 'en' }).
 const keys = Object.freeze({
   audio: 'canaan_audio_v1729',
   layout: 'canaan_layout_v1729',
   keybinds: 'canaan_keybinds_v1',
+  language: 'canaan_language_v1',
   network: 'canaan_network_v1',
   settings: 'canaan_settings_v1'
 });

@@ -7,6 +7,7 @@
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 import { CANAAN_ICON_ART } from './icon-art.js';
 import { svgPen } from './svg-pen.js';
+import { translateText } from '../i18n/i18n.js';
 
 // Plume commune (contour d'encre, reflets) réglée pour la grille 24 × 24 des émojis.
 const { ink: INK, O, p, c, r, l, hi, g, star } = svgPen();
@@ -1143,11 +1144,16 @@ const strip = text =>
 const SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'TITLE', 'svg', 'SVG']);
 const STRIP_ONLY = new Set(['OPTION']);
 const ATTRS = ['title', 'aria-label', 'placeholder'];
+// Chaque texte est d'abord traduit (client/i18n : rien en français), puis ses émojis deviennent des icônes.
 function fixText(node) {
-  const text = node.nodeValue;
-  if (!text || !TEST.test(text)) return;
   const parent = node.parentNode;
   if (!parent || SKIP.has(parent.nodeName) || parent.closest?.('svg')) return;
+  const raw = node.nodeValue;
+  const text = translateText(raw);
+  if (!text || !TEST.test(text)) {
+    if (text !== raw) node.nodeValue = text;
+    return;
+  }
   if (STRIP_ONLY.has(parent.nodeName)) {
     node.nodeValue = strip(text);
     return;
@@ -1162,7 +1168,10 @@ function fixText(node) {
 function fixAttrs(el) {
   for (const a of ATTRS) {
     const v = el.getAttribute?.(a);
-    if (v && TEST.test(v)) el.setAttribute(a, strip(v));
+    if (!v) continue;
+    const text = translateText(v);
+    if (TEST.test(text)) el.setAttribute(a, strip(text));
+    else if (text !== v) el.setAttribute(a, text);
   }
 }
 function fixTree(root) {
@@ -1184,7 +1193,10 @@ function fixTree(root) {
 function watch() {
   if (typeof MutationObserver === 'undefined' || !document.body || !document.createTreeWalker) return;
   fixTree(document.body);
-  if (document.title && TEST.test(document.title)) document.title = strip(document.title);
+  if (document.title) {
+    const title = translateText(document.title);
+    document.title = TEST.test(title) ? strip(title) : title;
+  }
   new MutationObserver(list => {
     for (const m of list) {
       if (m.type === 'characterData') fixText(m.target);
@@ -1312,18 +1324,19 @@ function patchCanvas() {
     }
     ctx.textAlign = align;
   }
+  // Textes du canevas : traduits (client/i18n), puis dessinés avec leurs icônes.
   proto.fillText = function (text, x, y, maxWidth) {
-    const s = String(text);
-    if (!TEST.test(s)) return fill.apply(this, arguments);
+    const s = translateText(String(text));
+    if (!TEST.test(s)) return fill.call(this, s, x, y, ...(maxWidth === undefined ? [] : [maxWidth]));
     draw(this, s, x, y, true);
   };
   proto.strokeText = function (text, x, y, maxWidth) {
-    const s = String(text);
-    if (!TEST.test(s)) return stroke.apply(this, arguments);
+    const s = translateText(String(text));
+    if (!TEST.test(s)) return stroke.call(this, s, x, y, ...(maxWidth === undefined ? [] : [maxWidth]));
     draw(this, s, x, y, false);
   };
   proto.measureText = function (text) {
-    const s = String(text);
+    const s = translateText(String(text));
     return measure.call(this, TEST.test(s) ? s.replace(RX, '　') : s);
   };
   // Images préparées d'avance : la première apparition d'une icône est déjà nette.

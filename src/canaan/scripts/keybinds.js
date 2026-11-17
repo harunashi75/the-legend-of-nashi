@@ -112,7 +112,8 @@
   function label(key) {
     const k = norm(key);
     if (!k) return '—';
-    if (NAMES[k]) return NAMES[k];
+    // Noms des touches dans la langue du jeu (« touche|Retour » : Retour arrière, pas le bouton Retour).
+    if (NAMES[k]) return tt(NAMES[k], null, 'touche');
     return k.length === 1 ? k.toUpperCase() : k.charAt(0).toUpperCase() + k.slice(1);
   }
   const labelOf = id => label(primary(id));

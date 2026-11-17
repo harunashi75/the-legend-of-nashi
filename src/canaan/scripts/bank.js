@@ -183,13 +183,19 @@
               esc(it.id) +
               '" data-action="bankWithdraw" data-ref="' +
               esc(it.id) +
-              '" title="Reprendre"'
+              '" title="' +
+              tt('Reprendre', null, 'banque') +
+              '"'
           )
         ),
         ...stackTiles(bank).map(p =>
           stackTile(
             p,
-            'data-action="bankWithdraw" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Reprendre"'
+            'data-action="bankWithdraw" data-ref="' +
+              esc(CANAAN_BAG.token(p)) +
+              '" title="' +
+              tt('Reprendre', null, 'banque') +
+              '"'
           )
         )
       ];

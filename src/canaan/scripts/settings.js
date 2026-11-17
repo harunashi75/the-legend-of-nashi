@@ -1,7 +1,7 @@
 // Paramètres (écran d'accueil, menu pause, barre du haut), rangés en onglets : Audio (bouton et volumes, gérés par
 // audio.js), Affichage (plein écran, résolution de la fenêtre, échelle, synchronisation verticale), Graphismes (lueurs,
-// particules et vent, limite et compteur d'images par seconde), Interface (taille des textes, chiffres de dégâts,
-// secousses de l'écran), Clavier (touches réglables, keybinds.js), Manette (commandes, vibrations), et Quitter le jeu.
+// particules et vent, limite et compteur d'images par seconde), Interface (langue, taille des textes, chiffres de
+// dégâts, secousses de l'écran), Clavier (touches réglables, keybinds.js), Manette (commandes, vibrations), et Quitter le jeu.
 // Dans l'application de bureau, la fenêtre est réglée par Electron (canaanDesktop.display) ; dans un navigateur, seul
 // le plein écran est possible. Les réglages du jeu sont gardés dans les préférences de l'appareil.
 (() => {
@@ -51,6 +51,7 @@
     );
     setText('setZoom', state ? Math.round(state.zoom * 100) + ' %' : '—');
     setText('setTextScale', Math.round(textScale * 100) + ' %');
+    setText('setLanguage', CANAAN_I18N.languages[CANAAN_I18N.lang()]);
     setText('setVsync', state ? onOff(state.vsync, '✓ Activée', 'Désactivée') : '—', state?.vsync);
     const restart = $('setRestartRow');
     if (restart) restart.hidden = !state || state.vsync === state.vsyncActive;
@@ -149,6 +150,15 @@
       canaanDisplay.fpsCap = FPS_CAPS[(i + dir + FPS_CAPS.length) % FPS_CAPS.length];
       save();
       return refresh();
+    }
+    // Langue : gardée, puis la partie est sauvegardée et le jeu redémarre pour traduire tous les textes.
+    if (key === 'language') {
+      const codes = Object.keys(CANAAN_I18N.languages);
+      const i = codes.indexOf(CANAAN_I18N.lang());
+      const next = codes[(i + dir + codes.length) % codes.length];
+      if (!CANAAN_I18N.choose(next)) return toast('Impossible de garder la langue choisie.');
+      if (started) saveGame();
+      return location.reload();
     }
     if (key === 'textscale') {
       const i = TEXT_SCALES.indexOf(textScale);

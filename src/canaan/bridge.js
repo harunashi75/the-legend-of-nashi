@@ -40,6 +40,7 @@ import * as dwarfArt from './client/art/dwarf-art.js';
 import * as preferences from './client/preferences.js';
 import * as music from './client/audio/music.js';
 import * as gamepad from './client/input/gamepad.js';
+import * as i18n from './client/i18n/i18n.js';
 
 Object.assign(
   globalThis,
@@ -77,5 +78,6 @@ Object.assign(
   dwarfArt,
   preferences,
   music,
-  gamepad
+  gamepad,
+  i18n
 );

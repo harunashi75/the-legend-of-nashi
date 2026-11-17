@@ -340,7 +340,8 @@ function chat(who, msg) {
 }
 function showChat(who, msg) {
   let d = document.createElement('div');
-  d.textContent = (who ? '[' + who + '] ' : '') + msg;
+  // L'expéditeur (« Système », un pseudo) : traduit s'il est connu ; le message passe par la traduction de l'affichage.
+  d.textContent = (who ? '[' + tt(who) + '] ' : '') + msg;
   chatLog.appendChild(d);
   chatLog.scrollTop = 1e9;
   while (chatLog.children.length > 40) chatLog.firstChild.remove();
