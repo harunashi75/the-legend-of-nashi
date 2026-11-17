@@ -1,3 +1,4 @@
+// @ts-check
 // Les quatre classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
 // Le joueur équipe 5 talents au plus parmi les 10 de sa classe (un emplacement aux niveaux 1, 10, 20, 30 et 40).
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.

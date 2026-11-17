@@ -1,3 +1,4 @@
+// @ts-check
 // Format des sauvegardes (schéma 10) : validation, aventure neuve, résumé pour le menu, importation du schéma 9.
 // Module partagé pur (shared/save) : aucun stockage ni fichier ; le jeu et l'application de bureau l'utilisent.
 import { ACTIVE_GEAR_SLOTS } from '../data/equipment.js';
@@ -22,14 +23,27 @@ export const HERO_FIELDS = Object.freeze([
 // Emplacements sauvegardés : les emplacements actifs et l'arme de réserve.
 export const SAVED_GEAR_SLOTS = Object.freeze([...ACTIVE_GEAR_SLOTS, 'weapon2']);
 
+/**
+ * @param {unknown} slot
+ * @returns {boolean}
+ */
 export function isValidSlot(slot) {
-  return Number.isInteger(slot) && slot >= 1 && slot <= SLOT_COUNT;
+  return typeof slot === 'number' && Number.isInteger(slot) && slot >= 1 && slot <= SLOT_COUNT;
 }
 // Une sauvegarde est valide si elle est au schéma courant et contient le héros de l'hôte.
+/**
+ * @param {any} data sauvegarde lue (non fiable)
+ * @returns {boolean}
+ */
 export function isValidSave(data) {
   return !!data && data.schema === SAVE_SCHEMA && !!data.heros?.hote && typeof data.heros.hote === 'object';
 }
 // Nom d'aventure ou pseudo : sans caractère de contrôle ni chevron, 32 caractères au plus.
+/**
+ * @param {unknown} name
+ * @param {number | string} slot numéro du slot, utilisé pour le nom par défaut
+ * @returns {string}
+ */
 export function cleanAdventureName(name, slot) {
   const text = String(name ?? '')
     .replace(/[\u0000-\u001f<>]/g, '')
@@ -38,8 +52,16 @@ export function cleanAdventureName(name, slot) {
   return text || 'Aventure ' + slot;
 }
 // Classe choisie à la création (shared/data/classes.js), ou aucune (choisie en jeu).
-const knownClass = id => (CLASS_IDS.includes(id) ? id : null);
+/** @type {(id: unknown) => string | null} */
+const knownClass = id => (typeof id === 'string' && CLASS_IDS.includes(id) ? id : null);
 // Héros neuf : équipement de départ dans le sac, sa classe sans talent, aucun Rubis.
+/**
+ * @param {object} options
+ * @param {{ x: number, y: number }} options.spawn point d'apparition, en pixels
+ * @param {number} options.baseMana
+ * @param {unknown} [options.look] apparence choisie (vérifiée)
+ * @param {string | null} [options.classe]
+ */
 export function freshHero({ spawn, baseMana, look, classe = null }) {
   return {
     // Apparence choisie à la création (voir shared/data/looks.js).
@@ -72,6 +94,17 @@ export function freshHero({ spawn, baseMana, look, classe = null }) {
   };
 }
 // Aventure neuve : un monde vierge, le héros de l'hôte, aucun invité.
+/**
+ * @param {object} options
+ * @param {unknown} options.nom
+ * @param {number} options.slot
+ * @param {string} options.version
+ * @param {number} options.now horodatage (ms)
+ * @param {{ x: number, y: number }} options.spawn
+ * @param {number} options.baseMana
+ * @param {unknown} [options.look]
+ * @param {string | null} [options.classe]
+ */
 export function freshSave({ nom, slot, version, now, spawn, baseMana, look, classe = null }) {
   return {
     schema: SAVE_SCHEMA,
@@ -85,6 +118,10 @@ export function freshSave({ nom, slot, version, now, spawn, baseMana, look, clas
   };
 }
 // Résumé d'un slot pour le menu : vide, illisible, ou aventure (nom, niveau, classe, or, pseudos des invités).
+/**
+ * @param {string | null | undefined} raw texte JSON du slot
+ * @param {number} slot
+ */
 export function summarizeSave(raw, slot) {
   if (raw === null || raw === undefined) return { slot, state: 'vide' };
   let data;
@@ -111,7 +148,12 @@ export function summarizeSave(raw, slot) {
   };
 }
 // Importation unique de l'ancienne partie du navigateur : schéma 9 → schéma 10, héros de l'hôte, aucun invité.
+/**
+ * @param {any} data ancienne partie du navigateur (schéma 9, non fiable)
+ * @param {{ version: string, now: number }} options
+ */
 export function convertLegacySave(data, { version, now }) {
+  /** @type {Record<string, unknown>} */
   const hote = {};
   for (const key of HERO_FIELDS) if (data[key] !== undefined) hote[key] = data[key];
   // Le héros importé prendra au chargement le niveau de sa meilleure pièce ; le résumé l'annonce déjà.

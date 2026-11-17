@@ -1,3 +1,4 @@
+// @ts-check
 // Économie : récompenses par source et prix des agrandissements du sac. Plus de matériaux de forge : la puissance
 // vient des objets lâchés par les monstres, les boss, les donjons et les raids.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.

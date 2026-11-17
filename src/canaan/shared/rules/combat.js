@@ -1,8 +1,13 @@
+// @ts-check
 // Règles de combat pures : dégâts infligés et reçus par un héros (Défense, Résistance, déviation, critiques).
 import { defenseReduction, levelGapFactor } from './stats.js';
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 
 // Chance de coup critique d'un ennemi : boss de monde 13 %, boss 10 %, monstre 4 %.
+/**
+ * @param {{ worldBoss?: boolean, boss?: boolean } | null | undefined} enemy
+ * @returns {number}
+ */
 export function enemyCritChance(enemy) {
   return enemy?.worldBoss ? 0.13 : enemy?.boss ? 0.1 : 0.04;
 }
@@ -10,6 +15,15 @@ export function enemyCritChance(enemy) {
 // dodge) ; attackerLevel : niveau de l'ennemi (la Défense compte moins contre un ennemi de haut niveau).
 // rng est tiré deux fois, dans cet ordre : déviation (dégâts ÷ 2), puis coup critique ennemi (×1,5).
 // critFactor réduit le bonus critique (Rubis Volonté, 1 sinon).
+/**
+ * @param {number} raw dégâts bruts
+ * @param {{ defense: number, resist?: number, guard?: number, dodge?: number }} stats
+ * @param {number} attackerLevel
+ * @param {() => number} rng
+ * @param {number} critChance dans [0, 1]
+ * @param {number} [critFactor]
+ * @returns {{ damage: number, deflected: boolean, crit: boolean }}
+ */
 export function mitigateIncoming(raw, stats, attackerLevel, rng, critChance, critFactor = 1) {
   let damage =
       raw *
@@ -33,6 +47,15 @@ export function mitigateIncoming(raw, stats, attackerLevel, rng, critChance, cri
 // value : dégâts de base ; stats : statistiques du héros (level, crit, critPower, damageBonus) ; target : le
 // monstre (niveau, élite, boss) ; rng est tiré une fois, pour le critique.
 // armorFactor et critFactor : Rubis du héros (Brise-armure, Précision), 1 sinon.
+/**
+ * @param {unknown} value dégâts de base
+ * @param {{ level: number, crit: number, critPower: number, damageBonus?: number }} stats
+ * @param {{ level?: number, elite?: boolean, boss?: boolean, worldBoss?: boolean }} target
+ * @param {() => number} rng
+ * @param {number} [armorFactor]
+ * @param {number} [critFactor]
+ * @returns {{ damage: number, crit: boolean }}
+ */
 export function resolveOutgoing(value, stats, target, rng, armorFactor = 1, critFactor = 1) {
   let damage = Math.max(1, Number(value) || 1) * (1 + Math.max(0, stats.damageBonus || 0) / 100);
   damage *= levelGapFactor(stats.level, target.level || stats.level);
@@ -43,11 +66,20 @@ export function resolveOutgoing(value, stats, target, rng, armorFactor = 1, crit
   return { damage: Math.max(1, Math.round(damage)), crit };
 }
 // Puissance d'attaque d'un héros (dégâts de base de ses coups) d'après sa statistique d'attaque.
+/**
+ * @param {number} attack
+ * @returns {number}
+ */
 export function heroPower(attack) {
   return Math.max(8, Math.round(18 + (attack - 18) * 0.75 + attack * 0.25));
 }
 // Puissance magique d'un héros (bâton) : la même que la Puissance d'attaque (l'Intelligence n'existe plus sur
 // les objets ; elle s'ajoute si un effet en donne). Le bâton n'est plus 40 % plus faible que les autres armes.
+/**
+ * @param {number} attack
+ * @param {number} [intellect]
+ * @returns {number}
+ */
 export function heroMagicPower(attack, intellect = 0) {
   return Math.max(8, Math.round(heroPower(attack) + Math.max(0, intellect) * 0.85));
 }

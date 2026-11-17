@@ -1,3 +1,4 @@
+// @ts-check
 // Protocole du coopératif : messages entre l'hôte, le relais et les invités, et leur vérification.
 // Module partagé pur (shared/net) : aucun réseau ici ; le relais (Node) et le jeu (navigateur) l'utilisent.
 // Les invités envoient des intentions ; l'hôte vérifie, simule et renvoie l'état du monde (10 fois par seconde).
@@ -15,11 +16,19 @@ export const DEFAULT_RELAY = 'ws://localhost:8787';
 // Objets au plus dans une offre d'échange.
 export const TRADE_ITEMS = 12;
 
+/**
+ * @param {() => number} rng
+ * @returns {string}
+ */
 export function makeRoomCode(rng) {
   let code = '';
   for (let i = 0; i < 6; i++) code += ROOM_ALPHABET[Math.floor(rng() * ROOM_ALPHABET.length)];
   return code;
 }
+/**
+ * @param {unknown} text
+ * @returns {string | null} null si illisible
+ */
 export function normalizeRoomCode(text) {
   const code = String(text ?? '')
     .toUpperCase()
@@ -29,6 +38,10 @@ export function normalizeRoomCode(text) {
 // Adresse du relais saisie ou collée par un joueur : ws:// ou wss://, avec un nom d'hôte et un port facultatif.
 // Un lien https:// devient wss://, http:// devient ws:// ; sans préfixe, wss:// pour une adresse
 // sans port (tunnel HTTPS) et ws:// avec un port. Renvoie null si l'adresse n'est pas lisible.
+/**
+ * @param {unknown} text
+ * @returns {string | null} null si illisible
+ */
 export function normalizeRelayUrl(text) {
   let s = String(text ?? '').trim();
   if (!s) return null;
@@ -42,10 +55,18 @@ export function normalizeRelayUrl(text) {
   return m[1].toLowerCase() + '://' + m[2].toLowerCase() + (m[3] ? ':' + m[3] : '');
 }
 // Invitation à partager : adresse du relais et code du salon, dans un texte lisible.
+/**
+ * @param {string} relay
+ * @param {string} code
+ * @returns {string}
+ */
 export function makeInvitation(relay, code) {
   return 'Rejoins ma partie The Legend of Nashi ! Relais : ' + relay + ' · Code : ' + code;
 }
 // Invitation collée par un invité (ou n'importe quel texte) : relais et code retrouvés si présents.
+/**
+ * @param {unknown} text
+ */
 export function parseInvitation(text) {
   const s = String(text ?? '');
   // Adresse avec préfixe, sinon une adresse nue avec son port (100.120.239.59:8787, mon-pc.tail1234.ts.net:8787).
@@ -61,9 +82,17 @@ export function parseInvitation(text) {
 // Identifiant d'un invité : créé une fois par son application, puis gardé dans sa configuration.
 export const GUEST_ID = /^[a-zA-Z][\w-]{5,63}$/;
 // Toujours tester un identifiant avec isGuestId : RegExp.test convertirait undefined en texte « undefined ».
+/**
+ * @param {unknown} id
+ * @returns {boolean}
+ */
 export function isGuestId(id) {
   return typeof id === 'string' && GUEST_ID.test(id);
 }
+/**
+ * @param {() => number} rng
+ * @returns {string}
+ */
 export function makeGuestId(rng) {
   let id = 'g-';
   for (let i = 0; i < 16; i++) id += '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(rng() * 36)];
@@ -90,6 +119,10 @@ const TYPES = new Set([
 ]);
 // Messages qu'un invité a le droit d'envoyer (le relais les transmet à l'hôte, les autres sont ignorés).
 export const GUEST_TYPES = Object.freeze(['intent', 'action', 'chat']);
+/**
+ * @param {unknown} text message brut du réseau
+ * @returns {any} objet lu, à vérifier, ou null
+ */
 export function parseMessage(text) {
   if (typeof text !== 'string' || text.length > MESSAGE_LIMIT) return null;
   let data;
@@ -101,11 +134,16 @@ export function parseMessage(text) {
   return data && typeof data === 'object' && !Array.isArray(data) && TYPES.has(data.t) ? data : null;
 }
 
+/** @type {(v: unknown, fallback?: number) => number} */
 const finite = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
+/** @type {(v: number, a: number, b: number) => number} */
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Intention d'un invité, vérifiée par l'hôte : direction (-1, 0 ou 1), attaque de base, compétence 0 à 3, point visé,
 // roulade (direction en -1..1) et numéro de séquence (pour que l'invité corrige sa position prédite).
 // L'invité n'envoie jamais de statistiques, d'or, d'objets ni de Rubis : seulement ce qu'il veut faire.
+/**
+ * @param {any} raw intention reçue d'un invité (non fiable : chaque champ est vérifié)
+ */
 export function sanitizeIntent(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const d = r.dodge && typeof r.dodge === 'object' ? r.dodge : null;
@@ -124,6 +162,10 @@ export function sanitizeIntent(raw) {
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
 export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+/**
+ * @param {any} raw action reçue d'un invité (non fiable : chaque champ est vérifié)
+ * @returns {Record<string, any> | null} action mise en forme, ou null si elle est invalide
+ */
 export function sanitizeAction(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
@@ -132,7 +174,8 @@ export function sanitizeAction(raw) {
     return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
   if (r.op === 'switch') return { op: 'switch' };
   // Classe, talents et Rubis : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
-  const word = v => (typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null);
+  const word = /** @param {unknown} v */ v =>
+    typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null;
   if (r.op === 'class-choose') return word(r.cls) ? { op: r.op, cls: r.cls } : null;
   if (r.op === 'talent-equip' || r.op === 'talent-unequip')
     return Number.isInteger(r.talent) && r.talent >= 0 && r.talent <= 9
@@ -140,7 +183,8 @@ export function sanitizeAction(raw) {
       : null;
   if (r.op === 'class-special') return { op: r.op };
   // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
-  const questId = v => (Number.isInteger(v) && v >= 0 && v <= 30 ? v : null);
+  const questId = /** @param {unknown} v */ v =>
+    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 30 ? v : null;
   if (r.op === 'quest-accept' || r.op === 'quest-turnin' || r.op === 'quest-track')
     return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
   if (r.op === 'quest-choice')
@@ -194,7 +238,8 @@ export function sanitizeAction(raw) {
   // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;
   // l'hôte vérifie la place et le catalogue.
   if (r.op === 'house-door') return { op: 'house-door' };
-  const cell = v => Number.isInteger(v) && v >= 0 && v <= 20;
+  const cell = /** @param {unknown} v */ v =>
+    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 20;
   const turn = Number.isInteger(r.r) && r.r >= 0 && r.r <= 3 ? r.r : 0;
   if (r.op === 'house-place')
     return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y)
@@ -243,7 +288,7 @@ export function sanitizeAction(raw) {
     if (
       !items ||
       items.length > TRADE_ITEMS ||
-      !items.every(x => typeof x === 'string' && x.length > 0 && x.length <= 96)
+      !items.every(/** @param {unknown} x */ x => typeof x === 'string' && x.length > 0 && x.length <= 96)
     )
       return null;
     return Number.isInteger(r.gold) && r.gold >= 0 && r.gold <= 1e12
@@ -253,6 +298,10 @@ export function sanitizeAction(raw) {
   return null;
 }
 // Pseudo d'un invité : sans caractère de contrôle ni chevron, 24 caractères au plus.
+/**
+ * @param {unknown} text
+ * @returns {string}
+ */
 export function cleanPseudo(text) {
   const pseudo = String(text ?? '')
     .replace(/[\u0000-\u001f<>]/g, '')
@@ -261,6 +310,10 @@ export function cleanPseudo(text) {
   return pseudo || 'Invité';
 }
 // Message de chat : 200 caractères au plus.
+/**
+ * @param {unknown} text
+ * @returns {string}
+ */
 export function cleanChat(text) {
   return String(text ?? '')
     .replace(/[\u0000-\u001f]/g, ' ')
@@ -269,7 +322,12 @@ export function cleanChat(text) {
 }
 
 // Instantané envoyé par l'hôte : héros, monstres, butins au sol et projectiles, avec des nombres arrondis.
+/** @type {(v: unknown) => number} */
 const round = v => Math.round(finite(v));
+/**
+ * @param {string} id
+ * @param {any} hero héros du jeu (game.heroes)
+ */
 export function heroSnapshot(id, hero) {
   const p = hero.player;
   return {
@@ -300,7 +358,12 @@ export function heroSnapshot(id, hero) {
   };
 }
 const MONSTER_LOOK = ['look', 'pal', 'scale', 'mobColor', 'lookOpts'];
+/**
+ * @param {any} m monstre du jeu (game.world.monsters)
+ * @returns {Record<string, any>}
+ */
 export function monsterSnapshot(m) {
+  /** @type {Record<string, any>} */
   const out = {
     k: m.netId,
     t: m.t,

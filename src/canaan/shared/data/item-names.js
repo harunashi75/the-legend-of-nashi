@@ -1,3 +1,4 @@
+// @ts-check
 // Noms officiels des objets (rareté × arme ou emplacement) et passifs des trois artéfacts.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Noms officiels extraits du tableau fourni : rareté × famille d'arme.

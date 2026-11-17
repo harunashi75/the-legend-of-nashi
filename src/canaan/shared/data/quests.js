@@ -1,3 +1,4 @@
+// @ts-check
 // Histoire « Les Échos de l'Aurore » : six chapitres (un par zone), 30 quêtes (12 principales, 18 secondaires).
 // Chaque quête : PNJ, lieu (site), objectifs (chacun avec sa mécanique), dialogues évolutifs et récompense.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.

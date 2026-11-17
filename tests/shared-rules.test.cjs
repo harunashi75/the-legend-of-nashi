@@ -82,7 +82,9 @@ test('Architecture : shared/ pur (aucun navigateur, aucun autre dossier), charge
   }
   // Chargeable sans écran (phase 2 : simulation dans Node).
   const mod=await import(require('node:url').pathToFileURL(file).href);
-  assert.ok(Object.keys(mod).length>0,rel);
+  // Un module de types JSDoc seuls (shared/types.js, « export {}; ») n'exporte aucune valeur.
+  const typesOnly=/^export \{\};?$/m.test(code)&&!/^export (?:const|function|let|class)\b/m.test(code);
+  assert.ok(typesOnly||Object.keys(mod).length>0,rel);
  }
  // Le pont importe uniquement des modules partagés, et chaque export arrive dans le jeu.
  const bridge=fs.readFileSync(path.join(root,'bridge.js'),'utf8');

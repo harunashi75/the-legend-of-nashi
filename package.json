@@ -10,6 +10,7 @@
     "check": "python3 tools/check_canaan.py",
     "test": "node --test --test-timeout=120000 \"tests/*.test.cjs\"",
     "lint": "eslint .",
+    "typecheck": "tsc -p src/canaan/shared/jsconfig.json",
     "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "start": "python3 tools/build_canaan.py && node tools/run_app.cjs",
@@ -24,7 +25,8 @@
     "eslint-scope": "9.1.2",
     "espree": "11.2.0",
     "globals": "17.14.0",
-    "prettier": "3.9.10"
+    "prettier": "3.9.10",
+    "typescript": "6.0.3"
   },
   "dependencies": {
     "ws": "8.22.0"

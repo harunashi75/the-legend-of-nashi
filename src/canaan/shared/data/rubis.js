@@ -1,3 +1,4 @@
+// @ts-check
 // Catalogue des Rubis : six familles de huit, emplacements et compétences sans dégâts.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 export const RUBIS_FAMILIES = Object.freeze([

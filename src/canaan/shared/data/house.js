@@ -1,3 +1,4 @@
+// @ts-check
 // Maison et pièces intérieures : catalogue des meubles (sans leur dessin), catégories du mode décoration,
 // meubles fixes et habitants de chaque pièce. Le dessin des meubles est dans scripts/house/render.js.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.

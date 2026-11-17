@@ -1,3 +1,4 @@
+// @ts-check
 // Arène des Épreuves : douze vagues, multiplicateurs, préparation du coopératif et les douze boss.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 export const ARENA_WAVES = 12;
@@ -17,6 +18,7 @@ export const ARENA_GROUP = Object.freeze([
 export const ARENA_BASE = Object.freeze({ hp: 15000, hit: 62 });
 // Cadence : les boss enchaînent leurs attaques de plus en plus vite (vague 1 : ×1, vague 12 : ×0,76 d'intervalle).
 // Les annonces au sol gardent leur durée : chaque attaque reste lisible et esquivable.
+/** @type {(wave: number) => number} */
 export const arenaTempo = wave => 1 - 0.022 * (wave - 1);
 export const ARENA_TIERS = Object.freeze([
   'Épreuves des champions',

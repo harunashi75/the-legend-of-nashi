@@ -1,3 +1,4 @@
+// @ts-check
 // Apparence des héros : sexe, race, peau, coiffure, couleurs des cheveux et des yeux, tenue, et l'apparence portée
 // (transmogrification, shared/data/skins.js ; vide : la tenue de création).
 // Purement visuel (aucun effet en combat). Module partagé pur : le jeu, le réseau et les tests l'utilisent.
@@ -105,10 +106,16 @@ export const LOOK_OUTFITS = Object.freeze([
   }
 ]);
 
-const pick = (list, value, fallback) => (list.includes(value) ? value : fallback);
+/** @type {<T>(list: readonly T[], value: unknown, fallback: T) => T} */
+const pick = (list, value, fallback) =>
+  list.includes(/** @type {any} */ (value)) ? /** @type {any} */ (value) : fallback;
+/** @type {(list: ReadonlyArray<{ id: string }>) => string[]} */
 const ids = list => list.map(x => x.id);
 
 // Apparence par défaut : celle du héros d'avant la création de personnage (humain, acier et pourpre).
+/**
+ * @returns {import('../types.js').Look}
+ */
 export function defaultLook() {
   return {
     sex: 'm',
@@ -121,6 +128,10 @@ export function defaultLook() {
   };
 }
 // Apparence vérifiée : chaque champ doit être une valeur connue (peau : une teinte de sa race).
+/**
+ * @param {any} raw apparence lue (non fiable : chaque champ est vérifié)
+ * @returns {import('../types.js').Look}
+ */
 export function sanitizeLook(raw) {
   const base = defaultLook();
   if (!raw || typeof raw !== 'object') return base;
@@ -138,7 +149,12 @@ export function sanitizeLook(raw) {
   };
 }
 // Apparence au hasard (rng : fonction qui renvoie un nombre dans [0, 1)).
+/**
+ * @param {() => number} [rng]
+ * @returns {import('../types.js').Look}
+ */
 export function randomLook(rng = Math.random) {
+  /** @type {<T>(list: readonly T[]) => T} */
   const one = list => list[Math.floor(rng() * list.length) % list.length];
   const race = one(LOOK_RACES);
   return sanitizeLook({
@@ -153,18 +169,30 @@ export function randomLook(rng = Math.random) {
 }
 // Forme compacte pour le réseau et le cache des sprites : « m|humain|#f0c7a0|court|#7d5140|#202938|acier », suivie de
 // « |dragon » quand une apparence est portée.
+/** @type {ReadonlyArray<keyof import('../types.js').Look>} */
 const ORDER = ['sex', 'race', 'skin', 'hairStyle', 'hair', 'eyes', 'outfit', 'wear'];
+/**
+ * @param {unknown} look
+ * @returns {string}
+ */
 export function encodeLook(look) {
   const clean = sanitizeLook(look);
   return ORDER.filter(key => key !== 'wear' || clean.wear)
     .map(key => clean[key])
     .join('|');
 }
+/**
+ * @param {unknown} text
+ * @returns {import('../types.js').Look}
+ */
 export function decodeLook(text) {
   if (typeof text !== 'string' || text.length > 120) return defaultLook();
   const parts = text.split('|');
   return sanitizeLook(Object.fromEntries(ORDER.map((key, i) => [key, parts[i]])));
 }
+/**
+ * @param {unknown} id
+ */
 export function lookOutfit(id) {
   return LOOK_OUTFITS.find(o => o.id === id) || LOOK_OUTFITS[0];
 }

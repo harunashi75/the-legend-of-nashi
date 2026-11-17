@@ -36,6 +36,9 @@ jobs:
       - name: ESLint
         run: npm run lint
 
+      - name: Types de shared/ (TypeScript, JSDoc)
+        run: npm run typecheck
+
       - name: Mise en forme (Prettier)
         run: npm run format:check
 

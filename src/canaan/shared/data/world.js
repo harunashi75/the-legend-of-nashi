@@ -1,3 +1,4 @@
+// @ts-check
 // Monde : donjons et raids, monstres ordinaires, boss de monde et leur délai de réapparition.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';

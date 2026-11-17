@@ -1,3 +1,4 @@
+// @ts-check
 // Apparences (transmogrification) : des tenues complètes, purement visuelles, qu'on trouve en jouant et qu'on porte
 // par-dessus son équipement. Une apparence est un ensemble : corps (robe, armure, salopette…), coiffe, dos (cape,
 // ailes, carquois…), épaulières et effets vivants. Plus la qualité est haute, plus la tenue est travaillée : une
@@ -466,6 +467,9 @@ export const SKINS = deepFreeze([
   }
 ]);
 export const SKIN_IDS = Object.freeze(SKINS.map(s => s.id));
+/**
+ * @param {unknown} id
+ */
 export function skinById(id) {
   return SKINS.find(s => s.id === id) || null;
 }

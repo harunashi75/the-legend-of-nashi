@@ -1,3 +1,4 @@
+// @ts-check
 // Donjons, raids et Arène : structure de chaque instance (forme du plan, dangers, décors posés, type de porte),
 // créatures qui la peuplent (nom, silhouette, palette), et constantes de l'exploration. Leur apparence (couleurs des
 // sols et des murs, lumière, flammes, runes, bannières, particules) est dans scripts/dungeons.js ; leurs règles

@@ -1,3 +1,4 @@
+// @ts-check
 // Statistiques et progression : niveaux du personnage (1 à 60), statistiques des équipements et zones de niveau.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
@@ -13,6 +14,7 @@ export const PRIMARY_STATS = deepFreeze({
   defense: { icon: '⟦st_defense⟧', name: 'Défense', desc: 'Réduit les dégâts reçus.' },
   vitality: { icon: '⟦st_vitality⟧', name: 'Vitalité', desc: 'Augmente les PV maximum.' }
 });
+/** @type {readonly string[]} */
 export const PRIMARY_KEYS = Object.freeze(Object.keys(PRIMARY_STATS));
 // Six statistiques secondaires : deux différentes par équipement, tirées au hasard.
 export const SECONDARY_STATS = deepFreeze({
@@ -31,8 +33,10 @@ export const SECONDARY_STATS = deepFreeze({
   healing: { icon: '⟦st_healing⟧', name: 'Soin', desc: 'Augmente les soins effectués.' },
   resist: { icon: '⟦st_resist⟧', name: 'Résistance', desc: 'Réduit les dégâts reçus.' }
 });
+/** @type {readonly string[]} */
 export const SECONDARY_KEYS = Object.freeze(Object.keys(SECONDARY_STATS));
 // Force d'une qualité à niveau égal : une meilleure qualité donne plus de points principaux et secondaires.
+/** @type {Readonly<Record<string, number>>} */
 export const QUALITY_FACTOR = Object.freeze({
   Commun: 1,
   'Peu commun': 1.12,
@@ -42,6 +46,7 @@ export const QUALITY_FACTOR = Object.freeze({
   Mythique: 2.1
 });
 // Part de chaque statistique principale selon l'emplacement [Attaque, Défense, Vitalité].
+/** @type {Readonly<Record<string, readonly number[]>>} */
 export const SLOT_PROFILE = deepFreeze({
   weapon: [1, 0.62, 0.75],
   armor: [0.55, 1, 0.9],
@@ -53,6 +58,7 @@ export const SLOT_PROFILE = deepFreeze({
   ring: [0.8, 0.55, 0.65]
 });
 // Niveaux des monstres de chaque zone, dans l'ordre des biomes (Plaines verdoyantes → Forêt enchantée).
+/** @type {ReadonlyArray<readonly [number, number]>} */
 export const ZONE_LEVELS = deepFreeze([
   [1, 10],
   [10, 20],

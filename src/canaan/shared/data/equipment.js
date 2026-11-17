@@ -1,3 +1,4 @@
+// @ts-check
 // Catalogues des objets : qualités, armes et compétences. Chaque objet a un niveau fixe (1 à 60), voir data/stats.js.
 // Pas d'artisanat : un objet garde les statistiques de son drop (monstres, boss, donjons, raids).
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
@@ -440,6 +441,7 @@ export const ACTIVE_GEAR_SLOTS = Object.freeze([
 ]);
 // Bijoux et artéfact : icône affichée à la place de celle d'une arme.
 export const JEWEL_SLOTS = Object.freeze(['neck', 'ring', 'artifact']);
+/** @type {Readonly<Record<string, string>>} */
 export const JEWEL_ICON = Object.freeze({
   neck: '⟦slot_neck⟧',
   ring: '⟦slot_ring⟧',
@@ -449,6 +451,7 @@ export const JEWEL_ICON = Object.freeze({
 // tirent jamais au hasard : ils ne viennent que du dernier raid (mode héroïque) et du dernier boss de l'Arène.
 export const RARITY_WEIGHTS = Object.freeze([45, 32, 20, 3, 0, 0]);
 // Anciennes qualités supprimées (sauvegardes) : Héroïque devient Épique, Céleste devient Mythique.
+/** @type {Readonly<Record<string, string>>} */
 export const LEGACY_RARITY = Object.freeze({ Héroïque: 'Épique', Céleste: 'Mythique' });
 // Butin de prestige : chance, par objet du coffre, d'une qualité supérieure (dernier raid en héroïque, Arène).
 export const PRESTIGE_DROPS = Object.freeze({
