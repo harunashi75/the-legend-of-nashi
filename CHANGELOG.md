@@ -9,6 +9,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.
 
 ### Refactorisation
+- Métiers : constantes, catalogues et règles pures (XP, qualités, repas, tirages, sauvegardes) dans `shared/data/professions.js` et `shared/rules/professions.js` ; résultats identiques à l’ancienne version sur 500 sauvegardes aléatoires et toutes les recettes.
 - Maison : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`), le dessin (`render.js`) et le coopératif (`net.js`).
 - Donjons : structure et créatures de chaque instance dans `shared/data/dungeons.js` ; `scripts/dungeons/` sépare les plans, énigmes et boss (`dungeons.js`) du dessin (`render.js`).
 - Rien ne change à l’écran : chaque étape a été comparée appel de dessin par appel de dessin avec la version précédente.

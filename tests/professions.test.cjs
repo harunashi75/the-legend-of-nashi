@@ -288,3 +288,31 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  run('CANAAN_ACHIEVEMENTS.actions.tab("titres")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Règles partagées des métiers : courbe d’XP, qualités, repas, tirages, collection et sauvegardes vérifiées',async()=>{
+ const path=require('node:path'),{pathToFileURL}=require('node:url');
+ const shared=f=>import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href);
+ const D=await shared('data/professions.js'),R=await shared('rules/professions.js');
+ assert.ok(Object.isFrozen(D.PROF_FISH.dore)&&Object.isFrozen(D.PROF_FISH_TABLES.sea[0]));
+ // Qualités débloquées aux niveaux 1, 6, 12, 20, 28 et 35 ; expérience croissante.
+ assert.deepEqual([1,5,6,11,12,20,27,28,35,40].map(R.profQualityCap),[0,0,1,1,2,3,3,4,5,5]);
+ for(let l=1;l<D.PROF_MAX_LEVEL;l++)assert.ok(R.profXpNeeded(l+1)>R.profXpNeeded(l));
+ // Expérience : niveaux atteints renvoyés, arrêt au niveau 40.
+ const s={level:1,exp:0};assert.deepEqual(R.profAddXp(s,R.profXpNeeded(1)+R.profXpNeeded(2)),[2,3]);assert.deepEqual(s,{level:3,exp:0});
+ const top={level:39,exp:0};R.profAddXp(top,1e9);assert.deepEqual(top,{level:40,exp:0});assert.deepEqual(R.profAddXp(top,99),[]);
+ // Tirages : table pondérée et qualité d'une prise (générateur en paramètre).
+ const seq=v=>{let i=0;return ()=>v[i++%v.length]};
+ assert.equal(R.profRollWeighted([['a',1],['b',3]],seq([0.1])),'a');assert.equal(R.profRollWeighted([['a',1],['b',3]],seq([0.5])),'b');
+ assert.equal(R.profRollWeighted([['a',1]],seq([0.999999])),'a');
+ assert.equal(R.profRollQuality(5,seq([0])),5);assert.equal(R.profRollQuality(5,seq([0.9999])),0);
+ // Collection : première prise signalée, meilleure qualité gardée.
+ const prof=R.profFresh();assert.equal(R.profRecordCatch(prof,'gardon',2),true);assert.equal(R.profRecordCatch(prof,'gardon',1),false);
+ assert.deepEqual(prof.codex.gardon,{n:2,best:2});
+ // Repas : nombres selon la qualité et le héros (sans héros : 100 PV et 300 mana).
+ assert.equal(R.profMealEffect('soupe',0).amount,103);assert.ok(R.profMealEffect('soupe',5,{mhp:1000,mmp:0}).amount>R.profMealEffect('soupe',0,{mhp:1000,mmp:0}).amount);
+ assert.match(R.profMealEffect('fume',3).text,/^\+12 % de dégâts pendant 1 min$/);
+ // Sauvegardes : niveaux bornés, espèces inconnues et quantités invalides écartées, anciennes qualités converties.
+ const clean=R.profSanitize({qv:1,fishing:{level:99,exp:-5},fish:{'gardon:7':3,'inconnu:1':2,'carpe:x':1,'truite:2':0},codex:{gardon:{n:4,best:6},'__proto__':{n:1}}});
+ assert.deepEqual(clean.fishing,{level:40,exp:0});assert.deepEqual(clean.fish,{'gardon:5':3});assert.deepEqual(clean.codex,{gardon:{n:4,best:5}});
+ assert.deepEqual(R.profSanitize('cassé'),R.profFresh());
+});

@@ -11,166 +11,17 @@
 (() => {
   'use strict';
   // Un métal par biome (ordre des ZONES) ; son rang donne la force de l'enchantement.
-  const ORES = Object.freeze({
-    cuivre: {
-      name: 'Minerai de cuivre',
-      metal: 'cuivre',
-      tier: 0,
-      zone: 0,
-      color: '#d07a3a',
-      icon: '⟦ore_cuivre⟧'
-    },
-    etain: {
-      name: 'Minerai d’étain',
-      metal: 'étain',
-      tier: 1,
-      zone: 1,
-      color: '#b8c4c8',
-      icon: '⟦ore_etain⟧'
-    },
-    fer: { name: 'Minerai de fer', metal: 'fer', tier: 2, zone: 2, color: '#8a6a5a', icon: '⟦ore_fer⟧' },
-    argent: {
-      name: 'Minerai d’argent',
-      metal: 'argent',
-      tier: 3,
-      zone: 3,
-      color: '#e8eef4',
-      icon: '⟦ore_argent⟧'
-    },
-    or: { name: 'Pépite d’or', metal: 'or', tier: 4, zone: 4, color: '#f0c040', icon: '⟦ore_or⟧' },
-    mithril: {
-      name: 'Minerai de mithril',
-      metal: 'mithril',
-      tier: 5,
-      zone: 5,
-      color: '#7ae8f0',
-      icon: '⟦ore_mithril⟧'
-    },
-    // Minerais rares des Tréfonds (zones 6 à 9) : ils ne font pas d'enchantement, mais se vendent très cher (value).
-    fer_noir: {
-      name: 'Minerai de fer noir',
-      metal: 'fer noir',
-      tier: 3,
-      zone: 6,
-      color: '#5a5e6e',
-      icon: '⟦ore_fer_noir⟧',
-      value: 3,
-      rare: true
-    },
-    quartz: {
-      name: 'Quartz ancien',
-      metal: 'quartz',
-      tier: 3,
-      zone: 7,
-      color: '#e8e0f8',
-      icon: '⟦ore_quartz⟧',
-      value: 3,
-      rare: true
-    },
-    obsidienne: {
-      name: 'Obsidienne funèbre',
-      metal: 'obsidienne',
-      tier: 4,
-      zone: 8,
-      color: '#3a2a4a',
-      icon: '⟦ore_obsidienne⟧',
-      value: 4,
-      rare: true
-    },
-    geode: {
-      name: 'Géode luisante',
-      metal: 'géode',
-      tier: 4,
-      zone: 9,
-      color: '#e870c0',
-      icon: '⟦ore_geode⟧',
-      value: 5,
-      rare: true
-    }
-  });
-  const HERBS = Object.freeze({
-    menthe: {
-      name: 'Menthe sauvage',
-      zone: 0,
-      color: '#7ad87a',
-      icon: '⟦herb_menthe⟧',
-      where: 'Plaines verdoyantes'
-    },
-    sauge: {
-      name: 'Sauge des bois',
-      zone: 1,
-      color: '#9ab8a0',
-      icon: '⟦herb_sauge⟧',
-      where: 'Forêt ancienne'
-    },
-    mousse: {
-      name: 'Mousse des brumes',
-      zone: 2,
-      color: '#6ab0a0',
-      icon: '⟦herb_mousse⟧',
-      where: 'Marais brumeux'
-    },
-    ortie: {
-      name: 'Ortie rousse',
-      zone: 3,
-      color: '#d8803a',
-      icon: '⟦herb_ortie⟧',
-      where: 'Forêt automnale'
-    },
-    aloes: {
-      name: 'Aloès des sables',
-      zone: 4,
-      color: '#a8c860',
-      icon: '⟦herb_aloes⟧',
-      where: 'Désert oublié'
-    },
-    lys: { name: 'Lys étoilé', zone: 5, color: '#c8a8ff', icon: '⟦herb_lys⟧', where: 'Forêt enchantée' },
-    // Herbes des Tréfonds.
-    racine: {
-      name: 'Racine de pierre',
-      zone: 6,
-      color: '#a87a4a',
-      icon: '⟦herb_racine⟧',
-      where: 'Galeries d’Argile (Tréfonds)'
-    },
-    lichen: {
-      name: 'Lichen des ruines',
-      zone: 7,
-      color: '#8ac8b0',
-      icon: '⟦herb_lichen⟧',
-      where: 'Cité Engloutie (Tréfonds)'
-    },
-    pavot: {
-      name: 'Pavot funèbre',
-      zone: 8,
-      color: '#a8f0c0',
-      icon: '⟦herb_pavot⟧',
-      where: 'Nécropole des Oubliés (Tréfonds)'
-    },
-    champignon: {
-      name: 'Champignon luisant',
-      zone: 9,
-      color: '#e870c0',
-      icon: '⟦herb_champignon⟧',
-      where: 'Fangeval (Tréfonds)'
-    }
-  });
+  const ORES = PROF_ORES;
+  const HERBS = PROF_HERBS;
   // Enchantements : une statistique secondaire chacun.
-  const ENCHANTS = Object.freeze({
-    power: { name: 'Enchantement de Puissance', icon: '⟦ench_power⟧' },
-    crit: { name: 'Enchantement de Critique', icon: '⟦ench_crit⟧' },
-    haste: { name: 'Enchantement de Célérité', icon: '⟦ench_haste⟧' },
-    mastery: { name: 'Enchantement de Maîtrise', icon: '⟦ench_mastery⟧' },
-    healing: { name: 'Enchantement de Soin', icon: '⟦ench_healing⟧' },
-    resist: { name: 'Enchantement de Résistance', icon: '⟦ench_resist⟧' }
-  });
+  const ENCHANTS = PROF_ENCHANTS;
   // Métaux d'enchantement, rang 0 à 5 (les minerais des Tréfonds n'en sont pas).
-  const METALS = ['cuivre', 'etain', 'fer', 'argent', 'or', 'mithril'];
+  const METALS = PROF_METALS;
   // Force d'un enchantement selon le métal (part de la base de l'objet, comme une secondaire : 16 % à 40 %) et
   // niveau d'enchanteur requis pour le forger. Le niveau d'enchanteur de celui qui pose l'enchantement le renforce
   // aussi de 1 % par niveau (jusqu'à +40 %).
-  const ENCH_MULT = [0.16, 0.2, 0.24, 0.28, 0.33, 0.4];
-  const ENCH_LEVEL = [1, 6, 12, 20, 28, 35];
+  const ENCH_MULT = PROF_ENCH_MULT;
+  const ENCH_LEVEL = PROF_ENCH_LEVEL;
   const levelTooLow = (hero, tier) => CANAAN_PROF.profOf(hero).enchanting.level < ENCH_LEVEL[tier];
   const levelText = (hero, tier) =>
     'Enchanteur niveau ' +
@@ -181,7 +32,7 @@
     CANAAN_PROF.profOf(hero).enchanting.level +
     ').';
   const levelBonus = hero => 1 + 0.01 * (CANAAN_PROF.profOf(hero).enchanting.level || 1);
-  const ORES_PER_ENCHANT = 3;
+  const ORES_PER_ENCHANT = PROF_ORES_PER_ENCHANT;
   const RESPAWN = 90 * 60;
   const REACH = TS * 1.7;
   const esc = s =>

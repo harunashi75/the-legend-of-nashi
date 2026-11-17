@@ -1,26 +1,7 @@
 // État d'une partie : l'objet game regroupe ce qui appartient au monde et aux héros.
 // Phase 2 de la conception du coopératif : l'état est un objet passé aux fonctions, plus des variables éparses.
 // game.hero est le héros de l'hôte. Les invités rejoindront game plus tard, chacun avec le même format de héros.
-// Métiers d'un héros neuf : pêche et cuisine au niveau 1, bourriche (poissons) et garde-manger (repas) vides.
-function canaanFreshProf() {
-  return {
-    fishing: { level: 1, exp: 0 },
-    cooking: { level: 1, exp: 0 },
-    hunting: { level: 1, exp: 0 },
-    mining: { level: 1, exp: 0 },
-    herbalism: { level: 1, exp: 0 },
-    enchanting: { level: 1, exp: 0 },
-    fish: {},
-    meat: {},
-    meals: {},
-    ore: {},
-    herb: {},
-    ench: {},
-    codex: {},
-    // Version des qualités (6 qualités, de Commun à Mythique).
-    qv: 2
-  };
-}
+// Métiers d'un héros neuf : profFresh (shared/rules/professions.js).
 const game = {
   // solo, host (salon ouvert à des invités) ou guest (connecté au monde d'un hôte, sans simulation locale).
   mode: 'solo',
@@ -61,7 +42,7 @@ const game = {
     // Records de l'Arène des Épreuves.
     arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
     // Métiers : pêche et cuisine (niveaux, poissons, repas).
-    prof: canaanFreshProf()
+    prof: profFresh()
   },
   // Monde de l'aventure : carte, entités simulées, coffres, boss de monde et instance en cours.
   // Les particules et les textes flottants n'en font pas partie : ce sont des effets d'affichage.
@@ -141,7 +122,7 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
     quetes: { active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null },
     rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
     arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
-    prof: canaanFreshProf()
+    prof: profFresh()
   };
   hero.player.mhp = hero.player.hp = characterStats(hero).maxHp;
   return hero;

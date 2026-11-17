@@ -30,7 +30,7 @@
   };
   // Les clés des secrets ne se vendent pas.
   const sellable = p => p.kind !== 'key';
-  const profOf = hero => hero.prof || (hero.prof = canaanFreshProf());
+  const profOf = hero => hero.prof || (hero.prof = profFresh());
   // Qualités : les mêmes noms et couleurs que l'équipement (Commun à Mythique).
   const qualityName = q => GEAR_RARITIES[q]?.name || 'Commun';
   const qualityColor = q => GEAR_RARITIES[q]?.color || '#aeb4c0';
