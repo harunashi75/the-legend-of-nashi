@@ -183,7 +183,12 @@ test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habita
  assert.equal(typeof run('__v.bubble&&__v.bubble.text'),'string');assert.ok(run('__v.lines.includes(__v.bubble.text)'));
  assert.ok(run('CANAAN_LIFE.villagers().every(v=>v.lines.length>=4&&v.name.length>1&&canWalk(v.x,v.y))'));
  // Marchand : nouveau dessin (chapeau, sac à dos), une image par village et par clignement.
- assert.match(source,/Marchand ambulant en pixels/);
+ // Dessiné pour de vrai : un sprite par village et par clignement, gardé en cache d'une image à l'autre.
+ run('{const imgs=[],c={drawImage:(i,...a)=>imgs.push([i,...a])};time=100;'+
+  'for(const n of [{x:100,y:100,sprite:0},{x:100,y:100,sprite:0},{x:100,y:100,sprite:1}])drawCanaanMerchant(c,n);'+
+  'time=160;drawCanaanMerchant(c,{x:100,y:100,sprite:0});'+
+  'globalThis.__m={n:imgs.length,cache:imgs[0][0]===imgs[1][0],village:imgs[0][0]!==imgs[2][0],blink:imgs[3][0]!==imgs[0][0],at:imgs[0].slice(1,4)}}');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__m)')),{n:4,cache:true,village:true,blink:true,at:[73,50,54]});
  assert.equal(errors.length,0,errors.join('\n'));
 });
 

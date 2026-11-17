@@ -66,13 +66,14 @@ test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances,
 });
 
 test('Sans artisanat : ni forge ni touche K, objets tels que lâchés, anciennes améliorations retirées, matériaux rendus en or',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {g,run,errors,fire}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
  // Plus rien de la forge : fonctions, catalogues, bouton du menu, raccourci K, matériaux du héros.
  for(const name of ['openCrafting','upgradeItem','setWeaponPassive','selectForgeItem','upgradeCost','upgradeLevel','upgradable','WEAPON_PASSIVES','PASSIVE_COSTS','UPGRADE_COSTS','UPGRADE_MAX','MATERIALS','materialGrant','materialSpend','rollResources','CANAAN_CRAFT','equippedWeaponPassive'])
   assert.equal(run('typeof '+name),'undefined',name);
  assert.doesNotMatch(source,/data-action="openCrafting"|Artisanat \(K\)/);
- assert.doesNotMatch(script('canaan-game-core'),/k === 'k'/);
+ // L'ancien raccourci K de la forge n'ouvre plus aucune fenêtre.
+ run('started=true;paused=false;closePanels()');fire(g,'keydown',{key:'k'});assert.equal(run('modalOpen()'),false);
  assert.equal(run('"materials" in game.hero'),false);
  assert.equal(run('Object.values(SOURCE_REWARDS).some(r=>"resources" in r)'),false);
  // Un objet garde les statistiques de son drop : les anciennes améliorations (+1 à +5) et passifs de forge sont retirés.

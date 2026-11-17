@@ -14,6 +14,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - Intégration continue GitHub Actions (lint, assemblage, régressions) et publication automatique sur tag `vX.Y.Z`.
 - Le README est raccourci ; la documentation détaillée est dans `docs/GAMEPLAY.md` et `docs/ARCHITECTURE.md`.
 - Tests rangés par système (`tests/*.test.cjs`) et lancés en parallèle ; démarrage du jeu dans les tests 10× plus rapide (contexte `vm` sans intercepteurs). La suite complète passe de 12 min à une vingtaine de secondes.
+- Tests de comportement à la place des recherches de texte dans le code : vrais clics (`click`) et vraies touches (`fire`) dans le jeu simulé, vitesse mesurée, dessin du marchand, HUD, validation du démarrage ; chacun vérifié en cassant le comportement.
 
 ## [1.9.7] - 2026-11-16
 

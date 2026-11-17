@@ -35,6 +35,8 @@ npm run check          # tout : ESLint, HTML à jour par rapport aux sources, r�
 
 Les tests sont rangés par système dans `tests/*.test.cjs` (combat, classes, sauvegardes, butin, réseau, maison, quêtes…) et `node --test` lance les fichiers en parallèle. Un seul fichier : `node --test tests/combat.test.cjs` ; un seul test : `node --test --test-name-pattern="Roulade" "tests/*.test.cjs"`. Le contexte commun (HTML assemblé, extraits de scripts, doubles de test) est dans `tests/helpers/context.cjs`, le démarrage complet du jeu dans `tests/helpers/canaan-runtime.cjs`. La variable `CANAAN_HTML` fait tester un autre HTML que celui de la version courante.
 
+Un test vérifie ce que fait le jeu, pas la forme de son code : `run(code)` exécute dans la partie, `fire(cible, 'keydown', { key: 'y' })` envoie un événement comme le navigateur, `click('newSlot', { slot: '2' })` clique un bouton `data-action`. Chercher du texte dans le HTML assemblé (`source`, `script(id)`) est réservé aux garde-fous d’architecture : pas d’`onclick` ni de `!important`, une seule définition par fonction, `shared/` sans navigateur, anciens systèmes absents. Pour s’assurer qu’un test protège vraiment, casser le comportement dans une copie du HTML et lancer le test avec `CANAAN_HTML=copie.html` : il doit échouer.
+
 Les tests utilisent un DOM et un Canvas simulés : sauvegardes, combat, équipement, talents, modules obligatoires, commandes tactiles, et un groupe de quatre héros joué sans écran dans un donjon et un raid. Le rendu visuel doit aussi être contrôlé dans le navigateur.
 
 L’intégration continue (GitHub Actions) lance ESLint, l’assemblage et les régressions à chaque push sur `main` et à chaque pull request.

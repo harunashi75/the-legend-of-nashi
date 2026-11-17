@@ -204,8 +204,13 @@ test('Version 1.9.0 : affichage à la fréquence de l’écran par interpolation
  // En pause : positions réelles.
  run('frames.length=0;runDrawPipeline=()=>frames.push(P.x);P.x=2000;canaanRememberPositions();P.x=2010;paused=true;loop(5000);loop(5010)');assert.equal(run('frames.at(-1)'),2010);
  // Vitesse du héros : 4,1 px par tick (+20 %), toujours modulée par la statistique de vitesse.
- assert.equal(run('CANAAN_PLAYER_SPEED'),4.1);assert.match(source,/CANAAN_PLAYER_SPEED \* \(1 \+ characterStats\(hero\)\.speed \/ 100\)/);
- assert.doesNotMatch(source,/let sp = 3\.4/);
+ assert.equal(run('CANAAN_PLAYER_SPEED'),4.1);
+ // Un pas vers la droite avec une Vitesse de 0 puis de 50 : 4,1 px puis 50 % de plus.
+ const step=speed=>run('{const cs=characterStats;characterStats=h=>({...cs(h),speed:'+speed+'});P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;P.dead=false;playerStun=0;'+
+  'game.hero.intent.dx=1;game.hero.intent.dy=0;const x0=P.x;try{stepHero(game.hero)}finally{characterStats=cs;game.hero.intent.dx=0}P.x-x0}');
+ const mult=run('CANAAN_PROF.speedMult(game.hero)');
+ assert.ok(Math.abs(step(0)-4.1*mult)<1e-9,'vitesse de base '+step(0));
+ assert.ok(Math.abs(step(50)-4.1*1.5*mult)<1e-9,'vitesse +50 % '+step(50));
  // Mana : 300 de base pour le héros, la fiche de statistiques et une nouvelle partie.
  run('paused=false;equipment={...equipment};recomputeStats()');assert.equal(run('CANAAN_BASE_MANA+","+characterStats().maxMp+","+P.mmp'),'300,300,300');
  assert.equal(run('CANAAN_PERSISTENCE.freshSnapshot().heros.hote.player.mp'),300);
@@ -236,7 +241,7 @@ test('Création du héros : sexe, race, peau, coiffure, couleurs et tenue, sauve
  const S=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','save','schema.js')).href);
  assert.equal(S.freshSave({nom:'x',slot:1,version:'v',now:1,spawn:{x:0,y:0},baseMana:300,look:{race:'elfe',sex:'f'}}).heros.hote.look.race,'elfe');
  // Écran de création dans le menu des aventures.
- const {g,run,nodes,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {g,run,nodes,errors,click}=require('./helpers/canaan-runtime.cjs')(source);
  const html=()=>nodes.get('slotMenu').innerHTML;
  run('CANAAN_SLOT_MENU.newSlot(1)');
  assert.match(html(),/class="look-creator"/);assert.match(html(),/id="lookPreview"/);
@@ -264,7 +269,13 @@ test('Création du héros : sexe, race, peau, coiffure, couleurs et tenue, sauve
  run('CANAAN_SLOT_MENU.lookSet("race",2);CANAAN_SLOT_MENU.lookSaveJoin()');
  assert.equal(run('decodeLook(CANAAN_NET.settings().look).race'),'elfe');assert.match(html(),/value="Lina"/);assert.match(html(),/Apparence enregistrée/);
  // Sprites : un par apparence, direction et pas ; le dessin d'une apparence invalide retombe sur celle par défaut.
- for(const action of ['lookSet','lookRandom','lookTurn','lookEditJoin','lookSaveJoin','lookBack'])assert.match(source,new RegExp(action+': '));
+ // Chaque bouton du créateur passe par la table des contrôles : un clic valide ses arguments, puis appelle le menu.
+ run('globalThis.__menu=CANAAN_SLOT_MENU;globalThis.__calls=[];CANAAN_SLOT_MENU=Object.fromEntries(Object.keys(__menu).map(k=>[k,typeof __menu[k]==="function"?(...a)=>{__calls.push([k,...a])}:__menu[k]]))');
+ try{
+  for(const [action,data] of [['lookSet',{key:'race',index:'3'}],['lookRandom'],['lookTurn',{dir:'-1'}],['lookEditJoin'],['lookSaveJoin'],['lookBack']])click(action,data);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(__calls)')),[['lookSet','race',3],['lookRandom'],['lookTurn',-1],['lookEditJoin'],['lookSaveJoin'],['lookBack']]);
+  assert.throws(()=>click('lookSet',{key:'race"><img',index:'1'}),/Argument d’action invalide/);
+ }finally{run('CANAAN_SLOT_MENU=__menu')}
  assert.equal(errors.length,0,errors.join('\n'));
 });
 

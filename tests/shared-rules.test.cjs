@@ -206,14 +206,14 @@ test('Objet game : game.hero porte le héros, statistiques de n’importe quel h
 });
 
 test('Simulation sans écran : intention du héros, monstres, projectiles et butins avancent sans jamais toucher au document',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {g,run,errors,nodes}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Une partie en cours, loin du camp, avec un monstre proche, un projectile et de l'or au sol.
  run('started=true;paused=false;P.dead=false;P.mhp=1e6;P.hp=1e6;game.world.instance=null;canaanRegenRates=()=>({mana:0,health:0})');
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++)if(canWalk((x+0.5)*TS,(y+0.5)*TS)&&canWalk((x+3.5)*TS,(y+0.5)*TS)&&!isSafe(x,y)&&Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30){s={x,y};break}P.x=(s.x+0.5)*TS;P.y=(s.y+0.5)*TS}');
  run('game.world.monsters=[{t:"Loup",x:P.x+90,y:P.y,hp:500,mhp:500,r:14,cd:0,g:3}];game.world.drops=[{x:P.x,y:P.y,v:7,life:300}]');
  run('game.world.projectiles=[{x:P.x,y:P.y,vx:6,vy:0,dmg:40,life:60,c:"#fff",combatContext:{magic:false}}]');
  const messages=[];g.__messages=messages;
- run('game.view={notify:m=>__messages.push(m),chat:()=>{}}');
+ run('globalThis.__view=game.view;game.view={notify:m=>__messages.push(m),chat:()=>{}}');
  // Succès coupés : leurs récompenses en or fausseraient le compte (ils sont testés à part).
  run('CanaanStages.achievements={after(){}}');
  const x0=run('P.x'),gold0=run('P.gold'),hp0=run('P.hp');
@@ -232,6 +232,7 @@ test('Simulation sans écran : intention du héros, monstres, projectiles et but
  assert.ok(run('__minHp')<hp0,'le monstre a frappé');assert.equal(run('game.world.projectiles.length'),0);
  assert.equal(errors.length,0,errors.join('\n'));
  // Avec l'interface, le même relais affiche les messages à l'écran.
- assert.match(source,/game\.view\.notify = showToast;/);
+ run('game.view=__view;toast("Coffre ouvert")');
+ assert.equal(nodes.get('toast').textContent,'Coffre ouvert');assert.equal(nodes.get('toast').style.opacity,1);
  assert.doesNotMatch(source.slice(source.indexOf('function update() {'),source.indexOf('function updateView() {')),/document\.|getElementById|keys\[|mouseWorld|camX|shake/);
 });

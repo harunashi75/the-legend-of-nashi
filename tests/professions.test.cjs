@@ -234,12 +234,18 @@ test('Travaux minutés : miner et cueillir 5 s, forger 10 s à la forge du camp,
 test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’hôte, récompenses une fois, titres, collections, sauvegarde et réseau',async()=>{
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
  assert.deepEqual(n.sanitizeAction({op:'ach-title',id:'c3'}),{op:'ach-title',id:'c3'});assert.equal(n.sanitizeAction({op:'ach-title',id:'<b>'}),null);
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {g,run,errors,fire,click}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Cent succès, vingt par catégorie, identifiants uniques, chacun avec sa récompense ; touche Y et bouton du menu.
  const list=JSON.parse(run('JSON.stringify(CANAAN_ACHIEVEMENTS.LIST.map(a=>({id:a.id,cat:a.cat,r:CANAAN_ACHIEVEMENTS.rewardText(a.reward)})))'));
  assert.equal(list.length,100);assert.equal(new Set(list.map(a=>a.id)).size,100);assert.ok(list.every(a=>a.r));
  for(const c of ['combat','explore','eco','magic','defi'])assert.equal(list.filter(a=>a.cat===c).length,20,c);
- assert.match(source,/data-action="toggleAchievements"[^>]*>.*?menu-shortcut">Y</);assert.match(source,/k === 'y'/);
+ assert.match(source,/data-action="toggleAchievements"[^>]*>.*?menu-shortcut">Y</);
+ // La touche Y ouvre le carnet, une seconde pression le ferme ; le bouton du menu fait de même.
+ const carnet=()=>run('modalOpen()&&document.getElementById("window").innerHTML.includes("ach-panel")');
+ run('started=true;paused=false;closePanels()');
+ fire(g,'keydown',{key:'y'});assert.equal(carnet(),true,'Y ouvre le carnet');
+ fire(g,'keydown',{key:'Y'});assert.equal(run('modalOpen()'),false,'Y referme le carnet');
+ click('toggleAchievements');assert.equal(carnet(),true,'le bouton ouvre le carnet');run('closePanels()');
  // Bestiaire : monstres du monde, créatures des instances, boss mondiaux, boss d'instance et de l'Arène.
  assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[22,16,27,12,72,12]');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Loup"})'),'m:Loup');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"x",worldBoss:true,worldBossId:"fenrir"})'),'w:fenrir');

@@ -204,7 +204,11 @@ test('Version actuelle, actions sans onclick et CSS sans important',()=>{
   assert.ok(/'\s*\+/.test(value)||value==='display:none',m[1]+' : style statique '+value);
  }
  assert.doesNotMatch(source,/correct1820|applyNames1735|craftGear1742|updateBagLimit1739/);
- assert.match(script('canaan-bootstrap'),/\[\s*'monde',\s*'worldRnd',\s*\(\)\s*=>\s*worldRnd,\s*'function'\s*\]/);
+ // Sans le générateur du monde, la validation du démarrage échoue et nomme la liaison manquante.
+ const {run}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(run('CANAAN_BOOTSTRAP.validate()'),true);
+ run('globalThis.__rnd=worldRnd;worldRnd=undefined');
+ try{assert.throws(()=>run('CANAAN_BOOTSTRAP.validate()'),/monde : worldRnd attendu function/)}finally{run('worldRnd=__rnd')}
 });
 
 test('Nettoyage : systèmes morts absents et progression par équipement conservée',()=>{
@@ -357,7 +361,13 @@ test('Préférences : stockage centralisé, valeurs illisibles ignorées et écr
 });
 
 test('Finitions : HUD en niveaux avec barre d’XP, plus d’iLvl, aucune variable morte et fichier versionné',()=>{
- assert.match(source,/<span id="plevel">Niv\. 1<\/span>/);assert.match(source,/<i id="xpb"><\/i>/);
+ assert.match(source,/<span id="plevel">/);assert.match(source,/<i id="xpb"><\/i>/);
+ // Le HUD affiche le niveau du héros et sa progression vers le suivant.
+ const hud=require('./helpers/canaan-runtime.cjs')(source);
+ hud.run('game.hero.level=7;game.hero.exp=Math.floor(xpToNext(7)/4);CANAAN_PROGRESSION.hud()');
+ assert.equal(hud.nodes.get('plevel').textContent,'Niv. 7');
+ assert.equal(hud.nodes.get('xpb').style.width,hud.run('100*game.hero.exp/xpToNext(7)')+'%');assert.ok(parseFloat(hud.nodes.get('xpb').style.width)>20&&parseFloat(hud.nodes.get('xpb').style.width)<30);
+ assert.equal(hud.nodes.get('xpt').textContent,hud.run('game.hero.exp+" / "+xpToNext(7)+" XP"'));
  assert.doesNotMatch(source,/id="pilvl"|\bspawnClock\b|const\s+obsolete\b/);
  // Plus d'iLvl dans le jeu : seules les conversions des anciennes sauvegardes en parlent.
  for(const m of scripts)if(!/canaan-(?:modules|gear-engine|persistence|group)"/.test(m[1]))assert.doesNotMatch(m[2],/\biLvl\b|averageItemLevel|ratings52/,m[1]);

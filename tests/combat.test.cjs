@@ -173,7 +173,7 @@ test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, r�
 });
 
 test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintien et verrou commun',()=>{
- const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {run,errors,fire,nodes}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
  // Secondaires fixées sans Célérité : les verrous gardent leur durée de base (0,55 s et 1,15 s).
@@ -196,9 +196,11 @@ test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintie
  // L'attaque lourde frappe plus fort que la rapide.
  run('monsters[0].hp=1e6');for(let i=0;i<90;i++)run('time++;runUpdatePipeline()');run('canaanBasicAttack(false)');
  assert.ok(heavy>1e6-run('monsters[0].hp'),'lourde '+heavy);
- // Le clic de la souris ne lance plus la compétence 1.
- assert.doesNotMatch(source,/mouseWorldY = e\.clientY \+ camY;\n {2}useSkill\(0\);/);
- assert.match(source,/canaanHoldBasicAttack\(e\.button, true, e\.clientX, e\.clientY\)/);
+ // Un vrai clic sur le canevas : attaque de base (bouton de la souris et visée), jamais la compétence 1.
+ run('globalThis.__calls=[];const hold=canaanHoldBasicAttack,skill=useSkill;canaanHoldBasicAttack=(...a)=>__calls.push(["hold",...a]);useSkill=i=>__calls.push(["skill",i]);globalThis.__restore=()=>{canaanHoldBasicAttack=hold;useSkill=skill}');
+ for(const button of [0,2])fire(nodes.get('game'),'mousedown',{button,clientX:640,clientY:360});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__calls)')),[['hold',0,true,640,360],['hold',2,true,640,360]]);
+ run('__restore()');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 

@@ -219,7 +219,7 @@ test('Slots d’aventure : résumé, création sans écrasement, suppression ave
 });
 
 test('Menu des aventures : trois cartes, création, confirmation de suppression avec invités, noms échappés',()=>{
- const {g,run,nodes,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {g,run,nodes,errors,click}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
  const html=()=>nodes.get('slotMenu').innerHTML;
  // Sans aventure choisie, le jeu ne démarre pas : le menu s'affiche.
@@ -237,8 +237,14 @@ test('Menu des aventures : trois cartes, création, confirmation de suppression 
  run('CANAAN_SLOT_MENU.cancel()');assert.doesNotMatch(html(),/confirmDeleteSlot/);
  run('CANAAN_SLOT_MENU.askDelete(2)');assert.equal(run('CANAAN_SLOT_MENU.remove(2)'),true);
  assert.equal(g.localStorage.getItem('canaan_slot_2'),null);assert.match(html(),/Aventure supprimée/);
- // Actions déclarées et validées par la table des contrôles.
- for(const action of ['playSlot','newSlot','createSlot','askDeleteSlot','confirmDeleteSlot','cancelSlotMenu','openSaveFolder'])assert.match(source,new RegExp(action+': '));
+ // Chaque bouton du menu passe par la table des contrôles : un clic valide ses arguments, puis appelle le menu.
+ run('globalThis.__menu=CANAAN_SLOT_MENU;globalThis.__calls=[];CANAAN_SLOT_MENU=Object.fromEntries(Object.keys(__menu).map(k=>[k,typeof __menu[k]==="function"?(...a)=>{__calls.push([k,...a])}:__menu[k]]))');
+ try{
+  for(const [action,data] of [['playSlot',{slot:'1'}],['newSlot',{slot:'2'}],['createSlot',{slot:'3'}],['askDeleteSlot',{slot:'1'}],['confirmDeleteSlot',{slot:'2'}],['cancelSlotMenu'],['openSaveFolder']])click(action,data);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(__calls)')),[['play',1],['newSlot',2],['create',3],['askDelete',1],['remove',2],['cancel'],['openFolder']]);
+  // Un argument invalide est refusé avant tout effet.
+  assert.throws(()=>click('confirmDeleteSlot',{slot:'2;x'}),/Argument d’action invalide/);assert.equal(run('__calls.length'),7);
+ }finally{run('CANAAN_SLOT_MENU=__menu')}
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
