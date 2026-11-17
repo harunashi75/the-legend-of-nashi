@@ -1,6 +1,14 @@
 // DOM et Canvas minimaux : vérifie le chargement et les appels, sans simuler le rendu visuel.
 const vm=require('node:vm');
-module.exports=function boot(source,{beforeScript=()=>{}}={}){
+// Raccourcis des tests : les anciens noms globaux (monsters, inventory, instanceState…) lisent et remplacent les champs
+// de game.hero et game.world. Le jeu ne les définit plus (un test le vérifie avec testNames: false) ; ils gardent
+// les tests courts.
+const TEST_NAMES={inventory:['hero','inventory'],equipment:['hero','equipment'],kills:['hero','kills'],world:['world','tiles'],
+ decor:['world','decor'],overworld:['world','overworld'],overdecor:['world','overdecor'],monsters:['world','monsters'],
+ projectiles:['world','projectiles'],drops:['world','drops'],npcs:['world','npcs'],chests:['world','chests'],
+ openedChests:['world','openedChests'],worldBossTimers:['world','worldBossTimers'],instanceState:['world','instance'],
+ returnPos:['world','returnPos'],worldClock:['world','clock']};
+module.exports=function boot(source,{beforeScript=()=>{},testNames=true}={}){
 const nodes=new Map(),errors=[];const noop=()=>{};
 // Écouteurs d'événements retenus par cible : fire() les déclenche comme le navigateur.
 const listen=function(type,fn){((this.listeners??={})[type]??=[]).push(fn)};
@@ -24,6 +32,9 @@ for(let i=0;i<scripts.length;i++){
  try{vm.runInContext(scripts[i][2],g,{filename:`script-${i}${scripts[i][1]}`,timeout:20000})}
  catch(e){console.log('ÉCHEC bloc',i,scripts[i][1]);throw e}
 }
+// game est une constante du jeu (pas une propriété de l'objet global) : lue une fois après le chargement.
+if(testNames){const game=vm.runInContext('game',g);for(const [name,[part,key]] of Object.entries(TEST_NAMES))
+ Object.defineProperty(g,name,{get:()=>game[part][key],set:value=>{game[part][key]=value},configurable:true});}
 // Déclenche un événement sur une cible (g, g.document ou un élément) : clavier, souris, clic…
 const fire=(target,type,props={})=>{const event={type,target,repeat:false,preventDefault:noop,stopPropagation:noop,...props};for(const fn of target.listeners?.[type]||[])fn(event);return event};
 // Clic sur un bouton data-action (arguments en data-*), par le gestionnaire délégué du document, comme un joueur.

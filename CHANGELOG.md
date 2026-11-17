@@ -27,6 +27,8 @@ Première version officielle avant la sortie sur Steam : la numérotation repart
 - Rien ne change à l’écran : chaque étape a été comparée appel de dessin par appel de dessin avec la version précédente.
 
 ### Outillage
+- Assemblage en Node (`tools/build.cjs`, esbuild par son API) à la place du script Python, HTML identique octet pour octet ; `npm run check` et l’icône aussi en Node : Python n’est plus nécessaire, ni en local ni en CI.
+- Les anciens noms globaux (`CANAAN_LEGACY_NAMES` : `monsters`, `inventory`, `instanceState`…) sont retirés du jeu ; seuls les tests gardent ces raccourcis.
 - Le HTML autonome n’est plus versionné : il est assemblé par `npm run build` et joint à chaque release GitHub.
 - Version unique : le template reçoit `{{VERSION}}` à l’assemblage ; `package.json` est vérifié par les tests.
 - ESLint (`npm run lint`), Prettier (`npm run format`, `npm run format:check`) et `npm test`.

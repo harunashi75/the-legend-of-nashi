@@ -156,32 +156,3 @@ function canaanLootNotice(hero, message) {
 // Relais d'affichage : ce que la simulation veut montrer (messages, chat). Sans interface, rien n'est affiché
 // et la simulation n'accède jamais à l'écran ; canaan-game-core y branche ses fonctions d'affichage.
 game.view = { notify() {}, chat() {}, remote() {}, fx() {} };
-// Raccourcis transitoires : les anciens noms globaux lisent et remplacent les champs de game.
-// Ils disparaîtront quand plus aucun ancien script ni test ne les utilisera.
-const CANAAN_LEGACY_NAMES = Object.freeze({
-  inventory: ['hero', 'inventory'],
-  equipment: ['hero', 'equipment'],
-  kills: ['hero', 'kills'],
-  world: ['world', 'tiles'],
-  decor: ['world', 'decor'],
-  overworld: ['world', 'overworld'],
-  overdecor: ['world', 'overdecor'],
-  monsters: ['world', 'monsters'],
-  projectiles: ['world', 'projectiles'],
-  drops: ['world', 'drops'],
-  npcs: ['world', 'npcs'],
-  chests: ['world', 'chests'],
-  openedChests: ['world', 'openedChests'],
-  worldBossTimers: ['world', 'worldBossTimers'],
-  instanceState: ['world', 'instance'],
-  returnPos: ['world', 'returnPos'],
-  worldClock: ['world', 'clock']
-});
-for (const [name, [part, key]] of Object.entries(CANAAN_LEGACY_NAMES))
-  Object.defineProperty(globalThis, name, {
-    get: () => game[part][key],
-    set: value => {
-      game[part][key] = value;
-    },
-    configurable: true
-  });
