@@ -79,6 +79,9 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   // Roulade : prédite chez l’invité, exécutée chez l’hôte avec sa recharge ; invulnérable pendant le roulé.
   const x0=guest.run('P.x');guest.run('canaanDodge(1,0)');
   await step(1);assert.ok(guest.run('P.x')>x0+5,'roulade prédite');
+  // L'hôte applique la roulade dès que le message arrive par le relais : on attend la livraison sans faire avancer le
+  // jeu (la roulade dure un nombre de ticks, pas de millisecondes).
+  for(let i=0;i<1000&&!host.run('CANAAN_COMBAT.invulnerable('+G+')');i++)await wait(2);
   assert.equal(host.run('CANAAN_COMBAT.invulnerable('+G+')'),true,'l’hôte fait rouler l’invité');
   assert.equal(host.run('hurtAlly('+G+',{t:"Loup",x:0,y:0,hp:9,mhp:9,dmg:50})'),0,'aucun dégât pendant la roulade');
   await step(30);
