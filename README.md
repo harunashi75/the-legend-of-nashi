@@ -29,9 +29,11 @@ Les sources sont dans `src/canaan/` : scripts par système dans `scripts/`, règ
 ```sh
 npm run lint           # ESLint
 npm run format:check   # mise en forme Prettier (npm run format pour corriger)
-npm test               # régressions (tests/canaan-regressions.cjs), sur le HTML assemblé
+npm test               # régressions, en parallèle, sur le HTML assemblé (une vingtaine de secondes)
 npm run check          # tout : ESLint, HTML à jour par rapport aux sources, régressions
 ```
+
+Les tests sont rangés par système dans `tests/*.test.cjs` (combat, classes, sauvegardes, butin, réseau, maison, quêtes…) et `node --test` lance les fichiers en parallèle. Un seul fichier : `node --test tests/combat.test.cjs` ; un seul test : `node --test --test-name-pattern="Roulade" "tests/*.test.cjs"`. Le contexte commun (HTML assemblé, extraits de scripts, doubles de test) est dans `tests/helpers/context.cjs`, le démarrage complet du jeu dans `tests/helpers/canaan-runtime.cjs`. La variable `CANAAN_HTML` fait tester un autre HTML que celui de la version courante.
 
 Les tests utilisent un DOM et un Canvas simulés : sauvegardes, combat, équipement, talents, modules obligatoires, commandes tactiles, et un groupe de quatre héros joué sans écran dans un donjon et un raid. Le rendu visuel doit aussi être contrôlé dans le navigateur.
 

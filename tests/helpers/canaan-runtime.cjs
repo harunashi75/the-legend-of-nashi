@@ -10,10 +10,12 @@ function element(id=''){
  el.parentElement=el;el.parentNode=el;return el;
 }
 const db=new Map();
-const g={location:{reload(){}},document:{head:element('head'),body:element('body'),hidden:false,activeElement:null,getElementById(id){if(!nodes.has(id))nodes.set(id,element(id));return nodes.get(id)},createElement:()=>element(),querySelector:()=>element(),querySelectorAll:()=>[],addEventListener:noop},
+let g={location:{reload(){}},document:{head:element('head'),body:element('body'),hidden:false,activeElement:null,getElementById(id){if(!nodes.has(id))nodes.set(id,element(id));return nodes.get(id)},createElement:()=>element(),querySelector:()=>element(),querySelectorAll:()=>[],addEventListener:noop},
  localStorage:{getItem:k=>db.get(k)??null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)},innerWidth:1280,innerHeight:720,devicePixelRatio:1,addEventListener:noop,requestAnimationFrame:()=>1,setInterval:()=>1,clearInterval:noop,setTimeout:()=>1,clearTimeout:noop,performance:{now:()=>0},confirm:()=>true,
  console:{info:noop,warn:noop,log:noop,error:(...a)=>errors.push(a.map(x=>x?.stack||String(x)).join(' '))}};
-g.window=g;vm.createContext(g);
+// Global sans intercepteurs (DONT_CONTEXTIFY) : les scripts lisent leurs variables globales à la vitesse d'un vrai
+// navigateur ; un contexte « contextifié » ralentit chaque accès global (démarrage de 6 s au lieu de quelques centaines de ms).
+const ctx=vm.createContext(vm.constants.DONT_CONTEXTIFY);for(const k of Object.keys(g))ctx[k]=g[k];ctx.window=ctx;g=ctx;
 const scripts=[...source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
 for(let i=0;i<scripts.length;i++){
  beforeScript(scripts[i],code=>vm.runInContext(code,g));

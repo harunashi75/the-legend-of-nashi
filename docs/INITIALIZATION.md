@@ -80,7 +80,7 @@ Restent globaux par conception les états partagés que plusieurs modules réaff
 - Ne pas redéfinir ni envelopper une fonction d’un autre module : modifier sa définition unique. Le test « Surcharges consolidées » le vérifie.
 - Conserver les appels directs aux dépendances obligatoires. Un appel prématuré doit être corrigé en déplaçant l’opération, sans ajout de garde silencieuse.
 
-Vérification : `node tests/canaan-regressions.cjs`. Les tests exercent les appels prématurés, la détection des entrées non installées et le chargement complet avec DOM/Canvas simulés.
+Vérification : `npm test`. Les tests exercent les appels prématurés, la détection des entrées non installées et le chargement complet avec DOM/Canvas simulés.
 
 Le module `canaan-controls` installe les actions déléguées des menus et les commandes tactiles avant le bootstrap. `clearTouchControls` et `CanaanStages.updateTouchControls` font partie des dépendances obligatoires. Les générateurs `worldRnd` et `visualRnd` sont également validés au démarrage.
 
