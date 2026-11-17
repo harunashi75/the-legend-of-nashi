@@ -21,6 +21,8 @@ import * as combatRules from './shared/rules/combat.js';
 import * as netMessages from './shared/net/messages.js';
 import * as looks from './shared/data/looks.js';
 import * as skins from './shared/data/skins.js';
+import * as houseData from './shared/data/house.js';
+import * as houseRules from './shared/rules/house.js';
 
 Object.assign(
   globalThis,
@@ -42,5 +44,7 @@ Object.assign(
   combatRules,
   netMessages,
   looks,
-  skins
+  skins,
+  houseData,
+  houseRules
 );

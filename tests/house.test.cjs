@@ -1,4 +1,6 @@
 const { test } = require('node:test');
+const { pathToFileURL } = require('node:url');
+const path = require('node:path');
 const {
   assert,
   source
@@ -152,4 +154,46 @@ test('Maison : chaumière dans les Plaines, pièce vide à décorer (H), meubles
   assert.ok(run('CANAAN_HOUSE.items().some(i=>i.k==="aquarium")'));assert.ok(guest.run('CANAAN_HOUSE.items().some(i=>i.k==="aquarium")'),'la maison revient à tous');
   for(const side of [host,guest])assert.equal(side.errors.length,0,side.errors.join('\n'));
  }finally{run('CANAAN_NET.closeRoom()');await relay.close()}
+});
+
+test('Règles partagées de la maison : place des meubles, porte libre, murs, orientations et chevauchements',async()=>{
+ const shared=f=>import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href);
+ const D=await shared('data/house.js'),R=await shared('rules/house.js');
+ const C=D.HOUSE_FURNITURE,room={w:12,h:10},MAX=D.HOUSE_MAX_ITEMS;
+ assert.ok(Object.isFrozen(C.lit)&&Object.isFrozen(D.HOUSE_ROOM_FURNITURE.chene));
+ assert.deepEqual(R.houseRoomGeometry(room),{floor:{x0:1,x1:10,y0:2,y1:8},door:{x:6,y:8}});
+ // Quart de tour : la place au sol pivote ; miroir : elle ne change pas.
+ assert.deepEqual(R.houseDims(C.lit,1),{w:2,h:1});assert.equal(R.houseTurns(C.lit),4);
+ const mirror=Object.keys(C).find(k=>!C[k].turn&&C[k].w!==C[k].h);
+ assert.equal(R.houseTurns(C[mirror]),2);assert.deepEqual(R.houseDims(C[mirror],1),{w:C[mirror].w,h:C[mirror].h});
+ const can=(k,x,y,list=[],r=0,limit=MAX)=>R.houseCanPlace(C,room,list,k,x,y,r,limit);
+ assert.equal(can('lit',1,2),true);
+ assert.equal(can('lit',0,2),false,'dans le mur');assert.equal(can('lit',1,8),false,'déborde en bas');
+ assert.equal(can('lit',6,7),false,'devant la porte');assert.equal(can('tapis',6,7),true,'un tapis laisse passer');
+ assert.equal(can('lit',1,2,[],4),false,'orientation inconnue');assert.equal(can('lit',1.5,2),false);
+ assert.equal(can('toString',1,2),false,'clé héritée refusée');assert.equal(can('inconnu',1,2),false);
+ // Même couche : pas de chevauchement ; couches différentes : un tapis passe sous un lit.
+ const bed=[{k:'lit',x:1,y:2,r:0}];
+ assert.equal(can('lit',1,3,bed),false);assert.equal(can('lit',2,2,bed),true);
+ assert.equal(can('tapis',1,2,bed),true);
+ assert.equal(can('lit',3,2,bed,0,1),false,'limite de meubles');
+ // Un meuble mural se pose toujours sur le mur du fond.
+ const wall=Object.keys(C).find(k=>R.houseOnWall(C[k]));
+ assert.equal(can(wall,3,5),true);
+ assert.deepEqual(R.houseSanitizeItems(C,room,[{k:wall,x:3,y:5}],MAX),[{k:wall,x:3,y:0,r:0}]);
+ // Meuble le plus haut sur une case : mur avant sol, sol avant tapis.
+ const list=[{k:'tapis',x:1,y:2,r:0},{k:'lit',x:1,y:2,r:0}];
+ assert.equal(R.houseTopItemAt(C,list,1,2).k,'lit');assert.equal(R.houseCovers(C,list[1],1,3),true);assert.equal(R.houseCovers(C,list[1],2,2),false);
+ // Rotation : quart de tour suivant s'il a la place, sinon null.
+ const alone={k:'lit',x:1,y:2,r:0};assert.equal(R.houseNextRotation(C,room,[alone],alone,MAX),1);
+ const tight=[{k:'lit',x:1,y:2,r:0},{k:'lit',x:2,y:2,r:0}];
+ assert.equal(R.houseNextRotation(C,room,tight,tight[0],MAX),2,'demi-tour : même place au sol');
+ // Lecture d'une sauvegarde : inconnus, mal placés et doublons écartés, dans l'ordre.
+ assert.deepEqual(R.houseSanitizeItems(C,room,[{k:'lit',x:1,y:2},{k:'lit',x:1,y:2},{k:'??',x:3,y:3},null,{k:'lit',x:0,y:2},{k:'lit',x:3,y:2,r:1}],MAX),
+  [{k:'lit',x:1,y:2,r:0},{k:'lit',x:3,y:2,r:1}]);
+ assert.deepEqual(R.houseSanitizeItems(C,room,'pas une liste',MAX),[]);
+ // Meubles fixes : chaque agencement du jeu est entièrement valide.
+ const fixed=R.houseFurnishRooms(C,{a:room},{a:[['lit',1,2],['lit',1,2]]},999);assert.equal(fixed.a.length,1);
+ for(const list of Object.values(D.HOUSE_ROOM_FURNITURE))for(const [k] of list)assert.ok(Object.hasOwn(C,k),k);
+ for(const tab of new Set(Object.values(C).map(c=>c.cat)))assert.ok(D.HOUSE_FURNITURE_CATEGORIES.some(([c])=>c===tab),tab);
 });

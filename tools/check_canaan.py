@@ -7,7 +7,7 @@ import sys
 root = Path(__file__).resolve().parents[1]
 for command in (['node', 'node_modules/eslint/bin/eslint.js', '.'],
                 [sys.executable, 'tools/build_canaan.py', '--check'],
-                ['node', '--test', 'tests/*.test.cjs']):
+                ['node', '--test', '--test-timeout=120000', 'tests/*.test.cjs']):
     try:
         result = subprocess.run(command, cwd=root, check=False)
     except FileNotFoundError as error:
