@@ -2,6 +2,7 @@
 // Noms officiels des objets (rareté × arme ou emplacement) et passifs des trois artéfacts.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Noms officiels extraits du tableau fourni : rareté × famille d'arme.
+/** @type {Record<string, Record<string, string>>} Nom de chaque famille d'arme, par qualité. */
 export const WEAPON_NAMES = {
   'Commun': {
     'sword': 'Épée émoussée',
@@ -70,6 +71,7 @@ export const WEAPON_NAMES = {
     'dualsword': 'Lames stellaires doubles'
   }
 };
+/** @type {Record<string, Record<string, any>>} Nom de chaque emplacement par qualité (artifact : trois variantes). */
 export const GEAR_NAMES = {
   'Commun': {
     'weapon': {

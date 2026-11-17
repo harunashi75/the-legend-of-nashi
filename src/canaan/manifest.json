@@ -176,11 +176,6 @@
       "file": "scripts/equipment.js"
     },
     {
-      "kind": "script",
-      "id": "canaan-weapon-names",
-      "file": "scripts/weapon-names.js"
-    },
-    {
       "kind": "style",
       "id": "canaan-map-style",
       "file": "styles/map-style.css"

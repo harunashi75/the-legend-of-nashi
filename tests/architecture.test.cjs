@@ -33,7 +33,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
     if(!script[1].includes('id="canaan-weapon-actions"'))return;
     // Juste après le cœur, tous ces points d'entrée attendent encore leur propriétaire.
     const owners={
-      characterStats:'canaan-stats',useSkill:'canaan-weapon-actions',drawBigMap:'canaan-world-map',applyItemName:'canaan-weapon-names',
+      characterStats:'canaan-stats',useSkill:'canaan-weapon-actions',drawBigMap:'canaan-world-map',
       hit:'canaan-combat',dropTierGear:'canaan-economy',
       renderInventory:'canaan-ui',renderCharacter:'canaan-ui',charSlot:'canaan-ui',
       showGearTooltip:'canaan-ui',showEquippedTooltip:'canaan-ui',
@@ -41,6 +41,8 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
       equipItem:'canaan-equipment',unequip:'canaan-equipment',
       equipReserveWeapon:'canaan-equipment',switchWeapon:'canaan-equipment'
     };
+    // Règle partagée (shared/rules/items.js) : disponible dès le départ, avant tous les scripts classiques.
+    assert.equal(run('typeof applyItemName'),'function');
     for(const [name,owner] of Object.entries(owners)){
       // Avant son module propriétaire, la fonction n'existe pas encore : aucun bouchon ni repli.
       assert.equal(run('typeof '+name),'undefined',name+' ('+owner+')');
@@ -48,7 +50,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
       earlyChecks++;
     }
   }}),{g,nodes,run}=runtime;
-  assert.equal(earlyChecks,18);
+  assert.equal(earlyChecks,17);
   assert.equal(runtime.errors.length,0,runtime.errors.join('\n'));
   assert.equal(g.CANAAN_READY,true);assert.equal(g.CANAAN_BOOTSTRAP.validate(),true);
   // Un export manquant est refusé par la validation, puis accepté une fois rétabli.
@@ -157,13 +159,13 @@ test('Dépendances obligatoires : pas de garde optionnelle ni de fallback de mod
 
 test('Modules réellement absents : une erreur agrégée visible et aucun démarrage ni sauvegarde',()=>{
   let broken=source;
-  for(const id of ['canaan-stats','canaan-gear-engine','canaan-weapon-names']){
+  for(const id of ['canaan-stats','canaan-gear-engine','canaan-artifacts']){
     const pattern=new RegExp('(<script\\b[^>]*id="'+id+'"[^>]*>)[\\s\\S]*?(</script>)');
     assert.ok(pattern.test(broken),id);broken=broken.replace(pattern,'$1\n$2');
   }
   const {g,nodes,errors,run}=require('./helpers/canaan-runtime.cjs')(broken);
   assert.equal(errors.length,1,errors.join('\n'));
-  for(const name of ['CANAAN_STATS_PREPARE','CANAAN_GEAR_ENGINE.normalize','applyItemName']){
+  for(const name of ['CANAAN_STATS_PREPARE','CANAAN_GEAR_ENGINE.normalize','CANAAN_ARTIFACT_STATS']){
     assert.ok(g.CANAAN_BOOT_ERROR.includes(name),name);
   }
   assert.equal(g.CANAAN_READY,false);assert.equal(run('started'),false);assert.equal(run('canaanLastFrame'),null);

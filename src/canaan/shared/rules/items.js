@@ -11,6 +11,7 @@ import {
   RARITY_WEIGHTS,
   WEAPON_TYPES
 } from '../data/equipment.js';
+import { GEAR_NAMES, WEAPON_NAMES } from '../data/item-names.js';
 /** @typedef {import('../types.js').Item} Item */
 
 // Qualité d'un objet ; une qualité absente ou inconnue vaut Commun.
@@ -83,4 +84,25 @@ export function ensureArtifact(item) {
   const v = item.artifactVariant;
   if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > 2)
     item.artifactVariant = stableArtifact(item);
+}
+// Nom officiel d'un objet d'après sa qualité et sa famille (armes) ou son emplacement (autres pièces, variante
+// d'artéfact). Seul le nom change : identité, niveau et statistiques restent ceux du drop.
+/**
+ * @param {Item & { artifactVariant?: number }} item modifié sur place
+ * @returns {Item} le même objet
+ */
+export function applyItemName(item) {
+  if (!item?.slot) return item;
+  const rarity = rarityInfo(item).name;
+  if (item.slot === 'weapon') {
+    ensureWeaponType(item);
+    item.name = WEAPON_NAMES[rarity][item.weaponType ?? 'sword'];
+  } else {
+    const entry = GEAR_NAMES[rarity];
+    if (item.slot === 'artifact') {
+      ensureArtifact(item);
+      item.name = entry.artifact[item.artifactVariant ?? 0];
+    } else if (entry[item.slot]) item.name = entry[item.slot];
+  }
+  return item;
 }

@@ -45,7 +45,7 @@ test('Version 1.9.0 : fonctions partagées définies une fois dans leur module, 
   'canaan-ui':['renderInventory','renderCharacter','charSlot','showGearTooltip','showEquippedTooltip'],
   'canaan-stats':['gearStat','gearScore','gearComparison','characterStats'],
   'canaan-equipment':['equipItem','unequip','equipReserveWeapon','switchWeapon'],
-  'canaan-weapon-names':['applyItemName'],'canaan-gear-engine':['giveGear'],'canaan-item-rules':['rarityRoll'],
+  'canaan-modules':['applyItemName'],'canaan-gear-engine':['giveGear'],'canaan-item-rules':['rarityRoll'],
   'canaan-economy':['dropTierGear'],'canaan-combat':['hit','monsterDamage'],'canaan-weapon-actions':['useSkill'],
   'canaan-class-talents':['renderTalents'],'canaan-world-map':['drawBigMap'],'canaan-map-panel':['toggleMap'],
   'canaan-portals':['openPortal']

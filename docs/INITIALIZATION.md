@@ -19,7 +19,7 @@ En cas d’échec, le démarrage est bloqué et l’écran d’accueil affiche l
 | --- | --- |
 | `canaan-weapon-actions` | `useSkill` |
 | `canaan-world-map` | `drawBigMap` |
-| `canaan-weapon-names` | `applyItemName` |
+| `canaan-modules` (`shared/rules/items.js`) | `applyItemName` |
 | `canaan-stats` | `characterStats`, `gearStat`, `gearScore`, `gearComparison` |
 | `canaan-progression` | `CANAAN_PROGRESSION`, `canaanKillXp`, `canaanGrantXp` |
 | `canaan-equipment` | `equipItem`, `unequip`, `equipReserveWeapon`, `switchWeapon` |

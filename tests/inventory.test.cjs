@@ -8,25 +8,27 @@ const {
   game
 } = require('./helpers/context.cjs');
 
-test('Noms : table officielle complète appliquée directement, identité et points inchangés',()=>{
-  const g=game();g.inventory=[];g.equipment={};
-  g.rarityInfo=item=>({name:item.rarity});
-  g.ensureArtifact=item=>{if(!Number.isInteger(item.artifactVariant))item.artifactVariant=0};
-  // GEAR_NAMES et WEAPON_NAMES viennent du module partagé shared/data/item-names.js (déjà chargé par game()).
-  // ensureWeaponType vient de shared/rules/items.js (déjà chargé par game()).
-  vm.runInContext(script('canaan-weapon-names'),g);
-  for(const [rarity,types] of Object.entries(g.WEAPON_NAMES)){
+test('Noms : table officielle complète appliquée directement, identité et points inchangés',async()=>{
+  // Règle pure de shared/rules/items.js, chargée directement dans Node avec les vraies données de shared/.
+  const shared=f=>import(require('node:url').pathToFileURL(require('node:path').join(__dirname,'..','src','canaan','shared',f)).href);
+  const {applyItemName}=await shared('rules/items.js'),{WEAPON_NAMES,GEAR_NAMES}=await shared('data/item-names.js');
+  for(const [rarity,types] of Object.entries(WEAPON_NAMES)){
     for(const [type,name] of Object.entries(types)){
       const sec={power:42,crit:7},item={id:'identity',slot:'weapon',name:'Ancien nom',rarity,weaponType:type,level:30,sec};
-      assert.equal(g.applyItemName(item),item);assert.equal(item.name,name);
+      assert.equal(applyItemName(item),item);assert.equal(item.name,name);
       assert.equal(item.level,30);assert.equal(item.weaponType,type);assert.equal(item.id,'identity');assert.equal(item.sec,sec);
     }
   }
   for(let variant=0;variant<3;variant++){
     const item={slot:'artifact',rarity:'Rare',artifactVariant:variant,ilvl:90};
-    g.applyItemName(item);
-    assert.equal(item.name,vm.runInContext('GEAR_NAMES.Rare.artifact['+variant+']',g));
+    applyItemName(item);
+    assert.equal(item.name,GEAR_NAMES.Rare.artifact[variant]);
   }
+  // Famille d'arme inconnue : une épée ; pièce sans emplacement : inchangée.
+  const odd={slot:'weapon',rarity:'Épique',weaponType:'lance-pierre'};assert.equal(applyItemName(odd).name,WEAPON_NAMES['Épique'].sword);
+  const none={name:'Caillou'};assert.equal(applyItemName(none).name,'Caillou');
+  // Le jeu utilise la même règle (exposée par le pont).
+  const g=game();assert.equal(vm.runInContext('applyItemName({slot:"weapon",rarity:"Rare",weaponType:"bow"}).name',g),WEAPON_NAMES.Rare.bow);
 });
 
 test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances, montée de niveau, niveau requis, sauvegarde et anciennes aventures',()=>{
