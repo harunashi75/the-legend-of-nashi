@@ -1,15 +1,12 @@
 // Bâtiments où l'on entre : E devant une porte fait passer dans une pièce intérieure (posée dans un coin d'océan
-// de la carte, invisible de l'extérieur), avec ses meubles et un ou deux habitants (life.js).
+// de la carte, invisible de l'extérieur), avec ses meubles fixes et un ou deux habitants (life.js).
 // - Camp de l'Aurore : l'Échoppe de Lira (le marchand, derrière son comptoir), La Marmite dorée (cuisinières où
 //   cuisiner ses prises) et deux demeures ; d'autres habitants restent dehors, autour du feu.
+// - Chaumière des Glycines : à l'ouest du camp, la maison d'une vieille tisserande et de son petit-fils.
 // - Refuges de l'île : cabanes en rondins (ou en terre crue dans le désert) avec cheminée ou cuisinière.
-// - Maison du joueur : chaumière à l'ouest du camp, pièce vide ; H y ouvre le mode décoration (lits, tables, chaises,
-//   cuisinière, plantes, tapis, fenêtres avec vue, rideaux…), R tourne le meuble en main ou celui visé.
-// Les meubles de la maison appartiennent à l'aventure (sauvegarde de l'hôte : monde.maison) ; un invité peut entrer
-// et décorer, l'hôte vérifie chaque meuble posé, tourné ou retiré et renvoie la maison à tous.
-// Ce fichier garde l'état (meubles posés, bâtiments, mode décoration) ; le catalogue et les règles des meubles sont
-// dans shared/data/house.js et shared/rules/house.js, tout le dessin dans scripts/house/render.js, le coopératif dans
-// scripts/house/net.js.
+// En ligne, l'hôte fait passer les portes (action house-door) ; chacun entre et sort pour soi.
+// Ce fichier garde les bâtiments et les portes ; le catalogue et les règles des meubles sont dans
+// shared/data/house.js et shared/rules/house.js, tout le dessin dans scripts/house/render.js.
 (() => {
   'use strict';
 
@@ -20,7 +17,8 @@
   // ---------------------------------------------------------------- Pièces intérieures
   // Chaque pièce (CANAAN_ROOMS, game-core) : sol, murs et porte selon houseRoomGeometry (shared/rules/house.js).
   const ROOM = Object.fromEntries(CANAAN_ROOMS.map(r => [r.id, r]));
-  const HOME = ROOM.maison;
+  // La Chaumière des Glycines (pièce « maison »), à l'ouest du camp.
+  const COTTAGE = ROOM.maison;
   // Pièces de l'île seulement : en donjon, les mêmes coordonnées désignent la carte de l'instance.
   const roomAt = (x, y) => {
     if (game.world.instance) return null;
@@ -34,43 +32,30 @@
     return null;
   };
   const inside = (x, y) => !!roomAt(x, y);
-  const inHome = (x, y) => roomAt(x, y) === HOME;
   const px = (room, lx) => (room.x + lx) * TS,
     py = (room, ly) => (room.y + ly) * TS;
-  // Dessin (scripts/house/render.js) : la scène donne les pièces, les portes, les meubles et le mode décoration.
+  // Dessin (scripts/house/render.js) : la scène donne les pièces, les portes et les meubles.
   // Fonctions enveloppées : elles sont lues au moment du dessin, quand tout le module est chargé.
   const ART = CANAAN_HOUSE_RENDER.create({
     roomAt: (x, y) => roomAt(x, y),
     px: (room, lx) => px(room, lx),
     py: (room, ly) => py(room, ly),
     itemsOf: room => itemsOf(room),
-    HOME,
     ROOM,
-    aimed: () => aimed(),
-    valid: (...args) => valid(...args),
-    topAt: (...args) => topAt(...args),
     insideDoor: room => insideDoor(room),
     outsideDoor: b => outsideDoor(b),
     externals: () => externals(),
     FLOOR_TILE,
     WALL_TILE,
     OUTSIDE_TILE,
-    items: () => items,
-    editing: () => editing,
-    buildings: () => buildings,
-    ui: () => ui
+    buildings: () => buildings
   });
 
-  // ---------------------------------------------------------------- Meubles : règles (vérifiées par l'hôte)
-  // La maison du joueur se décore ; les autres pièces gardent leurs meubles fixes (999 au plus).
-  // Les règles de placement sont dans shared/rules/house.js.
-  let items = [],
-    version = 0;
+  // ---------------------------------------------------------------- Meubles fixes
+  // Chaque pièce garde ses meubles (shared/data/house.js), vérifiés par shared/rules/house.js.
   const FIXED = houseFurnishRooms(HOUSE_FURNITURE, ROOM, HOUSE_ROOM_FURNITURE, 999);
-  const itemsOf = room => (!room ? [] : room === HOME ? items : FIXED[room.id] || []);
+  const itemsOf = room => (room ? FIXED[room.id] || [] : []);
   const cover = (it, lx, ly) => houseCovers(HOUSE_FURNITURE, it, lx, ly);
-  const valid = (k, x, y, list = items, r = 0, room = HOME, limit = HOUSE_MAX_ITEMS) =>
-    houseCanPlace(HOUSE_FURNITURE, room, list, k, x, y, r, limit);
   // Passage bloqué : meubles des pièces, et dehors les objets du camp (feu, souches, banc, torches).
   function blocked(wx, wy) {
     const room = roomAt(wx, wy);
@@ -80,50 +65,10 @@
     return itemsOf(room).some(it => HOUSE_FURNITURE[it.k].layer === 'floor' && cover(it, lx, ly));
   }
   canaanHouseBlocked = blocked;
-  // Le meuble visible le plus haut sur une case (rideau, mur, sol, tapis).
-  const topAt = (lx, ly, list = items) => houseTopItemAt(HOUSE_FURNITURE, list, lx, ly);
-  function changed() {
-    version++;
-    saveGame();
-  }
-  function place(hero, k, x, y, r = 0) {
-    if (!hero || !inHome(hero.player.x, hero.player.y)) return false;
-    const c = HOUSE_FURNITURE[k];
-    if (!c) return false;
-    // Décoration de quête : seulement pour un héros qui l'a gagnée.
-    if (c.quest && !CANAAN_QUESTS.hasDeco(hero, k)) {
-      if (hero === game.hero) toast('🔒 Récompense de quête : termine « ' + questById(c.quest).title + ' ».');
-      return false;
-    }
-    if (houseOnWall(c)) y = 0;
-    if (!valid(k, x, y, items, r)) return false;
-    items.push({ k, x, y, r });
-    changed();
-    return true;
-  }
-  function remove(hero, x, y) {
-    if (!hero || !inHome(hero.player.x, hero.player.y)) return false;
-    const it = topAt(x, y);
-    if (!it) return false;
-    items.splice(items.indexOf(it), 1);
-    changed();
-    return it;
-  }
-  // Tourner un meuble posé : quart de tour suivant (ou miroir), s'il a encore la place.
-  function rotate(hero, x, y) {
-    if (!hero || !inHome(hero.player.x, hero.player.y)) return false;
-    const it = topAt(x, y);
-    if (!it) return false;
-    const r = houseNextRotation(HOUSE_FURNITURE, HOME, items, it, HOUSE_MAX_ITEMS);
-    if (r === null) return false;
-    it.r = r;
-    changed();
-    return true;
-  }
 
   // ---------------------------------------------------------------- Bâtiments sur l'île
   // Camp de l'Aurore : échoppe, cuisine et deux demeures autour du feu (décalages en cases depuis le camp) ;
-  // maison du joueur à l'ouest du camp, loin des portails ; chaque refuge devient une cabane où l'on entre.
+  // la Chaumière des Glycines à l'ouest du camp, loin des portails ; chaque refuge devient une cabane où l'on entre.
   const VILLAGE = [
     { room: 'marmite', style: 'auberge', form: 'storey', w: 5, h: 3, dx: -2, dy: -11, sign: 'bol' },
     { room: 'echoppe', style: 'echoppe', w: 5, h: 3, dx: 5, dy: -9, sign: 'or' },
@@ -150,13 +95,13 @@
     rousses: 'gambrel',
     cristaux: 'tower'
   };
-  const homeB = () => buildings.find(b => b.room === HOME);
+  const cottageB = () => buildings.find(b => b.room === COTTAGE);
   const groundOk = (x, y) => {
     const t = game.world.overworld[y]?.[x];
     return t !== undefined && !SOLID.includes(t) && t !== 15 && t !== 30;
   };
-  // Emplacement de la maison : herbe des Plaines à l'ouest du camp, loin des portails, de l'Arène et des lieux.
-  function findHome() {
+  // Emplacement de la chaumière : herbe des Plaines à l'ouest du camp, loin des portails, de l'Arène et des lieux.
+  function findCottage() {
     const tiles = game.world.overworld,
       ok = (x, y) => [1, 2, 10].includes(tiles[y]?.[x]),
       tx = CANAAN_CAMP.x - 24,
@@ -230,7 +175,7 @@
         }
     }
     buildings = [];
-    const home = findHome();
+    const home = findCottage();
     for (const v of VILLAGE)
       buildings.push({
         room: ROOM[v.room],
@@ -244,7 +189,7 @@
         label: ROOM[v.room].name,
         village: true
       });
-    buildings.push({ room: HOME, style: 'chaume', w: 4, h: 3, x: home.x, y: home.y, label: '🏠 Ta maison' });
+    buildings.push({ room: COTTAGE, style: 'chaume', w: 4, h: 3, x: home.x, y: home.y, label: COTTAGE.name });
     // Chaque refuge prend l'architecture de son biome.
     const BIOME_STYLE = ['chaume', 'foret', 'marais', 'automne', 'desert', 'enchantee'];
     for (const p of PIXEL_PLACES) {
@@ -403,8 +348,8 @@
     return [...(under ? [] : buildings), ...externals()].filter(b => !!b.under === under);
   };
   // Points de passage : devant la porte d'un bâtiment, et juste devant la porte intérieure de sa pièce.
-  const outsideDoor = (b = homeB()) => ({ x: (b.x + b.w / 2) * TS, y: (b.y + b.h) * TS + 10 });
-  const insideDoor = (room = HOME) => {
+  const outsideDoor = (b = cottageB()) => ({ x: (b.x + b.w / 2) * TS, y: (b.y + b.h) * TS + 10 });
+  const insideDoor = (room = COTTAGE) => {
     const D = houseRoomGeometry(room).door;
     return { x: px(room, D.x) + TS / 2, y: py(room, D.y) + TS / 2 };
   };
@@ -446,39 +391,14 @@
     if (hero === game.hero) {
       camX = now ? (now.x + now.w / 2) * TS - W / 2 : p.x - W / 2;
       camY = now ? (now.y + now.h / 2 + 0.6) * TS - H / 2 : p.y - H / 2;
-      if (now === HOME) toast('🏠 Bienvenue chez toi ! Appuie sur H pour décorer.');
-      else if (now) toast('🚪 ' + now.name);
-      if (now !== HOME && editing) toggle();
-    } else
-      canaanLootNotice(
-        hero,
-        now === HOME
-          ? '🏠 Tu entres dans la maison (H pour décorer).'
-          : now
-            ? '🚪 ' + now.name
-            : '🚪 Tu sors.'
-      );
+      if (now) toast('🚪 ' + now.name);
+    } else canaanLootNotice(hero, now ? '🚪 ' + now.name : '🚪 Tu sors.');
     return true;
   }
 
-  // ---------------------------------------------------------------- Sauvegarde et réseau
-  const sanitize = raw => houseSanitizeItems(HOUSE_FURNITURE, HOME, raw?.items, HOUSE_MAX_ITEMS);
-  const layout = () => ({ items: items.map(it => ({ ...it })) });
-  function load(raw) {
-    items = sanitize(raw);
-    version++;
-  }
-  // Coopératif (scripts/house/net.js) : actions des invités vérifiées par l'hôte, maison envoyée à tous.
-  const NET = CANAAN_HOUSE_NET.create({
-    door: hero => door(hero),
-    place: (hero, k, x, y, r) => place(hero, k, x, y, r),
-    remove: (hero, x, y) => remove(hero, x, y),
-    rotate: (hero, x, y) => rotate(hero, x, y),
-    state: () => ({ version, items }),
-    receive: raw => {
-      items = sanitize({ items: raw });
-    }
-  });
+  // ---------------------------------------------------------------- Réseau
+  // Hôte : action d'un héros (le sien ou celui d'un invité). Seule la porte passe par l'hôte.
+  const handle = (hero, action) => action.op === 'house-door' && door(hero);
   // Touche E : porte d'un bâtiment ou porte intérieure. Renvoie vrai si E a servi.
   function interact() {
     if (game.world.instance) return false;
@@ -487,7 +407,8 @@
       const d = insideDoor(room);
       if (Math.hypot(P.x - d.x, P.y - d.y) > 90) return false;
     } else if (!nearestDoor(P.x, P.y)) return false;
-    NET.send({ op: 'house-door' });
+    if (game.mode === 'guest') CANAAN_NET.requestAction({ op: 'house-door' });
+    else door(game.hero);
     return true;
   }
   // Cuisiner : près d'une cuisinière, d'une marmite ou d'une cheminée (dans n'importe quel bâtiment).
@@ -507,190 +428,6 @@
     });
   }
 
-  // ---------------------------------------------------------------- Mode décoration (touche H)
-  let editing = false;
-  const ui = { cat: 'meubles', selected: null, tool: 'move', rot: 0 };
-  // Case visée par la souris (coordonnées de la pièce), bornée au sol ou au mur.
-  function aimed() {
-    const cat = ui.selected ? HOUSE_FURNITURE[ui.selected] : null,
-      d = cat ? houseDims(cat, ui.rot) : { w: 1, h: 1 },
-      lx = Math.floor(mouseWorldX / TS) - HOME.x - Math.floor((d.w - 1) / 2),
-      ly = Math.floor(mouseWorldY / TS) - HOME.y - (cat && !houseOnWall(cat) ? Math.floor((d.h - 1) / 2) : 0);
-    return { x: lx, y: ly };
-  }
-  const esc = text => safeGearText(text);
-  function renderBar() {
-    let bar = document.getElementById('housingBar');
-    if (!editing) {
-      if (bar) bar.remove();
-      return;
-    }
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'housingBar';
-      document.body.appendChild(bar);
-    }
-    const list = Object.entries(HOUSE_FURNITURE).filter(([, c]) => c.cat === ui.cat);
-    bar.innerHTML =
-      '<div class="house-head"><b>🏠 Décorer ta maison</b><span>Clic gauche : poser · clic sur un meuble : le déplacer · R : tourner · clic droit ou Échap : annuler · H : terminer</span></div>' +
-      '<div class="house-tabs">' +
-      HOUSE_FURNITURE_CATEGORIES.map(
-        ([id, text]) =>
-          '<button type="button" class="' +
-          (ui.cat === id ? 'on' : '') +
-          '" data-action="houseCat" data-cat="' +
-          id +
-          '">' +
-          text +
-          '</button>'
-      ).join('') +
-      '<button type="button" class="house-tool" data-action="houseRotate">⟳ Tourner (R)</button>' +
-      '<button type="button" class="house-tool' +
-      (ui.tool === 'remove' ? ' on' : '') +
-      '" data-action="houseTool" data-tool="' +
-      (ui.tool === 'remove' ? 'move' : 'remove') +
-      '">🗑 Retirer</button>' +
-      '<span class="house-count">' +
-      items.length +
-      ' / ' +
-      HOUSE_MAX_ITEMS +
-      ' objets</span></div>' +
-      '<div class="house-items">' +
-      list
-        .map(([k, c]) => {
-          const url = ART.preview(k),
-            locked = c.quest && !CANAAN_QUESTS.hasDeco(game.hero, k);
-          return (
-            '<button type="button" class="house-item' +
-            (ui.selected === k ? ' on' : '') +
-            (locked ? ' locked' : '') +
-            '" data-action="houseSelect" data-item="' +
-            k +
-            '"' +
-            (locked ? ' title="Récompense de quête : ' + esc(questById(c.quest).title) + '"' : '') +
-            '>' +
-            (url ? '<img src="' + url + '" alt="">' : '') +
-            '<span>' +
-            (locked ? '🔒 ' : '') +
-            esc(c.name) +
-            '</span></button>'
-          );
-        })
-        .join('') +
-      '</div>';
-  }
-  function toggle() {
-    if (!started) return false;
-    if (!editing && (!inHome(P.x, P.y) || game.world.instance)) {
-      toast('🏠 Entre dans ta maison (chaumière à l’ouest du Camp de l’Aurore) pour la décorer.');
-      return false;
-    }
-    editing = !editing;
-    ui.selected = null;
-    ui.tool = 'move';
-    ui.rot = 0;
-    renderBar();
-    return true;
-  }
-  function act(action) {
-    const done = NET.send(action);
-    renderBar();
-    return done;
-  }
-  // Tourner : le meuble en main (aperçu), sinon celui sous la souris.
-  function turn() {
-    if (!editing) return false;
-    if (ui.selected) {
-      ui.rot = (ui.rot + 1) % houseTurns(HOUSE_FURNITURE[ui.selected]);
-      return true;
-    }
-    const at = aimed();
-    if (!topAt(at.x, at.y)) {
-      toast('🏠 Prends un meuble ou vise-en un pour le tourner (R).');
-      return false;
-    }
-    act({ op: 'house-rotate', x: at.x, y: at.y });
-    return true;
-  }
-  // Clic dans le monde en mode décoration : poser, déplacer ou retirer. Renvoie vrai si le clic est pris.
-  function click(button) {
-    if (!editing) return false;
-    if (!inHome(P.x, P.y)) {
-      toggle();
-      return false;
-    }
-    if (button === 2) {
-      ui.selected = null;
-      renderBar();
-      return true;
-    }
-    const at = aimed();
-    if (ui.selected) {
-      const cat = HOUSE_FURNITURE[ui.selected],
-        y = houseOnWall(cat) ? 0 : at.y;
-      if (!valid(ui.selected, at.x, y, items, ui.rot)) {
-        toast('🏠 Impossible de poser ici.');
-        return true;
-      }
-      act({ op: 'house-place', k: ui.selected, x: at.x, y, r: ui.rot });
-      if (ui.moving) {
-        ui.selected = null;
-        ui.moving = false;
-      }
-      return true;
-    }
-    const it = topAt(at.x, at.y);
-    if (!it) return true;
-    act({ op: 'house-remove', x: at.x, y: at.y });
-    // Déplacer : le meuble repris suit la souris, dans le même sens, jusqu'au prochain clic.
-    if (ui.tool !== 'remove') {
-      ui.selected = it.k;
-      ui.rot = it.r || 0;
-      ui.moving = true;
-    }
-    renderBar();
-    return true;
-  }
-  // Échap annule le meuble en main avant de mettre le jeu en pause ; R (Paramètres → Clavier) tourne le meuble.
-  addEventListener(
-    'keydown',
-    e => {
-      if (!editing || e.target?.tagName === 'INPUT') return;
-      if (e.key === 'Escape' && ui.selected) {
-        ui.selected = null;
-        ui.moving = false;
-        renderBar();
-      } else if (CANAAN_KEYS.is(e, 'houseRotate')) turn();
-      else return;
-      e.stopImmediatePropagation();
-      e.preventDefault();
-    },
-    true
-  );
-  // Sortie de la maison : le mode décoration se ferme.
-  setInterval(() => {
-    if (editing && (!started || !inHome(P.x, P.y))) toggle();
-  }, 300);
-  const actions = {
-    cat(id) {
-      if (HOUSE_FURNITURE_CATEGORIES.some(([c]) => c === id)) ui.cat = id;
-      renderBar();
-    },
-    select(k) {
-      if (!HOUSE_FURNITURE[k]) return;
-      ui.selected = ui.selected === k ? null : k;
-      ui.moving = false;
-      ui.tool = 'move';
-      ui.rot = 0;
-      renderBar();
-    },
-    tool(t) {
-      ui.tool = t === 'remove' ? 'remove' : 'move';
-      ui.selected = null;
-      renderBar();
-    },
-    rotate: turn
-  };
   // Habitants des bâtiments (life.js) : [rôle, x, y] en cases du monde, avec le lieu d'un refuge.
   function residents() {
     const out = [];
@@ -708,10 +445,8 @@
     return out;
   }
   window.CANAAN_HOUSE = Object.freeze({
-    CATALOG: ART.CATALOG,
-    room: HOME,
     roomAt,
-    outside: () => ({ x: homeB().x, y: homeB().y }),
+    outside: () => ({ x: cottageB().x, y: cottageB().y }),
     // Bâtiments à redessiner devant les personnages qui passent derrière (world-look.js).
     occluders: () => ART.occluders(),
     buildings: () =>
@@ -727,26 +462,16 @@
         door: outsideDoor(b),
         inside: insideDoor(b.room)
       })),
-    outsideDoor: id => outsideDoor(id ? buildings.find(b => b.room.id === id) : homeB()),
-    insideDoor: id => insideDoor(id ? ROOM[id] : HOME),
+    outsideDoor: id => outsideDoor(id ? buildings.find(b => b.room.id === id) : cottageB()),
+    insideDoor: id => insideDoor(id ? ROOM[id] : COTTAGE),
     inside,
-    valid,
     blocked,
-    place,
-    remove,
-    rotate,
     door,
-    handle: NET.handle,
-    items: () => items.map(it => ({ ...it })),
+    handle,
     roomItems: id => itemsOf(ROOM[id]).map(it => ({ ...it })),
     drawFacade: ART.drawFacade,
     styles: ART.styles,
     residents,
-    layout,
-    load,
-    sanitize,
-    netView: NET.netView,
-    applyRemote: NET.applyRemote,
     interact,
     nearStove,
     drawTile: ART.drawTile,
@@ -763,11 +488,6 @@
       })),
     draw: ART.draw,
     drawPrompts: ART.drawPrompts,
-    click,
-    toggle,
-    editing: () => editing,
-    actions,
     hasFire: () => itemsOf(ART.current()).some(it => HOUSE_FURNITURE[it.k].fire)
   });
-  window.toggleHousing = toggle;
 })();

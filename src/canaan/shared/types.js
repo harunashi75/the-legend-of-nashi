@@ -53,10 +53,9 @@
  */
 
 /**
- * Meuble du catalogue de la maison (sans son dessin).
+ * Meuble du catalogue des pièces intérieures (sans son dessin).
  * @typedef {object} Furniture
  * @property {string} name
- * @property {string} cat onglet du mode décoration
  * @property {'floor' | 'rug' | 'wall' | 'curtain'} layer
  * @property {number} w largeur en cases
  * @property {number} h hauteur en cases
@@ -64,7 +63,6 @@
  * @property {boolean} [back] contre le mur du fond
  * @property {boolean} [fire] on y cuisine
  * @property {boolean} [light]
- * @property {number} [quest] quête qui le débloque
  */
 
 /**

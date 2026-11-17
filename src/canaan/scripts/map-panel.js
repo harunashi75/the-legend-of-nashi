@@ -90,7 +90,7 @@
       );
     }).join('');
     showPanel(
-      '<h2>🗺️ Canaan — L’île et ses six biomes</h2><p class="muted">🏕️ Camp · 🔴 Donjons · 🟣 Raids · 🔶 Arène · ⭐ Boss mondiaux · 🏠 Ta maison · 🛖 Refuges · ❗ Quête à prendre · ❓ Quête à rendre · 🎯 Objectif suivi · ⚪ Vous</p><div class="map-instance-layout"><div>' +
+      '<h2>🗺️ Canaan — L’île et ses six biomes</h2><p class="muted">🏕️ Camp · 🔴 Donjons · 🟣 Raids · 🔶 Arène · ⭐ Boss mondiaux · 🛖 Refuges · ❗ Quête à prendre · ❓ Quête à rendre · 🎯 Objectif suivi · ⚪ Vous</p><div class="map-instance-layout"><div>' +
         TOOLS +
         '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>🧭 Biomes, donjons et raids</h3><p class="muted">Survole une instance pour la voir sur la carte.</p>' +
         regions +

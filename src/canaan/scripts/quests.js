@@ -1,6 +1,6 @@
 // Histoire « Les Échos de l'Aurore » et quêtes (shared/data/quests.js, shared/rules/quests.js).
 // - Lieux : posés sur l'île après sa génération (mêmes cases chez chacun), avec leurs énigmes, PNJ et objets.
-// - Progression personnelle (hero.quetes, sauvegardée) : quêtes actives et étapes, terminées, drapeaux, décorations,
+// - Progression personnelle (hero.quetes, sauvegardée) : quêtes actives et étapes, terminées, drapeaux,
 //   choix ; l'état des énigmes et les changements du monde (pont, lanternes, sanctuaires) sont partagés
 //   (monde.quetes, sauvegardé par l'hôte). Une énigme résolue à plusieurs compte pour chaque héros qui l'a en cours.
 // - Touche E : parler aux PNJ et agir sur les énigmes ; touche L : journal (histoire, secondaires, terminées).
@@ -21,7 +21,7 @@
       /[&<>"']/g,
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
     );
-  const fresh = () => ({ active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null });
+  const fresh = () => ({ active: {}, done: {}, flags: {}, choices: {}, track: null });
   const stateOf = hero => (hero.quetes ??= fresh());
   // État du monde : drapeaux (pont, lanternes, sanctuaires ouverts…) et énigmes résolues.
   let qworld = { flags: {}, solved: {} };
@@ -1207,7 +1207,6 @@
       if (f.startsWith('sanct_')) qworld.flags[f] = true;
     }
     if (r.jewel) giveJewel(hero, q);
-    if (r.deco && !st.deco.includes(r.deco)) st.deco.push(r.deco);
     if (r.item) giveGear(clampLevel(hero.level), 'quest', r.item, hero);
     if (r.fishXp || r.goldenFish)
       CANAAN_PROF.questReward(hero, { fishXp: r.fishXp || 0, goldenFish: r.goldenFish || 0 });
@@ -3455,7 +3454,6 @@
     netView,
     applyRemote,
     questLook,
-    hasDeco: (hero, k) => stateOf(hero).deco.includes(k),
     done: (hero, id) => !!stateOf(hero).done[id],
     drawWorld,
     drawBubbles,

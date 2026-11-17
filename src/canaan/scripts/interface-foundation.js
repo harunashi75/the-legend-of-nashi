@@ -39,7 +39,11 @@ function nearMerchant(hero = game.hero) {
   const p = hero.player;
   return (
     !game.world.instance &&
-    game.world.npcs.some(n => n.type === 'shop' && canaanHere(n) && Math.hypot(p.x - n.x, p.y - n.y) < 135)
+    (game.world.npcs.some(
+      n => n.type === 'shop' && canaanHere(n) && Math.hypot(p.x - n.x, p.y - n.y) < 135
+    ) ||
+      // Thalion, l'armurier de Sylvaëlle, achète aussi (elven-city.js).
+      CANAAN_CITY.nearArmorer(hero))
   );
 }
 function modernPanel(html) {

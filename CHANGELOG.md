@@ -14,6 +14,11 @@ Première version officielle avant la sortie sur Steam : la numérotation repart
 - Jeu installable, sans navigateur : installateur `.exe` et `.zip` pour Windows, AppImage et `.tar.gz` pour Linux (`npm run dist:win`, `npm run dist:linux`, electron-builder). Les archives contiennent le dossier du jeu, prêt pour Steam. Icône provisoire en pixel art.
 - La release GitHub construit le jeu pour Windows et Linux, lance chaque version installée pour de vrai (menu, nouvelle aventure, sauvegarde sur disque, relais du coopératif ; `tools/smoke_package.cjs`) puis la publie.
 
+### Changé
+- **Armurerie de Sylvaëlle** : Thalion ouvre la même boutique que le marchand du Camp de l’Aurore. Sa marchandise elfique de niveau 60 est visible objet par objet (statistiques et comparaison au survol), en deux rayons, Rare (2 500 or) et Épique (7 500 or), avec une pièce de chaque emplacement (artefact compris) et **une arme de chaque famille**, à choisir (avant, l’arme était d’une famille tirée au hasard). Un objet acheté est remplacé par un autre du même genre ; le sac est à droite, et Thalion rachète le butin comme le marchand du camp. L’action réseau `city-buy` est remplacée par `shop-buy`.
+- **Plus de maison à décorer** : le mode décoration (touche H, bouton Maison, touche R pour tourner) et la sauvegarde des meubles (`monde.maison`, ignorée dans les anciennes sauvegardes) sont retirés, avec `scripts/house/net.js` et `styles/house.css`. La chaumière à l’ouest du camp devient la **Chaumière des Glycines**, maison meublée d’une vieille tisserande et de son petit-fils (cheminée où cuisiner).
+- Les sept quêtes qui donnaient une décoration de maison donnent maintenant un équipement de ton niveau : Rare pour les quêtes 3, 9 et 10, Épique pour les quêtes 14, 18, 23 et 29. Les décorations déjà gagnées disparaissent des sauvegardes.
+
 ### Corrigé
 - Application de bureau sous Windows : une écriture dans le journal sans console disponible (EBADF) pouvait arrêter le jeu au démarrage ; le journal ne peut plus lever d’erreur.
 - Trois lectures des anciens noms globaux (`monsters`, `projectiles`, `inventory`) avaient échappé au garde-fou : une expression régulière ignorait `...monsters`. Le garde-fou analyse maintenant les portées de tous les scripts du manifeste, sous-dossiers compris.
@@ -23,7 +28,7 @@ Première version officielle avant la sortie sur Steam : la numérotation repart
 - Métiers : constantes, catalogues et règles pures (XP, qualités, repas, tirages, sauvegardes) dans `shared/data/professions.js` et `shared/rules/professions.js` ; résultats identiques à l’ancienne version sur 500 sauvegardes aléatoires et toutes les recettes.
 - Quêtes : données et règles des énigmes dans `shared/data/puzzles.js` et `shared/rules/puzzles.js` (1 585 comparaisons exhaustives identiques à l’ancienne version).
 - Économie : butin garanti d’une instance, tirage de prestige et bourse des boss mondiaux dans `shared/rules/economy.js` (mêmes tirages dans le même ordre, vérifié sur 5 400 tirages à graine fixe).
-- Maison : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`), le dessin (`render.js`) et le coopératif (`net.js`).
+- Bâtiments : catalogue et règles des meubles dans `shared/` ; `scripts/house/` sépare l’état (`house.js`) et le dessin (`render.js`).
 - Donjons : structure et créatures de chaque instance dans `shared/data/dungeons.js` ; `scripts/dungeons/` sépare les plans, énigmes et boss (`dungeons.js`) du dessin (`render.js`).
 - Pixel art : un kit commun (`client/art/pixel-kit.js` : toile, contour, ombre et reflet, couleurs, bruit et trame, écailles et branches) remplace les copies propres à chaque art (bâtiments, nains, elfes, portails, héros, créatures) ; les icônes SVG partagent une même plume (`client/icons/svg-pen.js`). Chaque outil n’existe plus qu’une fois.
 - Rien ne change à l’écran : chaque étape a été comparée appel de dessin par appel de dessin avec la version précédente.

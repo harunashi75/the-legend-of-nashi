@@ -157,7 +157,7 @@ test('Interface générée : actions autorisées, catalogue officiel, musique et
  const actionCalls=[];g.actionCalls=actionCalls;
  const stubbed=['togglePause','pauseOpenPanel','pauseToTitle','startGame','toggleMap','enterInstance','renderInventory','renderCharacter','unequip','equipReserveWeapon','buyGear'];
  run('globalThis.realActions={'+stubbed.join(',')+',restartFresh:CANAAN_PERSISTENCE.restartFresh}');
- run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','toggleHousing','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','classPage','classPageTo','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','settingsTab','keybindReset','quitGame'])
+ run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','classPage','classPageTo','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','settingsTab','keybindReset','quitGame'])
   globalThis[name]=(...args)=>actionCalls.push([name,...args]);
   togglePause=globalThis.togglePause;pauseOpenPanel=globalThis.pauseOpenPanel;pauseToTitle=globalThis.pauseToTitle;startGame=globalThis.startGame;
   toggleMap=globalThis.toggleMap;enterInstance=globalThis.enterInstance;renderInventory=globalThis.renderInventory;
@@ -345,14 +345,12 @@ test('Paramètres en onglets ; touches du clavier réglables, échangées en cas
  // Défauts : ceux d'avant les réglages.
  assert.equal(run('CANAAN_KEYS.actionOf("e")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("Z")'),'moveUp');
  assert.equal(run('CANAAN_KEYS.actionOf(" ")'),'dodge');assert.equal(run('CANAAN_KEYS.actionOf("r")'),null);
- assert.equal(run('CANAAN_KEYS.actionOf("r","house")'),'houseRotate');
+ assert.equal(run('CANAAN_KEYS.actionOf("h")'),null,'plus de touche Maison');
  // Attendre une touche, puis la prendre : R devient Interagir ; E se libère.
  run('keybindCapture("interact",0)');assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.listening())')),{id:'interact',slot:0});
  fire(g,'keydown',{key:'R',stopImmediatePropagation(){}});
  assert.equal(run('CANAAN_KEYS.listening()'),null);
  assert.equal(run('CANAAN_KEYS.actionOf("r")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("e")'),null);
- // Tourner le meuble garde R : la maison est une autre situation.
- assert.equal(run('CANAAN_KEYS.actionOf("r","house")'),'houseRotate');
  // Conflit : I (Inventaire) donné à Interagir, l'Inventaire reçoit l'ancienne touche (R).
  run('CANAAN_KEYS.bind("interact",0,"i")');
  assert.equal(run('CANAAN_KEYS.actionOf("i")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("r")'),'inventory');

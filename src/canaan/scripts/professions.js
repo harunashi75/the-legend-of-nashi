@@ -286,10 +286,7 @@
       prof = profOf(hero);
     if (!r || !Number.isInteger(quality) || quality < 0 || quality > 7 || !knows(hero, recipe)) return false;
     if (!nearFire(hero.player.x, hero.player.y)) {
-      tell(
-        hero,
-        '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).'
-      );
+      tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp ou un refuge).');
       return false;
     }
     const have = prof[ING[r.fish].bag]?.[r.fish + ':' + quality] || 0;
@@ -307,10 +304,7 @@
       prof = profOf(hero);
     if (!r || !Number.isInteger(quality) || quality < 0 || quality > 7 || !knows(hero, recipe)) return false;
     if (!nearFire(hero.player.x, hero.player.y)) {
-      tell(
-        hero,
-        '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).'
-      );
+      tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp ou un refuge).');
       return false;
     }
     const bag = prof[ING[r.fish].bag],
@@ -838,7 +832,7 @@
         fire,
         fire
           ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.'
-          : '🔥 Va près d’une cuisinière : Marmite dorée (camp), refuge ou ta maison.'
+          : '🔥 Va près d’une cuisinière : Marmite dorée (camp) ou refuge.'
       ) +
       tips(
         [
@@ -848,7 +842,7 @@
         ],
         'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' +
           esc(qualityName(cap)) +
-          '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore, les refuges, et ta maison si tu en as posé une.'
+          '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore et les refuges.'
       ) +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)

@@ -38,7 +38,7 @@ const CANAAN_CAMP = Object.freeze({ name: 'Camp de l’Aurore', x: 72, y: 234, r
 // du joueur ; viennent ensuite l'échoppe, la cuisine et les demeures du camp, puis l'intérieur de chaque refuge.
 const CANAAN_ROOMS = Object.freeze(
   [
-    { id: 'maison', name: 'Ta maison', kind: 'home', x: 8, y: 8, w: 15, h: 11 },
+    { id: 'maison', name: 'Chaumière des Glycines', kind: 'home', x: 8, y: 8, w: 15, h: 11 },
     { id: 'echoppe', name: 'Échoppe de Lira', kind: 'shop', x: 38, y: 8, w: 13, h: 9 },
     { id: 'marmite', name: 'La Marmite dorée', kind: 'kitchen', x: 68, y: 8, w: 13, h: 9 },
     { id: 'aubepines', name: 'Demeure des Aubépines', kind: 'dwelling', x: 98, y: 8, w: 11, h: 9 },
@@ -117,7 +117,6 @@ const CANAAN_ROOMS = Object.freeze(
     }
   ].map(r => Object.freeze(r))
 );
-const CANAAN_HOUSE_ROOM = CANAAN_ROOMS[0];
 // Pièce qui contient la case (tx, ty), murs compris, ou null dehors (et toujours null en donjon, dont la carte
 // réutilise les mêmes coordonnées).
 // Les pièces des Tréfonds (under) n'existent que sous terre, les autres qu'à la surface.
@@ -301,7 +300,6 @@ addEventListener('keydown', e => {
     e.preventDefault();
     return chatInput.focus();
   }
-  if (action === 'housing') return toggleHousing();
   if (/^skill[1-4]$/.test(action)) return useSkill(+action.slice(5) - 1);
   if (Object.hasOwn(CANAAN_PANEL_KEYS, action)) {
     e.preventDefault();
@@ -318,8 +316,6 @@ function canaanMoveAxes() {
 }
 addEventListener('keyup', e => (keys[e.key.toLowerCase()] = false));
 cv.addEventListener('mousedown', e => {
-  // Mode décoration de la maison : le clic pose, déplace ou retire un meuble (pas d'attaque).
-  if (started && CANAAN_HOUSE.click(e.button)) return;
   if (
     !started ||
     paused ||

@@ -458,7 +458,7 @@ function gableHouse(k, o) {
 // ---------------------------------------------------------------- Modèles
 // Chaque modèle reçoit le pinceau, la largeur en pixels d'art, le bas des murs et les outils d'effets.
 const MODELS = {
-  // Ta maison : chaumière des Plaines, murs pêche, pignon à colombages, fenêtre ronde, auvent vert, boîte aux lettres.
+  // Chaumière des Glycines : chaumière des Plaines, murs pêche, pignon à colombages, fenêtre ronde, auvent vert, boîte aux lettres.
   maison(k, W, bot, e) {
     const x = 10,
       w = W - 20;

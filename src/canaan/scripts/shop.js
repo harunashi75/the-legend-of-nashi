@@ -1,62 +1,103 @@
-// Boutique du marchand (touche E près d'un marchand) : deux fenêtres côte à côte, comme dans un MMORPG.
-// À gauche, la marchandise : un objet Peu commun du niveau du héros pour chaque emplacement et chaque famille
-// d'arme, à choisir (un objet acheté est aussitôt remplacé par un autre du même genre). À droite, le sac : un clic
-// vend l'objet ou la pile (poissons, viandes, repas, Rubis en double).
+// Boutique d'un marchand (touche E) : deux fenêtres côte à côte, comme dans un MMORPG.
+// À gauche, la marchandise, objet par objet (survol : statistiques et comparaison ; un objet acheté est aussitôt
+// remplacé par un autre du même genre). À droite, le sac : un clic vend l'objet ou la pile (poissons, viandes, repas,
+// Rubis en double).
+// - Marchand du Camp de l'Aurore (et des villages) : un objet Peu commun du niveau du héros pour chaque emplacement et
+//   chaque famille d'arme.
+// - Thalion, l'armurier de Sylvaëlle : équipement elfique de niveau 60, Rare ou Épique, pour chaque emplacement (artefact
+//   compris) et chaque famille d'arme.
 // L'hôte garde la marchandise de chaque héros et vérifie tout (marchand à portée, or, place) ; un invité reçoit la
 // sienne dans son message privé et envoie ses achats et ventes (actions shop-buy et sell-stack).
 (() => {
   'use strict';
   const SLOTS = ['helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring'];
-  const RARITY = 'Peu commun';
   const stocks = new WeakMap();
   const esc = text => safeGearText(text);
   const say = (hero, text) => (hero === game.hero ? toast(text) : canaanLootNotice(hero, text));
   const guest = () => game.mode === 'guest';
-  // Un objet de la marchandise : emplacement (et famille d'arme) imposés, qualité Peu commun, niveau du héros.
-  function make(level, slot, weaponType = null) {
-    const item = {
-      id: 'shop' + Date.now() + Math.floor(Math.random() * 1e9),
-      name: '',
-      slot,
-      rarity: RARITY,
-      level: clampLevel(level)
-    };
+  const weapons = () => CANAAN_GEAR_ENGINE.weaponTypes;
+  // Un objet de la marchandise : emplacement (et famille d'arme) imposés.
+  function make(offer, level, slot, weaponType = null) {
+    let item;
+    if (offer.source) {
+      const raw = createRawGear(level, offer.source, offer.rarity, slot);
+      item = { ...raw, id: 'shop' + raw.id, rarity: offer.rarity, level: clampLevel(level) };
+      if (offer.origin) item.origin = offer.origin;
+      if (slot === 'artifact') item.artifactVariant = Math.floor(Math.random() * 3);
+    } else
+      item = {
+        id: 'shop' + Date.now() + Math.floor(Math.random() * 1e9),
+        name: '',
+        slot,
+        rarity: offer.rarity,
+        level: clampLevel(level)
+      };
     if (weaponType) item.weaponType = weaponType;
     window.CANAAN_GEAR.normalize(item);
     return item;
   }
-  // Marchandise d'un héros : refaite quand il change de niveau.
-  function stock(hero) {
-    const level = heroLevel(hero);
-    let s = stocks.get(hero);
-    if (!s || s.level !== level) {
-      s = {
-        level,
-        items: [
-          ...SLOTS.map(slot => make(level, slot)),
-          ...CANAAN_GEAR_ENGINE.weaponTypes.map(t => make(level, 'weapon', t))
-        ]
-      };
-      stocks.set(hero, s);
+  // Les marchands : niveau de la marchandise, offres (qualité et prix) et emplacements proposés.
+  const SHOPS = {
+    camp: {
+      level: hero => heroLevel(hero),
+      offers: hero => [{ rarity: 'Peu commun', price: shopPriceAt(heroLevel(hero)) }],
+      slots: SLOTS,
+      near: hero => nearMerchant(hero),
+      intro: 'Équipement Peu commun de ton niveau. Survole un objet pour le comparer, clique pour l’acheter.'
+    },
+    elfe: {
+      level: () => 60,
+      offers: () => [
+        { rarity: 'Rare', price: 2500, source: 'elfe', origin: 'elfique' },
+        { rarity: 'Épique', price: 7500, source: 'elfe', origin: 'elfique' }
+      ],
+      slots: [...SLOTS, 'artifact'],
+      near: hero => CANAAN_CITY.nearArmorer(hero),
+      name: 'Thalion, l’armurier',
+      place: 'Armurerie de Sylvaëlle',
+      intro:
+        '« Un équipement taillé par les elfes, de niveau 60. Choisis ta pièce, je m’occupe du reste. » Survole un objet pour le comparer, clique pour l’acheter.'
     }
-    return s.items;
+  };
+  // Marchand à portée du héros (l'armurier elfe d'abord : il compte aussi comme marchand pour vendre).
+  const which = hero => (SHOPS.elfe.near(hero) ? 'elfe' : SHOPS.camp.near(hero) ? 'camp' : null);
+  // Marchandise d'un héros chez un marchand : refaite quand il change de niveau ou que les prix changent.
+  function shelf(hero, kind = which(hero) || 'camp') {
+    const shop = SHOPS[kind],
+      level = shop.level(hero),
+      offers = shop.offers(hero),
+      key = level + ':' + offers.map(o => o.price).join(',');
+    let all = stocks.get(hero);
+    if (!all) stocks.set(hero, (all = {}));
+    let s = all[kind];
+    if (!s || s.key !== key) {
+      s = { key, items: [], offers: [] };
+      for (const offer of offers) {
+        for (const slot of shop.slots) (s.items.push(make(offer, level, slot)), s.offers.push(offer));
+        for (const t of weapons()) (s.items.push(make(offer, level, 'weapon', t)), s.offers.push(offer));
+      }
+      all[kind] = s;
+    }
+    return s;
   }
-  const priceOf = hero => shopPriceAt(heroLevel(hero));
+  const stock = (hero, kind) => shelf(hero, kind).items;
 
   // ---------------------------------------------------------------- Hôte : règles
   function buy(hero, index) {
-    const items = stock(hero),
-      item = items[index];
+    const kind = which(hero);
+    if (!kind) return (say(hero, '🛍️ Va voir un marchand pour acheter.'), false);
+    const s = shelf(hero, kind),
+      item = s.items[index],
+      offer = s.offers[index];
     if (!item) return false;
-    if (!nearMerchant(hero)) return (say(hero, '🛍️ Va voir un marchand pour acheter.'), false);
     if (canaanBagUsed(hero) >= canaanBagLimit(hero))
       return (say(hero, '🎒 Sac plein : vends d’abord un objet.'), false);
-    const cost = priceOf(hero);
+    const cost = offer.price;
     if (hero.player.gold < cost) return (say(hero, 'Or insuffisant (' + cost + ' or).'), false);
     hero.player.gold -= cost;
     hero.inventory.push(item);
     // Remplacé par un autre objet du même genre.
-    items[index] = make(heroLevel(hero), item.slot, item.weaponType || null);
+    s.items[index] = make(offer, SHOPS[kind].level(hero), item.slot, item.weaponType || null);
     hero.netBag = null;
     hero.netShop = null;
     say(hero, '🛍️ ' + gearDisplayName(item) + ' acheté (' + cost + ' or).');
@@ -86,7 +127,10 @@
   }
   // Marchandise envoyée à un invité (quand elle change), seulement près d'un marchand.
   function view(hero) {
-    return nearMerchant(hero) ? { price: priceOf(hero), items: stock(hero) } : null;
+    const kind = which(hero);
+    if (!kind) return null;
+    const s = shelf(hero, kind);
+    return { kind, items: s.items, prices: s.offers.map(o => o.price) };
   }
 
   // ---------------------------------------------------------------- Fenêtre (hôte ou invité)
@@ -207,30 +251,62 @@
   let shown = '';
   const signature = () =>
     JSON.stringify([
+      myStock()?.kind,
       myStock()?.items?.map(i => i.id),
       game.hero.inventory.map(i => i.id),
       CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p)),
       Math.floor(P.gold)
     ]);
+  // Rayons de la marchandise : un par qualité (chez l'armurier elfe, Rare puis Épique), avec leur prix.
+  function shelvesHTML(s) {
+    const groups = [];
+    s.items.forEach((it, i) => {
+      const last = groups.at(-1);
+      if (last && last.rarity === it.rarity && last.price === s.prices[i])
+        last.cells.push(stockCell(it, i, s.prices[i]));
+      else groups.push({ rarity: it.rarity, price: s.prices[i], cells: [stockCell(it, i, s.prices[i])] });
+    });
+    return groups
+      .map(
+        g =>
+          (groups.length > 1
+            ? '<h3 class="bag-subhead" style="color:' +
+              rarityInfo({ rarity: g.rarity }).color +
+              '">' +
+              esc(g.rarity) +
+              ' · 🪙 ' +
+              g.price +
+              '</h3>'
+            : '') +
+          '<div class="modern-bag shop-stock">' +
+          g.cells.join('') +
+          '</div>'
+      )
+      .join('');
+  }
   function render() {
     if (!isOpen()) return;
-    const s = myStock();
+    const s = myStock(),
+      shop = SHOPS[s?.kind] || SHOPS.camp,
+      elfe = s?.kind === 'elfe';
     shown = signature();
-    const name = merchant?.name || 'Marchand';
+    const name = shop.name || merchant?.name || 'Marchand';
     showPanel(
-      '<div class="rpg-head"><h2>🛍️ ' +
+      '<div class="rpg-head"><h2>' +
+        (elfe ? '🏹 ' : '🛍️ ') +
         esc(name) +
         '</h2></div><div class="shop-panel shop-columns">' +
         '<section class="shop-side"><h3>Marchandise · ' +
-        esc(merchant?.village || CANAAN_CAMP.name) +
+        esc(shop.place || merchant?.village || CANAAN_CAMP.name) +
         '</h3>' +
         (s
-          ? '<p class="muted">Équipement Peu commun de ton niveau. Survole un objet pour le comparer, clique pour l’acheter.</p><div class="modern-bag shop-stock">' +
-            s.items.map((it, i) => stockCell(it, i, s.price)).join('') +
-            '</div>'
+          ? '<p class="muted">' + esc(shop.intro) + '</p>' + shelvesHTML(s)
           : '<p class="muted">Approche-toi du marchand pour voir sa marchandise.</p>') +
-        bagUpgradeHTML() +
-        '<p class="muted">Pour devenir plus fort, il faut trouver mieux : monstres, boss mondiaux, donjons et raids lâchent des équipements toujours plus puissants.</p></section>' +
+        (elfe
+          ? ''
+          : bagUpgradeHTML() +
+            '<p class="muted">Pour devenir plus fort, il faut trouver mieux : monstres, boss mondiaux, donjons et raids lâchent des équipements toujours plus puissants.</p>') +
+        '</section>' +
         bagSide() +
         '</div>'
     );
@@ -274,7 +350,10 @@
     isOpen,
     showTooltip,
     applyRemote(v) {
-      remote = v && Array.isArray(v.items) ? v : null;
+      remote =
+        v && Array.isArray(v.items) && Array.isArray(v.prices) && SHOPS[v.kind]
+          ? { kind: v.kind, items: v.items, prices: v.prices }
+          : null;
       render();
     },
     buyAt: index => act({ op: 'shop-buy', index }),

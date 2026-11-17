@@ -300,11 +300,7 @@
       exports: {
         'CANAAN_HOUSE.drawTile': 'function',
         'CANAAN_HOUSE.draw': 'function',
-        'CANAAN_HOUSE.interact': 'function',
-        'CANAAN_HOUSE.click': 'function',
-        'CANAAN_HOUSE.layout': 'function',
-        'CANAAN_HOUSE.load': 'function',
-        toggleHousing: 'function'
+        'CANAAN_HOUSE.interact': 'function'
       }
     },
     {

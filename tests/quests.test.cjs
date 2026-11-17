@@ -26,8 +26,10 @@ test('Quêtes : les 15 quêtes des chapitres I à III se jouent de bout en bout 
  run('take(2);for(const s of ["etoile","lune","flamme"])act("q2","sym_"+s)');assert.equal(run('step(2)'),1);
  run('act("q2","ped0",2);act("q2","ped1",2);act("q2","ped2",2)');assert.equal(run('step(2)'),2);check(2);
  // Q3
+ const inv3=run('HR.inventory.length');
  run('take(3);act("q3","gate0");act("q3","gate1");act("q3","gate2");act("q3","whistle");tick(400)');assert.equal(run('step(3)'),1,'sheep');check(3);
- assert.ok(run('st().deco.includes("mouton")'));
+ assert.equal(run('HR.inventory.length'),inv3+1,'équipement Rare au lieu d’une décoration');assert.equal(run('HR.inventory.at(-1).rarity'),'Rare');
+ assert.equal(run('"deco" in st()'),false);
  // Q4
  const inv0=run('HR.inventory.length');run('take(4);act("q4","dig")');assert.equal(run('step(4)'),1);check(4);assert.equal(run('HR.inventory.length'),inv0+1);
  // Q5
@@ -71,10 +73,10 @@ test('Quêtes : les 15 quêtes des chapitres I à III se jouent de bout en bout 
  run('Q.importWorld({});');assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'),false);
  run('Q.importWorld('+JSON.stringify(snap.monde.quetes)+')');assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'),true);
  
- // Journal (trois onglets), dialogues et décorations de quête débloquées pour la maison.
+ // Journal (trois onglets) et dialogues.
  run('globalThis.__p=[];modernPanel=h=>__p.push(h);CANAAN_QUESTS.render("main");CANAAN_QUESTS.render("side");CANAAN_QUESTS.render("done")');
  assert.match(run('__p[0]'),/Étoiles du Cœur : ★★☆☆☆☆/);assert.match(run('__p[0]'),/Carte des sanctuaires/);assert.match(run('__p[2]'),/Souvenir/);
- assert.equal(run('CANAAN_QUESTS.hasDeco(HR,"mouton")&&CANAAN_QUESTS.hasDeco(HR,"tableau")'),true);
+ assert.equal(run('typeof CANAAN_QUESTS.hasDeco'),'undefined');
  assert.equal(run('CANAAN_PROF.RECIPES.dore.quest'),5);
  assert.equal(errors.length,0,errors.join('\n'));
 });
@@ -105,7 +107,7 @@ test('Quêtes à plusieurs : chacun sa progression, une énigme résolue ensembl
  assert.equal(run('Q.puzzles().q7.m.join()'),'1,2,3');
  // Progression sauvegardée vérifiée : quête inconnue, étape hors limite et drapeau inventé retirés.
  assert.equal(run('JSON.stringify(sanitizeQuests({active:{1:{step:99},77:{step:0}},done:{2:5},flags:{lumi:1,triche:1},deco:["mouton","x"]}))'),
-  JSON.stringify({active:{1:{step:2,got:[]}},done:{2:5},flags:{lumi:true},deco:['mouton'],choices:{},track:null}));
+  JSON.stringify({active:{1:{step:2,got:[]}},done:{2:5},flags:{lumi:true},choices:{},track:null}),'les anciennes décorations disparaissent');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -169,7 +171,7 @@ test('Quêtes : les chapitres IV à VI (quêtes 16 à 30) se jouent de bout en b
  run('act("q29","perch0",2);act("q29","perch1",1);act("q29","perch2",3);act("q29","perch3",2);act("q29","horn");tick(300)');assert.equal(run('step(29)'),1);check(29);
  // 30 : marcher sur les pierres dans l'ordre.
  run('take(30)');for(const [x,y] of [[-2,-1],[0,-2],[1,0],[0,1],[2,1]]){run(`tp("q30",${x},${y});tick(1)`)}
- assert.equal(run('step(30)'),1);const inv=run('HR.inventory.length');check(30);assert.equal(run('HR.inventory.length'),inv+1);
+ assert.equal(run('step(30)'),1);run('HR.inventory.length=0');const inv=run('HR.inventory.length');check(30);assert.equal(run('HR.inventory.length'),inv+1);
  assert.equal(run('Object.keys(st().done).length'),30);
  
  // Titre, aura visible par les autres, sanctuaires ouverts pour tout le monde, journal complet.

@@ -1,18 +1,14 @@
 // @ts-check
-// Maison et pièces intérieures : catalogue des meubles (sans leur dessin), catégories du mode décoration,
-// meubles fixes et habitants de chaque pièce. Le dessin des meubles est dans scripts/house/render.js.
+// Pièces intérieures : catalogue des meubles (sans leur dessin), meubles fixes et habitants de chaque pièce. Le dessin des meubles est dans scripts/house/render.js.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 
-// Nombre de meubles au plus dans la maison du joueur.
-export const HOUSE_MAX_ITEMS = 150;
-// Meubles : nom, catégorie du mode décoration, couche (floor, rug, wall, curtain), taille en cases (w × h),
+// Meubles : nom, couche (floor, rug, wall, curtain), taille en cases (w × h),
 // turn (true : quart de tour, la place au sol pivote ; 'self' : quatre orientations dessinées ; sinon miroir),
-// back (contre le mur du fond), fire (on y cuisine), light (éclaire la pièce), quest (récompense de cette quête).
+// back (contre le mur du fond), fire (on y cuisine), light (éclaire la pièce).
 export const HOUSE_FURNITURE = deepFreeze({
   lit: {
     name: 'Lit',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 2,
@@ -20,7 +16,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   lit_double: {
     name: 'Grand lit',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 2,
@@ -28,7 +23,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   table: {
     name: 'Table',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -36,14 +30,12 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   table_ronde: {
     name: 'Table ronde',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1
   },
   chaise: {
     name: 'Chaise',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -52,7 +44,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   banc: {
     name: 'Banc',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -60,14 +51,12 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   armoire: {
     name: 'Armoire',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1
   },
   bibliotheque: {
     name: 'Bibliothèque',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -75,7 +64,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   coffre: {
     name: 'Coffre',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -83,14 +71,12 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   commode: {
     name: 'Commode',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1
   },
   cuisiniere: {
     name: 'Cuisinière',
-    cat: 'cuisine',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -98,7 +84,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   cheminee: {
     name: 'Cheminée',
-    cat: 'cuisine',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -107,28 +92,24 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   tonneau: {
     name: 'Tonneau',
-    cat: 'cuisine',
     layer: 'floor',
     w: 1,
     h: 1
   },
   plante: {
     name: 'Grande plante',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   pot_fleurs: {
     name: 'Pot de fleurs',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   lampe: {
     name: 'Lampe',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -136,7 +117,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   aquarium: {
     name: 'Aquarium',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
@@ -144,7 +124,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   // Tapis : sous les meubles, on marche dessus.
   tapis: {
     name: 'Tapis rouge',
-    cat: 'tapis',
     layer: 'rug',
     w: 2,
     h: 2,
@@ -152,82 +131,65 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   tapis_rond: {
     name: 'Tapis rond',
-    cat: 'tapis',
     layer: 'rug',
     w: 2,
     h: 2
   },
   tapis_long: {
     name: 'Tapis long',
-    cat: 'tapis',
     layer: 'rug',
     w: 3,
     h: 1,
     turn: true
   },
-  // Décorations gagnées dans les quêtes (quest : quête qui la débloque pour le héros qui la pose).
+  // Bibelots et souvenirs.
   mouton: {
     name: 'Petit mouton',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
-    h: 1,
-    quest: 3
+    h: 1
   },
   figurine: {
     name: 'Le petit voleur',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
-    h: 1,
-    quest: 9
+    h: 1
   },
   lanterne: {
     name: 'Lueur d’Ilian',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1,
-    quest: 14,
     light: '#bfe8ff'
   },
   tableau: {
     name: 'L’oiseau d’ombre',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
-    h: 2,
-    quest: 10
+    h: 2
   },
   feuille: {
     name: 'Feuille éternelle',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1,
-    quest: 18,
     light: '#ffd84a'
   },
   bouteille: {
     name: 'Bouteille de vent',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
-    h: 1,
-    quest: 23
+    h: 1
   },
   dragon: {
     name: 'Petit dragon',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
-    h: 1,
-    quest: 29
+    h: 1
   },
   // Décoration murale : sur le mur du fond.
   fenetre: {
     name: 'Fenêtre',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2,
@@ -235,7 +197,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   grande_fenetre: {
     name: 'Grande fenêtre',
-    cat: 'murs',
     layer: 'wall',
     w: 2,
     h: 2,
@@ -243,63 +204,54 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   cadre: {
     name: 'Cadre',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   grand_tableau: {
     name: 'Grand tableau',
-    cat: 'murs',
     layer: 'wall',
     w: 2,
     h: 2
   },
   horloge: {
     name: 'Horloge',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   etagere: {
     name: 'Étagère',
-    cat: 'murs',
     layer: 'wall',
     w: 2,
     h: 2
   },
   trophee: {
     name: 'Trophée de chasse',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   miroir: {
     name: 'Miroir',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   rideaux: {
     name: 'Rideaux rouges',
-    cat: 'murs',
     layer: 'curtain',
     w: 1,
     h: 2
   },
   rideaux_bleus: {
     name: 'Rideaux bleus',
-    cat: 'murs',
     layer: 'curtain',
     w: 1,
     h: 2
   },
   comptoir: {
     name: 'Comptoir',
-    cat: 'meubles',
     layer: 'floor',
     w: 3,
     h: 1,
@@ -307,7 +259,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   presentoir: {
     name: 'Présentoir à potions',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -315,7 +266,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   caisse: {
     name: 'Caisse de marchandises',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -323,7 +273,6 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   marmite: {
     name: 'Grande marmite',
-    cat: 'cuisine',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -331,21 +280,18 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   sacs: {
     name: 'Sacs de grain',
-    cat: 'cuisine',
     layer: 'floor',
     w: 1,
     h: 1
   },
   casseroles: {
     name: 'Casseroles suspendues',
-    cat: 'murs',
     layer: 'wall',
     w: 2,
     h: 2
   },
   herbes: {
     name: 'Herbes et jambons',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
@@ -353,28 +299,24 @@ export const HOUSE_FURNITURE = deepFreeze({
   // ---- Meubles des elfes, des nains et de la ferme (intérieurs de Sylvaëlle, de Durgrim et de la grange).
   trone: {
     name: 'Trône de la Reine',
-    cat: 'meubles',
     layer: 'floor',
     w: 1,
     h: 1
   },
   harpe: {
     name: 'Harpe elfique',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   telescope: {
     name: 'Télescope',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   autel: {
     name: 'Autel de la Lune',
-    cat: 'deco',
     layer: 'floor',
     w: 2,
     h: 1,
@@ -382,70 +324,60 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   metier: {
     name: 'Métier à tisser',
-    cat: 'meubles',
     layer: 'floor',
     w: 2,
     h: 1
   },
   mannequin: {
     name: 'Mannequin de couture',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   rack_armes: {
     name: 'Râtelier d’armes',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   banniere_elfe: {
     name: 'Bannière de Sylvaëlle',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   banniere_naine: {
     name: 'Bannière de Durgrim',
-    cat: 'murs',
     layer: 'wall',
     w: 1,
     h: 2
   },
   enclume: {
     name: 'Enclume',
-    cat: 'cuisine',
     layer: 'floor',
     w: 1,
     h: 1
   },
   lingots: {
     name: 'Pile de lingots d’or',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   foin: {
     name: 'Botte de foin',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1
   },
   nichoir_poules: {
     name: 'Nichoirs à poules',
-    cat: 'deco',
     layer: 'floor',
     w: 2,
     h: 1
   },
   statue_elfe: {
     name: 'Statue elfique',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1,
@@ -453,21 +385,12 @@ export const HOUSE_FURNITURE = deepFreeze({
   },
   pilier_nain: {
     name: 'Pilier de pierre runique',
-    cat: 'deco',
     layer: 'floor',
     w: 1,
     h: 1,
     light: '#ffb060'
   }
 });
-// Onglets du mode décoration : [catégorie, libellé].
-export const HOUSE_FURNITURE_CATEGORIES = deepFreeze([
-  ['meubles', '🛏️ Meubles'],
-  ['cuisine', '🍳 Cuisine'],
-  ['deco', '🪴 Déco'],
-  ['murs', '🖼️ Murs'],
-  ['tapis', '🟥 Tapis']
-]);
 // Agencements communs des refuges : cabane en rondins et maison de terre crue (désert).
 const CABIN = [
   ['lit', 1, 2],
@@ -502,8 +425,36 @@ const ADOBE = [
   ['plante', 9, 7],
   ['lampe', 1, 6]
 ];
-// Meubles fixes des pièces qui ne se décorent pas : [meuble, x, y, orientation] en cases de la pièce.
+// Meubles fixes de chaque pièce : [meuble, x, y, orientation] en cases de la pièce.
 export const HOUSE_ROOM_FURNITURE = deepFreeze({
+  // Chaumière des Glycines : la tisserande et son petit-fils (grand lit, lit d'enfant, cheminée, métier à tisser).
+  maison: [
+    ['lit_double', 1, 2],
+    ['commode', 3, 2],
+    ['cheminee', 5, 2],
+    ['bibliotheque', 9, 2],
+    ['armoire', 12, 2],
+    ['lit', 13, 2],
+    ['coffre', 13, 4],
+    ['fenetre', 2, 0],
+    ['rideaux', 2, 0],
+    ['herbes', 4, 0],
+    ['cadre', 8, 0],
+    ['fenetre', 10, 0],
+    ['rideaux', 10, 0],
+    ['horloge', 12, 0],
+    ['tapis_rond', 3, 5],
+    ['table_ronde', 4, 6],
+    ['chaise', 3, 6, 3],
+    ['chaise', 5, 6, 1],
+    ['metier', 10, 5],
+    ['lampe', 12, 5],
+    ['tonneau', 1, 6],
+    ['plante', 1, 8],
+    ['tapis_long', 6, 8],
+    ['mouton', 12, 8],
+    ['pot_fleurs', 13, 8]
+  ],
   echoppe: [
     ['presentoir', 1, 2],
     ['presentoir', 10, 2],
@@ -911,6 +862,10 @@ export const HOUSE_ROOM_FURNITURE = deepFreeze({
 });
 // Habitants de chaque pièce : [rôle, x, y] en cases de la pièce.
 export const HOUSE_ROOM_RESIDENTS = deepFreeze({
+  maison: [
+    ['ancien', 10.5, 6.6],
+    ['enfant', 11.5, 8.4]
+  ],
   echoppe: [['villageois', 2.5, 4.5]],
   marmite: [
     ['cuisinier', 6, 3.7],

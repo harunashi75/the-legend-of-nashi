@@ -81,20 +81,34 @@ test('Sylvaëlle, la cité elfique : palissade sans trou, porte au niveau 60, Gr
  assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-bless"})'),true);assert.equal(run('CANAAN_CITY.blessMult(game.hero)'),1.1);
  assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-bless"})'),false,'une fois par jour');
  assert.equal(JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.heroSnapshot({x:0,y:0}).blessing)')).day.length,10,'gardée dans la sauvegarde');
- // Armurerie : la pièce choisie, de niveau 60, contre de l'or.
+ // Armurerie : la boutique commune (shop.js), chaque pièce visible et choisie, Rare ou Épique, de niveau 60.
  // Les marchands sont dans leur boutique (pièces de house.js) : Thalion derrière son comptoir, Elwyn à son métier.
  const near=id=>{const [rid,lx,ly]=id==='elfe_armurerie'?['sylv_armurerie',6.5,4.2]:['sylv_couture',4.5,5.6];run('{const r=CANAAN_ROOMS.find(r=>r.id==="'+rid+'");P.x=(r.x+'+lx+')*TS;P.y=(r.y+'+ly+')*TS}');};
  near('elfe_armurerie');run('P.gold=10000;game.hero.inventory=[]');
- assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-buy",slot:"boots",rarity:"epic"})'),true);
- assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.inventory.map(i=>[i.slot,i.rarity,i.level,i.origin]))')),[['boots','Épique',60,'elfique']]);assert.equal(run('P.gold'),2500);
- assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-buy",slot:"boots",rarity:"epic"})'),false,'pas assez d’or');
+ assert.equal(run('CANAAN_CITY.nearArmorer(game.hero)&&nearMerchant()'),true,'Thalion achète aussi le butin');
+ const view=JSON.parse(run('JSON.stringify(CANAAN_SHOP.view(game.hero))'));
+ assert.equal(view.kind,'elfe');assert.equal(view.items.length,34,'(8 pièces + 9 armes) × 2 qualités');
+ assert.deepEqual([...new Set(view.items.map(i=>i.rarity))],['Rare','Épique']);assert.deepEqual([...new Set(view.prices)],[2500,7500]);
+ assert.ok(view.items.every(i=>i.level===60&&i.origin==='elfique'));
+ const weapons=view.items.filter(i=>i.slot==='weapon'&&i.rarity==='Épique').map(i=>i.weaponType);
+ assert.deepEqual(weapons,JSON.parse(run('JSON.stringify(CANAAN_GEAR_ENGINE.weaponTypes)')),'une arme de chaque famille');
+ assert.ok(view.items.some(i=>i.slot==='artifact'));
+ const bow=view.items.findIndex(i=>i.weaponType==='bow'&&i.rarity==='Épique'),id=view.items[bow].id;
+ assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+bow+'})'),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.inventory.map(i=>[i.id,i.slot,i.weaponType,i.rarity,i.level,i.origin]))')),[[id,'weapon','bow','Épique',60,'elfique']]);assert.equal(run('P.gold'),2500);
+ assert.equal(run('CANAAN_SHOP.view(game.hero).items['+bow+'].weaponType'),'bow','remplacé par un autre arc');
+ assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+bow+'})'),false,'pas assez d’or');
+ // La fenêtre est celle du marchand du camp : marchandise à gauche, sac à vendre à droite.
+ run('globalThis.__html="";showPanel=h=>{__html=h;document.getElementById("overlay").style.display="flex"};CANAAN_CITY.interact()');
+ assert.match(run('__html'),/Thalion/);assert.match(run('__html'),/shop-columns/);assert.match(run('__html'),/data-action="shopBuy"/);assert.match(run('__html'),/Ton sac/);
  // Atelier : apparences elfiques exclusives (jamais tirées au butin).
  assert.equal(run('SKINS.filter(s=>s.shop).length'),4);assert.equal(run('(()=>{for(let i=0;i<400;i++){const id=CANAAN_WARDROBE.roll("secretBoss",()=>Math.random()*0.18);if(id&&SKINS.find(s=>s.id===id).shop)return false}return true})()'),true);
  near('elfe_couture');run('P.gold=5000;game.hero.skins={owned:[]}');
  assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-skin",id:"elfe_rodeur"})'),true);assert.equal(run('CANAAN_WARDROBE.has(game.hero,"elfe_rodeur")&&P.gold===2000'),true);
  // Réseau : les actions de la cité passent le filtre de l'hôte.
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
- assert.deepEqual(n.sanitizeAction({op:'city-buy',slot:'helm',rarity:'rare'}),{op:'city-buy',slot:'helm',rarity:'rare'});assert.equal(n.sanitizeAction({op:'city-buy',slot:'helm',rarity:'mythique'}),null);
+ assert.equal(n.sanitizeAction({op:'city-buy',slot:'helm',rarity:'rare'}),null,'l’ancien achat de la cité passe par shop-buy');
+ assert.deepEqual(n.sanitizeAction({op:'shop-buy',index:33}),{op:'shop-buy',index:33});
  assert.deepEqual(n.sanitizeAction({op:'city-gate'}),{op:'city-gate'});
  assert.equal(errors.length,0,errors.join('\n'));
 });

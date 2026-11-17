@@ -183,7 +183,6 @@ window.CANAAN_PERSISTENCE = {
       monde: {
         openedChests: game.world.openedChests,
         worldBossTimers: game.world.worldBossTimers,
-        maison: CANAAN_HOUSE.layout(),
         quetes: CANAAN_QUESTS.exportWorld(),
         couche:
           (game.world.instance ? game.world.returnLayer : game.world.layer) === 'under' ? 'under' : 'surface'
@@ -352,8 +351,6 @@ window.CANAAN_PERSISTENCE = {
     game.world.decor = game.world.overdecor;
     game.world.chests = [];
     game.world.projectiles = [];
-    // Meubles de la maison (avant de vérifier la position du héros, qui peut être chez lui).
-    CANAAN_HOUSE.load(monde.maison);
     // Monde des quêtes : pont, lanternes, sanctuaires ouverts et énigmes résolues.
     CANAAN_QUESTS.importWorld(monde.quetes);
     P.x = Number.isFinite(p.x) ? p.x : CANAAN_SPAWN.x;

@@ -531,23 +531,6 @@
         for (const dx of [-5, -1, 3]) R(dx, -12, 2, 3, '#22160e');
         R(-1, -5, 2, 3, '#ffd36b');
         break;
-      case 'home':
-        R(-7, -2, 14, 9, '#22160e');
-        R(-6, -1, 12, 7, '#f4e8c8');
-        c.fillStyle = '#22160e';
-        c.beginPath();
-        c.moveTo(-9, -1);
-        c.lineTo(0, -10);
-        c.lineTo(9, -1);
-        c.fill();
-        c.fillStyle = '#d8b04a';
-        c.beginPath();
-        c.moveTo(-7, -2);
-        c.lineTo(0, -8);
-        c.lineTo(7, -2);
-        c.fill();
-        R(-1, 1, 3, 5, '#6a3a1a');
-        break;
       case 'chest':
         R(-6, -5, 12, 10, '#22160e');
         R(-5, -4, 10, 8, '#a8642e');
@@ -713,11 +696,9 @@
       for (const p of PIXEL_PLACES) put(p.type === 'camp' ? 'refuge' : p.type, p.x, p.y, {}, p.name);
       // Entrées des Tréfonds.
       for (const e of CANAAN_UNDER.ENTRANCES) put('stairs', e.x, e.y, {}, e.name);
-      for (const b of houses)
-        if (b.id === 'maison') put('home', b.x + b.w / 2, b.y + b.h / 2, {}, 'Ta maison');
       if (!v.mini && v.scale >= 8)
         for (const b of houses)
-          if (b.name && b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y))
+          if (b.name && !b.place && !canaanRoomAt(b.x, b.y))
             label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
       for (const n of game.world.npcs)
         if (n.type === 'shop' && (v.mini || v.scale >= 6)) put('shop', n.x / TS, n.y / TS, {}, null);

@@ -6,7 +6,7 @@ const {
   source
 } = require('./helpers/context.cjs');
 
-test('Bâtiments : échoppe, cuisine, demeures et refuges où l’on entre (E), habitants dedans et dehors, maison loin des donjons',()=>{
+test('Bâtiments : échoppe, cuisine, demeures, chaumière et refuges où l’on entre (E), habitants dedans et dehors, chaumière loin des donjons',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){if(part[1].includes('canaan-runtime-config'))run('0')}});
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[]');
@@ -28,7 +28,7 @@ test('Bâtiments : échoppe, cuisine, demeures et refuges où l’on entre (E), 
  for(const [id,ok] of linked)assert.equal(ok,true,'sentier de '+id);
  // Chaque style de façade se dessine (un par biome, et ceux du camp).
  assert.equal(run('CANAAN_HOUSE.styles().length'),10);
- // La maison est loin des portails (le premier donjon était trop près) ; le camp regroupe ses bâtiments.
+ // La chaumière est loin des portails (le premier donjon était trop près) ; le camp regroupe ses bâtiments.
  assert.ok(run('instances.every(d=>Math.hypot(d.x-CANAAN_HOUSE.outside().x-2,d.y-CANAAN_HOUSE.outside().y-1)>=32)'));
  for(const id of ['echoppe','marmite','aubepines','puits'])assert.ok(run(`Math.hypot(CANAAN_HOUSE.outsideDoor("${id}").x/TS-CANAAN_CAMP.x,CANAAN_HOUSE.outsideDoor("${id}").y/TS-CANAAN_CAMP.y)`)<run('CANAAN_CAMP.r')+2,id);
  // Le marchand est derrière le comptoir de son échoppe : on y entre par la porte (E), puis on lui parle.
@@ -36,8 +36,8 @@ test('Bâtiments : échoppe, cuisine, demeures et refuges où l’on entre (E), 
  run('{const d=CANAAN_HOUSE.outsideDoor("echoppe");P.x=d.x;P.y=d.y+20}');assert.equal(run('nearMerchant()'),false);
  assert.equal(run('CANAAN_HOUSE.interact()'),true);assert.equal(run('currentZoneName()'),'Échoppe de Lira');assert.equal(run('isSafe(P.x/TS,P.y/TS)'),true);
  run('P.x=(CANAAN_ROOMS[1].x+6.5)*TS;P.y=(CANAAN_ROOMS[1].y+5.4)*TS');assert.equal(run('nearMerchant()'),true);
- assert.equal(run('toggleHousing()'),false,'on ne décore que sa maison');
- assert.equal(run('CANAAN_HOUSE.place(game.hero,"lit",1,6)'),false);
+ // Plus de maison à décorer : ni touche H, ni meubles à poser.
+ assert.equal(run('typeof toggleHousing'),'undefined');assert.equal(run('typeof CANAAN_HOUSE.place'),'undefined');
  // Les meubles bloquent le passage : le comptoir sépare le marchand des clients.
  assert.equal(run('canWalk((CANAAN_ROOMS[1].x+6.5)*TS,(CANAAN_ROOMS[1].y+4.5)*TS)'),false);
  // Sortie (E devant la porte intérieure) : retour devant l'échoppe.
@@ -46,7 +46,7 @@ test('Bâtiments : échoppe, cuisine, demeures et refuges où l’on entre (E), 
  // Habitants : un ou deux dans chaque bâtiment du jeu (cuisinier à La Marmite), d'autres dehors autour du feu et des refuges.
  run('CANAAN_LIFE.update()');
  const people=JSON.parse(run('JSON.stringify(CANAAN_LIFE.villagers().map(v=>({n:v.name,room:canaanRoomAt(v.x/TS,v.y/TS)?.id||null,camp:Math.hypot(v.x/TS-CANAAN_CAMP.x,v.y/TS-CANAAN_CAMP.y)<CANAAN_CAMP.r+2})))'));
- for(const id of ['echoppe','marmite','aubepines','puits','chene','clairieres','oasis','dunes']){const n=people.filter(p=>p.room===id).length;assert.ok(n>=1&&n<=2,id+' : '+n)}
+ for(const id of ['echoppe','marmite','aubepines','puits','maison','chene','clairieres','oasis','dunes']){const n=people.filter(p=>p.room===id).length;assert.ok(n>=1&&n<=2,id+' : '+n)}
  assert.ok(people.some(p=>p.room==='marmite'&&/^Cuisini/.test(p.n)));
  assert.ok(people.filter(p=>!p.room&&p.camp).length>=3,'des habitants restent dehors au camp');
  // En donjon, la carte de l'instance réutilise les mêmes coordonnées : ni pièce, ni meuble qui bloque.
@@ -78,7 +78,7 @@ test('Quêtes : devant chaque objet et chaque personnage de l’île, le texte [
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Maison : chaumière dans les Plaines, pièce vide à décorer (H), meubles qu’on tourne (R), sauvegarde et invitée en ligne',async()=>{
+test('Chaumière des Glycines : maison de PNJ meublée dans les Plaines, habitants, aucun meuble sauvegardé, porte en ligne',async()=>{
  const {createRelay}=require('../relay/server.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -87,55 +87,32 @@ test('Maison : chaumière dans les Plaines, pièce vide à décorer (H), meubles
  for(const side of [host,guest])assert.equal(side.errors.length,0,side.errors.join('\n'));
  try{
   run('started=true;paused=false;P.dead=false;P.mhp=P.hp=1e6;game.world.monsters=[];game.view={notify:()=>{},chat:()=>{}}');
+  run('globalThis.ROOM=CANAAN_ROOMS.find(r=>r.id==="maison")');
   // La chaumière est dans les Plaines verdoyantes, près du camp ; la pièce est fermée de murs.
   assert.equal(run('ZONES.indexOf(regionAt(CANAAN_HOUSE.outside().x+2,CANAAN_HOUSE.outside().y+1))'),0);
   assert.ok(run('Math.hypot(CANAAN_HOUSE.outside().x-CANAAN_CAMP.x,CANAAN_HOUSE.outside().y-CANAAN_CAMP.y)')<45);
   assert.equal(run('canWalk(CANAAN_HOUSE.outsideDoor().x,CANAAN_HOUSE.outsideDoor().y+14)'),true);
   assert.equal(run('canWalk(CANAAN_HOUSE.insideDoor().x,CANAAN_HOUSE.insideDoor().y)'),true);
-  assert.equal(run('[0,1].every(y=>overworld[CANAAN_HOUSE_ROOM.y+y].slice(CANAAN_HOUSE_ROOM.x,CANAAN_HOUSE_ROOM.x+15).every(t=>SOLID.includes(t)))'),true,'mur du fond');
-  // Entrer par la porte (E) : la maison est une zone sûre, « Ta maison ».
+  assert.equal(run('[0,1].every(y=>overworld[ROOM.y+y].slice(ROOM.x,ROOM.x+15).every(t=>SOLID.includes(t)))'),true,'mur du fond');
+  // Entrer par la porte (E) : zone sûre, au nom de la chaumière.
   run('{const d=CANAAN_HOUSE.outsideDoor();P.x=d.x;P.y=d.y+20}');assert.equal(run('CANAAN_HOUSE.interact()'),true);
-  assert.equal(run('CANAAN_HOUSE.inside(P.x,P.y)'),true);assert.equal(run('currentZoneName()'),'Ta maison');assert.equal(run('isSafe(P.x/TS,P.y/TS)'),true);
-  // Mode décoration seulement à l'intérieur ; la pièce commence vide.
-  assert.equal(run('CANAAN_HOUSE.items().length'),0);assert.equal(run('toggleHousing()'),true);assert.ok(run('!!document.getElementById("housingBar")'));
-  // Règles : dans la pièce, sans chevauchement (par couche), passage de la porte libre, cheminée contre le mur du fond.
-  const place=(k,x,y)=>run(`CANAAN_HOUSE.place(game.hero,"${k}",${x},${y})`);
-  assert.equal(place('lit',1,2),true);assert.equal(place('table',1,3),false,'chevauche le lit');
-  assert.equal(place('table',0,5),false,'dans le mur');assert.equal(place('banc',13,8),false,'déborde');
-  assert.equal(place('chaise',7,9),false,'devant la porte');assert.equal(place('tapis',6,8),true,'un tapis peut aller devant la porte');
-  assert.equal(place('cheminee',5,4),false);assert.equal(place('cheminee',5,2),true);
-  assert.equal(place('table',3,5),true);assert.equal(place('tapis_rond',3,4),true,'un tapis sous la table');
-  assert.equal(place('fenetre',9,5),true);assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_HOUSE.items().find(i=>i.k==="fenetre"))')),{k:'fenetre',x:9,y:0,r:0},'au mur du fond');
-  assert.equal(place('cadre',9,0),false,'déjà une fenêtre');assert.equal(place('rideaux',9,0),true,'des rideaux sur la fenêtre');
-  assert.equal(place('dragon',3,3),false);
-  // Les meubles bloquent le passage, pas les tapis.
-  assert.equal(run('canWalk(CANAAN_HOUSE.insideDoor().x-7*TS+TS/2,(CANAAN_HOUSE_ROOM.y+3)*TS)'),false,'le lit bloque');
-  assert.equal(run('canaanHouseBlocked((CANAAN_HOUSE_ROOM.x+6)*TS+24,(CANAAN_HOUSE_ROOM.y+8)*TS+24)'),false,'on marche sur le tapis');
-  // Retirer : le meuble le plus haut d'abord (les rideaux avant la fenêtre).
-  assert.equal(run('CANAAN_HOUSE.remove(game.hero,9,1).k'),'rideaux');assert.equal(run('CANAAN_HOUSE.items().some(i=>i.k==="fenetre")'),true);
-  // Clic en mode décoration : poser l'objet choisi sous la souris.
-  run('CANAAN_HOUSE.actions.select("plante");mouseWorldX=(CANAAN_HOUSE_ROOM.x+12)*TS+20;mouseWorldY=(CANAAN_HOUSE_ROOM.y+6)*TS+20');
-  assert.equal(run('CANAAN_HOUSE.click(0)'),true);assert.ok(run('CANAAN_HOUSE.items().some(i=>i.k==="plante"&&i.x===12&&i.y===6)'));
-  // Orientation : un banc tourné d'un quart de tour occupe 1×2 cases ; une armoire se retourne en miroir (2 sens).
-  assert.equal(run('CANAAN_HOUSE.place(game.hero,"banc",10,3,1)'),true);
-  assert.equal(run('canaanHouseBlocked((CANAAN_HOUSE_ROOM.x+10)*TS+24,(CANAAN_HOUSE_ROOM.y+4)*TS+24)'),true,'le banc tourné prend la case du dessous');
-  assert.equal(run('canaanHouseBlocked((CANAAN_HOUSE_ROOM.x+11)*TS+24,(CANAAN_HOUSE_ROOM.y+3)*TS+24)'),false);
-  assert.equal(run('CANAAN_HOUSE.rotate(game.hero,10,4)'),true);
-  assert.equal(run('CANAAN_HOUSE.items().find(i=>i.k==="banc").r'),2);
-  assert.equal(run('canaanHouseBlocked((CANAAN_HOUSE_ROOM.x+11)*TS+24,(CANAAN_HOUSE_ROOM.y+3)*TS+24)'),true,'remis à l’horizontale');
-  assert.equal(run('CANAAN_HOUSE.place(game.hero,"chaise",9,6,3)'),true,'chaise tournée vers la droite');
-  assert.equal(run('CANAAN_HOUSE.place(game.hero,"armoire",11,6,2)'),false,'une armoire n’a que deux sens');
-  assert.equal(run('CANAAN_HOUSE.place(game.hero,"armoire",11,6,1)'),true);
-  // Touche R en mode décoration : le meuble en main tourne avant d'être posé.
-  run('CANAAN_HOUSE.actions.select("lit");CANAAN_HOUSE.actions.rotate();mouseWorldX=(CANAAN_HOUSE_ROOM.x+9)*TS+20;mouseWorldY=(CANAAN_HOUSE_ROOM.y+8)*TS+20');
-  assert.equal(run('CANAAN_HOUSE.click(0)'),true);assert.equal(run('JSON.stringify(CANAAN_HOUSE.items().find(i=>i.k==="lit"&&i.r===1))'),'{"k":"lit","x":9,"y":8,"r":1}');
-  run('CANAAN_HOUSE.actions.select("lit")');
-  // Sauvegarde : les meubles sont dans monde.maison ; un meuble invalide est écarté au chargement.
+  assert.equal(run('CANAAN_HOUSE.inside(P.x,P.y)'),true);assert.equal(run('currentZoneName()'),'Chaumière des Glycines');assert.equal(run('isSafe(P.x/TS,P.y/TS)'),true);
+  // Meublée d'avance : chaque meuble de son agencement est à sa place ; les meubles bloquent, pas les tapis.
+  assert.equal(run('CANAAN_HOUSE.roomItems("maison").length'),25);
+  assert.ok(run('CANAAN_HOUSE.roomItems("maison").some(i=>i.k==="metier")&&CANAAN_HOUSE.roomItems("maison").some(i=>i.k==="cheminee")'));
+  assert.equal(run('canaanHouseBlocked((ROOM.x+1)*TS+24,(ROOM.y+2)*TS+24)'),true,'le grand lit bloque');
+  assert.equal(run('canaanHouseBlocked((ROOM.x+7)*TS+24,(ROOM.y+8)*TS+24)'),false,'on marche sur le tapis de l’entrée');
+  assert.equal(run('CANAAN_HOUSE.nearStove((ROOM.x+6)*TS,(ROOM.y+3.6)*TS)'),true,'on cuisine à la cheminée');
+  // Habitants : la tisserande et son petit-fils.
+  run('CANAAN_LIFE.update()');
+  const inside=JSON.parse(run('JSON.stringify(CANAAN_LIFE.villagers().filter(v=>canaanRoomAt(v.x/TS,v.y/TS)?.id==="maison").map(v=>v.name))'));
+  assert.equal(inside.length,2,inside.join(', '));
+  // Plus de mode décoration ni de meubles à sauvegarder.
+  assert.equal(run('typeof toggleHousing'),'undefined');assert.equal(run('CANAAN_KEYS.actionOf("h")'),null);
+  assert.equal(/toggleHousing|housingBar/.test(source),false,'ni bouton Maison ni barre de décoration');
   assert.equal(run('saveGame()'),true);
-  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).monde.maison;
-  assert.equal(saved.items.length,11);assert.equal(saved.items.find(i=>i.k==='banc').r,2,'l’orientation est sauvegardée');
-  assert.equal(run('CANAAN_HOUSE.sanitize({items:[{k:"lit",x:1,y:2},{k:"lit",x:1,y:2},{k:"chaise",x:7,y:9},{k:"x",x:2,y:2},{k:"tapis",x:20,y:2}]}).length'),1);
-  // En ligne : l'invitée entre par la porte, voit les meubles et en pose un.
+  assert.equal(JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).monde.maison,undefined);
+  // En ligne : l'invitée entre par la porte (l'hôte la fait passer) ; poser un meuble n'est plus une action.
   run('CANAAN_NET.openRoom("'+url+'")');
   for(let i=0;i<1000&&!run('CANAAN_NET.state().code');i++)await wait(10);
   guest.run('CANAAN_NET.joinRoom({relay:"'+url+'",code:"'+run('CANAAN_NET.state().code')+'",pseudo:"Lina"})');
@@ -145,21 +122,18 @@ test('Maison : chaumière dans les Plaines, pièce vide à décorer (H), meubles
   run(`{const d=CANAAN_HOUSE.outsideDoor();${G}.player.x=d.x;${G}.player.y=d.y+20;${G}.player.mhp=${G}.player.hp=1e6}`);await step(8);
   guest.run('{const d=CANAAN_HOUSE.outsideDoor();P.x=d.x;P.y=d.y+20}');
   assert.equal(guest.run('CANAAN_HOUSE.interact()'),true);await step(10);
-  assert.equal(run(`CANAAN_HOUSE.inside(${G}.player.x,${G}.player.y)`),true,'l’invitée est dans la maison chez l’hôte');
-  assert.equal(guest.run('CANAAN_HOUSE.items().length'),11,'elle voit les meubles');
-  assert.equal(guest.run('CANAAN_HOUSE.items().find(i=>i.k==="banc").r'),2,'dans le bon sens');
-  guest.run('CANAAN_NET.requestAction({op:"house-rotate",x:10,y:3})');await step(10);
-  assert.equal(run('CANAAN_HOUSE.items().find(i=>i.k==="banc").r'),3,'elle tourne un meuble');
-  guest.run('CANAAN_NET.requestAction({op:"house-place",k:"aquarium",x:13,y:9})');await step(10);
-  assert.ok(run('CANAAN_HOUSE.items().some(i=>i.k==="aquarium")'));assert.ok(guest.run('CANAAN_HOUSE.items().some(i=>i.k==="aquarium")'),'la maison revient à tous');
+  assert.equal(run(`CANAAN_HOUSE.inside(${G}.player.x,${G}.player.y)`),true,'l’invitée est dans la chaumière chez l’hôte');
+  assert.equal(guest.run('CANAAN_HOUSE.roomItems("maison").length'),25,'elle voit les mêmes meubles');
+  assert.equal(run(`CANAAN_HOUSE.handle(${G},{op:"house-place",k:"lit",x:9,y:8})`),false);
   for(const side of [host,guest])assert.equal(side.errors.length,0,side.errors.join('\n'));
  }finally{run('CANAAN_NET.closeRoom()');await relay.close()}
 });
 
-test('Règles partagées de la maison : place des meubles, porte libre, murs, orientations et chevauchements',async()=>{
+test('Règles partagées des pièces : place des meubles, porte libre, murs, orientations et chevauchements',async()=>{
  const shared=f=>import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href);
  const D=await shared('data/house.js'),R=await shared('rules/house.js');
- const C=D.HOUSE_FURNITURE,room={w:12,h:10},MAX=D.HOUSE_MAX_ITEMS;
+ const C=D.HOUSE_FURNITURE,room={w:12,h:10},MAX=999;
+ assert.equal(D.HOUSE_MAX_ITEMS,undefined);assert.equal(D.HOUSE_FURNITURE_CATEGORIES,undefined);assert.equal(R.houseTopItemAt,undefined);
  assert.ok(Object.isFrozen(C.lit)&&Object.isFrozen(D.HOUSE_ROOM_FURNITURE.chene));
  assert.deepEqual(R.houseRoomGeometry(room),{floor:{x0:1,x1:10,y0:2,y1:8},door:{x:6,y:8}});
  // Quart de tour : la place au sol pivote ; miroir : elle ne change pas.
@@ -181,48 +155,31 @@ test('Règles partagées de la maison : place des meubles, porte libre, murs, or
  const wall=Object.keys(C).find(k=>R.houseOnWall(C[k]));
  assert.equal(can(wall,3,5),true);
  assert.deepEqual(R.houseSanitizeItems(C,room,[{k:wall,x:3,y:5}],MAX),[{k:wall,x:3,y:0,r:0}]);
- // Meuble le plus haut sur une case : mur avant sol, sol avant tapis.
- const list=[{k:'tapis',x:1,y:2,r:0},{k:'lit',x:1,y:2,r:0}];
- assert.equal(R.houseTopItemAt(C,list,1,2).k,'lit');assert.equal(R.houseCovers(C,list[1],1,3),true);assert.equal(R.houseCovers(C,list[1],2,2),false);
- // Rotation : quart de tour suivant s'il a la place, sinon null.
- const alone={k:'lit',x:1,y:2,r:0};assert.equal(R.houseNextRotation(C,room,[alone],alone,MAX),1);
- const tight=[{k:'lit',x:1,y:2,r:0},{k:'lit',x:2,y:2,r:0}];
- assert.equal(R.houseNextRotation(C,room,tight,tight[0],MAX),2,'demi-tour : même place au sol');
- // Lecture d'une sauvegarde : inconnus, mal placés et doublons écartés, dans l'ordre.
+ const bed1={k:'lit',x:1,y:2,r:0};
+ assert.equal(R.houseCovers(C,bed1,1,3),true);assert.equal(R.houseCovers(C,bed1,2,2),false);
+ // Agencement lu : inconnus, mal placés et doublons écartés, dans l'ordre.
  assert.deepEqual(R.houseSanitizeItems(C,room,[{k:'lit',x:1,y:2},{k:'lit',x:1,y:2},{k:'??',x:3,y:3},null,{k:'lit',x:0,y:2},{k:'lit',x:3,y:2,r:1}],MAX),
   [{k:'lit',x:1,y:2,r:0},{k:'lit',x:3,y:2,r:1}]);
  assert.deepEqual(R.houseSanitizeItems(C,room,'pas une liste',MAX),[]);
  // Meubles fixes : chaque agencement du jeu est entièrement valide.
  const fixed=R.houseFurnishRooms(C,{a:room},{a:[['lit',1,2],['lit',1,2]]},999);assert.equal(fixed.a.length,1);
  for(const list of Object.values(D.HOUSE_ROOM_FURNITURE))for(const [k] of list)assert.ok(Object.hasOwn(C,k),k);
- for(const tab of new Set(Object.values(C).map(c=>c.cat)))assert.ok(D.HOUSE_FURNITURE_CATEGORIES.some(([c])=>c===tab),tab);
+ // La chaumière des Glycines : tout son agencement tient dans sa pièce de 15 × 11.
+ assert.equal(R.houseFurnishRooms(C,{maison:{w:15,h:11}},{maison:D.HOUSE_ROOM_FURNITURE.maison},999).maison.length,D.HOUSE_ROOM_FURNITURE.maison.length);
+ assert.ok(Object.values(C).every(c=>!('cat' in c)&&!('quest' in c)));
 });
 
-test('Maison en coopératif (house/net.js) : vue compacte, cadence d’envoi, actions routées, invité qui demande à l’hôte',()=>{
+test('Portes en coopératif : seule l’action house-door existe, les anciennes actions de décoration sont refusées',async()=>{
+ const n=await import(pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'house-door',x:3}),{op:'house-door'});
+ for(const op of ['house-place','house-remove','house-rotate'])assert.equal(n.sanitizeAction({op,k:'lit',x:1,y:2}),null,op);
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
- // Vue compacte : aller-retour exact ; une vue illisible est ignorée.
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_HOUSE_NET.decodeView(CANAAN_HOUSE_NET.encodeView(3,[{k:"lit",x:1,y:2,r:1},{k:"tapis",x:4,y:4}])))')),
-  [{k:'lit',x:1,y:2,r:1},{k:'tapis',x:4,y:4,r:0}]);
- assert.equal(run('CANAAN_HOUSE_NET.decodeView(null)'),null);assert.equal(run('CANAAN_HOUSE_NET.decodeView({items:"x"})'),null);
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_HOUSE_NET.decodeView({items:[7]}))')),[null]);
- // Une maison factice : chaque action est routée vers la bonne opération de l'hôte, pour le bon héros.
- run(`globalThis.__log=[];globalThis.__state={version:1,items:[{k:"lit",x:1,y:2,r:0}]};
-  globalThis.__net=CANAAN_HOUSE_NET.create({door:h=>__log.push(["door",h])&&true,place:(h,k,x,y,r)=>__log.push(["place",h,k,x,y,r])&&true,
-   remove:(h,x,y)=>(__log.push(["remove",h,x,y]),{k:"lit"}),rotate:(h,x,y)=>__log.push(["rotate",h,x,y])&&true,
-   state:()=>__state,receive:raw=>__log.push(["receive",raw])});`);
- run('__net.handle("H",{op:"house-door"});__net.handle("H",{op:"house-place",k:"lit",x:1,y:2});__net.handle("H",{op:"house-remove",x:1,y:2});__net.handle("H",{op:"house-rotate",x:3,y:4})');
- assert.equal(run('__net.handle("H",{op:"house-inconnue"})'),false);assert.equal(run('__net.handle("H",{op:"house-remove",x:1,y:2})'),true);
- assert.deepEqual(JSON.parse(run('JSON.stringify(__log.slice(0,4))')),[['door','H'],['place','H','lit',1,2,0],['remove','H',1,2],['rotate','H',3,4]]);
- // Cadence : envoyée une fois, puis seulement si elle change ou toutes les 5 secondes.
- run('time=1000');assert.deepEqual(JSON.parse(run('JSON.stringify(__net.netView())')),{v:1,items:[['lit',1,2,0]]});
- run('time=1001');assert.equal(run('__net.netView()'),undefined);
- run('__state={version:2,items:[]}');assert.deepEqual(JSON.parse(run('JSON.stringify(__net.netView())')),{v:2,items:[]});
- run('time=1300');assert.equal(run('__net.netView()'),undefined);run('time=1302');assert.equal(run('__net.netView().v'),2);
- // Invité : la vue reçue passe à la maison ; ses actions sont demandées à l'hôte, jamais appliquées sur place.
- run('__log.length=0;__net.applyRemote({v:5,items:[["tapis",4,4,0]]});__net.applyRemote({oops:1})');
- assert.deepEqual(JSON.parse(run('JSON.stringify(__log)')),[['receive',[{k:'tapis',x:4,y:4,r:0}]]]);
- run('globalThis.__asked=[];const net=CANAAN_NET,mode=game.mode;CANAAN_NET={...net,requestAction:a=>(__asked.push(a),true)};game.mode="guest";__log.length=0;try{__net.send({op:"house-door"})}finally{CANAAN_NET=net;game.mode=mode}');
- assert.deepEqual(JSON.parse(run('JSON.stringify([__asked,__log])')),[[{op:'house-door'}],[]]);
- // Hôte : la même action s'applique tout de suite.
- run('__net.send({op:"house-door"})');assert.equal(run('__log[0][0]'),'door');
+ assert.equal(run('typeof CANAAN_HOUSE_NET'),'undefined');
+ // Invité : E devant une porte est demandé à l'hôte, jamais appliqué sur place.
+ run('started=true;{const d=CANAAN_HOUSE.outsideDoor("echoppe");P.x=d.x;P.y=d.y+20}');
+ run('globalThis.__asked=[];const net=CANAAN_NET,mode=game.mode;CANAAN_NET={...net,requestAction:a=>(__asked.push(a),true)};game.mode="guest";try{CANAAN_HOUSE.interact()}finally{CANAAN_NET=net;game.mode=mode}');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__asked)')),[{op:'house-door'}]);
+ assert.equal(run('canaanInHouse(P.x/TS,P.y/TS)'),false);
+ // Hôte : la porte s'ouvre tout de suite.
+ assert.equal(run('CANAAN_HOUSE.interact()'),true);assert.equal(run('canaanInHouse(P.x/TS,P.y/TS)'),true);
 });

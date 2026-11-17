@@ -277,11 +277,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-house-net",
-      "file": "scripts/house/net.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-house",
       "file": "scripts/house/house.js"
     },
@@ -409,11 +404,6 @@
       "kind": "style",
       "id": "canaan-professions-style",
       "file": "styles/professions.css"
-    },
-    {
-      "kind": "style",
-      "id": "canaan-house-style",
-      "file": "styles/house.css"
     },
     {
       "kind": "style",

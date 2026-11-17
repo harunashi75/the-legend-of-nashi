@@ -1,7 +1,7 @@
 // @ts-check
-// Règles de la maison et des pièces intérieures : place des meubles, orientations, chevauchements.
+// Règles des pièces intérieures : place des meubles fixes, orientations, chevauchements.
 // Module partagé pur (shared/rules) : il reçoit le catalogue des meubles, la pièce et la liste des meubles posés
-// en paramètres, et ne lit jamais l'état d'une partie. L'hôte s'en sert pour vérifier chaque meuble d'un invité.
+// en paramètres, et ne lit jamais l'état d'une partie.
 
 /** @typedef {import('../types.js').Furniture} Furniture */
 /** @typedef {import('../types.js').PlacedItem} PlacedItem */
@@ -111,47 +111,8 @@ export function houseCanPlace(catalog, room, list, k, x, y, r, limit) {
   });
 }
 
-// Le meuble visible le plus haut sur une case (rideau, puis mur, sol, tapis), ou null.
-const LAYER_ORDER = ['curtain', 'wall', 'floor', 'rug'];
-/**
- * @param {Catalog} catalog
- * @param {readonly PlacedItem[]} list
- * @param {number} lx
- * @param {number} ly
- * @returns {PlacedItem | null}
- */
-export function houseTopItemAt(catalog, list, lx, ly) {
-  let best = null;
-  for (const item of list)
-    if (
-      houseCovers(catalog, item, lx, ly) &&
-      (!best || LAYER_ORDER.indexOf(catalog[item.k].layer) < LAYER_ORDER.indexOf(catalog[best.k].layer))
-    )
-      best = item;
-  return best;
-}
-
-// Orientation suivante d'un meuble posé (quart de tour ou miroir) qui a encore la place, ou null.
-/**
- * @param {Catalog} catalog
- * @param {Room} room
- * @param {readonly PlacedItem[]} list
- * @param {PlacedItem} item
- * @param {number} limit
- * @returns {number | null}
- */
-export function houseNextRotation(catalog, room, list, item, limit) {
-  const furniture = catalog[item.k],
-    others = list.filter(o => o !== item);
-  for (let step = 1; step < houseTurns(furniture); step++) {
-    const r = ((item.r || 0) + step) % houseTurns(furniture);
-    if (houseCanPlace(catalog, room, others, item.k, item.x, item.y, r, limit)) return r;
-  }
-  return null;
-}
-
-// Meubles d'une pièce lus d'une sauvegarde ou du réseau : seuls les meubles connus, bien placés et sans
-// chevauchement sont gardés, dans l'ordre ; un meuble mural revient sur le mur du fond.
+// Meubles d'une pièce : seuls les meubles connus, bien placés et sans chevauchement sont gardés, dans l'ordre ;
+// un meuble mural revient sur le mur du fond.
 /**
  * @param {Catalog} catalog
  * @param {Room} room

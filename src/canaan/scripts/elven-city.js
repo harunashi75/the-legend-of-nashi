@@ -2,7 +2,7 @@
 // world-generation.js). Une cité sûre de niveau 60 : un garde ne laisse passer la porte (cachée derrière le lac, au
 // sud-ouest) qu'aux héros de niveau 60. Dedans : place et fontaine-arbre, rues de marbre, bâtiments elfiques
 // (building-art.js), le Grand Arbre Ylvarë au visage vivant (histoire et bénédiction quotidienne), l'armurerie
-// (équipement de niveau 60 à choisir), l'atelier de la Tisseuse (apparences elfiques), la demeure de la Reine Elwë,
+// (boutique commune de shop.js : équipement elfique de niveau 60 à choisir), l'atelier de la Tisseuse (apparences elfiques), la demeure de la Reine Elwë,
 // des jardins (massifs, statues, nichoirs, étangs aux cygnes), des elfes qui flânent, des cerfs blancs, une licorne,
 // des renards sylvestres, des paons blancs, des lapins, des chouettes, des colibris, des fées et des lucioles.
 // L'art de la cité est peint par elven-art.js.
@@ -397,42 +397,6 @@
     talkUntil = 0;
 
   // ---------------------------------------------------------------- Boutiques
-  const ARMOR_PRICES = { rare: 2500, epic: 7500 };
-  const SLOTS = ['weapon', 'helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'artifact'];
-  const SLOT_NAMES = {
-    weapon: 'Arme',
-    helm: 'Heaume',
-    shoulders: 'Épaulières',
-    armor: 'Cuirasse',
-    gloves: 'Gants',
-    boots: 'Bottes',
-    neck: 'Collier',
-    ring: 'Anneau',
-    artifact: 'Artefact'
-  };
-  function buyElvenGear(hero, slot, rarity) {
-    const price = ARMOR_PRICES[rarity];
-    if (!price || !SLOTS.includes(slot)) return false;
-    if (!nearKind(hero.player, 'armurier'))
-      return (canaanLootNotice(hero, '🏹 Parle à Thalion, dans la cité, pour acheter.'), false);
-    if (hero.player.gold < price) return (canaanLootNotice(hero, '💰 Il faut ' + price + ' or.'), false);
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) return (canaanLootNotice(hero, '🎒 Sac plein'), false);
-    hero.player.gold -= price;
-    const item = giveGear(60, 'elfe', rarity === 'epic' ? 'Épique' : 'Rare', hero, slot);
-    if (item) item.origin = 'elfique';
-    canaanLootNotice(
-      hero,
-      '🏹 ' +
-        SLOT_NAMES[slot] +
-        ' de Sylvaëlle (' +
-        (rarity === 'epic' ? 'Épique' : 'Rare') +
-        ', niveau 60) : −' +
-        price +
-        ' or.'
-    );
-    hero.netBag = null;
-    return true;
-  }
   const shopSkins = () => SKINS.filter(s => s.shop);
   function buySkin(hero, id) {
     const sk = shopSkins().find(s => s.id === id);
@@ -448,30 +412,9 @@
   }
   function shopPanel(kind) {
     const hero = game.hero;
-    if (kind === 'armurier') {
-      const rows = SLOTS.map(
-        s =>
-          '<div class="city-row"><b>' +
-          SLOT_NAMES[s] +
-          '</b><button type="button" data-action="cityBuyGear" data-slot="' +
-          s +
-          '" data-rarity="rare">Rare · ' +
-          ARMOR_PRICES.rare +
-          ' or</button><button type="button" class="epic" data-action="cityBuyGear" data-slot="' +
-          s +
-          '" data-rarity="epic">Épique · ' +
-          ARMOR_PRICES.epic +
-          ' or</button></div>'
-      );
-      modernPanel(
-        rpgHeader('🏹 Armurerie de Sylvaëlle — Thalion') +
-          '<div class="modern-body"><p class="muted">« Un équipement taillé par les elfes, de niveau 60. Choisis la pièce, je m’occupe du reste. » · Ton or : <b>' +
-          Math.floor(hero.player.gold) +
-          '</b></p><div class="city-shop">' +
-          rows.join('') +
-          '</div></div>'
-      );
-    } else {
+    // L'armurerie : la boutique commune (shop.js), marchandise elfique objet par objet et vente du sac.
+    if (kind === 'armurier') CANAAN_SHOP.open({ name: 'Thalion, l’armurier' });
+    else {
       const cards = shopSkins().map(sk => {
         const r = GEAR_RARITIES[sk.rarity],
           mine = CANAAN_WARDROBE.has(hero, sk.id);
@@ -606,7 +549,6 @@
     }
     if (action.op === 'city-bless')
       return near(hero.player, plan().tree.x + 0.5, plan().tree.y + 1.5, 3.4) && bless(hero);
-    if (action.op === 'city-buy') return buyElvenGear(hero, action.slot, action.rarity);
     if (action.op === 'city-skin') return buySkin(hero, action.id);
     return false;
   }
@@ -622,12 +564,6 @@
       treePanel();
     },
     bless: () => act('city-bless', {}, () => bless(game.hero) && (treePanel(), true)),
-    buyGear: (slot, rarity) =>
-      act(
-        'city-buy',
-        { slot, rarity },
-        () => buyElvenGear(game.hero, slot, rarity) && (shopPanel('armurier'), true)
-      ),
     buySkin: id => act('city-skin', { id }, () => buySkin(game.hero, id) && (shopPanel('tisseuse'), true))
   };
   // Résurrection : à la cité pour un héros de niveau 60 tombé dans la Forêt enchantée ou dans la cité.
@@ -1169,6 +1105,8 @@
     blessingOf,
     plan,
     LORE,
-    ARMOR_PRICES
+    // Thalion à portée : sa boutique (shop.js) et la vente du sac (nearMerchant).
+    nearArmorer: hero =>
+      !!plan() && !game.world.instance && !canaanUnder() && nearKind(hero.player, 'armurier')
   });
 })();

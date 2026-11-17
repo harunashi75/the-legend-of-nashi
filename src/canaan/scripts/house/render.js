@@ -1,8 +1,8 @@
-// Dessin des bâtiments où l'on entre et de la maison : meubles (pixel art), intérieurs, façades des bâtiments de
-// l'île, abords et finitions, aperçus du mode décoration. Aucune règle ici : la place des meubles est dans
-// shared/rules/house.js, l'état de la maison (meubles posés, bâtiments, mode décoration) dans scripts/house/house.js.
-// house.js appelle CANAAN_HOUSE_RENDER.create(scène) une fois : la scène lui donne ses pièces, ses portes, ses
-// meubles et l'état du mode décoration (lus à chaque image, jamais modifiés ici).
+// Dessin des bâtiments où l'on entre : meubles (pixel art), intérieurs, façades des bâtiments de l'île, abords et
+// finitions. Aucune règle ici : la place des meubles est dans shared/rules/house.js, les bâtiments et les portes dans
+// scripts/house/house.js.
+// house.js appelle CANAAN_HOUSE_RENDER.create(scène) une fois : la scène lui donne ses pièces, ses portes et ses
+// meubles (lus à chaque image, jamais modifiés ici).
 (() => {
   'use strict';
   function create(scene) {
@@ -11,11 +11,7 @@
       px,
       py,
       itemsOf,
-      HOME,
       ROOM,
-      aimed,
-      valid,
-      topAt,
       insideDoor,
       outsideDoor,
       externals,
@@ -1556,55 +1552,11 @@
     function drawRoom(c) {
       const room = current();
       if (!room) return;
-      const list = itemsOf(room),
-        { floor: F } = houseRoomGeometry(room);
+      const list = itemsOf(room);
       c.save();
       c.imageSmoothingEnabled = false;
       for (const layer of ['rug', 'wall', 'curtain', 'floor'])
         for (const it of list) if (CATALOG[it.k].layer === layer) drawItem(c, room, it);
-      // Mode décoration : grille, aperçu vert (possible) ou rouge (impossible), case visée en mode retrait.
-      if (scene.editing() && room === HOME) {
-        c.globalAlpha = 0.12;
-        c.strokeStyle = '#ffffff';
-        for (let lx = F.x0; lx <= F.x1 + 1; lx++) {
-          c.beginPath();
-          c.moveTo(px(room, lx), py(room, 0));
-          c.lineTo(px(room, lx), py(room, F.y1 + 1));
-          c.stroke();
-        }
-        for (let ly = F.y0; ly <= F.y1 + 1; ly++) {
-          c.beginPath();
-          c.moveTo(px(room, F.x0), py(room, ly));
-          c.lineTo(px(room, F.x1 + 1), py(room, ly));
-          c.stroke();
-        }
-        c.globalAlpha = 1;
-        const at = aimed();
-        if (scene.ui().selected) {
-          const cat = CATALOG[scene.ui().selected],
-            wall = houseOnWall(cat),
-            d = houseDims(cat, scene.ui().rot),
-            ok = valid(scene.ui().selected, at.x, wall ? 0 : at.y, scene.items(), scene.ui().rot);
-          drawItem(c, room, { k: scene.ui().selected, x: at.x, y: wall ? 0 : at.y, r: scene.ui().rot }, 0.65);
-          c.strokeStyle = ok ? '#73ffa8' : '#ff5a5a';
-          c.lineWidth = 2;
-          c.strokeRect(px(room, at.x) + 1, py(room, wall ? 0 : at.y) + 1, d.w * TS - 2, d.h * TS - 2);
-        } else {
-          const it = topAt(at.x, at.y);
-          if (it) {
-            const cat = CATALOG[it.k],
-              d = houseDims(cat, it.r);
-            c.strokeStyle = scene.ui().tool === 'remove' ? '#ff5a5a' : '#ffd36d';
-            c.lineWidth = 2;
-            c.strokeRect(
-              px(room, it.x) + 1,
-              py(room, houseOnWall(cat) ? 0 : it.y) + 1,
-              d.w * TS - 2,
-              d.h * TS - 2
-            );
-          }
-        }
-      }
       const d = insideDoor(room);
       if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Sortir', d.x, d.y + 30, '#fff2cb');
       c.restore();
@@ -3501,7 +3453,7 @@
       } else roofTop = paintBuilding(c, b);
       // Nom du lieu (de près pour les demeures) et invitation à entrer (pas pour les maisons fermées des hameaux).
       const near = Math.hypot(P.x - mid, P.y - base) < 320;
-      if (!b.closed && (b.place || b.sign || b.room === HOME || near))
+      if (!b.closed && (b.place || b.sign || near))
         label(c, b.place ? b.place.name : b.label, mid, roofTop - 8);
       c.restore();
     }
@@ -3534,31 +3486,6 @@
       }
       c.restore();
     }
-    const previews = new Map();
-    function preview(k) {
-      if (previews.has(k)) return previews.get(k);
-      let url = '';
-      try {
-        const cat = CATALOG[k],
-          w = cat.w * TS,
-          h = cat.h * TS + 44,
-          cv = document.createElement('canvas');
-        cv.width = w + 16;
-        cv.height = h;
-        const g = cv.getContext('2d');
-        g.imageSmoothingEnabled = false;
-        if (houseOnWall(cat)) {
-          R(g, 8, 0, w, cat.h * TS, '#d8c49a');
-          cat.draw(g, 8, 0, w, cat.h * TS, 0);
-        } else cat.draw(g, 8, 40, w, cat.h * TS, 0);
-        url = cv.toDataURL();
-      } catch {
-        url = '';
-      }
-      previews.set(k, url);
-      return url;
-    }
-
     // Bâtiments à redessiner devant les personnages qui passent derrière (world-look.js).
     function occluders() {
       if (game.world.instance || current()) return [];
@@ -3584,7 +3511,6 @@
       drawPrompts,
       drawTile,
       occluders,
-      preview,
       // Aperçu d'une façade (tests et outils) : style de LOOKS, posée sur la case (tx, ty).
       drawFacade: (c, style, tx, ty) =>
         drawBuilding(c, { style, x: tx, y: ty, w: 4, h: 3, room: ROOM.chene, label: style }),

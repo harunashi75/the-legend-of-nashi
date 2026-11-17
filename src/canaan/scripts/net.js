@@ -290,8 +290,6 @@
         // Pêche : banc visé et touche (pour dessiner la ligne chez les autres).
         fish: hero.fishing ? [hero.fishing.spot, hero.fishing.state === 'bite' ? 1 : 0] : 0
       })),
-      // Maison : meubles, quand ils changent (et de temps en temps pour un invité qui arrive).
-      house: CANAAN_HOUSE.netView(),
       // Lieux des quêtes : énigmes partagées et changements du monde, quand ils changent.
       quests: CANAAN_QUESTS.netView(),
       // Boss : ses effets en cours (barre de boss des invités).
@@ -605,7 +603,6 @@
   function applyState(state) {
     if (!state.map || !Array.isArray(state.heroes)) return;
     applyMap(state.map);
-    if (state.house) CANAAN_HOUSE.applyRemote(state.house);
     if (state.quests) CANAAN_QUESTS.applyRemote(state.quests);
     const seen = new Set();
     for (const h of state.heroes) {

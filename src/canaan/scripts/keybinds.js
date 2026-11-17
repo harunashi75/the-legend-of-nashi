@@ -28,9 +28,7 @@
     ['journal', 'Journal de quêtes', ['l'], 'Menus'],
     ['achievements', 'Succès et collections', ['y'], 'Menus'],
     ['wardrobe', 'Garde-robe', ['v'], 'Menus'],
-    ['housing', 'Décorer la maison', ['h'], 'Menus'],
-    ['chat', 'Écrire dans la discussion', ['enter'], 'Menus'],
-    ['houseRotate', 'Tourner le meuble', ['r'], 'Maison', 'house']
+    ['chat', 'Écrire dans la discussion', ['enter'], 'Menus']
   ].map(([id, name, defaults, group, context = 'game']) => ({ id, name, defaults, group, context }));
   const BY_ID = Object.fromEntries(ACTIONS.map(a => [a.id, a]));
   const SLOTS = 2;
@@ -249,8 +247,7 @@
     toggleTrade: 'trade',
     toggleProfessions: 'professions',
     toggleJournal: 'journal',
-    toggleAchievements: 'achievements',
-    toggleHousing: 'housing'
+    toggleAchievements: 'achievements'
   };
   function refreshLabels() {
     for (const [action, id] of Object.entries(MENU_BUTTONS)) {

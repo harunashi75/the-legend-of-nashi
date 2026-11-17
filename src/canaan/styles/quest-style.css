@@ -180,6 +180,3 @@
   display: inline-block;
   font-style: normal;
 }
-#housingBar .house-item.locked {
-  opacity: 0.55;
-}

@@ -38,11 +38,6 @@
     toggleGroup: () => toggleGroup(),
     toggleTrade: () => toggleTrade(),
     toggleProfessions: () => toggleProfessions(),
-    toggleHousing: () => toggleHousing(),
-    houseCat: element => CANAAN_HOUSE.actions.cat(actionText(element, 'cat')),
-    houseTool: element => CANAAN_HOUSE.actions.tool(actionText(element, 'tool')),
-    houseSelect: element => CANAAN_HOUSE.actions.select(actionText(element, 'item')),
-    houseRotate: () => CANAAN_HOUSE.actions.rotate(),
     profTab: element => CANAAN_PROF.actions.tab(actionText(element, 'tab')),
     profCook: element =>
       CANAAN_PROF.actions.cook(actionText(element, 'recipe'), actionInteger(element, 'quality'), 1),
@@ -90,8 +85,6 @@
     // Cité elfique : écouter le Grand Arbre, sa bénédiction, l'armurerie et l'atelier de la Tisseuse.
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),
     cityBless: () => CANAAN_CITY.actions.bless(),
-    cityBuyGear: element =>
-      CANAAN_CITY.actions.buyGear(actionText(element, 'slot'), actionText(element, 'rarity')),
     cityBuySkin: element => CANAAN_CITY.actions.buySkin(actionText(element, 'skin')),
     wearSkin: element =>
       CANAAN_WARDROBE.choose(

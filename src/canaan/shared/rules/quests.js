@@ -11,7 +11,6 @@ import { clampLevel, xpToNext } from './stats.js';
  * @property {Record<number, { step: number, got: string[] }>} active quêtes en cours : étape et objets trouvés
  * @property {Record<number, number>} done quêtes terminées
  * @property {Record<string, boolean>} flags drapeaux d'histoire
- * @property {string[]} deco décorations de maison gagnées
  * @property {Record<number, number>} choices choix narratifs
  * @property {number | null} track quête suivie
  */
@@ -33,8 +32,7 @@ const FLAGS = new Set([
   ...QUESTS.flatMap(q => q.reward.flags || []),
   ...SANCTUARIES.map(s => 'visit_' + s.id)
 ]);
-const DECOS = new Set(QUESTS.map(q => q.reward.deco).filter(Boolean));
-// État de quêtes d'un héros, vérifié : quêtes actives (étape et données), terminées, drapeaux, décorations,
+// État de quêtes d'un héros, vérifié : quêtes actives (étape et données), terminées, drapeaux,
 // choix narratifs, quête suivie.
 /**
  * @param {any} raw état lu d'une sauvegarde ou du réseau (non fiable : chaque champ est vérifié)
@@ -42,7 +40,7 @@ const DECOS = new Set(QUESTS.map(q => q.reward.deco).filter(Boolean));
  */
 export function sanitizeQuests(raw) {
   const r = raw && typeof raw === 'object' ? raw : {},
-    /** @type {QuestState} */ out = { active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null };
+    /** @type {QuestState} */ out = { active: {}, done: {}, flags: {}, choices: {}, track: null };
   if (r.done && typeof r.done === 'object')
     for (const [k, v] of Object.entries(r.done))
       if (questById(Number(k))) out.done[Number(k)] = Number.isFinite(v) ? Math.max(0, Math.floor(v)) : 1;
@@ -60,8 +58,6 @@ export function sanitizeQuests(raw) {
     }
   if (r.flags && typeof r.flags === 'object')
     for (const k of Object.keys(r.flags)) if (FLAGS.has(k) && r.flags[k]) out.flags[k] = true;
-  if (Array.isArray(r.deco))
-    out.deco = [...new Set(r.deco.filter(/** @param {string} d */ d => DECOS.has(d)))];
   if (r.choices && typeof r.choices === 'object')
     for (const [k, v] of Object.entries(r.choices))
       if (questById(Number(k)) && Number.isInteger(v) && v >= 0 && v < 8) out.choices[Number(k)] = v;

@@ -210,7 +210,7 @@ export function sanitizeAction(raw) {
       ? { op: r.op, ref: r.ref }
       : null;
   if (r.op === 'shop-buy')
-    return Number.isInteger(r.index) && r.index >= 0 && r.index < 32 ? { op: r.op, index: r.index } : null;
+    return Number.isInteger(r.index) && r.index >= 0 && r.index < 64 ? { op: r.op, index: r.index } : null;
   // Pile du sac (poissons, viandes, repas, Rubis) : « genre:id:qualité*nombre ».
   if (r.op === 'sell-stack')
     return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
@@ -225,28 +225,14 @@ export function sanitizeAction(raw) {
     return { op: r.op };
   // Garde-robe : apparence à porter (identifiant court, ou vide pour la retirer) ; l'hôte vérifie qu'elle est possédée.
   if (r.op === 'skin-wear') return r.id === '' || word(r.id) ? { op: r.op, id: r.id } : null;
-  // Cité elfique : porte, bénédiction du Grand Arbre, armurerie (pièce et qualité), atelier (apparence) ; l'hôte vérifie.
+  // Cité elfique : porte, bénédiction du Grand Arbre, atelier (apparence) ; l'hôte vérifie. L'armurerie passe par shop-buy.
   if (r.op === 'city-gate' || r.op === 'city-bless') return { op: r.op };
-  if (r.op === 'city-buy')
-    return word(r.slot) && (r.rarity === 'rare' || r.rarity === 'epic')
-      ? { op: r.op, slot: r.slot, rarity: r.rarity }
-      : null;
   if (r.op === 'city-skin') return word(r.id) ? { op: r.op, id: r.id } : null;
   if (r.op === 'rubis-unequip')
     return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
-  // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;
-  // l'hôte vérifie la place et le catalogue.
+  // Bâtiments : passer une porte (l'hôte vérifie qu'elle est à portée).
   if (r.op === 'house-door') return { op: 'house-door' };
-  const cell = /** @param {unknown} v */ v =>
-    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 20;
-  const turn = Number.isInteger(r.r) && r.r >= 0 && r.r <= 3 ? r.r : 0;
-  if (r.op === 'house-place')
-    return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y)
-      ? { op: 'house-place', k: r.k, x: r.x, y: r.y, r: turn }
-      : null;
-  if (r.op === 'house-remove' || r.op === 'house-rotate')
-    return cell(r.x) && cell(r.y) ? { op: r.op, x: r.x, y: r.y } : null;
   if (r.op === 'fish') return { op: 'fish' };
   // Minage et cueillette : numéro du gisement ; enchanteur : statistique, métal (0 à 5), nombre ; poser : pile et pièce.
   if (r.op === 'gather')

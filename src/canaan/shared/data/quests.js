@@ -354,7 +354,7 @@ export const QUESTS = deepFreeze([
     summary:
       'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Mais les barrières l’envoient toujours ailleurs.',
     steps: [{ k: 'puzzle', text: 'Ouvrir et fermer les barrières pour guider Pompon jusqu’au sommet' }],
-    reward: { gold: 70, deco: 'mouton', text: 'Décoration « Petit mouton »' },
+    reward: { gold: 70, item: 'Rare', text: 'Équipement Rare de ton niveau' },
     talk: {
       offer: [
         'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Mais il suit toujours le chemin ouvert…',
@@ -523,7 +523,7 @@ export const QUESTS = deepFreeze([
       { k: 'trail', text: 'Suivre les petites empreintes (elles n’apparaissent que de près)' },
       { k: 'spot', at: [5, -4], text: 'Démasquer le voleur camouflé (E)' }
     ],
-    reward: { gold: 110, deco: 'figurine', text: 'Or et figurine « Le petit voleur »' },
+    reward: { gold: 110, item: 'Rare', text: 'Or et équipement Rare de ton niveau' },
     talk: {
       offer: [
         'On me vole mes provisions ! Des pommes, du fromage, même mes biscuits au miel.',
@@ -531,7 +531,7 @@ export const QUESTS = deepFreeze([
       ],
       active: 'Les empreintes partent de mon sac. Regarde par terre, de près.',
       ready:
-        'Un… caméléon-renard ? Il avait juste faim ? Bon. Je lui laisserai un biscuit. Prends cette figurine, il a posé pour le sculpteur !',
+        'Un… caméléon-renard ? Il avait juste faim ? Bon. Je lui laisserai un biscuit. Prends ceci pour ta peine !',
       after: 'Le petit voleur vient manger dans ma main maintenant. On est amis.'
     }
   },
@@ -552,14 +552,14 @@ export const QUESTS = deepFreeze([
         text: 'Trouver le point d’observation où l’ombre de l’arbre devient un oiseau (E)'
       }
     ],
-    reward: { gold: 90, deco: 'tableau', text: 'Tableau décoratif « L’oiseau d’ombre »' },
+    reward: { gold: 90, item: 'Rare', text: 'Équipement Rare de ton niveau' },
     talk: {
       offer: [
         'Un jour, d’un endroit précis, l’ombre de ce vieil arbre est devenue un oiseau. Un oiseau parfait !',
         'Je me souviens seulement : « au nord de l’arbre, un pas à l’ouest ». Trouve l’endroit et appelle-moi (E).'
       ],
       active: 'Au nord de l’arbre, un pas à l’ouest… L’ombre change quand on se déplace.',
-      ready: 'Le voilà ! Mon oiseau d’ombre ! Je l’ai peint deux fois : un tableau pour moi, un pour toi.',
+      ready: 'Le voilà ! Mon oiseau d’ombre ! Tiens, prends ceci : tu l’as bien mérité.',
       after: 'Je peins maintenant toutes les ombres de la forêt. Elles ont toutes une histoire.'
     }
   },
@@ -650,7 +650,7 @@ export const QUESTS = deepFreeze([
       { k: 'clues', n: 4, text: 'Interroger les habitants et examiner les objets du marais (4 indices)' },
       { k: 'choice', text: 'Rendre son nom à l’esprit' }
     ],
-    reward: { gold: 150, deco: 'lanterne', text: 'Lanterne décorative « Lueur d’Ilian »' },
+    reward: { gold: 150, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
       offer: [
         'Bouuh… pardon. Je ne voulais pas te faire peur. J’ai oublié mon nom, tu sais. Ça arrive, quand on est mort depuis longtemps.',
@@ -659,7 +659,7 @@ export const QUESTS = deepFreeze([
       active:
         'Une lanterne, une barque, un vieux chapeau… et les habitants. Quelqu’un se souvient forcément.',
       ready:
-        'Ilian… Ilian le lanternier. Oui. C’était moi. Merci. Garde ma lanterne : elle éclairera ta maison.',
+        'Ilian… Ilian le lanternier. Oui. C’était moi. Merci. Prends ceci : que ma lumière guide ta route.',
       after: 'Une douce lumière flotte parfois sur l’eau, là où Ilian allumait ses lanternes.'
     },
     choices: ['Orrin le passeur', 'Ilian le lanternier', 'Barnabé le pêcheur', 'Silas le chapelier'],
@@ -773,7 +773,7 @@ export const QUESTS = deepFreeze([
     summary:
       'Flavio organise un concours : attraper la feuille dorée que le vent fait tourbillonner sans jamais la laisser tomber.',
     steps: [{ k: 'catch', text: 'Attraper la feuille dorée dans le vent (E quand elle est sur toi)' }],
-    reward: { gold: 220, deco: 'feuille', text: 'Décoration « Feuille éternelle »' },
+    reward: { gold: 220, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
       offer: [
         'Le grand concours d’automne ! Une feuille dorée danse dans le vent. Qui l’attrape gagne.',
@@ -915,14 +915,14 @@ export const QUESTS = deepFreeze([
     summary:
       'Zafir vend du vent en bouteille. Pour le prouver, il faut faire glisser son bateau miniature jusqu’au quai.',
     steps: [{ k: 'puzzle', text: 'Souffler avec les bonnes bouteilles pour amener le bateau au quai' }],
-    reward: { gold: 330, deco: 'bouteille', text: 'Décoration « Bouteille de vent »' },
+    reward: { gold: 330, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
       offer: [
         'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde mon bassin.',
         'Débouche une bouteille (E) et le bateau file jusqu’au premier obstacle. Amène-le au quai.'
       ],
       active: 'Le bateau ne s’arrête que contre un rocher ou un bord. Réfléchis avant de souffler.',
-      ready: 'Au quai ! Tu vois bien que je vends du vrai vent. Tiens, une bouteille offerte par la maison.',
+      ready: 'Au quai ! Tu vois bien que je vends du vrai vent. Tiens, un cadeau de la maison.',
       after: 'Les affaires marchent. Le vent d’est se vend très bien en ce moment.'
     }
   },
@@ -1103,9 +1103,9 @@ export const QUESTS = deepFreeze([
     ],
     reward: {
       gold: 540,
-      deco: 'dragon',
+      item: 'Épique',
       flags: ['pyria'],
-      text: 'Décoration « Petit dragon » et Pyria s’installe dans la forêt'
+      text: 'Équipement Épique de ton niveau et Pyria s’installe dans la forêt'
     },
     talk: {
       offer: [
