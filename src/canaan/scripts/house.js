@@ -916,6 +916,304 @@
         for (let k = 0; k < 3; k++) R(g, x + 31, y + 25 + k * 7, 8, 7, '#f0ecd8');
       }
     },
+    // ---- Meubles des elfes, des nains et de la ferme (intérieurs de Sylvaëlle, de Durgrim et de la grange).
+    trone: {
+      name: 'Trône de la Reine',
+      cat: 'meubles',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        // Dossier haut en branches d'argent, feuille d'or, coussin de velours.
+        R(g, x + 8, y - 40, W - 16, 64, '#e8e4f0');
+        R(g, x + 12, y - 36, W - 24, 56, '#7a4aa8');
+        R(g, x + 14, y - 34, 4, 50, '#9a6ac8');
+        R(g, x + W / 2 - 6, y - 52, 12, 14, '#f0d060');
+        R(g, x + W / 2 - 3, y - 58, 6, 8, '#fff4b0');
+        for (const dx of [6, W - 10]) R(g, x + dx, y - 48, 4, 74, '#c8ccd8');
+        R(g, x + 4, y + 18, W - 8, 10, '#c8ccd8');
+        R(g, x + 6, y + 14, W - 12, 6, '#9a6ac8');
+        R(g, x + 6, y + 28, 6, 16, '#a8acb8');
+        R(g, x + W - 12, y + 28, 6, 16, '#a8acb8');
+      }
+    },
+    harpe: {
+      name: 'Harpe elfique',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        R(g, x + 10, y + 38, W - 18, 6, '#8a5a34');
+        R(g, x + 10, y - 20, 5, 60, '#c8a038');
+        R(g, x + 10, y - 22, 26, 5, '#f0d060');
+        R(g, x + 32, y - 18, 5, 12, '#f0d060');
+        for (let k = 0; k < 6; k++) R(g, x + 16 + k * 3, y - 16 + k * 3, 1, 52 - k * 4, '#fff6d8');
+        R(g, x + 30, y - 6, 4, 46, '#c8a038');
+      }
+    },
+    telescope: {
+      name: 'Télescope',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        for (const [ax, bx] of [[12, 22], [36, 26], [24, 24]]) {
+          g.strokeStyle = '#6a4426';
+          g.lineWidth = 3;
+          g.beginPath();
+          g.moveTo(x + ax, y + 44);
+          g.lineTo(x + bx, y + 12);
+          g.stroke();
+        }
+        g.save();
+        g.translate(x + 24, y + 6);
+        g.rotate(-0.6);
+        R(g, -18, -5, 38, 10, '#c8a038');
+        R(g, -18, -5, 38, 3, '#f0d060');
+        R(g, 18, -7, 6, 14, '#8a6a1e');
+        R(g, -22, -3, 5, 6, '#3a3036');
+        g.restore();
+      }
+    },
+    autel: {
+      name: 'Autel de la Lune',
+      cat: 'deco',
+      layer: 'floor',
+      w: 2,
+      h: 1,
+      light: '#d8e4ff',
+      draw(g, x, y, W, H) {
+        R(g, x + 4, y + 14, W - 8, 30, '#e8e4dc');
+        R(g, x + 4, y + 14, W - 8, 5, '#ffffff');
+        R(g, x + 8, y + 22, W - 16, 18, '#cfc8bc');
+        for (let k = 0; k < 4; k++) R(g, x + 14 + k * 20, y + 26, 8, 10, '#bfc8e8');
+        // Croissant de lune d'argent qui luit.
+        g.fillStyle = '#eef4ff';
+        g.beginPath();
+        g.arc(x + W / 2, y - 6, 16, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = '#cfc8bc';
+        g.beginPath();
+        g.arc(x + W / 2 + 7, y - 10, 14, 0, Math.PI * 2);
+        g.fill();
+        R(g, x + W / 2 - 22, y + 6, 6, 8, '#fff4b0');
+        R(g, x + W / 2 + 16, y + 6, 6, 8, '#fff4b0');
+      }
+    },
+    metier: {
+      name: 'Métier à tisser',
+      cat: 'meubles',
+      layer: 'floor',
+      w: 2,
+      h: 1,
+      draw(g, x, y, W, H) {
+        for (const dx of [6, W - 12]) R(g, x + dx, y - 14, 6, 58, '#8a5a34');
+        R(g, x + 6, y - 14, W - 12, 6, '#a87444');
+        R(g, x + 6, y + 30, W - 12, 6, '#a87444');
+        // Étoffe en cours : bandes vert et or, fils tendus.
+        R(g, x + 14, y - 6, W - 28, 34, '#3a8a5a');
+        for (let k = 0; k < 5; k++) R(g, x + 14, y - 2 + k * 7, W - 28, 2, k % 2 ? '#f0d060' : '#8ad8a8');
+        for (let k = 0; k < 10; k++) R(g, x + 16 + k * 7, y - 8, 1, 38, '#fff6d8');
+        R(g, x + 12, y + 18, W - 24, 4, '#6a4426');
+      }
+    },
+    mannequin: {
+      name: 'Mannequin de couture',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        R(g, x + 22, y + 22, 4, 20, '#6a4426');
+        R(g, x + 14, y + 40, 20, 4, '#6a4426');
+        R(g, x + 12, y - 16, 24, 40, '#2e7a5a');
+        R(g, x + 10, y - 2, 28, 26, '#3a9a6a');
+        R(g, x + 12, y - 16, 24, 4, '#f0d060');
+        R(g, x + 22, y - 22, 4, 6, '#6a4426');
+        for (let k = 0; k < 3; k++) R(g, x + 16 + k * 6, y + 2, 2, 20, '#5ab88a');
+      }
+    },
+    rack_armes: {
+      name: 'Râtelier d’armes',
+      cat: 'murs',
+      layer: 'wall',
+      w: 1,
+      h: 2,
+      draw(g, x, y, W, H) {
+        R(g, x + 4, y + 22, W - 8, 4, '#6a4426');
+        R(g, x + 4, y + 70, W - 8, 4, '#6a4426');
+        // Épée, lance et arc accrochés.
+        R(g, x + 12, y + 18, 3, 54, '#dfe8f0');
+        R(g, x + 8, y + 64, 11, 3, '#c8a038');
+        R(g, x + 23, y + 10, 2, 66, '#8a5a34');
+        R(g, x + 21, y + 6, 6, 8, '#dfe8f0');
+        g.strokeStyle = '#8a5a34';
+        g.lineWidth = 3;
+        g.beginPath();
+        g.arc(x + 36, y + 46, 18, -1.3, 1.3);
+        g.stroke();
+        R(g, x + 36, y + 29, 1, 34, '#fff6d8');
+      }
+    },
+    banniere_elfe: {
+      name: 'Bannière de Sylvaëlle',
+      cat: 'murs',
+      layer: 'wall',
+      w: 1,
+      h: 2,
+      draw(g, x, y, W, H) {
+        R(g, x + 6, y + 14, W - 12, 4, '#c8a038');
+        R(g, x + 10, y + 18, W - 20, 48, '#2e6a4a');
+        g.fillStyle = '#2e6a4a';
+        g.beginPath();
+        g.moveTo(x + 10, y + 66);
+        g.lineTo(x + W / 2, y + 78);
+        g.lineTo(x + W - 10, y + 66);
+        g.fill();
+        // Feuille d'or brodée.
+        g.fillStyle = '#f0d060';
+        g.beginPath();
+        g.ellipse(x + W / 2, y + 42, 7, 14, 0, 0, Math.PI * 2);
+        g.fill();
+        R(g, x + W / 2 - 1, y + 28, 2, 28, '#c8a038');
+      }
+    },
+    banniere_naine: {
+      name: 'Bannière de Durgrim',
+      cat: 'murs',
+      layer: 'wall',
+      w: 1,
+      h: 2,
+      draw(g, x, y, W, H) {
+        R(g, x + 6, y + 14, W - 12, 4, '#5a5e66');
+        R(g, x + 10, y + 18, W - 20, 52, '#7a1a20');
+        R(g, x + 10, y + 18, W - 20, 4, '#a82a30');
+        R(g, x + 10, y + 66, W - 20, 6, '#e0b040');
+        // Marteau croisé d'une hache, runes dorées.
+        R(g, x + W / 2 - 1, y + 28, 3, 30, '#e0b040');
+        R(g, x + W / 2 - 8, y + 28, 17, 6, '#e0b040');
+        for (let k = 0; k < 3; k++) R(g, x + 14 + k * 8, y + 60, 4, 3, '#e0b040');
+      }
+    },
+    enclume: {
+      name: 'Enclume',
+      cat: 'cuisine',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        R(g, x + 14, y + 30, W - 28, 14, '#5a3a22');
+        R(g, x + 18, y + 22, W - 36, 10, '#3a3a40');
+        R(g, x + 6, y + 12, W - 12, 12, '#4a4a52');
+        R(g, x + 6, y + 12, W - 12, 3, '#8a8e96');
+        R(g, x + 2, y + 14, 8, 6, '#4a4a52');
+        R(g, x + 26, y + 4, 4, 10, '#6a4426');
+        R(g, x + 22, y + 2, 12, 5, '#5a5e66');
+      }
+    },
+    lingots: {
+      name: 'Pile de lingots d’or',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        const bar = (bx, by) => {
+          R(g, bx, by, 14, 7, '#c8a038');
+          R(g, bx + 1, by, 12, 2, '#fff4b0');
+          R(g, bx + 1, by + 5, 12, 2, '#8a6a1e');
+        };
+        for (let k = 0; k < 3; k++) bar(x + 6 + k * 13, y + 36);
+        for (let k = 0; k < 2; k++) bar(x + 12 + k * 13, y + 29);
+        bar(x + 18, y + 22);
+        R(g, x + 30, y + 16, 3, 3, '#ffffff');
+      }
+    },
+    foin: {
+      name: 'Botte de foin',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      draw(g, x, y, W, H) {
+        R(g, x + 4, y + 14, W - 8, 30, '#d8b050');
+        R(g, x + 4, y + 14, W - 8, 5, '#f0d078');
+        for (let k = 0; k < 8; k++) R(g, x + 6 + k * 5, y + 20 + (k % 3) * 4, 2, 6, '#b08a34');
+        for (const dy of [20, 34]) R(g, x + 4, y + dy, W - 8, 2, '#8a5a34');
+        for (let k = 0; k < 5; k++) R(g, x + 6 + k * 8, y + 10 + (k % 2) * 2, 2, 5, '#f0d078');
+      }
+    },
+    nichoir_poules: {
+      name: 'Nichoirs à poules',
+      cat: 'deco',
+      layer: 'floor',
+      w: 2,
+      h: 1,
+      draw(g, x, y, W, H) {
+        R(g, x + 2, y - 8, W - 4, 50, '#8a5a34');
+        for (let k = 0; k < 3; k++) {
+          const bx = x + 6 + k * 29;
+          R(g, bx, y - 2, 25, 18, '#5a3a22');
+          R(g, bx + 2, y + 6, 21, 10, '#d8b050');
+          // Poule qui couve, crête rouge.
+          R(g, bx + 6, y + 1, 13, 9, '#f4f0e8');
+          R(g, bx + 16, y - 2, 5, 5, '#f4f0e8');
+          R(g, bx + 17, y - 4, 3, 2, '#e04040');
+          R(g, bx + 21, y, 2, 2, '#f0a030');
+          R(g, bx + 2, y + 22, 21, 16, '#5a3a22');
+          R(g, bx + 5, y + 30, 6, 5, '#fff6e8');
+          R(g, bx + 13, y + 31, 6, 5, '#f4e0c8');
+        }
+      }
+    },
+    statue_elfe: {
+      name: 'Statue elfique',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      light: '#bfffee',
+      draw(g, x, y, W, H) {
+        R(g, x + 8, y + 32, W - 16, 12, '#cfc8bc');
+        R(g, x + 8, y + 32, W - 16, 3, '#ffffff');
+        g.fillStyle = '#ece8e0';
+        g.beginPath();
+        g.moveTo(x + 14, y + 32);
+        g.lineTo(x + W - 14, y + 32);
+        g.lineTo(x + W - 18, y - 6);
+        g.lineTo(x + 18, y - 6);
+        g.fill();
+        R(g, x + 18, y - 6, 3, 38, '#ffffff');
+        R(g, x + 19, y - 22, 10, 14, '#ece8e0');
+        R(g, x + 17, y - 22, 3, 18, '#cfc8bc');
+        R(g, x + 28, y - 4, 10, 4, '#ece8e0');
+        g.fillStyle = '#bfffee';
+        g.beginPath();
+        g.arc(x + 38, y - 10, 6, 0, Math.PI * 2);
+        g.fill();
+        R(g, x + 36, y - 13, 2, 2, '#ffffff');
+      }
+    },
+    pilier_nain: {
+      name: 'Pilier de pierre runique',
+      cat: 'deco',
+      layer: 'floor',
+      w: 1,
+      h: 1,
+      light: '#ffb060',
+      draw(g, x, y, W, H) {
+        R(g, x + 6, y + 34, W - 12, 10, '#5a5048');
+        R(g, x + 10, y - 50, W - 20, 86, '#786c60');
+        R(g, x + 10, y - 50, 6, 86, '#9a8e80');
+        R(g, x + W - 16, y - 50, 6, 86, '#5a5048');
+        R(g, x + 6, y - 58, W - 12, 10, '#5a5048');
+        for (let k = 0; k < 4; k++) R(g, x + 20, y - 38 + k * 18, 8, 3, '#ffb060');
+        R(g, x + 18, y - 10, 12, 10, '#ffd36d');
+        R(g, x + 21, y - 8, 6, 6, '#fff4b0');
+      }
+    },
   };
   const CATS = [
     ['meubles', '🛏️ Meubles'],
@@ -939,7 +1237,9 @@
   // Pièces de l'île seulement : en donjon, les mêmes coordonnées désignent la carte de l'instance.
   const roomAt = (x, y) => {
     if (game.world.instance) return null;
+    const under = game.world.layer === 'under';
     for (const r of CANAAN_ROOMS) {
+      if (!!r.under !== under) continue;
       const lx = Math.floor(x / TS) - r.x,
         ly = Math.floor(y / TS) - r.y;
       if (lx >= 0 && ly >= 0 && lx < r.w && ly < r.h) return r;
@@ -966,6 +1266,23 @@
       pilotis: { floor: { style: 'planks', a: '#6a6440', b: '#46422a', c: '#8a8458' }, wall: { style: 'logs', face: '#6a6a48', dark: '#545436', light: '#8a8a62', top: '#2e2e1c' }, wains: ['#4a4a30', '#30301e', '#6a6a48'], edge: { top: '#2e2e1c', dark: '#1a1a10', light: '#6a6a48' } },
       rousses: { floor: { style: 'planks', a: '#9a5a30', b: '#6a3a1c', c: '#ba7a48' }, wall: { style: 'paper', face: '#e8b878', dark: '#c89058', light: '#f8d4a0', top: '#5a2e18' }, wains: ['#8a4a24', '#5a2e14', '#aa6a3a'], edge: WOOD_EDGE },
       cristaux: { floor: { style: 'flagstone', a: '#b8a8d8', b: '#8a7aac', c: '#d8ccf0' }, wall: { style: 'brick', face: '#c8b8e8', dark: '#9a88c0', light: '#e8dcff', top: '#3a2a58' }, wains: ['#7a6aa8', '#4a3a78', '#a898d8'], edge: { top: '#3a2a58', dark: '#20163a', light: '#8a7ab8' } },
+      // Sylvaëlle : bois clair et lambris de feuilles (leaf), marbre et or dans la demeure de la Reine, pierre de lune au
+      // temple, bleu nuit étoilé dans la tour, racines dans la Maison des Racines.
+      palace: { floor: { style: 'flagstone', a: '#ece8e0', b: '#cfc8bc', c: '#ffffff' }, wall: { style: 'leaf', face: '#f4f0e6', dark: '#d8ccb0', light: '#ffffff', top: '#8a6a1e', vine: '#5ea44a', gold: '#f0d060' }, wains: ['#c8a038', '#8a6a1e', '#f0d060'], edge: { top: '#6a5a3a', dark: '#3a2e1c', light: '#c8b088' } },
+      elftavern: { floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' }, wall: { style: 'leaf', face: '#f2e6ca', dark: '#dccaa4', light: '#fffaf0', top: '#5a3c24', vine: '#4e8a3a', gold: '#f0d060' }, wains: ['#8a5e38', '#5e3c22', '#b8844e'], edge: WOOD_EDGE },
+      elfshop: { floor: { style: 'planks', a: '#c89a62', b: '#94643a', c: '#e0b882' }, wall: { style: 'leaf', face: '#e8f0dc', dark: '#c8d8b4', light: '#f8fff0', top: '#3a5a2a', vine: '#3e7a36', gold: '#f0d060' }, wains: ['#7a5a34', '#5a3c24', '#a87a48'], edge: WOOD_EDGE },
+      elfhome: { floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' }, wall: { style: 'leaf', face: '#f2e6ca', dark: '#dccaa4', light: '#fffaf0', top: '#4a3020', vine: '#5ea44a', gold: '#f6a0d8' }, wains: ['#8a5e38', '#5e3c22', '#b8844e'], edge: WOOD_EDGE },
+      elfroots: { floor: { style: 'logs', a: '#7a5636', b: '#523820', c: '#9a7248' }, wall: { style: 'leaf', face: '#c8a878', dark: '#a8885a', light: '#e0c498', top: '#3a2414', vine: '#3e7a36', gold: '#a8d878' }, wains: ['#5a3c24', '#3a2414', '#7a5634'], edge: WOOD_EDGE },
+      elfstar: { floor: { style: 'flagstone', a: '#4a5a8a', b: '#34426a', c: '#6a7aaa' }, wall: { style: 'leaf', face: '#2a3a6a', dark: '#1e2a50', light: '#5a6aa8', top: '#141c38', vine: '#8a9ad8', gold: '#fff4b0' }, wains: ['#3a2e5a', '#241c3a', '#5a4a8a'], edge: { top: '#141c38', dark: '#0a0e20', light: '#4a5a8a' } },
+      temple: { floor: { style: 'flagstone', a: '#d8dcf0', b: '#b0b4d0', c: '#f4f6ff' }, wall: { style: 'leaf', face: '#e4e8f8', dark: '#c0c6e0', light: '#ffffff', top: '#4a4e78', vine: '#9aa8d8', gold: '#eef4ff' }, wains: ['#8a90b8', '#5a6088', '#b0b8e0'], edge: { top: '#4a4e78', dark: '#2a2e50', light: '#9aa0c8' } },
+      // Ferme du camp : planches brutes, foin.
+      barn: { floor: { style: 'planks', a: '#9a6a3e', b: '#6a4426', c: '#b8844e' }, wall: { style: 'logs', face: '#a85a3a', dark: '#8a4428', light: '#c87a52', top: '#4a2414' }, wains: ['#6a3a20', '#4a2414', '#8a5030'], edge: WOOD_EDGE },
+      // Durgrim : pierre taillée à runes dorées (rune), dalles et braises.
+      dwarfhall: { floor: { style: 'flagstone', a: '#7a6e64', b: '#5a5048', c: '#9a8e80' }, wall: { style: 'rune', face: '#6a5e54', dark: '#4a4038', light: '#8a7e70', top: '#2a221c', gold: '#e0b040' }, wains: ['#5a3a22', '#3a2414', '#7a5232'], edge: { top: '#2a221c', dark: '#16100c', light: '#6a5e54' } },
+      dwarfforge: { floor: { style: 'stone', a: '#5a5048', b: '#3e3630', c: '#786c60' }, wall: { style: 'rune', face: '#5a4e46', dark: '#3a322c', light: '#7a6e64', top: '#1e1814', gold: '#ff9a4a' }, wains: ['#4a3a2e', '#2a221c', '#6a5a4a'], edge: { top: '#1e1814', dark: '#0e0a08', light: '#5a4e46' } },
+      dwarftavern: { floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' }, wall: { style: 'rune', face: '#6e6258', dark: '#4e443c', light: '#8e8274', top: '#2a221c', gold: '#e0b040' }, wains: ['#6a4428', '#4a2e1a', '#8a5e38'], edge: { top: '#2a221c', dark: '#16100c', light: '#6e6258' } },
+      dwarfvault: { floor: { style: 'flagstone', a: '#6a6e78', b: '#4a4e58', c: '#8a8e98' }, wall: { style: 'rune', face: '#5a5e68', dark: '#3a3e48', light: '#7a7e88', top: '#1e2028', gold: '#f0d060' }, wains: ['#4a4e58', '#2a2e38', '#6a6e78'], edge: { top: '#1e2028', dark: '#0e1018', light: '#5a5e68' } },
+      dwarfhome: { floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' }, wall: { style: 'rune', face: '#7a6e64', dark: '#5a5048', light: '#9a8e80', top: '#2a221c', gold: '#c8a060' }, wains: ['#6a4428', '#4a2e1a', '#8a5e38'], edge: { top: '#2a221c', dark: '#16100c', light: '#7a6e64' } },
       adobe: { floor: { style: 'flagstone', a: '#dcb884', b: '#b8945e', c: '#f0d4a4' }, wall: { style: 'adobe', face: '#e8c890', dark: '#c8a46c', light: '#f8e4b8', top: '#8a5a34' }, wains: ['#c07a44', '#8a5230', '#e09a5a'], edge: { top: '#8a6440', dark: '#5a3c22', light: '#c8a070' } }
     }).map(([id, spec]) => [id, { id, ...spec }])
   );
@@ -986,6 +1303,39 @@
     dunes: ADOBE,
     pilotis: [['lit', 1, 2], ['tonneau', 2, 2], ['cheminee', 4, 2], ['aquarium', 8, 2], ['sacs', 9, 2], ['fenetre', 2, 0], ['herbes', 7, 0], ['trophee', 9, 0], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['banc', 7, 6], ['lampe', 9, 5]],
     rousses: [['lit', 1, 2], ['commode', 2, 2], ['cheminee', 4, 2], ['tonneau', 8, 2], ['sacs', 9, 2], ['fenetre', 7, 0], ['cadre', 2, 0], ['herbes', 9, 0], ['tapis_rond', 3, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 5, 5, 1], ['plante', 9, 7], ['lampe', 1, 6]],
+    // Sylvaëlle.
+    sylv_palais: [
+      ['grande_fenetre', 2, 0], ['rideaux', 2, 0], ['banniere_elfe', 5, 0], ['miroir', 7, 0], ['banniere_elfe', 11, 0], ['grande_fenetre', 13, 0],
+      ['rideaux', 14, 0], ['trone', 8, 2], ['statue_elfe', 6, 2], ['statue_elfe', 10, 2], ['harpe', 4, 2], ['plante', 1, 2], ['plante', 15, 2],
+      ['bibliotheque', 13, 2], ['tapis_long', 8, 4], ['tapis_long', 8, 6], ['table', 12, 6], ['chaise', 11, 6, 3], ['chaise', 14, 6, 1],
+      ['coffre', 1, 6], ['pot_fleurs', 1, 9], ['pot_fleurs', 15, 9], ['lampe', 4, 8], ['lampe', 12, 8], ['statue_elfe', 2, 4]
+    ],
+    sylv_taverne: [
+      ['fenetre', 2, 0], ['etagere', 5, 0], ['banniere_elfe', 8, 0], ['fenetre', 10, 0], ['tonneau', 1, 2], ['tonneau', 2, 2], ['comptoir', 4, 3],
+      ['cheminee', 8, 2], ['tonneau', 11, 2], ['harpe', 10, 2], ['table_ronde', 2, 5], ['chaise', 1, 5, 3], ['chaise', 3, 5, 1],
+      ['table_ronde', 9, 5], ['chaise', 8, 5, 3], ['chaise', 10, 5, 1], ['plante', 11, 7], ['lampe', 1, 7], ['tapis_rond', 6, 5]
+    ],
+    sylv_armurerie: [['rack_armes', 2, 0], ['rack_armes', 4, 0], ['fenetre', 6, 0], ['rack_armes', 8, 0], ['rack_armes', 10, 0], ['enclume', 2, 3], ['presentoir', 9, 2], ['presentoir', 10, 2], ['tonneau', 1, 2], ['comptoir', 5, 3], ['caisse', 1, 6], ['coffre', 11, 6], ['tapis_long', 6, 5], ['lampe', 11, 4], ['plante', 1, 7]],
+    sylv_couture: [['fenetre', 3, 0], ['rideaux', 3, 0], ['cadre', 6, 0], ['banniere_elfe', 9, 0], ['metier', 2, 2], ['mannequin', 5, 2], ['mannequin', 6, 2], ['mannequin', 7, 2], ['armoire', 10, 2], ['table', 3, 5], ['chaise', 2, 5, 3], ['tapis_rond', 7, 4], ['sacs', 11, 5], ['pot_fleurs', 1, 7], ['lampe', 11, 7]],
+    sylv_tour: [['tableau', 2, 0], ['grande_fenetre', 5, 0], ['grande_fenetre', 8, 0], ['bibliotheque', 1, 2], ['bibliotheque', 2, 2], ['telescope', 6, 2], ['coffre', 10, 2], ['lampe', 11, 2], ['table', 9, 4], ['chaise', 8, 4, 3], ['lit', 1, 5], ['tapis_rond', 5, 5], ['plante', 11, 7]],
+    sylv_temple: [['banniere_elfe', 2, 0], ['grande_fenetre', 5, 0], ['banniere_elfe', 10, 0], ['statue_elfe', 2, 2], ['autel', 5, 2], ['statue_elfe', 10, 2], ['tapis_long', 6, 4], ['banc', 2, 5], ['banc', 9, 5], ['plante', 1, 7], ['plante', 11, 7], ['lampe', 4, 3], ['lampe', 8, 3]],
+    sylv_maison: [['fenetre', 2, 0], ['rideaux', 2, 0], ['cadre', 5, 0], ['fenetre', 9, 0], ['lit', 1, 2], ['commode', 2, 2], ['cheminee', 5, 2], ['bibliotheque', 9, 2], ['harpe', 11, 2], ['tapis_rond', 4, 4], ['table_ronde', 5, 5], ['chaise', 4, 5, 3], ['chaise', 6, 5, 1], ['plante', 1, 7], ['pot_fleurs', 11, 7], ['lampe', 9, 6]],
+    sylv_racines: [['herbes', 2, 0], ['fenetre', 5, 0], ['herbes', 9, 0], ['lit', 1, 2], ['plante', 3, 2], ['cuisiniere', 6, 2], ['marmite', 7, 2], ['tonneau', 10, 2], ['tapis', 4, 4], ['table', 4, 5], ['chaise', 3, 5, 3], ['chaise', 6, 5, 1], ['plante', 11, 5], ['pot_fleurs', 1, 7], ['plante', 11, 7], ['lampe', 9, 6]],
+    // Ferme du camp.
+    grange: [['trophee', 3, 0], ['herbes', 6, 0], ['fenetre', 9, 0], ['foin', 1, 2], ['foin', 2, 2], ['foin', 1, 3], ['sacs', 4, 2], ['tonneau', 10, 2], ['caisse', 11, 2], ['foin', 12, 2], ['foin', 13, 2], ['foin', 13, 3], ['banc', 3, 6], ['foin', 11, 6], ['coffre', 1, 7], ['lampe', 13, 7]],
+    poulailler: [['fenetre', 5, 0], ['herbes', 8, 0], ['nichoir_poules', 1, 2], ['foin', 4, 2], ['nichoir_poules', 7, 2], ['sacs', 1, 6], ['foin', 9, 6], ['tonneau', 9, 4], ['lampe', 1, 4]],
+    // Forteresse naine de Durgrim.
+    dur_hall: [
+      ['banniere_naine', 3, 0], ['trophee', 6, 0], ['banniere_naine', 8, 0], ['trophee', 10, 0], ['banniere_naine', 13, 0], ['trone', 8, 2],
+      ['pilier_nain', 3, 3], ['pilier_nain', 13, 3], ['pilier_nain', 3, 7], ['pilier_nain', 13, 7], ['tonneau', 1, 2], ['tonneau', 15, 2],
+      ['lingots', 10, 2], ['coffre', 6, 2], ['tapis_long', 8, 4], ['tapis_long', 8, 6], ['table', 5, 6], ['chaise', 4, 6, 3], ['table', 10, 6],
+      ['chaise', 12, 6, 1], ['lampe', 1, 9], ['lampe', 15, 9]
+    ],
+    dur_forge: [['banniere_naine', 1, 0], ['rack_armes', 6, 0], ['rack_armes', 9, 0], ['cheminee', 2, 2], ['enclume', 4, 3], ['enclume', 8, 3], ['tonneau', 10, 2], ['caisse', 11, 2], ['lingots', 11, 4], ['sacs', 1, 6], ['coffre', 11, 6], ['lampe', 1, 4]],
+    dur_taverne: [['banniere_naine', 2, 0], ['etagere', 5, 0], ['banniere_naine', 9, 0], ['tonneau', 1, 2], ['tonneau', 2, 2], ['comptoir', 4, 3], ['cheminee', 8, 2], ['tonneau', 10, 2], ['tonneau', 11, 2], ['table', 2, 5], ['chaise', 1, 5, 3], ['table', 9, 5], ['chaise', 8, 5, 3], ['chaise', 11, 5, 1], ['lampe', 11, 7], ['sacs', 1, 7]],
+    dur_coffre: [['banniere_naine', 2, 0], ['banniere_naine', 8, 0], ['lingots', 1, 2], ['lingots', 2, 2], ['coffre', 4, 2], ['coffre', 6, 2], ['lingots', 8, 2], ['lingots', 9, 2], ['comptoir', 4, 4], ['caisse', 1, 6], ['caisse', 9, 6], ['lampe', 9, 4]],
+    dur_maison1: [['banniere_naine', 2, 0], ['cadre', 5, 0], ['herbes', 8, 0], ['lit', 1, 2], ['cheminee', 4, 2], ['tonneau', 8, 2], ['coffre', 9, 2], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['lit', 9, 5], ['lampe', 1, 6]],
+    dur_maison2: [['cadre', 2, 0], ['banniere_naine', 5, 0], ['etagere', 8, 0], ['lit_double', 1, 2], ['cheminee', 5, 2], ['marmite', 6, 2], ['tonneau', 9, 2], ['tapis_rond', 4, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 6, 5, 1], ['coffre', 9, 6], ['lampe', 1, 6]],
     cristaux: [['lit', 1, 2], ['bibliotheque', 3, 2], ['cuisiniere', 6, 2], ['marmite', 7, 2], ['armoire', 9, 2], ['fenetre', 5, 0], ['cadre', 2, 0], ['horloge', 8, 0], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['plante', 9, 7], ['lampe', 9, 5]]
   };
   const RESIDENTS = {
@@ -999,7 +1349,8 @@
     dunes: [['voyageur', 6.5, 4.6]],
     pilotis: [['pecheur', 6.5, 4.6]],
     rousses: [['villageois', 6.5, 4.6]],
-    cristaux: [['ermite', 6.5, 4.6]]
+    cristaux: [['ermite', 6.5, 4.6]],
+    grange: [['villageois', 7.5, 4.6]]
   };
 
   // ---------------------------------------------------------------- Meubles : règles (vérifiées par l'hôte)
@@ -1161,10 +1512,28 @@
     }
     return { x: p.x - 2, y: p.y - 4 };
   }
+  // Pièces des Tréfonds : creusées dans la roche de la carte souterraine (dès qu'elle existe).
+  function stampUnder() {
+    const tiles = game.world.underworld,
+      deco = game.world.underdecor;
+    if (!tiles || !deco) return false;
+    for (const room of CANAAN_ROOMS) {
+      if (!room.under) continue;
+      const { floor: F } = geo(room);
+      for (let ly = 0; ly < room.h; ly++)
+        for (let lx = 0; lx < room.w; lx++) {
+          tiles[room.y + ly][room.x + lx] = lx >= F.x0 && lx <= F.x1 && ly >= F.y0 && ly <= F.y1 ? FLOOR_TILE : WALL_TILE;
+          deco[room.y + ly][room.x + lx] = null;
+        }
+    }
+    return true;
+  }
   function stamp() {
     const tiles = game.world.overworld,
       deco = game.world.overdecor;
+    stampUnder();
     for (const room of CANAAN_ROOMS) {
+      if (room.under) continue;
       const { floor: F } = geo(room);
       for (let ly = 0; ly < room.h; ly++)
         for (let lx = 0; lx < room.w; lx++) {
@@ -1285,6 +1654,35 @@
   restamp();
   // Une île régénérée (même graine) retrouve ses bâtiments.
   window.canaanAfterWorld = restamp;
+  // Bâtiments dessinés par d'autres modules où l'on entre aussi : ceux de Sylvaëlle (CANAAN_CITY_PLAN), la grange et le
+  // poulailler du camp (camp-life.js), le hall, la forge, la taverne, la chambre forte et les maisons de la forteresse
+  // naine (underground.js, sous terre). Même règle de porte : au milieu du bas du bâtiment.
+  function externals() {
+    const out = [],
+      add = (id, x, y, w, h, under = false) => ROOM[id] && out.push({ room: ROOM[id], x, y, w, h, under, external: true, label: ROOM[id].name });
+    const plan = window.CANAAN_CITY_PLAN;
+    if (plan) for (const b of plan.buildings) add('sylv_' + b.id.replace('elfe_', ''), b.x, b.y, b.w, b.h);
+    const camp = window.CANAAN_CAMP_LIFE ? CANAAN_CAMP_LIFE.items() : [];
+    for (const [kind, id] of [['barn', 'grange'], ['coop', 'poulailler']]) {
+      const it = camp.find(i => i.kind === kind);
+      if (it) add(id, it.x, it.y, it.w, it.h);
+    }
+    if (window.CANAAN_UNDER) {
+      const homes = ['dur_maison1', 'dur_maison2'],
+        ids = { dwarfhall: 'dur_hall', forge: 'dur_forge', tavern: 'dur_taverne', vault: 'dur_coffre' };
+      for (const st of CANAAN_UNDER.structures()) {
+        if (st.biome !== 4) continue;
+        const id = st.kind === 'dwarfhouse' ? homes.shift() : ids[st.kind];
+        if (id) add(id, st.tx - st.w / 2, st.ty + 1 - st.h, st.w, st.h, true);
+      }
+    }
+    return out;
+  }
+  // Toutes les portes de la couche où l'on est (île ou Tréfonds).
+  const entrances = () => {
+    const under = game.world.layer === 'under';
+    return [...(under ? [] : buildings), ...externals()].filter(b => !!b.under === under);
+  };
   // Points de passage : devant la porte d'un bâtiment, et juste devant la porte intérieure de sa pièce.
   const outsideDoor = (b = homeB()) => ({ x: (b.x + b.w / 2) * TS, y: (b.y + b.h) * TS + 10 });
   const insideDoor = (room = HOME) => {
@@ -1294,7 +1692,8 @@
   const nearestDoor = (x, y) => {
     let best = null,
       bd = 90;
-    for (const b of buildings) {
+    for (const b of entrances()) {
+      if (b.closed) continue;
       const d = outsideDoor(b),
         dist = Math.hypot(x - d.x, y - d.y);
       if (dist < bd) {
@@ -1312,7 +1711,7 @@
     let to;
     if (room) {
       const d = insideDoor(room),
-        b = buildings.find(b => b.room === room);
+        b = entrances().find(b => b.room === room);
       if (!b || Math.hypot(p.x - d.x, p.y - d.y) > 90) return false;
       to = outsideDoor(b);
       to.y += 14;
@@ -1541,6 +1940,44 @@
           r(0, y, 48, 2, w.light);
           r(0, y + 10, 48, 1, I.edge.dark);
           if (hsh(k, 3) > 0.5) r(6 + hsh(3, k) * 32, y + 4, 5, 3, I.edge.dark);
+        }
+      } else if (w.style === 'leaf') {
+        // Elfes : lambris de bois clair à arcs, lierre fleuri qui grimpe, feuilles d'or peintes.
+        for (let x = 0; x < 48; x += 24) {
+          g.globalAlpha = 0.5;
+          r(x + 2, 14, 20, 40, w.dark);
+          g.globalAlpha = 1;
+          r(x + 4, 18, 16, 34, w.face);
+          for (let k = 0; k < 8; k++) r(x + 12 + Math.round(Math.sin(k * 1.3) * 4), 20 + k * 2, 2, 2, w.light);
+          r(x + 10, 13, 4, 3, w.gold);
+        }
+        for (let y = 12; y < 56; y += 3) {
+          const vx = 46 + Math.round(Math.sin((y + v * 7) * 0.4) * 2);
+          r(vx - 1, y, 2, 2, w.vine);
+          if (y % 9 === 0) r(vx - 3, y, 2, 2, w.vine);
+          if (y % 12 === 3) r(vx + 1, y - 1, 2, 2, w.gold);
+        }
+      } else if (w.style === 'rune') {
+        // Nains : grands blocs de pierre taillée, joints profonds, frise de runes dorées.
+        for (let row = 0; row < 4; row++) {
+          const y = 10 + row * 12,
+            off = row % 2 ? 0 : 12;
+          r(0, y, 48, 2, w.dark);
+          for (let x = -off; x < 48; x += 24) {
+            r(x, y, 2, 12, w.dark);
+            r(x + 2, y + 2, 21, 2, w.light);
+            if (hsh(x, row) > 0.7) {
+              g.globalAlpha = 0.3;
+              r(x + 4, y + 5, 16, 6, w.dark);
+              g.globalAlpha = 1;
+            }
+          }
+        }
+        r(0, 30, 48, 4, w.dark);
+        for (let x = 2; x < 48; x += 8) {
+          r(x, 31, 3, 1, w.gold);
+          r(x + 1, 32, 1, 2, w.gold);
+          r(x + 3, 32, 2, 1, w.gold);
         }
       } else {
         // Terre crue lissée, fissures, frise peinte.
@@ -3294,7 +3731,17 @@
   }
   function draw(c) {
     if (game.world.instance) return;
-    if (!current()) for (const b of buildings) drawBuilding(c, b);
+    if (!current()) {
+      if (game.world.layer !== 'under') for (const b of buildings) drawBuilding(c, b);
+      // Bâtiments des autres modules : seulement l'invitation à entrer, devant la porte.
+      c.save();
+      for (const b of externals()) {
+        if (!!b.under !== (game.world.layer === 'under')) continue;
+        const d = outsideDoor(b);
+        if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
+      }
+      c.restore();
+    }
     drawRoom(c);
   }
 
@@ -3482,7 +3929,7 @@
   // Habitants des bâtiments (life.js) : [rôle, x, y] en cases du monde, avec le lieu d'un refuge.
   function residents() {
     const out = [];
-    for (const b of buildings)
+    for (const b of [...buildings, ...externals().filter(e => !e.under)])
       for (const [role, lx, ly] of RESIDENTS[b.room.id] || []) out.push({ role, tx: b.room.x + lx - 0.5, ty: b.room.y + ly - 0.5, place: b.place || null, inside: true });
     for (const b of buildings) if (b.place) out.push({ role: null, tx: b.place.x, ty: b.place.y + 1, place: b.place, inside: false });
     return out;
@@ -3528,6 +3975,8 @@
     interact,
     nearStove,
     drawTile,
+    stampUnder,
+    entrances: () => entrances().map(b => ({ id: b.room.id, x: b.x, y: b.y, w: b.w, h: b.h, under: !!b.under, door: outsideDoor(b) })),
     draw,
     click,
     toggle,

@@ -178,6 +178,21 @@
     has,
     inCombat,
     restoreMana,
+    // Effets passagers en cours (barre des effets) : nom, icône du rubis, texte et secondes restantes.
+    auras() {
+      const t = now(),
+        out = [],
+        add = (id, until, text, extra = '') => {
+          const r = BY_ID.get(id);
+          if (r && until > t) out.push({ id, icon: r.icon, name: r.name + extra, text, left: until - t });
+        };
+      if (has('gardien')) add('gardien', rt.gardienUntil, 'Dégâts reçus −10 %.');
+      if (rt.shield > 0) add('rempart', rt.shieldUntil, 'Bouclier : absorbe encore ' + Math.round(rt.shield) + ' dégâts.');
+      if (has('benediction')) add('benediction', rt.blessUntil, 'Dégâts +5 %.');
+      if (has('acceleration')) add('acceleration', rt.accelUntil, 'Recharges −10 %.');
+      if (has('sprinteur')) add('sprinteur', rt.sprintUntil, 'Vitesse +20 %.');
+      return out;
+    },
     // Statistiques : appelé à la fin de characterStats.
     stats(s) {
       if (!active.size) return s;
@@ -426,6 +441,7 @@
     has: 1,
     inCombat: 0,
     restoreMana: 1,
+    auras: 0,
     stats: 1,
     attackBefore: 3,
     attackAfter: 3,

@@ -50,9 +50,9 @@
   }
   // Crée un objet du niveau donné et le dépose dans le sac du héros (l'hôte par défaut) ; sac plein : converti en or.
   // guaranteed : qualité imposée ; sinon selon la source (monstre : Commun ou Peu commun).
-  function giveGear(level, source = 'normal', guaranteed = null, hero = game.hero) {
-    // createRawGear fournit l'objet brut ; ce moteur le normalise puis le dépose.
-    const item = createRawGear(level, source, guaranteed);
+  function giveGear(level, source = 'normal', guaranteed = null, hero = game.hero, slot = null) {
+    // createRawGear fournit l'objet brut ; ce moteur le normalise puis le dépose (slot : pièce choisie).
+    const item = createRawGear(level, source, guaranteed, slot);
     if (!item) return item;
     item.level = clampLevel(level);
     // Sans qualité imposée : monstres et coffres donnent du Commun.

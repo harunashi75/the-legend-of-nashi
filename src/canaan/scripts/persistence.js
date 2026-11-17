@@ -140,6 +140,8 @@ window.CANAAN_PERSISTENCE = {
       look: sanitizeLook(hero.look),
       // Garde-robe : apparences trouvées (la tenue portée est dans l'apparence).
       skins: { owned: [...(hero.skins?.owned || [])] },
+      // Bénédiction du Grand Arbre (jour et fin).
+      ...(hero.blessing ? { blessing: { day: hero.blessing.day, until: hero.blessing.until } } : {}),
       // Clés des secrets : gardées seulement quand le héros en a.
       player: { x: position.x, y: position.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
       level: clampLevel(hero.level),
@@ -355,6 +357,7 @@ window.CANAAN_PERSISTENCE = {
     // Garde-robe : seulement des apparences connues ; la tenue portée doit en faire partie.
     game.hero.skins = { owned: [...new Set((Array.isArray(h.skins?.owned) ? h.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
     if (!game.hero.skins.owned.includes(game.hero.look.wear)) delete game.hero.look.wear;
+    game.hero.blessing = typeof h.blessing?.day === 'string' && Number.isFinite(Number(h.blessing.until)) ? { day: h.blessing.day.slice(0, 10), until: Number(h.blessing.until) } : null;
     // Métiers (les aventures d'avant les métiers commencent au niveau 1).
     game.hero.prof = CANAAN_PROF.sanitize(h.prof);
     game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);

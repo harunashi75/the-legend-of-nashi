@@ -18,6 +18,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'professions',
     'quests',
     'dungeonPuzzles',
+    'elvenCity',
     'bossMechanics',
     'achievements'
   ]),

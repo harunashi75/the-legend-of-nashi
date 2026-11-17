@@ -162,7 +162,7 @@
     c.beginPath();
     c.ellipse(canvas.width / 2, canvas.height - 26, 54, 12, 0, 0, Math.PI * 2);
     c.fill();
-    const sprite = canaanHeroSprite(ui.look, ui.face, previewFrame % 4),
+    const sprite = canaanHeroSprite(ui.look, ui.face, previewFrame % 4, { tool: 'none' }),
       scale = ui.look.race === 'minotaure' ? 3.9 : 3.5,
       w = 52 * scale,
       h = 64 * scale;
@@ -268,6 +268,8 @@
       reset('Impossible d’ouvrir cette aventure : stockage de session indisponible.');
       return false;
     }
+    // L'écran de chargement couvre tout jusqu'au rechargement, puis jusqu'à ce que le monde soit prêt.
+    canaanBootLoader.show('Ouverture de l’aventure…');
     window.location.reload();
     return true;
   }

@@ -132,6 +132,10 @@ export function sanitizeAction(raw) {
   if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest' || r.op === 'dungeon-use') return { op: r.op };
   // Garde-robe : apparence à porter (identifiant court, ou vide pour la retirer) ; l'hôte vérifie qu'elle est possédée.
   if (r.op === 'skin-wear') return r.id === '' || word(r.id) ? { op: r.op, id: r.id } : null;
+  // Cité elfique : porte, bénédiction du Grand Arbre, armurerie (pièce et qualité), atelier (apparence) ; l'hôte vérifie.
+  if (r.op === 'city-gate' || r.op === 'city-bless') return { op: r.op };
+  if (r.op === 'city-buy') return word(r.slot) && (r.rarity === 'rare' || r.rarity === 'epic') ? { op: r.op, slot: r.slot, rarity: r.rarity } : null;
+  if (r.op === 'city-skin') return word(r.id) ? { op: r.op, id: r.id } : null;
   if (r.op === 'rubis-unequip') return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
   // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;

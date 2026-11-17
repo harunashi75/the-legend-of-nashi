@@ -31,7 +31,12 @@
     cloth: ['#fff4dc', '#e8d4b0'],
     red: ['#f06a5a', '#c84838', '#8e2c22'],
     green: ['#8ad470', '#56a648', '#2e7034'],
-    blue: ['#7ab4f0', '#4a84cc', '#2c5a98']
+    blue: ['#7ab4f0', '#4a84cc', '#2c5a98'],
+    // Cité elfique : pierre blanche, feuillages, or et jade.
+    elfStone: ['#ffffff', '#f2eee2', '#dcd4c0', '#b4ac98', '#8a8270'],
+    elfLeaf: ['#c8f0a0', '#8ad070', '#5aa850', '#3a7a3c', '#24502a'],
+    elfGold: ['#fff4b0', '#f0d060', '#c8a038', '#8a6a1e'],
+    jade: ['#b0f0d8', '#6ad0b0', '#3aa088', '#24705e', '#164a40']
   };
   // ---------------------------------------------------------------- Pinceau sur la grille de pixels d'art
   function brush(w, h) {
@@ -153,11 +158,28 @@
         ins = Math.round((inset * r * rowH) / h),
         xa = x + ins,
         xb = x + w - ins;
-      k.rect(xa, yy, xb - xa, rowH, ramp[1]);
-      k.rect(xa, yy + rowH - 1, xb - xa, 1, ramp[3]);
-      k.rect(xa, yy, xb - xa, 1, ramp[0]);
-      for (let tx = xa + (r % 2) * (tileW / 2); tx < xb; tx += tileW) k.rect(tx, yy + 1, 1, rowH - 2, ramp[2]);
-      k.rect(xb - Math.max(3, Math.round((xb - xa) * 0.12)), yy, Math.max(3, Math.round((xb - xa) * 0.12)), rowH, ramp[2]);
+      // Croupes aux deux bouts, symétriques : la gauche au soleil, la droite à l'ombre ; les tuiles (joints et rangs)
+      // continuent jusqu'au bord, seule leur teinte change.
+      const hip = Math.max(3, Math.round((xb - xa) * 0.1));
+      for (const [x0, x1, base, joint] of [
+        [xa, xa + hip, ramp[0], ramp[1]],
+        [xa + hip, xb - hip, ramp[1], ramp[2]],
+        [xb - hip, xb, ramp[2], ramp[3]]
+      ]) {
+        k.rect(x0, yy, x1 - x0, rowH, base);
+        k.rect(x0, yy + rowH - 1, x1 - x0, 1, ramp[3]);
+        k.rect(x0, yy, x1 - x0, 1, x0 === xa + hip ? ramp[0] : base);
+        for (let tx = xa + (r % 2) * (tileW / 2); tx < xb; tx += tileW) if (tx >= x0 && tx < x1) k.rect(tx, yy + 1, 1, rowH - 2, joint);
+      }
+      // Arêtes des croupes.
+      k.rect(xa + hip, yy, 1, rowH - 1, ramp[2]);
+      k.rect(xb - hip - 1, yy, 1, rowH - 1, ramp[0]);
+    }
+    // Faîtage clair au sommet.
+    {
+      const ins = Math.round((inset * (Math.ceil(h / rowH) - 1) * rowH) / h);
+      k.rect(x + ins, y + h - Math.ceil(h / rowH) * rowH - 1, w - ins * 2, 2, ramp[3]);
+      k.rect(x + ins + 1, y + h - Math.ceil(h / rowH) * rowH - 1, w - ins * 2 - 2, 1, ramp[0]);
     }
   }
   function wallPlaster(k, x, y, w, h, ramp, timber) {
@@ -369,6 +391,190 @@
   // ---------------------------------------------------------------- Maison à pignon (base de la plupart des modèles)
   // o : x, w (largeur des murs), wallH, gableH, depth (profondeur du toit), ov (débord), roof, wall (fonction),
   //     gable (fonction), bot (bas des murs).
+  // ---------------------------------------------------------------- Style elfique (organique)
+  // Bardeaux, feuilles, branches torsadées, fenêtres de cristal, portes en arc à pentures de fer, paniers de fleurs.
+  const ELF = {
+    woodShingle: ['#f2cc94', '#d8a868', '#b8884c', '#8a6234', '#5a3e20'],
+    leafShingle: ['#c4ec90', '#8cca62', '#5ea44a', '#3e7a36', '#264c22'],
+    mossShingle: ['#a8d878', '#78b058', '#548a42', '#3a6632', '#244222'],
+    silverShingle: ['#eef4ff', '#c4d0e4', '#9cacc8', '#6e7c9c', '#4a5674'],
+    stucco: ['#fffaf0', '#f2e6ca', '#dccaa4', '#b8a27c'],
+    bark: ['#b08458', '#80583a', '#5a3c24', '#3a2614'],
+    plank: ['#d8a470', '#b8844e', '#94643a', '#6a4426', '#46301c'],
+    iron: '#3a3036',
+    crystal: ['#e8fffc', '#9af0f0', '#58c8e0', '#3a8ab8', '#2a5a8a'],
+    flowers: ['#b08aff', '#8a6ae8', '#f6a0d8', '#ffffff', '#6aa8ff']
+  };
+  // Courbe de Bézier quadratique (liste de points).
+  function bez(a, c, b, n = 12) {
+    const out = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n,
+        u = 1 - t;
+      out.push([u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]);
+    }
+    return out;
+  }
+  // Lignes d'un polygone : pour chaque rangée, les segments [x0, x1) à remplir.
+  function spans(pts) {
+    let y0 = Infinity,
+      y1 = -Infinity;
+    for (const [, y] of pts) {
+      y0 = Math.min(y0, y);
+      y1 = Math.max(y1, y);
+    }
+    const rows = [];
+    for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+      const xs = [];
+      for (let i = 0; i < pts.length; i++) {
+        const [ax, ay] = pts[i],
+          [bx, by] = pts[(i + 1) % pts.length];
+        if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
+      }
+      xs.sort((a, b) => a - b);
+      for (let i = 0; i + 1 < xs.length; i += 2) rows.push([y, Math.round(xs[i]), Math.round(xs[i + 1])]);
+    }
+    return rows;
+  }
+  // Toit en écailles dans un polygone : bardeaux de bois arrondis (leaf : feuilles pointues à nervure), rangées
+  // décalées, éclairage de gauche, reflet en haut de chaque écaille, variations par écaille.
+  function shingles(k, pts, ramp, o = {}) {
+    const sw = o.w || 7,
+      sh = o.h || 6,
+      leaf = !!o.leaf,
+      rows = spans(pts);
+    if (!rows.length) return;
+    const minX = Math.min(...rows.map(r => r[1])),
+      maxX = Math.max(...rows.map(r => r[2])),
+      minY = rows[0][0],
+      cx = o.cx ?? (minX + maxX) / 2,
+      half = Math.max(1, (maxX - minX) / 2),
+      step = sh - 1;
+    for (const [y, xa, xb] of rows)
+      for (let x = xa; x < xb; x++) {
+        const ry = y - minY,
+          row = Math.floor(ry / step),
+          ly = ry - row * step,
+          off = (row % 2) * Math.floor(sw / 2),
+          rx = x - minX + off + 64 * sw,
+          col = Math.floor(rx / sw),
+          lx = rx - col * sw,
+          v = hash(col, row + 7);
+        const lit = -(x - cx) / half + (v - 0.5) * 0.6 - (ry / 120) * 0.2,
+          t = lit > 0.55 ? 0 : lit > -0.1 ? 1 : lit > -0.7 ? 2 : 3,
+          dark = n => ramp[Math.min(ramp.length - 1, t + n)],
+          mid = (sw - 1) / 2,
+          d = Math.abs(lx - mid),
+          // Écaille de bois : bas arrondi ; feuille : large en haut, pointue en bas.
+          hw = leaf ? (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow(ly / step, 2.4))) : ly < step - 3 ? mid + 0.6 : (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow((ly - (step - 4)) / 3.2, 2)));
+        let c = ramp[t];
+        if (d > hw) c = dark(2);
+        else if (d > hw - 1) c = dark(1);
+        else if (ly <= 1 && lx <= mid) c = ramp[Math.max(0, t - 1)];
+        else if (leaf && Math.round(mid) === lx && ly > 0 && ly < step - 2) c = dark(1);
+        else if (!leaf && lx > mid + 1 && ly > 1) c = ramp[Math.min(ramp.length - 1, t + (ly > step - 4 ? 1 : 0))];
+        k.px(x, y, c);
+      }
+  }
+  // Branche torsadée le long d'un tracé : épaisseur t, modelé (clair à gauche, sombre à droite), nœuds.
+  function branch(k, pts, t, ramp = ELF.bark) {
+    let dist = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1],
+        [bx, by] = pts[i],
+        n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay)));
+      for (let s = 0; s <= n; s++, dist++) {
+        const x = ax + ((bx - ax) * s) / n,
+          y = ay + ((by - ay) * s) / n,
+          w = Math.max(1, Math.round(t * (0.85 + 0.15 * Math.sin(dist * 0.4))));
+        k.rect(x - w / 2, y, w, 1, ramp[1]);
+        k.px(x - w / 2, y, ramp[0]);
+        if (w > 2) k.px(x + w / 2 - 1, y, ramp[2]);
+        if (dist % 9 === 4 && w > 2) k.px(x, y, ramp[3]);
+      }
+    }
+  }
+  // Fenêtre de cristal en arc : cadre de bois, verre bleu-turquoise en losanges, lueur.
+  function crystalWindow(k, e, x, y, w, h) {
+    k.rect(x - 2, y + 2, w + 4, h, ELF.bark[1]);
+    k.disc(x + w / 2 - 0.5, y + 3, w / 2 + 1.5, ELF.bark[1]);
+    k.rect(x, y + 3, w, h - 2, ELF.crystal[2]);
+    k.disc(x + w / 2 - 0.5, y + 3, w / 2 - 0.5, ELF.crystal[1]);
+    k.rect(x, y + 3, w, Math.floor(h / 3), ELF.crystal[1]);
+    // Plombs en losanges, dans le verre seulement.
+    for (let yy = y + 4; yy < y + h + 1; yy++) for (let xx = x; xx < x + w; xx++) if ((xx + yy) % 4 === 0 || (xx - yy + 400) % 4 === 0) k.px(xx, yy, ELF.crystal[3]);
+    k.rect(x + 1, y + 3, 2, 2, ELF.crystal[0]);
+    k.rect(x - 3, y + h + 1, w + 6, 2, ELF.bark[0]);
+    e.window(x, y + 3, w, h - 2);
+  }
+  // Porte en arc de planches, pentures de fer recourbées, anneau, marche de pierre.
+  function archDoor(k, cx, bot, w, h, ramp = ELF.plank) {
+    const x = Math.round(cx - w / 2);
+    k.rect(x - 2, bot - h + w / 2, w + 4, h - w / 2, ELF.bark[2]);
+    k.disc(cx - 0.5, bot - h + w / 2, w / 2 + 2, ELF.bark[2]);
+    k.rect(x, bot - h + w / 2, w, h - w / 2, ramp[1]);
+    k.disc(cx - 0.5, bot - h + w / 2, w / 2, ramp[1]);
+    for (let xx = x + 3; xx < x + w - 1; xx += 4) k.rect(xx, bot - h + 2, 1, h - 2, ramp[3]);
+    k.rect(x, bot - h + w / 2, 1, h - w / 2, ramp[0]);
+    for (const yy of [bot - h + w / 2 + 3, bot - 6]) {
+      k.rect(x + 1, yy, w - 4, 2, ELF.iron);
+      k.px(x + w - 3, yy - 1, ELF.iron);
+      k.px(x + w - 2, yy, ELF.iron);
+    }
+    k.disc(cx + w / 4, bot - h / 2.2, 1.5, '#c8a038');
+    k.rect(x - 4, bot, w + 8, 3, RAMP.stone[1]);
+    k.rect(x - 4, bot, w + 8, 1, RAMP.stone[0]);
+  }
+  // Panier de fleurs suspendu : chaîne, pot, grappe de fleurs et lierre qui retombe.
+  function flowerBasket(k, x, y) {
+    k.rect(x, y - 6, 1, 6, ELF.iron);
+    k.rect(x - 4, y, 9, 4, '#8a5a34');
+    k.rect(x - 4, y, 9, 1, '#b07a48');
+    for (let i = 0; i < 14; i++) k.px(x - 5 + hash(i, x) * 11, y - 3 + hash(x, i) * 4, ELF.flowers[i % 5]);
+    for (const vx of [x - 4, x + 4]) for (let i = 0; i < 7; i++) k.px(vx + (i % 2), y + 4 + i, i % 3 ? '#4e8a3a' : '#8ad070');
+  }
+  // Lierre fleuri qui grimpe (fleurs violettes).
+  function vineBloom(k, x, y, len, seed) {
+    vines(k, x, y, len, seed);
+    for (let i = 3; i < len; i += 5) k.px(x + Math.round(Math.sin((i + seed) * 0.7)) + (i % 2 ? 1 : -1), y + i, ELF.flowers[(i + seed) % 3]);
+  }
+  // Chouette perchée.
+  function owlPerch(k, x, y) {
+    k.rect(x - 3, y - 8, 7, 8, '#8a7a68');
+    k.rect(x - 2, y - 5, 5, 5, '#d8ccb8');
+    k.rect(x - 3, y - 10, 2, 2, '#6a5a4a');
+    k.rect(x + 2, y - 10, 2, 2, '#6a5a4a');
+    k.px(x - 2, y - 7, '#ffd36d');
+    k.px(x + 2, y - 7, '#ffd36d');
+    k.px(x, y - 5, '#c8a038');
+  }
+  // Mur de crépi crème avec colombages de branches.
+  function elfStucco(k, x, y, w, h, beams = []) {
+    k.rect(x, y, w, h, ELF.stucco[1]);
+    k.rect(x, y, 2, h, ELF.stucco[0]);
+    k.rect(x + w - 3, y, 3, h, ELF.stucco[2]);
+    for (let i = 0; i < 8; i++) k.rect(x + 3 + hash(i, x + y) * (w - 8), y + 3 + hash(x, i) * (h - 6), 2, 1, ELF.stucco[2]);
+    for (const b of beams) branch(k, b, 3);
+  }
+  // Socle de pierres moussues.
+  function mossBase(k, x, y, w) {
+    k.rect(x, y, w, 6, RAMP.stone[2]);
+    for (let xx = x; xx < x + w; xx += 6) {
+      k.rect(xx + 1, y + 1, 4, 4, hash(xx, y) > 0.5 ? RAMP.stone[1] : RAMP.stone[2]);
+      k.px(xx + 1, y + 1, RAMP.stone[0]);
+    }
+    for (let xx = x; xx < x + w; xx += 3) if (hash(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hash(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
+  }
+  // Feuillage au pied (fougères et buissons).
+  function ferns(k, x, bot, n, seed) {
+    for (let i = 0; i < n; i++) {
+      const fx = x + i * 5 + Math.round(hash(i, seed) * 3);
+      for (let j = 0; j < 5; j++) {
+        k.line(fx, bot, fx - 3 + j * 1.5, bot - 5 - (j % 2) * 2, j % 2 ? '#5aa448' : '#86c860');
+      }
+    }
+  }
+
   function gableHouse(k, o) {
     const { x, w, wallH, gableH, depth, ov = 4, roof, bot } = o,
       top = bot - wallH,
@@ -778,6 +984,262 @@
       return Math.min(r.roofTop, deck - 66) - 8;
     },
     // Refuge des Cristaux : tour de pierre au toit conique violet, lierre, fenêtres en arc, cristal au sommet.
+    // ---------------------------------------------------------------- Cité elfique de Sylvaëlle
+    // Maison des Feuillages : grand pignon de bardeaux de bois dont la pointe s'enroule, aile basse au toit bombé,
+    // crépi crème à colombages de branches, porte en arc, panier de fleurs, lierre fleuri, chouette sur le faîte.
+    elfe_maison(k, W, bot, e) {
+      const base = bot - 6,
+        top = base - 30;
+      mossBase(k, 10, base, W - 20);
+      elfStucco(k, 50, top, 58, 30, [[[50, top], [50, base]], [[106, top], [106, base]], [[54, base], [74, top + 6]]]);
+      crystalWindow(k, e, 82, top + 8, 12, 14);
+      shingles(k, [...bez([42, top + 8], [44, top - 14], [58, top - 24]), ...bez([58, top - 24], [88, top - 34], [114, top - 26]), [118, top - 18], [116, top + 8]], ELF.woodShingle, { cx: 64 });
+      branch(k, bez([58, top - 24], [88, top - 35], [116, top - 26]), 3);
+      elfStucco(k, 14, top - 4, 40, 34, [[[14, top - 4], [14, base]], [[52, top - 4], [52, base]]]);
+      const L = [...bez([2, top + 12], [4, top - 30], [28, top - 60]), ...bez([28, top - 60], [40, top - 70], [46, top - 62]), ...bez([46, top - 62], [38, top - 54], [38, top - 44]), ...bez([38, top - 44], [54, top - 18], [62, top + 10])];
+      shingles(k, L, ELF.woodShingle, { cx: 26 });
+      branch(k, bez([2, top + 12], [4, top - 30], [28, top - 60]), 3);
+      branch(k, bez([38, top - 44], [54, top - 18], [62, top + 10]), 3);
+      archDoor(k, 32, base, 16, 26);
+      crystalWindow(k, e, 25, top - 30, 8, 10);
+      flowerBasket(k, 16, top + 4);
+      vineBloom(k, 12, top - 2, 32, 3);
+      vineBloom(k, 52, top + 2, 26, 7);
+      vineBloom(k, 106, top - 6, 30, 11);
+      owlPerch(k, 86, top - 33);
+      ferns(k, 98, bot, 3, 2);
+      return top - 72;
+    },
+    // Maison des Racines : grand pignon de feuilles au faîte de branche enroulée, ailes basses moussues, murs de
+    // planches, grande porte ronde sous un écu, fenêtres de cristal.
+    elfe_racines(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        top = base - 28;
+      mossBase(k, 8, base, W - 16);
+      for (const s of [-1, 1]) {
+        const wx = s < 0 ? 12 : W - 40;
+        wallPlanks(k, wx, top + 8, 28, base - top - 8, RAMP.wood, false);
+        crystalWindow(k, e, wx + 9, top + 12, 10, 12);
+        const edge = s < 0 ? 6 : W - 6,
+          inner = s < 0 ? cx - 18 : cx + 18;
+        shingles(k, [[edge, top + 12], ...bez([edge, top + 12], [edge + s * -4, top - 2], [inner, top - 8]), [inner, top + 12]], ELF.mossShingle, { cx: s < 0 ? 20 : W - 20, leaf: true, w: 6, h: 6 });
+      }
+      wallPlanks(k, cx - 22, top - 4, 44, base - top + 4, RAMP.wood, false);
+      const roof = [...bez([cx - 32, top + 4], [cx - 26, top - 36], [cx, top - 64]), ...bez([cx, top - 64], [cx + 26, top - 36], [cx + 32, top + 4])];
+      shingles(k, roof, ELF.leafShingle, { cx, leaf: true, w: 8, h: 8 });
+      branch(k, bez([cx - 32, top + 4], [cx - 26, top - 36], [cx, top - 64]), 3);
+      branch(k, bez([cx + 32, top + 4], [cx + 26, top - 36], [cx, top - 64]), 3);
+      branch(k, [...bez([cx, top - 2], [cx - 2, top - 40], [cx, top - 66]), ...bez([cx, top - 66], [cx + 2, top - 76], [cx + 8, top - 74]), [cx + 8, top - 70]], 4);
+      archDoor(k, cx, base, 24, 30);
+      k.poly([[cx - 7, top - 18], [cx + 7, top - 18], [cx + 7, top - 10], [cx, top - 4], [cx - 7, top - 10]], ELF.bark[1]);
+      k.poly([[cx - 5, top - 16], [cx + 5, top - 16], [cx + 5, top - 10], [cx, top - 6], [cx - 5, top - 10]], '#3a6aa8');
+      k.rect(cx - 1, top - 15, 2, 8, '#f0d060');
+      flowerBasket(k, cx + 18, top - 2);
+      e.pulse(cx, top - 12, 40, '#9fd8ff');
+      ferns(k, 4, bot, 2, 5);
+      return top - 80;
+    },
+    // Taverne de la Feuille d'Or : grand toit de larges feuilles à trois bosses, crépi blanc à colombages, double
+    // porte en arc, vitrail, enseigne à la chope, écus de part et d'autre, lanterne.
+    elfe_taverne(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        top = base - 32;
+      mossBase(k, 8, base, W - 16);
+      elfStucco(k, 12, top, W - 24, 32, [[[12, top], [12, base]], [[W - 13, top], [W - 13, base]], [[cx - 18, top], [cx - 18, base]], [[cx + 17, top], [cx + 17, base]], [[14, top + 16], [cx - 18, top + 4]]]);
+      const roof = [[2, top + 8], ...bez([2, top + 8], [6, top - 26], [28, top - 34]), ...bez([28, top - 34], [cx - 10, top - 64], [cx, top - 66]), ...bez([cx, top - 66], [cx + 12, top - 62], [W - 28, top - 34]), ...bez([W - 28, top - 34], [W - 6, top - 26], [W - 2, top + 8])];
+      shingles(k, roof, ELF.leafShingle, { cx: cx - 10, leaf: true, w: 11, h: 11 });
+      branch(k, bez([cx - 20, top - 52], [cx, top - 70], [cx + 18, top - 54]), 3);
+      archDoor(k, cx, base, 22, 28);
+      k.rect(cx - 1, base - 26, 2, 26, ELF.bark[2]);
+      crystalWindow(k, e, W - 34, top + 6, 12, 16);
+      crystalWindow(k, e, 22, top + 8, 10, 12);
+      // Enseigne à la chope dorée.
+      k.poly([[cx - 9, top - 30], [cx + 9, top - 30], [cx + 9, top - 18], [cx, top - 12], [cx - 9, top - 18]], ELF.bark[1]);
+      k.rect(cx - 4, top - 27, 7, 9, '#f0c040');
+      k.rect(cx - 4, top - 27, 7, 2, '#ffffff');
+      k.rect(cx + 3, top - 25, 2, 5, '#f0c040');
+      for (const [sx, col] of [[-2, '#3a6aa8'], [W - 6, '#8a2a3a']]) {
+        k.poly([[sx, base - 2], [sx + 8, base - 2], [sx + 8, base - 14], [sx + 4, base - 18], [sx, base - 14]], ELF.bark[1]);
+        k.poly([[sx + 1, base - 3], [sx + 7, base - 3], [sx + 7, base - 13], [sx + 4, base - 16], [sx + 1, base - 13]], col);
+        k.rect(sx + 3, base - 13, 2, 9, '#f0d060');
+      }
+      lantern(k, W - 16, base, e.fx, e.toWorld);
+      vineBloom(k, 12, top + 2, 28, 4);
+      vineBloom(k, W - 13, top + 2, 26, 9);
+      return top - 70;
+    },
+    // Armurerie de Sylvaëlle : bardeaux de bois, écu doré, râteliers d'arcs et de lances, vitrail.
+    elfe_armurerie(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        top = base - 30;
+      mossBase(k, 10, base, W - 20);
+      elfStucco(k, 16, top, W - 32, 30, [[[16, top], [16, base]], [[W - 17, top], [W - 17, base]], [[18, top + 28], [cx - 12, top + 2]]]);
+      shingles(k, [[6, top + 8], ...bez([6, top + 8], [10, top - 24], [cx, top - 48]), ...bez([cx, top - 48], [W - 10, top - 24], [W - 6, top + 8])], ELF.woodShingle, { cx: cx - 8 });
+      branch(k, bez([6, top + 8], [10, top - 24], [cx, top - 48]), 3);
+      branch(k, bez([W - 6, top + 8], [W - 10, top - 24], [cx, top - 48]), 3);
+      archDoor(k, cx, base, 16, 24);
+      crystalWindow(k, e, 24, top + 6, 10, 14);
+      k.poly([[cx - 7, top - 22], [cx + 7, top - 22], [cx + 7, top - 14], [cx, top - 6], [cx - 7, top - 14]], '#f0d060');
+      k.line(cx - 4, top - 20, cx + 4, top - 10, '#ffffff');
+      k.line(cx + 4, top - 20, cx - 4, top - 10, '#ffffff');
+      for (const rx of [W - 34, W - 2]) {
+        k.rect(rx, base - 18, 16, 2, ELF.bark[2]);
+        k.rect(rx, base - 6, 16, 2, ELF.bark[2]);
+        k.rect(rx, base - 18, 2, 18, ELF.bark[3]);
+        k.rect(rx + 14, base - 18, 2, 18, ELF.bark[3]);
+        for (let i = 0; i < 3; i++) {
+          k.rect(rx + 4 + i * 4, base - 28, 1, 26, ELF.bark[0]);
+          k.poly([[rx + 3 + i * 4, base - 28], [rx + 4.5 + i * 4, base - 33], [rx + 6 + i * 4, base - 28]], '#e0e8f0');
+        }
+      }
+      for (let i = 0; i < 3; i++) {
+        k.line(-4 + i * 4, base - 2, -2 + i * 4, base - 24, '#c8a038');
+        k.line(-2 + i * 4, base - 24, i * 4, base - 2, '#e8e0d0');
+      }
+      vineBloom(k, 16, top + 2, 24, 6);
+      e.sign(12, top - 4, 'or');
+      return top - 52;
+    },
+    // Atelier de la Tisseuse : toit de feuilles moussues, soieries suspendues, mannequin en robe elfique.
+    elfe_couture(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        top = base - 30;
+      mossBase(k, 10, base, W - 20);
+      elfStucco(k, 16, top, W - 32, 30, [[[16, top], [16, base]], [[W - 17, top], [W - 17, base]]]);
+      shingles(k, [[6, top + 8], ...bez([6, top + 8], [12, top - 30], [cx - 6, top - 44]), ...bez([cx - 6, top - 44], [cx + 6, top - 52], [cx + 12, top - 44]), ...bez([cx + 12, top - 44], [W - 12, top - 26], [W - 6, top + 8])], ELF.mossShingle, { cx: cx - 10, leaf: true, w: 8, h: 8 });
+      branch(k, bez([cx - 6, top - 44], [cx + 6, top - 54], [cx + 14, top - 46]), 3);
+      k.rect(14, top + 2, W - 28, 1, ELF.bark[2]);
+      ['#f6a0d0', '#9affe0', '#fff0a0', '#c8a8ff', '#f6a0d0'].forEach((col, i) => {
+        const sx = 20 + i * Math.floor((W - 44) / 5);
+        k.rect(sx, top + 3, 6, 10 + (i % 2) * 4, col);
+        k.rect(sx, top + 3, 1, 10 + (i % 2) * 4, '#ffffff');
+      });
+      archDoor(k, cx, base, 16, 22);
+      crystalWindow(k, e, W - 32, top + 14, 10, 12);
+      const mx = W - 4;
+      k.rect(mx, base - 4, 1, 4, ELF.bark[2]);
+      k.poly([[mx - 6, base - 4], [mx + 7, base - 4], [mx + 3, base - 20], [mx - 2, base - 20]], '#9affe0');
+      k.rect(mx - 2, base - 22, 5, 3, '#e8e0d0');
+      k.disc(mx, base - 25, 2, '#d8c8a8');
+      k.rect(mx - 5, base - 13, 12, 1, '#f0d060');
+      flowerBasket(k, 20, top - 2);
+      e.sign(12, top - 4, 'or');
+      return top - 58;
+    },
+    // Tour des Étoiles : tour de crépi enlacée d'une branche en spirale, toit conique de bardeaux à pointe enroulée,
+    // cristal au sommet.
+    elfe_tour(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        tw = 32,
+        x = cx - tw / 2,
+        top = base - 78;
+      mossBase(k, x - 8, base, tw + 16);
+      elfStucco(k, x, top, tw, base - top);
+      const spiral = [];
+      for (let y = base; y > top; y -= 2) spiral.push([cx + Math.sin((base - y) * 0.12) * (tw / 2 - 1), y]);
+      branch(k, spiral, 3);
+      for (let i = 0; i < 3; i++) crystalWindow(k, e, cx - 4, top + 8 + i * 22, 8, 12);
+      const apex = top - 50;
+      shingles(k, [[x - 8, top + 4], ...bez([x - 8, top + 4], [x, top - 20], [cx - 2, apex]), ...bez([cx - 2, apex], [cx + 8, apex - 8], [cx + 10, apex + 2]), ...bez([cx + 10, apex + 2], [cx + 4, apex + 4], [cx + 6, apex + 10]), ...bez([cx + 6, apex + 10], [x + tw, top - 20], [x + tw + 8, top + 4])], ELF.woodShingle, { cx: cx - 6, w: 6, h: 5 });
+      k.poly([[cx + 7, apex - 4], [cx + 10, apex - 14], [cx + 13, apex - 4], [cx + 10, apex]], '#bfffee');
+      k.poly([[cx + 7, apex - 4], [cx + 10, apex - 14], [cx + 10, apex]], '#ffffff');
+      e.pulse(cx + 10, apex - 8, 80, '#9affe8');
+      archDoor(k, cx, base, 12, 18);
+      vineBloom(k, x + 2, top + 20, 40, 3);
+      return apex - 18;
+    },
+    // Temple de la Lune : crépi blanc, toit de bardeaux d'argent bombé, colonnes de branches, croissant d'argent.
+    elfe_temple(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 6,
+        top = base - 32;
+      for (let i = 0; i < 3; i++) {
+        k.rect(4 + i * 3, base + 3 - i * 3, W - 8 - i * 6, 3, RAMP.stone[i % 2 ? 2 : 1]);
+        k.rect(4 + i * 3, base + 3 - i * 3, W - 8 - i * 6, 1, RAMP.stone[0]);
+      }
+      elfStucco(k, 16, top, W - 32, base - top - 3);
+      for (const px of [14, 30, W - 34, W - 18]) branch(k, [[px, base - 3], [px + 1, top + 12], [px - 1, top]], 4);
+      shingles(k, [[6, top + 6], ...bez([6, top + 6], [cx - 30, top - 40], [cx, top - 44]), ...bez([cx, top - 44], [cx + 30, top - 40], [W - 6, top + 6])], ELF.silverShingle, { cx: cx - 10, w: 7, h: 6 });
+      k.disc(cx, top - 50, 6, '#e8f0ff');
+      k.disc(cx + 3, top - 52, 5, ELF.silverShingle[3]);
+      e.pulse(cx, top - 50, 60, '#c8dcff');
+      crystalWindow(k, e, 36, top + 6, 8, 14);
+      crystalWindow(k, e, W - 44, top + 6, 8, 14);
+      archDoor(k, cx, base - 6, 14, 22, ELF.stucco);
+      return top - 60;
+    },
+    // Demeure de la Reine : grande salle au toit de feuilles, rosace de cristal, deux tours aux flèches de bardeaux et
+    // finials d'or, balcon aux bannières vert et or, grande porte dorée, perron et jardinières.
+    elfe_palais(k, W, bot, e) {
+      const cx = W / 2,
+        base = bot - 8,
+        top = base - 40;
+      for (let i = 0; i < 3; i++) {
+        k.rect(cx - 30 + i * 4, bot - 8 + i * 3, 60 - i * 8, 3, RAMP.stone[i % 2 ? 2 : 1]);
+        k.rect(cx - 30 + i * 4, bot - 8 + i * 3, 60 - i * 8, 1, RAMP.stone[0]);
+      }
+      mossBase(k, 8, base, W - 16);
+      // Tours.
+      for (const s of [-1, 1]) {
+        const tx = s < 0 ? 12 : W - 46,
+          ttop = base - 66;
+        elfStucco(k, tx, ttop, 34, base - ttop, [[[tx, ttop], [tx, base]], [[tx + 33, ttop], [tx + 33, base]]]);
+        const spiral = [];
+        for (let y = base; y > ttop; y -= 2) spiral.push([tx + 17 + Math.sin((base - y) * 0.1 + (s > 0 ? 3 : 0)) * 15, y]);
+        branch(k, spiral, 3);
+        crystalWindow(k, e, tx + 12, ttop + 10, 10, 16);
+        crystalWindow(k, e, tx + 12, ttop + 38, 10, 14);
+        const apex = ttop - 46,
+          tc = tx + 17;
+        shingles(k, [[tx - 8, ttop + 6], ...bez([tx - 8, ttop + 6], [tx + 2, ttop - 20], [tc, apex]), ...bez([tc, apex], [tx + 32, ttop - 20], [tx + 42, ttop + 6])], ELF.woodShingle, { cx: tc - 6, w: 6, h: 5 });
+        k.rect(tc, apex - 10, 1, 10, '#f0d060');
+        k.disc(tc, apex - 11, 2, '#fff4b0');
+        e.pulse(tc, apex - 11, 50, '#fff0a0');
+        e.flag(tc + 1, apex - 10, s < 0 ? '#3e8a4a' : '#f0d060', 10);
+      }
+      // Grande salle.
+      elfStucco(k, 44, top, W - 88, base - top, [[[44, top], [44, base]], [[W - 45, top], [W - 45, base]]]);
+      shingles(k, [[34, top + 10], ...bez([34, top + 10], [44, top - 40], [cx, top - 74]), ...bez([cx, top - 74], [W - 44, top - 40], [W - 34, top + 10])], ELF.leafShingle, { cx: cx - 12, leaf: true, w: 10, h: 10 });
+      branch(k, bez([34, top + 10], [44, top - 40], [cx, top - 74]), 4);
+      branch(k, bez([W - 34, top + 10], [W - 44, top - 40], [cx, top - 74]), 4);
+      branch(k, [...bez([cx, top - 70], [cx - 3, top - 84], [cx + 4, top - 90]), [cx + 9, top - 86]], 4);
+      // Rosace de cristal.
+      k.disc(cx, top - 30, 12, ELF.bark[1]);
+      k.disc(cx, top - 30, 10, ELF.crystal[2]);
+      for (let a = 0; a < 8; a++) k.line(cx, top - 30, cx + Math.cos((a * Math.PI) / 4) * 10, top - 30 + Math.sin((a * Math.PI) / 4) * 10, ELF.crystal[3]);
+      k.disc(cx, top - 30, 3, '#fff4b0');
+      e.pulse(cx, top - 30, 90, '#bfffee');
+      // Balcon et bannières.
+      k.rect(cx - 34, top + 2, 68, 3, ELF.bark[1]);
+      for (let x = cx - 33; x < cx + 34; x += 4) k.rect(x, top - 4, 1, 6, ELF.bark[2]);
+      k.rect(cx - 34, top - 5, 68, 2, ELF.bark[0]);
+      for (const bx of [cx - 28, cx + 20]) {
+        k.rect(bx, top + 5, 8, 18, '#3e8a4a');
+        k.rect(bx, top + 5, 8, 2, '#f0d060');
+        k.rect(bx + 3, top + 10, 2, 8, '#f0d060');
+        k.poly([[bx, top + 23], [bx + 4, top + 27], [bx + 8, top + 23]], '#3e8a4a');
+      }
+      crystalWindow(k, e, 54, top + 10, 12, 18);
+      crystalWindow(k, e, W - 66, top + 10, 12, 18);
+      // Grande porte dorée.
+      archDoor(k, cx, base, 28, 34);
+      for (let a = 0; a <= 16; a++) k.px(cx + Math.cos(Math.PI + (a / 16) * Math.PI) * 16, base - 20 + Math.sin(Math.PI + (a / 16) * Math.PI) * 16, '#f0d060');
+      for (const fx of [48, W - 62]) {
+        k.rect(fx, base - 4, 14, 4, '#8a5a34');
+        for (let i = 0; i < 8; i++) k.px(fx + 1 + i * 1.6, base - 6 - (i % 2), ELF.flowers[i % 5]);
+      }
+      vineBloom(k, 44, top + 4, 34, 2);
+      vineBloom(k, W - 45, top + 4, 34, 8);
+      ferns(k, 2, bot, 3, 4);
+      ferns(k, W - 16, bot, 3, 8);
+      return top - 94;
+    },
+    // Refuge des Cristaux : tour de pierre violette au toit conique d'ardoises, cristal au sommet, lierre et cristaux.
     cristaux(k, W, bot, e) {
       const cx = W / 2,
         tw = 46,
@@ -985,5 +1447,5 @@
     outline(k);
     return { canvas: k.cv, x0, y0, scale: U, fx, roofTop: y0 + top * U };
   }
-  window.CANAAN_BUILDING_ART = Object.freeze({ paint, farm, has: id => Object.hasOwn(MODELS, id), kit: Object.freeze({ brush, outline, roofPlane, RAMP, hash }) });
+  window.CANAAN_BUILDING_ART = Object.freeze({ paint, farm, has: id => Object.hasOwn(MODELS, id), kit: Object.freeze({ brush, outline, roofPlane, RAMP, hash, shingles, branch, bez, spans, ELF }) });
 })();

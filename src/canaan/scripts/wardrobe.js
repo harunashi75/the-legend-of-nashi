@@ -43,7 +43,8 @@
       pick -= d.weights[rarity];
       if (pick < 0) break;
     }
-    const pool = SKINS.filter(s => s.rarity === Math.min(rarity, 5));
+    // Les tenues de la cité elfique s'achètent : jamais tirées au butin.
+    const pool = SKINS.filter(s => s.rarity === Math.min(rarity, 5) && !s.shop);
     return pool.length ? pool[Math.floor(rnd() * pool.length)].id : null;
   }
   // Chance d'apparence d'une source pour un héros : tirée, puis donnée.
@@ -63,7 +64,7 @@
   function preview(look) {
     const key = encodeLook(look);
     if (previews.has(key)) return previews.get(key);
-    const spr = canaanHeroSprite(look, 0, 0),
+    const spr = canaanHeroSprite(look, 0, 0, { tool: 'none' }),
       cv = document.createElement('canvas');
     cv.width = 76;
     cv.height = 76;

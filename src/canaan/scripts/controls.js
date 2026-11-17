@@ -84,6 +84,11 @@
     toggleAchievements: () => toggleAchievements(),
     // Garde-robe (V) : ouvrir, porter une apparence (vide : la retirer).
     toggleWardrobe: () => toggleWardrobe(),
+    // Cité elfique : écouter le Grand Arbre, sa bénédiction, l'armurerie et l'atelier de la Tisseuse.
+    cityTreeTalk: () => CANAAN_CITY.actions.talk(),
+    cityBless: () => CANAAN_CITY.actions.bless(),
+    cityBuyGear: element => CANAAN_CITY.actions.buyGear(actionText(element, 'slot'), actionText(element, 'rarity')),
+    cityBuySkin: element => CANAAN_CITY.actions.buySkin(actionText(element, 'skin')),
     wearSkin: element => CANAAN_WARDROBE.choose(element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''),
     achTab: element => CANAAN_ACHIEVEMENTS.actions.tab(actionText(element, 'tab')),
     achCat: element => CANAAN_ACHIEVEMENTS.actions.cat(actionText(element, 'cat')),

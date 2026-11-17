@@ -78,12 +78,6 @@
     { kind: 'bench', x: -9, y: -6, w: 2, h: 1, block: true, optional: true, alt: [[-9, -4], [-1, -6]] },
     { kind: 'bench', x: -1, y: -4, w: 2, h: 1, block: true, optional: true, alt: [[-1, -3], [-8, -2]] }
   ];
-  // Parterres du jardin (cases depuis le camp) : fleur de chaque case.
-  const BEDS = [
-    [-5, -18, 'tulipe'], [-4, -18, 'rose'], [-1, -18, 'lavande'], [0, -18, 'rose'],
-    [-4, -17, 'tulipe'], [-3, -17, 'tulipe'], [-2, -17, 'rose'], [0, -17, 'marguerite'], [1, -17, 'marguerite'],
-    [-4, -15, 'lavande'], [-3, -15, 'lavande'], [-2, -15, 'tournesol'], [-1, -15, 'tournesol'], [0, -15, 'marguerite'], [1, -15, 'bleuet']
-  ];
   // Zones de la ferme où aucun monstre n'apparaît (cases depuis le camp).
   const CALM = [[-15, 3, 9, 20], [-28, 0, -19, 13], [-9, -20, 3, -13], [-22, -16, -14, 16]];
 
@@ -289,16 +283,16 @@
     // Pen et jardin : la clôture se dessine en deux fois (le fond derrière les bêtes, le devant à sa place).
     items = items.flatMap(it => (it.kind === 'pen' || it.kind === 'garden' ? [{ ...it, part: 'back', base: it.y + T }, { ...it, part: 'front' }] : [it]));
     // Allées du jardin et parterres.
+    // Le sol du jardin (allée courbe, placette ronde, massifs arrondis) est peint d'une pièce (gardenArt) : ses cases
+    // ne reçoivent plus de touffes de fleurs au hasard ; la porte reste une allée (l'arche s'y pose).
     const garden = items.find(it => it.kind === 'garden');
-    if (garden) {
-      for (let y = cy - 16; y < garden.ty + garden.h - 1; y++)
-        for (const gx of garden.gate) ground.set(key(cx + gx, y), { type: 'gpath' });
-      for (let x = garden.tx + 1; x < garden.tx + garden.w - 1; x++) if (!solid.has(key(x, cy - 16))) ground.set(key(x, cy - 16), { type: 'gpath' });
-      for (const [x, y, flower] of BEDS) {
-        const k = key(cx + x, cy + y);
-        if (ground.get(k)?.type === 'lawn' && !solid.has(k)) ground.set(k, { type: 'bed', flower });
-      }
-    }
+    if (garden)
+      for (let y = garden.ty + 1; y < garden.ty + garden.h; y++)
+        for (let x = garden.tx + 1; x < garden.tx + garden.w - 1; x++) {
+          const g = ground.get(key(x, y));
+          if (g?.type === 'gpath') g.hidden = true;
+          else if (!g || g.type === 'lawn') ground.set(key(x, y), { type: 'garden' });
+        }
     // Fleurs : touffes sur l'herbe libre du camp et de la ferme, plus serrées le long des chemins et autour de la place.
     const flowers = ['tulipe', 'marguerite', 'lavande', 'rose', 'tulipe', 'marguerite', 'bleuet'];
     for (let y = cy - 20; y <= cy + 20; y++)
@@ -1419,6 +1413,7 @@
       case 'lawn':
         break;
       case 'gpath': {
+        if (g.hidden) break;
         // Allée de terre battue et pas japonais ronds, aux couleurs des chemins.
         R(X, Y, T, T, '#b8925e');
         for (let k = 0; k < 10; k++) R(X + hash(x, y, k + 5) * 44, Y + hash(y, x, k + 6) * 44, 2, 2, k % 2 ? '#a07c4a' : '#cca674');
@@ -1476,6 +1471,184 @@
     groundImages.set(id, img);
     return img;
   }
+  // ---------------------------------------------------------------- Jardin fleuri (sol peint d'une pièce)
+  // Pixels de 2, comme les décors : allée de gravier courbe depuis l'arche, placette ronde pavée autour de la vasque,
+  // embranchement vers le banc, pas japonais ronds, massifs aux bords arrondis cernés de galets, pleins de fleurs
+  // mêlées (roses, tulipes, lavande, marguerites, bleuets, tournesols), touffes d'herbe qui débordent sur l'allée.
+  let gardenCanvas = null,
+    gardenKey = '';
+  function gardenArt(gd) {
+    const cw = (gd.w - 2) * 24,
+      ch = (gd.h - 1) * 24,
+      id = gd.tx + ',' + gd.ty;
+    if (gardenKey === id) return gardenCanvas;
+    gardenKey = id;
+    gardenCanvas = null;
+    if (typeof document === 'undefined') return null;
+    const cv = document.createElement('canvas');
+    cv.width = cw;
+    cv.height = ch;
+    const g = cv.getContext('2d');
+    if (!g || !g.fillRect) return null;
+    const px = (x, y, col, w = 1, h = 1) => {
+        g.fillStyle = col;
+        g.fillRect(Math.round(x), Math.round(y), w, h);
+      },
+      disc = (cx0, cy0, r, col, sq = 1) => {
+        g.fillStyle = col;
+        for (let y = -r; y <= r; y++) {
+          const hw = Math.round(Math.sqrt(Math.max(0, r * r - y * y)) / sq);
+          g.fillRect(Math.round(cx0 - hw), Math.round(cy0 + y * sq), hw * 2 + 1, Math.max(1, Math.round(sq)));
+        }
+      },
+      // Case du jardin (depuis le camp) → centre en pixels d'art.
+      at = (dx, dy) => [(origin.x + dx - gd.tx - 1) * 24 + 12, (origin.y + dy - gd.ty - 1) * 24 + 12],
+      blob = (cx0, cy0, rx, ry, seed) => {
+        const pts = [];
+        for (let i = 0; i < 32; i++) {
+          const a = (i / 32) * Math.PI * 2,
+            k = 1 + 0.12 * Math.sin(a * 3 + seed) + 0.06 * Math.sin(a * 5 + seed * 2);
+          pts.push([cx0 + Math.cos(a) * rx * k, cy0 + Math.sin(a) * ry * k]);
+        }
+        return pts;
+      },
+      inside = (pts, x, y) => {
+        let c = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+          const [ax, ay] = pts[i],
+            [bx, by] = pts[j];
+          if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax) c = !c;
+        }
+        return c;
+      };
+    // Allée : courbe de Bézier depuis la porte, jusqu'à la placette de la vasque.
+    const [gx] = at(-6, -14),
+      gate = [gx + 12, ch + 4],
+      [bx, by] = at(-1, -17),
+      bench = at(-3, -18),
+      path = [];
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40,
+        u = 1 - t;
+      path.push([u * u * gate[0] + 2 * u * t * (gate[0] + 6) + t * t * (bx - 18), u * u * gate[1] + 2 * u * t * (by + 20) + t * t * (by + 6)]);
+    }
+    const spur = [];
+    for (let i = 0; i <= 14; i++) {
+      const t = i / 14;
+      spur.push([bx - 14 + (bench[0] + 12 - (bx - 14)) * t, by - 2 + (bench[1] + 16 - (by - 2)) * t - Math.sin(t * Math.PI) * 4]);
+    }
+    const stroke = (pts, r, col) => pts.forEach(([x, y]) => disc(x, y, r, col));
+    stroke(path, 10, '#8a6a42');
+    stroke(spur, 7, '#8a6a42');
+    disc(bx, by + 2, 24, '#8a6a42', 0.62);
+    stroke(path, 8, '#c8a878');
+    stroke(spur, 5, '#c8a878');
+    // Placette ronde : pavés en anneaux autour de la vasque.
+    disc(bx, by + 2, 22, '#d8d0c0', 0.62);
+    for (let r = 6; r <= 20; r += 7)
+      for (let a = 0; a < Math.PI * 2; a += 0.6 / (r / 8)) {
+        const x = bx + Math.cos(a) * r,
+          y = by + 2 + Math.sin(a) * r * 0.62;
+        px(x, y, '#a8a090', 3, 1);
+        px(x, y - 1, '#f0ebe0', 2, 1);
+      }
+    // Gravier et pas japonais ronds le long de l'allée.
+    for (let i = 0; i < 260; i++) {
+      const p = path[Math.floor(hash(i, 1, 61) * path.length)];
+      px(p[0] + (hash(i, 2, 61) - 0.5) * 14, p[1] + (hash(i, 3, 61) - 0.5) * 14, i % 3 ? '#b0905e' : '#e0c896');
+    }
+    for (let i = 4; i < path.length - 3; i += 6) {
+      const [x, y] = path[i];
+      disc(x + 1, y + 1, 4, '#6a6258', 0.7);
+      disc(x, y, 4, '#c8c0b0', 0.7);
+      px(x - 2, y - 2, '#ece6da', 3, 1);
+    }
+    // Massifs arrondis : terre, feuillage serré, fleurs mêlées, bordure de galets.
+    const FL = {
+      rose: [['#c8203a', '#f05a70'], ['#f0a0b8', '#ffd0dc'], ['#ffffff', '#ffe8ec']],
+      tulipe: [['#e0303a', '#ff7a7a'], ['#f0c030', '#fff08a'], ['#e86ab0', '#ffb0d8']],
+      lavande: [['#9a6ad8', '#c8a8f0'], ['#7a5ac8', '#b098f0']],
+      champetre: [['#ffffff', '#ffffff'], ['#3a6ae0', '#8ab0ff'], ['#f0c030', '#fff08a'], ['#e86ab0', '#ffb0d8']]
+    };
+    const [l1x, l1y] = at(-3, -15),
+      [r1x, r1y] = at(1, -16),
+      [t1x, t1y] = at(-4, -18),
+      [t2x, t2y] = at(0, -18);
+    const beds = [
+      [l1x + 6, l1y + 2, 40, 13, 'rose', 1],
+      [r1x - 4, r1y + 8, 16, 22, 'champetre', 2],
+      [t1x - 4, t1y + 4, 18, 9, 'tulipe', 3],
+      [t2x + 2, t2y + 6, 12, 9, 'lavande', 4]
+    ];
+    for (const [cx0, cy0, rx, ry, kind, seed] of beds) {
+      const pts = blob(cx0, cy0, rx, ry, seed);
+      for (let y = Math.floor(cy0 - ry * 1.3); y <= cy0 + ry * 1.3; y++)
+        for (let x = Math.floor(cx0 - rx * 1.3); x <= cx0 + rx * 1.3; x++) if (inside(pts, x + 0.5, y + 0.5)) px(x, y, hash(x, y, 62) > 0.5 ? '#4a3420' : '#5a3e28');
+      // Feuillage.
+      for (let i = 0; i < rx * ry * 0.9; i++) {
+        const x = cx0 + (hash(i, seed, 63) - 0.5) * rx * 2,
+          y = cy0 + (hash(seed, i, 64) - 0.5) * ry * 2;
+        if (inside(pts, x, y)) px(x, y, ['#2e6a2a', '#3e8a36', '#5aa848'][i % 3], 2, 2);
+      }
+      // Fleurs : corolle en croix, cœur, tiges ; les tournesols et la lavande se dressent au fond.
+      const pal = FL[kind];
+      for (let i = 0; i < rx * ry * 0.22; i++) {
+        const x = cx0 + (hash(i, seed, 65) - 0.5) * rx * 1.8,
+          y = cy0 + (hash(seed, i, 66) - 0.5) * ry * 1.8;
+        if (!inside(pts, x, y)) continue;
+        const [m, l] = pal[Math.floor(hash(i, seed, 67) * pal.length)];
+        if (kind === 'lavande') {
+          for (let k = 0; k < 4; k++) px(x, y - k * 2, k % 2 ? m : l, 2, 2);
+          continue;
+        }
+        px(x - 1, y, m, 3, 1);
+        px(x, y - 1, m, 1, 3);
+        px(x, y - 1, l);
+        px(x, y, kind === 'champetre' && m === '#ffffff' ? '#f0c030' : l);
+      }
+      if (kind === 'champetre')
+        for (let k = 0; k < 3; k++) {
+          const x = cx0 - 6 + k * 6,
+            y = cy0 - ry + 4;
+          px(x, y, '#4a8a2e', 1, 10);
+          disc(x, y - 1, 3, '#f0c020');
+          disc(x, y - 1, 1, '#6a3a1a');
+        }
+      // Bordure de galets.
+      for (let i = 0; i < pts.length; i++) {
+        const [x, y] = pts[i],
+          [nx, ny] = pts[(i + 1) % pts.length];
+        for (let t = 0; t < 1; t += 0.5) {
+          const sx = x + (nx - x) * t,
+            sy = y + (ny - y) * t;
+          px(sx - 1, sy, '#6a6258', 4, 3);
+          px(sx - 1, sy - 1, hash(i, t * 10, 68) > 0.5 ? '#d8d0c4' : '#bab2a4', 3, 2);
+        }
+      }
+    }
+    // Touffes d'herbe qui débordent sur l'allée et la placette.
+    for (let i = 0; i < path.length; i += 2) {
+      const [x, y] = path[i];
+      for (const side of [-1, 1]) {
+        const tx = x + side * (8 + hash(i, side, 69) * 2),
+          ty = y + (hash(side, i, 70) - 0.5) * 4;
+        px(tx, ty - 2, '#5aa848', 1, 3);
+        px(tx + 1, ty - 3, '#7ac85a', 1, 3);
+        px(tx - 1, ty - 1, '#3e8a36', 1, 2);
+      }
+    }
+    gardenCanvas = cv;
+    return cv;
+  }
+  function drawGarden(c) {
+    const gd = items.find(it => it.kind === 'garden');
+    if (!gd) return;
+    const mx = (gd.tx + gd.w / 2) * T,
+      my = (gd.ty + gd.h / 2) * T;
+    if (mx < camX - 500 || mx > camX + W + 500 || my < camY - 500 || my > camY + H + 500) return;
+    const art = gardenArt(gd);
+    if (art) c.drawImage(art, (gd.tx + 1) * T, (gd.ty + 1) * T, art.width * 2, art.height * 2);
+  }
   const fieldSway = (x, y) => Math.round(Math.sin(time * 0.05 + x * 0.9 + y * 0.4) * 1.5 + (typeof windAt === 'function' ? windAt(x * T, y * T) * 2 : 0));
   function drawGround(c) {
     if (game.world.instance || !ground.size || canaanInHouse(P.x / TS, P.y / TS)) return;
@@ -1504,6 +1677,7 @@
         }
         paintGround(c, R, x, y, g, s);
       }
+    drawGarden(c);
     // Pommes tombées sous les arbres du verger.
     for (const it of items) {
       if (it.kind !== 'apple') continue;

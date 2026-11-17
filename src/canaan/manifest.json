@@ -11,6 +11,11 @@
       "file": "styles/panels-style.css"
     },
     {
+      "kind": "style",
+      "id": "canaan-boot-loader",
+      "file": "styles/boot-loader.css"
+    },
+    {
       "kind": "script",
       "id": "canaan-icon-art",
       "file": "scripts/icon-art.js"
@@ -267,6 +272,21 @@
     },
     {
       "kind": "script",
+      "id": "canaan-elven-art",
+      "file": "scripts/elven-art.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-elven-city",
+      "file": "scripts/elven-city.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-buff-bar",
+      "file": "scripts/buff-bar.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-house",
       "file": "scripts/house.js"
     },
@@ -344,6 +364,11 @@
       "kind": "script",
       "id": "canaan-gear-engine",
       "file": "scripts/gear-engine.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-dwarf-art",
+      "file": "scripts/dwarf-art.js"
     },
     {
       "kind": "script",

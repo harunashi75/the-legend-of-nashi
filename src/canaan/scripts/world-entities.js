@@ -6,7 +6,8 @@ const instances = createInstances();
 function isSafe(x, y) {
   // Tréfonds : la Forteresse naine de Durgrim est le seul lieu sûr.
   if (canaanUnder()) return CANAAN_UNDER.safe(x, y);
-  return villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y);
+  // La cité elfique de Sylvaëlle (dans sa palissade) est sûre elle aussi.
+  return villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y) || canaanInCity(x, y);
 }
 // Chaque instance a son portail ; canaan-world-generation le place sur l'île.
 for (let i = 0; i < instances.length; i++) {
@@ -74,7 +75,7 @@ function recordKill(m, hero = game.hero) {
   if (game.world.instance && m.boss && onInstanceBossDown(m)) {
     game.world.instance.cleared = true;
     spawnRewardChest();
-    toast('🏆 ' + m.t + ' vaincu ! Un coffre est apparu.');
+    toast('🏆 ' + m.t + ' vaincu ! Un coffre et un portail de retour sont apparus.');
   }
   // Monstre normal ou élite : objet garanti, au niveau du monstre ; en instance, rien (le coffre du boss fait le
   // butin, voir SOURCE_REWARDS).
@@ -95,9 +96,10 @@ function safeGearText(v) {
   );
 }
 // Fabrique de l'objet brut. giveGear, installée par canaan-gear-engine, le normalise puis le dépose.
-function createRawGear(level, source = 'normal', guaranteed = null) {
+// forcedSlot : pièce choisie (armurerie de la cité elfique), sinon au hasard.
+function createRawGear(level, source = 'normal', guaranteed = null, forcedSlot = null) {
   const slots = Object.keys(gearSlots).filter(k => k !== 'weapon2'),
-    slot = slots[Math.floor(rnd() * slots.length)];
+    slot = slots.includes(forcedSlot) ? forcedSlot : slots[Math.floor(rnd() * slots.length)];
   const rarity = guaranteed
     ? GEAR_RARITIES.find(r => r.name === guaranteed) || rarityRoll(level)
     : lootRarity(source);
@@ -118,6 +120,8 @@ function createRawGear(level, source = 'normal', guaranteed = null) {
       ? 'de l’Éclipse'
       : source === 'world'
         ? 'des Titans'
+        : source === 'elfe'
+          ? 'de Sylvaëlle'
         : source === 'dungeon'
           ? 'des Profondeurs'
           : ['des Étoiles', 'du Crépuscule', 'du Gardien', 'de l’Aube'][Math.floor(rnd() * 4)]);
@@ -352,6 +356,8 @@ const BIOME_COLORS = [
   '#8a7f6a',
   '#2a1810'
 ];
+// 37 : palissade de troncs et emprises de la cité elfique.
+BIOME_COLORS[37] = '#6a4a2e';
 let instanceEntrance = { x: 120 * TS, y: 133 * TS };
 const hash = (x, y, s = 0) => {
   let n = Math.sin(x * 127.1 + y * 311.7 + s * 71.3) * 43758.5453;

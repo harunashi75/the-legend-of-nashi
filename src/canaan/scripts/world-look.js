@@ -434,7 +434,7 @@
     }
     c.restore();
   }
-  const GLOWING = { glowtree: '#6fe0cc', magicplant: '#c99bff', crystal: '#9ce2e6', mushroom: '#d883a9' };
+  const GLOWING = { glowtree: '#6fe0cc', magicplant: '#c99bff', crystal: '#9ce2e6', mushroom: '#d883a9', elftree: '#bfffee', elfwillow: '#d8ffb0' };
   // Dessin d'une case de l'île : sol, débords des voisins, falaise, détails animés et décor.
   // Sol d'une case : texture (ou falaise), bords, ombre au pied d'une falaise. L'eau, animée, est à part (water).
   // Case de roche : face de falaise au bord inférieur d'un massif, dessus éclairé ailleurs.
@@ -450,6 +450,8 @@
   }
   // inChunk : peinte dans un bloc de sol où l'eau animée est dessinée dessous (transitions organiques, world-blend.js).
   function paintBase(c, x, y, t, X, Y, v, water, inChunk = false) {
+    // Palissade et emprises de la cité : le sol de leur biome (les troncs sont un décor, la cité dessine le reste).
+    if (t === CANAAN_WOOD_TILE) t = CANAAN_WOOD_GROUND.get(y * MAPW + x) ?? 1;
     const tex = PIXEL_TERRAIN[t] || PIXEL_TERRAIN[1],
       smooth = inChunk && !water && CANAAN_BLEND.active() && !BRIDGE_TILES.has(y * MAPW + x);
     let road = null,
@@ -642,6 +644,9 @@
     chunkFor = null,
     chunkBridges = -1;
   function chunkAt(cx, cy) {
+    // Dans un bâtiment, CANAAN_HOUSE.drawTile peint le dehors en noir : un bloc construit à ce moment-là resterait
+    // noir dans le cache (sol noir en ressortant). Aucun bloc n'est donc préparé à l'intérieur.
+    if (canaanInHouse(P.x / TS, P.y / TS)) return null;
     if (chunkFor !== game.world.overworld || chunkBridges !== BRIDGE_TILES.size) {
       chunks = new Map();
       chunkFor = game.world.overworld;
@@ -697,7 +702,7 @@
     aheadQueued = false;
   function prepareAhead(deadline) {
     aheadQueued = false;
-    if (!ahead || game.world.instance) return;
+    if (!ahead || game.world.instance || canaanInHouse(P.x / TS, P.y / TS)) return;
     const { cx0, cx1, cy0, cy1 } = ahead,
       // Du plus proche du centre au plus loin.
       mx = (cx0 + cx1) / 2,
@@ -895,7 +900,7 @@
   // Après les personnages, chaque objet haut (arbre, bâtiment, grand objet du camp) dont le pied est plus bas que celui
   // d'un personnage qui le chevauche est redessiné par-dessus : le personnage passe derrière. Si c'est un héros qui est
   // caché, l'objet devient à moitié transparent (on se voit toujours).
-  const TALL = new Set([...CANAAN_BIG_TREES, 'cactus', 'crystal', 'ruin', 'mushroom', 'rock', 'peak']);
+  const TALL = new Set([...CANAAN_BIG_TREES, 'cactus', 'crystal', 'ruin', 'mushroom', 'rock', 'peak', 'palisade', 'palisade2', 'palisade3']);
   function occlusionEntities() {
     const out = [];
     for (const h of game.heroes || []) if (h.player && !h.away) out.push({ x: h.player.x, foot: h.player.y + 14, hero: true });
@@ -925,7 +930,7 @@
           Y = y * TS;
         list.push({ x0: X + 24 - sprite.width / 2 + 8, x1: X + 24 + sprite.width / 2 - 8, y0: Y + 52 - sprite.height, base: Y + 42, draw: g => paintDecor(g, x, y, X, Y, d) });
       }
-    list.push(...CANAAN_HOUSE.occluders(), ...canaanCampLife.occluders(), ...CANAAN_PORTAL_ART.occluders());
+    list.push(...CANAAN_HOUSE.occluders(), ...canaanCampLife.occluders(), ...CANAAN_PORTAL_ART.occluders(), ...CANAAN_CITY.occluders());
     // Les objets redessinés n'allument pas une seconde fois leurs lumières.
     const light = window.canaanLight;
     window.canaanLight = () => {};

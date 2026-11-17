@@ -32,6 +32,8 @@
   // Pose une case du lieu ; une route ou un pont de l'île ne sont jamais recouverts (renvoie false).
   function setTile(x, y, t, deco = null) {
     if (x < 3 || y < 3 || x >= MAPW - 3 || y >= MAPH - 3) return false;
+    // Ni route, ni pont, ni palissade de troncs (cité elfique, Plaines | Forêt enchantée).
+    if (game.world.overworld[y][x] === CANAAN_WOOD_TILE) return false;
     if (t !== 2 && (game.world.overworld[y][x] === 2 || BRIDGE_TILES.has(y * MAPW + x))) return false;
     game.world.overworld[y][x] = t;
     game.world.overdecor[y][x] = deco;
@@ -69,7 +71,7 @@
       for (let xx = x - r; xx <= x + r; xx++) {
         if (Math.hypot(xx - x, yy - y) > r) continue;
         all++;
-        if (tools.valid(xx, yy) && ![0, 4].includes(game.world.overworld[yy][xx])) ok++;
+        if (tools.valid(xx, yy) && ![0, 4, CANAAN_WOOD_TILE].includes(game.world.overworld[yy][xx])) ok++;
       }
     return ok / all > 0.7;
   }
@@ -77,7 +79,7 @@
   function clearSite(site, r, tools) {
     for (let y = site.y - r; y <= site.y + r; y++)
       for (let x = site.x - r; x <= site.x + r; x++) {
-        if (!tools.valid(x, y) || Math.hypot(x - site.x, y - site.y) > r + 0.4 || BRIDGE_TILES.has(y * MAPW + x)) continue;
+        if (!tools.valid(x, y) || Math.hypot(x - site.x, y - site.y) > r + 0.4 || BRIDGE_TILES.has(y * MAPW + x) || game.world.overworld[y][x] === CANAAN_WOOD_TILE) continue;
         if (game.world.overworld[y][x] !== 2) game.world.overworld[y][x] = ZONES[site.zone].t;
         game.world.overdecor[y][x] = null;
       }

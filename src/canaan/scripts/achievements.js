@@ -245,7 +245,14 @@
       p = hero.player;
     if (r.gold) p.gold += r.gold;
     if (r.exp) canaanGrantXp(hero, Math.round(xpToNext(lvl(hero)) * r.exp));
-    if (r.gear) giveGear(lvl(hero), 'normal', r.gear, hero);
+    // Objet de récompense : de ton niveau (pas celui de l'instance), annoncé comme récompense de succès.
+    if (r.gear) {
+      const item = giveGear(lvl(hero), 'normal', r.gear, hero);
+      if (item) {
+        item.origin = 'succès';
+        canaanLootNotice(hero, '🏆 Récompense du succès « ' + a.name + ' » : objet ' + r.gear + ' de ton niveau (' + lvl(hero) + ').');
+      }
+    }
     if (r.rubis) {
       const missing = CANAAN_RUBIS.missing(hero);
       if (missing.length) CANAAN_RUBIS.grant(missing[Math.floor(Math.random() * missing.length)].id, hero);

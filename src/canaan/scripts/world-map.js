@@ -31,7 +31,9 @@
     15: '#4f9a8e',
     16: '#c27a3a',
     17: '#3f8f88',
-    18: '#5a62c8'
+    18: '#5a62c8',
+    // Palissade de troncs et emprises de la cité elfique.
+    37: '#6a4a2e'
   };
   // Décors vus d'en haut : couleur de la touffe, de son reflet, et sa taille (en pixels de l'image de fond).
   const TREES = {
@@ -205,7 +207,7 @@
       water = t => t === 0 || t === undefined;
     // L'île à plat, une fois ; les pièces des maisons (hors de l'île) comptent comme de la mer.
     for (let y = 0; y < MAPH; y++) for (let x = 0; x < MAPW; x++) flat[y * MAPW + x] = tiles[y][x] || 0;
-    for (const r of typeof CANAAN_ROOMS !== 'undefined' ? CANAAN_ROOMS : [])
+    for (const r of typeof CANAAN_ROOMS !== 'undefined' ? CANAAN_ROOMS.filter(r => !r.under) : [])
       for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) if (x >= 0 && y >= 0 && x < MAPW && y < MAPH) flat[y * MAPW + x] = 0;
     const g = pixels(cv, (px, w) => {
       const deep = shades('#1d5f96', 0.96, 1.04),
@@ -411,6 +413,18 @@
         c.lineTo(7, -1);
         c.fill();
         R(-2, 1, 4, 5, '#ffb347');
+        break;
+      case 'city':
+        // Cité elfique : arbre aux feuilles dorées sur un écusson de jade.
+        R(-9, -9, 18, 18, '#22160e');
+        R(-8, -8, 16, 16, '#2e8a6a');
+        R(-8, -8, 16, 3, '#5ac8a0');
+        R(-1, 0, 3, 6, '#6a4a2e');
+        c.fillStyle = '#f0d060';
+        c.beginPath();
+        c.arc(0, -2, 5, 0, Math.PI * 2);
+        c.fill();
+        R(-2, -5, 2, 2, '#fff4b0');
         break;
       case 'portal':
         R(-7, -7, 14, 14, '#22160e');
@@ -687,6 +701,7 @@
         }
       });
       for (const camp of villages) put('camp', camp.x, camp.y, {}, camp.name);
+      if (window.CANAAN_CITY_PLAN) put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
       for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
       // Personnages des quêtes : « ! » quête à prendre, « ? » quête à rendre.
       for (const npc of Object.values(CANAAN_QUESTS.npcs())) {

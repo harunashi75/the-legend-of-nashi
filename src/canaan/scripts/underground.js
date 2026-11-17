@@ -346,6 +346,8 @@
       const npc = game.world.npcs.find(n => n.type === 'portal' && n.instance === i);
       if (npc) Object.assign(npc, { x: d.x * TS, y: d.y * TS, layer: 'under' });
     }
+    // Pièces des bâtiments de la forteresse (house.js), creusées dans la roche du nord de la carte.
+    if (window.CANAAN_HOUSE) CANAAN_HOUSE.stampUnder();
   }
   // Entrées à la surface : terre ferme accessible depuis le camp, près de la route, loin des autres lieux.
   function placeEntrances() {
@@ -589,6 +591,21 @@
       'Un jour, j’irai voir le soleil. Il paraît qu’il brûle les yeux !'
     ] }
   ];
+  // Habitants des bâtiments de Durgrim : room (pièce), lx/ly (cases dans la pièce).
+  const DWARF_HOMES = [
+    { room: 'dur_hall', lx: 6.5, ly: 3.6, name: 'Conseillère Dagny', role: 'conseillère', beard: '#d8a040', helm: '#c09030', tunic: '#3a2a5a', tool: 'staff', fem: true, lines: ['Le Roi tient conseil sur la place, mais c’est ici que se décide l’avenir de Durgrim.', 'Ces piliers portent les noms des vingt rois. Le vingt-et-unième attend encore le sien.'] },
+    { room: 'dur_hall', lx: 10.5, ly: 3.6, name: 'Garde royal Hrolf', role: 'garde', beard: '#4a2e1e', helm: '#e0b030', tunic: '#7a1a20', tool: 'axe', lines: ['Personne ne s’assied sur le trône de pierre. Personne.'] },
+    { room: 'dur_forge', lx: 5.5, ly: 4.6, name: 'Sigrun la Forgeronne', role: 'forgeronne', beard: '#e8a040', helm: '#5a5e66', tunic: '#5a3a2a', tool: 'hammer', fem: true, lines: ['Le fer se plie à qui sait l’écouter. Le reste n’est que du bruit.', 'Hilda t’enchantera tes armes dehors, à la grande forge. Ici, on forge les haches de la garde.'] },
+    { room: 'dur_forge', lx: 9.5, ly: 4.6, name: 'Apprenti Kili', role: 'apprenti', beard: '#a8442a', helm: '#6a4a2a', tunic: '#4a4a3a', tool: 'hammer', lines: ['Trois cents coups de marteau par lame. J’en suis à deux cent douze… je crois.'] },
+    { room: 'dur_taverne', lx: 5.5, ly: 2.6, name: 'Helga la Brasseuse', role: 'brasseuse', beard: '#f0c060', helm: '#8a5a2a', tunic: '#2a5a3a', tool: 'mug', fem: true, lines: ['Bière de champignon, hydromel de mousse ou eau de roche ? Choisis bien, la surface.', 'Dorn dit que c’est sa taverne. Moi, je dis que c’est ma bière.'] },
+    { room: 'dur_taverne', lx: 3.4, ly: 5.4, name: 'Oin le Buveur', role: 'buveur', beard: '#c8642a', helm: '#8a8e96', tunic: '#5a3a1e', tool: 'mug', lines: ['Hic ! Les gargouilles… elles m’ont souri. Je le jure sur ma barbe.'] },
+    { room: 'dur_taverne', lx: 10.4, ly: 5.4, name: 'Frida Chope-Pleine', role: 'buveuse', beard: '#4a2e1e', helm: '#6a4a2a', tunic: '#6a2a3a', tool: 'mug', fem: true, lines: ['Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.'] },
+    { room: 'dur_coffre', lx: 5.5, ly: 6.2, name: 'Gardien Thror', role: 'garde', beard: '#8a8a8a', helm: '#c09030', tunic: '#2a2a3a', tool: 'axe', lines: ['L’or de Durgrim dort ici. Gimra compte, moi je garde. Chacun son métier.'] },
+    { room: 'dur_maison1', lx: 7.5, ly: 4.4, name: 'Ylva Pied-de-Roc', role: 'mère', beard: '#c8642a', helm: '#5a3a5a', tunic: '#4a6a3a', tool: 'none', fem: true, lines: ['Essuie tes bottes, voyageur ! La boue des Galeries, ça ne part jamais.', 'Mon mari est mineur. Il rentre quand la lanterne s’éteint.'] },
+    { room: 'dur_maison1', lx: 3.5, ly: 6.4, name: 'Petite Asa', role: 'enfant', beard: null, helm: '#8a3a5a', tunic: '#c8784a', tool: 'none', scale: 0.8, fem: true, lines: ['Quand je serai grande, j’aurai les plus longues tresses de Durgrim !'] },
+    { room: 'dur_maison2', lx: 7.5, ly: 4.6, name: 'Bombur Marteau-d’Or', role: 'père', beard: '#e0b040', helm: '#8a8e96', tunic: '#2a4a6a', tool: 'none', lines: ['Ma famille forge des marteaux depuis six générations. Le mien est accroché là-haut.'] },
+    { room: 'dur_maison2', lx: 2.5, ly: 5.4, name: 'Grand-mère Astrid', role: 'ancienne', beard: '#e8e8e0', helm: '#5a3a5a', tunic: '#3a2e3a', tool: 'staff', fem: true, lines: ['Assieds-toi, petit. Je vais te raconter la Grande Chute de Khaz-Ombral.', 'Les tresses d’une naine racontent sa vie : une par victoire, une par deuil.'] }
+  ];
   // Éclaireurs postés au centre de chaque biome.
   const SCOUTS = [
     ['Éclaireur Nori', ['Les Galeries d’Argile : terre, boue et vieilles mines. Attention aux taupes-garous.', 'La Mine Effondrée de Durgrim est au bout de la route. Grumbar y hante encore ses galeries.']],
@@ -605,6 +622,11 @@
       game.world.npcs.push({ x, y, name: d.name, type: d.type || 'dwarf', layer: 'under', dwarf: v, village: FORT.name });
     };
     for (const d of DWARF_PLAN) add(d, (C.x + d.dx + 0.5) * TS, (C.y + d.dy + 0.5) * TS);
+    // Nains qui vivent dans les bâtiments de la forteresse (pièces de house.js, cases de la pièce).
+    for (const d of DWARF_HOMES) {
+      const room = typeof CANAAN_ROOMS !== 'undefined' && CANAAN_ROOMS.find(r => r.id === d.room);
+      if (room) add(d, (room.x + d.lx) * TS, (room.y + d.ly) * TS);
+    }
     SCOUTS.forEach(([name, lines], k) => add({ name, role: 'éclaireur', beard: ['#c8642a', '#d8a040', '#4a2e1e', '#e8e0d0'][k], helm: '#6a4a2a', tunic: '#3a4a2a', tool: 'lantern', fem: k % 2 === 1, lines }, (hubs[k].x + 1.5) * TS, (hubs[k].y + 0.5) * TS));
   }
   // Une réplique du nain, en bulle au-dessus de lui.
@@ -667,11 +689,19 @@
       pants = '#4a3a2e',
       metal = '#b8c0c8',
       wood = '#7a5232';
-    // Jambes (pas alternés), bottes.
-    r(4, 14, 3, 3, pants);
-    r(9, 14, 3, 3, pants);
-    r(frame ? 3 : 4, 17, 4, 2, boot);
-    r(frame ? 10 : 9, 17, 4, 2, boot);
+    // Jambes (pas alternés), bottes ; les naines portent une jupe longue bordée d'or.
+    if (v.fem) {
+      r(frame ? 4 : 5, 17, 3, 2, boot);
+      r(frame ? 10 : 9, 17, 3, 2, boot);
+      r(3, 13, 10, 4, v.tunic);
+      r(2, 15, 12, 2, v.tunic);
+      r(2, 16, 12, 1, '#e0b040');
+    } else {
+      r(4, 14, 3, 3, pants);
+      r(9, 14, 3, 3, pants);
+      r(frame ? 3 : 4, 17, 4, 2, boot);
+      r(frame ? 10 : 9, 17, 4, 2, boot);
+    }
     // Tunique trapue, ceinture et boucle.
     r(3, 8, 10, 7, v.tunic);
     r(2, 9, 12, 5, v.tunic);
@@ -687,14 +717,33 @@
     r(5, 5, 2, 1, '#1a1418');
     r(9, 5, 2, 1, '#1a1418');
     r(7, 6, 2, 1, '#c98e62');
-    // Barbe (sauf les enfants) : longue, tressée, avec moustache.
-    if (beard) {
+    // Naines : pas de barbe, mais de longues tresses (couleur de cheveux : beard) à anneaux d'or, cils, joues et lèvres.
+    if (v.fem) {
+      const hair = beard || '#8a5a2a';
+      r(3, 3, 1, 4, hair);
+      r(12, 3, 1, 4, hair);
+      r(4, 3, 8, 1, hair);
+      r(2, 5, 2, 9, hair);
+      r(12, 5, 2, 9, hair);
+      r(2, 8, 2, 1, '#e0b040');
+      r(12, 8, 2, 1, '#e0b040');
+      r(2, 12, 2, 1, '#e0b040');
+      r(12, 12, 2, 1, '#e0b040');
+      r(5, 4, 2, 1, '#1a1418');
+      r(9, 4, 2, 1, '#1a1418');
+      r(4, 6, 1, 1, '#f0a0a0');
+      r(11, 6, 1, 1, '#f0a0a0');
+      r(7, 7, 2, 1, '#c8505a');
+      r(6, 8, 4, 1, '#e0b040');
+    }
+    // Barbe des nains (sauf les enfants) : longue, tressée, avec moustache.
+    else if (beard) {
       r(4, 6, 8, 2, beard);
       r(3, 7, 10, 3, beard);
       r(4, 10, 8, 2, beard);
       r(6, 12, 4, 2, beard);
       r(5, 6, 6, 1, beard);
-      if (!v.fem) r(7, 14, 2, 1, beard);
+      r(7, 14, 2, 1, beard);
       r(6, 13, 1, 1, '#e0b040');
       r(9, 13, 1, 1, '#e0b040');
     }
@@ -712,7 +761,6 @@
       r(1, 1, 2, 2, '#e8dcc0');
       r(13, 1, 2, 2, '#e8dcc0');
     }
-    if (v.fem && beard) r(2, 4, 1, 5, beard);
     // Outil.
     if (v.tool === 'pick') {
       r(14, 4, 1, 10, wood);
@@ -844,6 +892,67 @@
     R(c, x, y, w, h, col);
     R(c, x, y, w, 4, 'rgba(0,0,0,.4)');
   }
+  // Bâtiments de la forteresse peints par dwarf-art.js (pixels de 2), avec leurs feux, fumées et lueurs animés.
+  function drawFortArt(c, s, cx, by, flameCols) {
+    const img = CANAAN_DWARF_ART.art(s.kind);
+    if (!img) return false;
+    const u = CANAAN_DWARF_ART.U,
+      x0 = Math.round(cx - (img.width * u) / 2),
+      y0 = Math.round(by + 4 - img.height * u),
+      at = (ax, ay) => [x0 + ax * u, y0 + ay * u],
+      smokeAt = (ax, ay) => {
+        const [sx, sy] = at(ax, ay);
+        for (let k = 0; k < 3; k++) {
+          c.globalAlpha = 0.25 - k * 0.07;
+          c.fillStyle = '#c8c0b0';
+          c.beginPath();
+          c.arc(sx + Math.sin(time * 0.02 + k) * 4, sy - 10 - k * 14 - ((time * 0.3) % 14), 6 + k * 2, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.globalAlpha = 1;
+      };
+    c.imageSmoothingEnabled = false;
+    c.drawImage(img, x0, y0, img.width * u, img.height * u);
+    const W = img.width;
+    if (s.kind === 'dwarfhall')
+      for (const ax of [22, W - 22]) {
+        const [fx, fy] = at(ax, 64);
+        K().flame(c, fx, fy, 1, flameCols, ax < W / 2 ? -1 : 1);
+        canaanLight(fx, fy - 8, 200, flameCols[1]);
+      }
+    else if (s.kind === 'forge') {
+      const [hx, hy] = at(18, 78),
+        [ax, ay] = at(36, 76),
+        glow = 0.7 + Math.sin(time * 0.15) * 0.3;
+      // Feu du foyer, découpé à la forme de l'arc.
+      c.save();
+      c.beginPath();
+      c.rect(hx, ay, 72, 64);
+      c.arc(ax, ay, 36, Math.PI, 0);
+      c.clip();
+      c.globalAlpha = glow;
+      c.fillStyle = '#ff6a1f';
+      c.fillRect(hx, hy + 16, 72, 48);
+      c.fillStyle = '#ffd36b';
+      c.fillRect(hx + 14, hy + 30, 44, 34);
+      c.restore();
+      canaanLight(hx + 36, hy + 30, 240, '#ff8a3c');
+      if (hash(Math.floor(time / 12), 1, 2) > 0.7) for (let k = 0; k < 4; k++) R(c, hx + 10 + Math.random() * 50, hy - Math.random() * 30, 2, 2, '#ffd36b');
+      smokeAt(W - 20, 2);
+    } else if (s.kind === 'tavern') {
+      for (const [ax, ay] of [[29, 56], [W - 29, 56], [27, 88], [W - 27, 88]]) {
+        const [lx, ly] = at(ax, ay);
+        canaanLight(lx, ly, 100, '#ffb84a');
+      }
+    } else if (s.kind === 'dwarfhouse') {
+      const [wx, wy] = at(20, 64),
+        [lx, ly] = at(W - 23, 67);
+      canaanLight(wx, wy, 90, '#ffb84a');
+      canaanLight(lx, ly, 70, '#ffd36d');
+      smokeAt(W - 22, 2);
+    } else if (s.kind === 'kingstatue') canaanLight(cx, by - 40, 60, '#ffd36d');
+    return true;
+  }
   function drawStructure(c, s) {
     const cx = (s.tx + 0.5) * TS,
       by = (s.ty + 1) * TS - 4,
@@ -858,6 +967,10 @@
     c.beginPath();
     c.ellipse(cx, by, w * 0.55, 14, 0, 0, Math.PI * 2);
     c.fill();
+    if (s.biome === 4 && window.CANAAN_DWARF_ART && CANAAN_DWARF_ART.has(s.kind) && drawFortArt(c, s, cx, by, flameCols)) {
+      c.restore();
+      return;
+    }
     switch (s.kind) {
       case 'shack': {
         // Cabane de mineur effondrée : planches, toit crevé, poutre tombée.
@@ -1426,6 +1539,8 @@
   function drawGround(c, x0, x1, y0, y1) {
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
+        // Pièce d'un bâtiment nain (house.js) : son sol et ses murs ; le reste dans le noir quand on y est.
+        if (window.CANAAN_HOUSE && CANAAN_HOUSE.drawTile(c, x, y, at(x, y))) continue;
         const t = at(x, y),
           b = biomeAt(x, y),
           X = x * TS,
@@ -1721,7 +1836,7 @@
     }
     game.world.monsters.forEach(scaleBossHp);
   }
-  const safe = (tx, ty) => Math.hypot(tx - C.x, ty - C.y) < FORT_R + 3;
+  const safe = (tx, ty) => Math.hypot(tx - C.x, ty - C.y) < FORT_R + 3 || canaanInHouse(tx, ty);
   function blocked(px, py) {
     const tx = Math.floor(px / TS),
       ty = Math.floor(py / TS),

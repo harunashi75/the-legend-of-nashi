@@ -1810,6 +1810,13 @@
     standing: () => (active() ? fighters().length : 0),
     // Malédiction : soins −60 % pour le héros maudit (l'hôte par défaut).
     healFactor: (hero = game.hero) => (active() && run.curse instanceof Map && (run.curse.get(hero) || 0) > run.clock ? 0.4 : 1),
+    // Malus subis dans l'Arène (barre des effets) : secondes restantes de la malédiction et des effets sur la durée.
+    effects() {
+      if (!run || (!run.remote && !active())) return { curse: 0, dots: [] };
+      const s = myStatus(),
+        c = run.clock || 0;
+      return { curse: Math.max(0, (s.curse || 0) - c), dots: (s.dots || []).map(([k, u]) => [k, Math.max(0, u - c)]).filter(d => d[1] > 0) };
+    },
     cheer: () => (run && run.cheerUntil > run.clock ? Math.min(1, run.cheerUntil - run.clock) : 0),
     entities: () => (run ? run.shots : []),
     run: () => run,

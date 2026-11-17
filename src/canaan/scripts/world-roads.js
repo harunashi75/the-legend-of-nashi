@@ -124,6 +124,8 @@
     placesFor = game.world.tiles;
     plazas = [];
     plazas.push({ x: (CANAAN_CAMP.x + 0.5) * S, y: (CANAAN_CAMP.y + 0.5) * S, r: 3.3 * S });
+    // Place de la cité elfique : anneaux de marbre (zone 6 : marbre et joints dorés).
+    if (window.CANAAN_CITY_PLAN) plazas.push({ x: (CANAAN_CITY_PLAN.center.x + 0.5) * S, y: (CANAAN_CITY_PLAN.center.y + 0.5) * S, r: 5.2 * S, zone: 6 });
     return plazas;
   }
   const CAMP = () => ({ x: (CANAAN_CAMP.x + 0.5) * S, y: (CANAAN_CAMP.y + 0.5) * S, r: (CANAAN_CAMP.r + 5) * S });
@@ -250,7 +252,7 @@
     const dx = wx - p.x,
       dy = wy - p.y,
       r = Math.hypot(dx, dy),
-      tone = zone === 4 ? SLABS : zone === 5 ? SLATES : STONES;
+      tone = zone === 6 ? MARBLE : zone === 4 ? SLABS : zone === 5 ? SLATES : STONES;
     if (r < 13) {
       set(tone[2]);
       if (Math.abs(r - 8) < 1.2) set([96, 86, 72]);
@@ -324,6 +326,32 @@
     }
     if (d > 3 && ih(wx >> 1, wy >> 1, 114) > 0.992) set([230, 255, 248]);
   }
+  // Cité elfique : dalles de marbre clair en rangées décalées, joints dorés, quelques feuilles de jade incrustées.
+  const MARBLE = [[238, 232, 216], [226, 220, 202], [246, 242, 230], [216, 210, 192], [232, 226, 212]];
+  function shadeMarble(wx, wy, d) {
+    const row = Math.floor(wy / 14),
+      off = ih(row, 0, 131) * 20,
+      col0 = Math.floor((wx + off) / 20),
+      lx = wx + off - col0 * 20,
+      ly = wy - row * 14,
+      id = ih(col0, row, 132);
+    if (lx < 1.5 || ly < 1.5) {
+      set([196, 164, 86]);
+      return;
+    }
+    set(MARBLE[Math.floor(id * MARBLE.length)]);
+    mul(1 + 0.08 * clamp(((lx - 10) / 10) * LX + ((ly - 7) / 7) * LY, -1, 1));
+    if (lx > 18 || ly > 12) mul(0.9);
+    // Veinure légère.
+    if (Math.abs(Math.sin((wx + wy * 0.6) / 7 + id * 9)) < 0.05) mul(0.9);
+    // Feuille de jade sur une dalle sur six.
+    if (id > 0.83) {
+      const ax = Math.abs(lx - 10),
+        ay = Math.abs(ly - 7);
+      if (ax + ay * 1.6 < 4.5 && ax < 3.5) set(ay < 1 ? [150, 230, 190] : [86, 180, 140]);
+    }
+    if (d > 3 && ih(wx >> 1, wy >> 1, 133) > 0.996) set([255, 246, 210]);
+  }
   // Couleur de la chaussée en un point (avant éclairage).
   function surface(wx, wy, d, F, gF, lit) {
     const camp = CAMP(),
@@ -338,13 +366,14 @@
       if (r < edge) {
         const seg = Math.floor((Math.atan2(wy - p.y, wx - p.x) / (2 * Math.PI) + 1) * Math.round(p.r / 7)),
           joint = ((Math.atan2(wy - p.y, wx - p.x) / (2 * Math.PI) + 1) * Math.round(p.r / 7)) % 1;
-        set(pz === 5 ? SLATES[seg % SLATES.length] : pz === 4 ? SLABS[seg % SLABS.length] : STONES[seg % STONES.length], 0.8);
+        set(pz === 6 ? MARBLE[seg % MARBLE.length] : pz === 5 ? SLATES[seg % SLATES.length] : pz === 4 ? SLABS[seg % SLABS.length] : STONES[seg % STONES.length], 0.8);
         if (joint < 0.06 || r > edge - 1.5) mul(0.6);
         else if (r < edge - 5.5) mul(1.18);
         return 0.4;
       }
     }
     if (Math.hypot(wx - camp.x, wy - camp.y) < camp.r + jitter * 1.2) return shadeCobble(wx, wy, d), 0.45;
+    if (canaanInCity(wx / S, wy / S)) return shadeMarble(wx, wy, d), 0.4;
     if (zone === 4) return shadeSlabs(wx, wy, d), 0.5;
     if (zone === 5) return shadeSlate(wx, wy, d), 0.55;
     shadeDirt(zone, wx, wy, d, F, gF, lit);

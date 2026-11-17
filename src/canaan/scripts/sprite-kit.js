@@ -936,6 +936,8 @@
       x + w / 2,
       y + 11
     );
+    // Bonus du boss et malus infligés par les héros, sous la barre.
+    if (window.CANAAN_BUFF_BAR) CANAAN_BUFF_BAR.drawMonster(c, boss, x - 4, y + 28, w + 8);
     c.restore();
   }
   // Coffres : bois cerclé de fer et mousse pour les coffres cachés, or et gemme pour le coffre de boss.

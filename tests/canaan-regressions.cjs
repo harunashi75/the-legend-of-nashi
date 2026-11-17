@@ -55,7 +55,9 @@ function game() {
     // Tréfonds (underground.js, testé à part) : l'île seulement.
     canaanUnder: () => false, canaanHere: o => o?.layer !== 'under',
     CANAAN_PROF: {damageMult: () => 1, armorMult: () => 1, speedMult: () => 1, sanitize: p => p || {fishing: {level: 1, exp: 0}, cooking: {level: 1, exp: 0}, hunting: {level: 1, exp: 0}, fish: {}, meat: {}, meals: {}, codex: {}}},
-    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, bossMechanics: {}, achievements: {}},
+    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, elvenCity: {}, bossMechanics: {}, achievements: {}},
+    // Cité elfique (elven-city.js, testée à part) : pas de bénédiction.
+    CANAAN_CITY: {blessMult: () => 1, blocked: () => false},
     document: {activeElement: null, createElement: element, getElementById: () => ({style: {display:'none'}})},
     skEl: element(), chatInput: {}, performance: {now: () => 100000},
     // Niveau des monstres (monster-scaling.js, non chargé ici) : celui qu'ils portent, 1 sinon.
@@ -1063,7 +1065,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  assert.doesNotMatch(source,/const\s+\w+\s*=\s*(?:window\.)?CanaanStages\.\w+\s*;/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','bossMechanics','achievements']);
+ assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','elvenCity','bossMechanics','achievements']);
  // Les vraies étapes tournent sur une partie chargée.
  run('started=true;paused=false;P.dead=false');
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline();updateWorld()');
@@ -1077,7 +1079,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  run('runUpdatePipeline();runDrawPipeline()');
  assert.deepEqual(calls,['before:rubis','before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
   'after:weaponEffects=weaponEffects','after:mobScaling','after:weaponVfx=weaponVfx','after:facing','after:classes=classes',
-  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
+  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:elvenCity','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
  for(const state of ['paused=true','paused=false;P.dead=true','P.dead=false;started=false']){
   calls.length=0;run(state+';runUpdatePipeline()');assert.deepEqual(calls,[],state);
  }
@@ -1567,6 +1569,8 @@ test('Donjons et raids en exploration : trois boss par donjon, six par raid, én
  assert.equal(run('JSON.stringify(makeDungeon(7))===JSON.stringify(makeDungeon(7))'),true);
  run('game.hero.level=60;openPortal({instance:6})');
  assert.match(g.document.getElementById('window').innerHTML,/Boss \(6\) : Le Maître-Chien Ravageur → Sire Écorcheur/);
+ // Fiche du portail : les chances réelles (30 % par boss et par héros), plus de « 100 % garanti ».
+ assert.match(g.document.getElementById('window').innerHTML,/30 % de chance par boss et par héros \(0 à 6 objets\)/);assert.doesNotMatch(g.document.getElementById('window').innerHTML,/100 % garanti/);
  run('closePanels()');
  // Donjon : trois boss et un boss caché ; les ennemis portent le thème du donjon.
  run('enterInstance(0)');
@@ -1625,7 +1629,14 @@ test('Donjons et raids en exploration : trois boss par donjon, six par raid, én
  run('P.keys=1');
  // Lumi accompagne le héros sans bulle de message.
  assert.doesNotMatch(source,/lumiCloud|Lumi : ✨/);
- run('leaveInstance()');assert.equal(run('world'),run('overworld'));
+ // Portail de retour dans la salle du dernier boss : il attend que le coffre soit ouvert, puis ramène le groupe dehors.
+ const exit=JSON.parse(run('JSON.stringify(CANAAN_DUNGEON_EXPLORE.exitSpot(0))'));
+ assert.equal(run('[20,21].includes(world['+exit.y+']['+exit.x+'])'),true,'sur le sol');
+ walk(exit.x,exit.y);assert.equal(run('CANAAN_DUNGEON_EXPLORE.exitNear(P)'),true);
+ assert.equal(run('CANAAN_DUNGEON_EXPLORE.takeExit()'),true);assert.equal(run('!!instanceState'),true,'coffre pas encore ouvert : on reste');
+ run('P.x=chests[0].x*TS;P.y=chests[0].y*TS;openNearbyChest()');walk(exit.x,exit.y);
+ assert.equal(run('CANAAN_DUNGEON_EXPLORE.takeExit()'),true);assert.equal(run('instanceState'),null,'sorti par le portail');
+ assert.equal(run('world'),run('overworld'));
  // Raid : six boss, deux boss cachés.
  run('enterInstance(6)');
  assert.equal(run('monsters.filter(m=>m.boss&&m.secretBoss===undefined).length'),6);assert.equal(run('monsters.filter(m=>m.secretBoss!==undefined).length'),2);
@@ -1668,6 +1679,54 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  // Butin : un boss de donjon tire une apparence pour chaque héros (ici, forcée).
  run('game.hero.skins={owned:[]};game.hero.level=60;enterInstance(0);{const real=Math.random;Math.random=()=>0;const m=monsters.find(m=>m.bossStage===0);m.hp=0;recordKill(m);Math.random=real}');
  assert.equal(run('game.hero.skins.owned.length'),1,'apparence du boss');run('leaveInstance()');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Sylvaëlle, la cité elfique : palissade sans trou, porte au niveau 60, Grand Arbre, bénédiction, armurerie, atelier, zone sûre',async()=>{
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ // Plus de massif ni de crête de roche : la palissade (37) ceint la cité et sépare toujours Plaines et Forêt enchantée.
+ assert.equal(run('SOLID.includes(37)'),true);
+ assert.equal(run('(()=>{let n=0;for(let y=150;y<250;y++)for(let x=150;x<250;x++)if(overworld[y][x]===4)n++;return n})()'),0,'plus de roche au centre');
+ assert.equal(run('canaanInCity(200,200)&&!canaanInCity(200,140)'),true);
+ const reach=run('(()=>{const r=CANAAN_WORLD_TOOLS.reachableFrom(CANAAN_CAMP.x,CANAAN_CAMP.y),g=CANAAN_CITY_PLAN.gate;let inside=0;for(let y=150;y<250;y++)for(let x=150;x<250;x++)if(canaanInCity(x,y)&&r[y*MAPW+x])inside++;return JSON.stringify({out:r[g.out.y*MAPW+g.out.x],inside})})()');
+ assert.deepEqual(JSON.parse(reach),{out:1,inside:0},'porte accessible dehors, cité fermée à pied');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_WORLD_AUDIT().unreachable)')),[]);
+ // Plan : porte au sud-ouest (côté Forêt enchantée, près du lac), Grand Arbre au nord-ouest, bâtiments elfiques.
+ const plan=JSON.parse(run('JSON.stringify({deg:CANAAN_CITY_PLAN.gate.deg,tree:CANAAN_CITY_PLAN.tree,b:CANAAN_CITY_PLAN.buildings.map(b=>b.id),level:CANAAN_CITY_PLAN.level})'));
+ assert.ok(plan.deg>100&&plan.deg<150,String(plan.deg));assert.ok(plan.tree.x<200&&plan.tree.y<200,'Grand Arbre au nord-ouest');
+ assert.ok(['elfe_armurerie','elfe_couture','elfe_temple','elfe_tour','elfe_maison','elfe_taverne','elfe_palais'].every(id=>plan.b.includes(id)));assert.equal(plan.level,60);
+ assert.equal(run('CANAAN_BUILDING_ART.has("elfe_tour")&&CANAAN_BUILDING_ART.has("elfe_couture")'),true);
+ // Zone sûre (aucun monstre n'y apparaît), nom de zone.
+ assert.equal(run('isSafe(200,205)'),true);run('P.x=200.5*TS;P.y=206*TS');assert.equal(run('currentZoneName()'),'Sylvaëlle, la Cité des Elfes');
+ // Porte : le garde refuse sous le niveau 60, ouvre au niveau 60 ; on ressort par la même porte.
+ const go=(p)=>run('P.x=(CANAAN_CITY_PLAN.gate.'+p+'.x+0.5)*TS;P.y=(CANAAN_CITY_PLAN.gate.'+p+'.y+0.5)*TS');
+ run('started=true;game.hero.level=40');go('out');assert.equal(run('CANAAN_CITY.interact()'),true);assert.equal(run('canaanInCity(P.x/TS,P.y/TS)'),false,'trop jeune');
+ run('game.hero.level=60');go('out');run('CANAAN_CITY.interact()');assert.equal(run('canaanInCity(P.x/TS,P.y/TS)'),true,'entré');
+ run('CANAAN_CITY.interact()');assert.equal(run('canaanInCity(P.x/TS,P.y/TS)'),false,'ressorti');
+ // Résurrection à la cité pour un héros de niveau 60 tombé dans la Forêt enchantée.
+ go('out');assert.ok(run('!!CANAAN_CITY.respawnFor(game.hero)'));run('game.hero.level=30');assert.equal(run('CANAAN_CITY.respawnFor(game.hero)'),null);run('game.hero.level=60');
+ // Grand Arbre : histoire et bénédiction quotidienne (+10 % de dégâts), une fois par jour.
+ assert.ok(run('CANAAN_CITY.LORE.length')>=5);
+ run('P.x=(CANAAN_CITY_PLAN.tree.x+0.5)*TS;P.y=(CANAAN_CITY_PLAN.tree.y+2)*TS;game.hero.blessing=null');
+ assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-bless"})'),true);assert.equal(run('CANAAN_CITY.blessMult(game.hero)'),1.1);
+ assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-bless"})'),false,'une fois par jour');
+ assert.equal(JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.heroSnapshot({x:0,y:0}).blessing)')).day.length,10,'gardée dans la sauvegarde');
+ // Armurerie : la pièce choisie, de niveau 60, contre de l'or.
+ // Les marchands sont dans leur boutique (pièces de house.js) : Thalion derrière son comptoir, Elwyn à son métier.
+ const near=id=>{const [rid,lx,ly]=id==='elfe_armurerie'?['sylv_armurerie',6.5,4.2]:['sylv_couture',4.5,5.6];run('{const r=CANAAN_ROOMS.find(r=>r.id==="'+rid+'");P.x=(r.x+'+lx+')*TS;P.y=(r.y+'+ly+')*TS}');};
+ near('elfe_armurerie');run('P.gold=10000;game.hero.inventory=[]');
+ assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-buy",slot:"boots",rarity:"epic"})'),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.inventory.map(i=>[i.slot,i.rarity,i.level,i.origin]))')),[['boots','Épique',60,'elfique']]);assert.equal(run('P.gold'),2500);
+ assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-buy",slot:"boots",rarity:"epic"})'),false,'pas assez d’or');
+ // Atelier : apparences elfiques exclusives (jamais tirées au butin).
+ assert.equal(run('SKINS.filter(s=>s.shop).length'),4);assert.equal(run('(()=>{for(let i=0;i<400;i++){const id=CANAAN_WARDROBE.roll("secretBoss",()=>Math.random()*0.18);if(id&&SKINS.find(s=>s.id===id).shop)return false}return true})()'),true);
+ near('elfe_couture');run('P.gold=5000;game.hero.skins={owned:[]}');
+ assert.equal(run('CANAAN_CITY.handle(game.hero,{op:"city-skin",id:"elfe_rodeur"})'),true);assert.equal(run('CANAAN_WARDROBE.has(game.hero,"elfe_rodeur")&&P.gold===2000'),true);
+ // Réseau : les actions de la cité passent le filtre de l'hôte.
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'city-buy',slot:'helm',rarity:'rare'}),{op:'city-buy',slot:'helm',rarity:'rare'});assert.equal(n.sanitizeAction({op:'city-buy',slot:'helm',rarity:'mythique'}),null);
+ assert.deepEqual(n.sanitizeAction({op:'city-gate'}),{op:'city-gate'});
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -2558,7 +2617,7 @@ function playInstance(run,index,maxSeconds,prep=''){
   if(st.done||run('P.dead'))break;
   run('time++;simulateStep();updateWorld()');
  }
- return {foes,phases,seconds:ticks/60,heroes:JSON.parse(run('JSON.stringify(game.heroes.map(h=>({dead:h.player.dead,kills:h.kills,purse:h.player.gold-__gold0[game.heroes.indexOf(h)],keys:h.player.keys||0,relics:h.inventory.filter(i=>i.origin).map(i=>i.rarity+" "+i.level)})))'))};
+ return {foes,phases,seconds:ticks/60,heroes:JSON.parse(run('JSON.stringify(game.heroes.map(h=>({dead:h.player.dead,kills:h.kills,purse:h.player.gold-__gold0[game.heroes.indexOf(h)],keys:h.player.keys||0,relics:h.inventory.filter(i=>i.origin==="donjon"||i.origin==="raid").map(i=>i.rarity+" "+i.level)})))'))};
 }
 
 test('Groupe en instance : entrée et sortie ensemble, allié à terre relevé, coffre de boss individuel',()=>{

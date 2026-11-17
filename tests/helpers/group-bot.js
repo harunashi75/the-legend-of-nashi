@@ -1,6 +1,7 @@
 // Pilote de test : joue les intentions d'un groupe de héros dans une instance, sans écran.
 // Chaque héros suit un chemin case par case (recherche en largeur), attaque le monstre le plus proche
-// à portée de son arme ; une fois le dernier boss vaincu, l'hôte ouvre le coffre et ramène le groupe à la sortie.
+// à portée de son arme ; une fois le dernier boss vaincu, l'hôte ouvre le coffre et ramène le groupe dehors par le
+// portail de retour.
 // Exploration : quand plus aucun monstre n'est accessible, l'hôte examine les murs fissurés et résout les énigmes
 // des portes scellées (braseros, leviers dans l'ordre de la stèle, dalles gravées), comme un joueur.
 // Exécuté dans le contexte du jeu (script classique), comme le ferait un invité qui envoie ses intentions.
@@ -197,12 +198,17 @@ globalThis.canaanGroupBot = (() => {
         openNearbyChest(host);
       } else steer(host, chest.x * TS, chest.y * TS);
     } else if (game.world.instance.cleared) {
+      // Sortie par le portail de retour ouvert dans la salle du dernier boss (sinon, par l'entrée).
       state.phase = 'sortie';
-      if (Math.hypot(host.player.x - instanceEntrance.x, host.player.y - instanceEntrance.y) < 60) {
+      const exit = !game.world.instance.arena && CANAAN_DUNGEON_EXPLORE.exitSpot(game.world.instance.index),
+        ex = exit ? (exit.x + 0.5) * TS : instanceEntrance.x,
+        ey = exit ? (exit.y + 0.5) * TS : instanceEntrance.y;
+      if (exit ? CANAAN_DUNGEON_EXPLORE.exitNear(host.player) : Math.hypot(host.player.x - ex, host.player.y - ey) < 60) {
         for (const hero of game.heroes) stop(hero);
-        leaveInstance();
+        if (exit) CANAAN_DUNGEON_EXPLORE.takeExit(host);
+        else leaveInstance();
         state.done = true;
-      } else steer(host, instanceEntrance.x, instanceEntrance.y);
+      } else steer(host, ex, ey);
     }
     return state;
   }

@@ -50,15 +50,36 @@ const CANAAN_ROOMS = Object.freeze(
     // Refuges du marais, de l'automne et de la Forêt enchantée : dans le coin d'océan au nord-est.
     { id: 'pilotis', name: 'Refuge des Pilotis', kind: 'refuge', x: 330, y: 8, w: 11, h: 9 },
     { id: 'rousses', name: 'Refuge des Feuilles Rousses', kind: 'refuge', x: 360, y: 8, w: 11, h: 9 },
-    { id: 'cristaux', name: 'Refuge des Cristaux', kind: 'refuge', x: 360, y: 32, w: 11, h: 9 }
+    { id: 'cristaux', name: 'Refuge des Cristaux', kind: 'refuge', x: 360, y: 32, w: 11, h: 9 },
+    // Sylvaëlle, la cité elfique : la demeure de la Reine, la taverne, les deux échoppes, la tour, le temple et deux
+    // maisons (océan du nord) ; la grange et le poulailler du camp (océan de l'est).
+    { id: 'sylv_palais', name: 'Demeure de la Reine Elwë', kind: 'palace', x: 130, y: 6, w: 17, h: 11 },
+    { id: 'sylv_taverne', name: 'Taverne de la Feuille d’Or', kind: 'elftavern', x: 160, y: 6, w: 13, h: 9 },
+    { id: 'sylv_armurerie', name: 'Armurerie de Sylvaëlle', kind: 'elfshop', x: 190, y: 6, w: 13, h: 9 },
+    { id: 'sylv_couture', name: 'Atelier de la Tisseuse', kind: 'elfshop', x: 220, y: 6, w: 13, h: 9 },
+    { id: 'sylv_tour', name: 'Tour des Étoiles', kind: 'elfstar', x: 250, y: 6, w: 13, h: 9 },
+    { id: 'sylv_temple', name: 'Temple de la Lune', kind: 'temple', x: 280, y: 6, w: 13, h: 9 },
+    { id: 'sylv_maison', name: 'Maison des Feuillages', kind: 'elfhome', x: 310, y: 6, w: 13, h: 9 },
+    { id: 'sylv_racines', name: 'Maison des Racines', kind: 'elfroots', x: 336, y: 60, w: 13, h: 9 },
+    { id: 'grange', name: 'Grange du Camp', kind: 'barn', x: 336, y: 90, w: 15, h: 9 },
+    { id: 'poulailler', name: 'Poulailler', kind: 'barn', x: 366, y: 90, w: 11, h: 9 },
+    // Forteresse naine de Durgrim, dans les Tréfonds (under) : pièces creusées dans la roche, au nord de la carte.
+    { id: 'dur_hall', name: 'Grand Hall de Durgrim', kind: 'dwarfhall', under: true, x: 10, y: 10, w: 17, h: 11 },
+    { id: 'dur_forge', name: 'Forge de Durgrim', kind: 'dwarfforge', under: true, x: 40, y: 10, w: 13, h: 9 },
+    { id: 'dur_taverne', name: 'Taverne de Dorn', kind: 'dwarftavern', under: true, x: 70, y: 10, w: 13, h: 9 },
+    { id: 'dur_coffre', name: 'Chambre forte de Gimra', kind: 'dwarfvault', under: true, x: 100, y: 10, w: 11, h: 9 },
+    { id: 'dur_maison1', name: 'Maison de la famille Pied-de-Roc', kind: 'dwarfhome', under: true, x: 130, y: 10, w: 11, h: 9 },
+    { id: 'dur_maison2', name: 'Maison de la famille Marteau-d’Or', kind: 'dwarfhome', under: true, x: 160, y: 10, w: 11, h: 9 }
   ].map(r => Object.freeze(r))
 );
 const CANAAN_HOUSE_ROOM = CANAAN_ROOMS[0];
 // Pièce qui contient la case (tx, ty), murs compris, ou null dehors (et toujours null en donjon, dont la carte
 // réutilise les mêmes coordonnées).
+// Les pièces des Tréfonds (under) n'existent que sous terre, les autres qu'à la surface.
 function canaanRoomAt(tx, ty) {
-  if (game.world.instance || game.world.layer === 'under') return null;
-  for (const r of CANAAN_ROOMS) if (tx >= r.x - 1 && ty >= r.y - 1 && tx < r.x + r.w + 1 && ty < r.y + r.h + 1) return r;
+  if (game.world.instance) return null;
+  const under = game.world.layer === 'under';
+  for (const r of CANAAN_ROOMS) if (!!r.under === under && tx >= r.x - 1 && ty >= r.y - 1 && tx < r.x + r.w + 1 && ty < r.y + r.h + 1) return r;
   return null;
 }
 function canaanInHouse(tx, ty) {
@@ -70,7 +91,11 @@ const CANAAN_SPAWN = Object.freeze({ x: (CANAAN_CAMP.x + 0.5) * TS, y: (CANAAN_C
 // 19 herse et 22 danger (lave, gouffre, vide…) n'existent qu'en instance.
 // 31 : murs des intérieurs ; 32 : bâtiments vus de l'extérieur (voir house.js).
 // Tréfonds (underground.js) : 43 rivière de boue, 44 paroi rocheuse, 48 lac souterrain, 49 gouffre.
-const SOLID = [0, 4, 9, 18, 19, 22, 23, 31, 32, 43, 44, 48, 49];
+// 37 : palissade de troncs autour de la cité elfique et le long de l'ancienne crête (et les emprises de la cité :
+// bâtiments, Grand Arbre, fontaine), peinte sur le sol de son biome (CANAAN_WOOD_GROUND).
+const CANAAN_WOOD_TILE = 37;
+const CANAAN_WOOD_GROUND = new Map();
+const SOLID = [0, 4, 9, 18, 19, 22, 23, 31, 32, 37, 43, 44, 48, 49];
 function tileAt(x, y) {
   if (x < 0 || y < 0 || x >= MAPW || y >= MAPH) return 4;
   return game.world.tiles[y][x];
@@ -114,6 +139,48 @@ let particles = [],
 // Compteur de victimes : game.hero.kills.
 // Input
 const keys = {};
+// Touches des fenêtres : la même touche ferme sa fenêtre, une autre passe directement à la sienne.
+const CANAAN_PANEL_KEYS = { t: 'toggleTalents', i: 'toggleInventory', c: 'toggleCharacter', m: 'toggleMap', g: 'toggleGroup', j: 'toggleTrade', p: 'toggleProfessions', l: 'toggleJournal', y: 'toggleAchievements', v: 'toggleWardrobe' };
+let canaanPanelOpen = null,
+  canaanPanelOpening = null,
+  canaanPanelsTracked = false;
+// Retient quelle touche a ouvert la fenêtre affichée (les fenêtres ouvertes autrement n'en ont pas).
+function canaanTrackPanels() {
+  if (canaanPanelsTracked) return;
+  canaanPanelsTracked = true;
+  for (const name of Object.values(CANAAN_PANEL_KEYS)) {
+    const fn = window[name];
+    if (typeof fn !== 'function') continue;
+    window[name] = function (...args) {
+      canaanPanelOpening = name;
+      try {
+        return fn.apply(this, args);
+      } finally {
+        canaanPanelOpening = null;
+        canaanPanelOpen = modalOpen() ? name : null;
+      }
+    };
+  }
+  const show = window.showPanel;
+  if (typeof show === 'function')
+    window.showPanel = function (...args) {
+      const was = modalOpen(),
+        r = show.apply(this, args);
+      if (!canaanPanelOpening && !was) canaanPanelOpen = null;
+      return r;
+    };
+}
+function canaanPanelKey(k) {
+  const name = CANAAN_PANEL_KEYS[k];
+  if (!name || typeof window[name] !== 'function') return false;
+  canaanTrackPanels();
+  if (!modalOpen()) return false;
+  const same = canaanPanelOpen === name;
+  closePanels();
+  canaanPanelOpen = null;
+  if (!same) window[name]();
+  return true;
+}
 addEventListener('keydown', e => {
   if (document.activeElement === chatInput) return;
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
@@ -132,7 +199,13 @@ addEventListener('keydown', e => {
     togglePause();
     return;
   }
+  const typing = e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
+  if (!paused && modalOpen() && !typing && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && canaanPanelKey(k)) {
+    e.preventDefault();
+    return;
+  }
   if (paused || modalOpen()) return;
+  canaanTrackPanels();
   keys[k] = true;
   // Roulade d'esquive : Maj ou Espace, dans la direction du déplacement (sinon vers la visée).
   if ((k === 'shift' || k === ' ') && !e.repeat) {
@@ -306,8 +379,9 @@ function canaanHostRespawn(message) {
       if (game.world.instance) leaveInstance();
     } finally {
       canaanRespawnPending = false;
-      // Dans les Tréfonds, on se relève à la Forteresse de Durgrim ; sur l'île, au camp.
-      const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_SPAWN;
+      // Dans les Tréfonds, on se relève à la Forteresse de Durgrim ; sur l'île, au camp, ou à la cité elfique pour un
+      // héros de niveau 60 tombé dans la Forêt enchantée ou dans la cité.
+      const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_CITY.respawnFor(game.hero) || CANAAN_SPAWN;
       P.x = home.x;
       P.y = home.y;
       P.hp = P.mhp;
@@ -330,12 +404,16 @@ function interact() {
     if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
     // Un coffre à côté : l'hôte vérifie que le héros y est bien, puis l'ouvre pour lui.
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
+    // Cité elfique : porte (l'hôte la fait passer), Grand Arbre et marchands (fenêtres chez l'invité).
+    if (!game.world.instance && !canaanUnder() && CANAAN_CITY.guestUse()) return;
     // Donjon : mur fissuré, brasero, levier, stèle ou porte scellée (l'hôte agit pour lui).
     if (game.world.instance && CANAAN_DUNGEON_EXPLORE.near(P)) return CANAAN_NET.requestAction({ op: 'dungeon-use' });
+    // Portail de retour : c'est l'hôte qui le prend, pour tout le groupe.
+    if (game.world.instance && CANAAN_DUNGEON_EXPLORE.takeExit()) return;
     if (game.world.instance) return;
     // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte) ; bâtiments : portes (île seulement).
     if (!canaanUnder() && CANAAN_QUESTS.interact()) return;
-    if (!canaanUnder() && CANAAN_HOUSE.interact()) return;
+    if (CANAAN_HOUSE.interact()) return;
     // Pêche : lancer, ferrer ou remonter la ligne près d'un banc de poissons.
     if (CANAAN_PROF.interact()) return;
     const npc = game.world.npcs.find(n => (n.type === 'shop' || n.type === 'bank' || n.type === 'dwarf' || n.type === 'descend' || n.type === 'ascend') && canaanHere(n) && Math.hypot(P.x - n.x, P.y - n.y) < 120);
@@ -343,16 +421,19 @@ function interact() {
     return;
   }
   if (openNearbyChest()) return;
+  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_CITY.interact()) return;
   if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_QUESTS.interact()) return;
-  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_HOUSE.interact()) return;
+  if (!game.world.instance && !modalOpen() && CANAAN_HOUSE.interact()) return;
   if (!game.world.instance && !modalOpen() && CANAAN_PROF.interact()) return;
   if (game.world.instance?.arena) {
     CANAAN_ARENA.interact();
     return;
   }
   if (game.world.instance) {
-    // Exploration : murs fissurés, braseros, leviers, stèles et portes scellées.
+    // Exploration : murs fissurés, braseros, leviers, stèles et portes scellées ; portail de retour une fois le
+    // dernier boss vaincu.
     if (CANAAN_DUNGEON_EXPLORE.interact()) return;
+    if (CANAAN_DUNGEON_EXPLORE.takeExit()) return;
     if (game.world.instance.cleared && Math.hypot(P.x - instanceEntrance.x, P.y - instanceEntrance.y) < 95) {
       leaveInstance();
       return;
@@ -602,11 +683,12 @@ function canWalk(x, y) {
     // Lieux des quêtes : socles et haies bloquent, nénuphars et pont restauré portent (quests.js).
     const quest = canaanQuestWalk(x + a, y + b);
     if (quest !== null) return quest;
-    return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !canaanHouseBlocked(x + a, y + b) && !canaanTreeBlocked(x + a, y + b) && !canaanPortalBlocked(x + a, y + b);
+    return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !canaanHouseBlocked(x + a, y + b) && !canaanTreeBlocked(x + a, y + b) && !canaanPortalBlocked(x + a, y + b) && !CANAAN_CITY.blocked(x + a, y + b);
   });
 }
 // Grands arbres de l'île (décor) : leur tronc bloque le passage, on les contourne.
-const CANAAN_BIG_TREES = new Set(['tree', 'pine', 'snowpine', 'palm', 'deadwood', 'bigtree', 'twisted', 'autumn_red', 'autumn_orange', 'autumn_gold', 'glowtree']);
+// Arbres elfiques de Sylvaëlle (elven-city.js) : bouleau d'argent, cerisier en fleurs, cyprès, saule lumineux.
+const CANAAN_BIG_TREES = new Set(['tree', 'pine', 'snowpine', 'palm', 'deadwood', 'bigtree', 'twisted', 'autumn_red', 'autumn_orange', 'autumn_gold', 'glowtree', 'elftree', 'blossom', 'elfcypress', 'elfwillow']);
 function canaanTreeBlocked(px, py) {
   if (game.world.instance || game.world.layer === 'under') return false;
   const tx = Math.floor(px / TS),
@@ -837,6 +919,12 @@ function updateView() {
   const room = game.world.instance ? null : canaanRoomAt(P.x / TS, P.y / TS),
     focusX = room ? (room.x + room.w / 2) * TS : P.x,
     focusY = room ? (room.y + room.h / 2 + 0.6) * TS : P.y;
+  // Grand saut (début de partie, entrée ou sortie d'instance, retour au camp) : la caméra se pose d'un coup sur le
+  // héros au lieu de traverser la carte (elle partait de l'angle de la carte, où sont rangés les intérieurs).
+  if (Math.abs(focusX - W / 2 - camX) > W || Math.abs(focusY - H / 2 - camY) > H) {
+    camX = focusX - W / 2;
+    camY = focusY - H / 2;
+  }
   camX += (focusX - W / 2 - camX) * (room ? 0.2 : 0.1);
   camY += (focusY - H / 2 - camY) * (room ? 0.2 : 0.1);
   if (shake > 0) shake *= 0.85;
@@ -892,6 +980,8 @@ function draw() {
     // Tréfonds : gisements et bancs de poissons, décor, bâtiments, portails, entrées, nains et faune.
     CANAAN_PROF.drawSpots(ctx);
     CANAAN_UNDER.draw(ctx);
+    // Pièces de la forteresse naine (house.js) : intérieur meublé de celle où l'on est.
+    CANAAN_HOUSE.draw(ctx);
     CANAAN_LIFE.update();
     CANAAN_LIFE.drawAnimals(ctx);
   } else {
@@ -906,6 +996,8 @@ function draw() {
     CANAAN_HOUSE.draw(ctx);
     // Ferme, enclos, verger, jardin et fontaine du Camp de l'Aurore.
     canaanCampLife.draw(ctx);
+    // Sylvaëlle, la cité elfique : porte, bâtiments, Grand Arbre, fontaine, lanternes, elfes et animaux.
+    CANAAN_CITY.draw(ctx);
     // Animaux de chaque biome et habitants (camp, refuges, ruines, tours).
     CANAAN_LIFE.update();
     CANAAN_LIFE.drawAnimals(ctx);

@@ -1325,3 +1325,161 @@ svg.ico.solo {
   height: 1.45em;
   vertical-align: -0.32em;
 }
+
+/* ===== Barre des effets (à gauche de la mini-carte) : bonus, malus, passifs ===== */
+#buffbar {
+  position: fixed;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: min(46vw, 420px);
+  pointer-events: auto;
+}
+#buffbar.flip {
+  align-items: flex-start;
+}
+#buffbar .buff-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  gap: 5px;
+}
+#buffbar.flip .buff-row {
+  flex-direction: row;
+}
+#buffbar .buff-row:empty {
+  display: none;
+}
+#buffbar .buff {
+  --edge: #6fd38a;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 13px;
+  border-radius: 7px;
+  background: radial-gradient(circle at 35% 30%, #3a3328, #15110d 75%);
+  box-shadow:
+    0 0 0 2px var(--edge),
+    0 0 0 3px #120c08,
+    0 3px 8px rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  cursor: help;
+}
+#buffbar .buff.debuff {
+  --edge: #e5484d;
+  background: radial-gradient(circle at 35% 30%, #4a2020, #1a0a0a 75%);
+}
+#buffbar .buff.passive {
+  --edge: #c9a24a;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 0;
+  border-radius: 6px;
+}
+/* Voile du temps écoulé, qui tourne avec la durée. */
+#buffbar .buff::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(rgba(0, 0, 0, 0.62) var(--spent), transparent 0);
+  pointer-events: none;
+}
+#buffbar .buff.ending {
+  animation: buff-blink 0.6s ease-in-out infinite alternate;
+}
+@keyframes buff-blink {
+  to {
+    opacity: 0.35;
+  }
+}
+#buffbar .buff-icon {
+  display: grid;
+  place-items: center;
+  width: 78%;
+  height: 78%;
+  font-size: calc(20px * var(--font-scale));
+  line-height: 1;
+}
+#buffbar .buff-icon svg {
+  width: 100%;
+  height: 100%;
+}
+#buffbar .buff-time {
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 700;
+  color: #fff2cb;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 3px #000;
+}
+#buffbar .buff.debuff .buff-time {
+  color: #ffb0a0;
+}
+#buffbar .buff-stacks {
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  z-index: 1;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000;
+}
+.buff-tip {
+  position: fixed;
+  z-index: 60;
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: linear-gradient(#2a2118, #16110c);
+  border: 1px solid #8a6a3a;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  color: #ead9b8;
+  font-size: calc(12px * var(--font-scale));
+  pointer-events: none;
+}
+.buff-tip b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: calc(13px * var(--font-scale));
+  color: #9ff0b0;
+}
+.buff-tip b.debuff {
+  color: #ff8a80;
+}
+.buff-tip b.passive {
+  color: #f0d080;
+}
+.buff-tip b svg {
+  width: 18px;
+  height: 18px;
+}
+.buff-tip .buff-kind,
+.buff-tip .buff-left {
+  display: block;
+  font-size: calc(11px * var(--font-scale));
+  color: #a8957a;
+}
+.buff-tip p {
+  margin: 4px 0;
+}
+@media (max-width: 760px) {
+  #buffbar .buff {
+    width: 28px;
+    height: 28px;
+  }
+  #buffbar .buff.passive {
+    width: 22px;
+    height: 22px;
+  }
+}

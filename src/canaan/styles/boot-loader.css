@@ -1,0 +1,146 @@
+/* Écran de chargement : dans l'en-tête de la page, il s'affiche dès la première image, avant tout script, et couvre
+   le jeu jusqu'à ce que le menu des aventures soit prêt, ou que le monde soit chargé, placé et dessiné (bootstrap.js,
+   canaanBootLoader). Même ambiance que l'écran titre : fond brun et or, titre doré, cercle de runes qui tourne. Les
+   animations ne touchent que la transformation et l'opacité : elles restent fluides même pendant le chargement. */
+#bootLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%), radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
+  color: #f6dc98;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+#bootLoader.done {
+  opacity: 0;
+  pointer-events: none;
+}
+#bootLoader[hidden] {
+  display: none;
+}
+#bootLoader h1 {
+  margin: 0;
+  font-size: calc(54px * var(--font-scale));
+  letter-spacing: 8px;
+  background: linear-gradient(180deg, #fff2c0 0%, #e8b850 45%, #8a5a1e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+}
+#bootLoader .boot-sub {
+  margin: -8px 0 6px;
+  font-size: calc(12px * var(--font-scale));
+  letter-spacing: 4px;
+  color: #b89868;
+}
+/* Cercle de runes : huit pierres qui tournent autour d'une petite lumière. */
+#bootLoader .boot-rune {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  animation: boot-spin 3.2s linear infinite;
+}
+#bootLoader .boot-rune i {
+  position: absolute;
+  left: 38px;
+  top: 0;
+  width: 8px;
+  height: 8px;
+  background: #f6dc98;
+  box-shadow: 0 0 8px #e8b850;
+  transform-origin: 4px 42px;
+}
+#bootLoader .boot-rune i:nth-child(2n) {
+  background: #7de0ff;
+  box-shadow: 0 0 8px #7de0ff;
+}
+#bootLoader .boot-rune i:nth-child(1) { transform: rotate(0deg); }
+#bootLoader .boot-rune i:nth-child(2) { transform: rotate(45deg); }
+#bootLoader .boot-rune i:nth-child(3) { transform: rotate(90deg); }
+#bootLoader .boot-rune i:nth-child(4) { transform: rotate(135deg); }
+#bootLoader .boot-rune i:nth-child(5) { transform: rotate(180deg); }
+#bootLoader .boot-rune i:nth-child(6) { transform: rotate(225deg); }
+#bootLoader .boot-rune i:nth-child(7) { transform: rotate(270deg); }
+#bootLoader .boot-rune i:nth-child(8) { transform: rotate(315deg); }
+#bootLoader .boot-rune b {
+  position: absolute;
+  left: 32px;
+  top: 32px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #bfe8ff 45%, rgba(125, 224, 255, 0) 72%);
+  animation: boot-pulse 1.4s ease-in-out infinite;
+}
+/* Barre : une lueur qui glisse, et l'étape en cours. */
+#bootLoader .boot-bar {
+  position: relative;
+  width: min(360px, 70vw);
+  height: 10px;
+  overflow: hidden;
+  border: 2px solid #8a5a1e;
+  background: #1a100a;
+  box-shadow: 0 0 0 2px #0a0604;
+}
+#bootLoader .boot-bar i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(232, 184, 80, 0), #e8b850, rgba(232, 184, 80, 0));
+  animation: boot-slide 1.3s ease-in-out infinite;
+}
+#bootLoader .boot-step {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: calc(14px * var(--font-scale));
+  letter-spacing: 1px;
+}
+/* Astuces qui se relaient (sans script). */
+#bootLoader .boot-tips {
+  position: relative;
+  width: min(560px, 86vw);
+  height: 2.8em;
+  font-size: calc(13px * var(--font-scale));
+  color: #c8b088;
+  text-align: center;
+}
+#bootLoader .boot-tips span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: boot-tip 16s infinite;
+}
+#bootLoader .boot-tips span:nth-child(2) { animation-delay: 4s; }
+#bootLoader .boot-tips span:nth-child(3) { animation-delay: 8s; }
+#bootLoader .boot-tips span:nth-child(4) { animation-delay: 12s; }
+@keyframes boot-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes boot-pulse {
+  50% { transform: scale(1.35); opacity: 0.7; }
+}
+@keyframes boot-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@keyframes boot-tip {
+  0% { opacity: 0; }
+  4%, 22% { opacity: 1; }
+  27%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #bootLoader .boot-rune,
+  #bootLoader .boot-rune b,
+  #bootLoader .boot-bar i {
+    animation: none;
+  }
+}

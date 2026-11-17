@@ -515,6 +515,39 @@
       };
     }
   });
+  // Écran de chargement (template.html, styles/boot-loader.css) : visible dès la première image, il cache le jeu
+  // jusqu'à ce que le menu ou le monde soit prêt, puis s'efface en fondu ; il revient avant chaque rechargement.
+  window.canaanBootLoader = (() => {
+    const el = () => document.getElementById('bootLoader');
+    const step = text => {
+      const p = document.getElementById('bootStep');
+      if (p && typeof text === 'string') p.textContent = text;
+    };
+    const done = () => {
+      const node = el();
+      if (!node || !node.classList) return;
+      node.classList.add('done');
+      setTimeout(() => (node.hidden = true), 500);
+    };
+    return {
+      step,
+      done,
+      // Quelques images d'abord, pour que le premier dessin soit fait sous le voile.
+      doneAfter(frames) {
+        if (typeof requestAnimationFrame !== 'function') return done();
+        let n = 0;
+        const tick = () => (++n >= frames ? done() : requestAnimationFrame(tick));
+        requestAnimationFrame(tick);
+      },
+      show(text) {
+        const node = el();
+        if (!node || !node.classList) return;
+        node.hidden = false;
+        node.classList.remove('done');
+        step(text);
+      }
+    };
+  })();
   document.title = 'THE LEGEND OF NASHI V' + CANAAN_VERSION;
   const canaanBootstrapVersionLabel = document.querySelector('#title p');
   if (canaanBootstrapVersionLabel)
@@ -527,6 +560,7 @@
     const slot = CANAAN_PERSISTENCE.takePending();
     let loaded = false;
     if (slot) {
+      canaanBootLoader.step('Ouverture de l’aventure…');
       CANAAN_PERSISTENCE.selectSlot(slot);
       loaded = loadGame();
       if (loaded) CANAAN_PERSISTENCE.sessionBackup();
@@ -541,9 +575,17 @@
     console.info('[CANAAN ' + CANAAN_VERSION + ']', window.CANAAN_DEV.selfTest());
     window.CANAAN_READY = true;
     loop();
-    if (loaded) startGame();
-    else CANAAN_SLOT_MENU.render();
+    if (loaded) {
+      startGame();
+      // L'écran de chargement reste le temps que le monde soit placé et dessiné autour du héros.
+      canaanBootLoader.step('Préparation du monde…');
+      canaanBootLoader.doneAfter(24);
+    } else {
+      CANAAN_SLOT_MENU.render();
+      canaanBootLoader.doneAfter(2);
+    }
   } catch (error) {
+    canaanBootLoader.done();
     window.CANAAN_READY = false;
     window.CANAAN_BOOT_ERROR = error.message;
     started = false;

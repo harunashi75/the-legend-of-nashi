@@ -265,7 +265,12 @@
       house: CANAAN_HOUSE.netView(),
       // Lieux des quêtes : énigmes partagées et changements du monde, quand ils changent.
       quests: CANAAN_QUESTS.netView(),
-      monsters: game.world.monsters.map(monsterSnapshot),
+      // Boss : ses effets en cours (barre de boss des invités).
+      monsters: game.world.monsters.map(m => {
+        const snap = monsterSnapshot(m);
+        if ((m.boss || m.worldBoss || m.arenaBoss) && window.CANAAN_BUFF_BAR) snap.fx = CANAAN_BUFF_BAR.monsterCodes(m);
+        return snap;
+      }),
       drops: game.world.drops.map(d => ({ x: Math.round(d.x), y: Math.round(d.y) })),
       projectiles: game.world.projectiles.slice(0, 60).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), c: p.c, a: Math.round(Math.atan2(p.vy || 0, p.vx || 0) * 100), k: p.kind === 'arrow' ? 1 : 0 })),
       fx: net.fx.splice(0),
@@ -324,7 +329,8 @@
       rubis: { owned: hero.rubis.owned, equipped: hero.rubis.equipped },
       arena: hero.arena,
       prof: CANAAN_PROF.bagOf(hero),
-      skins: CANAAN_WARDROBE.export(hero)
+      skins: CANAAN_WARDROBE.export(hero),
+      bless: hero.blessing || null
     });
     if (bag !== hero.netBag) {
       hero.netBag = bag;
@@ -372,6 +378,7 @@
     if (action.op === 'open-chest') return openNearbyChest(hero);
     if (action.op === 'dungeon-use') return CANAAN_DUNGEON_EXPLORE.interact(hero);
     if (action.op === 'skin-wear') return CANAAN_WARDROBE.handle(hero, action);
+    if (action.op.startsWith('city-')) return CANAAN_CITY.handle(hero, action);
     if (action.op === 'sell') return sellItemFor(hero, action.id);
     if (action.op === 'sell-common') return sellCommonFor(hero);
     if (action.op === 'buy-gear') return buyGearFor(hero);
@@ -620,6 +627,7 @@
       applyClassAndRubis(bag);
       if (bag.prof && typeof bag.prof === 'object') game.hero.prof = CANAAN_PROF.sanitize(bag.prof);
       if (bag.skins && typeof bag.skins === 'object') CANAAN_WARDROBE.applyRemote(bag.skins);
+      game.hero.blessing = CANAAN_CITY.blessingOf(bag.bless);
       if (bag.quetes && typeof bag.quetes === 'object') game.hero.quetes = sanitizeQuests(bag.quetes);
       if (bag.arena && typeof bag.arena === 'object')
         game.hero.arena = {

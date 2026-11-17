@@ -31,6 +31,8 @@
       // Rubis équipés : bonus conditionnels avant la frappe, déclencheurs après.
       // Repas de cuisine : bonus de dégâts en cours.
       damage *= CANAAN_PROF.damageMult(hero);
+      // Bénédiction du Grand Arbre de la cité elfique : +10 % pendant 30 minutes.
+      damage *= CANAAN_CITY.blessMult(hero);
       damage = CANAAN_RUBIS.attackBefore(target, damage, options, hero);
       // Talents de classe : multiplicateurs avant, déclencheurs après (avec les dégâts réellement infligés).
       const talents = window.CANAAN_CLASS_ATTACK;

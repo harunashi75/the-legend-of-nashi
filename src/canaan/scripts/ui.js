@@ -253,7 +253,7 @@ function drawCharacterPreview() {
   c.clearRect(0, 0, preview.width, preview.height);
   c.imageSmoothingEnabled = false;
   // Le sprite d'une apparence est plus grand (ailes, chapeaux) : il est ramené dans le cadre.
-  const sprite = canaanHeroSprite(game.hero?.look, 0, 0),
+  const sprite = canaanHeroSprite(game.hero?.look, 0, 0, { tool: 'none' }),
     scale = Math.min(preview.width / sprite.width, preview.height / sprite.height) * (sprite.padX ? 0.95 : 0.82);
   c.translate(Math.round(preview.width / 2), Math.round(preview.height / 2));
   c.scale(scale, scale);

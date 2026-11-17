@@ -1,4 +1,4 @@
-// Portails des donjons et raids : niveau requis, niveau des ennemis, butin garanti et choix de la difficulté.
+// Portails des donjons et raids : niveau requis, niveau des ennemis, butin (chances par boss) et choix de la difficulté.
 // Niveau de l'objet gagné : du niveau requis au niveau de butin (« 7 à 10 »).
 function dropRange(d) {
   return d.level < d.dropLevel ? d.level + ' à ' + d.dropLevel : String(d.dropLevel);
@@ -8,7 +8,12 @@ function prestigeText(kind) {
   const list = PRESTIGE_DROPS[kind] || [];
   return list.map(([name, chance]) => '<br><b style="color:' + rarityInfo({ rarity: name }).color + '">' + Math.round(chance * 100) + ' % ' + name + '</b>').join('');
 }
-// Une carte de difficulté : conditions, butin garanti et puissance des ennemis.
+// Chances d'équipement d'une instance : chaque boss (hors boss cachés) a 30 % de chance de donner un objet à chaque
+// héros, d'où 0 à 3 objets par donjon et 0 à 6 par raid ; les boss cachés donnent une clé des secrets.
+function lootOdds(raid) {
+  return Math.round(CANAAN_BOSS_DROP_CHANCE * 100) + ' % de chance par boss et par héros (0 à ' + (raid ? 6 : 3) + ' objets) · boss cachés : clé des secrets';
+}
+// Une carte de difficulté : conditions, butin et puissance des ennemis.
 function difficultyCard(index, key, mode, lv) {
   const allowed = lv >= mode.level,
     rarity = rarityInfo({ rarity: mode.rarity }),
@@ -37,7 +42,8 @@ function difficultyCard(index, key, mode, lv) {
     rarity.name +
     ' — niveau ' +
     dropRange(mode) +
-    '</b><br><small>100 % garanti' +
+    '</b><br><small>' +
+    lootOdds(true) +
     prestigeText(mode.prestige) +
     '</small></p><p class="muted">' +
     power +
@@ -98,7 +104,9 @@ function openPortal(n) {
         rare.color +
         '">Rare</b> (' +
         Math.round((PRESTIGE_DROPS[d.prestige]?.[0]?.[1] || 0) * 100) +
-        ' %) · 100 % garanti</p><button data-action="enterInstance" data-instance="' +
+        ' %) · ' +
+        lootOdds(false) +
+        '</p><button data-action="enterInstance" data-instance="' +
         n.instance +
         '">⚔️ Entrer</button>'
     );
@@ -125,7 +133,9 @@ function openPortal(n) {
       rarity.name +
       ' — niveau ' +
       dropRange(d) +
-      '</b> · 100 % garanti</p><button data-action="enterInstance" data-instance="' +
+      '</b> · ' +
+      lootOdds(!!d.raid) +
+      '</p><button data-action="enterInstance" data-instance="' +
       n.instance +
       '" ' +
       (!allowed ? 'disabled' : '') +

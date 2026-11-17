@@ -1407,6 +1407,120 @@
     toast('⚔️ ' + m.t + ' vaincu (' + inst.bossesDown + '/' + total + ') — ' + (THEMES[i].gate === 'barrier' ? 'la barrière se dissipe.' : 'la herse se lève.'));
     return false;
   }
+  // Portail de retour : il s'ouvre dans la salle du dernier boss quand l'instance est terminée, de l'autre côté du
+  // coffre par rapport au boss (case de sol la plus proche), et ramène tout le groupe devant le portail de l'île.
+  function exitSpot(index) {
+    const plan = planFor(index),
+      room = plan?.rooms.filter(r => r.kind === 'boss').pop();
+    if (!room || !room.boss) return null;
+    if (room.exit) return room.exit;
+    const dx = Math.sign(room.boss.x - room.cx),
+      dy = Math.sign(room.boss.y - room.cy),
+      want = { x: room.cx - dx * 3, y: room.cy - dy * 3 };
+    let best = null;
+    for (let r = 0; r < 6 && !best; r++)
+      for (let y = want.y - r; y <= want.y + r && !best; y++)
+        for (let x = want.x - r; x <= want.x + r; x++)
+          if (WALKABLE(plan.grid[y]?.[x]) && !plan.solid.has(y * MAPW + x) && Math.hypot(x - room.cx, y - room.cy) >= 2.5) {
+            best = { x, y };
+            break;
+          }
+    room.exit = best || { x: room.cx, y: room.cy + 2 };
+    return room.exit;
+  }
+  // Le héros est-il devant le portail de retour (instance terminée) ?
+  function exitNear(p) {
+    const inst = game.world.instance;
+    if (!inst || inst.arena || !inst.cleared) return false;
+    const e = exitSpot(inst.index);
+    return !!e && Math.hypot(p.x / TS - (e.x + 0.5), p.y / TS - (e.y + 0.5)) < 1.6;
+  }
+  // Prendre le portail de retour : le coffre des boss doit être ouvert d'abord (sinon sa bourse serait perdue).
+  function takeExit(hero = game.hero) {
+    if (!exitNear(hero.player)) return false;
+    if (game.world.chests.some(c => c.instance && !c.opened)) {
+      canaanLootNotice(hero, '🎁 Ouvre d’abord le coffre des boss, juste à côté !');
+      return true;
+    }
+    if (game.mode === 'guest' || hero !== game.hero) {
+      canaanLootNotice(hero, '🌀 C’est l’hôte qui prend le portail : tout le groupe sort avec lui.');
+      return true;
+    }
+    leaveInstance();
+    return true;
+  }
+  // Portail de retour en pixels : anneau de pierre runique et tourbillon à la couleur de l'instance.
+  function drawExitPortal(c, th) {
+    const inst = game.world.instance;
+    if (!inst || inst.arena || !inst.cleared) return;
+    const e = exitSpot(inst.index);
+    if (!e) return;
+    const x = e.x * TS + 24,
+      y = e.y * TS + 24,
+      U = 3,
+      R2 = (px, py, w, h, col) => {
+        c.fillStyle = col;
+        c.fillRect(Math.round(x + px * U), Math.round(y + py * U), w * U, h * U);
+      };
+    // Ombre et socle.
+    c.save();
+    c.globalAlpha = 0.35;
+    c.fillStyle = '#05040a';
+    c.beginPath();
+    c.ellipse(x, y + 22, 30, 8, 0, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+    R2(-9, 6, 18, 2, '#1a1210');
+    R2(-8, 5, 16, 2, th.pillar[1]);
+    R2(-8, 5, 16, 1, th.pillar[2]);
+    // Anneau de pierre cerclé d'encre et ses runes qui tournent.
+    c.save();
+    for (const [rx, ry, col] of [[11, 14, '#1a1210'], [10, 13, th.pillar[0]], [8, 11, '#06040a']]) {
+      c.fillStyle = col;
+      c.beginPath();
+      c.ellipse(x, y - 14, rx * U, ry * U, 0, 0, Math.PI * 2);
+      c.fill();
+    }
+    // Tourbillon : bandes de la couleur des runes, qui tournent.
+    c.globalAlpha = 0.9;
+    for (let k = 0; k < 3; k++) {
+      c.strokeStyle = k === 1 ? '#ffffff' : th.rune;
+      c.lineWidth = U * 2;
+      const a = time * 0.06 + (k * Math.PI * 2) / 3;
+      c.beginPath();
+      c.ellipse(x, y - 14, (7 - k * 2) * U, (10 - k * 2.5) * U, 0, a, a + 2.2);
+      c.stroke();
+    }
+    c.globalAlpha = 0.5 + 0.3 * Math.sin(time * 0.08);
+    c.fillStyle = th.rune;
+    c.beginPath();
+    c.ellipse(x, y - 14, 3 * U, 4 * U, 0, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2 + time * 0.02;
+      R2(Math.cos(a) * 9.5 - 0.5, Math.sin(a) * 12.5 - 5, 1, 1, k % 2 ? th.rune : '#ffffff');
+    }
+    // Étincelles qui montent.
+    for (let k = 0; k < 5; k++) {
+      const ph = (time * 0.01 + k / 5) % 1;
+      c.globalAlpha = 1 - ph;
+      R2(Math.sin(k * 2.1 + time * 0.03) * 6, 2 - ph * 22, 1, 1, th.rune);
+    }
+    c.globalAlpha = 1;
+    canaanLight(x, y - 14, 190, th.rune);
+    const near = exitNear(P);
+    c.save();
+    c.textAlign = 'center';
+    c.font = 'bold 13px Palatino Linotype, Georgia, serif';
+    c.lineWidth = 3;
+    c.strokeStyle = '#1a1008';
+    const text = near ? '[E] Sortir de l’instance' : '🌀 Portail de retour';
+    c.strokeText(text, x, y - 62);
+    c.fillStyle = '#f6dc98';
+    c.fillText(text, x, y - 62);
+    c.restore();
+  }
   function dungeonChestSpot(index) {
     const plan = planFor(index),
       room = plan?.rooms.filter(r => r.kind === 'boss').pop();
@@ -3104,7 +3218,10 @@
         else pixelProp(c, p, th, i);
       }
     for (const g of plan.gates) if (g && game.world.tiles[g.cells[0][1]][g.cells[0][0]] === GATE) drawGate(c, g, th);
-    if (!plan.arena) drawExplore(c, plan, th, view);
+    if (!plan.arena) {
+      drawExplore(c, plan, th, view);
+      drawExitPortal(c, th);
+    }
     const d = instances[i],
       mode = instanceDifficulty();
     if (plan.title && view(plan.title.x, plan.title.y, 6)) {
@@ -3577,8 +3694,10 @@
     dungeonMinimapColor,
     arenaLayout,
     CANAAN_DUNGEON_AUDIT: auditDungeon,
+    // Chance d'équipement de chaque boss, pour chaque héros (fiche des portails).
+    CANAAN_BOSS_DROP_CHANCE: BOSS_DROP_CHANCE,
     // Exploration : interaction (E), ce qui est à portée, état copié chez les invités.
-    CANAAN_DUNGEON_EXPLORE: Object.freeze({ inBossRoom, interact: dungeonInteract, near: p => !!reachable(p), stateOut: dungeonStateOut, stateIn: dungeonStateIn, state: () => dunState(), plan: i => planFor(i) }),
+    CANAAN_DUNGEON_EXPLORE: Object.freeze({ exitSpot, exitNear, takeExit, inBossRoom, interact: dungeonInteract, near: p => !!reachable(p), stateOut: dungeonStateOut, stateIn: dungeonStateIn, state: () => dunState(), plan: i => planFor(i) }),
     // Monstres d'une instance (renforts appelés par les boss, boss-mechanics.js).
     CANAAN_DUNGEON_MOBS: i => THEMES[i].mobs,
     // Apparence des boss d'une instance (portraits du bestiaire).

@@ -143,6 +143,7 @@
         color: hero.color,
         look: sanitizeLook(hero.look),
         skins: { owned: [...(hero.skins?.owned || [])] },
+        ...(hero.blessing ? { blessing: { day: hero.blessing.day, until: hero.blessing.until } } : {}),
         player: { x: where.x, y: where.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
         kills: hero.kills,
         level: clampLevel(hero.level),
@@ -178,6 +179,7 @@
       hero.look = sanitizeLook(d.look);
       hero.skins = { owned: [...new Set((Array.isArray(d.skins?.owned) ? d.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
       if (!hero.skins.owned.includes(hero.look.wear)) delete hero.look.wear;
+      hero.blessing = typeof d.blessing?.day === 'string' && Number.isFinite(Number(d.blessing.until)) ? { day: d.blessing.day.slice(0, 10), until: Number(d.blessing.until) } : null;
       hero.prof = CANAAN_PROF.sanitize(d.prof);
       hero.succes = CANAAN_ACHIEVEMENTS.sanitize(d.succes);
       hero.quetes = sanitizeQuests(d.quetes);

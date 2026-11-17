@@ -22,10 +22,15 @@
   const WATER_TINT = { 0: [26, 80, 122], 15: [60, 132, 128], 18: [56, 60, 150] }; // roche, route, bâtiment : compte comme « plus haut » pour tous les niveaux
   const kit = () => window.CANAAN_GROUND_KIT;
   const bridge = (x, y) => BRIDGE_TILES.has(y * MAPW + x);
+  // Palissade et emprises de la cité elfique : elles se fondent comme le sol de leur biome (les troncs sont un décor).
+  const groundAt = (x, y) => {
+    const t = tileAt(x, y);
+    return t === CANAAN_WOOD_TILE ? (CANAAN_WOOD_GROUND.get(y * MAPW + x) ?? 1) : t;
+  };
   function levelAt(x, y) {
     if (x < 0 || y < 0 || x >= MAPW || y >= MAPH) return 0;
     if (bridge(x, y)) return 0;
-    const l = LEVEL[tileAt(x, y)];
+    const l = LEVEL[groundAt(x, y)];
     return l === undefined ? OTHER : l;
   }
   // Eau à dessiner sous une case (la sienne, ou celle d'une voisine si la case borde l'eau) ; -1 : aucune.
@@ -41,13 +46,13 @@
     const k = y * MAPW + x;
     if (under[k] !== -2) return under[k];
     let w = -1;
-    const t = tileAt(x, y);
+    const t = groundAt(x, y);
     if (WATER.has(t) && !bridge(x, y)) w = t;
     // Pont, route ou terre au bord de l'eau : l'eau des cases voisines passe dessous.
     else if (LEVEL[t] !== undefined || bridge(x, y) || t === 2)
       for (let j = -1; j <= 1 && w < 0; j++)
         for (let i = -1; i <= 1 && w < 0; i++) {
-          const n = tileAt(x + i, y + j);
+          const n = groundAt(x + i, y + j);
           if (WATER.has(n) && !bridge(x + i, y + j)) w = n;
         }
     under[k] = w;
@@ -63,7 +68,7 @@
     const levels = new Set([own]),
       // Sur une case d'eau, une route voisine compte comme de l'eau : c'est la route qui dessine son propre bord.
       wetHere = own === 0 && !bridge(tx, ty),
-      lvl = (x, y) => (wetHere && tileAt(x, y) === 2 && !bridge(x, y) ? 0 : levelAt(x, y));
+      lvl = (x, y) => (wetHere && groundAt(x, y) === 2 && !bridge(x, y) ? 0 : levelAt(x, y));
     for (let j = -1; j <= 1; j++)
       for (let i = -1; i <= 1; i++) {
         const l = lvl(tx + i, ty + j);
@@ -71,13 +76,13 @@
         if (l !== OTHER) levels.add(l);
       }
     // Mer et eau peu profonde (marais, lacs) côte à côte : limite organique par une teinte translucide sur l'eau animée.
-    const ownT = WATER.has(tileAt(tx, ty)) && !bridge(tx, ty) ? tileAt(tx, ty) : -1;
+    const ownT = WATER.has(groundAt(tx, ty)) && !bridge(tx, ty) ? groundAt(tx, ty) : -1;
     let shallowT = -1,
       seaNear = false;
     const wocc = new Float32Array(9);
     for (let j = -1; j <= 1; j++)
       for (let i = -1; i <= 1; i++) {
-        const u = tileAt(tx + i, ty + j),
+        const u = groundAt(tx + i, ty + j),
           isW = WATER.has(u) && !bridge(tx + i, ty + j);
         if (isW && u !== 0) shallowT = u;
         if (isW && u === 0) seaNear = true;
@@ -89,14 +94,14 @@
       n = order.length;
     // Terrain qui représente chaque niveau : le plus présent autour (la case elle-même d'abord).
     const kind = order.map(l => {
-      const t = tileAt(tx, ty);
+      const t = groundAt(tx, ty);
       if (LEVEL[t] === l) return t;
       const count = {};
       let best = -1,
         most = 0;
       for (let j = -1; j <= 1; j++)
         for (let i = -1; i <= 1; i++) {
-          const u = tileAt(tx + i, ty + j);
+          const u = groundAt(tx + i, ty + j);
           if (LEVEL[u] !== l || bridge(tx + i, ty + j)) continue;
           count[u] = (count[u] || 0) + 1;
           if (count[u] > most) {
@@ -278,7 +283,7 @@
     const count = {};
     for (let j = -1; j <= 1; j++)
       for (let i = -1; i <= 1; i++) {
-        const u = tileAt(tx + i, ty + j),
+        const u = groundAt(tx + i, ty + j),
           land = LEVEL[u] !== undefined && !WATER.has(u) && !bridge(tx + i, ty + j);
         occ[(j + 1) * 3 + i + 1] = j === 1 || !land ? 1 : 0;
         if (land && j < 1) {
