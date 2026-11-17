@@ -25,7 +25,9 @@ test('Dictionnaires : aucune clé en double, mêmes valeurs insérées, aucune t
    const key = fr.includes('|') ? fr.slice(fr.indexOf('|') + 1) : fr;
    assert.equal(placeholders(out), placeholders(key), lang + ' : valeurs insérées différentes pour « ' + fr + ' »');
    // Un modèle doit garder du texte fixe : « {a} {b} » reconnaîtrait n'importe quoi.
-   if (placeholders(key)) assert.ok(/\p{L}{2}/u.test(key.replace(/\{\w+\}/g, '')), lang + ' : modèle sans texte fixe « ' + fr + ' »');
+   // Avec seulement des valeurs numériques ({n}, {m}, {s}, {max}, {or}), une lettre suffit (« N°{n} »).
+   const numeric = [...key.matchAll(/\{(\w+)\}/g)].every(m => ['n', 'm', 's', 'max', 'or'].includes(m[1]));
+   if (placeholders(key)) assert.ok((numeric ? /\p{L}/u : /\p{L}{2}/u).test(key.replace(/\{\w+\}/g, '')), lang + ' : modèle sans texte fixe « ' + fr + ' »');
    // Repassée au point de passage, une traduction ne doit pas devenir autre chose.
    if (Object.hasOwn(dict, out)) assert.equal(dict[out], out, lang + ' : « ' + out + ' » est aussi une clé traduite autrement');
   }
