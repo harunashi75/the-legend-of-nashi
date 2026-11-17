@@ -113,7 +113,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Roi Sanglant',
-    bosses: ['Le Maître-Chien Ravageur', 'Sire Écorcheur', 'Le Chapelain Sanguin', 'La Comtesse Écarlate', 'Le Champion du Sang', 'Le Roi Sanglant'],
+    bosses: [
+      'Le Maître-Chien Ravageur',
+      'Sire Écorcheur',
+      'Le Chapelain Sanguin',
+      'La Comtesse Écarlate',
+      'Le Champion du Sang',
+      'Le Roi Sanglant'
+    ],
     // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
     secrets: ['Le Bourreau Masqué', 'La Dame Blanche du Bastion'],
     color: '#ffd36d',
@@ -131,7 +138,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Dévoreur Stellaire',
-    bosses: ['L’Horloger Fou', 'Le Gardien des Rouages', 'Le Sablier Vivant', 'La Tisseuse du Temps', 'L’Écho des Âges', 'Le Dévoreur Stellaire'],
+    bosses: [
+      'L’Horloger Fou',
+      'Le Gardien des Rouages',
+      'Le Sablier Vivant',
+      'La Tisseuse du Temps',
+      'L’Écho des Âges',
+      'Le Dévoreur Stellaire'
+    ],
     // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
     secrets: ['Le Paradoxe Errant', 'L’Enfant d’Avant le Temps'],
     color: '#ff7fa7',
@@ -149,7 +163,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'Le Séraphin Divin',
-    bosses: ['Le Chérubin Vigilant', 'L’Archonte Radieux', 'Le Trône Ailé', 'La Sentinelle Auréolée', 'La Voix du Chœur', 'Le Séraphin Divin'],
+    bosses: [
+      'Le Chérubin Vigilant',
+      'L’Archonte Radieux',
+      'Le Trône Ailé',
+      'La Sentinelle Auréolée',
+      'La Voix du Chœur',
+      'Le Séraphin Divin'
+    ],
     // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
     secrets: ['L’Ange Déchu Sans Nom', 'Le Gardien du Septième Ciel'],
     color: '#c4a0ff',
@@ -168,7 +189,14 @@ export const INSTANCE_DEFS = deepFreeze([
     x: 0,
     y: 0,
     boss: 'L’Avatar du Jugement',
-    bosses: ['Le Porte-Étoile', 'Le Héraut de Célestia', 'L’Astrolabe Vivant', 'La Balance Éternelle', 'Le Juge des Constellations', 'L’Avatar du Jugement'],
+    bosses: [
+      'Le Porte-Étoile',
+      'Le Héraut de Célestia',
+      'L’Astrolabe Vivant',
+      'La Balance Éternelle',
+      'Le Juge des Constellations',
+      'L’Avatar du Jugement'
+    ],
     // Boss cachés derrière les passages secrets : chacun donne une clé des secrets à chaque héros.
     secrets: ['La Comète Écarlate', 'Le Témoin du Premier Jour'],
     color: '#fff0a8',
@@ -177,7 +205,16 @@ export const INSTANCE_DEFS = deepFreeze([
     mobLevel: 60,
     // La difficulté choisie au portail fixe la qualité du butin, garanti, et la puissance des ennemis.
     difficulties: {
-      normal: { label: 'Normal', icon: '⟦mode_normal⟧', level: 58, mobLevel: 60, rarity: 'Épique', dropLevel: 60, hp: 1, damage: 1 },
+      normal: {
+        label: 'Normal',
+        icon: '⟦mode_normal⟧',
+        level: 58,
+        mobLevel: 60,
+        rarity: 'Épique',
+        dropLevel: 60,
+        hp: 1,
+        damage: 1
+      },
       heroic: {
         label: 'Héroïque',
         icon: '⟦mode_heroic⟧',

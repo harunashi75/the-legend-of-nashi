@@ -102,11 +102,37 @@ game.guests = {};
 function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
   const hero = {
     name,
-    player: { x, y, vx: 0, vy: 0, hp: 1, mhp: 1, mp: CANAAN_BASE_MANA, mmp: CANAAN_BASE_MANA, gold: 0, face: 1, anim: 0, atk: 0, dead: false },
+    player: {
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      hp: 1,
+      mhp: 1,
+      mp: CANAAN_BASE_MANA,
+      mmp: CANAAN_BASE_MANA,
+      gold: 0,
+      face: 1,
+      anim: 0,
+      atk: 0,
+      dead: false
+    },
     level: 1,
     exp: 0,
     inventory: [],
-    equipment: { weapon: null, weapon2: null, armor: null, helm: null, boots: null, shoulders: null, gloves: null, neck: null, ring: null, artifact: null, ...equipment },
+    equipment: {
+      weapon: null,
+      weapon2: null,
+      armor: null,
+      helm: null,
+      boots: null,
+      shoulders: null,
+      gloves: null,
+      neck: null,
+      ring: null,
+      artifact: null,
+      ...equipment
+    },
     // Niveau du sac d'un allié : 0 = 10 places, jusqu'à 9 = 100 places (comme l'hôte, mêmes prix).
     bagLevel: 0,
     kills: 0,

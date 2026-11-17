@@ -54,7 +54,10 @@
     R(x, y, w, 2, '#9a7248');
     R(x, y + h - 3, w, 3, '#43301f');
     for (let k = 6; k < w - 6; k += 11) R(x + k, y + 3, 6, 1, '#563b28');
-    for (const [on, ex] of [[endLeft, x - 2], [endRight, x + w - 6]])
+    for (const [on, ex] of [
+      [endLeft, x - 2],
+      [endRight, x + w - 6]
+    ])
       if (on) {
         R(ex, y, 8, h, '#c9a06c');
         R(ex + 1, y + 1, 6, h - 2, '#e0bc88');
@@ -74,7 +77,8 @@
     c.beginPath();
     c.ellipse(x, y + 5, 24, 10, 0, 0, Math.PI * 2);
     c.fill();
-    for (let k = 0; k < 6; k++) R(-16 + k * 6, 3 + (k % 2) * 3, 4, 2, (time + k * 7) % 30 < 15 ? '#ff7a2a' : '#c84a1a');
+    for (let k = 0; k < 6; k++)
+      R(-16 + k * 6, 3 + (k % 2) * 3, 4, 2, (time + k * 7) % 30 < 15 ? '#ff7a2a' : '#c84a1a');
     // Pierres du fond, bûches, flammes, puis pierres de devant (devant les bûches).
     const stones = Array.from({ length: 12 }, (_, k) => {
       const a = (k * Math.PI * 2) / 12;

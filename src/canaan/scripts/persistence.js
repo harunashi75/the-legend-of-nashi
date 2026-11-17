@@ -143,7 +143,14 @@ window.CANAAN_PERSISTENCE = {
       // Bénédiction du Grand Arbre (jour et fin).
       ...(hero.blessing ? { blessing: { day: hero.blessing.day, until: hero.blessing.until } } : {}),
       // Clés des secrets : gardées seulement quand le héros en a.
-      player: { x: position.x, y: position.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
+      player: {
+        x: position.x,
+        y: position.y,
+        hp: p.hp,
+        mp: p.mp,
+        gold: p.gold,
+        ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {})
+      },
       level: clampLevel(hero.level),
       exp: Math.max(0, Math.floor(hero.exp || 0)),
       kills: hero.kills,
@@ -173,7 +180,14 @@ window.CANAAN_PERSISTENCE = {
       // Résumé affiché par le menu des aventures sans recharger tout le héros.
       resume: { level: clampLevel(game.hero.level), gold: P.gold, classe: game.hero.classe.id },
       // couche : l'île ou les Tréfonds (en instance, celle d'où l'on est entré : on y reprend devant le portail).
-      monde: { openedChests: game.world.openedChests, worldBossTimers: game.world.worldBossTimers, maison: CANAAN_HOUSE.layout(), quetes: CANAAN_QUESTS.exportWorld(), couche: (game.world.instance ? game.world.returnLayer : game.world.layer) === 'under' ? 'under' : 'surface' },
+      monde: {
+        openedChests: game.world.openedChests,
+        worldBossTimers: game.world.worldBossTimers,
+        maison: CANAAN_HOUSE.layout(),
+        quetes: CANAAN_QUESTS.exportWorld(),
+        couche:
+          (game.world.instance ? game.world.returnLayer : game.world.layer) === 'under' ? 'under' : 'surface'
+      },
       // Invités : position du groupe comme l'hôte (entrée de l'instance, ou camp après une chute de l'hôte).
       heros: { hote: this.heroSnapshot(position), invites: CANAAN_GROUP.exportGuests(() => position) }
     };
@@ -234,7 +248,8 @@ window.CANAAN_PERSISTENCE = {
     try {
       const raw = localStorage.getItem(CANAAN_LEGACY_SAVE_KEY);
       if (raw === null) return false;
-      for (let slot = 1; slot <= CANAAN_SLOT_COUNT; slot++) if (CANAAN_SAVE_STORE.read(slot) !== null) return false;
+      for (let slot = 1; slot <= CANAAN_SLOT_COUNT; slot++)
+        if (CANAAN_SAVE_STORE.read(slot) !== null) return false;
       const d = JSON.parse(raw);
       if (!d || d.schema !== 9) return false;
       const encoded = JSON.stringify(this.convertLegacy(d));
@@ -261,7 +276,8 @@ window.CANAAN_PERSISTENCE = {
         'illisible',
         raw
       );
-      if (CANAAN_SAVE_STORE.read(this.slot) !== raw) throw new Error('La sauvegarde a changé. Recharge la page.');
+      if (CANAAN_SAVE_STORE.read(this.slot) !== raw)
+        throw new Error('La sauvegarde a changé. Recharge la page.');
       CANAAN_SAVE_STORE.write(this.slot, fresh);
     } catch (error) {
       console.error('[CANAAN] Réinitialisation impossible', error);
@@ -355,9 +371,16 @@ window.CANAAN_PERSISTENCE = {
     // Apparence (les aventures d'avant la création de personnage gardent le héros d'origine).
     game.hero.look = sanitizeLook(h.look);
     // Garde-robe : seulement des apparences connues ; la tenue portée doit en faire partie.
-    game.hero.skins = { owned: [...new Set((Array.isArray(h.skins?.owned) ? h.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
+    game.hero.skins = {
+      owned: [
+        ...new Set((Array.isArray(h.skins?.owned) ? h.skins.owned : []).filter(id => SKIN_IDS.includes(id)))
+      ]
+    };
     if (!game.hero.skins.owned.includes(game.hero.look.wear)) delete game.hero.look.wear;
-    game.hero.blessing = typeof h.blessing?.day === 'string' && Number.isFinite(Number(h.blessing.until)) ? { day: h.blessing.day.slice(0, 10), until: Number(h.blessing.until) } : null;
+    game.hero.blessing =
+      typeof h.blessing?.day === 'string' && Number.isFinite(Number(h.blessing.until))
+        ? { day: h.blessing.day.slice(0, 10), until: Number(h.blessing.until) }
+        : null;
     // Métiers (les aventures d'avant les métiers commencent au niveau 1).
     game.hero.prof = CANAAN_PROF.sanitize(h.prof);
     game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);
@@ -391,7 +414,10 @@ window.CANAAN_PERSISTENCE = {
     const refund = legacyMaterialGold(h.materials, LEGACY_MATERIAL_GOLD);
     if (refund) {
       P.gold += refund;
-      chat('Système', 'L’artisanat a disparu : tes anciens matériaux de forge ont été échangés contre ' + refund + ' or.');
+      chat(
+        'Système',
+        'L’artisanat a disparu : tes anciens matériaux de forge ont été échangés contre ' + refund + ' or.'
+      );
     }
     window.CANAAN_BAG_STATE.import(h.bagLevel);
     window.CANAAN_GEAR.normalizeAll();
@@ -403,10 +429,16 @@ window.CANAAN_PERSISTENCE = {
     );
     game.hero.exp = Math.min(nonnegative(h.exp), Math.max(0, xpToNext(game.hero.level) - 1));
     if (legacy && game.hero.level > 1)
-      chat('Système', 'Les niveaux arrivent : ton héros commence au niveau ' + game.hero.level + ', celui de ton meilleur équipement.');
+      chat(
+        'Système',
+        'Les niveaux arrivent : ton héros commence au niveau ' +
+          game.hero.level +
+          ', celui de ton meilleur équipement.'
+      );
     // Classe et talents ; une aventure d'avant les classes (anciennes voies) choisit sa classe en arrivant.
     window.CANAAN_CLASS_STATE.import(h.classe);
-    if (h.ways && !h.classe) chat('Système', 'Les voies sont remplacées par les classes : choisis ta classe et tes talents (T).');
+    if (h.ways && !h.classe)
+      chat('Système', 'Les voies sont remplacées par les classes : choisis ta classe et tes talents (T).');
     window.CANAAN_RUBIS_STATE.import(h.rubis);
     window.CANAAN_ARENA_STATE.import(h.arena);
     CANAAN_GROUP.importGuests(d.heros.invites);

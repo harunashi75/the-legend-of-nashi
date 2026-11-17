@@ -17,7 +17,14 @@
   // ---------------------------------------------------------------- Création, arrivée, départ
   function starterGear(id) {
     return {
-      weapon: { id: id + '-epee', name: 'Épée de recrue', slot: 'weapon', level: 1, rarity: 'Commun', weaponType: 'sword' },
+      weapon: {
+        id: id + '-epee',
+        name: 'Épée de recrue',
+        slot: 'weapon',
+        level: 1,
+        rarity: 'Commun',
+        weaponType: 'sword'
+      },
       armor: { id: id + '-tunique', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }
     };
   }
@@ -31,7 +38,10 @@
   function create(pseudo) {
     if (guests().length >= GUEST_LIMIT) return null;
     const id = newId(),
-      name = cleanAdventureName(pseudo, '?') === 'Aventure ?' ? 'Compagnon ' + (guests().length + 1) : cleanAdventureName(pseudo, '?'),
+      name =
+        cleanAdventureName(pseudo, '?') === 'Aventure ?'
+          ? 'Compagnon ' + (guests().length + 1)
+          : cleanAdventureName(pseudo, '?'),
       hero = canaanCreateHero({ name, x: P.x, y: P.y, equipment: starterGear(id) });
     hero.id = id;
     hero.local = true;
@@ -129,8 +139,13 @@
 
   // ---------------------------------------------------------------- Sauvegarde (heros.invites)
   const validItem = it =>
-    it && typeof it === 'object' && !Array.isArray(it) && Object.hasOwn(gearSlots, it.slot) && it.slot !== 'weapon2' &&
-    Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) && Number(it.level ?? it.ilvl ?? 1) > 0;
+    it &&
+    typeof it === 'object' &&
+    !Array.isArray(it) &&
+    Object.hasOwn(gearSlots, it.slot) &&
+    it.slot !== 'weapon2' &&
+    Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
+    Number(it.level ?? it.ilvl ?? 1) > 0;
   const count = v => (Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0);
   function exportGuests(position) {
     const out = {};
@@ -144,7 +159,14 @@
         look: sanitizeLook(hero.look),
         skins: { owned: [...(hero.skins?.owned || [])] },
         ...(hero.blessing ? { blessing: { day: hero.blessing.day, until: hero.blessing.until } } : {}),
-        player: { x: where.x, y: where.y, hp: p.hp, mp: p.mp, gold: p.gold, ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {}) },
+        player: {
+          x: where.x,
+          y: where.y,
+          hp: p.hp,
+          mp: p.mp,
+          gold: p.gold,
+          ...(p.keys > 0 ? { keys: Math.floor(p.keys) } : {})
+        },
         kills: hero.kills,
         level: clampLevel(hero.level),
         exp: Math.max(0, Math.floor(hero.exp || 0)),
@@ -172,14 +194,27 @@
     for (const [id, d] of Object.entries(data).slice(0, GUEST_LIMIT)) {
       if (!/^[a-zA-Z_][\w-]{0,63}$/.test(id) || !d || typeof d !== 'object') continue;
       const p = d.player || {},
-        hero = canaanCreateHero({ name: cleanAdventureName(d.pseudo, '?'), x: Number(p.x) || P.x, y: Number(p.y) || P.y });
+        hero = canaanCreateHero({
+          name: cleanAdventureName(d.pseudo, '?'),
+          x: Number(p.x) || P.x,
+          y: Number(p.y) || P.y
+        });
       hero.id = id;
       hero.local = d.local !== false;
-      hero.color = /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : COLORS[Object.keys(game.guests).length % COLORS.length];
+      hero.color = /^#[0-9a-f]{6}$/i.test(d.color)
+        ? d.color
+        : COLORS[Object.keys(game.guests).length % COLORS.length];
       hero.look = sanitizeLook(d.look);
-      hero.skins = { owned: [...new Set((Array.isArray(d.skins?.owned) ? d.skins.owned : []).filter(id => SKIN_IDS.includes(id)))] };
+      hero.skins = {
+        owned: [
+          ...new Set((Array.isArray(d.skins?.owned) ? d.skins.owned : []).filter(id => SKIN_IDS.includes(id)))
+        ]
+      };
       if (!hero.skins.owned.includes(hero.look.wear)) delete hero.look.wear;
-      hero.blessing = typeof d.blessing?.day === 'string' && Number.isFinite(Number(d.blessing.until)) ? { day: d.blessing.day.slice(0, 10), until: Number(d.blessing.until) } : null;
+      hero.blessing =
+        typeof d.blessing?.day === 'string' && Number.isFinite(Number(d.blessing.until))
+          ? { day: d.blessing.day.slice(0, 10), until: Number(d.blessing.until) }
+          : null;
       hero.prof = CANAAN_PROF.sanitize(d.prof);
       hero.succes = CANAAN_ACHIEVEMENTS.sanitize(d.succes);
       hero.quetes = sanitizeQuests(d.quetes);
@@ -187,15 +222,21 @@
       hero.bank = CANAAN_BANK.sanitize(d.bank);
       for (const slot of Object.keys(hero.equipment)) {
         const it = d.equipment?.[slot];
-        hero.equipment[slot] = validItem(it) && it.slot === (slot === 'weapon2' ? 'weapon' : slot) ? it : null;
+        hero.equipment[slot] =
+          validItem(it) && it.slot === (slot === 'weapon2' ? 'weapon' : slot) ? it : null;
       }
       hero.kills = count(d.kills);
       // Niveau : celui sauvegardé ; ancienne sauvegarde (avant les niveaux) : de quoi porter son équipement.
-      for (const it of [...hero.inventory, ...Object.values(hero.equipment)]) if (it) window.CANAAN_GEAR.normalize(it);
-      hero.level = clampLevel(d.level ?? Math.max(1, ...Object.values(hero.equipment).filter(Boolean).map(itemLevel)));
+      for (const it of [...hero.inventory, ...Object.values(hero.equipment)])
+        if (it) window.CANAAN_GEAR.normalize(it);
+      hero.level = clampLevel(
+        d.level ?? Math.max(1, ...Object.values(hero.equipment).filter(Boolean).map(itemLevel))
+      );
       hero.exp = Math.min(count(d.exp), Math.max(0, xpToNext(hero.level) - 1));
       // Ancienne règle (sans bagVersion) : tout allié avait 40 places (niveau 3) sans rien acheter → 10 places.
-      hero.bagLevel = canaanBagLevel({ bagLevel: d.bagVersion === 2 ? d.bagLevel : Math.max(0, (Number(d.bagLevel) || 0) - 3) });
+      hero.bagLevel = canaanBagLevel({
+        bagLevel: d.bagVersion === 2 ? d.bagLevel : Math.max(0, (Number(d.bagLevel) || 0) - 3)
+      });
       // Anciens matériaux de forge (supprimés) : rendus en or.
       hero.player.gold = count(p.gold) + legacyMaterialGold(d.materials, LEGACY_MATERIAL_GOLD);
       hero.player.keys = count(p.keys);
@@ -207,7 +248,8 @@
       // Compagnon d'avant les classes : il en reçoit une, avec ses talents.
       if (hero.local && !hero.classe.id) giveClass(hero);
       if (d.rubis?.owned && typeof d.rubis.owned === 'object')
-        for (const [k, n] of Object.entries(d.rubis.owned)) if (CANAAN_RUBIS.get(k) && count(n)) hero.rubis.owned[k] = count(n);
+        for (const [k, n] of Object.entries(d.rubis.owned))
+          if (CANAAN_RUBIS.get(k) && count(n)) hero.rubis.owned[k] = count(n);
       const worn = new Set();
       if (Array.isArray(d.rubis?.equipped))
         hero.rubis.equipped = Array.from({ length: 6 }, (_, k) => {
@@ -227,7 +269,8 @@
           lastBoss: typeof d.arena.lastBoss === 'string' ? d.arena.lastBoss.slice(0, 80) : '',
           pendingChoice: !!d.arena.pendingChoice
         };
-      for (const it of [...hero.inventory, ...Object.values(hero.equipment)]) if (it) window.CANAAN_GEAR.normalize(it);
+      for (const it of [...hero.inventory, ...Object.values(hero.equipment)])
+        if (it) window.CANAAN_GEAR.normalize(it);
       game.guests[id] = hero;
     }
   }
@@ -244,10 +287,16 @@
       const [x, y] = queue[head];
       if (x === gx && y === gy) {
         const path = [];
-        for (let k = key(x, y); k !== -1; k = seen.get(k)) path.unshift({ x: k % MAPW, y: Math.floor(k / MAPW) });
+        for (let k = key(x, y); k !== -1; k = seen.get(k))
+          path.unshift({ x: k % MAPW, y: Math.floor(k / MAPW) });
         return path;
       }
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1]
+      ]) {
         const nx = x + dx,
           ny = y + dy,
           k = key(nx, ny);
@@ -263,9 +312,14 @@
       goal = tileOf(tx) + ',' + tileOf(ty);
     let plan = hero.aiPath;
     if (!plan || plan.goal !== goal || plan.age++ > 40) {
-      plan = hero.aiPath = { goal, age: 0, path: findPath(tileOf(p.x), tileOf(p.y), tileOf(tx), tileOf(ty)) || [] };
+      plan = hero.aiPath = {
+        goal,
+        age: 0,
+        path: findPath(tileOf(p.x), tileOf(p.y), tileOf(tx), tileOf(ty)) || []
+      };
     }
-    while (plan.path.length > 1 && tileOf(p.x) === plan.path[0].x && tileOf(p.y) === plan.path[0].y) plan.path.shift();
+    while (plan.path.length > 1 && tileOf(p.x) === plan.path[0].x && tileOf(p.y) === plan.path[0].y)
+      plan.path.shift();
     const next = plan.path.length > 1 ? plan.path[0] : null,
       wx = next ? (next.x + 0.5) * TS : tx,
       wy = next ? (next.y + 0.5) * TS : ty;
@@ -309,10 +363,16 @@
       return;
     }
     const foes = game.world.monsters.filter(
-      m => m.hp > 0 && !m.hidden && Math.hypot(m.x - P.x, m.y - P.y) < 7 * TS && Math.hypot(m.x - p.x, m.y - p.y) < 9 * TS
+      m =>
+        m.hp > 0 &&
+        !m.hidden &&
+        Math.hypot(m.x - P.x, m.y - P.y) < 7 * TS &&
+        Math.hypot(m.x - p.x, m.y - p.y) < 9 * TS
     );
     if (foes.length && (game.world.instance || !isSafe(P.x / TS, P.y / TS))) {
-      const m = foes.reduce((a, b) => (Math.hypot(a.x - p.x, a.y - p.y) <= Math.hypot(b.x - p.x, b.y - p.y) ? a : b));
+      const m = foes.reduce((a, b) =>
+        Math.hypot(a.x - p.x, a.y - p.y) <= Math.hypot(b.x - p.x, b.y - p.y) ? a : b
+      );
       intent.aimX = m.x;
       intent.aimY = m.y;
       if (Math.hypot(m.x - p.x, m.y - p.y) <= reach(hero) + (m.r || 0) * 0.5) {
@@ -385,20 +445,56 @@
       : '⚪ Absent';
     if (ui.removing === hero.id)
       return (
-        '<article class="group-card confirm"><h3>' + esc(hero.name) + '</h3><p class="group-warning">Supprimer ce héros ? Son équipement, son sac et sa progression seront perdus.</p>' +
-        '<div class="group-actions"><button type="button" class="group-danger" data-action="groupRemove" data-guest="' + id + '">Supprimer</button>' +
+        '<article class="group-card confirm"><h3>' +
+        esc(hero.name) +
+        '</h3><p class="group-warning">Supprimer ce héros ? Son équipement, son sac et sa progression seront perdus.</p>' +
+        '<div class="group-actions"><button type="button" class="group-danger" data-action="groupRemove" data-guest="' +
+        id +
+        '">Supprimer</button>' +
         '<button type="button" data-action="groupCancel">Annuler</button></div></article>'
       );
     return (
-      '<article class="group-card' + (here ? ' here' : '') + '"><h3><span class="group-dot" data-color="' + esc(hero.color) + '"></span>' + esc(hero.name) + '</h3>' +
-      '<p class="group-meta">' + status + ' · ' + (classById(hero.classe?.id) ? classById(hero.classe.id).icon + ' ' + classById(hero.classe.id).name + ' · ' : '') + 'Niv. ' + clampLevel(hero.level) + ' · PV ' + Math.ceil(p.hp) + ' / ' + p.mhp + '</p>' +
-      '<p class="group-meta">⚔️ ' + hero.kills + ' victimes · 💰 ' + p.gold + ' or · 🎒 ' + hero.inventory.length + ' / 40</p>' +
+      '<article class="group-card' +
+      (here ? ' here' : '') +
+      '"><h3><span class="group-dot" data-color="' +
+      esc(hero.color) +
+      '"></span>' +
+      esc(hero.name) +
+      '</h3>' +
+      '<p class="group-meta">' +
+      status +
+      ' · ' +
+      (classById(hero.classe?.id)
+        ? classById(hero.classe.id).icon + ' ' + classById(hero.classe.id).name + ' · '
+        : '') +
+      'Niv. ' +
+      clampLevel(hero.level) +
+      ' · PV ' +
+      Math.ceil(p.hp) +
+      ' / ' +
+      p.mhp +
+      '</p>' +
+      '<p class="group-meta">⚔️ ' +
+      hero.kills +
+      ' victimes · 💰 ' +
+      p.gold +
+      ' or · 🎒 ' +
+      hero.inventory.length +
+      ' / 40</p>' +
       '<div class="group-actions">' +
       (here
         ? '<button type="button" data-action="groupLeave" data-guest="' + id + '">Renvoyer</button>'
-        : '<button type="button" data-action="groupJoin" data-guest="' + id + '"' + (present().length >= PRESENT_LIMIT ? ' disabled' : '') + '>Faire venir</button>') +
-      '<button type="button" data-action="groupEquip" data-guest="' + id + '">Équiper le meilleur</button>' +
-      '<button type="button" class="group-danger" data-action="groupAskRemove" data-guest="' + id + '">Supprimer</button></div></article>'
+        : '<button type="button" data-action="groupJoin" data-guest="' +
+          id +
+          '"' +
+          (present().length >= PRESENT_LIMIT ? ' disabled' : '') +
+          '>Faire venir</button>') +
+      '<button type="button" data-action="groupEquip" data-guest="' +
+      id +
+      '">Équiper le meilleur</button>' +
+      '<button type="button" class="group-danger" data-action="groupAskRemove" data-guest="' +
+      id +
+      '">Supprimer</button></div></article>'
     );
   }
   // Salon en ligne : ouvrir à ses amis (code à donner), ou fermer.
@@ -413,7 +509,9 @@
           commands.map(c => '<p class="group-meta"><code>' + esc(c) + '</code></p>').join('')
         : kind === 'lan'
           ? '<p class="group-meta">Si ton invité n’arrive pas à se connecter : autorise ce port dans ton pare-feu' +
-            (web.platform === 'win32' ? ' (Windows le propose à la première ouverture : accepte « réseaux privés »).' : ' (Ubuntu : <code>sudo ufw allow ' + esc(port) + '/tcp</code>).') +
+            (web.platform === 'win32'
+              ? ' (Windows le propose à la première ouverture : accepte « réseaux privés »).'
+              : ' (Ubuntu : <code>sudo ufw allow ' + esc(port) + '/tcp</code>).') +
             '</p>'
           : '';
     if (st.mode === 'host') {
@@ -422,35 +520,68 @@
       let link = '';
       if (hosted && web.kind === 'lan')
         link =
-          '<p class="group-link">🏠 Adresse sur ton réseau : <b>' + esc(web.relay) + '</b></p>' +
-          (web.addresses.length > 1 ? '<p class="group-meta">Autres adresses de ce PC : ' + web.addresses.slice(1).map(esc).join(' · ') + '</p>' : '') +
+          '<p class="group-link">🏠 Adresse sur ton réseau : <b>' +
+          esc(web.relay) +
+          '</b></p>' +
+          (web.addresses.length > 1
+            ? '<p class="group-meta">Autres adresses de ce PC : ' +
+              web.addresses.slice(1).map(esc).join(' · ') +
+              '</p>'
+            : '') +
           firewallHelp(web.firewall, port, 'lan');
       else if (hosted && web.kind === 'tailscale')
         link =
-          '<p class="group-link">🌍 Adresse Tailscale : <b>' + esc(web.relay) + '</b></p>' +
-          (web.addresses.length ? '<p class="group-meta">Ou par son nom : ' + web.addresses.map(esc).join(' · ') + '</p>' : '') +
+          '<p class="group-link">🌍 Adresse Tailscale : <b>' +
+          esc(web.relay) +
+          '</b></p>' +
+          (web.addresses.length
+            ? '<p class="group-meta">Ou par son nom : ' + web.addresses.map(esc).join(' · ') + '</p>'
+            : '') +
           '<p class="group-meta">Ton ami doit avoir Tailscale lancé et être dans ton réseau Tailscale (tu l’invites depuis la console Tailscale, ou tu partages cette machine avec lui).</p>' +
           firewallHelp(web.firewall, port, 'tailscale');
       else link = '<p class="group-meta">Relais ' + esc(st.relay) + '</p>';
       return (
-        '<div class="group-online open"><p class="group-code">Code du salon : <b>' + esc(st.code || '…') + '</b></p>' + link +
-        '<p class="group-meta">' + esc(st.status) + ' · ' + st.peers + ' invité(s) en ligne</p>' +
-        (st.code ? '<button type="button" data-action="groupCopyInvitation">📋 Copier l’invitation</button>' : '') +
-        '<button type="button" data-action="' + (hosted ? 'groupCloseInternet' : 'groupCloseRoom') + '">Fermer le salon</button></div>'
+        '<div class="group-online open"><p class="group-code">Code du salon : <b>' +
+        esc(st.code || '…') +
+        '</b></p>' +
+        link +
+        '<p class="group-meta">' +
+        esc(st.status) +
+        ' · ' +
+        st.peers +
+        ' invité(s) en ligne</p>' +
+        (st.code
+          ? '<button type="button" data-action="groupCopyInvitation">📋 Copier l’invitation</button>'
+          : '') +
+        '<button type="button" data-action="' +
+        (hosted ? 'groupCloseInternet' : 'groupCloseRoom') +
+        '">Fermer le salon</button></div>'
       );
     }
     const hosting = st.canHostOnline
-      ? '<div class="group-online-web"><button type="button" class="group-primary" data-action="groupOpenTailscale"' + (web.state === 'starting' ? ' disabled' : '') + '>🌍 Jouer avec Tailscale</button>' +
-        '<button type="button" data-action="groupOpenLan"' + (web.state === 'starting' ? ' disabled' : '') + '>🏠 Jouer en réseau local</button>' +
+      ? '<div class="group-online-web"><button type="button" class="group-primary" data-action="groupOpenTailscale"' +
+        (web.state === 'starting' ? ' disabled' : '') +
+        '>🌍 Jouer avec Tailscale</button>' +
+        '<button type="button" data-action="groupOpenLan"' +
+        (web.state === 'starting' ? ' disabled' : '') +
+        '>🏠 Jouer en réseau local</button>' +
         '<p class="group-meta">🌍 Un ami loin : installez tous les deux Tailscale (gratuit), mettez-vous dans le même réseau Tailscale, puis ouvre le salon ici. 🏠 Quelqu’un chez toi : le relais s’ouvre sur ton réseau, sans Internet. Dans les deux cas, copie l’invitation et envoie-la.</p>' +
-        (web.state === 'error' && web.message ? '<p class="group-meta group-warn">' + esc(web.message) + '</p>' : '') +
+        (web.state === 'error' && web.message
+          ? '<p class="group-meta group-warn">' + esc(web.message) + '</p>'
+          : '') +
         '</div>'
       : '';
     return (
-      '<div class="group-online">' + hosting +
-      '<div class="group-online-lan"><label for="groupRelay">' + (st.canHostOnline ? 'Ou un relais déjà lancé (serveur, npm run relay)' : 'Relais') + '</label><input id="groupRelay" type="text" autocomplete="off" value="' + esc(me.relay) + '">' +
+      '<div class="group-online">' +
+      hosting +
+      '<div class="group-online-lan"><label for="groupRelay">' +
+      (st.canHostOnline ? 'Ou un relais déjà lancé (serveur, npm run relay)' : 'Relais') +
+      '</label><input id="groupRelay" type="text" autocomplete="off" value="' +
+      esc(me.relay) +
+      '">' +
       '<button type="button" data-action="groupOpenRoom">🌐 Ouvrir à mes amis</button></div>' +
-      (st.status ? '<p class="group-meta">' + esc(st.status) + '</p>' : '') + '</div>'
+      (st.status ? '<p class="group-meta">' + esc(st.status) + '</p>' : '') +
+      '</div>'
     );
   }
   function render() {
@@ -458,17 +589,25 @@
     showPanel(
       '<div class="rpg-head"><h2>👥 Groupe</h2></div><div class="rpg-paper group-panel">' +
         '<p class="group-note">Tes amis te rejoignent en ligne avec le code du salon ; un compagnon local suit ton héros et combat seul. Chacun garde son propre butin, et tous sont enregistrés dans cette aventure : ' +
-        GUEST_LIMIT + ' au plus, ' + PRESENT_LIMIT + ' présents à la fois.</p>' +
+        GUEST_LIMIT +
+        ' au plus, ' +
+        PRESENT_LIMIT +
+        ' présents à la fois.</p>' +
         (ui.message ? '<p class="group-message" role="status">' + esc(ui.message) + '</p>' : '') +
         online() +
-        '<div class="group-list">' + (list.length ? list.map(card).join('') : '<p class="group-empty">Aucun compagnon pour l’instant.</p>') + '</div>' +
+        '<div class="group-list">' +
+        (list.length
+          ? list.map(card).join('')
+          : '<p class="group-empty">Aucun compagnon pour l’instant.</p>') +
+        '</div>' +
         (list.length < GUEST_LIMIT
           ? '<div class="group-new"><label for="groupPseudo">Nouveau compagnon</label><input id="groupPseudo" type="text" maxlength="32" autocomplete="off" placeholder="Pseudo">' +
             '<button type="button" data-action="groupCreate">Créer</button></div>'
           : '') +
         '</div>'
     );
-    for (const dot of document.querySelectorAll('#window .group-dot')) dot.style.background = dot.dataset.color;
+    for (const dot of document.querySelectorAll('#window .group-dot'))
+      dot.style.background = dot.dataset.color;
   }
   function changed(message) {
     ui.removing = null;
@@ -507,7 +646,11 @@
         const input = document.getElementById('groupPseudo'),
           hero = create(input ? input.value : '');
         if (!hero) return changed('Le groupe est complet (' + GUEST_LIMIT + ' compagnons).');
-        changed(join(hero.id) ? hero.name + ' rejoint le groupe.' : hero.name + ' est enregistré (absent : trois compagnons sont déjà là).');
+        changed(
+          join(hero.id)
+            ? hero.name + ' rejoint le groupe.'
+            : hero.name + ' est enregistré (absent : trois compagnons sont déjà là).'
+        );
       },
       join(id) {
         // Appelé depuis le panneau, un invité absent vient comme compagnon local (piloté par l'IA).

@@ -263,7 +263,12 @@
     },
     {
       name: 'vie du monde',
-      exports: { 'CANAAN_LIFE.update': 'function', 'CANAAN_LIFE.drawAnimals': 'function', 'CANAAN_LIFE.drawVillagers': 'function', 'CANAAN_LIFE.drawBubbles': 'function' }
+      exports: {
+        'CANAAN_LIFE.update': 'function',
+        'CANAAN_LIFE.drawAnimals': 'function',
+        'CANAAN_LIFE.drawVillagers': 'function',
+        'CANAAN_LIFE.drawBubbles': 'function'
+      }
     },
     {
       name: 'métiers et vie marine',
@@ -281,7 +286,15 @@
     },
     {
       name: 'maison',
-      exports: { 'CANAAN_HOUSE.drawTile': 'function', 'CANAAN_HOUSE.draw': 'function', 'CANAAN_HOUSE.interact': 'function', 'CANAAN_HOUSE.click': 'function', 'CANAAN_HOUSE.layout': 'function', 'CANAAN_HOUSE.load': 'function', toggleHousing: 'function' }
+      exports: {
+        'CANAAN_HOUSE.drawTile': 'function',
+        'CANAAN_HOUSE.draw': 'function',
+        'CANAAN_HOUSE.interact': 'function',
+        'CANAAN_HOUSE.click': 'function',
+        'CANAAN_HOUSE.layout': 'function',
+        'CANAAN_HOUSE.load': 'function',
+        toggleHousing: 'function'
+      }
     },
     {
       name: 'tréfonds',
@@ -329,11 +342,20 @@
     },
     {
       name: 'vie du camp',
-      exports: { 'CANAAN_CAMP_LIFE.audit': 'function', 'CANAAN_CAMP_LIFE.layout': 'function', 'CANAAN_CAMP_LIFE.items': 'function' }
+      exports: {
+        'CANAAN_CAMP_LIFE.audit': 'function',
+        'CANAAN_CAMP_LIFE.layout': 'function',
+        'CANAAN_CAMP_LIFE.items': 'function'
+      }
     },
     {
       name: 'échange entre joueurs',
-      exports: { 'CANAAN_TRADE.handle': 'function', 'CANAAN_TRADE.view': 'function', 'CANAAN_TRADE.applyRemote': 'function', toggleTrade: 'function' }
+      exports: {
+        'CANAAN_TRADE.handle': 'function',
+        'CANAAN_TRADE.view': 'function',
+        'CANAAN_TRADE.applyRemote': 'function',
+        toggleTrade: 'function'
+      }
     },
     {
       name: 'réseau',
@@ -495,7 +517,10 @@
         talentMenu: !!document.querySelector('#menuButtons button[data-action="toggleTalents"]'),
         talentShortcut: !!toggleTalents,
         offensiveCore: !!window.CANAAN_STATS_ATTACK && !!window.CANAAN_COMBAT.rawAttack,
-        fourClasses: !!window.CANAAN_CLASS && window.CANAAN_CLASS.audit().classes === 4 && window.CANAAN_CLASS.audit().talentCount === 40,
+        fourClasses:
+          !!window.CANAAN_CLASS &&
+          window.CANAAN_CLASS.audit().classes === 4 &&
+          window.CANAAN_CLASS.audit().talentCount === 40,
         clock: !!window.CANAAN_CLOCK && window.CANAAN_CLOCK.tickMs === 1000 / 60,
         randomStreams: worldRnd !== visualRnd,
         version: window.CANAAN_VERSION === CANAAN_VERSION,

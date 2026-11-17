@@ -260,7 +260,13 @@
       for (let y = Math.round(fy) - 2; y <= Math.round(fy) + 2; y++)
         for (let x = Math.round(fx) - 2; x <= Math.round(fx) + 2; x++) {
           // Jamais à travers la palissade (ni la cité elfique, qui a ses propres rues).
-          if (!valid(x, y) || Math.hypot(x - fx, y - fy) > half || game.world.tiles[y][x] === 2 || game.world.tiles[y][x] === CANAAN_WOOD_TILE) continue;
+          if (
+            !valid(x, y) ||
+            Math.hypot(x - fx, y - fy) > half ||
+            game.world.tiles[y][x] === 2 ||
+            game.world.tiles[y][x] === CANAAN_WOOD_TILE
+          )
+            continue;
           // Sur l'eau, profonde ou non, la route devient un petit pont en bois.
           if ([0, 15, 18].includes(game.world.tiles[y][x])) BRIDGE_TILES.add(y * MAPW + x);
           game.world.tiles[y][x] = 2;
@@ -270,7 +276,11 @@
   }
   function walkableLand(x, y) {
     return (
-      valid(x, y) && !SOLID.includes(game.world.tiles[y][x]) && game.world.tiles[y][x] !== 15 && !BRIDGE_TILES.has(y * MAPW + x) && !inCity(x, y)
+      valid(x, y) &&
+      !SOLID.includes(game.world.tiles[y][x]) &&
+      game.world.tiles[y][x] !== 15 &&
+      !BRIDGE_TILES.has(y * MAPW + x) &&
+      !inCity(x, y)
     );
   }
   // Intérieur de la cité elfique (dans la palissade) : rien d'autre ne s'y pose.
@@ -291,7 +301,12 @@
     for (let y = cy - r; y <= cy + r; y++)
       for (let x = cx - r; x <= cx + r; x++) {
         // La palissade de troncs reste intacte (ses troncs sont son décor).
-        if (!valid(x, y) || Math.hypot(x - cx, y - cy) > r + 0.4 || game.world.tiles[y][x] === CANAAN_WOOD_TILE) continue;
+        if (
+          !valid(x, y) ||
+          Math.hypot(x - cx, y - cy) > r + 0.4 ||
+          game.world.tiles[y][x] === CANAAN_WOOD_TILE
+        )
+          continue;
         if (tile !== undefined && !BRIDGE_TILES.has(y * MAPW + x)) game.world.tiles[y][x] = tile;
         game.world.decor[y][x] = null;
       }
@@ -350,8 +365,17 @@
     for (let y = 3; y < MAPH - 3; y++)
       for (let x = 3; x < MAPW - 3; x++) {
         if (BIOME_MAP[y * MAPW + x] !== 0 || SOLID.includes(game.world.tiles[y][x]) || inCity(x, y)) continue;
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]])
-          if (BIOME_MAP[(y + dy) * MAPW + x + dx] === 5 && !SOLID.includes(game.world.tiles[y + dy][x + dx]) && !inCity(x + dx, y + dy)) {
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ])
+          if (
+            BIOME_MAP[(y + dy) * MAPW + x + dx] === 5 &&
+            !SOLID.includes(game.world.tiles[y + dy][x + dx]) &&
+            !inCity(x + dx, y + dy)
+          ) {
             wall(x, y);
             break;
           }
@@ -360,11 +384,19 @@
     for (let y = CENTER.y - 50; y <= CENTER.y + 50; y++)
       for (let x = CENTER.x - 50; x <= CENTER.x + 50; x++) {
         if (!inCity(x, y)) continue;
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ]) {
           const nx = x + dx,
             ny = y + dy;
           if (inCity(nx, ny) || game.world.tiles[ny][nx] === CANAAN_WOOD_TILE) continue;
-          CANAAN_WOOD_GROUND.set(ny * MAPW + nx, game.world.tiles[ny][nx] === 4 ? 1 : game.world.tiles[ny][nx]);
+          CANAAN_WOOD_GROUND.set(
+            ny * MAPW + nx,
+            game.world.tiles[ny][nx] === 4 ? 1 : game.world.tiles[ny][nx]
+          );
           game.world.tiles[ny][nx] = CANAAN_WOOD_TILE;
           game.world.decor[ny][nx] = ['palisade', 'palisade2', 'palisade3'][Math.floor(hash(nx, ny, 77) * 3)];
         }
@@ -401,8 +433,14 @@
       for (let x = 3; x < MAPW - 3; x++) {
         const d = game.world.decor[y][x];
         if (!CANAAN_BIG_TREES.has(d)) continue;
-        const crowded = [[-1, -1], [0, -1], [1, -1], [-1, 0]].some(([dx, dy]) => CANAAN_BIG_TREES.has(game.world.decor[y + dy][x + dx]));
-        if (crowded || hash(x, y, 61) > 0.42) game.world.decor[y][x] = hash(x, y, 62) < 0.25 && d !== 'palm' ? 'bush' : null;
+        const crowded = [
+          [-1, -1],
+          [0, -1],
+          [1, -1],
+          [-1, 0]
+        ].some(([dx, dy]) => CANAAN_BIG_TREES.has(game.world.decor[y + dy][x + dx]));
+        if (crowded || hash(x, y, 61) > 0.42)
+          game.world.decor[y][x] = hash(x, y, 62) < 0.25 && d !== 'palm' ? 'bush' : null;
       }
     // Camp de l'Aurore : clairière d'herbe, terre battue autour du feu.
     const camp = villages[0];
@@ -482,13 +520,23 @@
     for (const p of PIXEL_PLACES) {
       const target = polar(p.angle, p.radius),
         biome = sectorOf(target.x, target.y).index,
-        spot = nearestSpot(target.x, target.y, biome, (x, y) => reachable(x, y) && game.world.tiles[y][x] !== 2);
+        spot = nearestSpot(
+          target.x,
+          target.y,
+          biome,
+          (x, y) => reachable(x, y) && game.world.tiles[y][x] !== 2
+        );
       p.x = spot.x;
       p.y = spot.y;
       clearArea(p.x, p.y, 2);
     }
     // Coffres secrets : tirage reproductible, loin des portails, des boss et des autres coffres.
-    const taken = [...instances.filter(d => !d.under), CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES].map(p => [p.x, p.y]);
+    const taken = [
+      ...instances.filter(d => !d.under),
+      CANAAN_ARENA_PORTAL,
+      ...WORLD_BOSSES,
+      ...PIXEL_PLACES
+    ].map(p => [p.x, p.y]);
     let next = 0;
     CHEST_SHARE.forEach((count, biome) => {
       for (let n = 0; n < count && next < hiddenChestSpots.length; n++) {
@@ -496,7 +544,11 @@
           const angle = ZONES[biome].angle - 27 + worldRnd() * 54,
             radius = 52 + worldRnd() * 108,
             p = polar(angle, radius);
-          if (!reachable(p.x, p.y) || game.world.tiles[p.y][p.x] === 2 || BIOME_MAP[p.y * MAPW + p.x] !== biome)
+          if (
+            !reachable(p.x, p.y) ||
+            game.world.tiles[p.y][p.x] === 2 ||
+            BIOME_MAP[p.y * MAPW + p.x] !== biome
+          )
             continue;
           if (taken.some(([x, y]) => Math.hypot(x - p.x, y - p.y) < 7)) continue;
           Object.assign(hiddenChestSpots[next++], { x: p.x, y: p.y });
@@ -523,7 +575,10 @@
     const T = game.world.tiles,
       D = game.world.decor,
       C = CENTER,
-      at = (deg, r) => ({ x: Math.round(C.x + Math.cos(deg * RAD) * r), y: Math.round(C.y + Math.sin(deg * RAD) * r) }),
+      at = (deg, r) => ({
+        x: Math.round(C.x + Math.cos(deg * RAD) * r),
+        y: Math.round(C.y + Math.sin(deg * RAD) * r)
+      }),
       solid = (x, y, w, h) => {
         for (let yy = y; yy < y + h; yy++)
           for (let xx = x; xx < x + w; xx++)
@@ -543,7 +598,8 @@
               }
       };
     // Sol de la cité : herbe dégagée.
-    for (let y = C.y - 45; y <= C.y + 45; y++) for (let x = C.x - 45; x <= C.x + 45; x++) if (inCity(x, y)) D[y][x] = null;
+    for (let y = C.y - 45; y <= C.y + 45; y++)
+      for (let x = C.x - 45; x <= C.x + 45; x++) if (inCity(x, y)) D[y][x] = null;
     // Porte : sur la palissade du côté de la Forêt enchantée, près du lac ; dehors, de la terre ferme accessible.
     const reach = reachableFrom(villages[0].x, villages[0].y);
     let gate = null;
@@ -579,15 +635,26 @@
         }
     const well = { x: C.x - 1, y: C.y - 1, w: 3, h: 3 };
     // Rues : de la porte à la place, puis une allée vers chaque bâtiment et vers le Grand Arbre (le reste est herbe).
-    street([[gate.in.x, gate.in.y], [(gate.in.x + C.x) / 2 + 2, (gate.in.y + C.y) / 2], [C.x, C.y + 4]]);
+    street([
+      [gate.in.x, gate.in.y],
+      [(gate.in.x + C.x) / 2 + 2, (gate.in.y + C.y) / 2],
+      [C.x, C.y + 4]
+    ]);
     // Grand Arbre au nord-ouest : tronc (emprise) et clairière autour (posé avant les bâtiments, qui l'évitent).
     const tp = at(205, 17),
       tree = { x: tp.x, y: tp.y, name: 'Ylvarë, l’Arbre-Ancien' };
     // Emprises : rectangles déjà pris (bâtiments, Grand Arbre, place), avec une marge.
-    const taken = [{ x: tree.x - 6, y: tree.y - 9, w: 13, h: 13 }, { x: C.x - 7, y: C.y - 7, w: 15, h: 15 }];
-    const overlaps = (r, m) => taken.some(o => r.x - m < o.x + o.w && r.x + r.w + m > o.x && r.y - m < o.y + o.h && r.y + r.h + m > o.y);
+    const taken = [
+      { x: tree.x - 6, y: tree.y - 9, w: 13, h: 13 },
+      { x: C.x - 7, y: C.y - 7, w: 15, h: 15 }
+    ];
+    const overlaps = (r, m) =>
+      taken.some(
+        o => r.x - m < o.x + o.w && r.x + r.w + m > o.x && r.y - m < o.y + o.h && r.y + r.h + m > o.y
+      );
     const inside = (r, m) => {
-      for (let y = r.y - m; y < r.y + r.h + m; y++) for (let x = r.x - m; x < r.x + r.w + m; x++) if (!inCity(x, y)) return false;
+      for (let y = r.y - m; y < r.y + r.h + m; y++)
+        for (let x = r.x - m; x < r.x + r.w + m; x++) if (!inCity(x, y)) return false;
       return true;
     };
     // Place le rectangle le plus près possible de l'angle et du rayon voulus, sans chevaucher.
@@ -623,7 +690,8 @@
       solid(b.x, b.y, b.w, b.h);
       buildings.push(b);
     }
-    for (let y = tree.y - 5; y <= tree.y + 3; y++) for (let x = tree.x - 5; x <= tree.x + 5; x++) if (inCity(x, y) && T[y][x] !== 2) D[y][x] = null;
+    for (let y = tree.y - 5; y <= tree.y + 3; y++)
+      for (let x = tree.x - 5; x <= tree.x + 5; x++) if (inCity(x, y) && T[y][x] !== 2) D[y][x] = null;
     solid(tree.x - 2, tree.y - 1, 5, 2);
     // Allée de chaque porte jusqu'à la rue la plus proche : chemin le plus court qui contourne les bâtiments (à une case
     // des murs), lissé en courbe ; plus d'allée coupée net ni d'allée qui traverse un bâtiment.
@@ -637,11 +705,26 @@
       let end = null;
       for (let i = 0; i < q.length && !end; i++) {
         const [x, y] = q[i];
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1]
+        ]) {
           const nx = x + dx,
             ny = y + dy,
             k = key(nx, ny);
-          if (prev.has(k) || !inCity(nx, ny) || T[ny][nx] === CANAAN_WOOD_TILE || (nearWall(nx, ny) && Math.hypot(nx - sx, ny - sy) > 1.5)) continue;
+          if (
+            prev.has(k) ||
+            !inCity(nx, ny) ||
+            T[ny][nx] === CANAAN_WOOD_TILE ||
+            (nearWall(nx, ny) && Math.hypot(nx - sx, ny - sy) > 1.5)
+          )
+            continue;
           if (dx && dy && (T[y][nx] === CANAAN_WOOD_TILE || T[ny][x] === CANAAN_WOOD_TILE)) continue;
           prev.set(k, key(x, y));
           if (T[ny][nx] === 2 && Math.hypot(nx - sx, ny - sy) > 2.5) {
@@ -659,29 +742,56 @@
     };
     for (const b of buildings) {
       const dx = b.x + Math.floor(b.w / 2);
-      street([[dx, b.y + b.h], [dx, b.y + b.h + 1]]);
+      street([
+        [dx, b.y + b.h],
+        [dx, b.y + b.h + 1]
+      ]);
       alley(dx, b.y + b.h + 1);
     }
-    street([[tree.x, tree.y + 1], [tree.x, tree.y + 2]]);
+    street([
+      [tree.x, tree.y + 1],
+      [tree.x, tree.y + 2]
+    ]);
     alley(tree.x, tree.y + 2);
     // La fontaine-arbre reste posée sur les dalles de la place : elle bloque par canaan-elven-city (CANAAN_CITY.blocked).
     // Étangs aux cygnes (dessinés et bloquants : canaan-elven-city), puis jardins, statues, nichoirs, bancs, arches.
     const props = [];
     // Un étang n'empiète sur aucune allée (ni sur une case autour).
     const dry = r => {
-      for (let y = r.y - 1; y <= r.y + r.h; y++) for (let x = r.x - 1; x <= r.x + r.w; x++) if (T[y][x] === 2 || T[y][x] === CANAAN_WOOD_TILE) return false;
+      for (let y = r.y - 1; y <= r.y + r.h; y++)
+        for (let x = r.x - 1; x <= r.x + r.w; x++)
+          if (T[y][x] === 2 || T[y][x] === CANAAN_WOOD_TILE) return false;
       return true;
     };
-    for (const [deg, r] of [[120, 13], [300, 10]]) {
+    for (const [deg, r] of [
+      [120, 13],
+      [300, 10]
+    ]) {
       const rect = placeRect(5, 3, deg, r, 1, dry);
       if (rect) props.push({ kind: 'pond', ...rect });
     }
-    const near = (x, y, d) => props.some(p => Math.hypot(p.x + p.w / 2 - x, p.y + p.h / 2 - y) < d) || buildings.some(b => x >= b.x - 2 && x <= b.x + b.w + 1 && y >= b.y - 3 && y <= b.y + b.h + 2);
+    const near = (x, y, d) =>
+      props.some(p => Math.hypot(p.x + p.w / 2 - x, p.y + p.h / 2 - y) < d) ||
+      buildings.some(b => x >= b.x - 2 && x <= b.x + b.w + 1 && y >= b.y - 3 && y <= b.y + b.h + 2);
     const grass = (x, y, w, h) => {
-      for (let yy = y - 1; yy <= y + h; yy++) for (let xx = x - 1; xx <= x + w; xx++) if (!inCity(xx, yy) || T[yy][xx] !== 1) return false;
+      for (let yy = y - 1; yy <= y + h; yy++)
+        for (let xx = x - 1; xx <= x + w; xx++) if (!inCity(xx, yy) || T[yy][xx] !== 1) return false;
       return true;
     };
-    const GARDEN = ['flowerbed', 'statue', 'birdhouses', 'flowerbed', 'birdbath', 'bench', 'topiary', 'stagstatue', 'flowerbed', 'bench', 'topiary', 'statue'];
+    const GARDEN = [
+      'flowerbed',
+      'statue',
+      'birdhouses',
+      'flowerbed',
+      'birdbath',
+      'bench',
+      'topiary',
+      'stagstatue',
+      'flowerbed',
+      'bench',
+      'topiary',
+      'statue'
+    ];
     let g = 0;
     for (let k = 0; k < 900 && g < 30; k++) {
       const a = hash(k, 3, 91) * 360,
@@ -700,7 +810,10 @@
       props.push({ kind: 'arch', x: p.x, y: p.y, w: 1, h: 1 });
       n++;
     }
-    for (const p of props) if (p.kind !== 'arch') for (let y = p.y - 1; y <= p.y + p.h; y++) for (let x = p.x - 1; x <= p.x + p.w; x++) if (D[y]?.[x]) D[y][x] = null;
+    for (const p of props)
+      if (p.kind !== 'arch')
+        for (let y = p.y - 1; y <= p.y + p.h; y++)
+          for (let x = p.x - 1; x <= p.x + p.w; x++) if (D[y]?.[x]) D[y][x] = null;
     // Arbres elfiques (bouleaux d'argent, cerisiers en fleurs, cyprès, saules), fleurs, à l'écart du reste.
     const free = (x, y) => inCity(x, y) && T[y][x] === 1 && !D[y][x];
     const ELFTREES = ['elftree', 'blossom', 'elftree', 'elfcypress', 'elfwillow', 'blossom', 'elfcypress'];
@@ -708,18 +821,34 @@
       for (let x = C.x - 45; x <= C.x + 45; x++) {
         if (!free(x, y)) continue;
         let close = false;
-        for (let j = -1; j <= 1 && !close; j++) for (let i = -1; i <= 1; i++) if (T[y + j]?.[x + i] !== 1) close = true;
+        for (let j = -1; j <= 1 && !close; j++)
+          for (let i = -1; i <= 1; i++) if (T[y + j]?.[x + i] !== 1) close = true;
         if (close) continue;
         const h = hash(x, y, 83);
-        if (h < 0.05 && !near(x, y, 3) && Math.hypot(x - tree.x, y - tree.y) > 7 && ![-2, -1, 1, 2].some(d => CANAAN_BIG_TREES.has(D[y][x + d]) || CANAAN_BIG_TREES.has(D[y + d]?.[x])))
+        if (
+          h < 0.05 &&
+          !near(x, y, 3) &&
+          Math.hypot(x - tree.x, y - tree.y) > 7 &&
+          ![-2, -1, 1, 2].some(d => CANAAN_BIG_TREES.has(D[y][x + d]) || CANAAN_BIG_TREES.has(D[y + d]?.[x]))
+        )
           D[y][x] = ELFTREES[Math.floor(hash(x, y, 84) * ELFTREES.length)];
-        else if (h < 0.14 && !near(x, y, 2)) D[y][x] = ['flower', 'magicplant', 'flower', 'bush', 'flower'][Math.floor(hash(x, y, 85) * 5)];
+        else if (h < 0.14 && !near(x, y, 2))
+          D[y][x] = ['flower', 'magicplant', 'flower', 'bush', 'flower'][Math.floor(hash(x, y, 85) * 5)];
       }
     // Lanternes de cristal le long des allées (une case à côté de la route).
     const lamps = [];
     for (let y = C.y - 45; y <= C.y + 45; y++)
       for (let x = C.x - 45; x <= C.x + 45; x++)
-        if (inCity(x, y) && T[y][x] === 1 && !D[y][x] && T[y][x + 1] === 2 && (x * 7 + y * 3) % 7 === 0 && !lamps.some(l => Math.hypot(l.x - x, l.y - y) < 4) && !near(x, y, 2)) lamps.push({ x, y });
+        if (
+          inCity(x, y) &&
+          T[y][x] === 1 &&
+          !D[y][x] &&
+          T[y][x + 1] === 2 &&
+          (x * 7 + y * 3) % 7 === 0 &&
+          !lamps.some(l => Math.hypot(l.x - x, l.y - y) < 4) &&
+          !near(x, y, 2)
+        )
+          lamps.push({ x, y });
     const dir = { x: Math.cos(gate.deg * RAD), y: Math.sin(gate.deg * RAD) };
     window.CANAAN_CITY_PLAN = {
       name: 'Sylvaëlle, la Cité des Elfes',
@@ -816,12 +945,21 @@
   function updateWorld() {
     game.world.clock++;
     if (game.world.clock % 420 === 0 && !game.world.instance) {
-      game.world.monsters = game.world.monsters.filter(m => m.worldBoss || Math.hypot(m.x - P.x, m.y - P.y) < TS * 34);
-      let nearby = game.world.monsters.filter(m => !m.worldBoss && Math.hypot(m.x - P.x, m.y - P.y) < TS * 25).length;
+      game.world.monsters = game.world.monsters.filter(
+        m => m.worldBoss || Math.hypot(m.x - P.x, m.y - P.y) < TS * 34
+      );
+      let nearby = game.world.monsters.filter(
+        m => !m.worldBoss && Math.hypot(m.x - P.x, m.y - P.y) < TS * 25
+      ).length;
       if (nearby < 10) spawnMonsters(Math.min(3, 12 - nearby));
     }
     updateWorldBosses();
-    if (game.world.instance && !game.world.instance.arena && game.world.instance.cleared && game.world.clock % 360 === 0)
+    if (
+      game.world.instance &&
+      !game.world.instance.arena &&
+      game.world.instance.cleared &&
+      game.world.clock % 360 === 0
+    )
       toast('Ouvre le coffre (E), puis retourne à l’entrée');
     if (
       game.world.instance &&
@@ -853,7 +991,14 @@
       reachableFrom,
       valid,
       biomeAt: (x, y) => BIOME_MAP[y * MAPW + x],
-      taken: () => [...instances.filter(d => !d.under), CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES, ...hiddenChestSpots].map(p => [p.x, p.y])
+      taken: () =>
+        [
+          ...instances.filter(d => !d.under),
+          CANAAN_ARENA_PORTAL,
+          ...WORLD_BOSSES,
+          ...PIXEL_PLACES,
+          ...hiddenChestSpots
+        ].map(p => [p.x, p.y])
     }),
     spawnMonsters,
     updateWorld,

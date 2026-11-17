@@ -37,7 +37,14 @@
     if (!m || m.hp <= 0) return;
     canaanMobLevel(m);
     const st = characterStats(hero),
-      blow = resolveOutgoing(d, st, m, Math.random, CANAAN_RUBIS.armorFactor(hero), CANAAN_RUBIS.critFactor(hero));
+      blow = resolveOutgoing(
+        d,
+        st,
+        m,
+        Math.random,
+        CANAAN_RUBIS.armorFactor(hero),
+        CANAAN_RUBIS.critFactor(hero)
+      );
     m._lastCrit = blow.crit;
     canaanAchieve(hero, 'hit', m, blow.damage, blow.crit);
     if (blow.crit) float(m.x, m.y - 44, 'CRITIQUE !', '#ffdf77');
@@ -59,7 +66,8 @@
       chat('Système', m.t + ' vaincu ! Ramasse le butin.');
       burst(m.x, m.y, '#ffd54a', 24);
       const goldFactor = CANAAN_RUBIS.goldFactor(hero);
-      if (m.g > 0) game.world.drops.push({ x: m.x, y: m.y, t: 'or', v: Math.round(m.g * goldFactor), life: 600 });
+      if (m.g > 0)
+        game.world.drops.push({ x: m.x, y: m.y, t: 'or', v: Math.round(m.g * goldFactor), life: 600 });
       const idx = game.world.monsters.indexOf(m);
       if (idx >= 0) game.world.monsters.splice(idx, 1);
     }
@@ -82,7 +90,10 @@
   const INSTANCE_DAMAGE = 1.5;
   function enemyRawDamage(m) {
     const level = canaanMobLevel(m),
-      raw = m.boss || m.worldBoss ? bossDamage(level, m.worldBoss ? 'world' : bossTier(m).raid ? 'raid' : 'dungeon') : mobDamage(level);
+      raw =
+        m.boss || m.worldBoss
+          ? bossDamage(level, m.worldBoss ? 'world' : bossTier(m).raid ? 'raid' : 'dungeon')
+          : mobDamage(level);
     // Donjons et raids : monstres 50 % plus forts que dehors ; un boss enragé (boss-mechanics.js) frappe 25 % plus fort.
     const inst = game.world?.instance && !game.world.instance.arena ? INSTANCE_DAMAGE : 1;
     return raw * inst * (m.enraged ? 1.25 : 1) * (instanceDifficulty()?.damage || 1) * canaanGroupScale().dmg;
@@ -118,7 +129,11 @@
   // Résistance et talents. Sert aux dégâts sur la durée de l'Arène, qui ne passent pas par les coups.
   window.canaanDamageTaken = function (hero = game.hero, attackerLevel = heroLevel(hero)) {
     const st = characterStats(hero);
-    return (1 - defenseReduction(st.defense, attackerLevel)) * (1 - Math.min(90, st.resist) / 100) * (1 - Math.min(90, st.guard) / 100);
+    return (
+      (1 - defenseReduction(st.defense, attackerLevel)) *
+      (1 - Math.min(90, st.resist) / 100) *
+      (1 - Math.min(90, st.guard) / 100)
+    );
   };
   // Étape du pipeline : chaque monstre se tourne vers le héros qu'il poursuit. Un héros caché par le Voile
   // d'ombre n'attire plus le regard (seuls les boss le voient encore, et le visent).
@@ -127,7 +142,8 @@
       if (!started || paused) return;
       for (const m of game.world.monsters) {
         const t = m.targetHero?.player;
-        if (m.hp > 0 && t && !t.dead && Math.hypot(t.x - m.x, t.y - m.y) < 430) m.facingAngle = Math.atan2(t.y - m.y, t.x - m.x);
+        if (m.hp > 0 && t && !t.dead && Math.hypot(t.x - m.x, t.y - m.y) < 430)
+          m.facingAngle = Math.atan2(t.y - m.y, t.x - m.x);
       }
     }
   };
@@ -154,7 +170,8 @@
     if (item.slot === 'artifact') return itemLevel(item) * 3;
     const st = itemStatsOf(item);
     return (
-      Object.values(st.primary).reduce((n, v) => n + v, 0) + 1.5 * Object.values(st.secondary).reduce((n, v) => n + v, 0)
+      Object.values(st.primary).reduce((n, v) => n + v, 0) +
+      1.5 * Object.values(st.secondary).reduce((n, v) => n + v, 0)
     );
   }
   function gearComparison(item, worn) {
@@ -185,7 +202,11 @@
         );
       })
       .join('');
-    return '<div class="gear-compare"><div class="gear-compare-head">⚖️ Comparaison des statistiques</div>' + rows + '</div>';
+    return (
+      '<div class="gear-compare"><div class="gear-compare-head">⚖️ Comparaison des statistiques</div>' +
+      rows +
+      '</div>'
+    );
   }
   // Ligne « Niveau requis » en rouge si le héros n'a pas encore le niveau de l'objet.
   function requirement(item) {
@@ -208,11 +229,19 @@
       ' · Niveau ' +
       itemLevel(item) +
       '</div>';
-    for (const [key, value] of Object.entries(st.primary)) html += '<div class="stat-line primary">+' + value + ' ' + label(key) + '</div>';
+    for (const [key, value] of Object.entries(st.primary))
+      html += '<div class="stat-line primary">+' + value + ' ' + label(key) + '</div>';
     const base = validSecondaries(item.sec) ? item.sec : {};
-    for (const [key, value] of Object.entries(base)) html += '<div class="stat-line secondary">+' + value + ' ' + label(key) + '</div>';
+    for (const [key, value] of Object.entries(base))
+      html += '<div class="stat-line secondary">+' + value + ' ' + label(key) + '</div>';
     // Enchantement : la troisième secondaire, en violet.
-    if (st.enchant) html += '<div class="stat-line secondary enchant">✨ +' + st.enchant.value + ' ' + label(st.enchant.stat) + ' <small>(enchantement)</small></div>';
+    if (st.enchant)
+      html +=
+        '<div class="stat-line secondary enchant">✨ +' +
+        st.enchant.value +
+        ' ' +
+        label(st.enchant.stat) +
+        ' <small>(enchantement)</small></div>';
     return html + requirement(item);
   }
   // Ce que fait une statistique (fiche du personnage).
@@ -223,7 +252,18 @@
       '<table class="stat-table"><thead><tr><th>' +
       title +
       '</th><th>Points</th></tr></thead><tbody>' +
-      keys.map(key => '<tr><td><div class="stat-name">' + label(key) + '</div><div class="stat-desc">' + describe(key) + '</div></td><td>' + (values[key] || 0) + '</td></tr>').join('') +
+      keys
+        .map(
+          key =>
+            '<tr><td><div class="stat-name">' +
+            label(key) +
+            '</div><div class="stat-desc">' +
+            describe(key) +
+            '</div></td><td>' +
+            (values[key] || 0) +
+            '</td></tr>'
+        )
+        .join('') +
       '</tbody></table>'
     );
   }

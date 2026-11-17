@@ -42,20 +42,31 @@
   function refresh() {
     const full = state ? state.fullscreen : !!document.fullscreenElement;
     setText('setFullscreen', onOff(full), full);
-    setText('setResolution', state ? state.width + ' × ' + state.height + (full ? ' (plein écran)' : '') : '—');
+    setText(
+      'setResolution',
+      state ? state.width + ' × ' + state.height + (full ? ' (plein écran)' : '') : '—'
+    );
     setText('setZoom', state ? Math.round(state.zoom * 100) + ' %' : '—');
     setText('setTextScale', Math.round(textScale * 100) + ' %');
     setText('setVsync', state ? onOff(state.vsync, '✓ Activée', 'Désactivée') : '—', state?.vsync);
     const restart = $('setRestartRow');
     if (restart) restart.hidden = !state || state.vsync === state.vsyncActive;
-    setText('setFpsCap', canaanDisplay.fpsCap ? canaanDisplay.fpsCap + ' images/s' : state && !state.vsyncActive ? 'Illimitée' : 'Selon l’écran');
+    setText(
+      'setFpsCap',
+      canaanDisplay.fpsCap
+        ? canaanDisplay.fpsCap + ' images/s'
+        : state && !state.vsyncActive
+          ? 'Illimitée'
+          : 'Selon l’écran'
+    );
     setText('setFps', onOff(canaanDisplay.fps), canaanDisplay.fps);
     setText('setGlow', onOff(canaanDisplay.glow, '✓ Activées', 'Désactivées'), canaanDisplay.glow);
     setText('setParticles', onOff(canaanDisplay.particles), canaanDisplay.particles);
     setText('setShake', onOff(canaanDisplay.shake, '✓ Activées', 'Désactivées'), canaanDisplay.shake);
     setText('setDamage', onOff(canaanDisplay.damage, '✓ Affichés', 'Masqués'), canaanDisplay.damage);
     // Hors application de bureau : résolution, échelle et VSync indisponibles.
-    for (const id of ['setResolutionRow', 'setZoomRow', 'setVsyncRow']) $(id)?.classList.toggle('disabled', !desktop);
+    for (const id of ['setResolutionRow', 'setZoomRow', 'setVsyncRow'])
+      $(id)?.classList.toggle('disabled', !desktop);
     const note = $('setDesktopNote');
     if (note) note.hidden = !!desktop;
     const el = $('fpsCounter');
@@ -95,7 +106,10 @@
       if (desktop) return push({ fullscreen: !(state && state.fullscreen) });
       const done = () => setTimeout(refresh, 120);
       if (document.fullscreenElement) document.exitFullscreen?.().then(done, done);
-      else document.documentElement.requestFullscreen?.().then(done, () => toast('Plein écran indisponible ici : essaie F11.'));
+      else
+        document.documentElement
+          .requestFullscreen?.()
+          .then(done, () => toast('Plein écran indisponible ici : essaie F11.'));
       return;
     }
     if (key === 'vsync') return desktop && push({ vsync: !(state && state.vsync) });
@@ -127,7 +141,13 @@
     if (key === 'resolution' && state.sizes.length) {
       // La taille la plus proche de l'actuelle, puis la suivante ou la précédente.
       let i = state.sizes.findIndex(([w, h]) => w === state.width && h === state.height);
-      if (i < 0) i = state.sizes.reduce((best, [w], k) => (Math.abs(w - state.width) < Math.abs(state.sizes[best][0] - state.width) ? k : best), 0) - (dir > 0 ? 1 : 0);
+      if (i < 0)
+        i =
+          state.sizes.reduce(
+            (best, [w], k) =>
+              Math.abs(w - state.width) < Math.abs(state.sizes[best][0] - state.width) ? k : best,
+            0
+          ) - (dir > 0 ? 1 : 0);
       const next = state.sizes[Math.max(0, Math.min(state.sizes.length - 1, i + dir))];
       return push({ size: next });
     }

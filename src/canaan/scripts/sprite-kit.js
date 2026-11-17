@@ -705,7 +705,9 @@
       atk = Math.min(1, (time - (m._atk ?? -99)) / 16),
       lunge = atk < 1 ? Math.sin(atk * Math.PI) : 0,
       // Élan de l'attaque vers le héros visé (pas vers un héros caché par le Voile d'ombre).
-      toward = m.targetHero ? Math.atan2(m.targetHero.player.y - m.y, m.targetHero.player.x - m.x) : m.facingAngle || 0,
+      toward = m.targetHero
+        ? Math.atan2(m.targetHero.player.y - m.y, m.targetHero.player.x - m.x)
+        : m.facingAngle || 0,
       reach = lunge * 9 * (scale / 1.5),
       ox = Math.cos(toward) * reach,
       oy = Math.sin(toward) * reach * 0.6,
@@ -842,15 +844,15 @@
     }
     // Halo coloré des flammes, cristaux et boss, plus visible dans l'obscurité (lueurs désactivables).
     if (canaanDisplay.glow) {
-    c.save();
-    c.globalCompositeOperation = 'lighter';
-    c.globalAlpha = 0.08 + amb.dark * 0.14;
-    for (const l of visible) {
-      if (!l.col) continue;
-      const r = l.r * 0.6;
-      c.drawImage(puff(l.col), l.x - r, l.y - r, r * 2, r * 2);
-    }
-    c.restore();
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = 0.08 + amb.dark * 0.14;
+      for (const l of visible) {
+        if (!l.col) continue;
+        const r = l.r * 0.6;
+        c.drawImage(puff(l.col), l.x - r, l.y - r, r * 2, r * 2);
+      }
+      c.restore();
     }
     if (amb.particles && canaanDisplay.particles) drawParticles(c, amb.particles, amb.color);
   }

@@ -18,10 +18,33 @@
   let castContext = { magic: false };
   // États des compétences propres à chaque héros (parade, rage, élan, combo, ombre, concentration, arcanes…)
   // et recharges des alliés ; ceux de l'hôte vivent dans game.hero.skillState, ses recharges dans weaponCooldowns.
-  const SKILL_STATES = ['guard', 'parryReady', 'berserk', 'flurry', 'combo', 'shadow', 'charge', 'focus', 'arcane', 'fastBow', 'mark', 'shieldGuard'];
-  const TIMED_STATES = ['guard', 'parryReady', 'berserk', 'flurry', 'combo', 'shadow', 'fastBow', 'shieldGuard'];
+  const SKILL_STATES = [
+    'guard',
+    'parryReady',
+    'berserk',
+    'flurry',
+    'combo',
+    'shadow',
+    'charge',
+    'focus',
+    'arcane',
+    'fastBow',
+    'mark',
+    'shieldGuard'
+  ];
+  const TIMED_STATES = [
+    'guard',
+    'parryReady',
+    'berserk',
+    'flurry',
+    'combo',
+    'shadow',
+    'fastBow',
+    'shieldGuard'
+  ];
   function skillStateOf(hero) {
-    if (!hero.skillState) hero.skillState = { ...Object.fromEntries(SKILL_STATES.map(k => [k, 0])), cooldowns: {} };
+    if (!hero.skillState)
+      hero.skillState = { ...Object.fromEntries(SKILL_STATES.map(k => [k, 0])), cooldowns: {} };
     return hero.skillState;
   }
   // Lanceur courant : les aides (cônes, cercles, ruées, projectiles, dégâts, soins) agissent pour ce héros.
@@ -54,8 +77,10 @@
   };
   const now = () => performance.now() / 1000,
     // Visée : la souris pour l'hôte, le point de son intention pour un allié.
-    aim = () => (isHost() ? facingAngleCore() : Math.atan2(actor.intent.aimY - AP.y, actor.intent.aimX - AP.x)),
-    groundTarget = () => (isHost() ? { x: mouseWorldX, y: mouseWorldY } : { x: actor.intent.aimX, y: actor.intent.aimY }),
+    aim = () =>
+      isHost() ? facingAngleCore() : Math.atan2(actor.intent.aimY - AP.y, actor.intent.aimX - AP.x),
+    groundTarget = () =>
+      isHost() ? { x: mouseWorldX, y: mouseWorldY } : { x: actor.intent.aimX, y: actor.intent.aimY },
     stats = () => characterStats(actor),
     power = () =>
       isHost()
@@ -69,11 +94,21 @@
     vfx.push({ shape, x, y, a, r, w, c, life: d, max: d });
     if (vfx.length > 180) vfx.shift();
     CANAAN_SOUND.effect(shape, x, y, c);
-    game.view.fx?.('v', [shape, Math.round(x), Math.round(y), Math.round(a * 100) / 100, Math.round(r), Math.round(w * 100) / 100, c, d]);
+    game.view.fx?.('v', [
+      shape,
+      Math.round(x),
+      Math.round(y),
+      Math.round(a * 100) / 100,
+      Math.round(r),
+      Math.round(w * 100) / 100,
+      c,
+      d
+    ]);
   }
   // Effets reçus de l'hôte par un invité en ligne : ajoutés tels quels, puis vieillis à chaque pas d'affichage.
   function remoteEffect([shape, x, y, a, r, w, c, d]) {
-    if (typeof shape !== 'string' || ![x, y, a, r, w, d].every(Number.isFinite) || typeof c !== 'string') return;
+    if (typeof shape !== 'string' || ![x, y, a, r, w, d].every(Number.isFinite) || typeof c !== 'string')
+      return;
     vfx.push({ shape, x, y, a, r, w, c, life: Math.min(d, 2), max: Math.min(d, 2) });
     if (vfx.length > 180) vfx.shift();
     CANAAN_SOUND.effect(shape, x, y, c);
@@ -112,7 +147,12 @@
   // coup). La Concentration (+40 %) est prise par la compétence offensive lancée (castSkill) : tous ses coups,
   // même différés, en profitent ; les attaques de base ne la consomment pas.
   function stanceMult(st, basic) {
-    return (st.berserk > 0 ? 1.25 : 1) * (st.flurry > 0 ? 1.15 : 1) * (st.shadow > 0 ? 1.6 : 1) * (!basic && castContext.focus ? 1.4 : 1);
+    return (
+      (st.berserk > 0 ? 1.25 : 1) *
+      (st.flurry > 0 ? 1.15 : 1) *
+      (st.shadow > 0 ? 1.6 : 1) *
+      (!basic && castContext.focus ? 1.4 : 1)
+    );
   }
   function spendStance() {
     S.shadow = 0;
@@ -291,7 +331,8 @@
         if (z.t <= 0) holyZones.splice(zi, 1);
       }
       // Durées des postures de chaque héros, et recharges des compétences des alliés.
-      for (const st of states) for (const k of TIMED_STATES) if (k !== 'shieldGuard') st[k] = Math.max(0, st[k] - dt);
+      for (const st of states)
+        for (const k of TIMED_STATES) if (k !== 'shieldGuard') st[k] = Math.max(0, st[k] - dt);
       for (const hero of game.heroes) {
         if (hero === game.hero) continue;
         const cds = skillStateOf(hero).cooldowns;
@@ -310,7 +351,8 @@
           if (m.v1746_bleedTick >= 1) {
             m.v1746_bleedTick -= 1;
             const by = m.v1746_bleedBy;
-            if (by && by !== game.hero && game.heroes.includes(by)) canaanHeroStrike(m, m.v1746_bleedPower || 3, by);
+            if (by && by !== game.hero && game.heroes.includes(by))
+              canaanHeroStrike(m, m.v1746_bleedPower || 3, by);
             else hit(m, m.v1746_bleedPower || 3);
           }
         }
@@ -591,7 +633,11 @@
       col = color[type],
       m = spec.mult;
     // Célérité (et forme féline) : attaques de base plus rapides.
-    basicLock = spec.lock * (1 - Math.min(60, characterStats().haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK() * (S.flurry > 0 ? 0.7 : 1);
+    basicLock =
+      spec.lock *
+      (1 - Math.min(60, characterStats().haste || 0) / 100) *
+      window.CANAAN_CLASS_BASIC_LOCK() *
+      (S.flurry > 0 ? 0.7 : 1);
     castContext = { magic: false, basic: true };
     switch (type) {
       case 'bow':
@@ -664,10 +710,18 @@
       a = Math.atan2(hero.intent.aimY - p.y, hero.intent.aimX - p.x),
       st = characterStats(hero),
       stance = skillStateOf(hero),
-      base = Math.round((type === 'staff' ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) * spec.mult * stanceMult(stance, true)),
+      base = Math.round(
+        (type === 'staff' ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) *
+          spec.mult *
+          stanceMult(stance, true)
+      ),
       context = { magic: type === 'staff', basic: true };
     stance.shadow = 0;
-    p.basicLock = spec.lock * (1 - Math.min(60, st.haste || 0) / 100) * window.CANAAN_CLASS_BASIC_LOCK(hero) * (stance.flurry > 0 ? 0.7 : 1);
+    p.basicLock =
+      spec.lock *
+      (1 - Math.min(60, st.haste || 0) / 100) *
+      window.CANAAN_CLASS_BASIC_LOCK(hero) *
+      (stance.flurry > 0 ? 0.7 : 1);
     p.atk = 0.28;
     if (type === 'bow' || type === 'staff') {
       const speed = type === 'bow' ? (heavy ? 15 : 13) : heavy ? 10 : 12;
@@ -689,15 +743,29 @@
     const spear = type === 'spear',
       wide = type === 'mace' || type === 'shield' || type === 'axe',
       range = spear ? (heavy ? 185 : 160) : wide ? (heavy ? 140 : 120) : heavy ? 130 : 115,
-      width = spear ? (heavy ? 30 : 22) : wide ? (heavy ? Math.PI * 0.8 : Math.PI / 2) : heavy ? Math.PI * 0.7 : Math.PI / 2;
+      width = spear
+        ? heavy
+          ? 30
+          : 22
+        : wide
+          ? heavy
+            ? Math.PI * 0.8
+            : Math.PI / 2
+          : heavy
+            ? Math.PI * 0.7
+            : Math.PI / 2;
     for (const m of game.world.monsters.slice()) {
       if (m.hp <= 0) continue;
       const dx = m.x - p.x,
         dy = m.y - p.y,
         r = m.r || 0;
       const inside = spear
-        ? (t => t >= 0 && t <= range + r && Math.abs(dx * Math.sin(a) - dy * Math.cos(a)) <= width + r)(dx * Math.cos(a) + dy * Math.sin(a))
-        : Math.hypot(dx, dy) <= range + r && Math.abs(Math.atan2(Math.sin(Math.atan2(dy, dx) - a), Math.cos(Math.atan2(dy, dx) - a))) <= width / 2;
+        ? (t => t >= 0 && t <= range + r && Math.abs(dx * Math.sin(a) - dy * Math.cos(a)) <= width + r)(
+            dx * Math.cos(a) + dy * Math.sin(a)
+          )
+        : Math.hypot(dx, dy) <= range + r &&
+          Math.abs(Math.atan2(Math.sin(Math.atan2(dy, dx) - a), Math.cos(Math.atan2(dy, dx) - a))) <=
+            width / 2;
       if (inside) CANAAN_COMBAT.attack(m, base, context, hero);
     }
     return true;
@@ -741,7 +809,12 @@
   function skillReady(hero, i) {
     if (hero === game.hero) return false;
     const spec = skillSpec(hero, i);
-    return !!spec && !hero.player.dead && (skillStateOf(hero).cooldowns[spec.key] || 0) <= 0 && hero.player.mp >= spec.cost;
+    return (
+      !!spec &&
+      !hero.player.dead &&
+      (skillStateOf(hero).cooldowns[spec.key] || 0) <= 0 &&
+      hero.player.mp >= spec.cost
+    );
   }
   function heroUseSkill(hero, i) {
     if (hero === game.hero) return useSkill(i);
@@ -749,9 +822,16 @@
     const spec = skillSpec(hero, i),
       recovery = Math.max(0, Math.min(80, characterStats(hero).cooldownReduction || 0));
     hero.player.mp -= spec.cost;
-    skillStateOf(hero).cooldowns[spec.key] = spec.cooldown * (1 - recovery / 100) * CANAAN_RUBIS.cooldownFactor(hero);
+    skillStateOf(hero).cooldowns[spec.key] =
+      spec.cooldown * (1 - recovery / 100) * CANAAN_RUBIS.cooldownFactor(hero);
     // Talents de classe (élément, Consécration…) et Rubis de compétence (Résonance, Éclipse, Chaos…) du lanceur.
-    const context = CANAAN_RUBIS.onCast(spec.type, i, spec.key, window.CANAAN_CLASS_CAST(spec.type, i, hero), hero);
+    const context = CANAAN_RUBIS.onCast(
+      spec.type,
+      i,
+      spec.key,
+      window.CANAAN_CLASS_CAST(spec.type, i, hero),
+      hero
+    );
     return withActor(hero, () => {
       castContext = context;
       castSkill(spec.type, i);
@@ -868,7 +948,13 @@
               dy = m.y - p.y,
               t = dx * Math.cos(a) + dy * Math.sin(a),
               cross = Math.abs(dx * Math.sin(a) - dy * Math.cos(a));
-            if (m.hp > 0 && t >= -20 && t <= Math.hypot(AP.x - p.x, AP.y - p.y) + 120 + (m.r || 0) && cross <= 40 + (m.r || 0)) hitOnce.add(m);
+            if (
+              m.hp > 0 &&
+              t >= -20 &&
+              t <= Math.hypot(AP.x - p.x, AP.y - p.y) + 120 + (m.r || 0) &&
+              cross <= 40 + (m.r || 0)
+            )
+              hitOnce.add(m);
           }
           for (const m of hitOnce) dmg(m, 2.4);
         }
@@ -1018,7 +1104,15 @@
     canaanHoldBasicAttack: holdBasicAttack,
     canaanHeroBasicAttack: heroBasicAttack,
     canaanHeroUseSkill: heroUseSkill,
-    CANAAN_SKILLS: Object.freeze({ ready: skillReady, spec: skillSpec, state: skillStateOf, remoteEffect, ageEffects, fx: effect, power: powerOf }),
+    CANAAN_SKILLS: Object.freeze({
+      ready: skillReady,
+      spec: skillSpec,
+      state: skillStateOf,
+      remoteEffect,
+      ageEffects,
+      fx: effect,
+      power: powerOf
+    }),
     CANAAN_BASIC_ATTACK: Object.freeze({
       spec: BASIC,
       lock: () => basicLock,

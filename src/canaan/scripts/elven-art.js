@@ -47,9 +47,28 @@
   // petites feuilles ; la silhouette descend sur les côtés (pas de champignon).
   function crown(k, kit, ramp, back, top, bark, seed) {
     const dark = [ramp[1], ramp[2], ramp[3], ramp[4], ramp[4]];
-    [[18, 34, 11], [46, 34, 11], [32, 20, 14]].forEach(([x, y, r], i) => cluster(k, kit, x, y, r, dark, seed + i, 0.9, 4));
-    for (const [bx, by] of [[16, 30], [48, 28], [26, 14], [40, 16]]) kit.branch(k, kit.bez([32, top], [32 + (bx - 32) * 0.3, (top + by) / 2], [bx, by]), 2, bark);
-    [[14, 28, 10], [50, 26, 10], [24, 14, 11], [42, 14, 11], [32, 30, 11], [20, 42, 7], [44, 42, 7], [32, 8, 9]].forEach(([x, y, r], i) => cluster(k, kit, x, y, r, ramp, seed * 3 + i * 5, 0.9, 4));
+    [
+      [18, 34, 11],
+      [46, 34, 11],
+      [32, 20, 14]
+    ].forEach(([x, y, r], i) => cluster(k, kit, x, y, r, dark, seed + i, 0.9, 4));
+    for (const [bx, by] of [
+      [16, 30],
+      [48, 28],
+      [26, 14],
+      [40, 16]
+    ])
+      kit.branch(k, kit.bez([32, top], [32 + (bx - 32) * 0.3, (top + by) / 2], [bx, by]), 2, bark);
+    [
+      [14, 28, 10],
+      [50, 26, 10],
+      [24, 14, 11],
+      [42, 14, 11],
+      [32, 30, 11],
+      [20, 42, 7],
+      [44, 42, 7],
+      [32, 8, 9]
+    ].forEach(([x, y, r], i) => cluster(k, kit, x, y, r, ramp, seed * 3 + i * 5, 0.9, 4));
   }
   // Tronc ou racine épaisse : disques le long d'un tracé, modelés (clair à gauche), rainures d'écorce.
   function limb(k, pts, t0, t1, ramp = BARK) {
@@ -61,7 +80,11 @@
           if (xx * xx + yy * yy > r * r) continue;
           const u = xx / Math.max(1, r),
             groove = Math.abs(Math.sin((x + xx) * 0.9 + (y + yy) * 0.25)) < 0.12;
-          k.px(x + xx, y + yy, groove ? ramp[3] : u < -0.45 ? ramp[0] : u < 0.25 ? ramp[1] : u < 0.7 ? ramp[2] : ramp[3]);
+          k.px(
+            x + xx,
+            y + yy,
+            groove ? ramp[3] : u < -0.45 ? ramp[0] : u < 0.25 ? ramp[1] : u < 0.7 ? ramp[2] : ramp[3]
+          );
         }
     });
   }
@@ -82,10 +105,31 @@
       const cx = TREE.cx,
         bk = [BARK[0], BARK[1], BARK[2], BARK[3]];
       // Couronne du fond (sombre) et maîtresses branches qui y montent.
-      const back = [[40, 62, 30], [130, 60, 30], [85, 34, 34], [62, 88, 26], [110, 88, 26]],
-        front = [[28, 80, 22], [142, 78, 22], [56, 50, 26], [114, 48, 26], [85, 60, 24], [85, 18, 20], [44, 96, 14], [126, 96, 14]];
+      const back = [
+          [40, 62, 30],
+          [130, 60, 30],
+          [85, 34, 34],
+          [62, 88, 26],
+          [110, 88, 26]
+        ],
+        front = [
+          [28, 80, 22],
+          [142, 78, 22],
+          [56, 50, 26],
+          [114, 48, 26],
+          [85, 60, 24],
+          [85, 18, 20],
+          [44, 96, 14],
+          [126, 96, 14]
+        ];
       back.forEach(([x, y, r], i) => cluster(k, kit, x, y, r, DEEP, i * 3, 0.85, 5));
-      for (const [bx, by] of [[34, 70], [136, 68], [60, 40], [110, 38], [85, 22]]) {
+      for (const [bx, by] of [
+        [34, 70],
+        [136, 68],
+        [60, 40],
+        [110, 38],
+        [85, 22]
+      ]) {
         const pts = kit.bez([cx + (bx - cx) * 0.15, 104], [cx + (bx - cx) * 0.5, 90], [bx, by], 20);
         limb(k, pts, 6, 2, BARK);
       }
@@ -118,13 +162,30 @@
           y = 6 + hsh(2, i) * 100;
         k.rect(x, y, 2, 2, i % 3 ? '#f0d060' : '#fff4b0');
       }
-      for (const [x, len] of [[22, 22], [44, 18], [126, 20], [150, 14], [64, 14], [106, 16]]) hang(k, x, 96, len, x);
+      for (const [x, len] of [
+        [22, 22],
+        [44, 18],
+        [126, 20],
+        [150, 14],
+        [64, 14],
+        [106, 16]
+      ])
+        hang(k, x, 96, len, x);
       // Racines noueuses qui s'étalent sur le sol, moussues.
-      for (const [dx, len, up] of [[-1, 50, 8], [1, 52, 6], [-1, 34, 3], [1, 36, 10], [-0.35, 22, 0], [0.4, 24, 0]]) {
+      for (const [dx, len, up] of [
+        [-1, 50, 8],
+        [1, 52, 6],
+        [-1, 34, 3],
+        [1, 36, 10],
+        [-0.35, 22, 0],
+        [0.4, 24, 0]
+      ]) {
         const pts = [];
-        for (let i = 0; i <= len; i += 2) pts.push([cx + dx * (14 + i), 192 + Math.sqrt(i) * 0.7 - up * (1 - i / len)]);
+        for (let i = 0; i <= len; i += 2)
+          pts.push([cx + dx * (14 + i), 192 + Math.sqrt(i) * 0.7 - up * (1 - i / len)]);
         limb(k, pts, 7, 2, BARK);
-        for (let i = 4; i < len; i += 7) k.rect(cx + dx * (14 + i) - 2, 187 + Math.sqrt(i) * 0.7 - up * (1 - i / len), 5, 2, MOSS[i % 3]);
+        for (let i = 4; i < len; i += 7)
+          k.rect(cx + dx * (14 + i) - 2, 187 + Math.sqrt(i) * 0.7 - up * (1 - i / len), 5, 2, MOSS[i % 3]);
       }
       // Visage sculpté dans l'écorce : orbites creuses, sourcils noueux, nez en nœud, bouche creuse, barbe de mousse.
       const ey = TREE.eyeY,
@@ -136,7 +197,15 @@
         k.rect(cx + s * 9 - 4, ey + 7, 8, 1, BARK[3]);
         k.rect(cx + s * 13 - 2, ey + 10, 4, 3, BARK[0]);
       }
-      k.poly([[cx - 2, ey - 5], [cx + 2, ey - 5], [cx + 5, ey + 12], [cx - 5, ey + 12]], BARK[1]);
+      k.poly(
+        [
+          [cx - 2, ey - 5],
+          [cx + 2, ey - 5],
+          [cx + 5, ey + 12],
+          [cx - 5, ey + 12]
+        ],
+        BARK[1]
+      );
       k.rect(cx - 2, ey - 4, 1, 14, BARK[0]);
       k.rect(cx + 3, ey + 2, 1, 9, BARK[2]);
       k.rect(cx - 6, ey + 12, 12, 2, BARK[3]);
@@ -147,9 +216,15 @@
         const hw = Math.round(8 * Math.sqrt(1 - (y * y) / 12));
         k.rect(cx - hw, my + y, hw * 2, 1, y < 0 ? BARK[4] : BARK[3]);
       }
-      for (let i = 0; i < 14; i++) k.rect(cx - 13 + i * 2, my + 4 + (i % 3), 2, 5 + ((i * 3) % 7), MOSS[i % 3]);
+      for (let i = 0; i < 14; i++)
+        k.rect(cx - 13 + i * 2, my + 4 + (i % 3), 2, 5 + ((i * 3) % 7), MOSS[i % 3]);
       // Champignons au pied.
-      for (const [x, col] of [[cx - 34, '#e85a48'], [cx + 38, '#f0a040'], [cx - 50, '#e85a48'], [cx + 52, '#c8a8ff']]) {
+      for (const [x, col] of [
+        [cx - 34, '#e85a48'],
+        [cx + 38, '#f0a040'],
+        [cx - 50, '#e85a48'],
+        [cx + 52, '#c8a8ff']
+      ]) {
         k.rect(x, 191, 2, 4, '#fff1d8');
         k.rect(x - 2, 188, 6, 3, col);
         k.px(x, 188, '#ffffff');
@@ -192,7 +267,8 @@
       const cx = FOUNT.cx,
         wy = FOUNT.waterY;
       // Rebord du fond, eau, tronc, rebord de devant.
-      for (let a = Math.PI; a <= Math.PI * 2; a += 0.08) k.disc(cx + Math.cos(a) * 40, wy + Math.sin(a) * 14, 4, a % 0.3 < 0.15 ? '#9a968a' : '#b4b0a4');
+      for (let a = Math.PI; a <= Math.PI * 2; a += 0.08)
+        k.disc(cx + Math.cos(a) * 40, wy + Math.sin(a) * 14, 4, a % 0.3 < 0.15 ? '#9a968a' : '#b4b0a4');
       k.g.fillStyle = '#3a8a9a';
       for (let y = -12; y <= 12; y++) {
         const hw = Math.round(36 * Math.sqrt(1 - (y * y) / 144));
@@ -202,17 +278,26 @@
       cluster(k, kit, cx + 10, 18, 12, LEAF, 9, 0.85, 4);
       for (let s = 0; s < 2; s++) {
         const pts = [];
-        for (let y = wy + 2; y >= 18; y -= 2) pts.push([cx + Math.sin((wy - y) * 0.12 + s * 3) * 4 + (s ? 3 : -3), y]);
+        for (let y = wy + 2; y >= 18; y -= 2)
+          pts.push([cx + Math.sin((wy - y) * 0.12 + s * 3) * 4 + (s ? 3 : -3), y]);
         limb(k, pts, 7, 4, BARK);
       }
-      for (const [dx, len] of [[-1, 30], [1, 28], [-0.5, 16], [0.6, 18]]) {
+      for (const [dx, len] of [
+        [-1, 30],
+        [1, 28],
+        [-0.5, 16],
+        [0.6, 18]
+      ]) {
         const pts = [];
         for (let i = 0; i <= len; i += 2) pts.push([cx + dx * (4 + i), wy + 2 + Math.min(10, i * 0.5)]);
         limb(k, pts, 4, 2, BARK);
       }
-      for (let a = 0; a <= Math.PI; a += 0.08) k.disc(cx + Math.cos(a) * 40, wy + Math.sin(a) * 14, 4, a % 0.3 < 0.15 ? '#a8a498' : '#c8c4b8');
-      for (let a = 0.2; a < Math.PI; a += 0.5) k.rect(cx + Math.cos(a) * 40 - 3, wy + Math.sin(a) * 14 - 3, 5, 2, MOSS[Math.floor(a * 3) % 3]);
-      for (const x of [4, 76]) for (let j = 0; j < 5; j++) k.line(x + 4, 80, x + j * 2, 70 - (j % 2) * 3, j % 2 ? LEAF[2] : LEAF[1]);
+      for (let a = 0; a <= Math.PI; a += 0.08)
+        k.disc(cx + Math.cos(a) * 40, wy + Math.sin(a) * 14, 4, a % 0.3 < 0.15 ? '#a8a498' : '#c8c4b8');
+      for (let a = 0.2; a < Math.PI; a += 0.5)
+        k.rect(cx + Math.cos(a) * 40 - 3, wy + Math.sin(a) * 14 - 3, 5, 2, MOSS[Math.floor(a * 3) % 3]);
+      for (const x of [4, 76])
+        for (let j = 0; j < 5; j++) k.line(x + 4, 80, x + j * 2, 70 - (j % 2) * 3, j % 2 ? LEAF[2] : LEAF[1]);
       hang(k, cx - 18, 22, 14, 1);
       hang(k, cx + 20, 24, 12, 5);
     });
@@ -223,7 +308,10 @@
       ox = X - FOUNT.cx * u,
       oy = Y - FOUNT.h * u;
     c.save();
-    for (const [sx, sy] of [[FOUNT.cx - 12, 26], [FOUNT.cx + 14, 28]])
+    for (const [sx, sy] of [
+      [FOUNT.cx - 12, 26],
+      [FOUNT.cx + 14, 28]
+    ])
       for (let i = 0; i < 6; i++) {
         const ph = (time * 0.05 + i / 6) % 1,
           y = sy + ph * (FOUNT.waterY - sy - 2);
@@ -284,7 +372,17 @@
           flame.push([32 + w + Math.sin(t * 9) * 1.5, y]);
         }
         kit.shingles(k, flame, DEEP, { leaf: true, w: 5, h: 5, cx: 28 });
-        kit.branch(k, [[33, 60], [30, 44], [34, 28], [31, 12]], 2, ['#e8e4dc', '#c0b8aa', '#8a8276']);
+        kit.branch(
+          k,
+          [
+            [33, 60],
+            [30, 44],
+            [34, 28],
+            [31, 12]
+          ],
+          2,
+          ['#e8e4dc', '#c0b8aa', '#8a8276']
+        );
       } else {
         // Saule lumineux : dôme et longues tiges qui retombent.
         const pts = [];
@@ -294,7 +392,12 @@
         cluster(k, kit, 32, 26, 22, willow, 3, 0.7);
         for (let x = 12; x < 54; x += 3) {
           const len = 18 + Math.round(hsh(x, 4) * 22);
-          for (let i = 0; i < len; i++) k.px(x + Math.round(Math.sin(i * 0.3 + x) * 1), 32 + i, i % 4 === 0 ? willow[0] : willow[2 + (i % 2)]);
+          for (let i = 0; i < len; i++)
+            k.px(
+              x + Math.round(Math.sin(i * 0.3 + x) * 1),
+              32 + i,
+              i % 4 === 0 ? willow[0] : willow[2 + (i % 2)]
+            );
           if (x % 9 === 0) k.px(x, 32 + len, '#fff4b0');
         }
       }
@@ -317,7 +420,17 @@
     }
   }
   // ---------------------------------------------------------------- Jardins
-  const PROP_SIZE = { flowerbed: [48, 22], statue: [24, 50], stagstatue: [44, 40], birdhouses: [44, 44], birdbath: [22, 26], bench: [44, 22], topiary: [22, 32], arch: [56, 60], pond: [120, 72] };
+  const PROP_SIZE = {
+    flowerbed: [48, 22],
+    statue: [24, 50],
+    stagstatue: [44, 40],
+    birdhouses: [44, 44],
+    birdbath: [22, 26],
+    bench: [44, 22],
+    topiary: [22, 32],
+    arch: [56, 60],
+    pond: [120, 72]
+  };
   function prop(kind) {
     const [w, h] = PROP_SIZE[kind] || [24, 24];
     return paint('prop:' + kind, w, h, (k, kit) => {
@@ -337,9 +450,33 @@
         k.rect(4, 40, 16, 2, stone[0]);
         k.rect(7, 36, 10, 4, stone[1]);
         // Elfe drapée, le bras levé tenant un globe de lumière ; longs cheveux, oreilles pointues, plis de la robe.
-        k.poly([[5, 37], [19, 37], [16, 21], [8, 21]], stone[1]);
-        k.poly([[5, 37], [9, 37], [10, 21], [8, 21]], stone[0]);
-        k.poly([[15, 37], [19, 37], [16, 21], [14, 21]], stone[2]);
+        k.poly(
+          [
+            [5, 37],
+            [19, 37],
+            [16, 21],
+            [8, 21]
+          ],
+          stone[1]
+        );
+        k.poly(
+          [
+            [5, 37],
+            [9, 37],
+            [10, 21],
+            [8, 21]
+          ],
+          stone[0]
+        );
+        k.poly(
+          [
+            [15, 37],
+            [19, 37],
+            [16, 21],
+            [14, 21]
+          ],
+          stone[2]
+        );
         for (const x of [9, 12, 15]) k.rect(x, 27, 1, 9, stone[2]);
         k.rect(8, 20, 8, 2, stone[2]);
         k.rect(9, 14, 6, 7, stone[1]);
@@ -365,13 +502,32 @@
         for (const lx of [11, 15, 25, 28]) k.rect(lx, 27, 2, 5, stone[2]);
         k.rect(27, 10, 5, 10, stone[1]);
         k.rect(29, 6, 8, 6, stone[0]);
-        for (const [x, y] of [[30, 4], [29, 2], [28, 0], [32, 3], [33, 1], [35, 2]]) k.px(x, y, stone[2]);
+        for (const [x, y] of [
+          [30, 4],
+          [29, 2],
+          [28, 0],
+          [32, 3],
+          [33, 1],
+          [35, 2]
+        ])
+          k.px(x, y, stone[2]);
         k.rect(4, 30, 4, 2, MOSS[1]);
       } else if (kind === 'birdhouses') {
-        for (const [x, top, col] of [[8, 10, '#c8784a'], [22, 2, '#7a9a5a'], [36, 14, '#c8a050']]) {
+        for (const [x, top, col] of [
+          [8, 10, '#c8784a'],
+          [22, 2, '#7a9a5a'],
+          [36, 14, '#c8a050']
+        ]) {
           k.rect(x - 1, top + 10, 2, 44 - top - 10, '#6a4426');
           k.rect(x - 5, top + 4, 10, 8, col);
-          k.poly([[x - 7, top + 5], [x, top - 1], [x + 7, top + 5]], '#8a5a34');
+          k.poly(
+            [
+              [x - 7, top + 5],
+              [x, top - 1],
+              [x + 7, top + 5]
+            ],
+            '#8a5a34'
+          );
           k.disc(x, top + 8, 1.5, '#2a1a10');
         }
       } else if (kind === 'birdbath') {
@@ -401,12 +557,19 @@
       } else if (kind === 'arch') {
         for (const x of [4, 50]) k.rect(x, 20, 3, 40, '#6a4426');
         const pts = [];
-        for (let a = 0; a <= 20; a++) pts.push([28 - Math.cos((a / 20) * Math.PI) * 24, 22 - Math.sin((a / 20) * Math.PI) * 18]);
+        for (let a = 0; a <= 20; a++)
+          pts.push([28 - Math.cos((a / 20) * Math.PI) * 24, 22 - Math.sin((a / 20) * Math.PI) * 18]);
         kit.branch(k, pts, 3, [BARK[0], BARK[1], BARK[2]]);
         for (let i = 0; i < 40; i++) {
           const a = hsh(i, 6) * Math.PI,
             r = 24 + (hsh(6, i) - 0.5) * 6;
-          k.rect(28 - Math.cos(a) * r, 22 - Math.sin(a) * r * 0.75, 2, 2, i % 3 ? LEAF[1 + (i % 2)] : FLOWERS[i % FLOWERS.length]);
+          k.rect(
+            28 - Math.cos(a) * r,
+            22 - Math.sin(a) * r * 0.75,
+            2,
+            2,
+            i % 3 ? LEAF[1 + (i % 2)] : FLOWERS[i % FLOWERS.length]
+          );
         }
         for (const x of [4, 50]) hang(k, x + 1, 22, 26, x);
       } else if (kind === 'pond') {
@@ -417,7 +580,14 @@
           k.disc(x, y, 4, Math.sin(a * 5) > 0 ? '#a8a498' : '#c4c0b4');
           if (Math.sin(a * 7) > 0.7) k.rect(x - 2, y - 4, 4, 2, MOSS[Math.floor(a * 2) % 3]);
         }
-        for (const [x, y] of [[14, 20], [104, 22], [20, 56], [100, 58]]) for (let j = 0; j < 4; j++) k.rect(x + j * 2, y - 10 - (j % 2) * 3, 1, 10 + (j % 2) * 3, j % 2 ? '#5aa448' : '#3e7a36');
+        for (const [x, y] of [
+          [14, 20],
+          [104, 22],
+          [20, 56],
+          [100, 58]
+        ])
+          for (let j = 0; j < 4; j++)
+            k.rect(x + j * 2, y - 10 - (j % 2) * 3, 1, 10 + (j % 2) * 3, j % 2 ? '#5aa448' : '#3e7a36');
       }
     });
   }
@@ -430,10 +600,27 @@
     c.fill();
     c.clip();
     c.fillStyle = '#4aa0b0';
-    for (let i = 0; i < 6; i++) c.fillRect(Math.round(X - w + ((i * 37 + time * 0.3) % (w * 2))), Math.round(Y - h + i * (h / 3)), 18, 2);
+    for (let i = 0; i < 6; i++)
+      c.fillRect(
+        Math.round(X - w + ((i * 37 + time * 0.3) % (w * 2))),
+        Math.round(Y - h + i * (h / 3)),
+        18,
+        2
+      );
     c.fillStyle = 'rgba(255,255,255,.5)';
-    for (let i = 0; i < 4; i++) c.fillRect(Math.round(X - w * 0.6 + i * 28), Math.round(Y - h * 0.5 + (i % 2) * 10 + Math.sin(time * 0.05 + i) * 2), 6, 2);
-    for (const [dx, dy, f] of [[-0.5, 0.2, 0], [0.3, -0.3, 1], [0.55, 0.35, 2], [-0.15, -0.45, 3]]) {
+    for (let i = 0; i < 4; i++)
+      c.fillRect(
+        Math.round(X - w * 0.6 + i * 28),
+        Math.round(Y - h * 0.5 + (i % 2) * 10 + Math.sin(time * 0.05 + i) * 2),
+        6,
+        2
+      );
+    for (const [dx, dy, f] of [
+      [-0.5, 0.2, 0],
+      [0.3, -0.3, 1],
+      [0.55, 0.35, 2],
+      [-0.15, -0.45, 3]
+    ]) {
       const x = X + dx * w,
         y = Y + dy * h;
       c.fillStyle = '#4e9a3a';
@@ -453,7 +640,16 @@
   function animal(kind, face, step) {
     const leg = step ? 1 : 0,
       flip = face === 3,
-      size = { stag: [26, 26], unicorn: [26, 26], fox: [20, 13], peacock: [16, 18], peacockFan: [28, 22], swan: [16, 12], rabbit: [10, 9], owl: [10, 12] }[kind] || [12, 12];
+      size = {
+        stag: [26, 26],
+        unicorn: [26, 26],
+        fox: [20, 13],
+        peacock: [16, 18],
+        peacockFan: [28, 22],
+        swan: [16, 12],
+        rabbit: [10, 9],
+        owl: [10, 12]
+      }[kind] || [12, 12];
     return paint('animal:' + kind + face + step, size[0], size[1], k => {
       const R = (x, y, w, h, col) => k.rect(flip ? size[0] - x - w : x, y, w, h, col);
       if (kind === 'stag' || kind === 'unicorn') {
@@ -461,13 +657,28 @@
         R(5, 12, 14, 7, body[1]);
         R(5, 12, 14, 2, body[0]);
         R(5, 17, 14, 2, body[2]);
-        for (const [lx, o] of [[6, leg], [9, -leg], [15, leg], [18, -leg]]) R(lx, 19, 2, 6 + o, body[2]);
+        for (const [lx, o] of [
+          [6, leg],
+          [9, -leg],
+          [15, leg],
+          [18, -leg]
+        ])
+          R(lx, 19, 2, 6 + o, body[2]);
         R(17, 6, 4, 8, body[1]);
         R(19, 4, 6, 5, body[0]);
         R(23, 6, 2, 2, '#3a3040');
         R(21, 5, 1, 1, '#1a1a20');
         if (kind === 'stag') {
-          for (const [x, y] of [[19, 3], [18, 1], [17, 0], [20, 1], [21, 0], [22, 2], [23, 1]]) R(x, y, 1, 1, '#f0d060');
+          for (const [x, y] of [
+            [19, 3],
+            [18, 1],
+            [17, 0],
+            [20, 1],
+            [21, 0],
+            [22, 2],
+            [23, 1]
+          ])
+            R(x, y, 1, 1, '#f0d060');
           R(3, 12, 3, 2, '#ffffff');
         } else {
           R(23, 1, 1, 3, '#f0d060');
@@ -479,7 +690,13 @@
         // Renard sylvestre : pelage vert-gris, ventre crème, queue à pointe de feuille lumineuse.
         R(5, 5, 10, 5, '#7aa88a');
         R(5, 8, 10, 2, '#e8e0c8');
-        for (const [lx, o] of [[6, leg], [8, -leg], [12, leg], [14, -leg]]) R(lx, 10, 1, 3 + o, '#4a6a54');
+        for (const [lx, o] of [
+          [6, leg],
+          [8, -leg],
+          [12, leg],
+          [14, -leg]
+        ])
+          R(lx, 10, 1, 3 + o, '#4a6a54');
         R(14, 2, 5, 4, '#7aa88a');
         R(14, 0, 1, 2, '#4a6a54');
         R(17, 0, 1, 2, '#4a6a54');
@@ -493,7 +710,8 @@
         if (fan) {
           for (let i = 0; i < 9; i++) {
             const a = Math.PI + (i / 8) * Math.PI;
-            for (let r = 2; r < 11; r++) R(10 + Math.cos(a) * r, 14 + Math.sin(a) * r, 1, 1, r > 8 ? '#ffffff' : '#ece8e0');
+            for (let r = 2; r < 11; r++)
+              R(10 + Math.cos(a) * r, 14 + Math.sin(a) * r, 1, 1, r > 8 ? '#ffffff' : '#ece8e0');
             R(10 + Math.cos(a) * 9, 14 + Math.sin(a) * 9, 2, 2, '#5ac8c8');
           }
         } else for (let i = 0; i < 8; i++) R(1 + i, 10 + (i % 2), 1, 4, '#ece8e0');
@@ -538,5 +756,17 @@
     });
   }
   registerTrees();
-  window.CANAAN_ELVEN_ART = Object.freeze({ TREE, FOUNT, PROP_SIZE, tree, face, fountain, fountainFx, prop, pondWater, animal, registerTrees });
+  window.CANAAN_ELVEN_ART = Object.freeze({
+    TREE,
+    FOUNT,
+    PROP_SIZE,
+    tree,
+    face,
+    fountain,
+    fountainFx,
+    prop,
+    pondWater,
+    animal,
+    registerTrees
+  });
 })();

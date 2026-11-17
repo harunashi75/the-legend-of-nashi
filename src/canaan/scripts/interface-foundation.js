@@ -12,7 +12,11 @@ const itemIcon = {
 // Objet de prestige (Légendaire, Mythique) : attribut des cases du sac et de la fiche, pour leur brillance animée.
 function canaanPrestige(item) {
   const name = item ? rarityInfo(item).name : '';
-  return name === 'Légendaire' ? ' data-prestige="legendaire"' : name === 'Mythique' ? ' data-prestige="mythique"' : '';
+  return name === 'Légendaire'
+    ? ' data-prestige="legendaire"'
+    : name === 'Mythique'
+      ? ' data-prestige="mythique"'
+      : '';
 }
 function rpgHeader(title) {
   return (
@@ -30,7 +34,10 @@ let BAG_LIMIT = 40; // Capacité dynamique, actualisée selon le niveau du sac a
 // Un héros (l'hôte par défaut) est-il près d'un marchand ? L'hôte le vérifie aussi pour ses invités.
 function nearMerchant(hero = game.hero) {
   const p = hero.player;
-  return !game.world.instance && game.world.npcs.some(n => n.type === 'shop' && canaanHere(n) && Math.hypot(p.x - n.x, p.y - n.y) < 135);
+  return (
+    !game.world.instance &&
+    game.world.npcs.some(n => n.type === 'shop' && canaanHere(n) && Math.hypot(p.x - n.x, p.y - n.y) < 135)
+  );
 }
 function modernPanel(html) {
   showPanel(html);

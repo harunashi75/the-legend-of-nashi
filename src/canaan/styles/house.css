@@ -11,9 +11,13 @@
   border: 2px solid var(--rpg-gold, #e8b850);
   border-radius: 8px;
   background: linear-gradient(180deg, rgba(42, 28, 18, 0.96), rgba(16, 10, 6, 0.97));
-  box-shadow: 0 0 0 2px #0c0805, 0 10px 30px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 0 0 2px #0c0805,
+    0 10px 30px rgba(0, 0, 0, 0.6);
   color: #e8d9b8;
-  font: calc(13px * var(--font-scale)) system-ui, sans-serif;
+  font:
+    calc(13px * var(--font-scale)) system-ui,
+    sans-serif;
 }
 #housingBar .house-head {
   display: flex;
@@ -45,7 +49,9 @@
   border: 1px solid rgba(232, 184, 80, 0.45);
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   color: #e8d9b8;
-  font: 600 calc(12px * var(--font-scale)) system-ui, sans-serif;
+  font:
+    600 calc(12px * var(--font-scale)) system-ui,
+    sans-serif;
   cursor: var(--cursor-pointer);
 }
 #housingBar button.on {

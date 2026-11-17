@@ -8,7 +8,17 @@ import { CLASS_IDS } from '../data/classes.js';
 export const SAVE_SCHEMA = 10;
 export const SLOT_COUNT = 3;
 // Champs d'un héros, repris du schéma 9 ; la conversion 9 → 10 les déplace sous heros.hote.
-export const HERO_FIELDS = Object.freeze(['player', 'kills', 'inventory', 'equipment', 'materials', 'bagLevel', 'ways', 'rubis', 'arena']);
+export const HERO_FIELDS = Object.freeze([
+  'player',
+  'kills',
+  'inventory',
+  'equipment',
+  'materials',
+  'bagLevel',
+  'ways',
+  'rubis',
+  'arena'
+]);
 // Emplacements sauvegardés : les emplacements actifs et l'arme de réserve.
 export const SAVED_GEAR_SLOTS = Object.freeze([...ACTIVE_GEAR_SLOTS, 'weapon2']);
 
@@ -50,7 +60,15 @@ export function freshHero({ spawn, baseMana, look, classe = null }) {
     rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
     arena: { best: 0, attempts: 0, completed: false, lastBoss: '' },
     // Métiers : pêche et cuisine au niveau 1, sans poisson ni repas.
-    prof: { fishing: { level: 1, exp: 0 }, cooking: { level: 1, exp: 0 }, hunting: { level: 1, exp: 0 }, fish: {}, meat: {}, meals: {}, codex: {} }
+    prof: {
+      fishing: { level: 1, exp: 0 },
+      cooking: { level: 1, exp: 0 },
+      hunting: { level: 1, exp: 0 },
+      fish: {},
+      meat: {},
+      meals: {},
+      codex: {}
+    }
   };
 }
 // Aventure neuve : un monde vierge, le héros de l'hôte, aucun invité.
@@ -76,7 +94,8 @@ export function summarizeSave(raw, slot) {
     return { slot, state: 'illisible' };
   }
   if (!isValidSave(data)) return { slot, state: 'illisible' };
-  const guests = data.heros.invites && typeof data.heros.invites === 'object' ? Object.values(data.heros.invites) : [];
+  const guests =
+    data.heros.invites && typeof data.heros.invites === 'object' ? Object.values(data.heros.invites) : [];
   return {
     slot,
     state: 'aventure',

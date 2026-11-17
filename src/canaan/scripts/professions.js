@@ -281,7 +281,8 @@
   for (const [id, f] of Object.entries(FISH)) ING[id] = { name: f.name, icon: f.icon, bag: 'fish' };
   for (const [id, m] of Object.entries(MEAT)) ING[id] = { name: m.name, icon: m.icon, bag: 'meat' };
   // Herbes de la cueillette (canaan-gathering) : cuisinées en infusions.
-  for (const [id, h] of Object.entries(CANAAN_GATHER.HERBS)) ING[id] = { name: h.name, icon: h.icon, bag: 'herb' };
+  for (const [id, h] of Object.entries(CANAAN_GATHER.HERBS))
+    ING[id] = { name: h.name, icon: h.icon, bag: 'herb' };
   // Recettes : effet du repas. kind : heal / mana (tout de suite), hot / regen (sur la durée), buff (bonus).
   const RECIPES = {
     soupe: { name: 'Soupe de gardon', fish: 'gardon', kind: 'heal' },
@@ -295,7 +296,13 @@
     civet: { name: 'Civet de lièvre', fish: 'lievre', kind: 'both' },
     roti: { name: 'Rôti de venaison', fish: 'venaison', kind: 'buff', stat: 'warrior', seconds: 120 },
     gigot: { name: 'Gigot aux herbes', fish: 'gigot', kind: 'hot', seconds: 8 },
-    cuisses: { name: 'Cuisses de grenouille sautées', fish: 'cuisses', kind: 'buff', stat: 'speed', seconds: 180 },
+    cuisses: {
+      name: 'Cuisses de grenouille sautées',
+      fish: 'cuisses',
+      kind: 'buff',
+      stat: 'speed',
+      seconds: 180
+    },
     banquet: { name: 'Banquet céleste', fish: 'astrale', kind: 'regen', seconds: 15 },
     meuniere: { name: 'Perche meunière', fish: 'perche', kind: 'heal' },
     quenelles: { name: 'Quenelles de brochet', fish: 'brochet', kind: 'buff', stat: 'damage', seconds: 90 },
@@ -315,12 +322,25 @@
     aloes: { name: 'Jus d’aloès', fish: 'aloes', kind: 'regen', seconds: 8 },
     nectar: { name: 'Nectar de lys étoilé', fish: 'lys', kind: 'regen', seconds: 12 },
     // Recette de la grand-mère d'Éloi : apprise en terminant sa quête.
-    dore: { name: 'Poisson doré en croûte de sel', fish: 'dore', kind: 'buff', stat: 'feast', seconds: 240, quest: 5 },
+    dore: {
+      name: 'Poisson doré en croûte de sel',
+      fish: 'dore',
+      kind: 'buff',
+      stat: 'feast',
+      seconds: 240,
+      quest: 5
+    },
     // Recette d'Amira : apprise en rendant son eau à l'oasis.
     tajine: { name: 'Tajine de l’oasis', fish: 'silure', kind: 'both', quest: 25 },
     // Recettes des Tréfonds (taverne de Dorn, Forteresse de Durgrim, ou n'importe quelle cuisinière).
     papillote: { name: 'Papillote de poisson aveugle', fish: 'aveugle', kind: 'heal' },
-    lanterne: { name: 'Poisson-lanterne flambé', fish: 'lanterne', kind: 'buff', stat: 'damage', seconds: 90 },
+    lanterne: {
+      name: 'Poisson-lanterne flambé',
+      fish: 'lanterne',
+      kind: 'buff',
+      stat: 'damage',
+      seconds: 90
+    },
     murene: { name: 'Murène en ragoût', fish: 'murene', kind: 'both' },
     fangeux: { name: 'Silure fangeux fumé', fish: 'fangeux', kind: 'hot', seconds: 7 },
     taupe: { name: 'Ragoût de taupe des nains', fish: 'taupe', kind: 'buff', stat: 'armor', seconds: 120 },
@@ -328,7 +348,13 @@
     racine: { name: 'Décoction de racine de pierre', fish: 'racine', kind: 'both' },
     lichen: { name: 'Thé de lichen', fish: 'lichen', kind: 'mana' },
     pavot: { name: 'Infusion de pavot funèbre', fish: 'pavot', kind: 'hot', seconds: 8 },
-    champignon: { name: 'Velouté de champignons luisants', fish: 'champignon', kind: 'buff', stat: 'feast', seconds: 120 }
+    champignon: {
+      name: 'Velouté de champignons luisants',
+      fish: 'champignon',
+      kind: 'buff',
+      stat: 'feast',
+      seconds: 120
+    }
   };
   const knows = (hero, id) => !RECIPES[id].quest || CANAAN_QUESTS.done(hero, RECIPES[id].quest);
   const QUICK_COOLDOWN = 20 * 60;
@@ -359,20 +385,34 @@
     }
     if (r.kind === 'regen') {
       const share = 1 + 0.25 * q;
-      return { share, text: 'Rend ' + share + ' % des PV et du mana par seconde pendant ' + r.seconds + ' s' };
+      return {
+        share,
+        text: 'Rend ' + share + ' % des PV et du mana par seconde pendant ' + r.seconds + ' s'
+      };
     }
     const label = { speed: 'vitesse', damage: 'dégâts', armor: 'dégâts subis' }[r.stat];
     if (r.stat === 'warrior') {
       const dmg = Math.round(pct * 0.6),
         arm = Math.round(pct * 0.6);
-      return { damage: dmg, armor: arm, text: '+' + dmg + ' % de dégâts et −' + arm + ' % de dégâts subis pendant ' + r.seconds / 60 + ' min' };
+      return {
+        damage: dmg,
+        armor: arm,
+        text: '+' + dmg + ' % de dégâts et −' + arm + ' % de dégâts subis pendant ' + r.seconds / 60 + ' min'
+      };
     }
     if (r.stat === 'feast') {
       const dmg = Math.round(pct * 0.7),
         spd = Math.round(pct * 0.6);
-      return { damage: dmg, speed: spd, text: '+' + dmg + ' % de dégâts et +' + spd + ' % de vitesse pendant ' + r.seconds / 60 + ' min' };
+      return {
+        damage: dmg,
+        speed: spd,
+        text: '+' + dmg + ' % de dégâts et +' + spd + ' % de vitesse pendant ' + r.seconds / 60 + ' min'
+      };
     }
-    return { [r.stat]: pct, text: (r.stat === 'armor' ? '−' : '+') + pct + ' % de ' + label + ' pendant ' + r.seconds / 60 + ' min' };
+    return {
+      [r.stat]: pct,
+      text: (r.stat === 'armor' ? '−' : '+') + pct + ' % de ' + label + ' pendant ' + r.seconds / 60 + ' min'
+    };
   }
 
   // ---------------------------------------------------------------- Bancs de poissons (mêmes positions chez chacun)
@@ -380,15 +420,47 @@
   const DEEP = new Set([0, 18]);
   // Espèces selon l'eau : mer, lac scintillant, ou lac d'un biome (ordre des ZONES).
   const TABLES = {
-    sea: [['saumon', 35], ['thon', 30], ['merou', 20], ['espadon', 8], ['raie', 7]],
-    glow: [['lune', 60], ['truite', 40]],
+    sea: [
+      ['saumon', 35],
+      ['thon', 30],
+      ['merou', 20],
+      ['espadon', 8],
+      ['raie', 7]
+    ],
+    glow: [
+      ['lune', 60],
+      ['truite', 40]
+    ],
     lake: [
-      [['gardon', 45], ['carpe', 30], ['perche', 25]],
-      [['truite', 45], ['gardon', 30], ['brochet', 25]],
-      [['carpe', 40], ['anguille', 35], ['gardon', 25]],
-      [['carpe', 40], ['truite', 40], ['brochet', 20]],
-      [['silure', 80], ['carpe', 20]],
-      [['truite', 50], ['gardon', 30], ['lune', 20]]
+      [
+        ['gardon', 45],
+        ['carpe', 30],
+        ['perche', 25]
+      ],
+      [
+        ['truite', 45],
+        ['gardon', 30],
+        ['brochet', 25]
+      ],
+      [
+        ['carpe', 40],
+        ['anguille', 35],
+        ['gardon', 25]
+      ],
+      [
+        ['carpe', 40],
+        ['truite', 40],
+        ['brochet', 20]
+      ],
+      [
+        ['silure', 80],
+        ['carpe', 20]
+      ],
+      [
+        ['truite', 50],
+        ['gardon', 30],
+        ['lune', 20]
+      ]
     ]
   };
   let spots = null;
@@ -414,7 +486,12 @@
       const i = queue[k],
         x = i % MAPW,
         y = (i - x) / MAPW;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1]
+      ]) {
         const nx = x + dx,
           ny = y + dy,
           j = ny * MAPW + nx;
@@ -436,13 +513,33 @@
         const sea = t === 0 && ocean[ty * MAPW + tx];
         if (hash(tx, ty) > (sea ? 0.32 : 0.8)) continue;
         // Rive praticable juste à côté (le héros pêche depuis le bord).
-        const shore = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].some(
-          ([dx, dy]) => !SOLID.includes(tile(tx + dx, ty + dy)) && tile(tx + dx, ty + dy) !== undefined && !DEEP.has(tile(tx + dx, ty + dy))
+        const shore = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [-1, -1],
+          [1, -1],
+          [-1, 1]
+        ].some(
+          ([dx, dy]) =>
+            !SOLID.includes(tile(tx + dx, ty + dy)) &&
+            tile(tx + dx, ty + dy) !== undefined &&
+            !DEEP.has(tile(tx + dx, ty + dy))
         );
         if (!shore || spots.some(s => Math.hypot(s.tx - tx, s.ty - ty) < (sea ? 9 : 5))) continue;
         const zone = Math.max(0, ZONES.indexOf(regionAt(tx, ty))),
           kind = t === 18 ? 'glow' : sea ? 'sea' : 'lake';
-        spots.push({ tx, ty, x: (tx + 0.5) * TS, y: (ty + 0.5) * TS, kind, zone, table: kind === 'lake' ? TABLES.lake[zone] : TABLES[kind] });
+        spots.push({
+          tx,
+          ty,
+          x: (tx + 0.5) * TS,
+          y: (ty + 0.5) * TS,
+          kind,
+          zone,
+          table: kind === 'lake' ? TABLES.lake[zone] : TABLES[kind]
+        });
       }
     // Puis les bancs des lacs souterrains (layer: 'under').
     spots.push(...CANAAN_UNDER.spots());
@@ -481,7 +578,21 @@
       s.exp -= xpNeeded(s.level);
       s.level++;
       const unlocked = QUALITY_LEVEL.indexOf(s.level);
-      tell(hero, ({ fishing: '⟦prof_fishing⟧ Pêche', cooking: '⟦prof_cooking⟧ Cuisine', hunting: '⟦prof_hunting⟧ Chasse', mining: '⟦prof_mining⟧ Minage', herbalism: '⟦prof_herbalism⟧ Cueillette', enchanting: '⟦prof_enchanting⟧ Enchanteur' }[skill]) + ' niveau ' + s.level + ' !' + (unlocked > 0 ? ' Qualité ' + qualityName(unlocked) + ' débloquée.' : ''));
+      tell(
+        hero,
+        {
+          fishing: '⟦prof_fishing⟧ Pêche',
+          cooking: '⟦prof_cooking⟧ Cuisine',
+          hunting: '⟦prof_hunting⟧ Chasse',
+          mining: '⟦prof_mining⟧ Minage',
+          herbalism: '⟦prof_herbalism⟧ Cueillette',
+          enchanting: '⟦prof_enchanting⟧ Enchanteur'
+        }[skill] +
+          ' niveau ' +
+          s.level +
+          ' !' +
+          (unlocked > 0 ? ' Qualité ' + qualityName(unlocked) + ' débloquée.' : '')
+      );
     }
     if (s.level >= MAX_LEVEL) s.exp = 0;
   }
@@ -493,7 +604,15 @@
       tell(hero, '🎣 Aucun banc de poissons à portée : approche-toi des remous dans l’eau profonde.');
       return false;
     }
-    hero.fishing = { spot: index, x: p.x, y: p.y, state: 'wait', at: time, bite: time + 110 + Math.floor(Math.random() * 230), until: 0 };
+    hero.fishing = {
+      spot: index,
+      x: p.x,
+      y: p.y,
+      state: 'wait',
+      at: time,
+      bite: time + 110 + Math.floor(Math.random() * 230),
+      until: 0
+    };
     return true;
   }
   function fishCatch(hero) {
@@ -522,7 +641,12 @@
     prof.fish[key] = (prof.fish[key] || 0) + 1;
     discover(prof, kind, q);
     hero.fishing = null;
-    float(hero.player.x, hero.player.y - 50, FISH[kind].icon + ' ' + FISH[kind].name + ' (' + qualityName(q) + ')', qualityColor(q));
+    float(
+      hero.player.x,
+      hero.player.y - 50,
+      FISH[kind].icon + ' ' + FISH[kind].name + ' (' + qualityName(q) + ')',
+      qualityColor(q)
+    );
     tell(hero, '🎣 ' + FISH[kind].name + ' ' + qualityName(q) + ' pêché !');
     gainXp(hero, 'fishing', 10 + 6 * q);
     canaanAchieve(hero, 'fish', kind, q);
@@ -555,7 +679,9 @@
     if (!g || !p || p.dead || hero.away || game.world.instance) return false;
     if ((hero.huntCd || 0) > time) return false;
     // Zone de chasse : 0 à 5 sur l'île, 6 à 9 dans les Tréfonds.
-    const zone = canaanUnder() ? CANAAN_UNDER.zoneId(p.x / TS, p.y / TS) : ZONES.indexOf(regionAt(p.x / TS, p.y / TS));
+    const zone = canaanUnder()
+      ? CANAAN_UNDER.zoneId(p.x / TS, p.y / TS)
+      : ZONES.indexOf(regionAt(p.x / TS, p.y / TS));
     if (!g.zones.includes(zone)) return false;
     hero.huntCd = time + 40;
     const prof = profOf(hero),
@@ -567,8 +693,22 @@
     }
     const first = discover(prof, kind, q);
     prof.meat[key] = (prof.meat[key] || 0) + 1;
-    float(p.x, p.y - 50, MEAT[g.meat].icon + ' ' + MEAT[g.meat].name + ' (' + qualityName(q) + ')', qualityColor(q));
-    tell(hero, '🏹 ' + g.name + ' : ' + MEAT[g.meat].name + ' ' + qualityName(q) + (first ? ' · nouvelle espèce dans ton carnet !' : ''));
+    float(
+      p.x,
+      p.y - 50,
+      MEAT[g.meat].icon + ' ' + MEAT[g.meat].name + ' (' + qualityName(q) + ')',
+      qualityColor(q)
+    );
+    tell(
+      hero,
+      '🏹 ' +
+        g.name +
+        ' : ' +
+        MEAT[g.meat].name +
+        ' ' +
+        qualityName(q) +
+        (first ? ' · nouvelle espèce dans ton carnet !' : '')
+    );
     gainXp(hero, 'hunting', 10 + 6 * q);
     canaanAchieve(hero, 'hunt', kind, q);
     hero.netBag = null;
@@ -589,20 +729,31 @@
       prof = profOf(hero);
     if (!r || !Number.isInteger(quality) || quality < 0 || quality > 7 || !knows(hero, recipe)) return false;
     if (!nearFire(hero.player.x, hero.player.y)) {
-      tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).');
+      tell(
+        hero,
+        '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).'
+      );
       return false;
     }
     const have = prof[ING[r.fish].bag]?.[r.fish + ':' + quality] || 0;
     if (!have) return false;
     const n = Math.max(1, Math.min(count | 0, have, 20));
-    return CANAAN_GATHER.startCook(hero, { x: hero.player.x + TS * 0.6, y: hero.player.y - TS * 0.4 }, () => cook(hero, recipe, quality, n), n);
+    return CANAAN_GATHER.startCook(
+      hero,
+      { x: hero.player.x + TS * 0.6, y: hero.player.y - TS * 0.4 },
+      () => cook(hero, recipe, quality, n),
+      n
+    );
   }
   function cook(hero, recipe, quality, count = 1) {
     const r = RECIPES[recipe],
       prof = profOf(hero);
     if (!r || !Number.isInteger(quality) || quality < 0 || quality > 7 || !knows(hero, recipe)) return false;
     if (!nearFire(hero.player.x, hero.player.y)) {
-      tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).');
+      tell(
+        hero,
+        '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp, un refuge ou ta maison).'
+      );
       return false;
     }
     const bag = prof[ING[r.fish].bag],
@@ -654,7 +805,8 @@
         p.mp = Math.min(p.mmp, p.mp + fx.amount);
         float(p.x, p.y - 40, '+' + fx.amount + ' mana', '#7ab8ff');
       }
-    } else if (r.kind === 'hot' || r.kind === 'regen') hero.foodHot = { recipe, q: quality, until: time + r.seconds * 60, next: time + 60 };
+    } else if (r.kind === 'hot' || r.kind === 'regen')
+      hero.foodHot = { recipe, q: quality, until: time + r.seconds * 60, next: time + 60 };
     else hero.food = { recipe, q: quality, until: time + r.seconds * 60 };
     prof.meals[key]--;
     if (!prof.meals[key]) delete prof.meals[key];
@@ -668,7 +820,8 @@
     if (action.op === 'cook') return startCook(hero, action.recipe, action.quality, action.count);
     if (action.op === 'eat') return eat(hero, action.recipe, action.quality);
     if (action.op === 'hunt') return hunt(hero, action.game);
-    if (action.op === 'gather' || action.op === 'enchant-craft' || action.op === 'enchant-apply') return CANAAN_GATHER.handle(hero, action);
+    if (action.op === 'gather' || action.op === 'enchant-craft' || action.op === 'enchant-apply')
+      return CANAAN_GATHER.handle(hero, action);
     return false;
   }
   // Étape du pipeline : touches et poissons qui s'échappent, soins des repas, fin des bonus.
@@ -713,7 +866,8 @@
     }
   };
   // Bonus du repas en cours (dégâts, protection, vitesse), lus par le combat et le déplacement.
-  const buffOf = hero => (hero?.food && hero.food.until > time ? effect(hero.food.recipe, hero.food.q, hero) : null);
+  const buffOf = hero =>
+    hero?.food && hero.food.until > time ? effect(hero.food.recipe, hero.food.q, hero) : null;
   const damageMult = hero => (100 + (buffOf(hero)?.damage || 0)) / 100;
   const armorMult = hero => (100 - (buffOf(hero)?.armor || 0)) / 100;
   const speedMult = hero => 1 + (buffOf(hero)?.speed || 0) / 100;
@@ -728,8 +882,14 @@
       left = t => Math.max(0, Math.ceil((t - time) / 60));
     return {
       fishing: f ? { spot: f.spot, bite: f.state === 'bite' } : null,
-      food: hero.food && hero.food.until > time ? { recipe: hero.food.recipe, q: hero.food.q, left: left(hero.food.until) } : null,
-      hot: hero.foodHot && hero.foodHot.until > time ? { recipe: hero.foodHot.recipe, q: hero.foodHot.q, left: left(hero.foodHot.until) } : null,
+      food:
+        hero.food && hero.food.until > time
+          ? { recipe: hero.food.recipe, q: hero.food.q, left: left(hero.food.until) }
+          : null,
+      hot:
+        hero.foodHot && hero.foodHot.until > time
+          ? { recipe: hero.foodHot.recipe, q: hero.foodHot.q, left: left(hero.foodHot.until) }
+          : null,
       cd: left(hero.foodCd || 0),
       // Travail en cours (miner, cueillir, forger, cuisiner) : animation et barre d'avancement.
       work: CANAAN_GATHER.workView(hero),
@@ -787,7 +947,13 @@
       }
       c.globalAlpha = 0.8;
       c.fillStyle = '#ffffff';
-      for (let k = 0; k < 3; k++) c.fillRect(Math.round(s.x - 8 + ((i * 7 + k * 9) % 16)), Math.round(s.y - 4 - ((time * 0.4 + k * 13) % 10)), 2, 2);
+      for (let k = 0; k < 3; k++)
+        c.fillRect(
+          Math.round(s.x - 8 + ((i * 7 + k * 9) % 16)),
+          Math.round(s.y - 4 - ((time * 0.4 + k * 13) % 10)),
+          2,
+          2
+        );
       const jump = (time + i * 97) % 300;
       if (jump < 26) {
         const t = jump / 26;
@@ -818,7 +984,12 @@
     if (game.world.instance) return;
     c.save();
     for (const hero of game.heroes) {
-      const f = hero === game.hero ? myLive().fishing : guest() ? hero.fishView : hero.fishing && { spot: hero.fishing.spot, bite: hero.fishing.state === 'bite' };
+      const f =
+        hero === game.hero
+          ? myLive().fishing
+          : guest()
+            ? hero.fishView
+            : hero.fishing && { spot: hero.fishing.spot, bite: hero.fishing.state === 'bite' };
       if (!f) continue;
       const s = allSpots()[f.spot];
       if (!s) continue;
@@ -869,11 +1040,23 @@
   // (fermé par défaut ; son état est gardé quand le panneau se redessine). Contenu écrit par le jeu (HTML sûr).
   function tips(items, more = '') {
     return (
-      '<div class="prof-tips">' + items.map(t => '<span>' + t + '</span>').join('') + '</div>' +
-      (more ? '<details class="prof-more"' + (ui.more ? ' open' : '') + '><summary>Comment ça marche ?</summary><div>' + more + '</div></details>' : '')
+      '<div class="prof-tips">' +
+      items.map(t => '<span>' + t + '</span>').join('') +
+      '</div>' +
+      (more
+        ? '<details class="prof-more"' +
+          (ui.more ? ' open' : '') +
+          '><summary>Comment ça marche ?</summary><div>' +
+          more +
+          '</div></details>'
+        : '')
     );
   }
-  document.addEventListener('toggle', e => e.target.matches?.('.prof-more') && (ui.more = e.target.open), true);
+  document.addEventListener(
+    'toggle',
+    e => e.target.matches?.('.prof-more') && (ui.more = e.target.open),
+    true
+  );
   // Où l'on en est (près de la forge, de la cuisinière…) : une ligne, verte si c'est bon, orange sinon.
   const status = (ok, text) => '<p class="prof-status' + (ok ? '' : ' warn') + '">' + text + '</p>';
   function bar(skill) {
@@ -881,10 +1064,29 @@
       need = xpNeeded(s.level),
       pct = s.level >= MAX_LEVEL ? 100 : Math.min(100, (s.exp / need) * 100);
     return (
-      '<div class="prof-level"><span><b>Niveau ' + s.level + '</b> / ' + MAX_LEVEL + '</span>' +
-      '<div class="prof-bar"><i style="width:' + pct.toFixed(1) + '%"></i></div><span>' + (s.level >= MAX_LEVEL ? 'Maîtrise complète' : s.exp + ' / ' + need + ' XP') + '</span></div>' +
+      '<div class="prof-level"><span><b>Niveau ' +
+      s.level +
+      '</b> / ' +
+      MAX_LEVEL +
+      '</span>' +
+      '<div class="prof-bar"><i style="width:' +
+      pct.toFixed(1) +
+      '%"></i></div><span>' +
+      (s.level >= MAX_LEVEL ? 'Maîtrise complète' : s.exp + ' / ' + need + ' XP') +
+      '</span></div>' +
       '<div class="prof-qualities">' +
-      QUALITY_LEVEL.map((need, q) => '<span class="prof-q' + (s.level >= need ? ' on' : '') + '" style="color:' + qualityColor(q) + '">' + esc(qualityName(q)) + ' <small>niv. ' + need + '</small></span>').join('') +
+      QUALITY_LEVEL.map(
+        (need, q) =>
+          '<span class="prof-q' +
+          (s.level >= need ? ' on' : '') +
+          '" style="color:' +
+          qualityColor(q) +
+          '">' +
+          esc(qualityName(q)) +
+          ' <small>niv. ' +
+          need +
+          '</small></span>'
+      ).join('') +
       '</div>'
     );
   }
@@ -927,14 +1129,27 @@
       R(10, 9, 3, 1, d);
       R(15, 5, 1, 1, '#1a1418');
       R(17, 6, 1, 1, d);
-      if (id === 'truite') for (const [x, y] of [[7, 5], [10, 4], [12, 6], [9, 6]]) R(x, y, 1, 1, '#3a2a1e');
+      if (id === 'truite')
+        for (const [x, y] of [
+          [7, 5],
+          [10, 4],
+          [12, 6],
+          [9, 6]
+        ])
+          R(x, y, 1, 1, '#3a2a1e');
       if (id === 'silure') {
         R(18, 7, 3, 1, d);
         R(18, 8, 2, 1, d);
       }
       if (id === 'espadon') R(18, 5, 4, 1, l);
       if (id === 'thon') R(4, 6, 1, 1, '#f0d040');
-      if (id === 'lune') for (const [x, y] of [[8, 5], [12, 6], [14, 4]]) R(x, y, 1, 1, '#ffffff');
+      if (id === 'lune')
+        for (const [x, y] of [
+          [8, 5],
+          [12, 6],
+          [14, 4]
+        ])
+          R(x, y, 1, 1, '#ffffff');
       url = cv.toDataURL();
     } catch {
       url = '';
@@ -947,7 +1162,11 @@
     if (icons.has(key)) return icons.get(key);
     let url = '';
     try {
-      url = CANAAN_LIFE.icon(id === 'astral' ? 'cerf' : id, id === 'astral' ? 1 : 0, id === 'astral').toDataURL();
+      url = CANAAN_LIFE.icon(
+        id === 'astral' ? 'cerf' : id,
+        id === 'astral' ? 1 : 0,
+        id === 'astral'
+      ).toDataURL();
     } catch {
       url = '';
     }
@@ -961,27 +1180,71 @@
       sel = list.find(([id]) => id === ui.codex && prof.codex[id]);
     const img = (id, cls = '') => {
       const url = iconOf(id);
-      return url ? '<img class="prof-ico' + cls + '" src="' + url + '" alt="">' : '<span class="prof-ico' + cls + '"></span>';
+      return url
+        ? '<img class="prof-ico' + cls + '" src="' + url + '" alt="">'
+        : '<span class="prof-ico' + cls + '"></span>';
     };
     let detail = '';
     if (sel) {
       const [id, info] = sel,
         e = prof.codex[id];
       detail =
-        '<div class="prof-codex-detail">' + img(id, ' big') + '<div><h4>' + esc(info.name) + '</h4><p>' + esc(info.bio) + '</p>' +
-        '<p class="prof-codex-stats">' + label + ' : <b>' + e.n + '</b> · Meilleure qualité : <b style="color:' + qualityColor(e.best) + '">' + esc(qualityName(e.best)) + '</b> · ' + esc(info.where) + '</p></div></div>';
+        '<div class="prof-codex-detail">' +
+        img(id, ' big') +
+        '<div><h4>' +
+        esc(info.name) +
+        '</h4><p>' +
+        esc(info.bio) +
+        '</p>' +
+        '<p class="prof-codex-stats">' +
+        label +
+        ' : <b>' +
+        e.n +
+        '</b> · Meilleure qualité : <b style="color:' +
+        qualityColor(e.best) +
+        '">' +
+        esc(qualityName(e.best)) +
+        '</b> · ' +
+        esc(info.where) +
+        '</p></div></div>';
     }
     return (
-      '<h3>Collection · ' + found + ' / ' + list.length + ' espèces découvertes</h3>' + detail +
+      '<h3>Collection · ' +
+      found +
+      ' / ' +
+      list.length +
+      ' espèces découvertes</h3>' +
+      detail +
       '<div class="prof-codex">' +
       list
         .map(([id, info]) => {
           const e = prof.codex[id];
           if (!e)
-            return '<div class="prof-card unknown" title="' + esc('Où : ' + info.where) + '">' + img(id, ' dark') + '<b>???</b><small>' + esc(info.where) + '</small></div>';
+            return (
+              '<div class="prof-card unknown" title="' +
+              esc('Où : ' + info.where) +
+              '">' +
+              img(id, ' dark') +
+              '<b>???</b><small>' +
+              esc(info.where) +
+              '</small></div>'
+            );
           return (
-            '<button type="button" class="prof-card' + (ui.codex === id ? ' on' : '') + '" data-action="profCodex" data-kind="' + id + '">' + img(id) +
-            '<b>' + esc(info.name) + '</b><small>× ' + e.n + ' · <span style="color:' + qualityColor(e.best) + '">' + esc(qualityName(e.best)) + '</span></small></button>'
+            '<button type="button" class="prof-card' +
+            (ui.codex === id ? ' on' : '') +
+            '" data-action="profCodex" data-kind="' +
+            id +
+            '">' +
+            img(id) +
+            '<b>' +
+            esc(info.name) +
+            '</b><small>× ' +
+            e.n +
+            ' · <span style="color:' +
+            qualityColor(e.best) +
+            '">' +
+            esc(qualityName(e.best)) +
+            '</span></small></button>'
           );
         })
         .join('') +
@@ -1014,10 +1277,21 @@
       cap = capOf(prof.cooking.level);
     return (
       bar('cooking') +
-      status(fire, fire ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.' : '🔥 Va près d’une cuisinière : Marmite dorée (camp), refuge ou ta maison.') +
+      status(
+        fire,
+        fire
+          ? '🔥 Tu es près d’une cuisinière : tu peux cuisiner.'
+          : '🔥 Va près d’une cuisinière : Marmite dorée (camp), refuge ou ta maison.'
+      ) +
       tips(
-        ['1 ingrédient = 1 repas', 'Qualité max : <b style="color:' + qualityColor(cap) + '">' + esc(qualityName(cap)) + '</b>', '⏳ 6 s, reste immobile'],
-        'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' + esc(qualityName(cap)) + '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore, les refuges, et ta maison si tu en as posé une.'
+        [
+          '1 ingrédient = 1 repas',
+          'Qualité max : <b style="color:' + qualityColor(cap) + '">' + esc(qualityName(cap)) + '</b>',
+          '⏳ 6 s, reste immobile'
+        ],
+        'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' +
+          esc(qualityName(cap)) +
+          '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore, les refuges, et ta maison si tu en as posé une.'
       ) +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)
@@ -1025,20 +1299,52 @@
         .map(([id, r]) => {
           const owned = stock(prof[ING[r.fish].bag], f => f === r.fish);
           return (
-            '<article class="prof-recipe"><h4>' + esc(r.name) + '</h4><p>' + ING[r.fish].icon + ' ' + esc(ING[r.fish].name) + ' · ' + esc(effect(id, Math.min(cap, owned[0]?.q ?? 0), game.hero).text) + '</p>' +
+            '<article class="prof-recipe"><h4>' +
+            esc(r.name) +
+            '</h4><p>' +
+            ING[r.fish].icon +
+            ' ' +
+            esc(ING[r.fish].name) +
+            ' · ' +
+            esc(effect(id, Math.min(cap, owned[0]?.q ?? 0), game.hero).text) +
+            '</p>' +
             (owned.length
               ? '<div class="prof-actions">' +
                 owned
                   .map(x => {
                     const mq = Math.min(x.q, cap);
                     return (
-                      '<button type="button" data-action="profCook" data-recipe="' + id + '" data-quality="' + x.q + '"' + (fire ? '' : ' disabled') + ' style="border-color:' + qualityColor(mq) + '">Cuisiner ' + esc(qualityName(mq)) + ' (' + x.n + ')</button>' +
-                      (x.n > 1 ? '<button type="button" data-action="profCookAll" data-recipe="' + id + '" data-quality="' + x.q + '"' + (fire ? '' : ' disabled') + '>× ' + Math.min(20, x.n) + '</button>' : '')
+                      '<button type="button" data-action="profCook" data-recipe="' +
+                      id +
+                      '" data-quality="' +
+                      x.q +
+                      '"' +
+                      (fire ? '' : ' disabled') +
+                      ' style="border-color:' +
+                      qualityColor(mq) +
+                      '">Cuisiner ' +
+                      esc(qualityName(mq)) +
+                      ' (' +
+                      x.n +
+                      ')</button>' +
+                      (x.n > 1
+                        ? '<button type="button" data-action="profCookAll" data-recipe="' +
+                          id +
+                          '" data-quality="' +
+                          x.q +
+                          '"' +
+                          (fire ? '' : ' disabled') +
+                          '>× ' +
+                          Math.min(20, x.n) +
+                          '</button>'
+                        : '')
                     );
                   })
                   .join('') +
                 '</div>'
-              : '<p class="prof-empty">Pas de ' + esc(ING[r.fish].name.toLowerCase()) + ' dans ton sac.</p>') +
+              : '<p class="prof-empty">Pas de ' +
+                esc(ING[r.fish].name.toLowerCase()) +
+                ' dans ton sac.</p>') +
             '</article>'
           );
         })
@@ -1050,19 +1356,44 @@
     const meals = stock(myProf().meals, id => RECIPES[id]),
       live = myLive();
     const active = [];
-    if (live.food) active.push('✨ ' + RECIPES[live.food.recipe].name + ' (' + qualityName(live.food.q) + ') : encore ' + live.food.left + ' s');
+    if (live.food)
+      active.push(
+        '✨ ' +
+          RECIPES[live.food.recipe].name +
+          ' (' +
+          qualityName(live.food.q) +
+          ') : encore ' +
+          live.food.left +
+          ' s'
+      );
     if (live.hot) active.push('💚 ' + RECIPES[live.hot.recipe].name + ' : encore ' + live.hot.left + ' s');
     if (live.cd) active.push('⏳ Repas rapide (PV, mana) dans ' + live.cd + ' s');
     return (
-      (active.length ? '<div class="prof-active">' + active.map(a => '<p>' + esc(a) + '</p>').join('') + '</div>' : '') +
+      (active.length
+        ? '<div class="prof-active">' + active.map(a => '<p>' + esc(a) + '</p>').join('') + '</div>'
+        : '') +
       tips(['⏳ PV / mana : 20 s entre deux', '✨ Un seul bonus à la fois']) +
       (meals.length
         ? '<div class="prof-grid meals">' +
           meals
             .map(
               x =>
-                '<div class="prof-item"><span style="color:' + qualityColor(x.q) + '">' + esc(RECIPES[x.id].name) + '</span><small>' + esc(qualityName(x.q)) + ' · ' + esc(effect(x.id, x.q, game.hero).text) + '</small>' +
-                '<b>× ' + x.n + '</b><button type="button" data-action="profEat" data-recipe="' + x.id + '" data-quality="' + x.q + '">Manger</button></div>'
+                '<div class="prof-item"><span style="color:' +
+                qualityColor(x.q) +
+                '">' +
+                esc(RECIPES[x.id].name) +
+                '</span><small>' +
+                esc(qualityName(x.q)) +
+                ' · ' +
+                esc(effect(x.id, x.q, game.hero).text) +
+                '</small>' +
+                '<b>× ' +
+                x.n +
+                '</b><button type="button" data-action="profEat" data-recipe="' +
+                x.id +
+                '" data-quality="' +
+                x.q +
+                '">Manger</button></div>'
             )
             .join('') +
           '</div>'
@@ -1085,7 +1416,20 @@
     shown = signature();
     showPanel(
       '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +
-        '<div class="prof-tabs">' + tabs.map(([id, label]) => '<button type="button" class="' + (ui.tab === id ? 'on' : '') + '" data-action="profTab" data-tab="' + id + '">' + label + '</button>').join('') + '</div>' +
+        '<div class="prof-tabs">' +
+        tabs
+          .map(
+            ([id, label]) =>
+              '<button type="button" class="' +
+              (ui.tab === id ? 'on' : '') +
+              '" data-action="profTab" data-tab="' +
+              id +
+              '">' +
+              label +
+              '</button>'
+          )
+          .join('') +
+        '</div>' +
         (ui.tab === 'peche'
           ? tabFishing()
           : ui.tab === 'chasse'
@@ -1104,7 +1448,15 @@
   }
   // Ce qui change l'affichage : métiers, pêche et repas en cours, onglet, sac et équipement (enchantement).
   const signature = () =>
-    JSON.stringify([myProf(), myLive(), ui.tab, ui.codex, nearFire(P.x, P.y), game.hero.inventory.map(i => [i.id, i.ench?.value]), Object.values(game.hero.equipment).map(i => i && [i.id, i.ench?.value])]);
+    JSON.stringify([
+      myProf(),
+      myLive(),
+      ui.tab,
+      ui.codex,
+      nearFire(P.x, P.y),
+      game.hero.inventory.map(i => [i.id, i.ench?.value]),
+      Object.values(game.hero.equipment).map(i => i && [i.id, i.ench?.value])
+    ]);
   // Ouvrir le panneau sur un onglet (depuis le sac : un enchantement choisi).
   function open(tab) {
     if (!started) return;
@@ -1151,7 +1503,8 @@
   };
   const actions = {
     tab(id) {
-      if (['peche', 'chasse', 'minage', 'cueillette', 'cuisine', 'enchant', 'repas'].includes(id)) ui.tab = id;
+      if (['peche', 'chasse', 'minage', 'cueillette', 'cuisine', 'enchant', 'repas'].includes(id))
+        ui.tab = id;
       render();
     },
     codex(kind) {
@@ -1180,17 +1533,30 @@
       for (const [id, e] of Object.entries(raw.codex)) {
         const n = Math.floor(Number(e?.n)),
           best = Math.floor(Number(e?.best));
-        if ((Object.hasOwn(FISH, id) || Object.hasOwn(GAME, id)) && n > 0) out.codex[id] = { n: Math.min(n, 999999), best: Math.max(0, Math.min(7, best || 0)) };
+        if ((Object.hasOwn(FISH, id) || Object.hasOwn(GAME, id)) && n > 0)
+          out.codex[id] = { n: Math.min(n, 999999), best: Math.max(0, Math.min(7, best || 0)) };
       }
     // Qualités au format actuel (qv 2) ; une ancienne sauvegarde est convertie (l'enchantement garde son métal).
     const convert = raw.qv !== 2;
-    for (const [bag, known] of [['fish', FISH], ['meat', MEAT], ['meals', RECIPES], ['ore', CANAAN_GATHER.ORES], ['herb', CANAAN_GATHER.HERBS], ['ench', CANAAN_GATHER.ENCHANTS]])
+    for (const [bag, known] of [
+      ['fish', FISH],
+      ['meat', MEAT],
+      ['meals', RECIPES],
+      ['ore', CANAAN_GATHER.ORES],
+      ['herb', CANAAN_GATHER.HERBS],
+      ['ench', CANAAN_GATHER.ENCHANTS]
+    ])
       if (raw[bag] && typeof raw[bag] === 'object')
         for (const [key, n] of Object.entries(raw[bag])) {
           const [id, qs] = key.split(':'),
             count = Math.floor(Number(n));
           if (!Object.hasOwn(known, id) || !/^[0-7]$/.test(qs) || !(count > 0)) continue;
-          const q = bag === 'ench' ? Math.min(5, Number(qs)) : convert ? OLD_QUALITY[Number(qs)] : Math.min(5, Number(qs)),
+          const q =
+              bag === 'ench'
+                ? Math.min(5, Number(qs))
+                : convert
+                  ? OLD_QUALITY[Number(qs)]
+                  : Math.min(5, Number(qs)),
             k = id + ':' + q;
           out[bag][k] = Math.min((out[bag][k] || 0) + count, 9999);
         }

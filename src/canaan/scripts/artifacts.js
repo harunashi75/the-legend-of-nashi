@@ -2,7 +2,11 @@
   'use strict';
   const ART = {
     0: { icon: '⟦art_ardeur⟧', name: 'Ardeur', desc: 'Dégâts infligés et soins prodigués' },
-    1: { icon: '⟦art_bastion⟧', name: 'Bastion', desc: 'Points de vie maximum et réduction des dégâts reçus' },
+    1: {
+      icon: '⟦art_bastion⟧',
+      name: 'Bastion',
+      desc: 'Points de vie maximum et réduction des dégâts reçus'
+    },
     2: { icon: '⟦art_instinct⟧', name: 'Instinct', desc: 'Chance de critique et vitesse de déplacement' }
   };
   function passive(it) {

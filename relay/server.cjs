@@ -20,7 +20,8 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
   let peerCounter = 0;
   const wss = new WebSocketServer({ port, host, maxPayload: MESSAGE_LIMIT });
   const send = (socket, message) => {
-    if (socket && socket.readyState === 1) socket.send(typeof message === 'string' ? message : JSON.stringify(message));
+    if (socket && socket.readyState === 1)
+      socket.send(typeof message === 'string' ? message : JSON.stringify(message));
   };
   function newCode() {
     let code;
@@ -66,7 +67,8 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
           const code = normalizeRoomCode(message.code),
             room = code && rooms.get(code);
           if (!room) return send(socket, { t: 'error', reason: 'Salon introuvable : vérifie le code.' });
-          if (room.guests.size >= ROOM_GUESTS) return send(socket, { t: 'error', reason: 'Salon complet (trois invités).' });
+          if (room.guests.size >= ROOM_GUESTS)
+            return send(socket, { t: 'error', reason: 'Salon complet (trois invités).' });
           const peer = 'p' + ++peerCounter;
           Object.assign(meta, { role: 'guest', code, peer });
           room.guests.set(peer, socket);
@@ -78,7 +80,9 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
       if (!room) return;
       if (meta.role === 'host') {
         // L'hôte s'adresse à un invité (peer) ou à tous.
-        const targets = message.peer ? [room.guests.get(message.peer)].filter(Boolean) : [...room.guests.values()];
+        const targets = message.peer
+          ? [room.guests.get(message.peer)].filter(Boolean)
+          : [...room.guests.values()];
         const text = JSON.stringify(message);
         for (const guest of targets) {
           send(guest, text);
@@ -140,5 +144,7 @@ module.exports = { createRelay };
 if (require.main === module) {
   const port = Number(process.env.PORT) || 8787;
   const relay = createRelay({ port, log: text => console.log('[relais] ' + text) });
-  relay.ready.then(() => console.log('[relais] The Legend of Nashi : relais prêt sur ws://localhost:' + relay.port));
+  relay.ready.then(() =>
+    console.log('[relais] The Legend of Nashi : relais prêt sur ws://localhost:' + relay.port)
+  );
 }

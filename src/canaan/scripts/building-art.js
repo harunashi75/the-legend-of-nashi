@@ -72,16 +72,19 @@
           for (let i = 0; i < pts.length; i++) {
             const [ax, ay] = pts[i],
               [bx, by] = pts[(i + 1) % pts.length];
-            if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
+            if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5))
+              xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
           }
           xs.sort((a, b) => a - b);
-          for (let i = 0; i + 1 < xs.length; i += 2) g.fillRect(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1);
+          for (let i = 0; i + 1 < xs.length; i += 2)
+            g.fillRect(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1);
         }
       },
       line(x0, y0, x1, y1, col, t = 1) {
         const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
         g.fillStyle = col;
-        for (let i = 0; i <= n; i++) g.fillRect(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), t, t);
+        for (let i = 0; i <= n; i++)
+          g.fillRect(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), t, t);
       },
       disc(cx, cy, r, col) {
         g.fillStyle = col;
@@ -102,7 +105,12 @@
       a = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : d[(y * w + x) * 4 + 3]),
       out = [];
     for (let y = 0; y < h; y++)
-      for (let x = 0; x < w; x++) if (a(x, y) < 128 && (a(x - 1, y) > 128 || a(x + 1, y) > 128 || a(x, y - 1) > 128 || a(x, y + 1) > 128)) out.push(y * w + x);
+      for (let x = 0; x < w; x++)
+        if (
+          a(x, y) < 128 &&
+          (a(x - 1, y) > 128 || a(x + 1, y) > 128 || a(x, y - 1) > 128 || a(x, y + 1) > 128)
+        )
+          out.push(y * w + x);
     for (const i of out) {
       d[i * 4] = 42;
       d[i * 4 + 1] = 24;
@@ -169,7 +177,8 @@
         k.rect(x0, yy, x1 - x0, rowH, base);
         k.rect(x0, yy + rowH - 1, x1 - x0, 1, ramp[3]);
         k.rect(x0, yy, x1 - x0, 1, x0 === xa + hip ? ramp[0] : base);
-        for (let tx = xa + (r % 2) * (tileW / 2); tx < xb; tx += tileW) if (tx >= x0 && tx < x1) k.rect(tx, yy + 1, 1, rowH - 2, joint);
+        for (let tx = xa + (r % 2) * (tileW / 2); tx < xb; tx += tileW)
+          if (tx >= x0 && tx < x1) k.rect(tx, yy + 1, 1, rowH - 2, joint);
       }
       // Arêtes des croupes.
       k.rect(xa + hip, yy, 1, rowH - 1, ramp[2]);
@@ -187,7 +196,8 @@
     k.rect(x, y, 2, h, ramp[0]);
     k.rect(x + w - 3, y, 3, h, ramp[2]);
     k.rect(x, y, w, 2, ramp[3]);
-    for (let i = 0; i < 9; i++) k.rect(x + 4 + hash(i, x) * (w - 10), y + 4 + hash(x, i) * (h - 8), 2, 1, ramp[2]);
+    for (let i = 0; i < 9; i++)
+      k.rect(x + 4 + hash(i, x) * (w - 10), y + 4 + hash(x, i) * (h - 8), 2, 1, ramp[2]);
     if (timber) {
       k.rect(x, y, 3, h, timber[1]);
       k.rect(x + w - 3, y, 3, h, timber[2]);
@@ -342,7 +352,13 @@
     k.disc(cx, bot - r, r, ramp[2]);
     k.disc(cx - 1, bot - r - 1, r - 1, ramp[1]);
     k.disc(cx - 2, bot - r - 2, Math.max(1, r - 3), ramp[0]);
-    if (flowers) for (let i = 0; i < 5; i++) k.px(cx - r + 1 + hash(i, cx) * (r * 2 - 2), bot - r * 2 + 1 + hash(cx, i) * r * 1.4, flowers[i % flowers.length]);
+    if (flowers)
+      for (let i = 0; i < 5; i++)
+        k.px(
+          cx - r + 1 + hash(i, cx) * (r * 2 - 2),
+          bot - r * 2 + 1 + hash(cx, i) * r * 1.4,
+          flowers[i % flowers.length]
+        );
   }
   function barrel(k, x, bot) {
     k.rect(x, bot - 10, 8, 10, RAMP.wood[2]);
@@ -411,7 +427,10 @@
     for (let i = 0; i <= n; i++) {
       const t = i / n,
         u = 1 - t;
-      out.push([u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]);
+      out.push([
+        u * u * a[0] + 2 * u * t * c[0] + t * t * b[0],
+        u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]
+      ]);
     }
     return out;
   }
@@ -429,7 +448,8 @@
       for (let i = 0; i < pts.length; i++) {
         const [ax, ay] = pts[i],
           [bx, by] = pts[(i + 1) % pts.length];
-        if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
+        if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5))
+          xs.push(ax + ((y + 0.5 - ay) / (by - ay)) * (bx - ax));
       }
       xs.sort((a, b) => a - b);
       for (let i = 0; i + 1 < xs.length; i += 2) rows.push([y, Math.round(xs[i]), Math.round(xs[i + 1])]);
@@ -466,13 +486,18 @@
           mid = (sw - 1) / 2,
           d = Math.abs(lx - mid),
           // Écaille de bois : bas arrondi ; feuille : large en haut, pointue en bas.
-          hw = leaf ? (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow(ly / step, 2.4))) : ly < step - 3 ? mid + 0.6 : (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow((ly - (step - 4)) / 3.2, 2)));
+          hw = leaf
+            ? (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow(ly / step, 2.4)))
+            : ly < step - 3
+              ? mid + 0.6
+              : (mid + 0.6) * Math.sqrt(Math.max(0, 1 - Math.pow((ly - (step - 4)) / 3.2, 2)));
         let c = ramp[t];
         if (d > hw) c = dark(2);
         else if (d > hw - 1) c = dark(1);
         else if (ly <= 1 && lx <= mid) c = ramp[Math.max(0, t - 1)];
         else if (leaf && Math.round(mid) === lx && ly > 0 && ly < step - 2) c = dark(1);
-        else if (!leaf && lx > mid + 1 && ly > 1) c = ramp[Math.min(ramp.length - 1, t + (ly > step - 4 ? 1 : 0))];
+        else if (!leaf && lx > mid + 1 && ly > 1)
+          c = ramp[Math.min(ramp.length - 1, t + (ly > step - 4 ? 1 : 0))];
         k.px(x, y, c);
       }
   }
@@ -502,7 +527,9 @@
     k.disc(x + w / 2 - 0.5, y + 3, w / 2 - 0.5, ELF.crystal[1]);
     k.rect(x, y + 3, w, Math.floor(h / 3), ELF.crystal[1]);
     // Plombs en losanges, dans le verre seulement.
-    for (let yy = y + 4; yy < y + h + 1; yy++) for (let xx = x; xx < x + w; xx++) if ((xx + yy) % 4 === 0 || (xx - yy + 400) % 4 === 0) k.px(xx, yy, ELF.crystal[3]);
+    for (let yy = y + 4; yy < y + h + 1; yy++)
+      for (let xx = x; xx < x + w; xx++)
+        if ((xx + yy) % 4 === 0 || (xx - yy + 400) % 4 === 0) k.px(xx, yy, ELF.crystal[3]);
     k.rect(x + 1, y + 3, 2, 2, ELF.crystal[0]);
     k.rect(x - 3, y + h + 1, w + 6, 2, ELF.bark[0]);
     e.window(x, y + 3, w, h - 2);
@@ -531,12 +558,14 @@
     k.rect(x - 4, y, 9, 4, '#8a5a34');
     k.rect(x - 4, y, 9, 1, '#b07a48');
     for (let i = 0; i < 14; i++) k.px(x - 5 + hash(i, x) * 11, y - 3 + hash(x, i) * 4, ELF.flowers[i % 5]);
-    for (const vx of [x - 4, x + 4]) for (let i = 0; i < 7; i++) k.px(vx + (i % 2), y + 4 + i, i % 3 ? '#4e8a3a' : '#8ad070');
+    for (const vx of [x - 4, x + 4])
+      for (let i = 0; i < 7; i++) k.px(vx + (i % 2), y + 4 + i, i % 3 ? '#4e8a3a' : '#8ad070');
   }
   // Lierre fleuri qui grimpe (fleurs violettes).
   function vineBloom(k, x, y, len, seed) {
     vines(k, x, y, len, seed);
-    for (let i = 3; i < len; i += 5) k.px(x + Math.round(Math.sin((i + seed) * 0.7)) + (i % 2 ? 1 : -1), y + i, ELF.flowers[(i + seed) % 3]);
+    for (let i = 3; i < len; i += 5)
+      k.px(x + Math.round(Math.sin((i + seed) * 0.7)) + (i % 2 ? 1 : -1), y + i, ELF.flowers[(i + seed) % 3]);
   }
   // Chouette perchée.
   function owlPerch(k, x, y) {
@@ -553,7 +582,8 @@
     k.rect(x, y, w, h, ELF.stucco[1]);
     k.rect(x, y, 2, h, ELF.stucco[0]);
     k.rect(x + w - 3, y, 3, h, ELF.stucco[2]);
-    for (let i = 0; i < 8; i++) k.rect(x + 3 + hash(i, x + y) * (w - 8), y + 3 + hash(x, i) * (h - 6), 2, 1, ELF.stucco[2]);
+    for (let i = 0; i < 8; i++)
+      k.rect(x + 3 + hash(i, x + y) * (w - 8), y + 3 + hash(x, i) * (h - 6), 2, 1, ELF.stucco[2]);
     for (const b of beams) branch(k, b, 3);
   }
   // Socle de pierres moussues.
@@ -563,7 +593,8 @@
       k.rect(xx + 1, y + 1, 4, 4, hash(xx, y) > 0.5 ? RAMP.stone[1] : RAMP.stone[2]);
       k.px(xx + 1, y + 1, RAMP.stone[0]);
     }
-    for (let xx = x; xx < x + w; xx += 3) if (hash(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hash(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
+    for (let xx = x; xx < x + w; xx += 3)
+      if (hash(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hash(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
   }
   // Feuillage au pied (fougères et buissons).
   function ferns(k, x, bot, n, seed) {
@@ -587,10 +618,20 @@
     k.rect(Math.round(cx) - 1, apex - 2 - depth, 1, depth + 1, roof[1]);
     // Mur de face et pignon.
     o.wall(k, x, top, w, wallH);
-    k.poly([[x, top + 1], [cx, apex], [x + w, top + 1]], o.gableRamp[1]);
+    k.poly(
+      [
+        [x, top + 1],
+        [cx, apex],
+        [x + w, top + 1]
+      ],
+      o.gableRamp[1]
+    );
     if (o.gable) o.gable(k, x, top, w, cx, apex);
     // Planches de rive le long du pignon.
-    for (const [ax, ay, bx, by] of [[x - ov, top + 3, cx, apex - 2], [cx, apex - 2, x + w + ov, top + 3]]) {
+    for (const [ax, ay, bx, by] of [
+      [x - ov, top + 3, cx, apex - 2],
+      [cx, apex - 2, x + w + ov, top + 3]
+    ]) {
       k.line(ax, ay, bx, by, o.trim[2], 2);
       k.line(ax, ay - 1, bx, by - 1, o.trim[1]);
     }
@@ -604,7 +645,15 @@
       const x = 10,
         w = W - 20;
       const r = gableHouse(k, {
-        x, w, bot, wallH: 30, gableH: 22, depth: 26, roof: RAMP.roofRed, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x,
+        w,
+        bot,
+        wallH: 30,
+        gableH: 22,
+        depth: 26,
+        roof: RAMP.roofRed,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, wx, wy, ww, wh) => wallPlaster(k2, wx, wy, ww, wh, RAMP.peach, RAMP.darkwood),
         gable: (k2, gx, gy, gw, cx, apex) => {
           k2.rect(gx + 2, gy - 2, gw - 4, 3, RAMP.darkwood[1]);
@@ -634,7 +683,15 @@
         w = W - 12;
       wallStone(k, x, bot - 22, w, 22, RAMP.stone);
       const r = gableHouse(k, {
-        x: x + 4, w: w - 8, bot: bot - 22, wallH: 24, gableH: 22, depth: 24, roof: RAMP.roofSlate, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x: x + 4,
+        w: w - 8,
+        bot: bot - 22,
+        wallH: 24,
+        gableH: 22,
+        depth: 24,
+        roof: RAMP.roofSlate,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, wx, wy, ww, wh) => wallPlaster(k2, wx, wy, ww, wh, RAMP.plaster, RAMP.darkwood),
         gable: (k2, gx, gy, gw, cx) => windowRound(k2, cx, gy - 9, 4, RAMP.darkwood)
       });
@@ -667,7 +724,14 @@
       wallPlanks(k, x, top, w, 32, RAMP.wood, true);
       k.rect(x, top, w, 3, RAMP.darkwood[1]);
       // Pignon de façade au-dessus de la porte.
-      k.poly([[W / 2 - 18, top + 1], [W / 2, top - 16], [W / 2 + 18, top + 1]], RAMP.plaster[1]);
+      k.poly(
+        [
+          [W / 2 - 18, top + 1],
+          [W / 2, top - 16],
+          [W / 2 + 18, top + 1]
+        ],
+        RAMP.plaster[1]
+      );
       k.line(W / 2 - 20, top + 2, W / 2, top - 17, RAMP.darkwood[2], 2);
       k.line(W / 2, top - 17, W / 2 + 20, top + 2, RAMP.darkwood[2], 2);
       windowRound(k, W / 2, top - 6, 3, RAMP.darkwood);
@@ -675,7 +739,8 @@
       k.rect(x + 6, bot - 22, 22, 13, RAMP.darkwood[2]);
       k.rect(x + 7, bot - 21, 20, 11, RAMP.glass[2]);
       k.rect(x + 7, bot - 21, 20, 5, RAMP.glass[1]);
-      for (let i = 0; i < 4; i++) k.rect(x + 9 + i * 5, bot - 14, 3, 3, ['#f06a5a', '#ffd060', '#7ad070', '#c88ae8'][i]);
+      for (let i = 0; i < 4; i++)
+        k.rect(x + 9 + i * 5, bot - 14, 3, 3, ['#f06a5a', '#ffd060', '#7ad070', '#c88ae8'][i]);
       e.window(x + 7, bot - 21, 20, 11);
       awning(k, x + 4, bot - 28, 26, '#e0503c', '#fff4dc');
       door(k, W / 2, bot, 12, 18, RAMP.wood, 'double');
@@ -685,7 +750,8 @@
       k.rect(x + w + 2, bot - 9, 18, 3, RAMP.wood[1]);
       k.rect(x + w + 3, bot - 6, 2, 6, RAMP.wood[2]);
       k.rect(x + w + 17, bot - 6, 2, 6, RAMP.wood[2]);
-      for (let i = 0; i < 6; i++) k.disc(x + w + 5 + i * 3, bot - 11, 1, ['#f06a5a', '#ffd060', '#7ad070'][i % 3]);
+      for (let i = 0; i < 6; i++)
+        k.disc(x + w + 5 + i * 3, bot - 11, 1, ['#f06a5a', '#ffd060', '#7ad070'][i % 3]);
       crate(k, x - 10, bot + 1);
       crate(k, x - 6, bot - 7, 7);
       e.sign(x - 4, bot - 34, 'or');
@@ -696,7 +762,15 @@
       const x = 10,
         w = W - 20;
       const r = gableHouse(k, {
-        x, w, bot, wallH: 30, gableH: 24, depth: 26, roof: RAMP.roofSlate, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x,
+        w,
+        bot,
+        wallH: 30,
+        gableH: 24,
+        depth: 26,
+        roof: RAMP.roofSlate,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, wx, wy, ww, wh) => {
           wallPlaster(k2, wx, wy, ww, wh, RAMP.plaster, RAMP.darkwood);
           for (const sx of [wx + 22, wx + ww - 25]) {
@@ -716,7 +790,8 @@
       e.window(x + 6, bot - 22, 10, 9);
       e.window(x + w - 16, bot - 22, 10, 9);
       door(k, W / 2, bot, 11, 18, RAMP.wood, 'arch');
-      for (const bx of [x - 4, x + 4, x + w - 4, x + w + 4]) bush(k, bx, bot + 1, 5, RAMP.leaf, ['#ffffff', '#f6b0c8']);
+      for (const bx of [x - 4, x + 4, x + w - 4, x + w + 4])
+        bush(k, bx, bot + 1, 5, RAMP.leaf, ['#ffffff', '#f6b0c8']);
       return r.roofTop - 10;
     },
     // Demeure du Puits : maison de pierre au toit bleu, perron, puits couvert à côté.
@@ -724,7 +799,15 @@
       const x = 12,
         w = W - 32;
       const r = gableHouse(k, {
-        x, w, bot, wallH: 30, gableH: 20, depth: 24, roof: RAMP.roofSlate, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x,
+        w,
+        bot,
+        wallH: 30,
+        gableH: 20,
+        depth: 24,
+        roof: RAMP.roofSlate,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, wx, wy, ww, wh) => wallStone(k2, wx, wy, ww, wh, RAMP.stone),
         gable: (k2, gx, gy, gw, cx) => windowRound(k2, cx, gy - 8, 3, RAMP.darkwood)
       });
@@ -737,7 +820,14 @@
       wallStone(k, px, bot - 9, 16, 9, RAMP.stone);
       k.rect(px + 1, bot - 26, 2, 17, RAMP.darkwood[1]);
       k.rect(px + 13, bot - 26, 2, 17, RAMP.darkwood[1]);
-      k.poly([[px - 3, bot - 25], [px + 8, bot - 33], [px + 19, bot - 25]], RAMP.roofSlate[1]);
+      k.poly(
+        [
+          [px - 3, bot - 25],
+          [px + 8, bot - 33],
+          [px + 19, bot - 25]
+        ],
+        RAMP.roofSlate[1]
+      );
       k.rect(px - 3, bot - 26, 22, 2, RAMP.roofSlate[3]);
       k.rect(px + 7, bot - 24, 1, 9, '#d8d0c0');
       k.rect(px + 5, bot - 16, 5, 4, RAMP.wood[2]);
@@ -748,7 +838,15 @@
       const x = 14,
         w = W - 28;
       const r = gableHouse(k, {
-        x, w, bot, wallH: 28, gableH: 22, depth: 24, roof: RAMP.roofBrown, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x,
+        w,
+        bot,
+        wallH: 28,
+        gableH: 22,
+        depth: 24,
+        roof: RAMP.roofBrown,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, wx, wy, ww, wh) => wallPlanks(k2, wx, wy, ww, wh, RAMP.plaster, false),
         gable: (k2, gx, gy, gw, cx) => {
           windowRect(k2, cx - 4, gy - 12, 8, 7, RAMP.darkwood);
@@ -758,18 +856,30 @@
       // Mousse en coulées sur le toit, lierre, champignons.
       for (let i = 0; i < 7; i++) mossPatch(k, x - 2 + i * 9, r.top + 3 - i * 2.5, 6, i);
       for (let i = 0; i < 5; i++) mossPatch(k, x + w / 2 + 2 + i * 8, r.apex + 2 + i * 3, 6, i + 9);
-      for (let i = 0; i < 6; i++) mossPatch(k, x + w / 2 - 4 + hash(i, 4) * 8, r.roofTop + 4 + i * 4, 4, i + 20);
+      for (let i = 0; i < 6; i++)
+        mossPatch(k, x + w / 2 - 4 + hash(i, 4) * 8, r.roofTop + 4 + i * 4, 4, i + 20);
       vines(k, x + 2, r.top + 2, 22, 1);
       vines(k, x + w - 4, r.top + 2, 18, 3);
       vines(k, x + w / 2, r.apex + 4, 10, 5);
-      for (const [sx, sy, col] of [[x + 6, r.top - 2, '#e0503c'], [x + 12, r.top - 6, '#e0503c'], [x + w - 12, r.top - 4, '#f06a8a'], [x + w / 2 - 3, r.roofTop + 10, '#e0503c']]) shroom(k, sx, sy, col);
+      for (const [sx, sy, col] of [
+        [x + 6, r.top - 2, '#e0503c'],
+        [x + 12, r.top - 6, '#e0503c'],
+        [x + w - 12, r.top - 4, '#f06a8a'],
+        [x + w / 2 - 3, r.roofTop + 10, '#e0503c']
+      ])
+        shroom(k, sx, sy, col);
       windowRect(k, x + 6, bot - 20, 9, 8, RAMP.darkwood);
       windowRect(k, x + w - 15, bot - 20, 9, 8, RAMP.darkwood);
       e.window(x + 6, bot - 20, 9, 8);
       e.window(x + w - 15, bot - 20, 9, 8);
       door(k, W / 2, bot, 12, 18, RAMP.wood, 'arch');
       vines(k, W / 2 + 6, bot - 20, 12, 7);
-      for (const [sx, col] of [[x - 6, '#e0503c'], [x - 1, '#f6e070'], [x + w + 4, '#e0503c']]) shroom(k, sx, bot + 1, col);
+      for (const [sx, col] of [
+        [x - 6, '#e0503c'],
+        [x - 1, '#f6e070'],
+        [x + w + 4, '#e0503c']
+      ])
+        shroom(k, sx, bot + 1, col);
       lantern(k, x - 3, bot, e.fx, e.toWorld);
       return r.roofTop - 10;
     },
@@ -778,10 +888,19 @@
       const x = 12,
         w = W - 24;
       const r = gableHouse(k, {
-        x, w, bot: bot - 4, wallH: 30, gableH: 26, depth: 24, roof: RAMP.roofMoss, trim: RAMP.darkwood, gableRamp: RAMP.logs,
+        x,
+        w,
+        bot: bot - 4,
+        wallH: 30,
+        gableH: 26,
+        depth: 24,
+        roof: RAMP.roofMoss,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.logs,
         wall: (k2, wx, wy, ww, wh) => wallLogs(k2, wx, wy, ww, wh, RAMP.logs),
         gable: (k2, gx, gy, gw, cx) => {
-          for (let yy = gy - 2; yy > gy - 22; yy -= 5) k2.rect(cx - (gy - yy) * 0.9, yy, (gy - yy) * 1.8, 1, RAMP.logs[3]);
+          for (let yy = gy - 2; yy > gy - 22; yy -= 5)
+            k2.rect(cx - (gy - yy) * 0.9, yy, (gy - yy) * 1.8, 1, RAMP.logs[3]);
           windowRect(k2, cx - 5, gy - 14, 10, 8, RAMP.darkwood);
           e.window(cx - 5, gy - 14, 10, 8);
         }
@@ -792,7 +911,8 @@
       k.rect(x - 6, bot - 1, w + 12, 1, RAMP.wood[3]);
       roofFlat(k, x - 8, bot - 40, w + 16, 8, RAMP.roofMoss, 6, 4, 0);
       for (const px of [x - 5, x + w + 3]) k.rect(px, bot - 32, 3, 27, RAMP.logs[1]);
-      for (let px = x - 2; px < x + w + 2; px += 4) if (Math.abs(px - W / 2) > 10) k.rect(px, bot - 12, 1, 7, RAMP.wood[2]);
+      for (let px = x - 2; px < x + w + 2; px += 4)
+        if (Math.abs(px - W / 2) > 10) k.rect(px, bot - 12, 1, 7, RAMP.wood[2]);
       k.rect(x - 4, bot - 13, w + 8, 2, RAMP.wood[1]);
       windowRect(k, x + 6, bot - 28, 10, 9, RAMP.darkwood, RAMP.darkwood);
       windowRect(k, x + w - 16, bot - 28, 10, 9, RAMP.darkwood, RAMP.darkwood);
@@ -843,8 +963,21 @@
       door(k, cx, bot, 12, 20, RAMP.wood, 'arch');
       // Palmier.
       const tx = x - 8;
-      for (let i = 0; i < 34; i += 2) k.rect(tx + Math.round(Math.sin(i * 0.08) * 3), bot - i - 2, 4, 2, i % 4 ? RAMP.logs[1] : RAMP.logs[2]);
-      for (const [dx, dy, len] of [[-14, 2, 14], [12, 2, 14], [-10, -4, 12], [8, -5, 12], [0, -7, 8]]) {
+      for (let i = 0; i < 34; i += 2)
+        k.rect(
+          tx + Math.round(Math.sin(i * 0.08) * 3),
+          bot - i - 2,
+          4,
+          2,
+          i % 4 ? RAMP.logs[1] : RAMP.logs[2]
+        );
+      for (const [dx, dy, len] of [
+        [-14, 2, 14],
+        [12, 2, 14],
+        [-10, -4, 12],
+        [8, -5, 12],
+        [0, -7, 8]
+      ]) {
         for (let i = 0; i < len; i++) {
           const fx = tx + 2 + Math.sign(dx) * i,
             fy = bot - 36 + dy + Math.round((i * i) / 18);
@@ -852,7 +985,10 @@
           if (i % 2) k.px(fx, fy + 2, RAMP.leaf[3]);
         }
       }
-      for (const [jx, h, col] of [[x + w + 3, 9, '#d07a40'], [x + w + 9, 7, '#a85a2c']]) {
+      for (const [jx, h, col] of [
+        [x + w + 3, 9, '#d07a40'],
+        [x + w + 9, 7, '#a85a2c']
+      ]) {
         k.rect(jx, bot - h, 6, h, col);
         k.rect(jx + 1, bot - h - 2, 4, 2, col);
         k.rect(jx + 1, bot - h + 1, 1, h - 2, '#ffd0a0');
@@ -880,9 +1016,30 @@
         if ((y - apex) % 12 === 0) k.rect(cx - hw, y, hw * 2, 1, '#00000033');
       }
       // Entrée relevée.
-      k.poly([[cx - 11, bot], [cx, bot - 30], [cx + 11, bot]], '#3a2418');
-      k.poly([[cx - 11, bot], [cx - 3, bot - 26], [cx - 16, bot - 4]], '#e8d4b0');
-      k.poly([[cx + 11, bot], [cx + 3, bot - 26], [cx + 16, bot - 4]], '#d0bc96');
+      k.poly(
+        [
+          [cx - 11, bot],
+          [cx, bot - 30],
+          [cx + 11, bot]
+        ],
+        '#3a2418'
+      );
+      k.poly(
+        [
+          [cx - 11, bot],
+          [cx - 3, bot - 26],
+          [cx - 16, bot - 4]
+        ],
+        '#e8d4b0'
+      );
+      k.poly(
+        [
+          [cx + 11, bot],
+          [cx + 3, bot - 26],
+          [cx + 16, bot - 4]
+        ],
+        '#d0bc96'
+      );
       e.window(cx - 6, bot - 18, 12, 18);
       // Mât, cordages, piquets.
       k.rect(cx, apex - 12, 1, 12, RAMP.darkwood[1]);
@@ -894,7 +1051,10 @@
       // Foyer.
       for (let i = 0; i < 5; i++) k.rect(8 + i * 3, bot - 1, 3, 2, i % 2 ? RAMP.stone[2] : RAMP.stone[1]);
       e.campfire(15, bot - 1);
-      for (const [jx, h, col] of [[W - 12, 9, '#d07a40'], [W - 6, 7, '#a85a2c']]) {
+      for (const [jx, h, col] of [
+        [W - 12, 9, '#d07a40'],
+        [W - 6, 7, '#a85a2c']
+      ]) {
         k.rect(jx, bot - h, 5, h, col);
         k.rect(jx + 1, bot - h - 2, 3, 2, col);
       }
@@ -915,14 +1075,25 @@
       k.rect(x - 8, deck - 3, w + 16, 1, RAMP.wood[0]);
       for (let px = x - 8; px < x + w + 8; px += 5) k.rect(px, deck - 3, 1, 4, RAMP.wood[3]);
       const r = gableHouse(k, {
-        x, w, bot: deck - 3, wallH: 26, gableH: 26, depth: 22, roof: RAMP.roofThatch, trim: RAMP.darkwood, gableRamp: RAMP.wood, tileW: 3, rowH: 3,
+        x,
+        w,
+        bot: deck - 3,
+        wallH: 26,
+        gableH: 26,
+        depth: 22,
+        roof: RAMP.roofThatch,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.wood,
+        tileW: 3,
+        rowH: 3,
         wall: (k2, wx, wy, ww, wh) => wallPlanks(k2, wx, wy, ww, wh, RAMP.wood, false),
         gable: (k2, gx, gy, gw, cx) => {
           windowRound(k2, cx, gy - 10, 4, RAMP.darkwood);
         }
       });
       // Frange de chaume.
-      for (let px = x - 4; px < x + w + 4; px += 2) k.rect(px, r.top + 2, 1, 2 + Math.floor(hash(px, 1) * 3), RAMP.roofThatch[2]);
+      for (let px = x - 4; px < x + w + 4; px += 2)
+        k.rect(px, r.top + 2, 1, 2 + Math.floor(hash(px, 1) * 3), RAMP.roofThatch[2]);
       windowRect(k, x + 5, deck - 22, 9, 8, RAMP.darkwood);
       windowRect(k, x + w - 14, deck - 22, 9, 8, RAMP.darkwood);
       e.window(x + 5, deck - 22, 9, 8);
@@ -957,7 +1128,15 @@
       e.smoke(wx + ww - 5, deck - 64);
       // Corps principal à pignon.
       const r = gableHouse(k, {
-        x, w: W / 2 - 4, bot: deck, wallH: 32, gableH: 24, depth: 22, roof: RAMP.roofBrown, trim: RAMP.darkwood, gableRamp: RAMP.plaster,
+        x,
+        w: W / 2 - 4,
+        bot: deck,
+        wallH: 32,
+        gableH: 24,
+        depth: 22,
+        roof: RAMP.roofBrown,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.plaster,
         wall: (k2, ax, ay, aw, ah) => wallPlaster(k2, ax, ay, aw, ah, RAMP.peach, RAMP.darkwood),
         gable: (k2, gx, gy, gw, cx) => windowRound(k2, cx, gy - 9, 4, RAMP.darkwood)
       });
@@ -969,13 +1148,18 @@
       k.rect(4, deck, W - 8, 6, RAMP.wood[1]);
       k.rect(4, deck, W - 8, 1, RAMP.wood[0]);
       for (let px = 4; px < W - 4; px += 6) k.rect(px, deck + 1, 1, 5, RAMP.wood[3]);
-      for (let px = 4; px < W - 4; px += 4) if (Math.abs(px - W / 2) > 9) k.rect(px, deck - 7, 1, 7, RAMP.wood[2]);
+      for (let px = 4; px < W - 4; px += 4)
+        if (Math.abs(px - W / 2) > 9) k.rect(px, deck - 7, 1, 7, RAMP.wood[2]);
       k.rect(4, deck - 8, W / 2 - 13, 2, RAMP.wood[1]);
       k.rect(W / 2 + 9, deck - 8, W / 2 - 13, 2, RAMP.wood[1]);
       door(k, W / 2, deck, 12, 18, RAMP.wood, 'double');
       for (let i = 0; i < 3; i++) k.rect(W / 2 - 8, deck + i * 2, 16, 2, i % 2 ? RAMP.wood[2] : RAMP.wood[1]);
       crate(k, wx + 8, deck);
-      for (const [px, py] of [[2, bot + 1], [9, bot + 2], [W - 12, bot + 1]]) {
+      for (const [px, py] of [
+        [2, bot + 1],
+        [9, bot + 2],
+        [W - 12, bot + 1]
+      ]) {
         k.disc(px + 3, py - 3, 3, '#e07a28');
         k.rect(px + 2, py - 7, 2, 2, RAMP.green[2]);
         k.rect(px + 3, py - 6, 1, 6, '#b05a1a');
@@ -991,12 +1175,49 @@
       const base = bot - 6,
         top = base - 30;
       mossBase(k, 10, base, W - 20);
-      elfStucco(k, 50, top, 58, 30, [[[50, top], [50, base]], [[106, top], [106, base]], [[54, base], [74, top + 6]]]);
+      elfStucco(k, 50, top, 58, 30, [
+        [
+          [50, top],
+          [50, base]
+        ],
+        [
+          [106, top],
+          [106, base]
+        ],
+        [
+          [54, base],
+          [74, top + 6]
+        ]
+      ]);
       crystalWindow(k, e, 82, top + 8, 12, 14);
-      shingles(k, [...bez([42, top + 8], [44, top - 14], [58, top - 24]), ...bez([58, top - 24], [88, top - 34], [114, top - 26]), [118, top - 18], [116, top + 8]], ELF.woodShingle, { cx: 64 });
+      shingles(
+        k,
+        [
+          ...bez([42, top + 8], [44, top - 14], [58, top - 24]),
+          ...bez([58, top - 24], [88, top - 34], [114, top - 26]),
+          [118, top - 18],
+          [116, top + 8]
+        ],
+        ELF.woodShingle,
+        { cx: 64 }
+      );
       branch(k, bez([58, top - 24], [88, top - 35], [116, top - 26]), 3);
-      elfStucco(k, 14, top - 4, 40, 34, [[[14, top - 4], [14, base]], [[52, top - 4], [52, base]]]);
-      const L = [...bez([2, top + 12], [4, top - 30], [28, top - 60]), ...bez([28, top - 60], [40, top - 70], [46, top - 62]), ...bez([46, top - 62], [38, top - 54], [38, top - 44]), ...bez([38, top - 44], [54, top - 18], [62, top + 10])];
+      elfStucco(k, 14, top - 4, 40, 34, [
+        [
+          [14, top - 4],
+          [14, base]
+        ],
+        [
+          [52, top - 4],
+          [52, base]
+        ]
+      ]);
+      const L = [
+        ...bez([2, top + 12], [4, top - 30], [28, top - 60]),
+        ...bez([28, top - 60], [40, top - 70], [46, top - 62]),
+        ...bez([46, top - 62], [38, top - 54], [38, top - 44]),
+        ...bez([38, top - 44], [54, top - 18], [62, top + 10])
+      ];
       shingles(k, L, ELF.woodShingle, { cx: 26 });
       branch(k, bez([2, top + 12], [4, top - 30], [28, top - 60]), 3);
       branch(k, bez([38, top - 44], [54, top - 18], [62, top + 10]), 3);
@@ -1023,17 +1244,55 @@
         crystalWindow(k, e, wx + 9, top + 12, 10, 12);
         const edge = s < 0 ? 6 : W - 6,
           inner = s < 0 ? cx - 18 : cx + 18;
-        shingles(k, [[edge, top + 12], ...bez([edge, top + 12], [edge + s * -4, top - 2], [inner, top - 8]), [inner, top + 12]], ELF.mossShingle, { cx: s < 0 ? 20 : W - 20, leaf: true, w: 6, h: 6 });
+        shingles(
+          k,
+          [
+            [edge, top + 12],
+            ...bez([edge, top + 12], [edge + s * -4, top - 2], [inner, top - 8]),
+            [inner, top + 12]
+          ],
+          ELF.mossShingle,
+          { cx: s < 0 ? 20 : W - 20, leaf: true, w: 6, h: 6 }
+        );
       }
       wallPlanks(k, cx - 22, top - 4, 44, base - top + 4, RAMP.wood, false);
-      const roof = [...bez([cx - 32, top + 4], [cx - 26, top - 36], [cx, top - 64]), ...bez([cx, top - 64], [cx + 26, top - 36], [cx + 32, top + 4])];
+      const roof = [
+        ...bez([cx - 32, top + 4], [cx - 26, top - 36], [cx, top - 64]),
+        ...bez([cx, top - 64], [cx + 26, top - 36], [cx + 32, top + 4])
+      ];
       shingles(k, roof, ELF.leafShingle, { cx, leaf: true, w: 8, h: 8 });
       branch(k, bez([cx - 32, top + 4], [cx - 26, top - 36], [cx, top - 64]), 3);
       branch(k, bez([cx + 32, top + 4], [cx + 26, top - 36], [cx, top - 64]), 3);
-      branch(k, [...bez([cx, top - 2], [cx - 2, top - 40], [cx, top - 66]), ...bez([cx, top - 66], [cx + 2, top - 76], [cx + 8, top - 74]), [cx + 8, top - 70]], 4);
+      branch(
+        k,
+        [
+          ...bez([cx, top - 2], [cx - 2, top - 40], [cx, top - 66]),
+          ...bez([cx, top - 66], [cx + 2, top - 76], [cx + 8, top - 74]),
+          [cx + 8, top - 70]
+        ],
+        4
+      );
       archDoor(k, cx, base, 24, 30);
-      k.poly([[cx - 7, top - 18], [cx + 7, top - 18], [cx + 7, top - 10], [cx, top - 4], [cx - 7, top - 10]], ELF.bark[1]);
-      k.poly([[cx - 5, top - 16], [cx + 5, top - 16], [cx + 5, top - 10], [cx, top - 6], [cx - 5, top - 10]], '#3a6aa8');
+      k.poly(
+        [
+          [cx - 7, top - 18],
+          [cx + 7, top - 18],
+          [cx + 7, top - 10],
+          [cx, top - 4],
+          [cx - 7, top - 10]
+        ],
+        ELF.bark[1]
+      );
+      k.poly(
+        [
+          [cx - 5, top - 16],
+          [cx + 5, top - 16],
+          [cx + 5, top - 10],
+          [cx, top - 6],
+          [cx - 5, top - 10]
+        ],
+        '#3a6aa8'
+      );
       k.rect(cx - 1, top - 15, 2, 8, '#f0d060');
       flowerBasket(k, cx + 18, top - 2);
       e.pulse(cx, top - 12, 40, '#9fd8ff');
@@ -1047,8 +1306,35 @@
         base = bot - 6,
         top = base - 32;
       mossBase(k, 8, base, W - 16);
-      elfStucco(k, 12, top, W - 24, 32, [[[12, top], [12, base]], [[W - 13, top], [W - 13, base]], [[cx - 18, top], [cx - 18, base]], [[cx + 17, top], [cx + 17, base]], [[14, top + 16], [cx - 18, top + 4]]]);
-      const roof = [[2, top + 8], ...bez([2, top + 8], [6, top - 26], [28, top - 34]), ...bez([28, top - 34], [cx - 10, top - 64], [cx, top - 66]), ...bez([cx, top - 66], [cx + 12, top - 62], [W - 28, top - 34]), ...bez([W - 28, top - 34], [W - 6, top - 26], [W - 2, top + 8])];
+      elfStucco(k, 12, top, W - 24, 32, [
+        [
+          [12, top],
+          [12, base]
+        ],
+        [
+          [W - 13, top],
+          [W - 13, base]
+        ],
+        [
+          [cx - 18, top],
+          [cx - 18, base]
+        ],
+        [
+          [cx + 17, top],
+          [cx + 17, base]
+        ],
+        [
+          [14, top + 16],
+          [cx - 18, top + 4]
+        ]
+      ]);
+      const roof = [
+        [2, top + 8],
+        ...bez([2, top + 8], [6, top - 26], [28, top - 34]),
+        ...bez([28, top - 34], [cx - 10, top - 64], [cx, top - 66]),
+        ...bez([cx, top - 66], [cx + 12, top - 62], [W - 28, top - 34]),
+        ...bez([W - 28, top - 34], [W - 6, top - 26], [W - 2, top + 8])
+      ];
       shingles(k, roof, ELF.leafShingle, { cx: cx - 10, leaf: true, w: 11, h: 11 });
       branch(k, bez([cx - 20, top - 52], [cx, top - 70], [cx + 18, top - 54]), 3);
       archDoor(k, cx, base, 22, 28);
@@ -1056,13 +1342,43 @@
       crystalWindow(k, e, W - 34, top + 6, 12, 16);
       crystalWindow(k, e, 22, top + 8, 10, 12);
       // Enseigne à la chope dorée.
-      k.poly([[cx - 9, top - 30], [cx + 9, top - 30], [cx + 9, top - 18], [cx, top - 12], [cx - 9, top - 18]], ELF.bark[1]);
+      k.poly(
+        [
+          [cx - 9, top - 30],
+          [cx + 9, top - 30],
+          [cx + 9, top - 18],
+          [cx, top - 12],
+          [cx - 9, top - 18]
+        ],
+        ELF.bark[1]
+      );
       k.rect(cx - 4, top - 27, 7, 9, '#f0c040');
       k.rect(cx - 4, top - 27, 7, 2, '#ffffff');
       k.rect(cx + 3, top - 25, 2, 5, '#f0c040');
-      for (const [sx, col] of [[-2, '#3a6aa8'], [W - 6, '#8a2a3a']]) {
-        k.poly([[sx, base - 2], [sx + 8, base - 2], [sx + 8, base - 14], [sx + 4, base - 18], [sx, base - 14]], ELF.bark[1]);
-        k.poly([[sx + 1, base - 3], [sx + 7, base - 3], [sx + 7, base - 13], [sx + 4, base - 16], [sx + 1, base - 13]], col);
+      for (const [sx, col] of [
+        [-2, '#3a6aa8'],
+        [W - 6, '#8a2a3a']
+      ]) {
+        k.poly(
+          [
+            [sx, base - 2],
+            [sx + 8, base - 2],
+            [sx + 8, base - 14],
+            [sx + 4, base - 18],
+            [sx, base - 14]
+          ],
+          ELF.bark[1]
+        );
+        k.poly(
+          [
+            [sx + 1, base - 3],
+            [sx + 7, base - 3],
+            [sx + 7, base - 13],
+            [sx + 4, base - 16],
+            [sx + 1, base - 13]
+          ],
+          col
+        );
         k.rect(sx + 3, base - 13, 2, 9, '#f0d060');
       }
       lantern(k, W - 16, base, e.fx, e.toWorld);
@@ -1076,13 +1392,44 @@
         base = bot - 6,
         top = base - 30;
       mossBase(k, 10, base, W - 20);
-      elfStucco(k, 16, top, W - 32, 30, [[[16, top], [16, base]], [[W - 17, top], [W - 17, base]], [[18, top + 28], [cx - 12, top + 2]]]);
-      shingles(k, [[6, top + 8], ...bez([6, top + 8], [10, top - 24], [cx, top - 48]), ...bez([cx, top - 48], [W - 10, top - 24], [W - 6, top + 8])], ELF.woodShingle, { cx: cx - 8 });
+      elfStucco(k, 16, top, W - 32, 30, [
+        [
+          [16, top],
+          [16, base]
+        ],
+        [
+          [W - 17, top],
+          [W - 17, base]
+        ],
+        [
+          [18, top + 28],
+          [cx - 12, top + 2]
+        ]
+      ]);
+      shingles(
+        k,
+        [
+          [6, top + 8],
+          ...bez([6, top + 8], [10, top - 24], [cx, top - 48]),
+          ...bez([cx, top - 48], [W - 10, top - 24], [W - 6, top + 8])
+        ],
+        ELF.woodShingle,
+        { cx: cx - 8 }
+      );
       branch(k, bez([6, top + 8], [10, top - 24], [cx, top - 48]), 3);
       branch(k, bez([W - 6, top + 8], [W - 10, top - 24], [cx, top - 48]), 3);
       archDoor(k, cx, base, 16, 24);
       crystalWindow(k, e, 24, top + 6, 10, 14);
-      k.poly([[cx - 7, top - 22], [cx + 7, top - 22], [cx + 7, top - 14], [cx, top - 6], [cx - 7, top - 14]], '#f0d060');
+      k.poly(
+        [
+          [cx - 7, top - 22],
+          [cx + 7, top - 22],
+          [cx + 7, top - 14],
+          [cx, top - 6],
+          [cx - 7, top - 14]
+        ],
+        '#f0d060'
+      );
       k.line(cx - 4, top - 20, cx + 4, top - 10, '#ffffff');
       k.line(cx + 4, top - 20, cx - 4, top - 10, '#ffffff');
       for (const rx of [W - 34, W - 2]) {
@@ -1092,7 +1439,14 @@
         k.rect(rx + 14, base - 18, 2, 18, ELF.bark[3]);
         for (let i = 0; i < 3; i++) {
           k.rect(rx + 4 + i * 4, base - 28, 1, 26, ELF.bark[0]);
-          k.poly([[rx + 3 + i * 4, base - 28], [rx + 4.5 + i * 4, base - 33], [rx + 6 + i * 4, base - 28]], '#e0e8f0');
+          k.poly(
+            [
+              [rx + 3 + i * 4, base - 28],
+              [rx + 4.5 + i * 4, base - 33],
+              [rx + 6 + i * 4, base - 28]
+            ],
+            '#e0e8f0'
+          );
         }
       }
       for (let i = 0; i < 3; i++) {
@@ -1109,8 +1463,27 @@
         base = bot - 6,
         top = base - 30;
       mossBase(k, 10, base, W - 20);
-      elfStucco(k, 16, top, W - 32, 30, [[[16, top], [16, base]], [[W - 17, top], [W - 17, base]]]);
-      shingles(k, [[6, top + 8], ...bez([6, top + 8], [12, top - 30], [cx - 6, top - 44]), ...bez([cx - 6, top - 44], [cx + 6, top - 52], [cx + 12, top - 44]), ...bez([cx + 12, top - 44], [W - 12, top - 26], [W - 6, top + 8])], ELF.mossShingle, { cx: cx - 10, leaf: true, w: 8, h: 8 });
+      elfStucco(k, 16, top, W - 32, 30, [
+        [
+          [16, top],
+          [16, base]
+        ],
+        [
+          [W - 17, top],
+          [W - 17, base]
+        ]
+      ]);
+      shingles(
+        k,
+        [
+          [6, top + 8],
+          ...bez([6, top + 8], [12, top - 30], [cx - 6, top - 44]),
+          ...bez([cx - 6, top - 44], [cx + 6, top - 52], [cx + 12, top - 44]),
+          ...bez([cx + 12, top - 44], [W - 12, top - 26], [W - 6, top + 8])
+        ],
+        ELF.mossShingle,
+        { cx: cx - 10, leaf: true, w: 8, h: 8 }
+      );
       branch(k, bez([cx - 6, top - 44], [cx + 6, top - 54], [cx + 14, top - 46]), 3);
       k.rect(14, top + 2, W - 28, 1, ELF.bark[2]);
       ['#f6a0d0', '#9affe0', '#fff0a0', '#c8a8ff', '#f6a0d0'].forEach((col, i) => {
@@ -1122,7 +1495,15 @@
       crystalWindow(k, e, W - 32, top + 14, 10, 12);
       const mx = W - 4;
       k.rect(mx, base - 4, 1, 4, ELF.bark[2]);
-      k.poly([[mx - 6, base - 4], [mx + 7, base - 4], [mx + 3, base - 20], [mx - 2, base - 20]], '#9affe0');
+      k.poly(
+        [
+          [mx - 6, base - 4],
+          [mx + 7, base - 4],
+          [mx + 3, base - 20],
+          [mx - 2, base - 20]
+        ],
+        '#9affe0'
+      );
       k.rect(mx - 2, base - 22, 5, 3, '#e8e0d0');
       k.disc(mx, base - 25, 2, '#d8c8a8');
       k.rect(mx - 5, base - 13, 12, 1, '#f0d060');
@@ -1145,9 +1526,35 @@
       branch(k, spiral, 3);
       for (let i = 0; i < 3; i++) crystalWindow(k, e, cx - 4, top + 8 + i * 22, 8, 12);
       const apex = top - 50;
-      shingles(k, [[x - 8, top + 4], ...bez([x - 8, top + 4], [x, top - 20], [cx - 2, apex]), ...bez([cx - 2, apex], [cx + 8, apex - 8], [cx + 10, apex + 2]), ...bez([cx + 10, apex + 2], [cx + 4, apex + 4], [cx + 6, apex + 10]), ...bez([cx + 6, apex + 10], [x + tw, top - 20], [x + tw + 8, top + 4])], ELF.woodShingle, { cx: cx - 6, w: 6, h: 5 });
-      k.poly([[cx + 7, apex - 4], [cx + 10, apex - 14], [cx + 13, apex - 4], [cx + 10, apex]], '#bfffee');
-      k.poly([[cx + 7, apex - 4], [cx + 10, apex - 14], [cx + 10, apex]], '#ffffff');
+      shingles(
+        k,
+        [
+          [x - 8, top + 4],
+          ...bez([x - 8, top + 4], [x, top - 20], [cx - 2, apex]),
+          ...bez([cx - 2, apex], [cx + 8, apex - 8], [cx + 10, apex + 2]),
+          ...bez([cx + 10, apex + 2], [cx + 4, apex + 4], [cx + 6, apex + 10]),
+          ...bez([cx + 6, apex + 10], [x + tw, top - 20], [x + tw + 8, top + 4])
+        ],
+        ELF.woodShingle,
+        { cx: cx - 6, w: 6, h: 5 }
+      );
+      k.poly(
+        [
+          [cx + 7, apex - 4],
+          [cx + 10, apex - 14],
+          [cx + 13, apex - 4],
+          [cx + 10, apex]
+        ],
+        '#bfffee'
+      );
+      k.poly(
+        [
+          [cx + 7, apex - 4],
+          [cx + 10, apex - 14],
+          [cx + 10, apex]
+        ],
+        '#ffffff'
+      );
       e.pulse(cx + 10, apex - 8, 80, '#9affe8');
       archDoor(k, cx, base, 12, 18);
       vineBloom(k, x + 2, top + 20, 40, 3);
@@ -1163,8 +1570,26 @@
         k.rect(4 + i * 3, base + 3 - i * 3, W - 8 - i * 6, 1, RAMP.stone[0]);
       }
       elfStucco(k, 16, top, W - 32, base - top - 3);
-      for (const px of [14, 30, W - 34, W - 18]) branch(k, [[px, base - 3], [px + 1, top + 12], [px - 1, top]], 4);
-      shingles(k, [[6, top + 6], ...bez([6, top + 6], [cx - 30, top - 40], [cx, top - 44]), ...bez([cx, top - 44], [cx + 30, top - 40], [W - 6, top + 6])], ELF.silverShingle, { cx: cx - 10, w: 7, h: 6 });
+      for (const px of [14, 30, W - 34, W - 18])
+        branch(
+          k,
+          [
+            [px, base - 3],
+            [px + 1, top + 12],
+            [px - 1, top]
+          ],
+          4
+        );
+      shingles(
+        k,
+        [
+          [6, top + 6],
+          ...bez([6, top + 6], [cx - 30, top - 40], [cx, top - 44]),
+          ...bez([cx, top - 44], [cx + 30, top - 40], [W - 6, top + 6])
+        ],
+        ELF.silverShingle,
+        { cx: cx - 10, w: 7, h: 6 }
+      );
       k.disc(cx, top - 50, 6, '#e8f0ff');
       k.disc(cx + 3, top - 52, 5, ELF.silverShingle[3]);
       e.pulse(cx, top - 50, 60, '#c8dcff');
@@ -1188,30 +1613,74 @@
       for (const s of [-1, 1]) {
         const tx = s < 0 ? 12 : W - 46,
           ttop = base - 66;
-        elfStucco(k, tx, ttop, 34, base - ttop, [[[tx, ttop], [tx, base]], [[tx + 33, ttop], [tx + 33, base]]]);
+        elfStucco(k, tx, ttop, 34, base - ttop, [
+          [
+            [tx, ttop],
+            [tx, base]
+          ],
+          [
+            [tx + 33, ttop],
+            [tx + 33, base]
+          ]
+        ]);
         const spiral = [];
-        for (let y = base; y > ttop; y -= 2) spiral.push([tx + 17 + Math.sin((base - y) * 0.1 + (s > 0 ? 3 : 0)) * 15, y]);
+        for (let y = base; y > ttop; y -= 2)
+          spiral.push([tx + 17 + Math.sin((base - y) * 0.1 + (s > 0 ? 3 : 0)) * 15, y]);
         branch(k, spiral, 3);
         crystalWindow(k, e, tx + 12, ttop + 10, 10, 16);
         crystalWindow(k, e, tx + 12, ttop + 38, 10, 14);
         const apex = ttop - 46,
           tc = tx + 17;
-        shingles(k, [[tx - 8, ttop + 6], ...bez([tx - 8, ttop + 6], [tx + 2, ttop - 20], [tc, apex]), ...bez([tc, apex], [tx + 32, ttop - 20], [tx + 42, ttop + 6])], ELF.woodShingle, { cx: tc - 6, w: 6, h: 5 });
+        shingles(
+          k,
+          [
+            [tx - 8, ttop + 6],
+            ...bez([tx - 8, ttop + 6], [tx + 2, ttop - 20], [tc, apex]),
+            ...bez([tc, apex], [tx + 32, ttop - 20], [tx + 42, ttop + 6])
+          ],
+          ELF.woodShingle,
+          { cx: tc - 6, w: 6, h: 5 }
+        );
         k.rect(tc, apex - 10, 1, 10, '#f0d060');
         k.disc(tc, apex - 11, 2, '#fff4b0');
         e.pulse(tc, apex - 11, 50, '#fff0a0');
         e.flag(tc + 1, apex - 10, s < 0 ? '#3e8a4a' : '#f0d060', 10);
       }
       // Grande salle.
-      elfStucco(k, 44, top, W - 88, base - top, [[[44, top], [44, base]], [[W - 45, top], [W - 45, base]]]);
-      shingles(k, [[34, top + 10], ...bez([34, top + 10], [44, top - 40], [cx, top - 74]), ...bez([cx, top - 74], [W - 44, top - 40], [W - 34, top + 10])], ELF.leafShingle, { cx: cx - 12, leaf: true, w: 10, h: 10 });
+      elfStucco(k, 44, top, W - 88, base - top, [
+        [
+          [44, top],
+          [44, base]
+        ],
+        [
+          [W - 45, top],
+          [W - 45, base]
+        ]
+      ]);
+      shingles(
+        k,
+        [
+          [34, top + 10],
+          ...bez([34, top + 10], [44, top - 40], [cx, top - 74]),
+          ...bez([cx, top - 74], [W - 44, top - 40], [W - 34, top + 10])
+        ],
+        ELF.leafShingle,
+        { cx: cx - 12, leaf: true, w: 10, h: 10 }
+      );
       branch(k, bez([34, top + 10], [44, top - 40], [cx, top - 74]), 4);
       branch(k, bez([W - 34, top + 10], [W - 44, top - 40], [cx, top - 74]), 4);
       branch(k, [...bez([cx, top - 70], [cx - 3, top - 84], [cx + 4, top - 90]), [cx + 9, top - 86]], 4);
       // Rosace de cristal.
       k.disc(cx, top - 30, 12, ELF.bark[1]);
       k.disc(cx, top - 30, 10, ELF.crystal[2]);
-      for (let a = 0; a < 8; a++) k.line(cx, top - 30, cx + Math.cos((a * Math.PI) / 4) * 10, top - 30 + Math.sin((a * Math.PI) / 4) * 10, ELF.crystal[3]);
+      for (let a = 0; a < 8; a++)
+        k.line(
+          cx,
+          top - 30,
+          cx + Math.cos((a * Math.PI) / 4) * 10,
+          top - 30 + Math.sin((a * Math.PI) / 4) * 10,
+          ELF.crystal[3]
+        );
       k.disc(cx, top - 30, 3, '#fff4b0');
       e.pulse(cx, top - 30, 90, '#bfffee');
       // Balcon et bannières.
@@ -1222,13 +1691,25 @@
         k.rect(bx, top + 5, 8, 18, '#3e8a4a');
         k.rect(bx, top + 5, 8, 2, '#f0d060');
         k.rect(bx + 3, top + 10, 2, 8, '#f0d060');
-        k.poly([[bx, top + 23], [bx + 4, top + 27], [bx + 8, top + 23]], '#3e8a4a');
+        k.poly(
+          [
+            [bx, top + 23],
+            [bx + 4, top + 27],
+            [bx + 8, top + 23]
+          ],
+          '#3e8a4a'
+        );
       }
       crystalWindow(k, e, 54, top + 10, 12, 18);
       crystalWindow(k, e, W - 66, top + 10, 12, 18);
       // Grande porte dorée.
       archDoor(k, cx, base, 28, 34);
-      for (let a = 0; a <= 16; a++) k.px(cx + Math.cos(Math.PI + (a / 16) * Math.PI) * 16, base - 20 + Math.sin(Math.PI + (a / 16) * Math.PI) * 16, '#f0d060');
+      for (let a = 0; a <= 16; a++)
+        k.px(
+          cx + Math.cos(Math.PI + (a / 16) * Math.PI) * 16,
+          base - 20 + Math.sin(Math.PI + (a / 16) * Math.PI) * 16,
+          '#f0d060'
+        );
       for (const fx of [48, W - 62]) {
         k.rect(fx, base - 4, 14, 4, '#8a5a34');
         for (let i = 0; i < 8; i++) k.px(fx + 1 + i * 1.6, base - 6 - (i % 2), ELF.flowers[i % 5]);
@@ -1274,11 +1755,30 @@
         }
       }
       // Cristal au sommet.
-      k.poly([[cx - 3, apex - 2], [cx, apex - 12], [cx + 3, apex - 2], [cx, apex + 2]], '#8ae8ff');
-      k.poly([[cx - 3, apex - 2], [cx, apex - 12], [cx, apex + 2]], '#d8faff');
+      k.poly(
+        [
+          [cx - 3, apex - 2],
+          [cx, apex - 12],
+          [cx + 3, apex - 2],
+          [cx, apex + 2]
+        ],
+        '#8ae8ff'
+      );
+      k.poly(
+        [
+          [cx - 3, apex - 2],
+          [cx, apex - 12],
+          [cx, apex + 2]
+        ],
+        '#d8faff'
+      );
       e.pulse(cx, apex - 6, 70, '#9af0ff');
       // Fenêtres, porte, lierre et fleurs.
-      for (const [wxp, wyp] of [[cx - 5, top + 10], [cx + 8, top + 30], [cx - 16, top + 32]]) {
+      for (const [wxp, wyp] of [
+        [cx - 5, top + 10],
+        [cx + 8, top + 30],
+        [cx - 16, top + 32]
+      ]) {
         windowArch(k, wxp, wyp, 8, 11, RAMP.darkwood);
         e.window(wxp, wyp + 2, 8, 9);
       }
@@ -1286,17 +1786,45 @@
       vines(k, cx - 10, apex + 10, 30, 2);
       vines(k, cx + 12, top - 6, 40, 6);
       vines(k, x + 3, top + 20, 30, 9);
-      for (const [fx, fy] of [[cx + 13, top + 14], [x + 4, top + 34], [cx - 9, apex + 26], [cx + 11, top + 44]]) {
+      for (const [fx, fy] of [
+        [cx + 13, top + 14],
+        [x + 4, top + 34],
+        [cx - 9, apex + 26],
+        [cx + 11, top + 44]
+      ]) {
         k.px(fx, fy, '#ffffff');
         k.px(fx + 1, fy + 1, '#ffe070');
       }
       // Cristaux et champignons au pied.
-      for (const [px, h, col] of [[x - 8, 14, '#9af0ff'], [x - 2, 9, '#c89aff'], [x + tw + 2, 16, '#9af0ff'], [x + tw + 8, 9, '#ffb0f0']]) {
-        k.poly([[px - 2, bot], [px, bot - h], [px + 2, bot]], col);
-        k.poly([[px - 2, bot], [px, bot - h], [px, bot]], '#ffffff');
+      for (const [px, h, col] of [
+        [x - 8, 14, '#9af0ff'],
+        [x - 2, 9, '#c89aff'],
+        [x + tw + 2, 16, '#9af0ff'],
+        [x + tw + 8, 9, '#ffb0f0']
+      ]) {
+        k.poly(
+          [
+            [px - 2, bot],
+            [px, bot - h],
+            [px + 2, bot]
+          ],
+          col
+        );
+        k.poly(
+          [
+            [px - 2, bot],
+            [px, bot - h],
+            [px, bot]
+          ],
+          '#ffffff'
+        );
         e.pulse(px, bot - h / 2, 40, col);
       }
-      for (const [sx, col] of [[x - 14, '#c89aff'], [x + tw + 12, '#ff9af0']]) shroom(k, sx, bot + 1, col);
+      for (const [sx, col] of [
+        [x - 14, '#c89aff'],
+        [x + tw + 12, '#ff9af0']
+      ])
+        shroom(k, sx, bot + 1, col);
       return apex - 18;
     }
   };
@@ -1308,7 +1836,15 @@
         w = W - 20,
         trimW = ['#ffffff', '#f0ece4', '#d8d0c4'];
       const r = gableHouse(k, {
-        x, w, bot, wallH: 36, gableH: 32, depth: 28, roof: RAMP.roofSlate, trim: trimW, gableRamp: RAMP.red,
+        x,
+        w,
+        bot,
+        wallH: 36,
+        gableH: 32,
+        depth: 28,
+        roof: RAMP.roofSlate,
+        trim: trimW,
+        gableRamp: RAMP.red,
         wall: (k2, wx, wy, ww, wh) => {
           wallPlanks(k2, wx, wy, ww, wh, ['#e8705a', '#c84838', '#a03428', '#7a2418'], false);
           k2.rect(wx, wy, 2, wh, trimW[0]);
@@ -1351,7 +1887,17 @@
         w = W - 12;
       for (const px of [x + 2, x + w - 5]) k.rect(px, bot - 6, 3, 6, RAMP.darkwood[1]);
       const r = gableHouse(k, {
-        x, w, bot: bot - 6, wallH: 18, gableH: 14, depth: 14, roof: RAMP.roofRed, trim: RAMP.darkwood, gableRamp: RAMP.wood, tileW: 5, rowH: 3,
+        x,
+        w,
+        bot: bot - 6,
+        wallH: 18,
+        gableH: 14,
+        depth: 14,
+        roof: RAMP.roofRed,
+        trim: RAMP.darkwood,
+        gableRamp: RAMP.wood,
+        tileW: 5,
+        rowH: 3,
         wall: (k2, wx, wy, ww, wh) => wallPlanks(k2, wx, wy, ww, wh, RAMP.wood, false),
         gable: (k2, gx, gy, gw, cx) => k2.disc(cx, gy - 5, 2, RAMP.darkwood[3])
       });
@@ -1447,5 +1993,10 @@
     outline(k);
     return { canvas: k.cv, x0, y0, scale: U, fx, roofTop: y0 + top * U };
   }
-  window.CANAAN_BUILDING_ART = Object.freeze({ paint, farm, has: id => Object.hasOwn(MODELS, id), kit: Object.freeze({ brush, outline, roofPlane, RAMP, hash, shingles, branch, bez, spans, ELF }) });
+  window.CANAAN_BUILDING_ART = Object.freeze({
+    paint,
+    farm,
+    has: id => Object.hasOwn(MODELS, id),
+    kit: Object.freeze({ brush, outline, roofPlane, RAMP, hash, shingles, branch, bez, spans, ELF })
+  });
 })();

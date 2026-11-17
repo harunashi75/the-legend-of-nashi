@@ -6,7 +6,8 @@
 (() => {
   'use strict';
   // Les cases qui ont déjà leur info-bulle détaillée (objets, Rubis, compétences…) n'affichent pas la bulle simple.
-  const RICH = '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]';
+  const RICH =
+    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]';
   const DELAY = 280;
 
   // ---------------------------------------------------------------- title → data-tip
@@ -30,7 +31,12 @@
         if (m.type === 'attributes') adopt(m.target);
         else for (const n of m.addedNodes) adoptTree(n);
       }
-    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
+    }).observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['title']
+    });
 
   // ---------------------------------------------------------------- Bulle d'aide
   const tip = document.createElement('div');
@@ -144,5 +150,11 @@
   );
 
   window.canaanConfirm = canaanConfirm;
-  window.CANAAN_UI_OVERLAY = Object.freeze({ confirm: canaanConfirm, isConfirmOpen: () => !!pending, accept: () => close(true), cancel: () => close(false), hideTip: hide });
+  window.CANAAN_UI_OVERLAY = Object.freeze({
+    confirm: canaanConfirm,
+    isConfirmOpen: () => !!pending,
+    accept: () => close(true),
+    cancel: () => close(false),
+    hideTip: hide
+  });
 })();

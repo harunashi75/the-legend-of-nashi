@@ -169,7 +169,13 @@ export const GEAR_NAMES = {
 };
 // Passifs des trois artéfacts.
 export const ARTIFACT_BUFFS = [
-  { name: 'Ardeur', icon: '⟦art_ardeur⟧', description: 'Augmente les dégâts et les soins', stat: 'attack', percent: 6 },
+  {
+    name: 'Ardeur',
+    icon: '⟦art_ardeur⟧',
+    description: 'Augmente les dégâts et les soins',
+    stat: 'attack',
+    percent: 6
+  },
   {
     name: 'Bastion',
     icon: '⟦art_bastion⟧',

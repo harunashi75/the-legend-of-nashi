@@ -303,15 +303,18 @@
         for (let i = 0; i < pts.length; i++) {
           const [ax2, ay] = pts[i],
             [bx2, by] = pts[(i + 1) % pts.length];
-          if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax2 + ((y + 0.5 - ay) / (by - ay)) * (bx2 - ax2));
+          if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5))
+            xs.push(ax2 + ((y + 0.5 - ay) / (by - ay)) * (bx2 - ax2));
         }
         xs.sort((a, b) => a - b);
-        for (let i = 0; i + 1 < xs.length; i += 2) R(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1, col);
+        for (let i = 0; i + 1 < xs.length; i += 2)
+          R(Math.round(xs[i]), y, Math.round(xs[i + 1]) - Math.round(xs[i]), 1, col);
       }
     };
     const line = (x0, y0, x1, y1, col) => {
       const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
-      for (let i = 0; i <= n; i++) R(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), 1, 1, col);
+      for (let i = 0; i <= n; i++)
+        R(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), 1, 1, col);
     };
     const mirror = pts => pts.map(([x, y]) => [25 - x, y]);
     const both = (pts, col) => {
@@ -329,12 +332,51 @@
         const bat = sk.back === 'batwings',
           memb = bat ? cD : cM,
           edge = bat ? '#0c080a' : cD;
-        const W = [[8, 12], [2, 3 - big], [-4 - big, 0 - big], [-3 - big, 5], [-6 - big, 8], [-3 - big, 11], [-5 - big, 15 + big], [1, 16], [7, 17]];
+        const W = [
+          [8, 12],
+          [2, 3 - big],
+          [-4 - big, 0 - big],
+          [-3 - big, 5],
+          [-6 - big, 8],
+          [-3 - big, 11],
+          [-5 - big, 15 + big],
+          [1, 16],
+          [7, 17]
+        ];
         both(W, edge);
-        both([[8, 13], [2, 4 - big], [-3 - big, 2 - big], [-2 - big, 6], [-5 - big, 9], [-2 - big, 12], [-4 - big, 14 + big], [1, 15], [7, 16]], memb);
+        both(
+          [
+            [8, 13],
+            [2, 4 - big],
+            [-3 - big, 2 - big],
+            [-2 - big, 6],
+            [-5 - big, 9],
+            [-2 - big, 12],
+            [-4 - big, 14 + big],
+            [1, 15],
+            [7, 16]
+          ],
+          memb
+        );
         // Cellules plus claires entre les os.
-        both([[6, 13], [1, 6], [-2 - big, 4], [-1, 9]], bat ? cM : cL);
-        both([[5, 15], [-1, 11], [-3 - big, 13], [1, 14]], bat ? cM : cL);
+        both(
+          [
+            [6, 13],
+            [1, 6],
+            [-2 - big, 4],
+            [-1, 9]
+          ],
+          bat ? cM : cL
+        );
+        both(
+          [
+            [5, 15],
+            [-1, 11],
+            [-3 - big, 13],
+            [1, 14]
+          ],
+          bat ? cM : cL
+        );
         bothLine(8, 12, -4 - big, 0 - big, mD);
         bothLine(7, 13, -6 - big, 8, mD);
         bothLine(7, 15, -5 - big, 15 + big, mD);
@@ -345,22 +387,101 @@
           const y = 3 + r * 4 - big,
             len = 11 - r * 2 + big,
             col = [cL, '#ffffff', cM, cD][r % 4];
-          both([[8, y + 8], [8 - len, y], [8 - len - 1, y + 3], [8 - len + 2, y + 6], [7, y + 11]], col);
-          for (let k = 0; k < len; k += 2) R(8 - len + k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL), R(17 + len - k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL);
+          both(
+            [
+              [8, y + 8],
+              [8 - len, y],
+              [8 - len - 1, y + 3],
+              [8 - len + 2, y + 6],
+              [7, y + 11]
+            ],
+            col
+          );
+          for (let k = 0; k < len; k += 2)
+            (R(8 - len + k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL),
+              R(17 + len - k, y + 4 + (k % 4 === 0 ? 1 : 0), 1, 2, r % 2 ? cM : cL));
         }
         bothLine(8, 11, 8 - (11 + big), 3 - big, trim);
       } else if (sk.back === 'fairywings') {
-        both([[8, 12], [3, 2 - big], [-2 - big, 3 - big], [-1 - big, 8], [5, 12]], cL);
-        both([[8, 12], [3, 3 - big], [-1 - big, 4 - big], [0, 8], [5, 11]], cM);
-        both([[8, 14], [1, 14], [-1 - big, 19 + big], [4, 19], [7, 16]], cL);
-        both([[8, 14], [2, 15], [0, 18 + big], [4, 18], [7, 16]], cD);
+        both(
+          [
+            [8, 12],
+            [3, 2 - big],
+            [-2 - big, 3 - big],
+            [-1 - big, 8],
+            [5, 12]
+          ],
+          cL
+        );
+        both(
+          [
+            [8, 12],
+            [3, 3 - big],
+            [-1 - big, 4 - big],
+            [0, 8],
+            [5, 11]
+          ],
+          cM
+        );
+        both(
+          [
+            [8, 14],
+            [1, 14],
+            [-1 - big, 19 + big],
+            [4, 19],
+            [7, 16]
+          ],
+          cL
+        );
+        both(
+          [
+            [8, 14],
+            [2, 15],
+            [0, 18 + big],
+            [4, 18],
+            [7, 16]
+          ],
+          cD
+        );
         R(2, 6, 1, 1, '#ffffff');
         R(22, 6, 1, 1, '#ffffff');
       } else if (sk.back === 'flamecape') {
         // Langues de feu qui jaillissent des épaules, de part et d'autre du corps.
-        both([[8, 12], [4, 5 - big], [5, 9], [1, 7 - big], [3, 13], [0, 14], [4, 18], [7, 17]], cD);
-        both([[8, 13], [5, 7 - big], [5, 10], [2, 9], [4, 14], [2, 15], [5, 17], [7, 16]], cM);
-        both([[7, 14], [5, 11], [4, 14], [6, 16]], cL);
+        both(
+          [
+            [8, 12],
+            [4, 5 - big],
+            [5, 9],
+            [1, 7 - big],
+            [3, 13],
+            [0, 14],
+            [4, 18],
+            [7, 17]
+          ],
+          cD
+        );
+        both(
+          [
+            [8, 13],
+            [5, 7 - big],
+            [5, 10],
+            [2, 9],
+            [4, 14],
+            [2, 15],
+            [5, 17],
+            [7, 16]
+          ],
+          cM
+        );
+        both(
+          [
+            [7, 14],
+            [5, 11],
+            [4, 14],
+            [6, 16]
+          ],
+          cL
+        );
         R(4, 5 - big, 1, 1, '#fff0a0');
         R(20, 5 - big, 1, 1, '#fff0a0');
       } else if (sk.back === 'quiver') {
@@ -377,7 +498,12 @@
       }
     }
     if (stage === 'behind' || stage === 'front') {
-      if (['dragonwings', 'batwings', 'angelwings', 'fairywings', 'flamecape', 'quiver', 'backpack'].includes(sk.back)) wings();
+      if (
+        ['dragonwings', 'batwings', 'angelwings', 'fairywings', 'flamecape', 'quiver', 'backpack'].includes(
+          sk.back
+        )
+      )
+        wings();
       return;
     }
     // ---------------------------------------------------------------- Corps
@@ -563,7 +689,14 @@
         break;
       case 'leafhood':
         hood([cD, cM, cL], 1);
-        for (const [x, y] of [[8, 3], [12, 1], [17, 3], [10, 2], [15, 2]]) R(x, y, 2, 2, trim);
+        for (const [x, y] of [
+          [8, 3],
+          [12, 1],
+          [17, 3],
+          [10, 2],
+          [15, 2]
+        ])
+          R(x, y, 2, 2, trim);
         R(13, 2, 1, 1, acc);
         R(9, 4, 1, 1, acc);
         break;
@@ -643,7 +776,14 @@
           tall = sk.head === 'icecrown' ? 2 : 0;
         R(9, 2, 9, 2, g[1]);
         R(9, 2, 9, 1, g[2]);
-        for (const [x, h] of [[9, 2], [11, 3], [13, 4], [15, 3], [17, 2]]) R(x, 2 - h - tall + 1, 1, h + tall, g[1]);
+        for (const [x, h] of [
+          [9, 2],
+          [11, 3],
+          [13, 4],
+          [15, 3],
+          [17, 2]
+        ])
+          R(x, 2 - h - tall + 1, 1, h + tall, g[1]);
         R(13, 3, 1, 1, sk.head === 'crown' ? '#ff4050' : acc);
         R(10, 3, 1, 1, acc);
         R(16, 3, 1, 1, acc);
@@ -670,7 +810,14 @@
         break;
       case 'flowercrown':
         R(8, 4, 11, 1, '#4e8a3a');
-        for (const [x, col] of [[8, acc], [10, trim], [12, '#ffffff'], [14, acc], [16, trim], [18, '#ffffff']]) {
+        for (const [x, col] of [
+          [8, acc],
+          [10, trim],
+          [12, '#ffffff'],
+          [14, acc],
+          [16, trim],
+          [18, '#ffffff']
+        ]) {
           R(x, 3, 2, 2, col);
           R(x, 3, 1, 1, tint(col, 1.3));
         }
@@ -704,7 +851,8 @@
     for (const fx of sk.fx) {
       if (layer === 'under' && fx === 'aura') {
         // Aura : halo au sol qui respire, couleur de la tenue (l'aurore change de teinte).
-        const col = sk.id === 'aurore' ? ['#9affe8', '#ff9ad8', '#c8a8ff', '#9ae8ff'][Math.floor(t / 40) % 4] : glow;
+        const col =
+          sk.id === 'aurore' ? ['#9affe8', '#ff9ad8', '#c8a8ff', '#9ae8ff'][Math.floor(t / 40) % 4] : glow;
         c.globalAlpha = 0.22 + 0.1 * Math.sin(t * 0.06);
         c.fillStyle = col;
         c.beginPath();
@@ -733,7 +881,13 @@
       else if (fx === 'embers')
         for (let k = 0; k < 5; k++) {
           const ph = (t * 0.012 + k / 5) % 1;
-          sq(x + Math.sin(k * 3.1 + t * 0.03) * 16, y + 10 - ph * 60, 3, ph < 0.5 ? '#fff0a0' : sk.ember || glow, 1 - ph);
+          sq(
+            x + Math.sin(k * 3.1 + t * 0.03) * 16,
+            y + 10 - ph * 60,
+            3,
+            ph < 0.5 ? '#fff0a0' : sk.ember || glow,
+            1 - ph
+          );
         }
       else if (fx === 'stars')
         for (let k = 0; k < 3; k++) {
@@ -747,17 +901,35 @@
       else if (fx === 'frost')
         for (let k = 0; k < 4; k++) {
           const ph = (t * 0.006 + k / 4) % 1;
-          sq(x - 20 + ((k * 13 + Math.floor(t / 300)) % 40) + Math.sin(t * 0.05 + k) * 3, y - 50 + ph * 60, 2, '#e8f8ff', 1 - ph * 0.7);
+          sq(
+            x - 20 + ((k * 13 + Math.floor(t / 300)) % 40) + Math.sin(t * 0.05 + k) * 3,
+            y - 50 + ph * 60,
+            2,
+            '#e8f8ff',
+            1 - ph * 0.7
+          );
         }
       else if (fx === 'petals')
         for (let k = 0; k < 4; k++) {
           const ph = (t * 0.005 + k / 4) % 1;
-          sq(x - 24 + ((k * 17) % 48) + Math.sin(t * 0.04 + k * 2) * 8, y - 46 + ph * 62, 3, k % 2 ? sk.accent : '#ffc8e8', 1 - ph * 0.6);
+          sq(
+            x - 24 + ((k * 17) % 48) + Math.sin(t * 0.04 + k * 2) * 8,
+            y - 46 + ph * 62,
+            3,
+            k % 2 ? sk.accent : '#ffc8e8',
+            1 - ph * 0.6
+          );
         }
       else if (fx === 'shadow')
         for (let k = 0; k < 4; k++) {
           const ph = (t * 0.01 + k / 4) % 1;
-          sq(x - 14 + k * 9 + Math.sin(t * 0.04 + k) * 3, y + 12 - ph * 40, 4, k % 2 ? '#1a1024' : glow, (1 - ph) * 0.55);
+          sq(
+            x - 14 + k * 9 + Math.sin(t * 0.04 + k) * 3,
+            y + 12 - ph * 40,
+            4,
+            k % 2 ? '#1a1024' : glow,
+            (1 - ph) * 0.55
+          );
         }
       else if (fx === 'halo') canaanLight(x, y - 46, 70, glow);
     }
@@ -831,8 +1003,18 @@
           R(x, 27 - h, 1, h + 1, x % 2 ? '#ffd36d' : capeL);
           R(x, 28, 1, 1, '#fff0a0');
         }
-      if (capeKind === 'starcape') for (const [sx2, sy2] of [[8, 17], [12, 20], [15, 16], [10, 24], [16, 23], [13, 26]]) R(sx2, sy2, 1, 1, sx2 % 3 ? '#ffffff' : sk.trim);
-      if (capeKind === 'leafcape') for (let x = 6; x < 19; x += 2) R(x, 26 + (x % 4 ? 1 : 0), 2, 2, x % 4 ? capeL : sk.trim);
+      if (capeKind === 'starcape')
+        for (const [sx2, sy2] of [
+          [8, 17],
+          [12, 20],
+          [15, 16],
+          [10, 24],
+          [16, 23],
+          [13, 26]
+        ])
+          R(sx2, sy2, 1, 1, sx2 % 3 ? '#ffffff' : sk.trim);
+      if (capeKind === 'leafcape')
+        for (let x = 6; x < 19; x += 2) R(x, 26 + (x % 4 ? 1 : 0), 2, 2, x % 4 ? capeL : sk.trim);
     }
     // Torse : plus fin pour une héroïne, plus large pour un orc ou un minotaure.
     tx = female ? 8 : broad ? 6 : 7;
@@ -1169,17 +1351,37 @@
   // body.form === 'feral' : panthère du Druide ; body.veiled : Voile d'ombre (presque invisible).
   // hero : le héros dessiné (arme équipée et visée) ; l'hôte par défaut. L'arme est dessinée à part, dans sa main,
   // par canaan-weapon-look (derrière le corps quand il vise vers le haut).
-  function drawPixelHero(c, x, y, color, phase, player, body = P, look = body === P ? game.hero?.look : null, hero = body === P ? game.hero : null) {
+  function drawPixelHero(
+    c,
+    x,
+    y,
+    color,
+    phase,
+    player,
+    body = P,
+    look = body === P ? game.hero?.look : null,
+    hero = body === P ? game.hero : null
+  ) {
     const dx = body.vx || 0,
       dy = body.vy || 0;
     const moving = Math.abs(dx) + Math.abs(dy) > 0.1;
     // Le héros regarde sa mire à l'arrêt et pendant une attaque ; sinon, la direction de sa marche.
     const aiming = hero && ((body.atk || 0) > 0 || !moving);
-    const face = aiming ? CANAAN_WEAPON_LOOK.faceFromAim(CANAAN_WEAPON_LOOK.aimOf(hero, body)) : Math.abs(dx) > Math.abs(dy) ? (dx >= 0 ? 1 : 3) : dy < 0 ? 2 : 0;
+    const face = aiming
+      ? CANAAN_WEAPON_LOOK.faceFromAim(CANAAN_WEAPON_LOOK.aimOf(hero, body))
+      : Math.abs(dx) > Math.abs(dy)
+        ? dx >= 0
+          ? 1
+          : 3
+        : dy < 0
+          ? 2
+          : 0;
     // Pas plus doux : environ neuf images par seconde (anim avance de 0,25 par pas de simulation).
     const frame = moving ? Math.floor(Math.abs(phase) * 0.6) % 4 : 0;
     const feral = body.form === 'feral';
-    const spr = feral ? canaanFeralSprite(face, frame) : canaanHeroSprite(look, face, frame, hero ? { tool: 'none' } : {});
+    const spr = feral
+      ? canaanFeralSprite(face, frame)
+      : canaanHeroSprite(look, face, frame, hero ? { tool: 'none' } : {});
     const bob = moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
     // Le minotaure est un peu plus grand.
     const scale = !feral && look?.race === 'minotaure' ? 1.1 : 1.0;
@@ -1191,7 +1393,13 @@
     if (sk) drawSkinFx(c, sk, x, y + bob, 'under');
     const px = spr.padX || 0,
       py = spr.padY || 0;
-    c.drawImage(spr, Math.round(x - (26 + px) * scale), Math.round(y + 18 - (60 + py) * scale + bob), Math.round(spr.width * scale), Math.round(spr.height * scale));
+    c.drawImage(
+      spr,
+      Math.round(x - (26 + px) * scale),
+      Math.round(y + 18 - (60 + py) * scale + bob),
+      Math.round(spr.width * scale),
+      Math.round(spr.height * scale)
+    );
     if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'front');
     if (sk) drawSkinFx(c, sk, x, y + bob, 'over');
     c.restore();
@@ -1233,7 +1441,12 @@
         x1 = Math.max(x1, x);
         y0 = Math.min(y0, y);
         y1 = Math.max(y1, y);
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ]) {
           const nk = (y + dy) * MAPW + x + dx;
           if (BRIDGE_TILES.has(nk)) {
             if (!seen.has(nk)) {
@@ -1327,8 +1540,10 @@
             c.fillStyle = img.water[2];
             // Le reflet passe sous les pilotis (u 18 à 24 d'un côté, 26 à 32 de l'autre).
             const r2 = (ripple + 20) % TS;
-            if (img.edgeA && (ripple + 8 <= 18 || ripple >= 24)) img.vert ? c.fillRect(X + 1, Y + ripple, 2, 8) : c.fillRect(X + ripple, Y + 1, 8, 2);
-            if (img.edgeB && (r2 + 8 <= 26 || r2 >= 32)) img.vert ? c.fillRect(X + TS - 3, Y + r2, 2, 8) : c.fillRect(X + r2, Y + TS - 3, 8, 2);
+            if (img.edgeA && (ripple + 8 <= 18 || ripple >= 24))
+              img.vert ? c.fillRect(X + 1, Y + ripple, 2, 8) : c.fillRect(X + ripple, Y + 1, 8, 2);
+            if (img.edgeB && (r2 + 8 <= 26 || r2 >= 32))
+              img.vert ? c.fillRect(X + TS - 3, Y + r2, 2, 8) : c.fillRect(X + r2, Y + TS - 3, 8, 2);
             c.globalAlpha = 1;
             continue;
           }
@@ -1348,7 +1563,14 @@
           edgeA = !side(-1),
           edgeB = !side(1);
         // Eau sous le pont, de la couleur de l'eau voisine, avec un reflet qui passe.
-        const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => tile(x + dx, y + dy)).find(t => BRIDGE_WATER[t]),
+        const near = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ]
+            .map(([dx, dy]) => tile(x + dx, y + dy))
+            .find(t => BRIDGE_WATER[t]),
           water = BRIDGE_WATER[near] || BRIDGE_WATER[0];
         // Sous le pont, l'eau continue de l'île (world-look.js) se voit ; sinon, une eau unie.
         if (!only || !CANAAN_BLEND.active() || CANAAN_BLEND.waterUnder(x, y) < 0) {
@@ -1400,7 +1622,10 @@
           R(TS - 5, wb - 2, 5, 2, '#3a2618');
         }
         // Garde-corps : longue main courante et poteaux, en trois tons avec contour.
-        for (const [on, w0] of [[edgeA, 0], [edgeB, TS - 8]]) {
+        for (const [on, w0] of [
+          [edgeA, 0],
+          [edgeB, TS - 8]
+        ]) {
           if (!on) continue;
           R(0, w0, TS, 8, '#22160e');
           R(0, w0 + 1, TS, 6, '#7a5236');

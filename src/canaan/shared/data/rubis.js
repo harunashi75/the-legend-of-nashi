@@ -25,7 +25,14 @@ export const RUBIS_FAMILIES = Object.freeze([
     light: '#a8f2bc',
     dark: '#0e4424'
   },
-  { name: 'Rubis d’armes', short: 'Arme', icon: '⟦fam_weapon⟧', color: '#e09a2a', light: '#ffd890', dark: '#5a3608' },
+  {
+    name: 'Rubis d’armes',
+    short: 'Arme',
+    icon: '⟦fam_weapon⟧',
+    color: '#e09a2a',
+    light: '#ffd890',
+    dark: '#5a3608'
+  },
   {
     name: 'Rubis utilitaires',
     short: 'Utilitaire',
@@ -46,7 +53,13 @@ export const RUBIS_FAMILIES = Object.freeze([
 // [identifiant, famille, nom, icône, effet]. L'ordre donne le numéro (01 à 48).
 const LIST = [
   ['berserker', 0, 'Berserker', '⟦rubis_berserker⟧', '+15 % de dégâts lorsque tes PV sont sous 30 %.'],
-  ['duelliste', 0, 'Duelliste', '⟦rubis_duelliste⟧', '+8 % de dégâts si un seul ennemi se trouve à moins de 5 cases.'],
+  [
+    'duelliste',
+    0,
+    'Duelliste',
+    '⟦rubis_duelliste⟧',
+    '+8 % de dégâts si un seul ennemi se trouve à moins de 5 cases.'
+  ],
   ['chasseur', 0, 'Chasseur', '⟦rubis_chasseur⟧', '+12 % de dégâts contre les mobs élites.'],
   ['briseur', 0, 'Briseur', '⟦rubis_briseur⟧', 'Les attaques ignorent 8 % de la défense ennemie.'],
   [
@@ -70,7 +83,13 @@ const LIST = [
     '⟦rubis_acharnement⟧',
     'Frapper 4 fois la même cible augmente les dégâts contre elle de 10 % pendant 5 s.'
   ],
-  ['dernier_souffle', 0, 'Dernier souffle', '⟦rubis_dernier_souffle⟧', '+15 % de dégâts contre les ennemis sous 20 % de PV.'],
+  [
+    'dernier_souffle',
+    0,
+    'Dernier souffle',
+    '⟦rubis_dernier_souffle⟧',
+    '+15 % de dégâts contre les ennemis sous 20 % de PV.'
+  ],
   ['colosse', 1, 'Colosse', '⟦rubis_colosse⟧', '+10 % de PV maximum, mais −5 % de vitesse de déplacement.'],
   [
     'gardien',
@@ -110,11 +129,23 @@ const LIST = [
     'Une fois par combat, survivre à un coup fatal avec 10 % des PV max.'
   ],
   ['guerisseur', 2, 'Guérisseur', '⟦rubis_guerisseur⟧', '+8 % de soins prodigués.'],
-  ['regeneration', 2, 'Régénération', '⟦rubis_regeneration⟧', 'Récupère 1 % des PV max toutes les 5 s hors combat.'],
+  [
+    'regeneration',
+    2,
+    'Régénération',
+    '⟦rubis_regeneration⟧',
+    'Récupère 1 % des PV max toutes les 5 s hors combat.'
+  ],
   ['arcane', 2, 'Arcane', '⟦rubis_arcane⟧', 'Les compétences consomment 10 % de mana en moins.'],
   ['faucheur', 2, 'Faucheur', '⟦rubis_faucheur⟧', 'Chaque élimination restaure 5 % des PV max.'],
   ['meditation', 2, 'Méditation', '⟦rubis_meditation⟧', 'Récupère 3 % du mana maximum toutes les 5 s.'],
-  ['benediction', 2, 'Bénédiction', '⟦rubis_benediction⟧', 'Après avoir reçu un soin, gagne +5 % de dégâts pendant 6 s.'],
+  [
+    'benediction',
+    2,
+    'Bénédiction',
+    '⟦rubis_benediction⟧',
+    'Après avoir reçu un soin, gagne +5 % de dégâts pendant 6 s.'
+  ],
   ['source_vitale', 2, 'Source vitale', '⟦rubis_source_vitale⟧', 'Les soins reçus sont augmentés de 10 %.'],
   [
     'communion',
@@ -137,7 +168,13 @@ const LIST = [
     '⟦rubis_echo⟧',
     'Les compétences offensives ont 10 % de chance de répéter 30 % de leurs dégâts.'
   ],
-  ['vampire', 3, 'Vampire', '⟦rubis_vampire⟧', 'Les coups critiques rendent 3 % des dégâts réellement infligés en PV.'],
+  [
+    'vampire',
+    3,
+    'Vampire',
+    '⟦rubis_vampire⟧',
+    'Les coups critiques rendent 3 % des dégâts réellement infligés en PV.'
+  ],
   [
     'onde',
     3,
@@ -263,4 +300,11 @@ export const RUBIS_CATALOG = Object.freeze(
 );
 export const RUBIS_SLOTS = 6;
 // Compétences sans dégâts : postures, renforcements, esquives et soins.
-export const RUBIS_UTILITY_SKILLS = new Set(['sword:2', 'dualsword:2', 'axe:2', 'dualdagger:2', 'staff:2', 'shield:3']);
+export const RUBIS_UTILITY_SKILLS = new Set([
+  'sword:2',
+  'dualsword:2',
+  'axe:2',
+  'dualdagger:2',
+  'staff:2',
+  'shield:3'
+]);

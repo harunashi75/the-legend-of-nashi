@@ -195,23 +195,30 @@
     const mask = canvas(48, 48),
       mg = mask.getContext('2d');
     mg.fillStyle = '#000';
-    for (let by = 0; by < 48; by += 2) for (let bx = 0; bx < 48; bx += 2) if (inside(bx + 1, by + 1)) mg.fillRect(bx, by, 2, 2);
+    for (let by = 0; by < 48; by += 2)
+      for (let bx = 0; bx < 48; bx += 2) if (inside(bx + 1, by + 1)) mg.fillRect(bx, by, 2, 2);
     g.drawImage(PIXEL_TERRAIN[t], v * 48, 0, 48, 48, 0, 0, 48, 48);
     g.globalCompositeOperation = 'destination-in';
     g.drawImage(mask, 0, 0);
     g.globalCompositeOperation = 'source-over';
     if (band) {
       g.fillStyle = 'rgba(40,24,10,.26)';
-      for (let by = 0; by < 48; by += 2) for (let bx = 0; bx < 48; bx += 2) if (band(bx + 1, by + 1)) g.fillRect(bx, by, 2, 2);
+      for (let by = 0; by < 48; by += 2)
+        for (let bx = 0; bx < 48; bx += 2) if (band(bx + 1, by + 1)) g.fillRect(bx, by, 2, 2);
     }
     ROAD_EDGE[key] = c;
     return c;
   }
   // Profondeur de la morsure le long d'un bord (k de 0 à 48) : la même aux deux bouts, variée au milieu.
   const BITE = [0, 3, 5, -1];
-  const bite = (k, dir, v) => Math.max(1, 5 + 2.5 * Math.sin((4 * Math.PI * k) / 48 + dir * 1.7) + BITE[v] * Math.sin((Math.PI * k) / 48));
+  const bite = (k, dir, v) =>
+    Math.max(
+      1,
+      5 + 2.5 * Math.sin((4 * Math.PI * k) / 48 + dir * 1.7) + BITE[v] * Math.sin((Math.PI * k) / 48)
+    );
   // Repère d'un bord : k le long du bord, a la distance au bord.
-  const along = (dir, px, py) => (dir === 0 || dir === 2 ? [px, dir === 0 ? py : 48 - py] : [py, dir === 3 ? px : 48 - px]);
+  const along = (dir, px, py) =>
+    dir === 0 || dir === 2 ? [px, dir === 0 ? py : 48 - py] : [py, dir === 3 ? px : 48 - px];
   // Un bout du bord s'efface en douceur (taper) là où un angle intérieur arrondi prend le relais sur la case voisine.
   const ease = (k, a, b) => {
     let f = 1;
@@ -221,26 +228,41 @@
   };
   function roadSide(t, dir, v, a0, b0) {
     const depth = k => bite(k, dir, v) * ease(k, a0, b0);
-    return maskedTile('s' + t + ':' + dir + ':' + v + ':' + a0 + b0, t, v, (px, py) => {
-      const [k, a] = along(dir, px, py);
-      return a < depth(k);
-    }, (px, py) => {
-      const [k, a] = along(dir, px, py),
-        d = depth(k);
-      return d > 0.5 && a >= d && a < d + 2;
-    });
+    return maskedTile(
+      's' + t + ':' + dir + ':' + v + ':' + a0 + b0,
+      t,
+      v,
+      (px, py) => {
+        const [k, a] = along(dir, px, py);
+        return a < depth(k);
+      },
+      (px, py) => {
+        const [k, a] = along(dir, px, py),
+          d = depth(k);
+        return d > 0.5 && a >= d && a < d + 2;
+      }
+    );
   }
   // Coin : 0 haut-gauche, 1 haut-droite, 2 bas-droite, 3 bas-gauche.
-  const cornerXY = (corner, px, py) => [corner === 1 || corner === 2 ? 48 - px : px, corner >= 2 ? 48 - py : py];
+  const cornerXY = (corner, px, py) => [
+    corner === 1 || corner === 2 ? 48 - px : px,
+    corner >= 2 ? 48 - py : py
+  ];
   function roadCorner(t, corner, v) {
-    return maskedTile('c' + t + ':' + corner + ':' + v, t, v, (px, py) => {
-      const [cx, cy] = cornerXY(corner, px, py);
-      return cx < ROUND && cy < ROUND && Math.hypot(cx - ROUND, cy - ROUND) > ROUND;
-    }, (px, py) => {
-      const [cx, cy] = cornerXY(corner, px, py),
-        d = Math.hypot(cx - ROUND, cy - ROUND);
-      return cx < ROUND && cy < ROUND && d <= ROUND && d > ROUND - 2;
-    });
+    return maskedTile(
+      'c' + t + ':' + corner + ':' + v,
+      t,
+      v,
+      (px, py) => {
+        const [cx, cy] = cornerXY(corner, px, py);
+        return cx < ROUND && cy < ROUND && Math.hypot(cx - ROUND, cy - ROUND) > ROUND;
+      },
+      (px, py) => {
+        const [cx, cy] = cornerXY(corner, px, py),
+          d = Math.hypot(cx - ROUND, cy - ROUND);
+        return cx < ROUND && cy < ROUND && d <= ROUND && d > ROUND - 2;
+      }
+    );
   }
   function roadFillet(corner, v) {
     return maskedTile('f' + corner + ':' + v, 2, v, (px, py) => {
@@ -250,10 +272,21 @@
   }
   const isRoad = (x, y) => tileAt(x, y) === 2 && !BRIDGE_TILES.has(y * MAPW + x);
   // Terrains qui arrondissent les chemins : la terre ferme et l'eau peu profonde du marais (pas la mer ni la roche).
-  const softEdge = n => n !== 2 && n !== 4 && (!WATER.has(n) || n === 15) && PIXEL_TERRAIN[n] && PRIORITY[n] !== undefined;
-  const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  const softEdge = n =>
+    n !== 2 && n !== 4 && (!WATER.has(n) || n === 15) && PIXEL_TERRAIN[n] && PRIORITY[n] !== undefined;
+  const SIDES = [
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 0]
+  ];
   // Coins : les deux côtés qui les bordent, et la case en diagonale.
-  const CORNERS = [[3, 0, -1, -1], [0, 1, 1, -1], [1, 2, 1, 1], [2, 3, -1, 1]];
+  const CORNERS = [
+    [3, 0, -1, -1],
+    [0, 1, 1, -1],
+    [1, 2, 1, 1],
+    [2, 3, -1, 1]
+  ];
   function roadEdges(out, x, y, v) {
     const around = SIDES.map(([dx, dy]) => tileAt(x + dx, y + dy)),
       soft = SIDES.map(([dx, dy], i) => softEdge(around[i]) && !BRIDGE_TILES.has((y + dy) * MAPW + x + dx));
@@ -261,11 +294,24 @@
       if (!soft[dir]) continue;
       // Les deux bouts du bord (gauche/droite, ou haut/bas) : la route continue-t-elle en tournant derrière l'herbe ?
       const [dx, dy] = SIDES[dir],
-        ends = dir % 2 === 0 ? [[-1, 0], [1, 0]] : [[0, -1], [0, 1]],
+        ends =
+          dir % 2 === 0
+            ? [
+                [-1, 0],
+                [1, 0]
+              ]
+            : [
+                [0, -1],
+                [0, 1]
+              ],
         [a0, b0] = ends.map(([sx, sy]) => {
           const next = tileAt(x + sx, y + sy);
           // Route qui tourne derrière l'herbe, ou bord qui arrive sur l'eau, un pont ou la roche : la morsure s'efface.
-          return (isRoad(x + sx, y + sy) && isRoad(x + sx + dx, y + sy + dy)) || (!isRoad(x + sx, y + sy) && !softEdge(next)) || BRIDGE_TILES.has((y + sy) * MAPW + x + sx) ? 1 : 0;
+          return (isRoad(x + sx, y + sy) && isRoad(x + sx + dx, y + sy + dy)) ||
+            (!isRoad(x + sx, y + sy) && !softEdge(next)) ||
+            BRIDGE_TILES.has((y + sy) * MAPW + x + sx)
+            ? 1
+            : 0;
         });
       out.push(roadSide(around[dir], dir, (v + dir) & 3, a0, b0));
     }
@@ -278,7 +324,8 @@
     CORNERS.forEach(([a, b, dx, dy], corner) => {
       const [ax, ay] = SIDES[a],
         [bx, by] = SIDES[b];
-      if (isRoad(x + ax, y + ay) && isRoad(x + bx, y + by) && isRoad(x + dx, y + dy)) out.push(roadFillet(corner, v));
+      if (isRoad(x + ax, y + ay) && isRoad(x + bx, y + by) && isRoad(x + dx, y + dy))
+        out.push(roadFillet(corner, v));
     });
   }
   // Bords d'une case (débords des voisins, bords arrondis des chemins) : calculés une fois, gardés pour toute l'île
@@ -363,7 +410,9 @@
   // Valeur d'environ 0 (calme) à 1,3 (rafale) au point (px, py) du monde.
   function windAt(px, py) {
     const gust = 0.5 + 0.5 * Math.sin(time * 0.006 - px * 0.0035 + py * 0.0012),
-      flutter = Math.sin(time * 0.045 + px * 0.031 + py * 0.017) * 0.3 + Math.sin(time * 0.11 + px * 0.07 + py * 0.05) * 0.12;
+      flutter =
+        Math.sin(time * 0.045 + px * 0.031 + py * 0.017) * 0.3 +
+        Math.sin(time * 0.11 + px * 0.07 + py * 0.05) * 0.12;
     return gust * (0.65 + flutter) + 0.12 * Math.sin(time * 0.02 + px * 0.05);
   }
   // Souplesse de chaque décor dans le vent (les rochers, cristaux et champignons ne bougent pas).
@@ -412,7 +461,12 @@
         spin = Math.sin(time * 0.09 + k);
       c.globalAlpha = 0.55 + 0.3 * Math.abs(spin);
       c.fillStyle = colors[k % 3];
-      c.fillRect(Math.round(camX + x), Math.round(camY + y), Math.max(1, Math.round(5 * Math.abs(spin))) + 1, 3);
+      c.fillRect(
+        Math.round(camX + x),
+        Math.round(camY + y),
+        Math.max(1, Math.round(5 * Math.abs(spin))) + 1,
+        3
+      );
     }
     // Souffles : traits pâles et fugaces, visibles surtout pendant les rafales.
     c.strokeStyle = '#ffffff';
@@ -434,7 +488,14 @@
     }
     c.restore();
   }
-  const GLOWING = { glowtree: '#6fe0cc', magicplant: '#c99bff', crystal: '#9ce2e6', mushroom: '#d883a9', elftree: '#bfffee', elfwillow: '#d8ffb0' };
+  const GLOWING = {
+    glowtree: '#6fe0cc',
+    magicplant: '#c99bff',
+    crystal: '#9ce2e6',
+    mushroom: '#d883a9',
+    elftree: '#bfffee',
+    elfwillow: '#d8ffb0'
+  };
   // Dessin d'une case de l'île : sol, débords des voisins, falaise, détails animés et décor.
   // Sol d'une case : texture (ou falaise), bords, ombre au pied d'une falaise. L'eau, animée, est à part (water).
   // Case de roche : face de falaise au bord inférieur d'un massif, dessus éclairé ailleurs.
@@ -457,7 +518,8 @@
     let road = null,
       blend = null;
     if (t === 4) {
-      const rock = inChunk && CANAAN_BLEND.active() && CANAAN_BLEND.rock(x, y, v, g => drawRock(g, x, y, 0, 0, v));
+      const rock =
+        inChunk && CANAAN_BLEND.active() && CANAAN_BLEND.rock(x, y, v, g => drawRock(g, x, y, 0, 0, v));
       if (rock) c.drawImage(rock, X, Y);
       else drawRock(c, x, y, X, Y, v);
     } else if (water) drawScrolled(c, tex, v * 48, X, Y, time * (t === 0 ? 0.12 : 0.08) + y * 11);
@@ -555,7 +617,10 @@
     for (let y = 0; y < P; y += 2)
       for (let x = 0; x < P; x += 2) {
         // Marbrure : grandes ondulations étirées à l'horizontale, en quatre tons avec un léger tramage.
-        const n = pnoise(P, x, y * 1.6, 4, 71 + t) * 0.55 + pnoise(P, x, y, 8, 72 + t) * 0.3 + pnoise(P, x, y, 32, 73 + t) * 0.15,
+        const n =
+            pnoise(P, x, y * 1.6, 4, 71 + t) * 0.55 +
+            pnoise(P, x, y, 8, 72 + t) * 0.3 +
+            pnoise(P, x, y, 32, 73 + t) * 0.15,
           dither = ((x >> 1) + (y >> 1)) & 1 ? 0.025 : -0.025,
           k = Math.max(0, Math.min(3, Math.floor((n + dither - 0.28) * 7))),
           col = tones[k];
@@ -581,7 +646,11 @@
         gg.fillRect(x, y, w, 2);
         if (x + w > P) gg.fillRect(x - P, y, w, 2);
       }
-    WATER_PATTERNS[t] = { base: c.createPattern(base, 'repeat'), glint: c.createPattern(glint, 'repeat'), speed: look.speed };
+    WATER_PATTERNS[t] = {
+      base: c.createPattern(base, 'repeat'),
+      glint: c.createPattern(glint, 'repeat'),
+      speed: look.speed
+    };
     return WATER_PATTERNS[t];
   }
   // Pose l'eau t sur le rectangle (monde) donné ; faux si le motif est indisponible (rendu d'avant).
@@ -734,7 +803,8 @@
       deco = game.world.decor;
     // Dans une maison : dessin case par case (le dehors passe dans le noir).
     if (canaanInHouse(P.x / TS, P.y / TS)) {
-      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
+      for (let y = y0; y < y1; y++)
+        for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
       return;
     }
     // Transitions organiques : l'eau animée (et ses reflets) est peinte d'abord, sous les blocs de sol, sur les cases
@@ -743,7 +813,7 @@
     if (under) {
       // Suites de cases d'une même eau sur chaque rangée : un seul remplissage par suite.
       for (let y = y0; y < y1; y++)
-        for (let x = x0; x < x1; ) {
+        for (let x = x0; x < x1;) {
           const w = CANAAN_BLEND.waterUnder(x, y);
           if (w < 0) {
             x++;
@@ -752,10 +822,20 @@
           let end = x + 1;
           while (end < x1 && CANAAN_BLEND.waterUnder(end, y) === w) end++;
           if (!fillWater(c, w, x * TS, y * TS, (end - x) * TS, TS))
-            for (let k = x; k < end; k++) drawScrolled(c, PIXEL_TERRAIN[w], ((k * 7 + y * 13) & 3) * 48, k * TS, y * TS, time * (w === 0 ? 0.12 : 0.08) + y * 11);
+            for (let k = x; k < end; k++)
+              drawScrolled(
+                c,
+                PIXEL_TERRAIN[w],
+                ((k * 7 + y * 13) & 3) * 48,
+                k * TS,
+                y * TS,
+                time * (w === 0 ? 0.12 : 0.08) + y * 11
+              );
           x = end;
         }
-      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (WATER.has(tiles[y][x]) && !BRIDGE_TILES.has(y * MAPW + x)) drawCoastLive(c, x, y, 1);
+      for (let y = y0; y < y1; y++)
+        for (let x = x0; x < x1; x++)
+          if (WATER.has(tiles[y][x]) && !BRIDGE_TILES.has(y * MAPW + x)) drawCoastLive(c, x, y, 1);
     }
     const m = c.getTransform?.(),
       snapX = m ? m.e : 0,
@@ -772,11 +852,17 @@
         // laissait un liseré sombre à la jonction avec son voisin.
         c.drawImage(img, Math.round(cx * CH * TS + snapX) - snapX, Math.round(cy * CH * TS + snapY) - snapY);
       }
-    ahead = { cx0: Math.floor(x0 / CH), cx1: Math.floor((x1 - 1) / CH), cy0: Math.floor(y0 / CH), cy1: Math.floor((y1 - 1) / CH) };
+    ahead = {
+      cx0: Math.floor(x0 / CH),
+      cx1: Math.floor((x1 - 1) / CH),
+      cy0: Math.floor(y0 / CH),
+      cy1: Math.floor((y1 - 1) / CH)
+    };
     if (ok) queueAhead();
     // Sans canevas (tests sans écran) : dessin case par case.
     if (!ok) {
-      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
+      for (let y = y0; y < y1; y++)
+        for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
       return;
     }
     for (let y = y0; y < y1; y++)
@@ -900,16 +986,32 @@
   // Après les personnages, chaque objet haut (arbre, bâtiment, grand objet du camp) dont le pied est plus bas que celui
   // d'un personnage qui le chevauche est redessiné par-dessus : le personnage passe derrière. Si c'est un héros qui est
   // caché, l'objet devient à moitié transparent (on se voit toujours).
-  const TALL = new Set([...CANAAN_BIG_TREES, 'cactus', 'crystal', 'ruin', 'mushroom', 'rock', 'peak', 'palisade', 'palisade2', 'palisade3']);
+  const TALL = new Set([
+    ...CANAAN_BIG_TREES,
+    'cactus',
+    'crystal',
+    'ruin',
+    'mushroom',
+    'rock',
+    'peak',
+    'palisade',
+    'palisade2',
+    'palisade3'
+  ]);
   function occlusionEntities() {
     const out = [];
-    for (const h of game.heroes || []) if (h.player && !h.away) out.push({ x: h.player.x, foot: h.player.y + 14, hero: true });
+    for (const h of game.heroes || [])
+      if (h.player && !h.away) out.push({ x: h.player.x, foot: h.player.y + 14, hero: true });
     for (const m of game.world.mobs || []) if (!m.dead) out.push({ x: m.x, foot: m.y + 14 });
-    for (const n of game.world.npcs || []) if (n.type !== 'portal' && n.type !== 'arena' && canaanHere(n)) out.push({ x: n.x, foot: n.y + 14 });
+    for (const n of game.world.npcs || [])
+      if (n.type !== 'portal' && n.type !== 'arena' && canaanHere(n)) out.push({ x: n.x, foot: n.y + 14 });
     for (const a of CANAAN_LIFE.animals()) if (!a.dead && canaanHere(a)) out.push({ x: a.x, foot: a.y });
     for (const v of CANAAN_LIFE.villagers()) out.push({ x: v.x, foot: v.y + 12 });
-    for (const n of Object.values(CANAAN_QUESTS.npcs())) if (Number.isFinite(n.x)) out.push({ x: n.x, foot: n.y + 12 });
-    return out.filter(e => Math.abs(e.x - camX - W / 2) < W / 2 + 100 && Math.abs(e.foot - camY - H / 2) < H / 2 + 150);
+    for (const n of Object.values(CANAAN_QUESTS.npcs()))
+      if (Number.isFinite(n.x)) out.push({ x: n.x, foot: n.y + 12 });
+    return out.filter(
+      e => Math.abs(e.x - camX - W / 2) < W / 2 + 100 && Math.abs(e.foot - camY - H / 2) < H / 2 + 150
+    );
   }
   function drawCanaanOcclusion(c) {
     if (game.world.instance || canaanUnder() || canaanInHouse(P.x / TS, P.y / TS)) return;
@@ -928,9 +1030,20 @@
         if (!sprite) continue;
         const X = x * TS,
           Y = y * TS;
-        list.push({ x0: X + 24 - sprite.width / 2 + 8, x1: X + 24 + sprite.width / 2 - 8, y0: Y + 52 - sprite.height, base: Y + 42, draw: g => paintDecor(g, x, y, X, Y, d) });
+        list.push({
+          x0: X + 24 - sprite.width / 2 + 8,
+          x1: X + 24 + sprite.width / 2 - 8,
+          y0: Y + 52 - sprite.height,
+          base: Y + 42,
+          draw: g => paintDecor(g, x, y, X, Y, d)
+        });
       }
-    list.push(...CANAAN_HOUSE.occluders(), ...canaanCampLife.occluders(), ...CANAAN_PORTAL_ART.occluders(), ...CANAAN_CITY.occluders());
+    list.push(
+      ...CANAAN_HOUSE.occluders(),
+      ...canaanCampLife.occluders(),
+      ...CANAAN_PORTAL_ART.occluders(),
+      ...CANAAN_CITY.occluders()
+    );
     // Les objets redessinés n'allument pas une seconde fois leurs lumières.
     const light = window.canaanLight;
     window.canaanLight = () => {};
@@ -944,7 +1057,9 @@
   // personnage passé devant : opaque pour un monstre ou un habitant, à moitié transparent pour un héros.
   function drawOccluders(c, list, ents) {
     for (const o of list) {
-      const hid = ents.filter(e => e.foot < o.base && e.x + 14 > o.x0 && e.x - 14 < o.x1 && e.foot > o.y0 && e.foot - 60 < o.base);
+      const hid = ents.filter(
+        e => e.foot < o.base && e.x + 14 > o.x0 && e.x - 14 < o.x1 && e.foot > o.y0 && e.foot - 60 < o.base
+      );
       if (!hid.length) continue;
       for (const hero of [false, true]) {
         const part = hid.filter(e => !!e.hero === hero);
@@ -962,5 +1077,14 @@
   buildTerrain();
   polishDecor();
   // Noms publics du module ; tout le reste est privé.
-  Object.assign(window, { drawCanaanOcclusion, drawWorldTile, drawWorldGround, worldAmbience, drawWaterRipples, drawWade, windAt, drawWindLayer });
+  Object.assign(window, {
+    drawCanaanOcclusion,
+    drawWorldTile,
+    drawWorldGround,
+    worldAmbience,
+    drawWaterRipples,
+    drawWade,
+    windAt,
+    drawWindLayer
+  });
 })();

@@ -4,10 +4,7 @@ function rarityRoll(level) {
 }
 
 function artifactPower(item) {
-  return Math.max(
-    1,
-    Math.round(ARTIFACT_BUFFS[item.artifactVariant].percent * (1 + itemLevel(item) / 57))
-  );
+  return Math.max(1, Math.round(ARTIFACT_BUFFS[item.artifactVariant].percent * (1 + itemLevel(item) / 57)));
 }
 
 let playerStun = 0,

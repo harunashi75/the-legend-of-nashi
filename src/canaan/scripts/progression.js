@@ -8,7 +8,9 @@
   const SHARE = 18 * TS;
   function sharers(at, killer) {
     return game.heroes.filter(
-      h => h === killer || (!h.away && !h.player.dead && Math.hypot(h.player.x - at.x, h.player.y - at.y) < SHARE)
+      h =>
+        h === killer ||
+        (!h.away && !h.player.dead && Math.hypot(h.player.x - at.x, h.player.y - at.y) < SHARE)
     );
   }
   // Donne de l'XP à un héros ; une montée de niveau rend tous les PV et le mana et est annoncée.
@@ -23,7 +25,8 @@
     recomputeHeroStats(hero);
     hero.player.hp = hero.player.mhp;
     hero.player.mp = hero.player.mmp;
-    const text = '⭐ Niveau ' + hero.level + ' !' + (hero.level >= MAX_LEVEL ? ' Niveau maximum atteint.' : '');
+    const text =
+      '⭐ Niveau ' + hero.level + ' !' + (hero.level >= MAX_LEVEL ? ' Niveau maximum atteint.' : '');
     canaanLootNotice(hero, text);
     if (hero === game.hero) {
       burst(hero.player.x, hero.player.y - 20, '#ffe08a', 40);

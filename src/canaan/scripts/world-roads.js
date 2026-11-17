@@ -43,7 +43,10 @@
       d = ih(xi + 1, yi + 1, s);
     return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
   }
-  const fbm = (x, y, s) => vnoise(x, y, s) * 0.57 + vnoise(x * 2.03, y * 2.03, s + 7) * 0.29 + vnoise(x * 4.1, y * 4.1, s + 13) * 0.14;
+  const fbm = (x, y, s) =>
+    vnoise(x, y, s) * 0.57 +
+    vnoise(x * 2.03, y * 2.03, s + 7) * 0.29 +
+    vnoise(x * 4.1, y * 4.1, s + 13) * 0.14;
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const smooth = (a, b, v) => {
     const t = clamp((v - a) / (b - a), 0, 1);
@@ -72,7 +75,7 @@
         DC[k] = ((-12 * a + 9 * a * a) / 6) * sg;
       } else if (a < 2) {
         C[k] = (2 - a) ** 3 / 6;
-        DC[k] = (-3 * (2 - a) ** 2 / 6) * sg;
+        DC[k] = ((-3 * (2 - a) ** 2) / 6) * sg;
       }
     }
   // Pixels des textures de terrain (sous la route, hors de la chaussée), lus une fois par terrain.
@@ -125,21 +128,70 @@
     plazas = [];
     plazas.push({ x: (CANAAN_CAMP.x + 0.5) * S, y: (CANAAN_CAMP.y + 0.5) * S, r: 3.3 * S });
     // Place de la cité elfique : anneaux de marbre (zone 6 : marbre et joints dorés).
-    if (window.CANAAN_CITY_PLAN) plazas.push({ x: (CANAAN_CITY_PLAN.center.x + 0.5) * S, y: (CANAAN_CITY_PLAN.center.y + 0.5) * S, r: 5.2 * S, zone: 6 });
+    if (window.CANAAN_CITY_PLAN)
+      plazas.push({
+        x: (CANAAN_CITY_PLAN.center.x + 0.5) * S,
+        y: (CANAAN_CITY_PLAN.center.y + 0.5) * S,
+        r: 5.2 * S,
+        zone: 6
+      });
     return plazas;
   }
-  const CAMP = () => ({ x: (CANAAN_CAMP.x + 0.5) * S, y: (CANAAN_CAMP.y + 0.5) * S, r: (CANAAN_CAMP.r + 5) * S });
+  const CAMP = () => ({
+    x: (CANAAN_CAMP.x + 0.5) * S,
+    y: (CANAAN_CAMP.y + 0.5) * S,
+    r: (CANAAN_CAMP.r + 5) * S
+  });
   // Chaussée de chaque région (indice des ZONES) : couleurs [sombre, moyen, clair].
   const DIRT = [
-    [[132, 102, 70], [170, 138, 98], [200, 172, 128]],
-    [[104, 82, 58], [136, 108, 76], [164, 136, 98]],
-    [[78, 66, 48], [104, 88, 64], [132, 114, 84]],
-    [[124, 90, 62], [158, 120, 84], [188, 150, 106]]
+    [
+      [132, 102, 70],
+      [170, 138, 98],
+      [200, 172, 128]
+    ],
+    [
+      [104, 82, 58],
+      [136, 108, 76],
+      [164, 136, 98]
+    ],
+    [
+      [78, 66, 48],
+      [104, 88, 64],
+      [132, 114, 84]
+    ],
+    [
+      [124, 90, 62],
+      [158, 120, 84],
+      [188, 150, 106]
+    ]
   ];
-  const LEAVES = [[217, 84, 47], [233, 138, 44], [239, 193, 69], [168, 67, 42], [196, 112, 52]];
-  const STONES = [[152, 146, 138], [128, 122, 116], [168, 158, 142], [140, 126, 108], [118, 112, 104]];
-  const SLABS = [[214, 182, 128], [198, 164, 110], [226, 196, 140], [188, 152, 100]];
-  const SLATES = [[78, 86, 104], [66, 74, 92], [92, 98, 116], [74, 78, 100], [84, 80, 104]];
+  const LEAVES = [
+    [217, 84, 47],
+    [233, 138, 44],
+    [239, 193, 69],
+    [168, 67, 42],
+    [196, 112, 52]
+  ];
+  const STONES = [
+    [152, 146, 138],
+    [128, 122, 116],
+    [168, 158, 142],
+    [140, 126, 108],
+    [118, 112, 104]
+  ];
+  const SLABS = [
+    [214, 182, 128],
+    [198, 164, 110],
+    [226, 196, 140],
+    [188, 152, 100]
+  ];
+  const SLATES = [
+    [78, 86, 104],
+    [66, 74, 92],
+    [92, 98, 116],
+    [74, 78, 100],
+    [84, 80, 104]
+  ];
   const col = [0, 0, 0];
   const set = (c, k = 1) => {
     col[0] = c[0] * k;
@@ -167,7 +219,8 @@
       lx = (wx & 7) - ox,
       ly = (wy & 7) - oy,
       big = ih(cx, cy, s + 3) > 0.5 ? 2 : 1;
-    if (lx >= 0 && ly >= 0 && lx <= big * 2 && ly <= big * 2 - (big - 1) * 2) return lx + ly < big * 2 ? 1.25 : 0.85;
+    if (lx >= 0 && ly >= 0 && lx <= big * 2 && ly <= big * 2 - (big - 1) * 2)
+      return lx + ly < big * 2 ? 1.25 : 0.85;
     if (lx >= 1 && ly >= 1 && lx <= big * 2 + 2 && ly <= big * 2 + 1) return -1;
     return 0;
   }
@@ -209,7 +262,11 @@
     if (F > 0.9) mix(pal[2], 0.18);
     ruts(F, gF, d, lit);
     // Bande d'herbe entre les ornières, en touffes.
-    if (zone === 0 && F > 0.95 && fbm(wx / 16, wy / 16, 51) + (ih(wx >> 1, wy >> 1, 53) - 0.5) * 0.18 > 0.54) {
+    if (
+      zone === 0 &&
+      F > 0.95 &&
+      fbm(wx / 16, wy / 16, 51) + (ih(wx >> 1, wy >> 1, 53) - 0.5) * 0.18 > 0.54
+    ) {
       set([86, 134, 62]);
       const blade = ih(wx >> 1, (wy >> 1) + (wx % 3), 52);
       if (blade > 0.62) set([122, 170, 84]);
@@ -294,7 +351,8 @@
         const ang = id * 40,
           cx = Math.cos(ang),
           cy = Math.sin(ang);
-        if (Math.abs((lx - 9) * cy - (ly - 7) * cx) < 0.8 && Math.abs((lx - 9) * cx + (ly - 7) * cy) < 6) mul(0.66);
+        if (Math.abs((lx - 9) * cy - (ly - 7) * cx) < 0.8 && Math.abs((lx - 9) * cx + (ly - 7) * cy) < 6)
+          mul(0.66);
       }
     }
     if (drift > 0.6) {
@@ -327,7 +385,13 @@
     if (d > 3 && ih(wx >> 1, wy >> 1, 114) > 0.992) set([230, 255, 248]);
   }
   // Cité elfique : dalles de marbre clair en rangées décalées, joints dorés, quelques feuilles de jade incrustées.
-  const MARBLE = [[238, 232, 216], [226, 220, 202], [246, 242, 230], [216, 210, 192], [232, 226, 212]];
+  const MARBLE = [
+    [238, 232, 216],
+    [226, 220, 202],
+    [246, 242, 230],
+    [216, 210, 192],
+    [232, 226, 212]
+  ];
   function shadeMarble(wx, wy, d) {
     const row = Math.floor(wy / 14),
       off = ih(row, 0, 131) * 20,
@@ -362,20 +426,29 @@
       const r = Math.hypot(wx - p.x, wy - p.y),
         edge = p.r + (fbm(wx / 60, wy / 60, 123) - 0.5) * 14;
       const pz = p.zone ?? (p.zone = Math.max(0, ZONES.indexOf(regionAt(p.x / S, p.y / S))));
-      if (r < edge - 7) return shadePlaza(wx, wy, p, pz), 0.4;
+      if (r < edge - 7) return (shadePlaza(wx, wy, p, pz), 0.4);
       if (r < edge) {
         const seg = Math.floor((Math.atan2(wy - p.y, wx - p.x) / (2 * Math.PI) + 1) * Math.round(p.r / 7)),
           joint = ((Math.atan2(wy - p.y, wx - p.x) / (2 * Math.PI) + 1) * Math.round(p.r / 7)) % 1;
-        set(pz === 6 ? MARBLE[seg % MARBLE.length] : pz === 5 ? SLATES[seg % SLATES.length] : pz === 4 ? SLABS[seg % SLABS.length] : STONES[seg % STONES.length], 0.8);
+        set(
+          pz === 6
+            ? MARBLE[seg % MARBLE.length]
+            : pz === 5
+              ? SLATES[seg % SLATES.length]
+              : pz === 4
+                ? SLABS[seg % SLABS.length]
+                : STONES[seg % STONES.length],
+          0.8
+        );
         if (joint < 0.06 || r > edge - 1.5) mul(0.6);
         else if (r < edge - 5.5) mul(1.18);
         return 0.4;
       }
     }
-    if (Math.hypot(wx - camp.x, wy - camp.y) < camp.r + jitter * 1.2) return shadeCobble(wx, wy, d), 0.45;
-    if (canaanInCity(wx / S, wy / S)) return shadeMarble(wx, wy, d), 0.4;
-    if (zone === 4) return shadeSlabs(wx, wy, d), 0.5;
-    if (zone === 5) return shadeSlate(wx, wy, d), 0.55;
+    if (Math.hypot(wx - camp.x, wy - camp.y) < camp.r + jitter * 1.2) return (shadeCobble(wx, wy, d), 0.45);
+    if (canaanInCity(wx / S, wy / S)) return (shadeMarble(wx, wy, d), 0.4);
+    if (zone === 4) return (shadeSlabs(wx, wy, d), 0.5);
+    if (zone === 5) return (shadeSlate(wx, wy, d), 0.55);
     shadeDirt(zone, wx, wy, d, F, gF, lit);
     return 1;
   }
@@ -403,7 +476,12 @@
       const c = document.createElement('canvas');
       c.width = c.height = S;
       const g = c.getContext?.('2d');
-      probe = !!(g && typeof g.putImageData === 'function' && g.createImageData?.(2, 2)?.data?.length === 16 && terrainData(1)?.length === 192 * 48 * 4);
+      probe = !!(
+        g &&
+        typeof g.putImageData === 'function' &&
+        g.createImageData?.(2, 2)?.data?.length === 16 &&
+        terrainData(1)?.length === 192 * 48 * 4
+      );
     }
     return probe;
   }
@@ -416,7 +494,8 @@
       for (let i = -2; i <= 2; i++) {
         const r = isRoad(tx + i, ty + j) ? 1 : 0;
         occ2[(j + 2) * 5 + i + 2] = r;
-        occ[(j + 2) * 5 + i + 2] = r || (road && Math.abs(i) <= 1 && Math.abs(j) <= 1 && isHard(tx + i, ty + j)) ? 1 : 0;
+        occ[(j + 2) * 5 + i + 2] =
+          r || (road && Math.abs(i) <= 1 && Math.abs(j) <= 1 && isHard(tx + i, ty + j)) ? 1 : 0;
         if (r && Math.abs(i) <= 1 && Math.abs(j) <= 1) any = true;
       }
     if (!any) return null;
@@ -480,7 +559,10 @@
           const cast = clamp(-(d + 6 * lit) / 3, 0, 1);
           shade *= 1 - 0.28 * cast;
         } else if (d > -4) {
-          rim = lit < 0 ? 1 - 0.32 * (1 + Math.max(-4, d) / 4) * (0.5 - lit * 0.5) : 1 + 0.22 * lit * smooth(-2.5, 0, d);
+          rim =
+            lit < 0
+              ? 1 - 0.32 * (1 + Math.max(-4, d) / 4) * (0.5 - lit * 0.5)
+              : 1 + 0.22 * lit * smooth(-2.5, 0, d);
           if (d >= 0) rim = 1;
         }
         // Terrain voisin sous la route : celui vers lequel pointe le bord, sinon le plus présent autour.
@@ -559,7 +641,7 @@
       return img;
     }
     const img = paint(tx, ty, v, road);
-    if (tileAt(tx, ty) === 15) return keep.set(id, img), img;
+    if (tileAt(tx, ty) === 15) return (keep.set(id, img), img);
     cache.set(id, img);
     if (cache.size > KEEP) cache.delete(cache.keys().next().value);
     return img;
@@ -576,7 +658,12 @@
     for (let y = Math.max(0, y0); y < Math.min(MAPH, y1); y++)
       for (let x = Math.max(0, x0); x < Math.min(MAPW, x1); x++) {
         const road = isRoad(x, y);
-        if (cache.has(y * 4096 + x) || keep.has(y * 4096 + x) || !(road || (SOFT.has(tileAt(x, y)) && nearRoad(x, y)))) continue;
+        if (
+          cache.has(y * 4096 + x) ||
+          keep.has(y * 4096 + x) ||
+          !(road || (SOFT.has(tileAt(x, y)) && nearRoad(x, y)))
+        )
+          continue;
         if (performance.now() > deadline) return false;
         cached(x, y, (x * 7 + y * 13) & 3, road);
       }

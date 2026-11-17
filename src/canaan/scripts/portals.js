@@ -6,12 +6,28 @@ function dropRange(d) {
 // Chances d'objet de prestige (Légendaire, Mythique) d'un mode de difficulté.
 function prestigeText(kind) {
   const list = PRESTIGE_DROPS[kind] || [];
-  return list.map(([name, chance]) => '<br><b style="color:' + rarityInfo({ rarity: name }).color + '">' + Math.round(chance * 100) + ' % ' + name + '</b>').join('');
+  return list
+    .map(
+      ([name, chance]) =>
+        '<br><b style="color:' +
+        rarityInfo({ rarity: name }).color +
+        '">' +
+        Math.round(chance * 100) +
+        ' % ' +
+        name +
+        '</b>'
+    )
+    .join('');
 }
 // Chances d'équipement d'une instance : chaque boss (hors boss cachés) a 30 % de chance de donner un objet à chaque
 // héros, d'où 0 à 3 objets par donjon et 0 à 6 par raid ; les boss cachés donnent une clé des secrets.
 function lootOdds(raid) {
-  return Math.round(CANAAN_BOSS_DROP_CHANCE * 100) + ' % de chance par boss et par héros (0 à ' + (raid ? 6 : 3) + ' objets) · boss cachés : clé des secrets';
+  return (
+    Math.round(CANAAN_BOSS_DROP_CHANCE * 100) +
+    ' % de chance par boss et par héros (0 à ' +
+    (raid ? 6 : 3) +
+    ' objets) · boss cachés : clé des secrets'
+  );
 }
 // Une carte de difficulté : conditions, butin et puissance des ennemis.
 function difficultyCard(index, key, mode, lv) {

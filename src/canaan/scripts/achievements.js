@@ -24,7 +24,10 @@
   const codex = h => profOf(h).codex || {};
   const ARMOR = ['helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'weapon'];
   const worn = h => ARMOR.map(slot => h.equipment?.[slot]).filter(Boolean);
-  const allItems = h => [...(h.inventory || []), ...Object.values(h.equipment || {}), ...((h.bank && h.bank.items) || [])].filter(Boolean);
+  const allItems = h =>
+    [...(h.inventory || []), ...Object.values(h.equipment || {}), ...((h.bank && h.bank.items) || [])].filter(
+      Boolean
+    );
   const rank = it => GEAR_RARITIES.findIndex(r => r.name === rarityInfo(it).name);
   const killed = (h, key) => (stateOf(h).best[key]?.[1] || 0) > 0;
   const rubisFamily = id => RUBIS_CATALOG.find(r => r.id === id)?.family;
@@ -32,8 +35,10 @@
     const eq = h.rubis?.equipped || [];
     return eq.length >= RUBIS_SLOTS && eq.every(id => id && rubisFamily(id) === f) ? 1 : 0;
   };
-  const talentsFull = cls => h => (h.classe?.id === cls && (h.classe.talents || []).length >= TALENT_SLOT_LEVELS.length ? 1 : 0);
-  const weaponKills = h => Object.keys(WEAPON_DEFINITIONS).filter(t => num(stateOf(h).s['w_' + t]) >= 50).length;
+  const talentsFull = cls => h =>
+    h.classe?.id === cls && (h.classe.talents || []).length >= TALENT_SLOT_LEVELS.length ? 1 : 0;
+  const weaponKills = h =>
+    Object.keys(WEAPON_DEFINITIONS).filter(t => num(stateOf(h).s['w_' + t]) >= 50).length;
 
   // ---------------------------------------------------------------- Bestiaire
   let beasts = null;
@@ -53,31 +58,73 @@
         key: 'm:' + t.name,
         group: t.under === undefined ? 'mob' : 'under',
         name: t.name,
-        where: (t.under === undefined ? 'Monde ouvert' : 'Tréfonds · ' + CANAAN_UNDER.BIOMES[t.under].name) + ' · peut être une élite',
+        where:
+          (t.under === undefined ? 'Monde ouvert' : 'Tréfonds · ' + CANAAN_UNDER.BIOMES[t.under].name) +
+          ' · peut être une élite',
         look: { t: t.name, mobColor: t.color }
       });
     instances.forEach((d, i) =>
       CANAAN_DUNGEON_MOBS(i).forEach(m =>
-        push({ key: 'd:' + m.name, group: 'dungeon', name: m.name, where: d.name, look: { t: m.name, look: m.look, pal: m.pal, lookOpts: {} } })
+        push({
+          key: 'd:' + m.name,
+          group: 'dungeon',
+          name: m.name,
+          where: d.name,
+          look: { t: m.name, look: m.look, pal: m.pal, lookOpts: {} }
+        })
       )
     );
-    for (const b of WORLD_BOSS_DEFS) push({ key: 'w:' + b.id, group: 'world', name: b.name, where: 'Boss mondial · niveau ' + b.level, look: { t: b.name, worldBoss: true, worldBossId: b.id, mobColor: b.color } });
-    for (const b of CANAAN_UNDER.BOSSES) push({ key: 'w:' + b.id, group: 'world', name: b.name, where: 'Boss des Tréfonds · à ton niveau', look: { t: b.name, look: b.look, pal: b.pal, lookOpts: b.opts } });
+    for (const b of WORLD_BOSS_DEFS)
+      push({
+        key: 'w:' + b.id,
+        group: 'world',
+        name: b.name,
+        where: 'Boss mondial · niveau ' + b.level,
+        look: { t: b.name, worldBoss: true, worldBossId: b.id, mobColor: b.color }
+      });
+    for (const b of CANAAN_UNDER.BOSSES)
+      push({
+        key: 'w:' + b.id,
+        group: 'world',
+        name: b.name,
+        where: 'Boss des Tréfonds · à ton niveau',
+        look: { t: b.name, look: b.look, pal: b.pal, lookOpts: b.opts }
+      });
     instances.forEach((d, i) =>
       (d.bosses || [d.boss]).forEach((name, k) => {
         const looks = CANAAN_DUNGEON_BOSS_LOOKS(i),
           look = looks[k] || looks[0] || {};
-        push({ key: 'b:' + name, group: 'boss', name, where: (d.raid ? 'Raid · ' : 'Donjon · ') + d.name, look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color } });
+        push({
+          key: 'b:' + name,
+          group: 'boss',
+          name,
+          where: (d.raid ? 'Raid · ' : 'Donjon · ') + d.name,
+          look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color }
+        });
       })
     );
     // Boss cachés, derrière les passages secrets des donjons et des raids.
     instances.forEach((d, i) =>
       (d.secrets || []).forEach((name, k) => {
         const look = CANAAN_DUNGEON_SECRET_LOOKS(i)[k] || {};
-        push({ key: 'b:' + name, group: 'boss', name, where: 'Boss caché · ' + d.name, look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color } });
+        push({
+          key: 'b:' + name,
+          group: 'boss',
+          name,
+          where: 'Boss caché · ' + d.name,
+          look: { t: name, look: look.look, pal: look.pal, lookOpts: look, boss: true, mobColor: d.color }
+        });
       })
     );
-    ARENA_BOSSES.forEach((b, k) => push({ key: 'a:' + b.name, group: 'arena', name: b.name, where: 'Arène des Épreuves · vague ' + (k + 1), look: { t: b.name, look: b.look, pal: b.pal, lookOpts: b.opts || {} } }));
+    ARENA_BOSSES.forEach((b, k) =>
+      push({
+        key: 'a:' + b.name,
+        group: 'arena',
+        name: b.name,
+        where: 'Arène des Épreuves · vague ' + (k + 1),
+        look: { t: b.name, look: b.look, pal: b.pal, lookOpts: b.opts || {} }
+      })
+    );
     beasts = out;
     return out;
   }
@@ -85,11 +132,18 @@
   // Repère d'un monstre dans le bestiaire (les clones de l'Arène et les inconnus ne comptent pas).
   function beastKey(m) {
     if (!m || m.arenaClone) return null;
-    const key = m.arenaBoss ? 'a:' + m.t : m.worldBoss ? 'w:' + m.worldBossId : m.boss ? 'b:' + m.t : 'm:' + m.t;
+    const key = m.arenaBoss
+      ? 'a:' + m.t
+      : m.worldBoss
+        ? 'w:' + m.worldBossId
+        : m.boss
+          ? 'b:' + m.t
+          : 'm:' + m.t;
     if (beastKeys().has(key)) return key;
     return beastKeys().has('d:' + m.t) ? 'd:' + m.t : null;
   }
-  const bestiary = h => catalog().filter(b => b.group === 'mob' || b.group === 'dungeon' || b.group === 'under');
+  const bestiary = h =>
+    catalog().filter(b => b.group === 'mob' || b.group === 'dungeon' || b.group === 'under');
 
   // ---------------------------------------------------------------- Catalogue des succès
   // Récompenses : gold (or), exp (part d'un niveau d'XP), gear (qualité, au niveau du héros), rubis (un Rubis qui manque),
@@ -101,114 +155,965 @@
     { id: 'magic', icon: '🔮', name: 'Magie, Rubis & progression' },
     { id: 'defi', icon: '🏆', name: 'Défis & Arène' }
   ];
-  const A = (cat, id, icon, name, desc, goal, val, reward = {}, pts = 10) => ({ cat, id, icon, name, desc, goal, val, reward, pts });
-  const W = (id, type, name, reward) => A('combat', id, WEAPON_TYPES[type].icon, name, 'Vaincre 200 ennemis avec une arme de la famille ' + WEAPON_TYPES[type].name + '.', 200, S('w_' + type), reward, 15);
+  const A = (cat, id, icon, name, desc, goal, val, reward = {}, pts = 10) => ({
+    cat,
+    id,
+    icon,
+    name,
+    desc,
+    goal,
+    val,
+    reward,
+    pts
+  });
+  const W = (id, type, name, reward) =>
+    A(
+      'combat',
+      id,
+      WEAPON_TYPES[type].icon,
+      name,
+      'Vaincre 200 ennemis avec une arme de la famille ' + WEAPON_TYPES[type].name + '.',
+      200,
+      S('w_' + type),
+      reward,
+      15
+    );
   const LIST = [
     // ---------------------------------------------------------------- Combat & armes
-    A('combat', 'c1', '🩸', 'Premiers pas ensanglantés', 'Vaincre ton tout premier monstre.', 1, h => Math.max(S('kills')(h), h.kills || 0), { gold: 50 }, 5),
-    A('combat', 'c2', '⚔️', 'Le massacre des Plaines', 'Vaincre 100 monstres.', 100, h => Math.max(S('kills')(h), h.kills || 0), { gold: 300, stack: ['meal', 'soupe', 1, 5] }),
-    A('combat', 'c3', '🗡️', 'Fléau des ténèbres', 'Vaincre 1 000 monstres.', 1000, h => Math.max(S('kills')(h), h.kills || 0), { title: 'Le Pourfendeur', gold: 1000 }, 25),
-    A('combat', 'c4', '💀', 'Génocide légendaire', 'Vaincre 10 000 monstres.', 10000, h => Math.max(S('kills')(h), h.kills || 0), { title: 'Dieu de la guerre', gold: 10000 }, 50),
-    A('combat', 'c5', '⭐', 'Chasseur d’élites', 'Vaincre 25 monstres élites.', 25, S('elites'), { gear: 'Rare' }),
-    A('combat', 'c6', '🌟', 'Fléau des élites', 'Vaincre 250 monstres élites.', 250, S('elites'), { gear: 'Épique', title: 'Briseur d’élites' }, 25),
+    A(
+      'combat',
+      'c1',
+      '🩸',
+      'Premiers pas ensanglantés',
+      'Vaincre ton tout premier monstre.',
+      1,
+      h => Math.max(S('kills')(h), h.kills || 0),
+      { gold: 50 },
+      5
+    ),
+    A(
+      'combat',
+      'c2',
+      '⚔️',
+      'Le massacre des Plaines',
+      'Vaincre 100 monstres.',
+      100,
+      h => Math.max(S('kills')(h), h.kills || 0),
+      { gold: 300, stack: ['meal', 'soupe', 1, 5] }
+    ),
+    A(
+      'combat',
+      'c3',
+      '🗡️',
+      'Fléau des ténèbres',
+      'Vaincre 1 000 monstres.',
+      1000,
+      h => Math.max(S('kills')(h), h.kills || 0),
+      { title: 'Le Pourfendeur', gold: 1000 },
+      25
+    ),
+    A(
+      'combat',
+      'c4',
+      '💀',
+      'Génocide légendaire',
+      'Vaincre 10 000 monstres.',
+      10000,
+      h => Math.max(S('kills')(h), h.kills || 0),
+      { title: 'Dieu de la guerre', gold: 10000 },
+      50
+    ),
+    A('combat', 'c5', '⭐', 'Chasseur d’élites', 'Vaincre 25 monstres élites.', 25, S('elites'), {
+      gear: 'Rare'
+    }),
+    A(
+      'combat',
+      'c6',
+      '🌟',
+      'Fléau des élites',
+      'Vaincre 250 monstres élites.',
+      250,
+      S('elites'),
+      { gear: 'Épique', title: 'Briseur d’élites' },
+      25
+    ),
     A('combat', 'c7', '🎯', 'Œil du tigre', 'Réussir 500 coups critiques.', 500, S('crits'), { gold: 800 }),
-    A('combat', 'c8', '💥', 'Frappe dévastatrice', 'Infliger 1 000 dégâts en un seul coup.', 1000, S('maxHit'), { gold: 500 }),
-    A('combat', 'c9', '💥', 'Le Dévastateur', 'Infliger 5 000 dégâts en un seul coup.', 5000, S('maxHit'), { title: 'Le Dévastateur' }, 25),
-    A('combat', 'c10', '🏃', 'Artiste de l’esquive', 'Faire 500 roulades d’esquive.', 500, S('dodges'), { title: 'L’Insaisissable', gear: 'Rare' }),
-    A('combat', 'c11', '🌀', 'Tempête d’acier', 'Lancer 1 000 compétences d’arme.', 1000, S('skills'), { exp: 0.5 }),
-    A('combat', 'c12', '✨', 'Pouvoir de classe', 'Lancer 100 fois le sort de ta classe (touche F).', 100, S('specials'), { exp: 0.5 }),
-    A('combat', 'c13', '⚔️', 'Maître d’armes', 'Vaincre 50 ennemis avec chacune des neuf familles d’arme.', 9, weaponKills, { title: 'Maître d’armes', gear: 'Épique' }, 50),
+    A(
+      'combat',
+      'c8',
+      '💥',
+      'Frappe dévastatrice',
+      'Infliger 1 000 dégâts en un seul coup.',
+      1000,
+      S('maxHit'),
+      { gold: 500 }
+    ),
+    A(
+      'combat',
+      'c9',
+      '💥',
+      'Le Dévastateur',
+      'Infliger 5 000 dégâts en un seul coup.',
+      5000,
+      S('maxHit'),
+      { title: 'Le Dévastateur' },
+      25
+    ),
+    A('combat', 'c10', '🏃', 'Artiste de l’esquive', 'Faire 500 roulades d’esquive.', 500, S('dodges'), {
+      title: 'L’Insaisissable',
+      gear: 'Rare'
+    }),
+    A('combat', 'c11', '🌀', 'Tempête d’acier', 'Lancer 1 000 compétences d’arme.', 1000, S('skills'), {
+      exp: 0.5
+    }),
+    A(
+      'combat',
+      'c12',
+      '✨',
+      'Pouvoir de classe',
+      'Lancer 100 fois le sort de ta classe (touche F).',
+      100,
+      S('specials'),
+      { exp: 0.5 }
+    ),
+    A(
+      'combat',
+      'c13',
+      '⚔️',
+      'Maître d’armes',
+      'Vaincre 50 ennemis avec chacune des neuf familles d’arme.',
+      9,
+      weaponKills,
+      { title: 'Maître d’armes', gear: 'Épique' },
+      50
+    ),
     W('c14', 'bow', 'Tireur d’élite', { gear: 'Rare' }),
     W('c15', 'dualdagger', 'Exécuteur silencieux', { gear: 'Rare' }),
     W('c16', 'axe', 'Bûcheron des âmes', { gear: 'Rare' }),
     W('c17', 'mace', 'Masse atomique', { gear: 'Rare' }),
     W('c18', 'staff', 'Surcharge arcanique', { gear: 'Rare' }),
-    A('combat', 'c19', '⟦rubis_phenix⟧', 'Résilience de Phénix', 'Survivre à un coup fatal grâce au Rubis Phénix.', 1, S('phoenix'), { gold: 500 }),
-    A('combat', 'c20', '🩸', 'Bourreau des cœurs', 'Vaincre un boss mondial moins de 30 secondes après le premier coup.', 1, S('fastWb'), { gear: 'Épique' }, 25),
+    A(
+      'combat',
+      'c19',
+      '⟦rubis_phenix⟧',
+      'Résilience de Phénix',
+      'Survivre à un coup fatal grâce au Rubis Phénix.',
+      1,
+      S('phoenix'),
+      { gold: 500 }
+    ),
+    A(
+      'combat',
+      'c20',
+      '🩸',
+      'Bourreau des cœurs',
+      'Vaincre un boss mondial moins de 30 secondes après le premier coup.',
+      1,
+      S('fastWb'),
+      { gear: 'Épique' },
+      25
+    ),
     // ---------------------------------------------------------------- Exploration & aventure
-    A('explore', 'e1', '🌅', 'Le grand départ', 'Quitter le Camp de l’Aurore pour la première fois.', 1, S('leftCamp'), { gold: 50 }, 5),
-    A('explore', 'e2', '🥾', 'Promeneur solitaire', 'Marcher 10 km dans le monde ouvert (une case = 1 m).', 10000, S('dist'), { gold: 500 }),
-    A('explore', 'e3', '🥾', 'Globe-trotteur', 'Marcher 50 km dans le monde ouvert.', 50000, S('dist'), { title: 'Le Vagabond' }, 25),
-    A('explore', 'e4', '🌍', 'Touriste des biomes', 'Visiter les six régions de l’île.', 6, SET('biomes'), { title: 'Voyageur intrépide', gold: 600 }),
-    A('explore', 'e5', '🎁', 'Chasseur de trésors', 'Ouvrir ton premier coffre secret.', 1, h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0), { gold: 200 }, 5),
-    A('explore', 'e6', '🎁', 'Pilleur de tombes', 'Ouvrir 25 coffres secrets.', 25, h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0), { gear: 'Rare' }),
-    A('explore', 'e7', '🧭', 'Cartographe royal', 'Ouvrir tous les coffres secrets de l’île.', () => hiddenChestSpots.length, h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0), { title: 'Cartographe royal', gear: 'Épique' }, 50),
-    A('explore', 'e8', '🏛️', 'Premier portail', 'Entrer dans un donjon ou un raid.', 1, SET('visited'), { gold: 100 }, 5),
-    A('explore', 'e9', '🌌', 'Collectionneur de portails', 'Entrer dans tous les donjons et raids, sur l’île et dans les Tréfonds.', () => instances.length, SET('visited'), { gold: 2000 }, 25),
-    A('explore', 'e10', '🌋', 'Promenade en enfer', 'Entrer dans la Forge d’Écaille-Ardente.', 1, h => (stateOf(h).sets.visited || []).includes(4) ? 1 : 0, { gold: 400 }),
-    A('explore', 'e11', '🌌', 'Pèlerinage céleste', 'Atteindre l’Aiguille du Continuum.', 1, h => (stateOf(h).sets.visited || []).includes(7) ? 1 : 0, { gold: 800 }),
-    A('explore', 'e12', '💀', 'Au cœur des ténèbres', 'Rester 5 minutes d’affilée dans une région plus forte que toi, sans tomber.', 300, S('highZone'), { gear: 'Rare' }),
-    A('explore', 'e13', '❓', 'Touriste égaré', 'Tomber dans la Forêt enchantée (niveau 50+) en étant niveau 10 ou moins.', 1, S('reckless'), { title: 'Téméraire inconscient' }, 15),
-    A('explore', 'e14', '💫', 'Première chute', 'Tomber au combat pour la première fois.', 1, S('deaths'), { gold: 50 }, 5),
-    A('explore', 'e15', '☠️', 'Increvable', 'Tomber 100 fois et te relever à chaque fois.', 100, S('deaths'), { title: 'L’Increvable' }, 15),
-    A('explore', 'e16', '🐉', 'Chasseur de légendes', 'Découvrir les huit boss mondiaux.', 8, h => WORLD_BOSS_DEFS.filter(b => stateOf(h).best['w:' + b.id]?.[0]).length, { gold: 1500 }, 15),
-    A('explore', 'e17', '📜', 'Premier chapitre', 'Terminer une quête.', 1, h => Object.keys(h.quetes?.done || {}).length, { gold: 100 }, 5),
-    A('explore', 'e18', '📖', 'Aventurier aguerri', 'Terminer 15 quêtes.', 15, h => Object.keys(h.quetes?.done || {}).length, { gear: 'Rare' }),
-    A('explore', 'e19', '📚', 'Chroniqueur de l’Aurore', 'Terminer toutes les quêtes.', () => QUESTS.length, h => Object.keys(h.quetes?.done || {}).length, { title: 'Chroniqueur', gear: 'Épique' }, 25),
-    A('explore', 'e20', '👑', 'Légende vivante', 'Terminer l’histoire « Les Échos de l’Aurore ».', 1, h => (h.quetes?.flags?.title ? 1 : 0), { title: 'Sauveur de Canaan', gold: 3000 }, 50),
+    A(
+      'explore',
+      'e1',
+      '🌅',
+      'Le grand départ',
+      'Quitter le Camp de l’Aurore pour la première fois.',
+      1,
+      S('leftCamp'),
+      { gold: 50 },
+      5
+    ),
+    A(
+      'explore',
+      'e2',
+      '🥾',
+      'Promeneur solitaire',
+      'Marcher 10 km dans le monde ouvert (une case = 1 m).',
+      10000,
+      S('dist'),
+      { gold: 500 }
+    ),
+    A(
+      'explore',
+      'e3',
+      '🥾',
+      'Globe-trotteur',
+      'Marcher 50 km dans le monde ouvert.',
+      50000,
+      S('dist'),
+      { title: 'Le Vagabond' },
+      25
+    ),
+    A('explore', 'e4', '🌍', 'Touriste des biomes', 'Visiter les six régions de l’île.', 6, SET('biomes'), {
+      title: 'Voyageur intrépide',
+      gold: 600
+    }),
+    A(
+      'explore',
+      'e5',
+      '🎁',
+      'Chasseur de trésors',
+      'Ouvrir ton premier coffre secret.',
+      1,
+      h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0),
+      { gold: 200 },
+      5
+    ),
+    A(
+      'explore',
+      'e6',
+      '🎁',
+      'Pilleur de tombes',
+      'Ouvrir 25 coffres secrets.',
+      25,
+      h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0),
+      { gear: 'Rare' }
+    ),
+    A(
+      'explore',
+      'e7',
+      '🧭',
+      'Cartographe royal',
+      'Ouvrir tous les coffres secrets de l’île.',
+      () => hiddenChestSpots.length,
+      h => Math.max(S('chests')(h), h === game.hero ? game.world.openedChests.length : 0),
+      { title: 'Cartographe royal', gear: 'Épique' },
+      50
+    ),
+    A(
+      'explore',
+      'e8',
+      '🏛️',
+      'Premier portail',
+      'Entrer dans un donjon ou un raid.',
+      1,
+      SET('visited'),
+      { gold: 100 },
+      5
+    ),
+    A(
+      'explore',
+      'e9',
+      '🌌',
+      'Collectionneur de portails',
+      'Entrer dans tous les donjons et raids, sur l’île et dans les Tréfonds.',
+      () => instances.length,
+      SET('visited'),
+      { gold: 2000 },
+      25
+    ),
+    A(
+      'explore',
+      'e10',
+      '🌋',
+      'Promenade en enfer',
+      'Entrer dans la Forge d’Écaille-Ardente.',
+      1,
+      h => ((stateOf(h).sets.visited || []).includes(4) ? 1 : 0),
+      { gold: 400 }
+    ),
+    A(
+      'explore',
+      'e11',
+      '🌌',
+      'Pèlerinage céleste',
+      'Atteindre l’Aiguille du Continuum.',
+      1,
+      h => ((stateOf(h).sets.visited || []).includes(7) ? 1 : 0),
+      { gold: 800 }
+    ),
+    A(
+      'explore',
+      'e12',
+      '💀',
+      'Au cœur des ténèbres',
+      'Rester 5 minutes d’affilée dans une région plus forte que toi, sans tomber.',
+      300,
+      S('highZone'),
+      { gear: 'Rare' }
+    ),
+    A(
+      'explore',
+      'e13',
+      '❓',
+      'Touriste égaré',
+      'Tomber dans la Forêt enchantée (niveau 50+) en étant niveau 10 ou moins.',
+      1,
+      S('reckless'),
+      { title: 'Téméraire inconscient' },
+      15
+    ),
+    A(
+      'explore',
+      'e14',
+      '💫',
+      'Première chute',
+      'Tomber au combat pour la première fois.',
+      1,
+      S('deaths'),
+      { gold: 50 },
+      5
+    ),
+    A(
+      'explore',
+      'e15',
+      '☠️',
+      'Increvable',
+      'Tomber 100 fois et te relever à chaque fois.',
+      100,
+      S('deaths'),
+      { title: 'L’Increvable' },
+      15
+    ),
+    A(
+      'explore',
+      'e16',
+      '🐉',
+      'Chasseur de légendes',
+      'Découvrir les huit boss mondiaux.',
+      8,
+      h => WORLD_BOSS_DEFS.filter(b => stateOf(h).best['w:' + b.id]?.[0]).length,
+      { gold: 1500 },
+      15
+    ),
+    A(
+      'explore',
+      'e17',
+      '📜',
+      'Premier chapitre',
+      'Terminer une quête.',
+      1,
+      h => Object.keys(h.quetes?.done || {}).length,
+      { gold: 100 },
+      5
+    ),
+    A(
+      'explore',
+      'e18',
+      '📖',
+      'Aventurier aguerri',
+      'Terminer 15 quêtes.',
+      15,
+      h => Object.keys(h.quetes?.done || {}).length,
+      { gear: 'Rare' }
+    ),
+    A(
+      'explore',
+      'e19',
+      '📚',
+      'Chroniqueur de l’Aurore',
+      'Terminer toutes les quêtes.',
+      () => QUESTS.length,
+      h => Object.keys(h.quetes?.done || {}).length,
+      { title: 'Chroniqueur', gear: 'Épique' },
+      25
+    ),
+    A(
+      'explore',
+      'e20',
+      '👑',
+      'Légende vivante',
+      'Terminer l’histoire « Les Échos de l’Aurore ».',
+      1,
+      h => (h.quetes?.flags?.title ? 1 : 0),
+      { title: 'Sauveur de Canaan', gold: 3000 },
+      50
+    ),
     // ---------------------------------------------------------------- Économie & métiers
-    A('eco', 'p1', '🪙', 'Premier pécule', 'Gagner tes 100 premières pièces d’or.', 100, S('goldEarned'), { gold: 50 }, 5),
-    A('eco', 'p2', '💰', 'Magnat de l’or', 'Gagner 100 000 pièces d’or au total.', 100000, S('goldEarned'), { title: 'Le Magnat' }, 25),
-    A('eco', 'p3', '🎒', 'Gros portefeuille', 'Agrandir ton sac jusqu’à 100 places.', 100, h => canaanBagLimit(h), { gold: 2000 }),
-    A('eco', 'p4', '⭐', 'Maître artisan', 'Atteindre le niveau 40 dans un métier.', 40, h => Math.max(...['fishing', 'cooking', 'hunting', 'mining', 'herbalism', 'enchanting'].map(k => profOf(h)[k]?.level || 1)), { title: 'Maître artisan' }, 25),
-    A('eco', 'p5', '⚖️', 'Commerçant malin', 'Gagner 10 000 pièces d’or en vendant aux marchands.', 10000, S('sold'), { title: 'Le Marchand' }, 15),
-    A('eco', 'p6', '🏦', 'Coffre-fort', 'Ranger 50 cases à la banque.', 50, h => CANAAN_BANK.used(h), { gold: 500 }),
-    A('eco', 'p7', '⟦prof_mining⟧', 'Mineur de fond', 'Extraire 100 minerais.', 100, S('ores'), { stack: ['ore', 'fer', 2, 10] }),
-    A('eco', 'p8', '⟦ore_or⟧', 'Chercheur d’or pur', 'Extraire une pépite d’or.', 1, S('oreOr'), { gold: 400 }),
-    A('eco', 'p9', '⟦prof_herbalism⟧', 'Herboriste des bois', 'Cueillir 100 herbes.', 100, S('herbs'), { stack: ['herb', 'sauge', 2, 10] }),
-    A('eco', 'p10', '⟦herb_lys⟧', 'La main verte', 'Cueillir un aloès ou un lys étoilé.', 1, S('herbRare'), { gold: 400 }),
-    A('eco', 'p11', '⟦prof_cooking⟧', 'Apprenti cuisinier', 'Cuisiner 10 recettes différentes.', 10, SET('recipes'), { gold: 400 }),
-    A('eco', 'p12', '⟦prof_cooking⟧', 'Maître cuisinier', 'Cuisiner toutes les recettes du jeu.', () => Object.keys(CANAAN_PROF.RECIPES).length, SET('recipes'), { title: 'Chef étoilé' }, 25),
-    A('eco', 'p13', '🍳', 'Festin royal', 'Cuisiner un repas de qualité Mythique.', 1, S('mealMythic'), { gear: 'Épique' }, 25),
-    A('eco', 'p14', '🎣', 'Pêcheur du dimanche', 'Pêcher ton tout premier poisson.', 1, h => Math.max(S('fish')(h), Object.keys(CANAAN_PROF.FISH).reduce((n, k) => n + (codex(h)[k]?.n || 0), 0)), { gold: 50 }, 5),
-    A('eco', 'p15', '⟦fish_espadon⟧', 'Gros poisson', 'Pêcher un espadon ou un poisson-lune astral.', 1, h => (codex(h).espadon || codex(h).lune ? 1 : 0), { gold: 600 }),
-    A('eco', 'p16', '⟦fish_lune⟧', 'Maître des profondeurs', 'Compléter la collection des poissons.', () => Object.keys(CANAAN_PROF.FISH).length, h => Object.keys(CANAAN_PROF.FISH).filter(k => codex(h)[k]).length, { title: 'Vieux Loup de Mer', gear: 'Épique' }, 25),
-    A('eco', 'p17', '⟦prof_enchanting⟧', 'Enchanteur débutant', 'Avoir une pièce d’équipement enchantée.', 1, h => (allItems(h).some(it => it.ench) ? 1 : 0), { gold: 200 }, 5),
-    A('eco', 'p18', '⟦prof_enchanting⟧', 'Runes mystiques', 'Porter huit pièces enchantées (toutes sauf l’artéfact).', 8, h => worn(h).filter(it => it.ench).length, { title: 'Le Runiste', gear: 'Épique' }, 25),
-    A('eco', 'p19', '⟦prof_hunting⟧', 'Chasseur de viande', 'Chasser 50 animaux.', 50, h => Math.max(S('hunts')(h), Object.keys(CANAAN_PROF.GAME).reduce((n, k) => n + (codex(h)[k]?.n || 0), 0)), { stack: ['meal', 'roti', 2, 5] }),
-    A('eco', 'p20', '🤝', 'Le Philanthrope', 'Faire un échange avec un autre joueur.', 1, S('trades'), { title: 'Le Philanthrope' }),
+    A(
+      'eco',
+      'p1',
+      '🪙',
+      'Premier pécule',
+      'Gagner tes 100 premières pièces d’or.',
+      100,
+      S('goldEarned'),
+      { gold: 50 },
+      5
+    ),
+    A(
+      'eco',
+      'p2',
+      '💰',
+      'Magnat de l’or',
+      'Gagner 100 000 pièces d’or au total.',
+      100000,
+      S('goldEarned'),
+      { title: 'Le Magnat' },
+      25
+    ),
+    A(
+      'eco',
+      'p3',
+      '🎒',
+      'Gros portefeuille',
+      'Agrandir ton sac jusqu’à 100 places.',
+      100,
+      h => canaanBagLimit(h),
+      { gold: 2000 }
+    ),
+    A(
+      'eco',
+      'p4',
+      '⭐',
+      'Maître artisan',
+      'Atteindre le niveau 40 dans un métier.',
+      40,
+      h =>
+        Math.max(
+          ...['fishing', 'cooking', 'hunting', 'mining', 'herbalism', 'enchanting'].map(
+            k => profOf(h)[k]?.level || 1
+          )
+        ),
+      { title: 'Maître artisan' },
+      25
+    ),
+    A(
+      'eco',
+      'p5',
+      '⚖️',
+      'Commerçant malin',
+      'Gagner 10 000 pièces d’or en vendant aux marchands.',
+      10000,
+      S('sold'),
+      { title: 'Le Marchand' },
+      15
+    ),
+    A('eco', 'p6', '🏦', 'Coffre-fort', 'Ranger 50 cases à la banque.', 50, h => CANAAN_BANK.used(h), {
+      gold: 500
+    }),
+    A('eco', 'p7', '⟦prof_mining⟧', 'Mineur de fond', 'Extraire 100 minerais.', 100, S('ores'), {
+      stack: ['ore', 'fer', 2, 10]
+    }),
+    A('eco', 'p8', '⟦ore_or⟧', 'Chercheur d’or pur', 'Extraire une pépite d’or.', 1, S('oreOr'), {
+      gold: 400
+    }),
+    A('eco', 'p9', '⟦prof_herbalism⟧', 'Herboriste des bois', 'Cueillir 100 herbes.', 100, S('herbs'), {
+      stack: ['herb', 'sauge', 2, 10]
+    }),
+    A('eco', 'p10', '⟦herb_lys⟧', 'La main verte', 'Cueillir un aloès ou un lys étoilé.', 1, S('herbRare'), {
+      gold: 400
+    }),
+    A(
+      'eco',
+      'p11',
+      '⟦prof_cooking⟧',
+      'Apprenti cuisinier',
+      'Cuisiner 10 recettes différentes.',
+      10,
+      SET('recipes'),
+      { gold: 400 }
+    ),
+    A(
+      'eco',
+      'p12',
+      '⟦prof_cooking⟧',
+      'Maître cuisinier',
+      'Cuisiner toutes les recettes du jeu.',
+      () => Object.keys(CANAAN_PROF.RECIPES).length,
+      SET('recipes'),
+      { title: 'Chef étoilé' },
+      25
+    ),
+    A(
+      'eco',
+      'p13',
+      '🍳',
+      'Festin royal',
+      'Cuisiner un repas de qualité Mythique.',
+      1,
+      S('mealMythic'),
+      { gear: 'Épique' },
+      25
+    ),
+    A(
+      'eco',
+      'p14',
+      '🎣',
+      'Pêcheur du dimanche',
+      'Pêcher ton tout premier poisson.',
+      1,
+      h =>
+        Math.max(
+          S('fish')(h),
+          Object.keys(CANAAN_PROF.FISH).reduce((n, k) => n + (codex(h)[k]?.n || 0), 0)
+        ),
+      { gold: 50 },
+      5
+    ),
+    A(
+      'eco',
+      'p15',
+      '⟦fish_espadon⟧',
+      'Gros poisson',
+      'Pêcher un espadon ou un poisson-lune astral.',
+      1,
+      h => (codex(h).espadon || codex(h).lune ? 1 : 0),
+      { gold: 600 }
+    ),
+    A(
+      'eco',
+      'p16',
+      '⟦fish_lune⟧',
+      'Maître des profondeurs',
+      'Compléter la collection des poissons.',
+      () => Object.keys(CANAAN_PROF.FISH).length,
+      h => Object.keys(CANAAN_PROF.FISH).filter(k => codex(h)[k]).length,
+      { title: 'Vieux Loup de Mer', gear: 'Épique' },
+      25
+    ),
+    A(
+      'eco',
+      'p17',
+      '⟦prof_enchanting⟧',
+      'Enchanteur débutant',
+      'Avoir une pièce d’équipement enchantée.',
+      1,
+      h => (allItems(h).some(it => it.ench) ? 1 : 0),
+      { gold: 200 },
+      5
+    ),
+    A(
+      'eco',
+      'p18',
+      '⟦prof_enchanting⟧',
+      'Runes mystiques',
+      'Porter huit pièces enchantées (toutes sauf l’artéfact).',
+      8,
+      h => worn(h).filter(it => it.ench).length,
+      { title: 'Le Runiste', gear: 'Épique' },
+      25
+    ),
+    A(
+      'eco',
+      'p19',
+      '⟦prof_hunting⟧',
+      'Chasseur de viande',
+      'Chasser 50 animaux.',
+      50,
+      h =>
+        Math.max(
+          S('hunts')(h),
+          Object.keys(CANAAN_PROF.GAME).reduce((n, k) => n + (codex(h)[k]?.n || 0), 0)
+        ),
+      { stack: ['meal', 'roti', 2, 5] }
+    ),
+    A('eco', 'p20', '🤝', 'Le Philanthrope', 'Faire un échange avec un autre joueur.', 1, S('trades'), {
+      title: 'Le Philanthrope'
+    }),
     // ---------------------------------------------------------------- Magie, Rubis & progression
     A('magic', 'm1', '⭐', 'Éveil des pouvoirs', 'Atteindre le niveau 10.', 10, lvl, { gold: 300 }, 5),
-    A('magic', 'm2', '⭐', 'Force de l’âge', 'Atteindre le niveau 30.', 30, lvl, { gear: 'Rare', gold: 1000 }),
-    A('magic', 'm3', '🌟', 'Transcendance totale', 'Atteindre le niveau maximum (60).', 60, lvl, { title: 'L’Immortel', gear: 'Épique' }, 50),
-    A('magic', 'm4', '💎', 'Premier Rubis', 'Équiper ton premier Rubis.', 1, h => (h.rubis?.equipped || []).filter(Boolean).length, { gold: 100 }, 5),
-    A('magic', 'm5', '💎', 'Collection de gemmes', 'Posséder 20 Rubis différents.', 20, h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length, { rubis: 1 }, 15),
-    A('magic', 'm6', '💎', 'Joaillier suprême', 'Posséder les 48 Rubis.', () => RUBIS_CATALOG.length, h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length, { title: 'Le Joaillier' }, 50),
-    A('magic', 'm7', '⟦fam_offense⟧', 'Puissance écarlate', 'Remplir tes six emplacements avec des Rubis offensifs.', 1, familyFull(0), { gold: 800 }),
-    A('magic', 'm8', '⟦fam_defense⟧', 'Forteresse impénétrable', 'Remplir tes six emplacements avec des Rubis défensifs.', 1, familyFull(1), { gold: 800 }),
-    A('magic', 'm9', '⟦fam_support⟧', 'Bénédiction divine', 'Remplir tes six emplacements avec des Rubis de soutien.', 1, familyFull(2), { gold: 800 }),
-    A('magic', 'm10', '⟦rubis_phenix⟧', 'Immortalité du Phénix', 'Être sauvé par le Rubis Phénix en plein combat de boss.', 1, S('phoenixBoss'), { rubis: 1 }, 25),
-    A('magic', 'm11', '⟦menu_talents⟧', 'Spécialisation de classe', 'Choisir ta classe.', 1, h => (h.classe?.id ? 1 : 0), { gold: 100 }, 5),
-    A('magic', 'm12', '⟦cls_druide⟧', 'Maître Druide', 'Remplir les cinq emplacements de talents en Druide.', 1, talentsFull('druide'), { gear: 'Épique' }, 15),
-    A('magic', 'm13', '⟦cls_paladin⟧', 'Paladin éternel', 'Remplir les cinq emplacements de talents en Paladin.', 1, talentsFull('paladin'), { gear: 'Épique' }, 15),
-    A('magic', 'm14', '⟦cls_assassin⟧', 'Ombre mortelle', 'Remplir les cinq emplacements de talents en Assassin.', 1, talentsFull('assassin'), { gear: 'Épique' }, 15),
-    A('magic', 'm15', '⟦cls_elementaliste⟧', 'Seigneur des Éléments', 'Remplir les cinq emplacements de talents en Élémentaliste.', 1, talentsFull('elementaliste'), { gear: 'Épique' }, 15),
-    A('magic', 'm16', '⟦menu_talents⟧', 'Toutes les voies', 'Jouer les quatre classes.', 4, SET('classes'), { title: 'L’Éclectique' }, 15),
-    A('magic', 'm17', '🌟', 'Éclat légendaire', 'Obtenir un objet Légendaire.', 1, h => (allItems(h).some(it => rank(it) >= 4) ? 1 : 0), { gold: 2000 }, 25),
-    A('magic', 'm18', '🌟', 'Mythe vivant', 'Obtenir un objet Mythique.', 1, h => (allItems(h).some(it => rank(it) >= 5) ? 1 : 0), { title: 'Porteur de mythe' }, 50),
-    A('magic', 'm19', '🛡️', 'Panoplie épique', 'Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).', 8, h => worn(h).filter(it => rank(it) >= 3).length, { gold: 3000 }, 25),
-    A('magic', 'm20', '👑', 'Collectionneur mythique', 'Porter huit pièces Mythiques (toutes sauf l’artéfact).', 8, h => worn(h).filter(it => rank(it) >= 5).length, { title: 'Élu des Dieux' }, 50),
+    A('magic', 'm2', '⭐', 'Force de l’âge', 'Atteindre le niveau 30.', 30, lvl, {
+      gear: 'Rare',
+      gold: 1000
+    }),
+    A(
+      'magic',
+      'm3',
+      '🌟',
+      'Transcendance totale',
+      'Atteindre le niveau maximum (60).',
+      60,
+      lvl,
+      { title: 'L’Immortel', gear: 'Épique' },
+      50
+    ),
+    A(
+      'magic',
+      'm4',
+      '💎',
+      'Premier Rubis',
+      'Équiper ton premier Rubis.',
+      1,
+      h => (h.rubis?.equipped || []).filter(Boolean).length,
+      { gold: 100 },
+      5
+    ),
+    A(
+      'magic',
+      'm5',
+      '💎',
+      'Collection de gemmes',
+      'Posséder 20 Rubis différents.',
+      20,
+      h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
+      { rubis: 1 },
+      15
+    ),
+    A(
+      'magic',
+      'm6',
+      '💎',
+      'Joaillier suprême',
+      'Posséder les 48 Rubis.',
+      () => RUBIS_CATALOG.length,
+      h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
+      { title: 'Le Joaillier' },
+      50
+    ),
+    A(
+      'magic',
+      'm7',
+      '⟦fam_offense⟧',
+      'Puissance écarlate',
+      'Remplir tes six emplacements avec des Rubis offensifs.',
+      1,
+      familyFull(0),
+      { gold: 800 }
+    ),
+    A(
+      'magic',
+      'm8',
+      '⟦fam_defense⟧',
+      'Forteresse impénétrable',
+      'Remplir tes six emplacements avec des Rubis défensifs.',
+      1,
+      familyFull(1),
+      { gold: 800 }
+    ),
+    A(
+      'magic',
+      'm9',
+      '⟦fam_support⟧',
+      'Bénédiction divine',
+      'Remplir tes six emplacements avec des Rubis de soutien.',
+      1,
+      familyFull(2),
+      { gold: 800 }
+    ),
+    A(
+      'magic',
+      'm10',
+      '⟦rubis_phenix⟧',
+      'Immortalité du Phénix',
+      'Être sauvé par le Rubis Phénix en plein combat de boss.',
+      1,
+      S('phoenixBoss'),
+      { rubis: 1 },
+      25
+    ),
+    A(
+      'magic',
+      'm11',
+      '⟦menu_talents⟧',
+      'Spécialisation de classe',
+      'Choisir ta classe.',
+      1,
+      h => (h.classe?.id ? 1 : 0),
+      { gold: 100 },
+      5
+    ),
+    A(
+      'magic',
+      'm12',
+      '⟦cls_druide⟧',
+      'Maître Druide',
+      'Remplir les cinq emplacements de talents en Druide.',
+      1,
+      talentsFull('druide'),
+      { gear: 'Épique' },
+      15
+    ),
+    A(
+      'magic',
+      'm13',
+      '⟦cls_paladin⟧',
+      'Paladin éternel',
+      'Remplir les cinq emplacements de talents en Paladin.',
+      1,
+      talentsFull('paladin'),
+      { gear: 'Épique' },
+      15
+    ),
+    A(
+      'magic',
+      'm14',
+      '⟦cls_assassin⟧',
+      'Ombre mortelle',
+      'Remplir les cinq emplacements de talents en Assassin.',
+      1,
+      talentsFull('assassin'),
+      { gear: 'Épique' },
+      15
+    ),
+    A(
+      'magic',
+      'm15',
+      '⟦cls_elementaliste⟧',
+      'Seigneur des Éléments',
+      'Remplir les cinq emplacements de talents en Élémentaliste.',
+      1,
+      talentsFull('elementaliste'),
+      { gear: 'Épique' },
+      15
+    ),
+    A(
+      'magic',
+      'm16',
+      '⟦menu_talents⟧',
+      'Toutes les voies',
+      'Jouer les quatre classes.',
+      4,
+      SET('classes'),
+      { title: 'L’Éclectique' },
+      15
+    ),
+    A(
+      'magic',
+      'm17',
+      '🌟',
+      'Éclat légendaire',
+      'Obtenir un objet Légendaire.',
+      1,
+      h => (allItems(h).some(it => rank(it) >= 4) ? 1 : 0),
+      { gold: 2000 },
+      25
+    ),
+    A(
+      'magic',
+      'm18',
+      '🌟',
+      'Mythe vivant',
+      'Obtenir un objet Mythique.',
+      1,
+      h => (allItems(h).some(it => rank(it) >= 5) ? 1 : 0),
+      { title: 'Porteur de mythe' },
+      50
+    ),
+    A(
+      'magic',
+      'm19',
+      '🛡️',
+      'Panoplie épique',
+      'Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).',
+      8,
+      h => worn(h).filter(it => rank(it) >= 3).length,
+      { gold: 3000 },
+      25
+    ),
+    A(
+      'magic',
+      'm20',
+      '👑',
+      'Collectionneur mythique',
+      'Porter huit pièces Mythiques (toutes sauf l’artéfact).',
+      8,
+      h => worn(h).filter(it => rank(it) >= 5).length,
+      { title: 'Élu des Dieux' },
+      50
+    ),
     // ---------------------------------------------------------------- Défis & Arène
-    A('defi', 'd1', '⚔️', 'Entrée dans l’Arène', 'Tenter l’Arène des Épreuves.', 1, h => h.arena?.attempts || 0, { gold: 100 }, 5),
-    A('defi', 'd2', '🛡️', 'Gladiateur', 'Atteindre la vague 6 de l’Arène.', 6, h => h.arena?.best || 0, { gear: 'Rare' }),
-    A('defi', 'd3', '🏆', 'Champion des champions', 'Vaincre les 12 vagues de l’Arène.', 1, h => (h.arena?.completed ? 1 : 0), { title: 'Champion de l’Arène' }, 50),
-    A('defi', 'd4', '⟦mode_heroic⟧', 'Le triomphe de l’Héroïque', 'Terminer le Jugement de Célestia en mode Héroïque.', 1, S('raid4h'), { title: 'Dominateur des Mondes' }, 50),
-    A('defi', 'd5', '⚖️', 'Chasseur de divinités', 'Vaincre L’Avatar du Jugement.', 1, h => (killed(h, 'b:L’Avatar du Jugement') ? 1 : 0), { gear: 'Épique' }, 25),
-    A('defi', 'd6', '🐉', 'Premier boss mondial', 'Vaincre un boss mondial.', 1, h => WORLD_BOSS_DEFS.filter(b => killed(h, 'w:' + b.id)).length, { gold: 500 }),
-    A('defi', 'd7', '🐉', 'Tueur de dieux anciens', 'Vaincre les huit boss mondiaux.', 8, h => WORLD_BOSS_DEFS.filter(b => killed(h, 'w:' + b.id)).length, { title: 'Titanomache', gear: 'Épique' }, 50),
-    A('defi', 'd8', '🔥', 'Le réveil du dragon', 'Vaincre Pyrrhax, Wyrm d’Écaille-Ardente.', 1, h => (killed(h, 'b:Pyrrhax, Wyrm d’Écaille-Ardente') ? 1 : 0), { gold: 1000 }),
-    A('defi', 'd9', '👑', 'Cauchemar d’argent', 'Vaincre le Roi Sanglant dans le Bastion.', 1, h => (killed(h, 'b:Le Roi Sanglant') ? 1 : 0), { gold: 1500 }),
-    A('defi', 'd10', '🌌', 'Voyageur temporel', 'Vaincre le Dévoreur Stellaire dans l’Aiguille du Continuum.', 1, h => (killed(h, 'b:Le Dévoreur Stellaire') ? 1 : 0), { gold: 2000 }),
-    A('defi', 'd11', '⚖️', 'Jugement dernier', 'Vaincre L’Avatar du Jugement moins de 3 minutes après le premier coup.', 1, S('fastAvatar'), { gear: 'Épique' }, 50),
-    A('defi', 'd12', '🗡️', 'Défi en solitaire', 'Terminer un donjon ou un raid seul, sans tomber.', 1, S('solo'), { title: 'Loup solitaire' }, 25),
-    A('defi', 'd13', '🩸', 'Le prix du sang', 'Vaincre un boss en ayant moins de 5 % de tes PV.', 1, S('lowBoss'), { rubis: 1 }, 25),
-    A('defi', 'd14', '⚡', 'Vitesse éclair', 'Terminer un donjon ou un raid en moins de 5 minutes.', 1, S('fastClear'), { gear: 'Rare' }),
-    A('defi', 'd15', '🏰', 'Conquérant des donjons', 'Terminer les six donjons de l’île.', 6, h => (stateOf(h).sets.cleared || []).filter(i => instances[i] && !instances[i].raid && !instances[i].under).length, { gear: 'Épique' }, 25),
-    A('defi', 'd16', '🏰', 'Fléau des raids', 'Terminer les quatre raids.', 4, h => (stateOf(h).sets.cleared || []).filter(i => instances[i]?.raid).length, { title: 'Fléau des raids' }, 50),
-    A('defi', 'd17', '🛡️', 'Résistant suprême', 'Subir 1 000 000 de dégâts au total.', 1000000, S('hurt'), { title: 'Le Roc' }, 25),
-    A('defi', 'd18', '📖', 'Bestiaire complet', 'Vaincre chaque espèce du monde, des donjons et des raids.', () => bestiary().length, h => bestiary().filter(b => killed(h, b.key)).length, { title: 'Le Naturaliste' }, 50),
-    A('defi', 'd19', '🌟', 'Perfectionniste absolu', 'Débloquer 99 succès.', 98, h => Object.keys(stateOf(h).done).filter(id => id !== 'd19' && id !== 'd20').length, { gold: 10000 }, 50),
-    A('defi', 'd20', '👑', 'La Légende de Nashi', 'Débloquer tous les autres succès.', 99, h => Object.keys(stateOf(h).done).filter(id => id !== 'd20').length, { title: 'La Légende Vivante', aura: true }, 100)
+    A(
+      'defi',
+      'd1',
+      '⚔️',
+      'Entrée dans l’Arène',
+      'Tenter l’Arène des Épreuves.',
+      1,
+      h => h.arena?.attempts || 0,
+      { gold: 100 },
+      5
+    ),
+    A('defi', 'd2', '🛡️', 'Gladiateur', 'Atteindre la vague 6 de l’Arène.', 6, h => h.arena?.best || 0, {
+      gear: 'Rare'
+    }),
+    A(
+      'defi',
+      'd3',
+      '🏆',
+      'Champion des champions',
+      'Vaincre les 12 vagues de l’Arène.',
+      1,
+      h => (h.arena?.completed ? 1 : 0),
+      { title: 'Champion de l’Arène' },
+      50
+    ),
+    A(
+      'defi',
+      'd4',
+      '⟦mode_heroic⟧',
+      'Le triomphe de l’Héroïque',
+      'Terminer le Jugement de Célestia en mode Héroïque.',
+      1,
+      S('raid4h'),
+      { title: 'Dominateur des Mondes' },
+      50
+    ),
+    A(
+      'defi',
+      'd5',
+      '⚖️',
+      'Chasseur de divinités',
+      'Vaincre L’Avatar du Jugement.',
+      1,
+      h => (killed(h, 'b:L’Avatar du Jugement') ? 1 : 0),
+      { gear: 'Épique' },
+      25
+    ),
+    A(
+      'defi',
+      'd6',
+      '🐉',
+      'Premier boss mondial',
+      'Vaincre un boss mondial.',
+      1,
+      h => WORLD_BOSS_DEFS.filter(b => killed(h, 'w:' + b.id)).length,
+      { gold: 500 }
+    ),
+    A(
+      'defi',
+      'd7',
+      '🐉',
+      'Tueur de dieux anciens',
+      'Vaincre les huit boss mondiaux.',
+      8,
+      h => WORLD_BOSS_DEFS.filter(b => killed(h, 'w:' + b.id)).length,
+      { title: 'Titanomache', gear: 'Épique' },
+      50
+    ),
+    A(
+      'defi',
+      'd8',
+      '🔥',
+      'Le réveil du dragon',
+      'Vaincre Pyrrhax, Wyrm d’Écaille-Ardente.',
+      1,
+      h => (killed(h, 'b:Pyrrhax, Wyrm d’Écaille-Ardente') ? 1 : 0),
+      { gold: 1000 }
+    ),
+    A(
+      'defi',
+      'd9',
+      '👑',
+      'Cauchemar d’argent',
+      'Vaincre le Roi Sanglant dans le Bastion.',
+      1,
+      h => (killed(h, 'b:Le Roi Sanglant') ? 1 : 0),
+      { gold: 1500 }
+    ),
+    A(
+      'defi',
+      'd10',
+      '🌌',
+      'Voyageur temporel',
+      'Vaincre le Dévoreur Stellaire dans l’Aiguille du Continuum.',
+      1,
+      h => (killed(h, 'b:Le Dévoreur Stellaire') ? 1 : 0),
+      { gold: 2000 }
+    ),
+    A(
+      'defi',
+      'd11',
+      '⚖️',
+      'Jugement dernier',
+      'Vaincre L’Avatar du Jugement moins de 3 minutes après le premier coup.',
+      1,
+      S('fastAvatar'),
+      { gear: 'Épique' },
+      50
+    ),
+    A(
+      'defi',
+      'd12',
+      '🗡️',
+      'Défi en solitaire',
+      'Terminer un donjon ou un raid seul, sans tomber.',
+      1,
+      S('solo'),
+      { title: 'Loup solitaire' },
+      25
+    ),
+    A(
+      'defi',
+      'd13',
+      '🩸',
+      'Le prix du sang',
+      'Vaincre un boss en ayant moins de 5 % de tes PV.',
+      1,
+      S('lowBoss'),
+      { rubis: 1 },
+      25
+    ),
+    A(
+      'defi',
+      'd14',
+      '⚡',
+      'Vitesse éclair',
+      'Terminer un donjon ou un raid en moins de 5 minutes.',
+      1,
+      S('fastClear'),
+      { gear: 'Rare' }
+    ),
+    A(
+      'defi',
+      'd15',
+      '🏰',
+      'Conquérant des donjons',
+      'Terminer les six donjons de l’île.',
+      6,
+      h =>
+        (stateOf(h).sets.cleared || []).filter(i => instances[i] && !instances[i].raid && !instances[i].under)
+          .length,
+      { gear: 'Épique' },
+      25
+    ),
+    A(
+      'defi',
+      'd16',
+      '🏰',
+      'Fléau des raids',
+      'Terminer les quatre raids.',
+      4,
+      h => (stateOf(h).sets.cleared || []).filter(i => instances[i]?.raid).length,
+      { title: 'Fléau des raids' },
+      50
+    ),
+    A(
+      'defi',
+      'd17',
+      '🛡️',
+      'Résistant suprême',
+      'Subir 1 000 000 de dégâts au total.',
+      1000000,
+      S('hurt'),
+      { title: 'Le Roc' },
+      25
+    ),
+    A(
+      'defi',
+      'd18',
+      '📖',
+      'Bestiaire complet',
+      'Vaincre chaque espèce du monde, des donjons et des raids.',
+      () => bestiary().length,
+      h => bestiary().filter(b => killed(h, b.key)).length,
+      { title: 'Le Naturaliste' },
+      50
+    ),
+    A(
+      'defi',
+      'd19',
+      '🌟',
+      'Perfectionniste absolu',
+      'Débloquer 99 succès.',
+      98,
+      h => Object.keys(stateOf(h).done).filter(id => id !== 'd19' && id !== 'd20').length,
+      { gold: 10000 },
+      50
+    ),
+    A(
+      'defi',
+      'd20',
+      '👑',
+      'La Légende de Nashi',
+      'Débloquer tous les autres succès.',
+      99,
+      h => Object.keys(stateOf(h).done).filter(id => id !== 'd20').length,
+      { title: 'La Légende Vivante', aura: true },
+      100
+    )
   ];
   const BY_ID = Object.fromEntries(LIST.map(a => [a.id, a]));
   const goalOf = a => (typeof a.goal === 'function' ? a.goal() : a.goal);
@@ -237,7 +1142,12 @@
     if (r.aura) out.push('aura dorée');
     if (r.gear) out.push('un objet ' + r.gear + ' de ton niveau');
     if (r.rubis) out.push('un Rubis qui te manque');
-    if (r.stack) out.push(r.stack[3] + ' × ' + CANAAN_BAG.info({ kind: r.stack[0], id: r.stack[1], q: r.stack[2], n: r.stack[3] }).name);
+    if (r.stack)
+      out.push(
+        r.stack[3] +
+          ' × ' +
+          CANAAN_BAG.info({ kind: r.stack[0], id: r.stack[1], q: r.stack[2], n: r.stack[3] }).name
+      );
     if (r.exp) out.push(Math.round(r.exp * 100) + ' % d’un niveau d’XP');
     if (r.gold) out.push(r.gold + ' or');
     return out.join(' · ');
@@ -252,7 +1162,16 @@
       const item = giveGear(lvl(hero), 'normal', r.gear, hero);
       if (item) {
         item.origin = 'succès';
-        canaanLootNotice(hero, '🏆 Récompense du succès « ' + a.name + ' » : objet ' + r.gear + ' de ton niveau (' + lvl(hero) + ').');
+        canaanLootNotice(
+          hero,
+          '🏆 Récompense du succès « ' +
+            a.name +
+            ' » : objet ' +
+            r.gear +
+            ' de ton niveau (' +
+            lvl(hero) +
+            ').'
+        );
       }
     }
     if (r.rubis) {
@@ -272,7 +1191,11 @@
   const BOSSY = m => m.boss || m.worldBoss || m.arenaBoss;
   // Héros qui partagent une victoire sur un boss : tous ceux de l'instance, ou ceux qui sont tout près dehors.
   const sharers = (m, killer) =>
-    game.world.instance ? game.heroes.filter(h => !h.away) : game.heroes.filter(h => h === killer || (!h.away && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 18 * TS));
+    game.world.instance
+      ? game.heroes.filter(h => !h.away)
+      : game.heroes.filter(
+          h => h === killer || (!h.away && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 18 * TS)
+        );
   function onKill(hero, m) {
     if (!m || m.arenaClone) return;
     const key = beastKey(m),
@@ -346,7 +1269,12 @@
         return onClear(hero, a);
       case 'phoenix':
         add(st, 'phoenix');
-        if (game.world.monsters.some(m => BOSSY(m) && m.hp > 0 && Math.hypot(m.x - hero.player.x, m.y - hero.player.y) < 700)) st.s.phoenixBoss = 1;
+        if (
+          game.world.monsters.some(
+            m => BOSSY(m) && m.hp > 0 && Math.hypot(m.x - hero.player.x, m.y - hero.player.y) < 700
+          )
+        )
+          st.s.phoenixBoss = 1;
         return;
       case 'trade':
         return add(st, 'trades');
@@ -361,7 +1289,8 @@
       p = hero.player,
       inst = game.world.instance;
     // Or gagné : toutes les hausses de la bourse.
-    if (Number.isFinite(hero._achGold) && p.gold > hero._achGold) add(st, 'goldEarned', p.gold - hero._achGold);
+    if (Number.isFinite(hero._achGold) && p.gold > hero._achGold)
+      add(st, 'goldEarned', p.gold - hero._achGold);
     hero._achGold = p.gold;
     // Distance à pied dans le monde ouvert (une case = 1 m ; les téléportations ne comptent pas).
     if (!inst && !hero.away && hero._achPos) {
@@ -375,7 +1304,13 @@
       add(st, 'deaths');
       hero._achRunDied = true;
       hero._achHigh = 0;
-      if (!inst && game.world.layer !== 'under' && canaanZoneIndexAt(p.x / TS, p.y / TS) === 5 && lvl(hero) <= 10) st.s.reckless = 1;
+      if (
+        !inst &&
+        game.world.layer !== 'under' &&
+        canaanZoneIndexAt(p.x / TS, p.y / TS) === 5 &&
+        lvl(hero) <= 10
+      )
+        st.s.reckless = 1;
     }
     hero._achDead = !!p.dead;
     if (inst) {
@@ -388,7 +1323,8 @@
     } else if (!hero.away && game.world.layer !== 'under') {
       const zone = canaanZoneIndexAt(p.x / TS, p.y / TS);
       if (zone >= 0 && zone < 6) addSet(st, 'biomes', zone);
-      if (Math.hypot(p.x / TS - CANAAN_CAMP.x, p.y / TS - CANAAN_CAMP.y) > CANAAN_CAMP.r + 14) st.s.leftCamp = 1;
+      if (Math.hypot(p.x / TS - CANAAN_CAMP.x, p.y / TS - CANAAN_CAMP.y) > CANAAN_CAMP.r + 14)
+        st.s.leftCamp = 1;
       // Région plus forte que le héros : temps passé d'affilée, sans tomber.
       if (!p.dead && ZONE_LEVELS[zone] && ZONE_LEVELS[zone][0] > lvl(hero)) {
         hero._achHigh = (hero._achHigh || 0) + 1;
@@ -422,7 +1358,9 @@
   function announce(hero, list) {
     if (hero === game.hero) popup(list);
     else for (const a of list.slice(0, 3)) canaanLootNotice(hero, '🏆 Succès : ' + a.name);
-    if (game.heroes.length > 1) for (const a of list.slice(0, 3)) chat('Succès', (hero.name || 'Le héros') + ' débloque « ' + a.name + ' »');
+    if (game.heroes.length > 1)
+      for (const a of list.slice(0, 3))
+        chat('Succès', (hero.name || 'Le héros') + ' débloque « ' + a.name + ' »');
   }
   let clock = 0;
   function tick() {
@@ -444,7 +1382,12 @@
   function popup(list) {
     if (!list.length) return;
     // Beaucoup d'un coup (ancienne aventure) : un seul bandeau récapitulatif.
-    if (list.length > 3) queue.push({ icon: '🏆', name: list.length + ' succès débloqués !', sub: 'Ouvre le panneau des succès (Y) pour les voir.' });
+    if (list.length > 3)
+      queue.push({
+        icon: '🏆',
+        name: list.length + ' succès débloqués !',
+        sub: 'Ouvre le panneau des succès (Y) pour les voir.'
+      });
     else for (const a of list) queue.push({ icon: a.icon, name: a.name, sub: rewardText(a.reward) });
     if (!showing) next();
   }
@@ -456,7 +1399,14 @@
       return;
     }
     showing = true;
-    banner.innerHTML = '<span class="ach-pop-icon">' + item.icon + '</span><span><small>Succès débloqué</small><b>' + esc(item.name) + '</b><em>' + esc(item.sub) + '</em></span>';
+    banner.innerHTML =
+      '<span class="ach-pop-icon">' +
+      item.icon +
+      '</span><span><small>Succès débloqué</small><b>' +
+      esc(item.name) +
+      '</b><em>' +
+      esc(item.sub) +
+      '</em></span>';
     banner.classList.add('show');
     CANAAN_SOUND.cue('levelup');
     setTimeout(() => {
@@ -469,16 +1419,29 @@
   function sanitize(raw) {
     const out = fresh();
     if (!raw || typeof raw !== 'object') return out;
-    if (raw.done && typeof raw.done === 'object') for (const [id, t] of Object.entries(raw.done)) if (BY_ID[id]) out.done[id] = Number.isFinite(Number(t)) ? Number(t) : 1;
+    if (raw.done && typeof raw.done === 'object')
+      for (const [id, t] of Object.entries(raw.done))
+        if (BY_ID[id]) out.done[id] = Number.isFinite(Number(t)) ? Number(t) : 1;
     if (raw.s && typeof raw.s === 'object')
-      for (const [k, v] of Object.entries(raw.s)) if (/^[a-zA-Z_]{1,24}$/.test(k) && Number.isFinite(Number(v)) && Number(v) > 0) out.s[k] = Math.min(1e12, Math.round(Number(v) * 10) / 10);
+      for (const [k, v] of Object.entries(raw.s))
+        if (/^[a-zA-Z_]{1,24}$/.test(k) && Number.isFinite(Number(v)) && Number(v) > 0)
+          out.s[k] = Math.min(1e12, Math.round(Number(v) * 10) / 10);
     if (raw.sets && typeof raw.sets === 'object')
-      for (const k of SET_KEYS) if (Array.isArray(raw.sets[k])) out.sets[k] = [...new Set(raw.sets[k].filter(v => (typeof v === 'string' && v.length <= 40) || Number.isInteger(v)))].slice(0, 100);
+      for (const k of SET_KEYS)
+        if (Array.isArray(raw.sets[k]))
+          out.sets[k] = [
+            ...new Set(
+              raw.sets[k].filter(v => (typeof v === 'string' && v.length <= 40) || Number.isInteger(v))
+            )
+          ].slice(0, 100);
     if (raw.best && typeof raw.best === 'object') {
       const keys = beastKeys();
-      for (const [k, v] of Object.entries(raw.best)) if (keys.has(k) && Array.isArray(v)) out.best[k] = [v[0] ? 1 : 0, Math.floor(num(v[1])), Math.floor(num(v[2]))];
+      for (const [k, v] of Object.entries(raw.best))
+        if (keys.has(k) && Array.isArray(v))
+          out.best[k] = [v[0] ? 1 : 0, Math.floor(num(v[1])), Math.floor(num(v[2]))];
     }
-    if (typeof raw.title === 'string' && BY_ID[raw.title]?.reward.title && out.done[raw.title]) out.title = raw.title;
+    if (typeof raw.title === 'string' && BY_ID[raw.title]?.reward.title && out.done[raw.title])
+      out.title = raw.title;
     return out;
   }
   const exportOf = hero => sanitize(stateOf(hero));
@@ -529,7 +1492,12 @@
         c.fillStyle = '#fff2b0';
         for (let k = 0; k < 4; k++) {
           const a = time * 0.04 + (k * Math.PI) / 2;
-          c.fillRect(p.x + Math.cos(a) * 22 - 1.5, p.y + 17 + Math.sin(a) * 8 - 1.5 - ((time + k * 20) % 40) * 0.6, 3, 3);
+          c.fillRect(
+            p.x + Math.cos(a) * 22 - 1.5,
+            p.y + 17 + Math.sin(a) * 8 - 1.5 - ((time + k * 20) % 40) * 0.6,
+            3,
+            3
+          );
         }
         c.restore();
       }
@@ -572,29 +1540,80 @@
       pct = Math.round((100 * have) / Math.max(1, goal)),
       big = n => Math.floor(n).toLocaleString('fr-FR');
     return (
-      '<article class="ach-card' + (done ? ' done' : '') + '"><span class="ach-icon">' + a.icon + '</span><div class="ach-body">' +
-      '<h4>' + esc(a.name) + ' <small>' + a.pts + ' pts</small></h4><p>' + esc(a.desc) + '</p>' +
-      (goal > 1 ? '<div class="ach-bar"><i style="width:' + pct + '%"></i><span>' + big(have) + ' / ' + big(goal) + '</span></div>' : '') +
-      '<p class="ach-reward">⟦menu_achievements⟧ ' + esc(rewardText(a.reward)) + '</p></div>' +
-      (done ? '<span class="ach-date">✓ ' + date(st.done[a.id]) + '</span>' : '') + '</article>'
+      '<article class="ach-card' +
+      (done ? ' done' : '') +
+      '"><span class="ach-icon">' +
+      a.icon +
+      '</span><div class="ach-body">' +
+      '<h4>' +
+      esc(a.name) +
+      ' <small>' +
+      a.pts +
+      ' pts</small></h4><p>' +
+      esc(a.desc) +
+      '</p>' +
+      (goal > 1
+        ? '<div class="ach-bar"><i style="width:' +
+          pct +
+          '%"></i><span>' +
+          big(have) +
+          ' / ' +
+          big(goal) +
+          '</span></div>'
+        : '') +
+      '<p class="ach-reward">⟦menu_achievements⟧ ' +
+      esc(rewardText(a.reward)) +
+      '</p></div>' +
+      (done ? '<span class="ach-date">✓ ' + date(st.done[a.id]) + '</span>' : '') +
+      '</article>'
     );
   }
   function tabSucces(h) {
     const st = stateOf(h),
       count = cat => LIST.filter(a => (cat === 'all' || a.cat === cat) && st.done[a.id]).length,
-      chips = [{ id: 'all', icon: '🏆', name: 'Tous' }, ...CATS, { id: 'recent', icon: '⭐', name: 'Récents' }];
-    let list = ui.cat === 'all' ? LIST : ui.cat === 'recent' ? LIST.filter(a => st.done[a.id]).sort((x, y) => st.done[y.id] - st.done[x.id]).slice(0, 12) : LIST.filter(a => a.cat === ui.cat);
+      chips = [
+        { id: 'all', icon: '🏆', name: 'Tous' },
+        ...CATS,
+        { id: 'recent', icon: '⭐', name: 'Récents' }
+      ];
+    let list =
+      ui.cat === 'all'
+        ? LIST
+        : ui.cat === 'recent'
+          ? LIST.filter(a => st.done[a.id])
+              .sort((x, y) => st.done[y.id] - st.done[x.id])
+              .slice(0, 12)
+          : LIST.filter(a => a.cat === ui.cat);
     // Les succès presque finis d'abord, puis les autres ; les débloqués à la fin (sauf dans « Récents »).
-    if (ui.cat !== 'recent') list = [...list].sort((x, y) => !!st.done[x.id] - !!st.done[y.id] || progress(h, y) / goalOf(y) - progress(h, x) / goalOf(x));
+    if (ui.cat !== 'recent')
+      list = [...list].sort(
+        (x, y) => !!st.done[x.id] - !!st.done[y.id] || progress(h, y) / goalOf(y) - progress(h, x) / goalOf(x)
+      );
     return (
       '<div class="ach-chips">' +
       chips
         .map(c => {
-          const total = c.id === 'all' ? LIST.length : c.id === 'recent' ? 0 : LIST.filter(a => a.cat === c.id).length;
-          return '<button type="button" class="' + (ui.cat === c.id ? 'on' : '') + '" data-action="achCat" data-cat="' + c.id + '">' + c.icon + ' ' + esc(c.name) + (total ? ' <small>' + count(c.id) + '/' + total + '</small>' : '') + '</button>';
+          const total =
+            c.id === 'all' ? LIST.length : c.id === 'recent' ? 0 : LIST.filter(a => a.cat === c.id).length;
+          return (
+            '<button type="button" class="' +
+            (ui.cat === c.id ? 'on' : '') +
+            '" data-action="achCat" data-cat="' +
+            c.id +
+            '">' +
+            c.icon +
+            ' ' +
+            esc(c.name) +
+            (total ? ' <small>' + count(c.id) + '/' + total + '</small>' : '') +
+            '</button>'
+          );
         })
         .join('') +
-      '</div><div class="ach-list">' + (list.length ? list.map(a => card(h, a)).join('') : '<p class="muted">Aucun succès débloqué pour l’instant.</p>') + '</div>'
+      '</div><div class="ach-list">' +
+      (list.length
+        ? list.map(a => card(h, a)).join('')
+        : '<p class="muted">Aucun succès débloqué pour l’instant.</p>') +
+      '</div>'
     );
   }
   const GROUPS = [
@@ -611,12 +1630,26 @@
       seen = all.filter(b => st.best[b.key]?.[0]).length,
       won = all.filter(b => killed(h, b.key)).length;
     return (
-      '<p class="ach-summary">Découverts <b>' + seen + ' / ' + all.length + '</b> · Vaincus <b>' + won + ' / ' + all.length + '</b> <span class="muted">— une créature est découverte quand tu la croises de près.</span></p>' +
+      '<p class="ach-summary">Découverts <b>' +
+      seen +
+      ' / ' +
+      all.length +
+      '</b> · Vaincus <b>' +
+      won +
+      ' / ' +
+      all.length +
+      '</b> <span class="muted">— une créature est découverte quand tu la croises de près.</span></p>' +
       GROUPS.map(([g, label]) => {
         const list = all.filter(b => b.group === g),
           n = list.filter(b => st.best[b.key]?.[0]).length;
         return (
-          '<h3 class="ach-group">' + label + ' <small>' + n + ' / ' + list.length + '</small></h3><div class="beast-grid">' +
+          '<h3 class="ach-group">' +
+          label +
+          ' <small>' +
+          n +
+          ' / ' +
+          list.length +
+          '</small></h3><div class="beast-grid">' +
           list
             .map(b => {
               const rec = st.best[b.key],
@@ -624,10 +1657,28 @@
                 img = portrait(b),
                 won = rec?.[1] || 0;
               return (
-                '<div class="beast-card' + (won ? ' killed' : known ? ' seen' : ' unknown') + '" title="' + (known ? esc(b.name + ' — ' + b.where) : 'Créature inconnue') + '">' +
-                (img ? '<img class="beast-img" alt="" src="' + img + '">' : '<span class="beast-img">❓</span>') +
-                '<b>' + (known ? esc(b.name) : '???') + '</b><small>' + (known ? esc(b.where) : 'Pas encore croisée') + '</small>' +
-                '<span class="beast-kills">' + (won ? '⚔️ ' + won.toLocaleString('fr-FR') + (rec[2] ? ' · ⭐ ' + rec[2] + ' élite' + (rec[2] > 1 ? 's' : '') : '') : known ? 'Découverte' : '') + '</span></div>'
+                '<div class="beast-card' +
+                (won ? ' killed' : known ? ' seen' : ' unknown') +
+                '" title="' +
+                (known ? esc(b.name + ' — ' + b.where) : 'Créature inconnue') +
+                '">' +
+                (img
+                  ? '<img class="beast-img" alt="" src="' + img + '">'
+                  : '<span class="beast-img">❓</span>') +
+                '<b>' +
+                (known ? esc(b.name) : '???') +
+                '</b><small>' +
+                (known ? esc(b.where) : 'Pas encore croisée') +
+                '</small>' +
+                '<span class="beast-kills">' +
+                (won
+                  ? '⚔️ ' +
+                    won.toLocaleString('fr-FR') +
+                    (rec[2] ? ' · ⭐ ' + rec[2] + ' élite' + (rec[2] > 1 ? 's' : '') : '')
+                  : known
+                    ? 'Découverte'
+                    : '') +
+                '</span></div>'
               );
             })
             .join('') +
@@ -641,17 +1692,42 @@
       mine = TITLES.filter(a => st.done[a.id]);
     return (
       '<p class="muted">Ton titre s’affiche au-dessus de ton personnage, pour tous les joueurs du groupe.</p><div class="ach-titles">' +
-      '<button type="button" class="' + (!st.title ? 'on' : '') + '" data-action="achTitle" data-title="none">Aucun titre</button>' +
-      mine.map(a => '<button type="button" class="' + (st.title === a.id ? 'on' : '') + '" data-action="achTitle" data-title="' + a.id + '">« ' + esc(a.reward.title) + ' »<small>' + esc(a.name) + '</small></button>').join('') +
+      '<button type="button" class="' +
+      (!st.title ? 'on' : '') +
+      '" data-action="achTitle" data-title="none">Aucun titre</button>' +
+      mine
+        .map(
+          a =>
+            '<button type="button" class="' +
+            (st.title === a.id ? 'on' : '') +
+            '" data-action="achTitle" data-title="' +
+            a.id +
+            '">« ' +
+            esc(a.reward.title) +
+            ' »<small>' +
+            esc(a.name) +
+            '</small></button>'
+        )
+        .join('') +
       '</div>' +
       (TITLES.length > mine.length
-        ? '<h3 class="ach-group">À débloquer</h3><div class="ach-titles locked">' + TITLES.filter(a => !st.done[a.id]).map(a => '<span>🔒 « ' + esc(a.reward.title) + ' »<small>' + esc(a.name) + '</small></span>').join('') + '</div>'
+        ? '<h3 class="ach-group">À débloquer</h3><div class="ach-titles locked">' +
+          TITLES.filter(a => !st.done[a.id])
+            .map(a => '<span>🔒 « ' + esc(a.reward.title) + ' »<small>' + esc(a.name) + '</small></span>')
+            .join('') +
+          '</div>'
         : '')
     );
   }
   const isOpen = () => modalOpen() && !!document.querySelector('#window .ach-panel');
   let shown = '';
-  const signature = () => JSON.stringify([stateOf(game.hero).done, stateOf(game.hero).title, ui, ui.tab === 'succes' ? stateOf(game.hero).s : Object.keys(stateOf(game.hero).best).length]);
+  const signature = () =>
+    JSON.stringify([
+      stateOf(game.hero).done,
+      stateOf(game.hero).title,
+      ui,
+      ui.tab === 'succes' ? stateOf(game.hero).s : Object.keys(stateOf(game.hero).best).length
+    ]);
   function render() {
     if (!isOpen()) return;
     shown = signature();
@@ -666,9 +1742,32 @@
     const scroll = document.querySelector('#window .ach-scroll')?.scrollTop || 0;
     showPanel(
       '<div class="rpg-head"><h2>⟦menu_achievements⟧ Succès & collections</h2></div><div class="rpg-paper ach-panel">' +
-        '<div class="ach-top"><div class="ach-total"><b>' + done + ' / ' + LIST.length + '</b> succès · <b>' + points(h) + '</b> points</div><div class="ach-bar big"><i style="width:' + Math.round((100 * done) / LIST.length) + '%"></i></div></div>' +
-        '<div class="prof-tabs">' + tabs.map(([id, label]) => '<button type="button" class="' + (ui.tab === id ? 'on' : '') + '" data-action="achTab" data-tab="' + id + '">' + label + '</button>').join('') + '</div>' +
-        '<div class="ach-scroll">' + (ui.tab === 'bestiaire' ? tabBestiaire(h) : ui.tab === 'titres' ? tabTitres(h) : tabSucces(h)) + '</div></div>'
+        '<div class="ach-top"><div class="ach-total"><b>' +
+        done +
+        ' / ' +
+        LIST.length +
+        '</b> succès · <b>' +
+        points(h) +
+        '</b> points</div><div class="ach-bar big"><i style="width:' +
+        Math.round((100 * done) / LIST.length) +
+        '%"></i></div></div>' +
+        '<div class="prof-tabs">' +
+        tabs
+          .map(
+            ([id, label]) =>
+              '<button type="button" class="' +
+              (ui.tab === id ? 'on' : '') +
+              '" data-action="achTab" data-tab="' +
+              id +
+              '">' +
+              label +
+              '</button>'
+          )
+          .join('') +
+        '</div>' +
+        '<div class="ach-scroll">' +
+        (ui.tab === 'bestiaire' ? tabBestiaire(h) : ui.tab === 'titres' ? tabTitres(h) : tabSucces(h)) +
+        '</div></div>'
     );
     const box = document.querySelector('#window .ach-scroll');
     if (box) box.scrollTop = scroll;

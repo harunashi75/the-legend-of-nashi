@@ -5,7 +5,11 @@ import { deepFreeze } from '../freeze.js';
 export const MAX_LEVEL = 60;
 // Trois statistiques principales, données par chaque équipement classique (pas l'artéfact).
 export const PRIMARY_STATS = deepFreeze({
-  attack: { icon: '⟦st_attack⟧', name: 'Attaque', desc: 'Augmente les dégâts des attaques et compétences offensives.' },
+  attack: {
+    icon: '⟦st_attack⟧',
+    name: 'Attaque',
+    desc: 'Augmente les dégâts des attaques et compétences offensives.'
+  },
   defense: { icon: '⟦st_defense⟧', name: 'Défense', desc: 'Réduit les dégâts reçus.' },
   vitality: { icon: '⟦st_vitality⟧', name: 'Vitalité', desc: 'Augmente les PV maximum.' }
 });
@@ -14,8 +18,16 @@ export const PRIMARY_KEYS = Object.freeze(Object.keys(PRIMARY_STATS));
 export const SECONDARY_STATS = deepFreeze({
   power: { icon: '⟦st_power⟧', name: 'Puissance', desc: 'Augmente tous les dégâts infligés.' },
   crit: { icon: '⟦st_crit⟧', name: 'Critique', desc: 'Augmente les chances de coup critique.' },
-  haste: { icon: '⟦st_haste⟧', name: 'Célérité', desc: 'Augmente la vitesse d’attaque et réduit les temps de recharge.' },
-  mastery: { icon: '⟦st_mastery⟧', name: 'Maîtrise', desc: 'Augmente les dégâts des compétences offensives.' },
+  haste: {
+    icon: '⟦st_haste⟧',
+    name: 'Célérité',
+    desc: 'Augmente la vitesse d’attaque et réduit les temps de recharge.'
+  },
+  mastery: {
+    icon: '⟦st_mastery⟧',
+    name: 'Maîtrise',
+    desc: 'Augmente les dégâts des compétences offensives.'
+  },
   healing: { icon: '⟦st_healing⟧', name: 'Soin', desc: 'Augmente les soins effectués.' },
   resist: { icon: '⟦st_resist⟧', name: 'Résistance', desc: 'Réduit les dégâts reçus.' }
 });

@@ -215,7 +215,9 @@
   pointer-events: none;
 }
 #skills .skill.skill-boosted {
-  box-shadow: 0 0 14px #ffd76a, inset 0 0 10px #ffd76a66;
+  box-shadow:
+    0 0 14px #ffd76a,
+    inset 0 0 10px #ffd76a66;
 }
 #skills .skill.skill-boosted .skill-badge {
   border-color: #ffd76a;

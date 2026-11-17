@@ -175,7 +175,9 @@
   background:
     radial-gradient(ellipse at 25% 30%, rgba(255, 200, 120, 0.14), transparent 55%),
     linear-gradient(180deg, rgba(42, 28, 18, 0.95), rgba(16, 10, 6, 0.97));
-  box-shadow: 0 0 0 2px #0c0805, 0 10px 30px rgba(0, 0, 0, 0.55);
+  box-shadow:
+    0 0 0 2px #0c0805,
+    0 10px 30px rgba(0, 0, 0, 0.55);
 }
 #slotMenu .look-creator h3 {
   margin: 0 0 12px;
@@ -215,7 +217,9 @@
 #title #slotMenu p.look-summary,
 #title #slotMenu p.look-note {
   margin: 0;
-  font: calc(13px * var(--font-scale)) system-ui, sans-serif;
+  font:
+    calc(13px * var(--font-scale)) system-ui,
+    sans-serif;
   letter-spacing: 0;
   color: #e8d9b8;
   text-align: center;
@@ -239,7 +243,9 @@
   align-items: center;
 }
 #slotMenu .look-title {
-  font: 600 calc(13px * var(--font-scale)) system-ui, sans-serif;
+  font:
+    600 calc(13px * var(--font-scale)) system-ui,
+    sans-serif;
   color: var(--rpg-muted, #b8a483);
 }
 #slotMenu .look-options {
@@ -271,7 +277,9 @@
 }
 #title #slotMenu button.look-swatch.on {
   border-color: #f6dc98;
-  box-shadow: 0 0 0 2px #f6dc98, inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 0 0 2px #f6dc98,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 #title #slotMenu button.slot-join-look {
   margin-top: 6px;

@@ -95,8 +95,12 @@
   // (le plus proche pour la poursuite, un héros au hasard pour chaque grande attaque).
   let TP = null;
   // Un invité déconnecté (place réservée) ne combat pas, ne compte pas et n'est pas visé.
-  const fighters = () => game.heroes.filter(hero => !hero.away && !hero.player.dead && insideArena(hero.player.x, hero.player.y, 0));
-  const inArena = () => game.heroes.filter(hero => !hero.away && insideArena(hero.player.x, hero.player.y, 0));
+  const fighters = () =>
+    game.heroes.filter(
+      hero => !hero.away && !hero.player.dead && insideArena(hero.player.x, hero.player.y, 0)
+    );
+  const inArena = () =>
+    game.heroes.filter(hero => !hero.away && insideArena(hero.player.x, hero.player.y, 0));
   function nearestFighter(b) {
     let best = null,
       bestD = Infinity;
@@ -128,7 +132,11 @@
     const p = hero.player;
     if (!run?.boss || p.dead) return 0;
     const raw = h() * mult,
-      n = CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(run.boss, raw, { magic: !!opts.magic }, hero), run.boss, hero);
+      n = CANAAN_COMBAT.hurt(
+        CANAAN_COMBAT.incoming(run.boss, raw, { magic: !!opts.magic }, hero),
+        run.boss,
+        hero
+      );
     if (n > 0) {
       if (opts.bleed) addDot('bleed', 0.22, 5, hero);
       if (opts.burn) addDot('burn', 0.25, 4, hero);
@@ -205,7 +213,9 @@
   function slowFactor(b) {
     const t = time / 60;
     return (
-      (b._rubisSlowUntil > t ? 0.75 : 1) * (b.v1746_slow > 0 ? 0.75 : 1) * (b._clsSlow && b._clsSlow.until > t ? 0.85 : 1)
+      (b._rubisSlowUntil > t ? 0.75 : 1) *
+      (b.v1746_slow > 0 ? 0.75 : 1) *
+      (b._clsSlow && b._clsSlow.until > t ? 0.85 : 1)
     );
   }
   function shoot(x, y, a, speed, mult, color, opts = {}) {
@@ -841,9 +851,15 @@
       const before = p.hp;
       p.hp = Math.min(p.mhp, p.hp + p.mhp * RECOVERY);
       const mana = CANAAN_RUBIS.restoreMana(p.mmp * RECOVERY, hero);
-      float(p.x, p.y - 40, '+' + Math.round(p.hp - before) + ' PV · +' + Math.round(mana) + ' mana', '#8fe3ae');
+      float(
+        p.x,
+        p.y - 40,
+        '+' + Math.round(p.hp - before) + ' PV · +' + Math.round(mana) + ' mana',
+        '#8fe3ae'
+      );
     }
-    if (!run.banner || run.banner.wave !== wave) run.banner = { text: m.t + ' vaincu !', until: run.clock + 4, wave };
+    if (!run.banner || run.banner.wave !== wave)
+      run.banner = { text: m.t + ' vaincu !', until: run.clock + 4, wave };
     chat('Arène', m.t + ' est vaincu ! Un Rubis pour chaque héros de l’arène.');
     setGate(false);
     if (wave >= WAVES) {
@@ -855,7 +871,15 @@
         // Butin de prestige du dernier boss : 5 % de chances d'un objet Légendaire du niveau du héros.
         if (prestigeRoll('arenaFinal')) {
           const item = giveGear(clampLevel(hero.level), 'arena', 'Légendaire', hero);
-          if (item) chat('Arène', '🌟 ' + (hero.name || 'Le héros') + ' remporte un objet LÉGENDAIRE : ' + gearDisplayName(item) + ' !');
+          if (item)
+            chat(
+              'Arène',
+              '🌟 ' +
+                (hero.name || 'Le héros') +
+                ' remporte un objet LÉGENDAIRE : ' +
+                gearDisplayName(item) +
+                ' !'
+            );
         }
         if (CANAAN_RUBIS.missing(hero).length) {
           // L'hôte choisit son Rubis final ; un allié reçoit un Rubis qui lui manque.
@@ -863,7 +887,8 @@
             rec.pendingChoice = true;
             later(2.5, () => openFinalChoice());
           } else {
-            const pick = CANAAN_RUBIS.missing(hero)[Math.floor(Math.random() * CANAAN_RUBIS.missing(hero).length)];
+            const pick =
+              CANAAN_RUBIS.missing(hero)[Math.floor(Math.random() * CANAAN_RUBIS.missing(hero).length)];
             CANAAN_RUBIS.grant(pick.id, hero);
             canaanLootNotice(hero, '🏆 Rubis de la victoire : ' + pick.name);
           }
@@ -985,7 +1010,10 @@
         // Chaque héros n'est blessé qu'une fois par charge.
         b.dash.hits ??= [];
         for (const hero of fighters())
-          if (!b.dash.hits.includes(hero) && Math.hypot(hero.player.x - b.x, hero.player.y - b.y) < b.r + 34) {
+          if (
+            !b.dash.hits.includes(hero) &&
+            Math.hypot(hero.player.x - b.x, hero.player.y - b.y) < b.r + 34
+          ) {
             b.dash.hits.push(hero);
             swing(b);
             if (hero === game.hero) shake = 12;
@@ -1173,7 +1201,11 @@
         ring.hits ??= [];
         for (const hero of fighters()) {
           const p = hero.player;
-          if (ring.hits.includes(hero) || Math.abs(Math.hypot(p.x - ring.x, p.y - ring.y) - ring.r) >= ring.w / 2 + 8) continue;
+          if (
+            ring.hits.includes(hero) ||
+            Math.abs(Math.hypot(p.x - ring.x, p.y - ring.y) - ring.r) >= ring.w / 2 + 8
+          )
+            continue;
           ring.hits.push(hero);
           strike(ring.mult, {}, hero);
         }
@@ -1197,7 +1229,15 @@
         const hz = run.hazards[i];
         if (hz.chase) {
           // Une zone électrique poursuit le héros le plus proche d'elle.
-          const prey = fighters().reduce((a, o) => (!a || Math.hypot(o.player.x - hz.x, o.player.y - hz.y) < Math.hypot(a.player.x - hz.x, a.player.y - hz.y) ? o : a), null);
+          const prey = fighters().reduce(
+            (a, o) =>
+              !a ||
+              Math.hypot(o.player.x - hz.x, o.player.y - hz.y) <
+                Math.hypot(a.player.x - hz.x, a.player.y - hz.y)
+                ? o
+                : a,
+            null
+          );
           if (prey) {
             const q = prey.player,
               d = Math.hypot(q.x - hz.x, q.y - hz.y) || 1;
@@ -1269,7 +1309,8 @@
           m.shotClock = 2.2;
           m.cd += 1;
           const prey = nearestFighter(m);
-          if (prey) shoot(m.x, m.y - 30, Math.atan2(prey.player.y - m.y, prey.player.x - m.x), 4.6, 1.2, COLORS.void);
+          if (prey)
+            shoot(m.x, m.y - 30, Math.atan2(prey.player.y - m.y, prey.player.x - m.x), 4.6, 1.2, COLORS.void);
         }
         m.cd = Math.max(0, m.cd - dt);
       }
@@ -1589,7 +1630,9 @@
     if (mine.curse > run.clock) status.push('☠ Soins −60 % ' + Math.ceil(mine.curse - run.clock) + ' s');
     for (const [kind, until] of mine.dots)
       if (kind !== 'curse')
-        status.push((kind === 'bleed' ? '🩸 Saignement ' : '🔥 Brûlure ') + Math.ceil(until - run.clock) + ' s');
+        status.push(
+          (kind === 'bleed' ? '🩸 Saignement ' : '🔥 Brûlure ') + Math.ceil(until - run.clock) + ' s'
+        );
     status.forEach((s, k) => text(s, W / 2, H - 170 - k * 20, 14, '#ffb0a0', 4));
     c.restore();
   }
@@ -1611,11 +1654,16 @@
     if (run.remote) return run.downs || [];
     return inArena()
       .filter(hero => hero.player.dead)
-      .map(hero => ({ x: hero.player.x, y: hero.player.y, p: (run.revives.get(hero) || 0) / REVIVE.seconds }));
+      .map(hero => ({
+        x: hero.player.x,
+        y: hero.player.y,
+        p: (run.revives.get(hero) || 0) / REVIVE.seconds
+      }));
   }
   const pick = (o, keys) => {
     const out = {};
-    for (const k of keys) if (o[k] !== undefined) out[k] = typeof o[k] === 'number' ? Math.round(o[k] * 100) / 100 : o[k];
+    for (const k of keys)
+      if (o[k] !== undefined) out[k] = typeof o[k] === 'number' ? Math.round(o[k] * 100) / 100 : o[k];
     return out;
   };
   // Ce qu'un invité doit dessiner : tout sauf les fonctions et les héros visés (idOf : identifiant réseau d'un héros).
@@ -1635,8 +1683,35 @@
       clock: Math.round(run.clock * 100) / 100,
       cheerUntil: run.cheerUntil,
       gate: run.phase === 'fight',
-      boss: run.boss ? { k: run.boss.netId, shieldHp: run.boss.shieldHp || 0, parryUntil: run.boss.parryUntil || 0, phase: run.boss.phase, wave: run.boss.wave } : null,
-      fx: run.fx.slice(0, 60).map(fx => pick(fx, ['shape', 'x', 'y', 'a', 'w', 'r', 'len', 't', 'delay', 'color', 'lock', 'auto', 'meteor', 'crystal'])),
+      boss: run.boss
+        ? {
+            k: run.boss.netId,
+            shieldHp: run.boss.shieldHp || 0,
+            parryUntil: run.boss.parryUntil || 0,
+            phase: run.boss.phase,
+            wave: run.boss.wave
+          }
+        : null,
+      fx: run.fx
+        .slice(0, 60)
+        .map(fx =>
+          pick(fx, [
+            'shape',
+            'x',
+            'y',
+            'a',
+            'w',
+            'r',
+            'len',
+            't',
+            'delay',
+            'color',
+            'lock',
+            'auto',
+            'meteor',
+            'crystal'
+          ])
+        ),
       rings: run.rings.slice(0, 20).map(r => pick(r, ['x', 'y', 'r', 'w', 'speed', 'max', 'color'])),
       hazards: run.hazards.slice(0, 40).map(hz => pick(hz, ['x', 'y', 'r', 'until', 'color', 'kind'])),
       shots: run.shots.slice(0, 60).map(sh => pick(sh, ['x', 'y', 'vx', 'vy', 'r', 'color'])),
@@ -1679,7 +1754,13 @@
     if (v.boss) {
       const b = game.world.monsters.find(m => m.k === v.boss.k);
       if (b) {
-        Object.assign(b, { shieldHp: +v.boss.shieldHp || 0, parryUntil: +v.boss.parryUntil || 0, phase: v.boss.phase | 0, wave, def: BOSSES[wave - 1] });
+        Object.assign(b, {
+          shieldHp: +v.boss.shieldHp || 0,
+          parryUntil: +v.boss.parryUntil || 0,
+          phase: v.boss.phase | 0,
+          wave,
+          def: BOSSES[wave - 1]
+        });
         run.boss = b;
       }
     }
@@ -1809,13 +1890,17 @@
     // Héros encore debout dans le colisée.
     standing: () => (active() ? fighters().length : 0),
     // Malédiction : soins −60 % pour le héros maudit (l'hôte par défaut).
-    healFactor: (hero = game.hero) => (active() && run.curse instanceof Map && (run.curse.get(hero) || 0) > run.clock ? 0.4 : 1),
+    healFactor: (hero = game.hero) =>
+      active() && run.curse instanceof Map && (run.curse.get(hero) || 0) > run.clock ? 0.4 : 1,
     // Malus subis dans l'Arène (barre des effets) : secondes restantes de la malédiction et des effets sur la durée.
     effects() {
       if (!run || (!run.remote && !active())) return { curse: 0, dots: [] };
       const s = myStatus(),
         c = run.clock || 0;
-      return { curse: Math.max(0, (s.curse || 0) - c), dots: (s.dots || []).map(([k, u]) => [k, Math.max(0, u - c)]).filter(d => d[1] > 0) };
+      return {
+        curse: Math.max(0, (s.curse || 0) - c),
+        dots: (s.dots || []).map(([k, u]) => [k, Math.max(0, u - c)]).filter(d => d[1] > 0)
+      };
     },
     cheer: () => (run && run.cheerUntil > run.clock ? Math.min(1, run.cheerUntil - run.clock) : 0),
     entities: () => (run ? run.shots : []),

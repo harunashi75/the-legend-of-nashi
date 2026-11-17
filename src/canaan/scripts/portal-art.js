@@ -11,7 +11,18 @@
     AH = 132,
     CX = 90,
     BASE = 112;
-  const KEYS = ['terriers', 'mine', 'eclipse', 'penitents', 'forge', 'fosse', 'bastion', 'continuum', 'seraphin', 'celestia'];
+  const KEYS = [
+    'terriers',
+    'mine',
+    'eclipse',
+    'penitents',
+    'forge',
+    'fosse',
+    'bastion',
+    'continuum',
+    'seraphin',
+    'celestia'
+  ];
   const THEME = {
     terriers: { rune: '#a3c7ff', flame: ['#e5522e', '#f9a640', '#fff1b5'], banner: ['#6b4a2e', '#c9a46e'] },
     mine: { rune: '#67d8ee', flame: ['#e5822e', '#f9c640', '#fff6c5'], banner: ['#3d4652', '#9fe8ff'] },
@@ -45,17 +56,49 @@
   };
   // Habillage de chaque région (indice des ZONES) : herbe, détails au pied et sur les corniches.
   const DRESS = [
-    { grass: ['#b4e27a', '#7cbc52', '#4e8c38', '#2f6426'], bits: ['#fff4d0', '#f6c5e2', '#f8d96a', '#d9c7ff'], moss: true },
-    { grass: ['#8cc45c', '#5a9a3e', '#3a7430', '#24501e'], bits: ['#e85a48', '#fff1d8'], moss: true, shrooms: true },
-    { grass: ['#9cbc78', '#6e9454', '#4a6c3c', '#30482a'], bits: ['#8a5a32', '#c8a070'], moss: true, reeds: true, stain: '#2c4a2a' },
-    { grass: ['#b8b45a', '#8c8a3e', '#62622c', '#42421e'], bits: ['#f6c25a', '#ea8a36', '#c85a26', '#d9542f'], leaves: true },
+    {
+      grass: ['#b4e27a', '#7cbc52', '#4e8c38', '#2f6426'],
+      bits: ['#fff4d0', '#f6c5e2', '#f8d96a', '#d9c7ff'],
+      moss: true
+    },
+    {
+      grass: ['#8cc45c', '#5a9a3e', '#3a7430', '#24501e'],
+      bits: ['#e85a48', '#fff1d8'],
+      moss: true,
+      shrooms: true
+    },
+    {
+      grass: ['#9cbc78', '#6e9454', '#4a6c3c', '#30482a'],
+      bits: ['#8a5a32', '#c8a070'],
+      moss: true,
+      reeds: true,
+      stain: '#2c4a2a'
+    },
+    {
+      grass: ['#b8b45a', '#8c8a3e', '#62622c', '#42421e'],
+      bits: ['#f6c25a', '#ea8a36', '#c85a26', '#d9542f'],
+      leaves: true
+    },
     { grass: ['#fbe2b4', '#ecc88e', '#d2a86c', '#a8804c'], bits: ['#c8a06a', '#8a6a44'], sand: true },
-    { grass: ['#8ae0c8', '#4eb4a0', '#2e8a80', '#1e5a5e'], bits: ['#c8fff4', '#b48aff', '#7ae8d8'], crystals: true, moss: true }
+    {
+      grass: ['#8ae0c8', '#4eb4a0', '#2e8a80', '#1e5a5e'],
+      bits: ['#c8fff4', '#b48aff', '#7ae8d8'],
+      crystals: true,
+      moss: true
+    }
   ];
   const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => v / 16);
   const bay = (x, y) => BAYER[(y & 3) * 4 + (x & 3)];
   const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-  const hex = c => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  const hex = c =>
+    '#' +
+    c
+      .map(v =>
+        Math.max(0, Math.min(255, Math.round(v)))
+          .toString(16)
+          .padStart(2, '0')
+      )
+      .join('');
   const mixc = (a, b, t) => {
     const A = rgb(a),
       B = rgb(b);
@@ -129,7 +172,8 @@
   function archPts(cx, yb, hw, h) {
     const pts = [[cx - hw, yb]],
       yc = yb - h + hw;
-    for (let a = 0; a <= 16; a++) pts.push([cx - Math.cos((a / 16) * Math.PI) * hw, yc - Math.sin((a / 16) * Math.PI) * hw]);
+    for (let a = 0; a <= 16; a++)
+      pts.push([cx - Math.cos((a / 16) * Math.PI) * hw, yc - Math.sin((a / 16) * Math.PI) * hw]);
     pts.push([cx + hw, yb]);
     return pts;
   }
@@ -139,7 +183,13 @@
     const yc = yb - h + hw;
     for (let a = 1; a < 9; a++) {
       const ang = (a / 9) * Math.PI;
-      k.line(cx - Math.cos(ang) * hw, yc - Math.sin(ang) * hw, cx - Math.cos(ang) * (hw + t), yc - Math.sin(ang) * (hw + t), R[3]);
+      k.line(
+        cx - Math.cos(ang) * hw,
+        yc - Math.sin(ang) * hw,
+        cx - Math.cos(ang) * (hw + t),
+        yc - Math.sin(ang) * (hw + t),
+        R[3]
+      );
     }
     for (let yy = yc; yy < yb; yy += 5) {
       k.rect(cx - hw - t, yy, t, 1, R[3]);
@@ -254,7 +304,12 @@
       rock(k, CX + 23, b - 26, 9, 8, C.mossy, 6, G);
       rock(k, CX, b - 42, 16, 7, C.grey, 7, G);
       // Racines qui pendent du linteau.
-      for (const [rx, len] of [[-8, 7], [-3, 4], [4, 8], [9, 5]]) {
+      for (const [rx, len] of [
+        [-8, 7],
+        [-3, 4],
+        [4, 8],
+        [9, 5]
+      ]) {
         k.rect(CX + rx, b - 37, 1, len, C.wood[3]);
         k.px(CX + rx + 1, b - 37 + len - 1, C.wood[3]);
       }
@@ -315,7 +370,13 @@
         k.disc(wx + ox, b - 3, 2, C.iron[3]);
         k.px(wx + ox, b - 3, C.iron[1]);
       }
-      for (const [ox, h] of [[-7, 4], [-3, 6], [1, 5], [5, 4]]) crystal(k, wx + ox, b - 14, h, ['#e0fbff', '#7de0ff', '#3a9ac8']);
+      for (const [ox, h] of [
+        [-7, 4],
+        [-3, 6],
+        [1, 5],
+        [5, 4]
+      ])
+        crystal(k, wx + ox, b - 14, h, ['#e0fbff', '#7de0ff', '#3a9ac8']);
       e.glint(wx - 1, b - 17, 10, '#7de0ff');
       e.light(wx, b - 16, 70, '#7de0ff');
       // Pioche posée contre la roche.
@@ -342,8 +403,22 @@
       k.rect(CX - 46, et, 92, 1, R[0]);
       k.rect(CX - 46, et + 8, 92, 1, R[4]);
       for (let x = CX - 42; x < CX + 42; x += 6) k.rect(x, et + 3, 3, 3, R[3]);
-      k.poly([[CX - 48, et], [CX, et - 24], [CX + 48, et]], R[1]);
-      k.poly([[CX - 40, et - 2], [CX, et - 19], [CX + 40, et - 2]], R[3]);
+      k.poly(
+        [
+          [CX - 48, et],
+          [CX, et - 24],
+          [CX + 48, et]
+        ],
+        R[1]
+      );
+      k.poly(
+        [
+          [CX - 40, et - 2],
+          [CX, et - 19],
+          [CX + 40, et - 2]
+        ],
+        R[3]
+      );
       k.line(CX - 48, et, CX, et - 24, R[0]);
       k.disc(CX, et - 9, 6, '#ffcc55');
       k.disc(CX + 3, et - 10, 5, '#160c22');
@@ -388,7 +463,8 @@
       k.rect(CX - 22, b - 50, 44, 2, C.iron[0]);
       k.rect(CX - 22, b - 50, 2, 50, C.iron[1]);
       k.rect(CX + 20, b - 50, 2, 50, C.iron[3]);
-      for (let y = b - 44; y < b; y += 8) for (const s of [-1, 1]) k.px(CX + s * 19 - (s > 0 ? 1 : 0), y, C.iron[0]);
+      for (let y = b - 44; y < b; y += 8)
+        for (const s of [-1, 1]) k.px(CX + s * 19 - (s > 0 ? 1 : 0), y, C.iron[0]);
       k.rect(CX - 17, b - 44, 34, 44, '#1a0806');
       k.rect(CX - 15, b - 42, 30, 42, '#0c0404');
       e.portal(CX, b - 22, 13, 20, '#ff6a1f');
@@ -426,7 +502,11 @@
       k.rect(CX - 52, b - 70, 104, 1, C.iron[0]);
       k.rect(CX - 52, b - 66, 104, 1, C.iron[4]);
       // Menhirs du fond.
-      for (const [ox, h] of [[-30, 22], [30, 20], [0, 16]]) {
+      for (const [ox, h] of [
+        [-30, 22],
+        [30, 20],
+        [0, 16]
+      ]) {
         masonry(k, CX + ox - 5, cy - 8 - h, 10, h, C.mossy, 10, 6, 50 + ox);
         k.rect(CX + ox - 4, cy - 9 - h, 8, 1, C.mossy[1]);
       }
@@ -437,7 +517,9 @@
       e.portal(CX, cy, 31, 10);
       // Premier plan : margelle avant et chaînes qui plongent.
       ring(f, CX, cy, 42, 16, 33, 11, R, 1);
-      for (const ox of [-16, 16]) for (let y = b - 64; y < cy + 2; y += 3) f.rect(CX + ox + ((y >> 2) % 2), y, 2, 2, C.iron[(y >> 1) % 2 ? 1 : 2]);
+      for (const ox of [-16, 16])
+        for (let y = b - 64; y < cy + 2; y += 3)
+          f.rect(CX + ox + ((y >> 2) % 2), y, 2, 2, C.iron[(y >> 1) % 2 ? 1 : 2]);
       for (const s of [-1, 1]) {
         torchPost(f, e, CX + s * 58, b + 6, 20, th.flame, s + 5);
         e.light(CX + s * 58, b - 18, 110, th.flame[1]);
@@ -489,7 +571,16 @@
             const x = CX + s * (9 + j * 5),
               y = top - 74 - j * 3 + r * 6 + Math.round(j * j * 0.25),
               h = 10 - r * 2 + (j === 5 - r ? 3 : 0);
-            k.poly([[x - 2, y], [x + 3, y], [x + 3, y + h - 2], [x + 0.5, y + h], [x - 2, y + h - 2]], R[r]);
+            k.poly(
+              [
+                [x - 2, y],
+                [x + 3, y],
+                [x + 3, y + h - 2],
+                [x + 0.5, y + h],
+                [x - 2, y + h - 2]
+              ],
+              R[r]
+            );
             k.rect(x + (s > 0 ? 2 : -2), y + 1, 1, h - 3, R[Math.min(4, r + 2)]);
             k.px(x, y + 1, '#ffffff');
           }
@@ -510,7 +601,16 @@
         R = C.night,
         top = steps(k, CX, b, 92, 2, R),
         cy = top - 40;
-      for (const s of [-1, 1]) k.poly([[CX + s * 20, top], [CX + s * 40, top], [CX + s * 34, top - 14], [CX + s * 26, top - 14]], R[2]);
+      for (const s of [-1, 1])
+        k.poly(
+          [
+            [CX + s * 20, top],
+            [CX + s * 40, top],
+            [CX + s * 34, top - 14],
+            [CX + s * 26, top - 14]
+          ],
+          R[2]
+        );
       ring(k, CX, cy, 38, 42, 29, 33, R, 0);
       k.g.fillStyle = C.void;
       fillEllipse(k, CX, cy, 29, 33);
@@ -523,7 +623,15 @@
         e.glint(x, y, 5, '#fff0a8');
       }
       e.portal(CX, cy, 27, 31);
-      k.poly([[CX - 8, cy - 44], [CX, cy - 52], [CX + 8, cy - 44], [CX, cy - 47]], C.gold[1]);
+      k.poly(
+        [
+          [CX - 8, cy - 44],
+          [CX, cy - 52],
+          [CX + 8, cy - 44],
+          [CX, cy - 47]
+        ],
+        C.gold[1]
+      );
       for (const s of [-1, 1]) {
         const px = CX + s * 56;
         crystal(k, px - 3, b - 1, 9, ['#fff8d0', '#fff0a8', '#c8a838'], -2);
@@ -565,7 +673,8 @@
         banner(k, CX + s * 40 - 6, b - 70, 12, 22, th.banner);
         k.line(CX + s * 8, b - 98, CX - s * 6, b - 84, '#dfe6ee', 2);
         k.px(CX - s * 6, b - 83, C.gold[1]);
-        for (let i = 0; i < 5; i++) k.rect(CX + s * (10 + i * 4), b - 84 - i * 2, 4, 2, i % 2 ? '#6aa04a' : '#4e8a3a');
+        for (let i = 0; i < 5; i++)
+          k.rect(CX + s * (10 + i * 4), b - 84 - i * 2, 4, 2, i % 2 ? '#6aa04a' : '#4e8a3a');
       }
       k.disc(CX, b - 88, 4, C.gold[2]);
       k.px(CX - 1, b - 89, C.gold[0]);
@@ -657,7 +766,7 @@
     g.save();
     g.globalCompositeOperation = 'source-atop';
     for (let i = 0; i < 4; i++) {
-      g.fillStyle = 'rgba(60,30,20,' + (0.07 * (4 - i)) + ')';
+      g.fillStyle = 'rgba(60,30,20,' + 0.07 * (4 - i) + ')';
       g.fillRect(cx - hw - 2 + i * 6, y0, 6, y1 - y0);
       g.fillRect(cx + hw + 2 - (i + 1) * 6, y0, 6, y1 - y0);
     }
@@ -701,7 +810,8 @@
           if (h > 0.8) k.rect(x, y, 1, 1 + Math.floor(h * 3), G[2]);
         } else if (D.leaves && h > 0.7) k.px(x, y - 1, D.bits[Math.floor(h * 13) % D.bits.length]);
         else if (D.sand && h > 0.5) k.rect(x, y - 1 - (h > 0.85 ? 1 : 0), 1, 1 + (h > 0.85 ? 1 : 0), G[1]);
-        else if (D.crystals && h > 0.94) crystal(k, x, y - 1, 3 + Math.floor(h * 3), ['#e8fffa', '#7ae8d8', '#2e8a80']);
+        else if (D.crystals && h > 0.94)
+          crystal(k, x, y - 1, 3 + Math.floor(h * 3), ['#e8fffa', '#7ae8d8', '#2e8a80']);
       }
     // Pied : touffes, fleurs, roseaux, feuilles, congères de sable, cristaux — au premier plan, contourés.
     for (const [x0, x1] of marks.feet) {
@@ -709,14 +819,22 @@
         const h = hash(x, seed + 3),
           y = BASE + 1 + Math.floor(hash(x, seed + 4) * 4);
         if (D.sand) {
-          if (h > 0.55) for (let i = -4; i <= 4; i++) f.rect(x + i, BASE + 2 - Math.round(3 * Math.cos((i / 4) * 1.5)), 1, 4, i < 0 ? G[1] : G[2]);
+          if (h > 0.55)
+            for (let i = -4; i <= 4; i++)
+              f.rect(x + i, BASE + 2 - Math.round(3 * Math.cos((i / 4) * 1.5)), 1, 4, i < 0 ? G[1] : G[2]);
         } else if (D.crystals && h > 0.82) {
           crystal(f, x, y, 5 + Math.floor(h * 6), ['#e8fffa', '#b48aff', '#6a4ab0'], h > 0.9 ? 2 : -1);
         } else if (D.reeds && h > 0.72) {
-          for (const dx of [-1, 1, 2]) f.rect(x + dx, y - 9 - (dx & 1) * 2, 1, 9 + (dx & 1) * 2, G[1 + (dx & 1)]);
+          for (const dx of [-1, 1, 2])
+            f.rect(x + dx, y - 9 - (dx & 1) * 2, 1, 9 + (dx & 1) * 2, G[1 + (dx & 1)]);
           f.rect(x + 1, y - 13, 2, 4, '#7a4a28');
         } else if (D.leaves && h > 0.5) {
-          for (let i = 0; i < 4; i++) f.px(x + Math.floor(hash(i, x) * 6) - 3, y - Math.floor(hash(x, i) * 2), D.bits[(i + x) % D.bits.length]);
+          for (let i = 0; i < 4; i++)
+            f.px(
+              x + Math.floor(hash(i, x) * 6) - 3,
+              y - Math.floor(hash(x, i) * 2),
+              D.bits[(i + x) % D.bits.length]
+            );
         } else if (h > 0.62) {
           tuft(f, x, y, G);
           if (D.shrooms && h > 0.93) {
@@ -748,7 +866,16 @@
       for (let x = -rx; x <= rx; x++) {
         const d = (x * x) / (rx * rx) + (y * y) / 100;
         if (d > 1) continue;
-        const a = d < 0.45 ? 0.3 : d < 0.75 ? (bay(x, y) > (d - 0.45) / 0.3 ? 0.3 : 0.16) : bay(x, y) > (d - 0.75) / 0.25 ? 0.16 : 0;
+        const a =
+          d < 0.45
+            ? 0.3
+            : d < 0.75
+              ? bay(x, y) > (d - 0.45) / 0.3
+                ? 0.3
+                : 0.16
+              : bay(x, y) > (d - 0.75) / 0.25
+                ? 0.16
+                : 0;
         if (!a) continue;
         gk.g.fillStyle = 'rgba(22,16,28,' + a + ')';
         gk.g.fillRect(Math.round(cx + x), BASE + 1 + y, 1, 1);
@@ -777,11 +904,20 @@
         gk.rect(x - 3, y - 1, 3, 1, 'rgba(200,226,236,.5)');
       }
     if (D.sand)
-      for (let y = BASE + 4; y < AH; y += 5) for (let x = 0; x < AW; x++) if (bay(x, y) < 0.12 && Math.abs(Math.sin(x * 0.18 + y)) > 0.6) gk.rect(x, y, 2, 1, 'rgba(255,240,200,.35)');
+      for (let y = BASE + 4; y < AH; y += 5)
+        for (let x = 0; x < AW; x++)
+          if (bay(x, y) < 0.12 && Math.abs(Math.sin(x * 0.18 + y)) > 0.6)
+            gk.rect(x, y, 2, 1, 'rgba(255,240,200,.35)');
   }
 
   // ---------------------------------------------------------------- Tourbillon, engrenages, anneau
-  const tones = col => [mixc(col, '#05030a', 0.78), mixc(col, '#05030a', 0.5), col, mixc(col, '#ffffff', 0.5), mixc(col, '#ffffff', 0.85)];
+  const tones = col => [
+    mixc(col, '#05030a', 0.78),
+    mixc(col, '#05030a', 0.5),
+    col,
+    mixc(col, '#ffffff', 0.5),
+    mixc(col, '#ffffff', 0.85)
+  ];
   function swirl(rx, ry, col) {
     const T = tones(col),
       frames = [],
@@ -923,7 +1059,9 @@
     for (const layer of [k, f]) {
       const img = layer.g.getImageData(0, BASE - 6, AW, 6),
         d = img && img.data;
-      if (d) for (let x = 0; x < AW; x++) for (let y = 0; y < 6; y++) if (d[(y * AW + x) * 4 + 3] > 128) cols[x] = 1;
+      if (d)
+        for (let x = 0; x < AW; x++)
+          for (let y = 0; y < 6; y++) if (d[(y * AW + x) * 4 + 3] > 128) cols[x] = 1;
     }
     const P = {
       cols,
@@ -942,7 +1080,11 @@
       right: x0 + (marks.feet[0]?.[1] ?? AW - 20) * U,
       open: { x: x0 + open.ax * U, y: y0 + open.ay * U, rx: open.rx, ry: open.ry, col: open.col },
       swirl: swirl(open.rx, open.ry, open.col),
-      ring: ringFx && { img: ringFx.img, x: x0 + (ringFx.ax - ringFx.rx - 2) * U, y: y0 + (ringFx.ay - ringFx.ry - 2) * U },
+      ring: ringFx && {
+        img: ringFx.img,
+        x: x0 + (ringFx.ax - ringFx.rx - 2) * U,
+        y: y0 + (ringFx.ay - ringFx.ry - 2) * U
+      },
       glow: glowSprite(open.col)
     };
     if (fx.some(v => v[0] === 'gear')) GEARS = GEARS || gearFrames();
@@ -976,7 +1118,9 @@
   function warm() {
     if (warming || typeof requestIdleCallback !== 'function' || typeof instances === 'undefined') return;
     warming = true;
-    const todo = instances.map((d, i) => [i, d]).filter(([, d]) => !d.under && Number.isFinite(d.x) && KEYS[0] !== undefined);
+    const todo = instances
+      .map((d, i) => [i, d])
+      .filter(([, d]) => !d.under && Number.isFinite(d.x) && KEYS[0] !== undefined);
     if (typeof CANAAN_ARENA_PORTAL !== 'undefined') todo.push(['arena', CANAAN_ARENA_PORTAL]);
     const step = () => {
       const next = todo.shift();
@@ -1033,7 +1177,12 @@
             const t = (time * 0.006 + i / 4) % 1,
               s = Math.round((3 + t * 6) / 1) * U;
             c.fillStyle = 'rgba(110,100,104,' + (0.42 * (1 - t)).toFixed(3) + ')';
-            c.fillRect(Math.round((v[1] + Math.sin(t * 6 + i) * 8 - s / 2) / U) * U, Math.round((v[2] - t * 90 - s / 2) / U) * U, s, s);
+            c.fillRect(
+              Math.round((v[1] + Math.sin(t * 6 + i) * 8 - s / 2) / U) * U,
+              Math.round((v[2] - t * 90 - s / 2) / U) * U,
+              s,
+              s
+            );
           }
           break;
         case 'lava':
@@ -1092,7 +1241,8 @@
       const fr = P.swirl[Math.floor(time * 0.22) % P.swirl.length];
       c.drawImage(fr, o.x - o.rx * U, o.y - o.ry * U + bob, fr.width * U, fr.height * U);
     }
-    if (P.ring) c.drawImage(P.ring.img, P.ring.x, P.ring.y + bob, P.ring.img.width * U, P.ring.img.height * U);
+    if (P.ring)
+      c.drawImage(P.ring.img, P.ring.x, P.ring.y + bob, P.ring.img.width * U, P.ring.img.height * U);
     c.drawImage(P.front, P.x0, P.y0, AW * U, AH * U);
     drawFx(c, P, lights);
   }
@@ -1133,7 +1283,8 @@
   function occluders() {
     const out = [];
     for (const P of CACHE.values()) {
-      if (P.right < camX - 40 || P.left > camX + W + 40 || P.top > camY + H + 40 || P.base < camY - 40) continue;
+      if (P.right < camX - 40 || P.left > camX + W + 40 || P.top > camY + H + 40 || P.base < camY - 40)
+        continue;
       out.push({ x0: P.left, x1: P.right, y0: P.top, base: P.base - 8, draw: g => layers(g, P, false) });
     }
     return out;
@@ -1148,5 +1299,11 @@
     }
     return false;
   }
-  window.CANAAN_PORTAL_ART = Object.freeze({ draw, labelAt, occluders, blocked, has: i => i === 'arena' || (Number.isInteger(i) && i < KEYS.length) });
+  window.CANAAN_PORTAL_ART = Object.freeze({
+    draw,
+    labelAt,
+    occluders,
+    blocked,
+    has: i => i === 'arena' || (Number.isInteger(i) && i < KEYS.length)
+  });
 })();

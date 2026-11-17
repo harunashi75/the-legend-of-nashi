@@ -32,7 +32,10 @@ export function normalizeRoomCode(text) {
 export function normalizeRelayUrl(text) {
   let s = String(text ?? '').trim();
   if (!s) return null;
-  s = s.replace(/^https:\/\//i, 'wss://').replace(/^http:\/\//i, 'ws://').replace(/^tcp:\/\//i, 'ws://');
+  s = s
+    .replace(/^https:\/\//i, 'wss://')
+    .replace(/^http:\/\//i, 'ws://')
+    .replace(/^tcp:\/\//i, 'ws://');
   if (!/^wss?:\/\//i.test(s)) s = (/:\d{2,5}(\/|$)/.test(s) ? 'ws://' : 'wss://') + s;
   const m = /^(wss?):\/\/([a-z0-9.-]+|\[[0-9a-f:]+\])(?::(\d{2,5}))?\/?$/i.exec(s);
   if (!m || (m[3] && (+m[3] < 1 || +m[3] > 65535))) return null;
@@ -46,9 +49,14 @@ export function makeInvitation(relay, code) {
 export function parseInvitation(text) {
   const s = String(text ?? '');
   // Adresse avec préfixe, sinon une adresse nue avec son port (100.120.239.59:8787, mon-pc.tail1234.ts.net:8787).
-  const relay = /\b((?:wss?|https?):\/\/[^\s·,;]+)/i.exec(s) || /(?:^|[\s:])((?:\d{1,3}(?:\.\d{1,3}){3}|[a-z0-9-]+(?:\.[a-z0-9-]+)+):\d{2,5})\b/i.exec(s),
+  const relay =
+      /\b((?:wss?|https?):\/\/[^\s·,;]+)/i.exec(s) ||
+      /(?:^|[\s:])((?:\d{1,3}(?:\.\d{1,3}){3}|[a-z0-9-]+(?:\.[a-z0-9-]+)+):\d{2,5})\b/i.exec(s),
     code = /code\s*:?\s*([A-Za-z0-9]{6})\b/i.exec(s);
-  return { relay: relay ? normalizeRelayUrl(relay[1]) : null, code: code ? normalizeRoomCode(code[1]) : null };
+  return {
+    relay: relay ? normalizeRelayUrl(relay[1]) : null,
+    code: code ? normalizeRoomCode(code[1]) : null
+  };
 }
 // Identifiant d'un invité : créé une fois par son application, puis gardé dans sa configuration.
 export const GUEST_ID = /^[a-zA-Z][\w-]{5,63}$/;
@@ -63,7 +71,23 @@ export function makeGuestId(rng) {
 }
 
 // Lit un message reçu : JSON objet avec un type connu, taille limitée ; null sinon.
-const TYPES = new Set(['host', 'room', 'join', 'accept', 'refuse', 'intent', 'action', 'state', 'me', 'notice', 'left', 'closed', 'kick', 'chat', 'error']);
+const TYPES = new Set([
+  'host',
+  'room',
+  'join',
+  'accept',
+  'refuse',
+  'intent',
+  'action',
+  'state',
+  'me',
+  'notice',
+  'left',
+  'closed',
+  'kick',
+  'chat',
+  'error'
+]);
 // Messages qu'un invité a le droit d'envoyer (le relais les transmet à l'hôte, les autres sont ignorés).
 export const GUEST_TYPES = Object.freeze(['intent', 'action', 'chat']);
 export function parseMessage(text) {
@@ -104,66 +128,127 @@ export function sanitizeAction(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
   if (r.op === 'equip' || r.op === 'reserve') return id ? { op: r.op, id } : null;
-  if (r.op === 'unequip') return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
+  if (r.op === 'unequip')
+    return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
   if (r.op === 'switch') return { op: 'switch' };
   // Classe, talents et Rubis : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
   const word = v => (typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null);
   if (r.op === 'class-choose') return word(r.cls) ? { op: r.op, cls: r.cls } : null;
   if (r.op === 'talent-equip' || r.op === 'talent-unequip')
-    return Number.isInteger(r.talent) && r.talent >= 0 && r.talent <= 9 ? { op: r.op, talent: r.talent } : null;
+    return Number.isInteger(r.talent) && r.talent >= 0 && r.talent <= 9
+      ? { op: r.op, talent: r.talent }
+      : null;
   if (r.op === 'class-special') return { op: r.op };
   // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
   const questId = v => (Number.isInteger(v) && v >= 0 && v <= 30 ? v : null);
-  if (r.op === 'quest-accept' || r.op === 'quest-turnin' || r.op === 'quest-track') return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
-  if (r.op === 'quest-choice') return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7 ? { op: r.op, q: r.q, choice: r.choice } : null;
+  if (r.op === 'quest-accept' || r.op === 'quest-turnin' || r.op === 'quest-track')
+    return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
+  if (r.op === 'quest-choice')
+    return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7
+      ? { op: r.op, q: r.q, choice: r.choice }
+      : null;
   if (r.op === 'quest-act')
-    return typeof r.site === 'string' && /^(q\d{1,2}|camp)$/.test(r.site) && typeof r.obj === 'string' && /^[a-z0-9_]{1,24}$/.test(r.obj) ? { op: r.op, site: r.site, obj: r.obj } : null;
+    return typeof r.site === 'string' &&
+      /^(q\d{1,2}|camp)$/.test(r.site) &&
+      typeof r.obj === 'string' &&
+      /^[a-z0-9_]{1,24}$/.test(r.obj)
+      ? { op: r.op, site: r.site, obj: r.obj }
+      : null;
   if (r.op === 'rubis-equip') return word(r.rubis) ? { op: r.op, rubis: r.rubis } : null;
   // Marchand : l'hôte vérifie la présence d'un marchand, l'or et l'objet.
   if (r.op === 'sell') return id ? { op: r.op, id } : null;
   // Banque : un équipement (identifiant) ou une pile (repère) à déposer ou reprendre.
   // Succès : titre choisi (identifiant d'un succès débloqué, ou none).
-  if (r.op === 'ach-title') return typeof r.id === 'string' && /^[a-z0-9]{1,8}$/.test(r.id) ? { op: r.op, id: r.id } : null;
-  if (r.op === 'bank-deposit' || r.op === 'bank-withdraw') return typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96 ? { op: r.op, ref: r.ref } : null;
-  if (r.op === 'shop-buy') return Number.isInteger(r.index) && r.index >= 0 && r.index < 32 ? { op: r.op, index: r.index } : null;
+  if (r.op === 'ach-title')
+    return typeof r.id === 'string' && /^[a-z0-9]{1,8}$/.test(r.id) ? { op: r.op, id: r.id } : null;
+  if (r.op === 'bank-deposit' || r.op === 'bank-withdraw')
+    return typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96
+      ? { op: r.op, ref: r.ref }
+      : null;
+  if (r.op === 'shop-buy')
+    return Number.isInteger(r.index) && r.index >= 0 && r.index < 32 ? { op: r.op, index: r.index } : null;
   // Pile du sac (poissons, viandes, repas, Rubis) : « genre:id:qualité*nombre ».
-  if (r.op === 'sell-stack') return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
+  if (r.op === 'sell-stack')
+    return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
   // Donjon : E devant un mur fissuré, un brasero, un levier, une stèle ou une porte scellée (l'hôte vérifie).
-  if (r.op === 'sell-common' || r.op === 'bag-upgrade' || r.op === 'buy-gear' || r.op === 'open-chest' || r.op === 'dungeon-use') return { op: r.op };
+  if (
+    r.op === 'sell-common' ||
+    r.op === 'bag-upgrade' ||
+    r.op === 'buy-gear' ||
+    r.op === 'open-chest' ||
+    r.op === 'dungeon-use'
+  )
+    return { op: r.op };
   // Garde-robe : apparence à porter (identifiant court, ou vide pour la retirer) ; l'hôte vérifie qu'elle est possédée.
   if (r.op === 'skin-wear') return r.id === '' || word(r.id) ? { op: r.op, id: r.id } : null;
   // Cité elfique : porte, bénédiction du Grand Arbre, armurerie (pièce et qualité), atelier (apparence) ; l'hôte vérifie.
   if (r.op === 'city-gate' || r.op === 'city-bless') return { op: r.op };
-  if (r.op === 'city-buy') return word(r.slot) && (r.rarity === 'rare' || r.rarity === 'epic') ? { op: r.op, slot: r.slot, rarity: r.rarity } : null;
+  if (r.op === 'city-buy')
+    return word(r.slot) && (r.rarity === 'rare' || r.rarity === 'epic')
+      ? { op: r.op, slot: r.slot, rarity: r.rarity }
+      : null;
   if (r.op === 'city-skin') return word(r.id) ? { op: r.op, id: r.id } : null;
-  if (r.op === 'rubis-unequip') return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
+  if (r.op === 'rubis-unequip')
+    return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
   // Bâtiments : passer une porte ; maison : poser (avec son orientation), tourner ou retirer un meuble ;
   // l'hôte vérifie la place et le catalogue.
   if (r.op === 'house-door') return { op: 'house-door' };
   const cell = v => Number.isInteger(v) && v >= 0 && v <= 20;
   const turn = Number.isInteger(r.r) && r.r >= 0 && r.r <= 3 ? r.r : 0;
-  if (r.op === 'house-place') return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y) ? { op: 'house-place', k: r.k, x: r.x, y: r.y, r: turn } : null;
-  if (r.op === 'house-remove' || r.op === 'house-rotate') return cell(r.x) && cell(r.y) ? { op: r.op, x: r.x, y: r.y } : null;
+  if (r.op === 'house-place')
+    return typeof r.k === 'string' && /^[a-z_]{2,24}$/.test(r.k) && cell(r.x) && cell(r.y)
+      ? { op: 'house-place', k: r.k, x: r.x, y: r.y, r: turn }
+      : null;
+  if (r.op === 'house-remove' || r.op === 'house-rotate')
+    return cell(r.x) && cell(r.y) ? { op: r.op, x: r.x, y: r.y } : null;
   if (r.op === 'fish') return { op: 'fish' };
   // Minage et cueillette : numéro du gisement ; enchanteur : statistique, métal (0 à 5), nombre ; poser : pile et pièce.
-  if (r.op === 'gather') return Number.isInteger(r.node) && r.node >= 0 && r.node < 5000 ? { op: 'gather', node: r.node } : null;
+  if (r.op === 'gather')
+    return Number.isInteger(r.node) && r.node >= 0 && r.node < 5000 ? { op: 'gather', node: r.node } : null;
   if (r.op === 'enchant-craft')
-    return word(r.stat) && Number.isInteger(r.tier) && r.tier >= 0 && r.tier <= 5 && Number.isInteger(r.count) && r.count >= 1 && r.count <= 20 ? { op: r.op, stat: r.stat, tier: r.tier, count: r.count } : null;
-  if (r.op === 'enchant-apply') return typeof r.token === 'string' && STACK_TOKEN.test(r.token) && typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96 ? { op: r.op, token: r.token, ref: r.ref } : null;
-  if (r.op === 'hunt') return typeof r.game === 'string' && /^[a-z]{2,16}$/.test(r.game) ? { op: 'hunt', game: r.game } : null;
+    return word(r.stat) &&
+      Number.isInteger(r.tier) &&
+      r.tier >= 0 &&
+      r.tier <= 5 &&
+      Number.isInteger(r.count) &&
+      r.count >= 1 &&
+      r.count <= 20
+      ? { op: r.op, stat: r.stat, tier: r.tier, count: r.count }
+      : null;
+  if (r.op === 'enchant-apply')
+    return typeof r.token === 'string' &&
+      STACK_TOKEN.test(r.token) &&
+      typeof r.ref === 'string' &&
+      r.ref.length > 0 &&
+      r.ref.length <= 96
+      ? { op: r.op, token: r.token, ref: r.ref }
+      : null;
+  if (r.op === 'hunt')
+    return typeof r.game === 'string' && /^[a-z]{2,16}$/.test(r.game) ? { op: 'hunt', game: r.game } : null;
   const recipe = typeof r.recipe === 'string' && /^[a-z]{2,16}$/.test(r.recipe) ? r.recipe : null,
     quality = Number.isInteger(r.quality) && r.quality >= 0 && r.quality <= 7 ? r.quality : null;
-  if (r.op === 'cook') return recipe && quality !== null && Number.isInteger(r.count) && r.count >= 1 && r.count <= 20 ? { op: 'cook', recipe, quality, count: r.count } : null;
+  if (r.op === 'cook')
+    return recipe && quality !== null && Number.isInteger(r.count) && r.count >= 1 && r.count <= 20
+      ? { op: 'cook', recipe, quality, count: r.count }
+      : null;
   if (r.op === 'eat') return recipe && quality !== null ? { op: 'eat', recipe, quality } : null;
   // Échange entre joueurs : l'hôte vérifie ensuite le partenaire, les objets du sac, l'or et la place.
   if (r.op === 'trade-request') return r.to === 'host' || isGuestId(r.to) ? { op: r.op, to: r.to } : null;
-  if (r.op === 'trade-answer' || r.op === 'trade-ready') return typeof r.yes === 'boolean' ? { op: r.op, yes: r.yes } : null;
+  if (r.op === 'trade-answer' || r.op === 'trade-ready')
+    return typeof r.yes === 'boolean' ? { op: r.op, yes: r.yes } : null;
   if (r.op === 'trade-cancel') return { op: r.op };
   if (r.op === 'trade-offer') {
     const items = Array.isArray(r.items) ? r.items : null;
-    if (!items || items.length > TRADE_ITEMS || !items.every(x => typeof x === 'string' && x.length > 0 && x.length <= 96)) return null;
-    return Number.isInteger(r.gold) && r.gold >= 0 && r.gold <= 1e12 ? { op: r.op, items: [...items], gold: r.gold } : null;
+    if (
+      !items ||
+      items.length > TRADE_ITEMS ||
+      !items.every(x => typeof x === 'string' && x.length > 0 && x.length <= 96)
+    )
+      return null;
+    return Number.isInteger(r.gold) && r.gold >= 0 && r.gold <= 1e12
+      ? { op: r.op, items: [...items], gold: r.gold }
+      : null;
   }
   return null;
 }

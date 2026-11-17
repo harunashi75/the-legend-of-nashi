@@ -44,7 +44,20 @@
         }
       }
       const type = types[k % types.length];
-      const add = { x, y, hp: 1, mhp: 1, t: type.name, mobColor: type.pal[0], look: type.look, pal: type.pal, r: 13, cd: 1, g: 0, summoned: true };
+      const add = {
+        x,
+        y,
+        hp: 1,
+        mhp: 1,
+        t: type.name,
+        mobColor: type.pal[0],
+        look: type.look,
+        pal: type.pal,
+        r: 13,
+        cd: 1,
+        g: 0,
+        summoned: true
+      };
       canaanMobLevel(add);
       canaanSetupMob(add);
       game.world.monsters.push(add);
@@ -56,7 +69,12 @@
     const raid = instances[game.world.instance.index].raid,
       s = (m.mech ??= { wave: now() + (raid ? 300 : 360), rain: now() + (raid ? 480 : 600), adds: 0 }),
       ratio = m.hp / m.mhp,
-      targets = game.heroes.filter(h => alive(h) && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 12 * T && CANAAN_DUNGEON_EXPLORE.inBossRoom(m, h.player));
+      targets = game.heroes.filter(
+        h =>
+          alive(h) &&
+          Math.hypot(h.player.x - m.x, h.player.y - m.y) < 12 * T &&
+          CANAAN_DUNGEON_EXPLORE.inBossRoom(m, h.player)
+      );
     if (!targets.length) return;
     // Onde de choc sous un héros au hasard, toutes les 7 s (5 s en raid).
     if (now() >= s.wave) {
@@ -68,7 +86,15 @@
     // Pluie d'éclats : un cercle sur chaque héros proche, toutes les 9 s en raid (13 s en donjon).
     if (now() >= s.rain) {
       s.rain = now() + (raid ? 540 : 780);
-      for (const h of targets) warn(m, h.player.x + (Math.random() - 0.5) * 40, h.player.y + (Math.random() - 0.5) * 40, 1.3 * T, 80, raid ? 1.3 : 1.1);
+      for (const h of targets)
+        warn(
+          m,
+          h.player.x + (Math.random() - 0.5) * 40,
+          h.player.y + (Math.random() - 0.5) * 40,
+          1.3 * T,
+          80,
+          raid ? 1.3 : 1.1
+        );
       float(m.x, m.y - 70, '⚠️ Pluie d’éclats !', '#ff8a6a');
     }
     // Renforts : une vague à 66 % de PV, une autre à 33 %.

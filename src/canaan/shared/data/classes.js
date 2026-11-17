@@ -38,16 +38,37 @@ export const CLASSES = deepFreeze([
       cooldown: 1.5
     },
     talents: [
-      ['Ronces sauvages', 'Les compétences offensives ont 20 % de chance d’infliger 30 % de leurs dégâts en dégâts de nature sur 5 secondes.'],
+      [
+        'Ronces sauvages',
+        'Les compétences offensives ont 20 % de chance d’infliger 30 % de leurs dégâts en dégâts de nature sur 5 secondes.'
+      ],
       ['Régénération naturelle', 'Restaure 1 % des PV maximum toutes les 5 secondes en combat.'],
-      ['Écorce protectrice', 'Sous 40 % de PV, réduit les dégâts reçus de 15 % pendant 6 secondes. Recharge : 40 s.'],
+      [
+        'Écorce protectrice',
+        'Sous 40 % de PV, réduit les dégâts reçus de 15 % pendant 6 secondes. Recharge : 40 s.'
+      ],
       ['Toucher de vie', 'Augmente les soins effectués de 15 %.'],
-      ['Poison rampant', 'Les coups critiques ont 25 % de chance d’infliger un poison causant 40 % des dégâts du coup sur 6 secondes.'],
-      ['Bénédiction forestière', 'Soigner un allié lui accorde un bouclier de 8 % de ses PV maximum pendant 5 secondes. Recharge : 12 s par allié.'],
-      ['Racines profondes', 'Les compétences offensives ont 15 % de chance de ralentir la cible de 30 % pendant 3 secondes.'],
+      [
+        'Poison rampant',
+        'Les coups critiques ont 25 % de chance d’infliger un poison causant 40 % des dégâts du coup sur 6 secondes.'
+      ],
+      [
+        'Bénédiction forestière',
+        'Soigner un allié lui accorde un bouclier de 8 % de ses PV maximum pendant 5 secondes. Recharge : 12 s par allié.'
+      ],
+      [
+        'Racines profondes',
+        'Les compétences offensives ont 15 % de chance de ralentir la cible de 30 % pendant 3 secondes.'
+      ],
       ['Symbiose', 'Soigner un allié restaure également au Druide 25 % des PV réellement soignés.'],
-      ['Fureur sauvage', 'Inflige 12 % de dégâts supplémentaires aux ennemis affectés par ses poisons ou effets de nature.'],
-      ['Avatar de la nature', 'Toutes les 45 s en combat, gagne +15 % de dégâts et +50 % de régénération naturelle pendant 8 secondes.']
+      [
+        'Fureur sauvage',
+        'Inflige 12 % de dégâts supplémentaires aux ennemis affectés par ses poisons ou effets de nature.'
+      ],
+      [
+        'Avatar de la nature',
+        'Toutes les 45 s en combat, gagne +15 % de dégâts et +50 % de régénération naturelle pendant 8 secondes.'
+      ]
     ]
   },
   {
@@ -71,16 +92,34 @@ export const CLASSES = deepFreeze([
       cooldown: 45
     },
     talents: [
-      ['Frappe sacrée', 'Les attaques normales ont 20 % de chance d’infliger 35 % de dégâts sacrés supplémentaires.'],
+      [
+        'Frappe sacrée',
+        'Les attaques normales ont 20 % de chance d’infliger 35 % de dégâts sacrés supplémentaires.'
+      ],
       ['Armure bénie', 'Augmente la Défense totale de 12 %.'],
-      ['Foi inébranlable', 'Sous 35 % de PV, réduit les dégâts reçus de 20 % pendant 5 secondes. Recharge : 45 s.'],
+      [
+        'Foi inébranlable',
+        'Sous 35 % de PV, réduit les dégâts reçus de 20 % pendant 5 secondes. Recharge : 45 s.'
+      ],
       ['Lumière guérisseuse', 'Augmente les soins effectués de 12 % et les soins reçus de 8 %.'],
-      ['Consécration', 'Après 3 compétences offensives, crée une zone sacrée pendant 5 s infligeant 15 % de l’Attaque par seconde. Recharge : 15 s.'],
-      ['Gardien divin', 'Soigner un allié lui accorde un bouclier de 10 % de ses PV maximum pendant 5 secondes. Recharge : 15 s par allié.'],
+      [
+        'Consécration',
+        'Après 3 compétences offensives, crée une zone sacrée pendant 5 s infligeant 15 % de l’Attaque par seconde. Recharge : 15 s.'
+      ],
+      [
+        'Gardien divin',
+        'Soigner un allié lui accorde un bouclier de 10 % de ses PV maximum pendant 5 secondes. Recharge : 15 s par allié.'
+      ],
       ['Jugement', 'Inflige 15 % de dégâts supplémentaires aux ennemis sous 30 % de PV.'],
-      ['Aura protectrice', 'Les alliés à moins de 6 cases subissent 5 % de dégâts en moins. Effet non cumulable.'],
+      [
+        'Aura protectrice',
+        'Les alliés à moins de 6 cases subissent 5 % de dégâts en moins. Effet non cumulable.'
+      ],
       ['Volonté sacrée', 'Subir un coup critique restaure 5 % des PV maximum. Recharge : 20 s.'],
-      ['Intervention divine', 'Une fois par combat, un coup fatal laisse le Paladin à 1 PV et lui accorde un bouclier de 25 % des PV maximum pendant 5 secondes.']
+      [
+        'Intervention divine',
+        'Une fois par combat, un coup fatal laisse le Paladin à 1 PV et lui accorde un bouclier de 25 % des PV maximum pendant 5 secondes.'
+      ]
     ]
   },
   {
@@ -104,16 +143,40 @@ export const CLASSES = deepFreeze([
       cooldown: 30
     },
     talents: [
-      ['Lames empoisonnées', 'Les attaques normales ont 20 % de chance d’infliger un poison causant 35 % des dégâts du coup sur 5 secondes.'],
+      [
+        'Lames empoisonnées',
+        'Les attaques normales ont 20 % de chance d’infliger un poison causant 35 % des dégâts du coup sur 5 secondes.'
+      ],
       ['Précision mortelle', 'Augmente les chances de coup critique de 8 points de pourcentage.'],
-      ['Danse des ombres', 'Après une esquive, augmente la vitesse de déplacement de 20 % pendant 3 secondes.'],
-      ['Hémorragie', 'Les coups critiques infligent un saignement causant 30 % des dégâts du coup sur 4 secondes.'],
+      [
+        'Danse des ombres',
+        'Après une esquive, augmente la vitesse de déplacement de 20 % pendant 3 secondes.'
+      ],
+      [
+        'Hémorragie',
+        'Les coups critiques infligent un saignement causant 30 % des dégâts du coup sur 4 secondes.'
+      ],
       ['Exécuteur', 'Inflige 20 % de dégâts supplémentaires aux ennemis sous 25 % de PV.'],
-      ['Assaut implacable', 'Chaque attaque consécutive sur la même cible augmente les dégâts de 2 %, jusqu’à 10 %. Réinitialisation après 4 s sans toucher la cible.'],
-      ['Instinct de survie', 'Sous 35 % de PV, gagne +20 % de vitesse de déplacement et 10 % de réduction des dégâts pendant 5 secondes. Recharge : 40 s.'],
-      ['Lame fantôme', 'Les compétences offensives ont 15 % de chance de déclencher une frappe supplémentaire infligeant 40 % des dégâts initiaux.'],
-      ['Prédateur solitaire', 'Inflige 12 % de dégâts supplémentaires lorsqu’un seul ennemi se trouve dans un rayon de 5 cases.'],
-      ['Ombre meurtrière', 'Après 3 coups critiques, la prochaine compétence offensive inflige 30 % de dégâts supplémentaires. Recharge : 15 s.']
+      [
+        'Assaut implacable',
+        'Chaque attaque consécutive sur la même cible augmente les dégâts de 2 %, jusqu’à 10 %. Réinitialisation après 4 s sans toucher la cible.'
+      ],
+      [
+        'Instinct de survie',
+        'Sous 35 % de PV, gagne +20 % de vitesse de déplacement et 10 % de réduction des dégâts pendant 5 secondes. Recharge : 40 s.'
+      ],
+      [
+        'Lame fantôme',
+        'Les compétences offensives ont 15 % de chance de déclencher une frappe supplémentaire infligeant 40 % des dégâts initiaux.'
+      ],
+      [
+        'Prédateur solitaire',
+        'Inflige 12 % de dégâts supplémentaires lorsqu’un seul ennemi se trouve dans un rayon de 5 cases.'
+      ],
+      [
+        'Ombre meurtrière',
+        'Après 3 coups critiques, la prochaine compétence offensive inflige 30 % de dégâts supplémentaires. Recharge : 15 s.'
+      ]
     ]
   },
   {
@@ -138,20 +201,48 @@ export const CLASSES = deepFreeze([
       cooldown: 60
     },
     talents: [
-      ['Flammes persistantes', 'Les compétences offensives ont 20 % de chance d’infliger une brûlure causant 35 % des dégâts initiaux sur 5 secondes.'],
-      ['Cœur de glace', 'Les compétences offensives ont 20 % de chance de ralentir la cible de 30 % pendant 3 secondes.'],
-      ['Surcharge électrique', 'Les coups critiques ont 20 % de chance de déclencher un éclair supplémentaire infligeant 40 % des dégâts du coup.'],
+      [
+        'Flammes persistantes',
+        'Les compétences offensives ont 20 % de chance d’infliger une brûlure causant 35 % des dégâts initiaux sur 5 secondes.'
+      ],
+      [
+        'Cœur de glace',
+        'Les compétences offensives ont 20 % de chance de ralentir la cible de 30 % pendant 3 secondes.'
+      ],
+      [
+        'Surcharge électrique',
+        'Les coups critiques ont 20 % de chance de déclencher un éclair supplémentaire infligeant 40 % des dégâts du coup.'
+      ],
       ['Affinité élémentaire', 'Augmente les dégâts des effets de feu, glace et foudre de 15 %.'],
-      ['Explosion ardente', 'Lorsqu’un ennemi brûlé meurt, il explose et inflige 50 % de l’Attaque aux ennemis dans un rayon de 3 cases.'],
-      ['Barrière de givre', 'Sous 40 % de PV, gagne un bouclier de 15 % des PV maximum pendant 5 secondes. Recharge : 40 s.'],
-      ['Chaîne d’éclairs', 'Les compétences offensives ont 15 % de chance de propager un éclair à 2 ennemis proches, infligeant 25 % des dégâts initiaux à chacun.'],
+      [
+        'Explosion ardente',
+        'Lorsqu’un ennemi brûlé meurt, il explose et inflige 50 % de l’Attaque aux ennemis dans un rayon de 3 cases.'
+      ],
+      [
+        'Barrière de givre',
+        'Sous 40 % de PV, gagne un bouclier de 15 % des PV maximum pendant 5 secondes. Recharge : 40 s.'
+      ],
+      [
+        'Chaîne d’éclairs',
+        'Les compétences offensives ont 15 % de chance de propager un éclair à 2 ennemis proches, infligeant 25 % des dégâts initiaux à chacun.'
+      ],
       ['Gel profond', 'Inflige 15 % de dégâts supplémentaires aux ennemis ralentis par ses effets de glace.'],
       ['Concentration arcanique', 'Chaque troisième compétence offensive coûte 50 % de mana en moins.'],
-      ['Tempête élémentaire', 'Toutes les 5 compétences offensives, déclenche une explosion infligeant 80 % de l’Attaque aux ennemis dans un rayon de 4 cases. Recharge : 12 s.']
+      [
+        'Tempête élémentaire',
+        'Toutes les 5 compétences offensives, déclenche une explosion infligeant 80 % de l’Attaque aux ennemis dans un rayon de 4 cases. Recharge : 12 s.'
+      ]
     ]
   }
 ]);
 export const CLASS_IDS = Object.freeze(CLASSES.map(c => c.id));
 // Compétences d'armes qui n'infligent pas de dégâts (postures, ruées, concentration) : elles ne comptent pas
 // comme « compétences offensives » pour les talents. Clé : famille d'arme et numéro (0 à 3).
-export const UTILITY_SKILLS = Object.freeze(['sword:2', 'dualsword:2', 'axe:2', 'dualdagger:2', 'staff:2', 'shield:3']);
+export const UTILITY_SKILLS = Object.freeze([
+  'sword:2',
+  'dualsword:2',
+  'axe:2',
+  'dualdagger:2',
+  'staff:2',
+  'shield:3'
+]);

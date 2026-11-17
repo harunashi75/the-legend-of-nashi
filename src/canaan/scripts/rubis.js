@@ -47,7 +47,10 @@
   // Héros de l'appel en cours, ou l'hôte.
   const me = () => cur || game.hero;
   // Un héros sans Rubis (créé avant eux) n'en possède ni n'en porte aucun.
-  const NO_RUBIS = Object.freeze({ owned: Object.freeze({}), equipped: Object.freeze(Array(SLOTS).fill(null)) });
+  const NO_RUBIS = Object.freeze({
+    owned: Object.freeze({}),
+    equipped: Object.freeze(Array(SLOTS).fill(null))
+  });
   const gems = () => me().rubis || NO_RUBIS;
   const has = id => (cur ? active : runtime(game.hero).active).has(id);
   function refreshActive() {
@@ -196,7 +199,8 @@
           if (r && until > t) out.push({ id, icon: r.icon, name: r.name + extra, text, left: until - t });
         };
       if (has('gardien')) add('gardien', rt.gardienUntil, 'Dégâts reçus −10 %.');
-      if (rt.shield > 0) add('rempart', rt.shieldUntil, 'Bouclier : absorbe encore ' + Math.round(rt.shield) + ' dégâts.');
+      if (rt.shield > 0)
+        add('rempart', rt.shieldUntil, 'Bouclier : absorbe encore ' + Math.round(rt.shield) + ' dégâts.');
       if (has('benediction')) add('benediction', rt.blessUntil, 'Dégâts +5 %.');
       if (has('acceleration')) add('acceleration', rt.accelUntil, 'Recharges −10 %.');
       if (has('sprinteur')) add('sprinteur', rt.sprintUntil, 'Vitesse +20 %.');
@@ -222,7 +226,9 @@
       const t = now();
       if (has('berserker') && HP.hp / HP.mhp < 0.3) mult *= 1.15;
       if (has('duelliste')) {
-        const near = game.world.monsters.filter(o => o.hp > 0 && Math.hypot(o.x - HP.x, o.y - HP.y) < 5 * TS).length;
+        const near = game.world.monsters.filter(
+          o => o.hp > 0 && Math.hypot(o.x - HP.x, o.y - HP.y) < 5 * TS
+        ).length;
         if (near === 1) mult *= 1.08;
       }
       if (has('chasseur') && m.elite) mult *= 1.12;
@@ -428,7 +434,9 @@
       if (!has('explorateur') || game.world.instance) return [];
       const x = HP.x / TS,
         y = HP.y / TS;
-      return canaanSecretChests().filter(c => !game.world.openedChests.includes(c.id) && Math.hypot(c.x - x, c.y - y) <= 12);
+      return canaanSecretChests().filter(
+        c => !game.world.openedChests.includes(c.id) && Math.hypot(c.x - x, c.y - y) <= 12
+      );
     },
     // Nouvelle vague de l'Arène : un nouveau combat commence.
     newCombat() {
@@ -569,7 +577,8 @@
     );
   // Hors combat et hors Arène : on prépare ses Rubis avant la tentative.
   function canChange() {
-    if (game.world.instance?.arena) return { ok: false, why: 'Les Rubis se changent avant d’entrer dans l’Arène.' };
+    if (game.world.instance?.arena)
+      return { ok: false, why: 'Les Rubis se changent avant d’entrer dans l’Arène.' };
     if (inCombat()) return { ok: false, why: 'Impossible de changer de Rubis en combat.' };
     return { ok: true, why: '' };
   }
@@ -628,7 +637,8 @@
     else if (!discovered())
       html += '<p class="rubis-lock">⚔️ Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
     // Les Rubis possédés sont des objets du sac (I) : un clic sur l'un d'eux l'équipe ici.
-    html += '<p class="rubis-lock">⟦menu_inventory⟧ Tes Rubis sont dans ton sac (I) : clique sur un Rubis pour l’équiper ; clique sur un emplacement pour le retirer.</p>';
+    html +=
+      '<p class="rubis-lock">⟦menu_inventory⟧ Tes Rubis sont dans ton sac (I) : clique sur un Rubis pour l’équiper ; clique sur un emplacement pour le retirer.</p>';
     return html + '</div>';
   }
   function refreshPanel() {
@@ -729,7 +739,11 @@
         ? '<div class="rubis-tip-note">👥 Effet de groupe : s’active en coopération.</div>'
         : '') +
       '<div class="rubis-tip-note">' +
-      (slot >= 0 ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer' : n ? 'Clic : équiper' : '🏦 Rangé à la banque : reprends-le pour l’équiper') +
+      (slot >= 0
+        ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer'
+        : n
+          ? 'Clic : équiper'
+          : '🏦 Rangé à la banque : reprends-le pour l’équiper') +
       '</div>'
     );
   }

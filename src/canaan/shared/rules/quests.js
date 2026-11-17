@@ -11,7 +11,10 @@ export function questXp(quest) {
   return Math.round(xpToNext(level) * (quest?.main ? 0.6 : 0.35));
 }
 // Drapeaux d'histoire connus (récompenses et lieux débloqués).
-const FLAGS = new Set([...QUESTS.flatMap(q => q.reward.flags || []), ...SANCTUARIES.map(s => 'visit_' + s.id)]);
+const FLAGS = new Set([
+  ...QUESTS.flatMap(q => q.reward.flags || []),
+  ...SANCTUARIES.map(s => 'visit_' + s.id)
+]);
 const DECOS = new Set(QUESTS.map(q => q.reward.deco).filter(Boolean));
 // État de quêtes d'un héros, vérifié : quêtes actives (étape et données), terminées, drapeaux, décorations,
 // choix narratifs, quête suivie.
@@ -19,19 +22,24 @@ export function sanitizeQuests(raw) {
   const r = raw && typeof raw === 'object' ? raw : {},
     out = { active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null };
   if (r.done && typeof r.done === 'object')
-    for (const [k, v] of Object.entries(r.done)) if (questById(Number(k))) out.done[Number(k)] = Number.isFinite(v) ? Math.max(0, Math.floor(v)) : 1;
+    for (const [k, v] of Object.entries(r.done))
+      if (questById(Number(k))) out.done[Number(k)] = Number.isFinite(v) ? Math.max(0, Math.floor(v)) : 1;
   if (r.active && typeof r.active === 'object')
     for (const [k, v] of Object.entries(r.active)) {
       const q = questById(Number(k));
       if (!q || out.done[q.id] || !v || typeof v !== 'object') continue;
       const step = Math.max(0, Math.min(q.steps.length, Math.floor(Number(v.step) || 0))),
-        got = Array.isArray(v.got) ? [...new Set(v.got.filter(x => typeof x === 'string' && x.length <= 24))].slice(0, 12) : [];
+        got = Array.isArray(v.got)
+          ? [...new Set(v.got.filter(x => typeof x === 'string' && x.length <= 24))].slice(0, 12)
+          : [];
       out.active[q.id] = { step, got };
     }
-  if (r.flags && typeof r.flags === 'object') for (const k of Object.keys(r.flags)) if (FLAGS.has(k) && r.flags[k]) out.flags[k] = true;
+  if (r.flags && typeof r.flags === 'object')
+    for (const k of Object.keys(r.flags)) if (FLAGS.has(k) && r.flags[k]) out.flags[k] = true;
   if (Array.isArray(r.deco)) out.deco = [...new Set(r.deco.filter(d => DECOS.has(d)))];
   if (r.choices && typeof r.choices === 'object')
-    for (const [k, v] of Object.entries(r.choices)) if (questById(Number(k)) && Number.isInteger(v) && v >= 0 && v < 8) out.choices[Number(k)] = v;
+    for (const [k, v] of Object.entries(r.choices))
+      if (questById(Number(k)) && Number.isInteger(v) && v >= 0 && v < 8) out.choices[Number(k)] = v;
   if (questById(Number(r.track)) && (out.active[Number(r.track)] || false)) out.track = Number(r.track);
   return out;
 }
@@ -41,6 +49,7 @@ export function canStart(state, quest) {
   return !quest.requires || !!state.done[quest.requires];
 }
 // Toutes les étapes faites : il reste à revenir voir le PNJ.
-export const questReady = (state, quest) => !!state.active[quest.id] && state.active[quest.id].step >= quest.steps.length;
+export const questReady = (state, quest) =>
+  !!state.active[quest.id] && state.active[quest.id].step >= quest.steps.length;
 // Nombre d'étoiles du Cœur retrouvées (drapeaux star1…star6).
 export const starCount = state => [1, 2, 3, 4, 5, 6].filter(n => state.flags['star' + n]).length;

@@ -8,7 +8,8 @@
   'use strict';
   const ownedOf = hero => (hero.skins ||= { owned: [] }).owned;
   const has = (hero, id) => ownedOf(hero).includes(id);
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const esc = s =>
+    String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const rarityOf = sk => GEAR_RARITIES[sk.rarity] || GEAR_RARITIES[0];
   // Collection vérifiée : seulement des apparences connues, chacune une fois.
   function sanitize(raw) {
@@ -29,7 +30,14 @@
     }
     ownedOf(hero).push(id);
     hero.netBag = null;
-    canaanLootNotice(hero, (sk.rarity >= 4 ? '🌟 APPARENCE ' + r.name.toUpperCase() + ' ! ' : '👗 Nouvelle apparence ' + r.name + ' : ') + sk.name + ' (touche V)');
+    canaanLootNotice(
+      hero,
+      (sk.rarity >= 4
+        ? '🌟 APPARENCE ' + r.name.toUpperCase() + ' ! '
+        : '👗 Nouvelle apparence ' + r.name + ' : ') +
+        sk.name +
+        ' (touche V)'
+    );
     return true;
   }
   // Tirage d'une apparence pour une source (SKIN_DROPS) ; renvoie son id ou null.
@@ -88,17 +96,42 @@
           img = mine ? preview({ ...hero.look, wear: sk.id }) : '',
           on = worn === sk.id;
         return (
-          '<button type="button" class="skin-card' + (mine ? '' : ' locked') + (on ? ' worn' : '') + '" style="--rarity:' + r.color + '"' + (mine ? ' data-action="wearSkin" data-skin="' + sk.id + '"' : '') + ' title="' + esc(mine ? sk.name + ' · ' + r.name : 'Apparence ' + r.name + ' à découvrir') + '"' + canaanPrestige({ rarity: r.name }) + '>' +
+          '<button type="button" class="skin-card' +
+          (mine ? '' : ' locked') +
+          (on ? ' worn' : '') +
+          '" style="--rarity:' +
+          r.color +
+          '"' +
+          (mine ? ' data-action="wearSkin" data-skin="' + sk.id + '"' : '') +
+          ' title="' +
+          esc(mine ? sk.name + ' · ' + r.name : 'Apparence ' + r.name + ' à découvrir') +
+          '"' +
+          canaanPrestige({ rarity: r.name }) +
+          '>' +
           (img ? '<img alt="" src="' + img + '">' : '<span class="skin-unknown">?</span>') +
-          '<span class="skin-name">' + esc(mine ? sk.name : '???') + '</span><span class="skin-rarity">' + esc(r.name) + (on ? ' · portée' : '') + '</span></button>'
+          '<span class="skin-name">' +
+          esc(mine ? sk.name : '???') +
+          '</span><span class="skin-rarity">' +
+          esc(r.name) +
+          (on ? ' · portée' : '') +
+          '</span></button>'
         );
       };
     modernPanel(
       rpgHeader('👗 Garde-robe — ' + owned.length + ' / ' + SKINS.length + ' apparences') +
         '<div class="modern-body"><p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules). Clique pour porter.</p>' +
-        '<div class="skin-current"><img alt="" src="' + preview(hero.look) + '"><div><b>' + esc(worn ? skinById(worn).name : 'Tenue d’origine') + '</b>' +
-        (worn ? '<button type="button" data-action="wearSkin" data-skin="">Retirer l’apparence</button>' : '<span class="muted">Aucune apparence portée.</span>') + '</div></div>' +
-        '<div class="skin-grid">' + SKINS.map(card).join('') + '</div></div>'
+        '<div class="skin-current"><img alt="" src="' +
+        preview(hero.look) +
+        '"><div><b>' +
+        esc(worn ? skinById(worn).name : 'Tenue d’origine') +
+        '</b>' +
+        (worn
+          ? '<button type="button" data-action="wearSkin" data-skin="">Retirer l’apparence</button>'
+          : '<span class="muted">Aucune apparence portée.</span>') +
+        '</div></div>' +
+        '<div class="skin-grid">' +
+        SKINS.map(card).join('') +
+        '</div></div>'
     );
     document.getElementById('window').dataset.canaanPanel = 'wardrobe';
     isOpen = true;
@@ -128,6 +161,19 @@
     game.hero.skins = sanitize(raw);
     if (isOpen && modalOpen()) render();
   }
-  window.CANAAN_WARDROBE = Object.freeze({ sanitize, export: exportOf, grant, roll, drop, wear, has, toggle, choose, handle, applyRemote, render });
+  window.CANAAN_WARDROBE = Object.freeze({
+    sanitize,
+    export: exportOf,
+    grant,
+    roll,
+    drop,
+    wear,
+    has,
+    toggle,
+    choose,
+    handle,
+    applyRemote,
+    render
+  });
   window.toggleWardrobe = toggle;
 })();

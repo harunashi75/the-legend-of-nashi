@@ -64,13 +64,60 @@
   const NO_CLASS = Object.freeze({ id: null, talents: Object.freeze([]) });
   const classe = (hero = me()) => hero.classe || NO_CLASS;
   const def = (hero = me()) => classById(classe(hero).id);
-  const forHero = (fn, at) => (...args) => within(args[at] && args[at].player ? args[at] : game.hero, () => fn(...args));
+  const forHero =
+    (fn, at) =>
+    (...args) =>
+      within(args[at] && args[at].player ? args[at] : game.hero, () => fn(...args));
   // Numéro de chaque talent dans sa classe (voir shared/data/classes.js).
   const T = Object.freeze({
-    druide: { thorns: 0, regen: 1, bark: 2, touch: 3, poison: 4, blessing: 5, roots: 6, symbiosis: 7, fury: 8, avatar: 9 },
-    paladin: { holyStrike: 0, armor: 1, faith: 2, light: 3, consecration: 4, guardian: 5, judgment: 6, aura: 7, will: 8, intervention: 9 },
-    assassin: { poison: 0, precision: 1, dance: 2, hemorrhage: 3, executioner: 4, relentless: 5, instinct: 6, phantom: 7, predator: 8, shadow: 9 },
-    elementaliste: { flames: 0, iceHeart: 1, overload: 2, affinity: 3, blaze: 4, frost: 5, chain: 6, deepFreeze: 7, arcane: 8, tempest: 9 }
+    druide: {
+      thorns: 0,
+      regen: 1,
+      bark: 2,
+      touch: 3,
+      poison: 4,
+      blessing: 5,
+      roots: 6,
+      symbiosis: 7,
+      fury: 8,
+      avatar: 9
+    },
+    paladin: {
+      holyStrike: 0,
+      armor: 1,
+      faith: 2,
+      light: 3,
+      consecration: 4,
+      guardian: 5,
+      judgment: 6,
+      aura: 7,
+      will: 8,
+      intervention: 9
+    },
+    assassin: {
+      poison: 0,
+      precision: 1,
+      dance: 2,
+      hemorrhage: 3,
+      executioner: 4,
+      relentless: 5,
+      instinct: 6,
+      phantom: 7,
+      predator: 8,
+      shadow: 9
+    },
+    elementaliste: {
+      flames: 0,
+      iceHeart: 1,
+      overload: 2,
+      affinity: 3,
+      blaze: 4,
+      frost: 5,
+      chain: 6,
+      deepFreeze: 7,
+      arcane: 8,
+      tempest: 9
+    }
   });
   const on = (cls, key, hero = me()) => classe(hero).id === cls && classe(hero).talents.includes(T[cls][key]);
   const isClass = (cls, hero = me()) => classe(hero).id === cls;
@@ -128,7 +175,12 @@
     // Lumière divine reçue (d'un Paladin, soi compris).
     if (t < w.divineUntil) s.guard += 20;
     // Aura protectrice : un Paladin à moins de 6 cases (soi compris) ; non cumulable.
-    if (game.heroes.some(h => !h.player.dead && on('paladin', 'aura', h) && (h === me() || near(h.player, HP, 6)))) s.guard += 5;
+    if (
+      game.heroes.some(
+        h => !h.player.dead && on('paladin', 'aura', h) && (h === me() || near(h.player, HP, 6))
+      )
+    )
+      s.guard += 5;
     return s;
   }, 1);
 
@@ -163,7 +215,9 @@
     if (p.hp < p.mhp) {
       // Rubis (Guérisseur, Source vitale) et malédiction des soins de l'Arène.
       const outside = CANAAN_RUBIS.healFactor(periodic, target) * CANAAN_ARENA.healFactor(target);
-      const amount = periodic ? n * outside : Math.round(n * healingDone(healer) * healingReceived(target) * outside);
+      const amount = periodic
+        ? n * outside
+        : Math.round(n * healingDone(healer) * healingReceived(target) * outside);
       gained = Math.max(0, Math.min(p.mhp - p.hp, amount));
       p.hp += gained;
       if (gained > 0) CANAAN_RUBIS.onHealed(gained, periodic, target);
@@ -193,7 +247,13 @@
   }
   // canaanApplyHeal(n, periodic, hero, healer) : soin d'un héros (l'hôte par défaut) par un soigneur (lui-même).
   window.canaanApplyHeal = (n, periodic = false, hero = game.hero, healer = hero, splash = false) =>
-    applyHeal(n, periodic, hero && hero.player ? hero : game.hero, healer && healer.player ? healer : hero && hero.player ? hero : game.hero, splash);
+    applyHeal(
+      n,
+      periodic,
+      hero && hero.player ? hero : game.hero,
+      healer && healer.player ? healer : hero && hero.player ? hero : game.hero,
+      splash
+    );
 
   // ---------------------------------------------------------------- Effets sur les monstres
   // Effet sur la durée d'un héros sur un monstre : un seul par type et par héros, la plus forte valeur gardée.
@@ -205,19 +265,27 @@
       next = refreshDot(old, total / seconds, t + seconds);
     if (old) Object.assign(old, next);
     else list.push({ kind, by: me(), element, dps: next.dps, until: next.until, tick: t + 1 });
-    float(m.x, m.y - 50, { thorns: '🌿', sap: '🌱', poison: '☠️', bleed: '🩸', burn: '🔥' }[kind] || '✦', elementColor(element));
+    float(
+      m.x,
+      m.y - 50,
+      { thorns: '🌿', sap: '🌱', poison: '☠️', bleed: '🩸', burn: '🔥' }[kind] || '✦',
+      elementColor(element)
+    );
   }
-  const hasDot = (m, kinds, hero = me()) => (m._clsDots || []).some(d => d.by === hero && d.until > now() && kinds.includes(d.kind));
+  const hasDot = (m, kinds, hero = me()) =>
+    (m._clsDots || []).some(d => d.by === hero && d.until > now() && kinds.includes(d.kind));
   // Ralentissement d'un héros : le plus fort en cours, jamais cumulé.
   function slow(m, pct, seconds, element) {
     if (!alive(m)) return;
     const t = now(),
       s = m._clsSlow;
-    if (!s || s.until <= t || pct >= s.pct) m._clsSlow = { pct, until: Math.max(s && s.until > t ? s.until : 0, t + seconds), by: me(), element };
+    if (!s || s.until <= t || pct >= s.pct)
+      m._clsSlow = { pct, until: Math.max(s && s.until > t ? s.until : 0, t + seconds), by: me(), element };
     else s.until = Math.max(s.until, t + seconds);
     if (element === 'ice') float(m.x, m.y - 47, '❄️', '#8fdcff');
   }
-  const slowedBy = (m, element, hero = me()) => m._clsSlow && m._clsSlow.until > now() && m._clsSlow.by === hero && m._clsSlow.element === element;
+  const slowedBy = (m, element, hero = me()) =>
+    m._clsSlow && m._clsSlow.until > now() && m._clsSlow.by === hero && m._clsSlow.element === element;
   // Fureur sauvage : poisons, ronces ou ralentissement de nature du Druide.
   const natureMarked = m => hasDot(m, ['thorns', 'sap', 'poison']) || slowedBy(m, 'nature');
   // Dégâts d'un effet (sur la durée, éclair, explosion) : ne redéclenchent pas les talents (aucune récursion).
@@ -233,7 +301,9 @@
   function blast(x, y, tiles, amount, element, except = null) {
     CANAAN_SKILLS.fx('ring', x, y, 0, TILES(tiles), 0, elementColor(element), 0.55);
     burst(x, y, elementColor(element), 18);
-    for (const m of game.world.monsters.slice()) if (m !== except && alive(m) && Math.hypot(m.x - x, m.y - y) < TILES(tiles) + (m.r || 0)) effectHit(m, amount, element);
+    for (const m of game.world.monsters.slice())
+      if (m !== except && alive(m) && Math.hypot(m.x - x, m.y - y) < TILES(tiles) + (m.r || 0))
+        effectHit(m, amount, element);
   }
   function onKill(m, burned) {
     // Explosion ardente : un ennemi brûlé par l'Élémentaliste explose (une seule fois).
@@ -256,7 +326,14 @@
   window.CANAAN_CLASS_CAST = forHero(function (type, i) {
     const offensive = isOffensiveSkill(type, i),
       t = now(),
-      context = { magic: type === 'staff', multiplier: 1, skill: true, offensive, slot: i, element: skillElement(classe().id, i) };
+      context = {
+        magic: type === 'staff',
+        multiplier: 1,
+        skill: true,
+        offensive,
+        slot: i,
+        element: skillElement(classe().id, i)
+      };
     if (!offensive) return context;
     w.arcane++;
     // Empreinte de l'Assassin : une compétence utilitaire renforce la prochaine compétence offensive.
@@ -337,9 +414,16 @@
         : '☀️ Paladin : toi et tes alliés à 6 cases gagnez un bouclier de 10 % des PV max pendant 5 s.';
     if (id === 'assassin')
       return offensive
-        ? '🌑 Assassin : +12 % de dégâts' + (i === 3 ? ', et encore +30 % contre une cible sous 50 % de ses PV.' : '.')
+        ? '🌑 Assassin : +12 % de dégâts' +
+            (i === 3 ? ', et encore +30 % contre une cible sous 50 % de ses PV.' : '.')
         : '🌑 Assassin : ta prochaine compétence offensive fait +25 % de dégâts (Embuscade).';
-    if (!offensive) return el.icon + ' ' + el.name + ' : libère une décharge autour de toi (100 % de l’Attaque, rayon 2,5 cases).';
+    if (!offensive)
+      return (
+        el.icon +
+        ' ' +
+        el.name +
+        ' : libère une décharge autour de toi (100 % de l’Attaque, rayon 2,5 cases).'
+      );
     if (el.name === 'Feu') return '🔥 Feu : brûle les cibles (30 % des dégâts infligés, en plus, sur 4 s).';
     if (el.name === 'Glace') return '❄️ Glace : ralentit les cibles de 30 % pendant 2,5 s.';
     return '⚡ Foudre : chaque coup rebondit sur 2 ennemis proches (35 % des dégâts).';
@@ -361,10 +445,15 @@
       const r = w.relentless.get(m);
       if (r && t - r.last <= 4) mult *= 1 + 0.02 * Math.min(5, r.stacks);
     }
-    if (on('assassin', 'predator') && game.world.monsters.filter(o => alive(o) && near(o, HP, 5)).length === 1) mult *= 1.12;
+    if (
+      on('assassin', 'predator') &&
+      game.world.monsters.filter(o => alive(o) && near(o, HP, 5)).length === 1
+    )
+      mult *= 1.12;
     if (on('elementaliste', 'deepFreeze') && slowedBy(m, 'ice')) mult *= 1.15;
     // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
-    if (options.skill && options.offensive && isClass('assassin')) mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
+    if (options.skill && options.offensive && isClass('assassin'))
+      mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
     return { damage: damage * mult, base: damage, options };
   }
   // Après un coup : déclencheurs (effets sur la durée, éclairs, ralentissements, soins), d'après les dégâts réels.
@@ -389,7 +478,8 @@
     // Sève vitale (Druide, hors forme féline) : 5 % des dégâts rendus à lui et aux alliés proches.
     if (skill && dealt > 0 && isClass('druide') && !feral())
       for (const hero of game.heroes)
-        if (!hero.player.dead && !hero.away && (hero === me() || near(hero.player, HP, 6))) applyHeal(dealt * 0.05, false, hero, me(), true);
+        if (!hero.player.dead && !hero.away && (hero === me() || near(hero.player, HP, 6)))
+          applyHeal(dealt * 0.05, false, hero, me(), true);
     if (dealt > 0 && alive(m)) {
       // Druide
       if (skill && on('druide', 'thorns') && roll() < 0.2) dot(m, 'thorns', 5, dealt * 0.3, 'nature');
@@ -400,7 +490,8 @@
       if (crit && on('assassin', 'hemorrhage')) dot(m, 'bleed', 4, dealt * 0.3, 'shadow');
       // Empreintes de classe sur les compétences offensives : sève (Druide), feu et glace (Élémentaliste).
       if (skill && isClass('druide')) dot(m, 'sap', 4, dealt * 0.25, 'nature');
-      if (skill && options.element === 'fire' && isClass('elementaliste')) dot(m, 'burn', 4, dealt * 0.3, 'fire');
+      if (skill && options.element === 'fire' && isClass('elementaliste'))
+        dot(m, 'burn', 4, dealt * 0.3, 'fire');
       if (skill && options.element === 'ice' && isClass('elementaliste')) slow(m, 0.3, 2.5, 'ice');
       if (skill && on('elementaliste', 'flames') && roll() < 0.2) dot(m, 'burn', 5, dealt * 0.35, 'fire');
       if (skill && on('elementaliste', 'iceHeart') && roll() < 0.2) slow(m, 0.3, 3, 'ice');
@@ -426,7 +517,16 @@
           .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))
           .slice(0, 2);
         for (const o of others) {
-          CANAAN_SKILLS.fx('beam', m.x, m.y, Math.atan2(o.y - m.y, o.x - m.x), Math.hypot(o.x - m.x, o.y - m.y), 5, '#f4f07a', 0.25);
+          CANAAN_SKILLS.fx(
+            'beam',
+            m.x,
+            m.y,
+            Math.atan2(o.y - m.y, o.x - m.x),
+            Math.hypot(o.x - m.x, o.y - m.y),
+            5,
+            '#f4f07a',
+            0.25
+          );
           effectHit(o, dealt * 0.35, 'lightning');
         }
       }
@@ -436,7 +536,16 @@
           .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))
           .slice(0, 2);
         for (const o of others) {
-          CANAAN_SKILLS.fx('beam', m.x, m.y, Math.atan2(o.y - m.y, o.x - m.x), Math.hypot(o.x - m.x, o.y - m.y), 5, '#f4f07a', 0.25);
+          CANAAN_SKILLS.fx(
+            'beam',
+            m.x,
+            m.y,
+            Math.atan2(o.y - m.y, o.x - m.x),
+            Math.hypot(o.x - m.x, o.y - m.y),
+            5,
+            '#f4f07a',
+            0.25
+          );
           effectHit(o, dealt * 0.25, 'lightning');
         }
       }
@@ -444,7 +553,10 @@
     if (m.hp <= 0) onKill(m, info.burned);
   }
   window.CANAAN_CLASS_ATTACK = {
-    before: forHero((m, damage, options) => ({ ...before(m, damage, options), burned: hasDot(m, ['burn']) }), 3),
+    before: forHero(
+      (m, damage, options) => ({ ...before(m, damage, options), burned: hasDot(m, ['burn']) }),
+      3
+    ),
     after: forHero(after, 2)
   };
   // Coup reçu : bouclier, puis le combat continue. Le reste des réductions est dans la Garde (statistiques).
@@ -564,7 +676,10 @@
   }
   // Temps de recharge restant du sort spécial (affichage ; l'invité le reçoit de l'hôte).
   let guestSpecial = 0;
-  const specialLeft = (hero = game.hero) => (game.mode === 'guest' && hero === game.hero ? guestSpecial : Math.max(0, runtime(hero).specialReady - now()));
+  const specialLeft = (hero = game.hero) =>
+    game.mode === 'guest' && hero === game.hero
+      ? guestSpecial
+      : Math.max(0, runtime(hero).specialReady - now());
 
   // ---------------------------------------------------------------- Étape de simulation
   // Zones sacrées de la Consécration.
@@ -626,7 +741,8 @@
     before() {
       const t = now(),
         positions = new Map();
-      for (const m of game.world.monsters) if (m._clsSlow && m._clsSlow.until > t) positions.set(m, { x: m.x, y: m.y, pct: m._clsSlow.pct });
+      for (const m of game.world.monsters)
+        if (m._clsSlow && m._clsSlow.until > t) positions.set(m, { x: m.x, y: m.y, pct: m._clsSlow.pct });
       return { t, positions };
     },
     after({ t, positions }) {
@@ -635,7 +751,8 @@
         m.y = p.y + (m.y - p.y) * (1 - p.pct);
       }
       // Les héros retirés du groupe gardent un monstre à moitié dans un effet orphelin : il se termine seul.
-      for (const m of game.world.monsters) if (m._clsDots) m._clsDots = m._clsDots.filter(d => game.heroes.includes(d.by) && d.until > t - 1);
+      for (const m of game.world.monsters)
+        if (m._clsDots) m._clsDots = m._clsDots.filter(d => game.heroes.includes(d.by) && d.until > t - 1);
       for (const hero of game.heroes) within(hero, () => stepHero(t));
       for (let i = zones.length - 1; i >= 0; i--) {
         const z = zones[i];
@@ -648,7 +765,8 @@
         CANAAN_SKILLS.fx('ring', z.x, z.y, 0, z.r, 0, '#ffd76a', 1);
         within(z.owner, () => {
           const atk = characterStats(me()).attack * 0.15;
-          for (const m of game.world.monsters.slice()) if (alive(m) && Math.hypot(m.x - z.x, m.y - z.y) < z.r + (m.r || 0)) effectHit(m, atk, 'holy');
+          for (const m of game.world.monsters.slice())
+            if (alive(m) && Math.hypot(m.x - z.x, m.y - z.y) < z.r + (m.r || 0)) effectHit(m, atk, 'holy');
         });
       }
     }
@@ -680,7 +798,16 @@
         ctx.ellipse(p.x, p.y - 4, 28, 34, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
-      if (p.form === 'feral' && time % 9 === 0) particles.push({ x: p.x + (Math.random() - 0.5) * 30, y: p.y + 12, vx: 0, vy: -0.6, life: 26, c: '#7ee36a', r: 2.5 });
+      if (p.form === 'feral' && time % 9 === 0)
+        particles.push({
+          x: p.x + (Math.random() - 0.5) * 30,
+          y: p.y + 12,
+          vx: 0,
+          vy: -0.6,
+          life: 26,
+          c: '#7ee36a',
+          r: 2.5
+        });
     }
     ctx.restore();
     const el = document.getElementById('specialSkill');
@@ -714,7 +841,16 @@
   }, 1);
   const equipTalent = forHero(function (i) {
     const k = classe();
-    if (!k.id || !Number.isInteger(i) || i < 0 || i >= TALENTS_PER_CLASS || k.talents.includes(i) || k.talents.length >= slots() || inCombat()) return false;
+    if (
+      !k.id ||
+      !Number.isInteger(i) ||
+      i < 0 ||
+      i >= TALENTS_PER_CLASS ||
+      k.talents.includes(i) ||
+      k.talents.length >= slots() ||
+      inCombat()
+    )
+      return false;
     k.talents.push(i);
     recompute();
     return true;
@@ -737,7 +873,9 @@
   function autoTalents(hero) {
     const k = classe(hero);
     if (!k.id) return;
-    for (const i of BUILDS[k.id]) if (k.talents.length < talentSlotsAt(clampLevel(hero.level)) && !k.talents.includes(i)) k.talents.push(i);
+    for (const i of BUILDS[k.id])
+      if (k.talents.length < talentSlotsAt(clampLevel(hero.level)) && !k.talents.includes(i))
+        k.talents.push(i);
   }
   // Montée de niveau : un nouvel emplacement s'ouvre peut-être.
   const onLevel = forHero(function () {
@@ -776,14 +914,40 @@
     ui.picking = !!open;
     renderTalents();
   };
-  const escape = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const escape = s =>
+    String(s).replace(
+      /[&<>"']/g,
+      c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+    );
   function classCard(c, current) {
     return (
-      '<div class="class-card" style="--class-color:' + c.color + '"><div class="class-icon">' + c.icon + '</div><h3>' + escape(c.name) + '</h3>' +
-      '<p class="class-style">' + escape(c.style) + '</p>' +
-      '<p class="class-line"><b>' + escape(c.passive.name) + '</b> · ' + escape(c.passive.desc) + '</p>' +
-      '<p class="class-line"><b>' + c.special.icon + ' ' + escape(c.special.name) + ' (F)</b> · ' + escape(c.special.desc) + '</p>' +
-      '<button ' + (current ? 'disabled' : 'data-action="chooseClass" data-class="' + c.id + '"') + '>' + (current ? '✓ Ta classe' : 'Choisir ' + escape(c.name)) + '</button></div>'
+      '<div class="class-card" style="--class-color:' +
+      c.color +
+      '"><div class="class-icon">' +
+      c.icon +
+      '</div><h3>' +
+      escape(c.name) +
+      '</h3>' +
+      '<p class="class-style">' +
+      escape(c.style) +
+      '</p>' +
+      '<p class="class-line"><b>' +
+      escape(c.passive.name) +
+      '</b> · ' +
+      escape(c.passive.desc) +
+      '</p>' +
+      '<p class="class-line"><b>' +
+      c.special.icon +
+      ' ' +
+      escape(c.special.name) +
+      ' (F)</b> · ' +
+      escape(c.special.desc) +
+      '</p>' +
+      '<button ' +
+      (current ? 'disabled' : 'data-action="chooseClass" data-class="' + c.id + '"') +
+      '>' +
+      (current ? '✓ Ta classe' : 'Choisir ' + escape(c.name)) +
+      '</button></div>'
     );
   }
   function renderPicker(current) {
@@ -795,7 +959,9 @@
       '</p><div class="class-grid">' +
       CLASSES.map(c => classCard(c, c.id === current)).join('') +
       '</div>' +
-      (current ? '<button class="class-back" data-action="pickClass" data-open="0">↩ Retour aux talents</button>' : '') +
+      (current
+        ? '<button class="class-back" data-action="pickClass" data-open="0">↩ Retour aux talents</button>'
+        : '') +
       '</div>'
     );
   }
@@ -808,10 +974,30 @@
       fighting = inCombat(hero),
       next = TALENT_SLOT_LEVELS[open];
     let html =
-      '<div class="classes" style="--class-color:' + c.color + '"><h2>' + c.icon + ' ' + escape(c.name) + ' <small>· ' + escape(c.spec) + '</small></h2>' +
-      '<div class="class-boxes"><div class="class-box"><b>Passif : ' + escape(c.passive.name) + '</b><span>' + escape(c.passive.desc) + '</span></div>' +
-      '<div class="class-box"><b>' + c.special.icon + ' Sort spécial (F) : ' + escape(c.special.name) + '</b><span>' + escape(c.special.desc) +
-      ' Mana ' + c.special.mana + (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') + '.</span></div></div>' +
+      '<div class="classes" style="--class-color:' +
+      c.color +
+      '"><h2>' +
+      c.icon +
+      ' ' +
+      escape(c.name) +
+      ' <small>· ' +
+      escape(c.spec) +
+      '</small></h2>' +
+      '<div class="class-boxes"><div class="class-box"><b>Passif : ' +
+      escape(c.passive.name) +
+      '</b><span>' +
+      escape(c.passive.desc) +
+      '</span></div>' +
+      '<div class="class-box"><b>' +
+      c.special.icon +
+      ' Sort spécial (F) : ' +
+      escape(c.special.name) +
+      '</b><span>' +
+      escape(c.special.desc) +
+      ' Mana ' +
+      c.special.mana +
+      (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') +
+      '.</span></div></div>' +
       '<div class="talent-slots">';
     for (let s = 0; s < TALENT_SLOT_LEVELS.length; s++) {
       const i = k.talents[s];
@@ -823,23 +1009,44 @@
             : '<div class="talent-slot filled"><b>' + escape(c.talents[i][0]) + '</b></div>';
     }
     html +=
-      '</div><p class="class-foot">Talents équipés : <strong>' + k.talents.length + ' / ' + open + '</strong>' +
+      '</div><p class="class-foot">Talents équipés : <strong>' +
+      k.talents.length +
+      ' / ' +
+      open +
+      '</strong>' +
       (next ? ' · prochain emplacement au niveau ' + next : ' · tous les emplacements sont ouverts') +
-      (fighting ? ' · <span class="class-warn">en combat : changements impossibles</span>' : ' · changements gratuits hors combat') +
+      (fighting
+        ? ' · <span class="class-warn">en combat : changements impossibles</span>'
+        : ' · changements gratuits hors combat') +
       '.</p><div class="talent-list">';
     c.talents.forEach(([name, desc], i) => {
       const equipped = k.talents.includes(i),
         full = k.talents.length >= open,
         disabled = fighting || (!equipped && full);
       html +=
-        '<div class="talent-row' + (equipped ? ' equipped' : '') + '"><span class="talent-num">' + (i + 1) + '</span><div class="talent-desc"><b>' + escape(name) + '</b>' + escape(desc) + '</div><button ' +
-        (disabled ? 'disabled' : 'data-action="' + (equipped ? 'unequipTalent' : 'equipTalent') + '" data-talent="' + i + '"') +
-        '>' + (equipped ? 'Retirer' : full ? 'Complet' : 'Équiper') + '</button></div>';
+        '<div class="talent-row' +
+        (equipped ? ' equipped' : '') +
+        '"><span class="talent-num">' +
+        (i + 1) +
+        '</span><div class="talent-desc"><b>' +
+        escape(name) +
+        '</b>' +
+        escape(desc) +
+        '</div><button ' +
+        (disabled
+          ? 'disabled'
+          : 'data-action="' + (equipped ? 'unequipTalent' : 'equipTalent') + '" data-talent="' + i + '"') +
+        '>' +
+        (equipped ? 'Retirer' : full ? 'Complet' : 'Équiper') +
+        '</button></div>';
     });
     const camp = atCamp(hero);
     html +=
-      '</div><button class="class-change" ' + (camp ? 'data-action="pickClass" data-open="1"' : 'disabled') + '>' +
-      (camp ? '🔄 Changer de classe (gratuit)' : '🔄 Changer de classe : au Camp de l’Aurore') + '</button></div>';
+      '</div><button class="class-change" ' +
+      (camp ? 'data-action="pickClass" data-open="1"' : 'disabled') +
+      '>' +
+      (camp ? '🔄 Changer de classe (gratuit)' : '🔄 Changer de classe : au Camp de l’Aurore') +
+      '</button></div>';
     return html;
   }
   function renderTalents() {
@@ -854,14 +1061,21 @@
       if (!element) return;
       el.style.setProperty('--skill-element', element.color);
       el.classList.add('elemental');
-      el.insertAdjacentHTML('beforeend', '<span class="skill-elem" aria-hidden="true">' + element.icon + '</span>');
+      el.insertAdjacentHTML(
+        'beforeend',
+        '<span class="skill-elem" aria-hidden="true">' + element.icon + '</span>'
+      );
     });
     if (!c) return;
     const el = document.createElement('div');
     el.className = 'skill special';
     el.id = 'specialSkill';
     el.dataset.tooltipSkill = 'special';
-    el.innerHTML = (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) + '<span class="skill-label">' + escape(c.special.name) + '</span><div class="key">F</div><div class="cd" style="display:none"></div>';
+    el.innerHTML =
+      (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) +
+      '<span class="skill-label">' +
+      escape(c.special.name) +
+      '</span><div class="key">F</div><div class="cd" style="display:none"></div>';
     el.style.setProperty('--skill-element', c.color);
     bar.appendChild(el);
   }

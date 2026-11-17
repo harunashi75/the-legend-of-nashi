@@ -11,7 +11,8 @@
   const U = 2;
   const plan = () => window.CANAAN_CITY_PLAN || null;
   const near = (p, x, y, r) => Math.hypot(p.x / TS - x, p.y / TS - y) < r;
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const esc = s =>
+    String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   // Toile en pixels d'art (1 pixel d'art = U pixels d'écran), cernée d'encre ensuite.
   function art(w, h, fn) {
     const cv = document.createElement('canvas');
@@ -83,7 +84,16 @@
   registerDecor();
 
   // ---------------------------------------------------------------- Habitants
-  const ELF = (sex, skin, hairStyle, hair, wear) => ({ sex, race: 'elfe', skin, hairStyle, hair, eyes: '#3a9a4a', outfit: 'foret', wear });
+  const ELF = (sex, skin, hairStyle, hair, wear) => ({
+    sex,
+    race: 'elfe',
+    skin,
+    hairStyle,
+    hair,
+    eyes: '#3a9a4a',
+    outfit: 'foret',
+    wear
+  });
   let folk = null,
     animals = null;
   function setup() {
@@ -94,10 +104,42 @@
       arm = P0.buildings.find(b => b.id === 'elfe_armurerie'),
       cou = P0.buildings.find(b => b.id === 'elfe_couture');
     folk = [
-      { kind: 'guard', name: 'Garde de Sylvaëlle', x: g.out.x + side.x * 2, y: g.out.y + side.y * 2, look: ELF('m', '#f6dcc8', 'long', '#e8d9a8', 'elfe_gardien'), tool: 'spear', face: 0 },
-      { kind: 'guardIn', name: 'Garde de Sylvaëlle', x: g.in.x - side.x * 2, y: g.in.y - side.y * 2, look: ELF('f', '#e9c9a8', 'queue', '#c9a24a', 'elfe_gardien'), tool: 'spear', face: 0 },
-      { kind: 'armurier', name: 'Thalion, l’armurier', x: arm ? arm.x + 2.5 : P0.center.x + 3, y: arm ? arm.y + arm.h + 1.2 : P0.center.y + 6, look: ELF('m', '#e9c9a8', 'court', '#2a1f1a', 'elfe_rodeur'), tool: 'none', face: 0 },
-      { kind: 'tisseuse', name: 'Elwyn, la Tisseuse', x: cou ? cou.x + 2.5 : P0.center.x - 3, y: cou ? cou.y + cou.h + 1.2 : P0.center.y + 6, look: ELF('f', '#f6dcc8', 'long', '#e8e8e0', 'elfe_mage'), tool: 'none', face: 0 }
+      {
+        kind: 'guard',
+        name: 'Garde de Sylvaëlle',
+        x: g.out.x + side.x * 2,
+        y: g.out.y + side.y * 2,
+        look: ELF('m', '#f6dcc8', 'long', '#e8d9a8', 'elfe_gardien'),
+        tool: 'spear',
+        face: 0
+      },
+      {
+        kind: 'guardIn',
+        name: 'Garde de Sylvaëlle',
+        x: g.in.x - side.x * 2,
+        y: g.in.y - side.y * 2,
+        look: ELF('f', '#e9c9a8', 'queue', '#c9a24a', 'elfe_gardien'),
+        tool: 'spear',
+        face: 0
+      },
+      {
+        kind: 'armurier',
+        name: 'Thalion, l’armurier',
+        x: arm ? arm.x + 2.5 : P0.center.x + 3,
+        y: arm ? arm.y + arm.h + 1.2 : P0.center.y + 6,
+        look: ELF('m', '#e9c9a8', 'court', '#2a1f1a', 'elfe_rodeur'),
+        tool: 'none',
+        face: 0
+      },
+      {
+        kind: 'tisseuse',
+        name: 'Elwyn, la Tisseuse',
+        x: cou ? cou.x + 2.5 : P0.center.x - 3,
+        y: cou ? cou.y + cou.h + 1.2 : P0.center.y + 6,
+        look: ELF('f', '#f6dcc8', 'long', '#e8e8e0', 'elfe_mage'),
+        tool: 'none',
+        face: 0
+      }
     ];
     // Dans les bâtiments (house.js) : les marchands derrière leur comptoir, la Reine sur son trône, la cour, le
     // tavernier et ses clients, la prêtresse, l'astronome et les habitants des maisons (cases de chaque pièce).
@@ -106,23 +148,86 @@
         const r = R0(id);
         return r ? { ...n, room: id, x: r.x + lx, y: r.y + ly } : null;
       };
-    for (const [kind, id, lx, ly] of [['armurier', 'sylv_armurerie', 6.5, 2.6], ['tisseuse', 'sylv_couture', 4.5, 4.4]]) {
+    for (const [kind, id, lx, ly] of [
+      ['armurier', 'sylv_armurerie', 6.5, 2.6],
+      ['tisseuse', 'sylv_couture', 4.5, 4.4]
+    ]) {
       const n = folk.find(v => v.kind === kind),
         r = R0(id);
       if (n && r) Object.assign(n, { room: id, x: r.x + lx, y: r.y + ly });
     }
     folk.push(
       ...[
-        inside('sylv_palais', 8.5, 3.2, { kind: 'reine', name: 'Elwë, Reine de Sylvaëlle', look: ELF('f', '#f6dcc8', 'long', '#f4ecd0', 'elfe_reine'), tool: 'none', face: 0 }),
-        inside('sylv_palais', 5.5, 4.4, { kind: 'cour', name: 'Dame Aelin', look: ELF('f', '#e9c9a8', 'tresses', '#c9a24a', 'elfe_mage'), tool: 'none', face: 0 }),
-        inside('sylv_palais', 11.5, 4.4, { kind: 'cour', name: 'Seigneur Calen', look: ELF('m', '#f6dcc8', 'long', '#e8d9a8', 'elfe_gardien'), tool: 'spear', face: 0 }),
-        inside('sylv_taverne', 5.5, 2.6, { kind: 'indoor', name: 'Fëanwë, le tavernier', look: ELF('m', '#e9c9a8', 'queue', '#3a7a4a', 'fleurs'), tool: 'none', face: 0 }),
-        inside('sylv_taverne', 1.6, 5.4, { kind: 'indoor', name: 'Lindir', look: ELF('m', '#c9a0d8', 'long', '#e8e8e0', 'elfe_rodeur'), tool: 'none', face: 0 }),
-        inside('sylv_taverne', 10.4, 5.4, { kind: 'indoor', name: 'Merilwen', look: ELF('f', '#f6dcc8', 'long', '#6a8ad8', 'elfe_mage'), tool: 'none', face: 0 }),
-        inside('sylv_temple', 6.5, 3.8, { kind: 'indoor', name: 'Ithilië, prêtresse de la Lune', look: ELF('f', '#a8b8e0', 'long', '#e8e8f0', 'elfe_mage'), tool: 'none', face: 0 }),
-        inside('sylv_tour', 7.6, 3.6, { kind: 'indoor', name: 'Elrohen, l’astronome', look: ELF('m', '#f6dcc8', 'long', '#e8e8e0', 'elfe_mage'), tool: 'none', face: 0 }),
-        inside('sylv_maison', 8.5, 4.6, { kind: 'indoor', name: 'Nimloth', look: ELF('f', '#e9c9a8', 'queue', '#e8d9a8', 'fleurs'), tool: 'none', face: 0 }),
-        inside('sylv_racines', 9.5, 4.2, { kind: 'indoor', name: 'Haldir des Racines', look: ELF('m', '#e9c9a8', 'court', '#3a7a4a', 'elfe_rodeur'), tool: 'none', face: 0 })
+        inside('sylv_palais', 8.5, 3.2, {
+          kind: 'reine',
+          name: 'Elwë, Reine de Sylvaëlle',
+          look: ELF('f', '#f6dcc8', 'long', '#f4ecd0', 'elfe_reine'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_palais', 5.5, 4.4, {
+          kind: 'cour',
+          name: 'Dame Aelin',
+          look: ELF('f', '#e9c9a8', 'tresses', '#c9a24a', 'elfe_mage'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_palais', 11.5, 4.4, {
+          kind: 'cour',
+          name: 'Seigneur Calen',
+          look: ELF('m', '#f6dcc8', 'long', '#e8d9a8', 'elfe_gardien'),
+          tool: 'spear',
+          face: 0
+        }),
+        inside('sylv_taverne', 5.5, 2.6, {
+          kind: 'indoor',
+          name: 'Fëanwë, le tavernier',
+          look: ELF('m', '#e9c9a8', 'queue', '#3a7a4a', 'fleurs'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_taverne', 1.6, 5.4, {
+          kind: 'indoor',
+          name: 'Lindir',
+          look: ELF('m', '#c9a0d8', 'long', '#e8e8e0', 'elfe_rodeur'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_taverne', 10.4, 5.4, {
+          kind: 'indoor',
+          name: 'Merilwen',
+          look: ELF('f', '#f6dcc8', 'long', '#6a8ad8', 'elfe_mage'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_temple', 6.5, 3.8, {
+          kind: 'indoor',
+          name: 'Ithilië, prêtresse de la Lune',
+          look: ELF('f', '#a8b8e0', 'long', '#e8e8f0', 'elfe_mage'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_tour', 7.6, 3.6, {
+          kind: 'indoor',
+          name: 'Elrohen, l’astronome',
+          look: ELF('m', '#f6dcc8', 'long', '#e8e8e0', 'elfe_mage'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_maison', 8.5, 4.6, {
+          kind: 'indoor',
+          name: 'Nimloth',
+          look: ELF('f', '#e9c9a8', 'queue', '#e8d9a8', 'fleurs'),
+          tool: 'none',
+          face: 0
+        }),
+        inside('sylv_racines', 9.5, 4.2, {
+          kind: 'indoor',
+          name: 'Haldir des Racines',
+          look: ELF('m', '#e9c9a8', 'court', '#3a7a4a', 'elfe_rodeur'),
+          tool: 'none',
+          face: 0
+        })
       ].filter(Boolean)
     );
     // La garde royale, devant la demeure de la Reine.
@@ -130,7 +235,16 @@
     if (pal) {
       const dx = pal.x + pal.w / 2,
         dy = pal.y + pal.h + 1.4;
-      for (const s of [-1, 1]) folk.push({ kind: 'garde', name: 'Garde royal', x: dx + s * 2.2, y: dy - 0.3, look: ELF(s < 0 ? 'm' : 'f', '#e9c9a8', 'long', '#e8d9a8', 'elfe_gardien'), tool: 'spear', face: 0 });
+      for (const s of [-1, 1])
+        folk.push({
+          kind: 'garde',
+          name: 'Garde royal',
+          x: dx + s * 2.2,
+          y: dy - 0.3,
+          look: ELF(s < 0 ? 'm' : 'f', '#e9c9a8', 'long', '#e8d9a8', 'elfe_gardien'),
+          tool: 'spear',
+          face: 0
+        });
     }
     // Elfes qui flânent dans les rues.
     const walkers = [
@@ -144,7 +258,18 @@
     const names = ['Lúthiel', 'Aerendil', 'Nimrielle', 'Galdor', 'Ithilwen', 'Faelar'];
     walkers.forEach((look, k) => {
       const a = (k / walkers.length) * Math.PI * 2;
-      folk.push({ kind: 'walker', name: names[k], x: P0.center.x + Math.cos(a) * 9, y: P0.center.y + Math.sin(a) * 9, look, tool: 'none', face: 0, tx: null, ty: null, wait: k * 40 });
+      folk.push({
+        kind: 'walker',
+        name: names[k],
+        x: P0.center.x + Math.cos(a) * 9,
+        y: P0.center.y + Math.sin(a) * 9,
+        look,
+        tool: 'none',
+        face: 0,
+        tx: null,
+        ty: null,
+        wait: k * 40
+      });
     });
     animals = [];
     const spot = k => {
@@ -153,7 +278,8 @@
           r = 6 + hsh(t, k, 6) * 20,
           x = P0.center.x + Math.cos(a) * r,
           y = P0.center.y + Math.sin(a) * r;
-        if (P0.inside(Math.floor(x), Math.floor(y)) && tileAt(Math.floor(x), Math.floor(y)) === 1) return { x, y };
+        if (P0.inside(Math.floor(x), Math.floor(y)) && tileAt(Math.floor(x), Math.floor(y)) === 1)
+          return { x, y };
       }
       return { x: P0.center.x + 4, y: P0.center.y + 8 };
     };
@@ -166,11 +292,23 @@
     ])
       for (let i = 0; i < n; i++) {
         const s = spot(animals.length + 1);
-        animals.push({ kind, x: s.x, y: s.y, tx: s.x, ty: s.y, speed, face: 1, step: 0, rest: 60 + i * 50, seed: animals.length });
+        animals.push({
+          kind,
+          x: s.x,
+          y: s.y,
+          tx: s.x,
+          ty: s.y,
+          speed,
+          face: 1,
+          step: 0,
+          rest: 60 + i * 50,
+          seed: animals.length
+        });
       }
     // Deux cygnes par étang, qui glissent en rond.
     for (const pond of (P0.props || []).filter(p => p.kind === 'pond'))
-      for (let i = 0; i < 2; i++) animals.push({ kind: 'swan', pond, ang: i * Math.PI, dir: i ? -1 : 1, perch: true });
+      for (let i = 0; i < 2; i++)
+        animals.push({ kind: 'swan', pond, ang: i * Math.PI, dir: i ? -1 : 1, perch: true });
     // Chouettes perchées au bord du Grand Arbre et sur la tour.
     const t = P0.tree,
       tour = P0.buildings.find(b => b.id === 'elfe_tour');
@@ -224,14 +362,19 @@
     hero.blessing = { day: today(), until: Date.now() + BLESS_MS };
     hero.netBag = null;
     burst(hero.player.x, hero.player.y - 20, '#c8ffb0', 30);
-    canaanLootNotice(hero, '🌳 Bénédiction du Grand Arbre : +10 % de dégâts et régénération pendant 30 minutes.');
+    canaanLootNotice(
+      hero,
+      '🌳 Bénédiction du Grand Arbre : +10 % de dégâts et régénération pendant 30 minutes.'
+    );
     return true;
   }
   // Régénération douce : 1 % des PV toutes les 3 secondes pendant la bénédiction (hôte).
   function update() {
     if (!started || paused || game.world.instance) return;
     if (game.mode !== 'guest' && time % 180 === 0)
-      for (const h of game.heroes) if (blessed(h) && !h.player.dead) h.player.hp = Math.min(h.player.mhp, h.player.hp + Math.ceil(h.player.mhp * 0.01));
+      for (const h of game.heroes)
+        if (blessed(h) && !h.player.dead)
+          h.player.hp = Math.min(h.player.mhp, h.player.hp + Math.ceil(h.player.mhp * 0.01));
     const P0 = plan();
     if (!P0 || canaanUnder()) return;
     setup();
@@ -256,17 +399,37 @@
   // ---------------------------------------------------------------- Boutiques
   const ARMOR_PRICES = { rare: 2500, epic: 7500 };
   const SLOTS = ['weapon', 'helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'artifact'];
-  const SLOT_NAMES = { weapon: 'Arme', helm: 'Heaume', shoulders: 'Épaulières', armor: 'Cuirasse', gloves: 'Gants', boots: 'Bottes', neck: 'Collier', ring: 'Anneau', artifact: 'Artefact' };
+  const SLOT_NAMES = {
+    weapon: 'Arme',
+    helm: 'Heaume',
+    shoulders: 'Épaulières',
+    armor: 'Cuirasse',
+    gloves: 'Gants',
+    boots: 'Bottes',
+    neck: 'Collier',
+    ring: 'Anneau',
+    artifact: 'Artefact'
+  };
   function buyElvenGear(hero, slot, rarity) {
     const price = ARMOR_PRICES[rarity];
     if (!price || !SLOTS.includes(slot)) return false;
-    if (!nearKind(hero.player, 'armurier')) return canaanLootNotice(hero, '🏹 Parle à Thalion, dans la cité, pour acheter.'), false;
-    if (hero.player.gold < price) return canaanLootNotice(hero, '💰 Il faut ' + price + ' or.'), false;
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) return canaanLootNotice(hero, '🎒 Sac plein'), false;
+    if (!nearKind(hero.player, 'armurier'))
+      return (canaanLootNotice(hero, '🏹 Parle à Thalion, dans la cité, pour acheter.'), false);
+    if (hero.player.gold < price) return (canaanLootNotice(hero, '💰 Il faut ' + price + ' or.'), false);
+    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) return (canaanLootNotice(hero, '🎒 Sac plein'), false);
     hero.player.gold -= price;
     const item = giveGear(60, 'elfe', rarity === 'epic' ? 'Épique' : 'Rare', hero, slot);
     if (item) item.origin = 'elfique';
-    canaanLootNotice(hero, '🏹 ' + SLOT_NAMES[slot] + ' de Sylvaëlle (' + (rarity === 'epic' ? 'Épique' : 'Rare') + ', niveau 60) : −' + price + ' or.');
+    canaanLootNotice(
+      hero,
+      '🏹 ' +
+        SLOT_NAMES[slot] +
+        ' de Sylvaëlle (' +
+        (rarity === 'epic' ? 'Épique' : 'Rare') +
+        ', niveau 60) : −' +
+        price +
+        ' or.'
+    );
     hero.netBag = null;
     return true;
   }
@@ -274,9 +437,11 @@
   function buySkin(hero, id) {
     const sk = shopSkins().find(s => s.id === id);
     if (!sk) return false;
-    if (!nearKind(hero.player, 'tisseuse')) return canaanLootNotice(hero, '👗 Parle à Elwyn, dans la cité, pour acheter.'), false;
-    if (CANAAN_WARDROBE.has(hero, id)) return canaanLootNotice(hero, '👗 Tu possèdes déjà cette apparence.'), false;
-    if (hero.player.gold < sk.shop) return canaanLootNotice(hero, '💰 Il faut ' + sk.shop + ' or.'), false;
+    if (!nearKind(hero.player, 'tisseuse'))
+      return (canaanLootNotice(hero, '👗 Parle à Elwyn, dans la cité, pour acheter.'), false);
+    if (CANAAN_WARDROBE.has(hero, id))
+      return (canaanLootNotice(hero, '👗 Tu possèdes déjà cette apparence.'), false);
+    if (hero.player.gold < sk.shop) return (canaanLootNotice(hero, '💰 Il faut ' + sk.shop + ' or.'), false);
     hero.player.gold -= sk.shop;
     CANAAN_WARDROBE.grant(hero, id);
     return true;
@@ -286,16 +451,58 @@
     if (kind === 'armurier') {
       const rows = SLOTS.map(
         s =>
-          '<div class="city-row"><b>' + SLOT_NAMES[s] + '</b><button type="button" data-action="cityBuyGear" data-slot="' + s + '" data-rarity="rare">Rare · ' + ARMOR_PRICES.rare + ' or</button><button type="button" class="epic" data-action="cityBuyGear" data-slot="' + s + '" data-rarity="epic">Épique · ' + ARMOR_PRICES.epic + ' or</button></div>'
+          '<div class="city-row"><b>' +
+          SLOT_NAMES[s] +
+          '</b><button type="button" data-action="cityBuyGear" data-slot="' +
+          s +
+          '" data-rarity="rare">Rare · ' +
+          ARMOR_PRICES.rare +
+          ' or</button><button type="button" class="epic" data-action="cityBuyGear" data-slot="' +
+          s +
+          '" data-rarity="epic">Épique · ' +
+          ARMOR_PRICES.epic +
+          ' or</button></div>'
       );
-      modernPanel(rpgHeader('🏹 Armurerie de Sylvaëlle — Thalion') + '<div class="modern-body"><p class="muted">« Un équipement taillé par les elfes, de niveau 60. Choisis la pièce, je m’occupe du reste. » · Ton or : <b>' + Math.floor(hero.player.gold) + '</b></p><div class="city-shop">' + rows.join('') + '</div></div>');
+      modernPanel(
+        rpgHeader('🏹 Armurerie de Sylvaëlle — Thalion') +
+          '<div class="modern-body"><p class="muted">« Un équipement taillé par les elfes, de niveau 60. Choisis la pièce, je m’occupe du reste. » · Ton or : <b>' +
+          Math.floor(hero.player.gold) +
+          '</b></p><div class="city-shop">' +
+          rows.join('') +
+          '</div></div>'
+      );
     } else {
       const cards = shopSkins().map(sk => {
         const r = GEAR_RARITIES[sk.rarity],
           mine = CANAAN_WARDROBE.has(hero, sk.id);
-        return '<div class="city-row" style="--rarity:' + r.color + '"><b style="color:' + r.color + '">' + esc(sk.name) + '</b><span class="muted">' + r.name + '</span>' + (mine ? '<span class="muted">Déjà dans ta garde-robe</span>' : '<button type="button" data-action="cityBuySkin" data-skin="' + sk.id + '">' + sk.shop + ' or</button>') + '</div>';
+        return (
+          '<div class="city-row" style="--rarity:' +
+          r.color +
+          '"><b style="color:' +
+          r.color +
+          '">' +
+          esc(sk.name) +
+          '</b><span class="muted">' +
+          r.name +
+          '</span>' +
+          (mine
+            ? '<span class="muted">Déjà dans ta garde-robe</span>'
+            : '<button type="button" data-action="cityBuySkin" data-skin="' +
+              sk.id +
+              '">' +
+              sk.shop +
+              ' or</button>') +
+          '</div>'
+        );
       });
-      modernPanel(rpgHeader('👗 Atelier de la Tisseuse — Elwyn') + '<div class="modern-body"><p class="muted">« Des tenues tissées de fil de lune et de feuilles d’or, qu’on ne trouve nulle part ailleurs. » Elles rejoignent ta garde-robe (V). · Ton or : <b>' + Math.floor(hero.player.gold) + '</b></p><div class="city-shop">' + cards.join('') + '</div></div>');
+      modernPanel(
+        rpgHeader('👗 Atelier de la Tisseuse — Elwyn') +
+          '<div class="modern-body"><p class="muted">« Des tenues tissées de fil de lune et de feuilles d’or, qu’on ne trouve nulle part ailleurs. » Elles rejoignent ta garde-robe (V). · Ton or : <b>' +
+          Math.floor(hero.player.gold) +
+          '</b></p><div class="city-shop">' +
+          cards.join('') +
+          '</div></div>'
+      );
     }
   }
   function treePanel() {
@@ -305,9 +512,17 @@
     talkUntil = time + 240;
     modernPanel(
       rpgHeader('🌳 Ylvarë, l’Arbre-Ancien') +
-        '<div class="modern-body"><p class="city-lore">« ' + esc(LORE[loreIndex % LORE.length]) + ' »</p>' +
+        '<div class="modern-body"><p class="city-lore">« ' +
+        esc(LORE[loreIndex % LORE.length]) +
+        ' »</p>' +
         '<div class="modern-foot"><button type="button" data-action="cityTreeTalk">💬 Écouter encore</button>' +
-        (done ? '<span class="muted">' + (left ? 'Bénédiction active : encore ' + left + ' min.' : 'Déjà béni aujourd’hui. Reviens demain.') + '</span>' : '<button type="button" data-action="cityBless">🍃 Recevoir la bénédiction (+10 % de dégâts et régénération, 30 min)</button>') +
+        (done
+          ? '<span class="muted">' +
+            (left
+              ? 'Bénédiction active : encore ' + left + ' min.'
+              : 'Déjà béni aujourd’hui. Reviens demain.') +
+            '</span>'
+          : '<button type="button" data-action="cityBless">🍃 Recevoir la bénédiction (+10 % de dégâts et régénération, 30 min)</button>') +
         '</div></div>'
     );
   }
@@ -336,7 +551,12 @@
       g = P0.gate,
       to = inward ? g.in : g.out;
     if (inward && clampLevel(hero.level) < P0.level) {
-      canaanLootNotice(hero, '🛡️ Garde : « Halte. Seuls les héros de niveau ' + P0.level + ' entrent à Sylvaëlle. Reviens quand tu seras prêt. »');
+      canaanLootNotice(
+        hero,
+        '🛡️ Garde : « Halte. Seuls les héros de niveau ' +
+          P0.level +
+          ' entrent à Sylvaëlle. Reviens quand tu seras prêt. »'
+      );
       return true;
     }
     const x = (to.x + 0.5) * TS,
@@ -346,7 +566,12 @@
       hero.player.x = x;
       hero.player.y = y;
     }
-    canaanLootNotice(hero, inward ? '🌿 Les portes s’ouvrent : bienvenue à Sylvaëlle, la Cité des Elfes.' : '🌿 Tu quittes Sylvaëlle.');
+    canaanLootNotice(
+      hero,
+      inward
+        ? '🌿 Les portes s’ouvrent : bienvenue à Sylvaëlle, la Cité des Elfes.'
+        : '🌿 Tu quittes Sylvaëlle.'
+    );
     return true;
   }
   // E chez l'hôte (pour lui ou pour un invité) : true si la cité a répondu.
@@ -379,7 +604,8 @@
       const what = reach(hero.player);
       return what === 'gateIn' ? gate(hero, true) : what === 'gateOut' ? gate(hero, false) : false;
     }
-    if (action.op === 'city-bless') return near(hero.player, plan().tree.x + 0.5, plan().tree.y + 1.5, 3.4) && bless(hero);
+    if (action.op === 'city-bless')
+      return near(hero.player, plan().tree.x + 0.5, plan().tree.y + 1.5, 3.4) && bless(hero);
     if (action.op === 'city-buy') return buyElvenGear(hero, action.slot, action.rarity);
     if (action.op === 'city-skin') return buySkin(hero, action.id);
     return false;
@@ -396,7 +622,12 @@
       treePanel();
     },
     bless: () => act('city-bless', {}, () => bless(game.hero) && (treePanel(), true)),
-    buyGear: (slot, rarity) => act('city-buy', { slot, rarity }, () => buyElvenGear(game.hero, slot, rarity) && (shopPanel('armurier'), true)),
+    buyGear: (slot, rarity) =>
+      act(
+        'city-buy',
+        { slot, rarity },
+        () => buyElvenGear(game.hero, slot, rarity) && (shopPanel('armurier'), true)
+      ),
     buySkin: id => act('city-skin', { id }, () => buySkin(game.hero, id) && (shopPanel('tisseuse'), true))
   };
   // Résurrection : à la cité pour un héros de niveau 60 tombé dans la Forêt enchantée ou dans la cité.
@@ -483,7 +714,12 @@
           const ph = (time * 0.004 + k / 3 + v[6] * 0.01) % 1;
           c.fillStyle = v[5][k % v[5].length];
           c.globalAlpha = 1 - ph;
-          c.fillRect(v[1] + ((k * 37 + v[6]) % v[3]) + Math.sin(time * 0.03 + k) * 6, v[2] + ph * v[4] * 2, 4, 3);
+          c.fillRect(
+            v[1] + ((k * 37 + v[6]) % v[3]) + Math.sin(time * 0.03 + k) * 6,
+            v[2] + ph * v[4] * 2,
+            4,
+            3
+          );
           c.globalAlpha = 1;
         }
       else if (v[0] === 8) {
@@ -508,7 +744,12 @@
   }
   const builtArt = new Map();
   function buildingArt(b) {
-    if (!builtArt.has(b)) builtArt.set(b, window.CANAAN_BUILDING_ART && CANAAN_BUILDING_ART.paint({ room: { id: b.id } }, b.x * TS, (b.y + b.h) * TS, b.w * TS));
+    if (!builtArt.has(b))
+      builtArt.set(
+        b,
+        window.CANAAN_BUILDING_ART &&
+          CANAAN_BUILDING_ART.paint({ room: { id: b.id } }, b.x * TS, (b.y + b.h) * TS, b.w * TS)
+      );
     return builtArt.get(b);
   }
   const visible = (x, y, m = 300) => x > camX - m && x < camX + W + m && y > camY - m && y < camY + H + m;
@@ -535,11 +776,27 @@
       gx = (g.x + 0.5) * TS,
       gy = (g.y + 1) * TS;
     gateArt ||= makeGate();
-    if (gateArt) parts.push({ x0: gx - gateArt.width / 2, x1: gx + gateArt.width / 2, y0: gy - gateArt.height + 8, base: gy, draw: c => c.drawImage(gateArt, Math.round(gx - gateArt.width / 2), Math.round(gy - gateArt.height + 8)) });
+    if (gateArt)
+      parts.push({
+        x0: gx - gateArt.width / 2,
+        x1: gx + gateArt.width / 2,
+        y0: gy - gateArt.height + 8,
+        base: gy,
+        draw: c =>
+          c.drawImage(gateArt, Math.round(gx - gateArt.width / 2), Math.round(gy - gateArt.height + 8))
+      });
     for (const b of P0.buildings) {
       const s = buildingArt(b);
       if (!s) continue;
-      parts.push({ b, x0: s.x0 + 40, x1: s.x0 + s.canvas.width * s.scale - 40, y0: s.y0, base: (b.y + b.h) * TS - 4, draw: c => c.drawImage(s.canvas, s.x0, s.y0, s.canvas.width * s.scale, s.canvas.height * s.scale), s });
+      parts.push({
+        b,
+        x0: s.x0 + 40,
+        x1: s.x0 + s.canvas.width * s.scale - 40,
+        y0: s.y0,
+        base: (b.y + b.h) * TS - 4,
+        draw: c => c.drawImage(s.canvas, s.x0, s.y0, s.canvas.width * s.scale, s.canvas.height * s.scale),
+        s
+      });
     }
     const tree = A && A.tree();
     if (tree) {
@@ -548,14 +805,35 @@
         bot = (P0.tree.y + 1) * TS + 24,
         tw = T.w * TREE_U,
         th = T.h * TREE_U;
-      parts.push({ tree: true, x0: tx - tw / 2, x1: tx + tw / 2, y0: bot - th, base: bot - 30, shadow: 150, draw: c => (c.drawImage(tree, Math.round(tx - tw / 2), Math.round(bot - th), tw, th), A.face(c, tx, bot, TREE_U, time < talkUntil)) });
+      parts.push({
+        tree: true,
+        x0: tx - tw / 2,
+        x1: tx + tw / 2,
+        y0: bot - th,
+        base: bot - 30,
+        shadow: 150,
+        draw: c => (
+          c.drawImage(tree, Math.round(tx - tw / 2), Math.round(bot - th), tw, th),
+          A.face(c, tx, bot, TREE_U, time < talkUntil)
+        )
+      });
     }
     const fount = A && A.fountain();
     if (fount) {
       const F = A.FOUNT,
         wx = (P0.well.x + 1.5) * TS,
         wy = (P0.well.y + 3) * TS;
-      parts.push({ well: true, x0: wx - F.w, x1: wx + F.w, y0: wy - F.h * U, base: wy - 10, draw: c => (c.drawImage(fount, Math.round(wx - F.w), Math.round(wy - F.h * U), F.w * U, F.h * U), A.fountainFx(c, wx, wy)) });
+      parts.push({
+        well: true,
+        x0: wx - F.w,
+        x1: wx + F.w,
+        y0: wy - F.h * U,
+        base: wy - 10,
+        draw: c => (
+          c.drawImage(fount, Math.round(wx - F.w), Math.round(wy - F.h * U), F.w * U, F.h * U),
+          A.fountainFx(c, wx, wy)
+        )
+      });
     }
     for (const p of P0.props || []) {
       const spr = A && A.prop(p.kind);
@@ -565,19 +843,42 @@
       if (p.kind === 'pond') {
         const x = p.x * TS,
           y = p.y * TS;
-        parts.push({ prop: p, flat: true, x0: x, x1: x + w, y0: y, base: y, draw: c => (A.pondWater(c, x + w / 2, y + 76, 108, 54), c.drawImage(spr, x, y, w, h)) });
+        parts.push({
+          prop: p,
+          flat: true,
+          x0: x,
+          x1: x + w,
+          y0: y,
+          base: y,
+          draw: c => (A.pondWater(c, x + w / 2, y + 76, 108, 54), c.drawImage(spr, x, y, w, h))
+        });
         continue;
       }
       const X = (p.x + p.w / 2) * TS,
         bot = (p.y + p.h) * TS - 4;
-      parts.push({ prop: p, x0: X - w / 2, x1: X + w / 2, y0: bot - h, base: bot, shadow: p.kind === 'arch' ? 0 : w / 2.6, draw: c => c.drawImage(spr, Math.round(X - w / 2), Math.round(bot - h), w, h) });
+      parts.push({
+        prop: p,
+        x0: X - w / 2,
+        x1: X + w / 2,
+        y0: bot - h,
+        base: bot,
+        shadow: p.kind === 'arch' ? 0 : w / 2.6,
+        draw: c => c.drawImage(spr, Math.round(X - w / 2), Math.round(bot - h), w, h)
+      });
     }
     lampArt ||= makeLamp();
     if (lampArt)
       for (const l of P0.lamps) {
         const lx = (l.x + 0.5) * TS,
           ly = (l.y + 0.9) * TS;
-        parts.push({ lamp: true, x0: lx - 10, x1: lx + 10, y0: ly - lampArt.height, base: ly, draw: c => c.drawImage(lampArt, Math.round(lx - lampArt.width / 2), Math.round(ly - lampArt.height)) });
+        parts.push({
+          lamp: true,
+          x0: lx - 10,
+          x1: lx + 10,
+          y0: ly - lampArt.height,
+          base: ly,
+          draw: c => c.drawImage(lampArt, Math.round(lx - lampArt.width / 2), Math.round(ly - lampArt.height))
+        });
       }
     parts.sort((a, b) => (b.flat ? 1 : 0) - (a.flat ? 1 : 0) || a.base - b.base);
     return parts;
@@ -611,7 +912,12 @@
       for (let i = 1; i < 5; i++) {
         c.globalAlpha = 0.5 - i * 0.1;
         c.fillStyle = col;
-        c.fillRect(Math.round(cx + Math.cos(t - i * 0.08) * 60 + Math.sin((t - i * 0.08) * 2.3) * 14), Math.round(cy - 50 + Math.sin((t - i * 0.08) * 1.4) * 26), 2, 2);
+        c.fillRect(
+          Math.round(cx + Math.cos(t - i * 0.08) * 60 + Math.sin((t - i * 0.08) * 2.3) * 14),
+          Math.round(cy - 50 + Math.sin((t - i * 0.08) * 1.4) * 26),
+          2,
+          2
+        );
       }
       const flap = Math.sin(time * 0.6 + k) > 0;
       c.globalAlpha = 0.75;
@@ -656,9 +962,16 @@
       spr = canaanHeroSprite(n.look, n.kind === 'walker' ? n.face : 0, frame, { tool: n.tool });
     const sk = skinById(n.look.wear);
     if (sk) drawSkinFx(c, sk, x, y, 'under');
-    c.drawImage(spr, Math.round(x - 26 - (spr.padX || 0)), Math.round(y + 18 - 60 - (spr.padY || 0)), spr.width, spr.height);
+    c.drawImage(
+      spr,
+      Math.round(x - 26 - (spr.padX || 0)),
+      Math.round(y + 18 - 60 - (spr.padY || 0)),
+      spr.width,
+      spr.height
+    );
     if (n.kind === 'reine') canaanLight(x, y - 30, 120, '#d8c8ff');
-    if (Math.hypot(P.x - x, P.y - y) < 200) label(c, n.name, x, y - 62, n.kind === 'walker' || n.kind === 'indoor' ? '#d8f0e0' : '#f6dc98');
+    if (Math.hypot(P.x - x, P.y - y) < 200)
+      label(c, n.name, x, y - 62, n.kind === 'walker' || n.kind === 'indoor' ? '#d8f0e0' : '#f6dc98');
   }
   const PROMPTS = {
     armurier: '[E] Armurerie',
@@ -677,7 +990,8 @@
   }
   function draw(c) {
     const P0 = plan(),
-      room = !game.world.instance && typeof canaanRoomAt === 'function' ? canaanRoomAt(P.x / TS, P.y / TS) : null;
+      room =
+        !game.world.instance && typeof canaanRoomAt === 'function' ? canaanRoomAt(P.x / TS, P.y / TS) : null;
     if (room && room.id.startsWith('sylv_')) return drawIndoor(c, room);
     if (!P0 || game.world.instance || canaanUnder()) return;
     if (Math.hypot(P.x / TS - P0.center.x, P.y / TS - P0.center.y) > 70) return;
@@ -691,7 +1005,15 @@
         c.globalAlpha = 0.28;
         c.fillStyle = '#0a1008';
         c.beginPath();
-        c.ellipse((p.x0 + p.x1) / 2, p.base - 4, p.shadow || (p.x1 - p.x0) / 2.4, p.tree ? 30 : 10, 0, 0, Math.PI * 2);
+        c.ellipse(
+          (p.x0 + p.x1) / 2,
+          p.base - 4,
+          p.shadow || (p.x1 - p.x0) / 2.4,
+          p.tree ? 30 : 10,
+          0,
+          0,
+          Math.PI * 2
+        );
         c.fill();
         c.globalAlpha = 1;
       }
@@ -701,7 +1023,8 @@
       if (p.well) canaanLight((p.x0 + p.x1) / 2, p.y0 + 60, 200, '#9fd8ff');
       if (p.prop?.kind === 'statue') canaanLight(p.x0 + 36, p.y0 + 30, 60, '#bfffee');
       if (p.tree) canaanLight((p.x0 + p.x1) / 2, p.y0 + 220, 380, '#e8ffb0');
-      if (p.b && Math.hypot(P.x - (p.x0 + p.x1) / 2, P.y - p.base) < 360) label(c, p.b.name, (p.x0 + p.x1) / 2, p.s.roofTop - 10);
+      if (p.b && Math.hypot(P.x - (p.x0 + p.x1) / 2, P.y - p.base) < 360)
+        label(c, p.b.name, (p.x0 + p.x1) / 2, p.s.roofTop - 10);
     }
     // Cygnes sur les étangs.
     for (const a of animals)
@@ -715,7 +1038,13 @@
         c.fillStyle = '#e8ffff';
         c.fillRect(Math.round(x - 18), Math.round(y + 4), 36, 2);
         c.globalAlpha = 1;
-        c.drawImage(spr, Math.round(x - spr.width), Math.round(y - spr.height * U + 6), spr.width * U, spr.height * U);
+        c.drawImage(
+          spr,
+          Math.round(x - spr.width),
+          Math.round(y - spr.height * U + 6),
+          spr.width * U,
+          spr.height * U
+        );
       }
     leaves(c, P0);
     // Lucioles et papillons dans toute la cité.
@@ -747,7 +1076,10 @@
         y = a.y * TS;
       if (!visible(x, y, 60)) continue;
       const moving = a.tx !== null && a.wait <= 0,
-        kind = a.kind === 'peacock' && !moving && Math.floor(time / 240 + a.seed) % 3 === 0 ? 'peacockFan' : a.kind,
+        kind =
+          a.kind === 'peacock' && !moving && Math.floor(time / 240 + a.seed) % 3 === 0
+            ? 'peacockFan'
+            : a.kind,
         spr = ART()?.animal(kind, a.face === 3 ? 3 : 1, moving && Math.floor((a.step || 0) * 2) % 2 ? 1 : 0);
       if (!spr) continue;
       const w = spr.width * U,
@@ -784,7 +1116,13 @@
   // Grands objets à redessiner devant un personnage passé derrière (world-look.js) ; jamais les étangs.
   function occluders() {
     const P0 = plan();
-    if (!P0 || game.world.instance || canaanUnder() || Math.hypot(P.x / TS - P0.center.x, P.y / TS - P0.center.y) > 70) return [];
+    if (
+      !P0 ||
+      game.world.instance ||
+      canaanUnder() ||
+      Math.hypot(P.x / TS - P0.center.x, P.y / TS - P0.center.y) > 70
+    )
+      return [];
     return collect().filter(p => !p.flat && visible((p.x0 + p.x1) / 2, p.base, 200));
   }
   // État de la bénédiction gardé dans la sauvegarde et envoyé à l'invité.
@@ -806,7 +1144,13 @@
     for (const p of P0.props || []) {
       if (p.kind === 'arch') continue;
       const m = p.kind === 'pond' ? 0.25 : 0.1;
-      if (x >= p.x + m && x <= p.x + p.w - m && y >= p.y + (p.kind === 'pond' ? 0.4 : 0.45) && y <= p.y + p.h - 0.05) return true;
+      if (
+        x >= p.x + m &&
+        x <= p.x + p.w - m &&
+        y >= p.y + (p.kind === 'pond' ? 0.4 : 0.45) &&
+        y <= p.y + p.h - 0.05
+      )
+        return true;
     }
     return false;
   }

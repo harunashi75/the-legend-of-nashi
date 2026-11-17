@@ -385,23 +385,183 @@
   };
   // Thèmes : tonalité, tempo, enchaînement d'accords (degrés), instruments et percussions.
   const THEMES = {
-    plaines: { root: 62, mode: 'major', bpm: 84, prog: [0, 4, 5, 3], lead: 'flute', arp: 'harp', pad: 'warm', perc: null, bass: true },
-    foret: { root: 52, mode: 'dorian', bpm: 70, prog: [0, 6, 3, 0], lead: 'flute', arp: 'harp', pad: 'soft', perc: 'shaker', bass: true },
-    marais: { root: 57, mode: 'phrygian', bpm: 56, prog: [0, 1, 5, 0], lead: 'bell', arp: null, pad: 'dark', perc: null, drone: true },
-    automne: { root: 59, mode: 'aeolian', bpm: 76, prog: [0, 5, 2, 6], lead: 'flute', arp: 'guitar', pad: 'warm', perc: null, bass: true },
-    desert: { root: 62, mode: 'hijaz', bpm: 92, prog: [0, 0, 6, 0], lead: 'oud', arp: null, pad: 'drone', perc: 'frame', drone: true },
-    enchantee: { root: 65, mode: 'lydian', bpm: 64, prog: [0, 1, 4, 0], lead: 'bell', arp: 'harp', pad: 'shimmer', perc: null, bass: false },
-    maison: { root: 65, mode: 'major', bpm: 70, prog: [0, 5, 3, 4], lead: 'bell', arp: 'harp', pad: 'soft', perc: null, bass: true },
-    village: { root: 67, mode: 'major', bpm: 100, prog: [0, 3, 4, 0], lead: 'flute', arp: 'guitar', pad: 'warm', perc: 'frame-light', bass: true },
-    donjon: { root: 48, mode: 'harmonic', bpm: 66, prog: [0, 5, 3, 4], lead: 'strings', arp: 'low', pad: 'dark', perc: 'taiko-slow', drone: true },
-    raid: { root: 50, mode: 'harmonic', bpm: 100, prog: [0, 5, 6, 4], lead: 'brass', arp: 'ostinato', pad: 'choir', perc: 'taiko', bass: true },
-    arene: { root: 52, mode: 'phrygian', bpm: 124, prog: [0, 1, 0, 6], lead: 'brass', arp: 'ostinato', pad: 'choir', perc: 'battle', bass: true },
+    plaines: {
+      root: 62,
+      mode: 'major',
+      bpm: 84,
+      prog: [0, 4, 5, 3],
+      lead: 'flute',
+      arp: 'harp',
+      pad: 'warm',
+      perc: null,
+      bass: true
+    },
+    foret: {
+      root: 52,
+      mode: 'dorian',
+      bpm: 70,
+      prog: [0, 6, 3, 0],
+      lead: 'flute',
+      arp: 'harp',
+      pad: 'soft',
+      perc: 'shaker',
+      bass: true
+    },
+    marais: {
+      root: 57,
+      mode: 'phrygian',
+      bpm: 56,
+      prog: [0, 1, 5, 0],
+      lead: 'bell',
+      arp: null,
+      pad: 'dark',
+      perc: null,
+      drone: true
+    },
+    automne: {
+      root: 59,
+      mode: 'aeolian',
+      bpm: 76,
+      prog: [0, 5, 2, 6],
+      lead: 'flute',
+      arp: 'guitar',
+      pad: 'warm',
+      perc: null,
+      bass: true
+    },
+    desert: {
+      root: 62,
+      mode: 'hijaz',
+      bpm: 92,
+      prog: [0, 0, 6, 0],
+      lead: 'oud',
+      arp: null,
+      pad: 'drone',
+      perc: 'frame',
+      drone: true
+    },
+    enchantee: {
+      root: 65,
+      mode: 'lydian',
+      bpm: 64,
+      prog: [0, 1, 4, 0],
+      lead: 'bell',
+      arp: 'harp',
+      pad: 'shimmer',
+      perc: null,
+      bass: false
+    },
+    maison: {
+      root: 65,
+      mode: 'major',
+      bpm: 70,
+      prog: [0, 5, 3, 4],
+      lead: 'bell',
+      arp: 'harp',
+      pad: 'soft',
+      perc: null,
+      bass: true
+    },
+    village: {
+      root: 67,
+      mode: 'major',
+      bpm: 100,
+      prog: [0, 3, 4, 0],
+      lead: 'flute',
+      arp: 'guitar',
+      pad: 'warm',
+      perc: 'frame-light',
+      bass: true
+    },
+    donjon: {
+      root: 48,
+      mode: 'harmonic',
+      bpm: 66,
+      prog: [0, 5, 3, 4],
+      lead: 'strings',
+      arp: 'low',
+      pad: 'dark',
+      perc: 'taiko-slow',
+      drone: true
+    },
+    raid: {
+      root: 50,
+      mode: 'harmonic',
+      bpm: 100,
+      prog: [0, 5, 6, 4],
+      lead: 'brass',
+      arp: 'ostinato',
+      pad: 'choir',
+      perc: 'taiko',
+      bass: true
+    },
+    arene: {
+      root: 52,
+      mode: 'phrygian',
+      bpm: 124,
+      prog: [0, 1, 0, 6],
+      lead: 'brass',
+      arp: 'ostinato',
+      pad: 'choir',
+      perc: 'battle',
+      bass: true
+    },
     // Les Tréfonds : un caractère par biome, et la forteresse naine.
-    galeries: { root: 45, mode: 'dorian', bpm: 62, prog: [0, 6, 3, 4], lead: 'oud', arp: 'low', pad: 'dark', perc: 'taiko-slow', drone: true },
-    ombral: { root: 50, mode: 'aeolian', bpm: 58, prog: [0, 5, 3, 6], lead: 'bell', arp: 'harp', pad: 'choir', perc: null, drone: true },
-    necropole: { root: 46, mode: 'phrygian', bpm: 50, prog: [0, 1, 0, 6], lead: 'strings', arp: null, pad: 'dark', perc: null, drone: true },
-    fangeval: { root: 53, mode: 'lydian', bpm: 60, prog: [0, 1, 4, 0], lead: 'bell', arp: 'harp', pad: 'shimmer', perc: 'shaker', drone: true },
-    durgrim: { root: 55, mode: 'dorian', bpm: 96, prog: [0, 3, 4, 0], lead: 'brass', arp: 'guitar', pad: 'warm', perc: 'frame-light', bass: true }
+    galeries: {
+      root: 45,
+      mode: 'dorian',
+      bpm: 62,
+      prog: [0, 6, 3, 4],
+      lead: 'oud',
+      arp: 'low',
+      pad: 'dark',
+      perc: 'taiko-slow',
+      drone: true
+    },
+    ombral: {
+      root: 50,
+      mode: 'aeolian',
+      bpm: 58,
+      prog: [0, 5, 3, 6],
+      lead: 'bell',
+      arp: 'harp',
+      pad: 'choir',
+      perc: null,
+      drone: true
+    },
+    necropole: {
+      root: 46,
+      mode: 'phrygian',
+      bpm: 50,
+      prog: [0, 1, 0, 6],
+      lead: 'strings',
+      arp: null,
+      pad: 'dark',
+      perc: null,
+      drone: true
+    },
+    fangeval: {
+      root: 53,
+      mode: 'lydian',
+      bpm: 60,
+      prog: [0, 1, 4, 0],
+      lead: 'bell',
+      arp: 'harp',
+      pad: 'shimmer',
+      perc: 'shaker',
+      drone: true
+    },
+    durgrim: {
+      root: 55,
+      mode: 'dorian',
+      bpm: 96,
+      prog: [0, 3, 4, 0],
+      lead: 'brass',
+      arp: 'guitar',
+      pad: 'warm',
+      perc: 'frame-light',
+      bass: true
+    }
   };
   const BIOME_THEMES = ['plaines', 'foret', 'marais', 'automne', 'desert', 'enchantee'];
   // Sections de la pièce (8 × 4 mesures) : qui joue dans chacune.
@@ -454,7 +614,9 @@
             // Temps fort : une note de l'accord ; sinon pas conjoint.
             if (beat === 0 || beat === 2) {
               const tones = [chord, chord + 2, chord + 4, chord + 7];
-              pos = tones.reduce((best, d) => (Math.abs(d - pos) < Math.abs(best - pos) ? d : best), tones[0]) + (rng() < 0.25 ? 7 * (rng() < 0.5 ? -1 : 1) : 0);
+              pos =
+                tones.reduce((best, d) => (Math.abs(d - pos) < Math.abs(best - pos) ? d : best), tones[0]) +
+                (rng() < 0.25 ? 7 * (rng() < 0.5 ? -1 : 1) : 0);
             } else pos += rng() < 0.5 ? 1 : -1;
             pos = Math.max(-2, Math.min(11, pos));
             notes.push({ bar, beat, len, d: pos });
@@ -479,22 +641,67 @@
         if (theme.drone && bar === 0) events.push({ beat, kind: 'drone', note: deg(0, -2), len: 16 });
         if (section.arp && theme.arp) {
           const tones = chordOf(chord);
-          const pattern = theme.arp === 'ostinato' ? [0, 1, 2, 1, 0, 1, 2, 1] : theme.arp === 'low' ? [0, -1, 1, -1] : [0, 1, 2, 3, 2, 1];
+          const pattern =
+            theme.arp === 'ostinato'
+              ? [0, 1, 2, 1, 0, 1, 2, 1]
+              : theme.arp === 'low'
+                ? [0, -1, 1, -1]
+                : [0, 1, 2, 3, 2, 1];
           const step = 4 / pattern.length;
           pattern.forEach((p, i) => {
             if (p < 0) return;
             const n = p === 3 ? tones[0] + 12 : tones[p];
-            events.push({ beat: beat + i * step, kind: 'arp', note: n + (theme.arp === 'low' ? -12 : 0), len: step });
+            events.push({
+              beat: beat + i * step,
+              kind: 'arp',
+              note: n + (theme.arp === 'low' ? -12 : 0),
+              len: step
+            });
           });
         }
         if (section.perc && theme.perc) {
           const P = {
-            shaker: [[0.5, 'shaker', 0.3], [1.5, 'shaker', 0.25], [2.5, 'shaker', 0.3], [3.5, 'shaker', 0.25]],
-            frame: [[0, 'frame', 0.7], [1.5, 'frame', 0.45], [2, 'frame', 0.6], [3, 'frame', 0.45], [3.5, 'frame', 0.35]],
-            'frame-light': [[0, 'frame', 0.45], [2, 'frame', 0.35], [3, 'shaker', 0.2]],
-            'taiko-slow': bar % 2 === 0 ? [[0, 'taiko', 0.9]] : [[0, 'taiko', 0.6], [2.5, 'tom', 0.4]],
-            taiko: [[0, 'taiko', 1], [1.5, 'tom', 0.5], [2, 'taiko', 0.8], [3, 'tom', 0.5], [3.5, 'tom', 0.45]],
-            battle: [[0, 'taiko', 1], [0.5, 'tom', 0.4], [1, 'taiko', 0.7], [2, 'taiko', 1], [2.5, 'tom', 0.4], [3, 'taiko', 0.7], [3.5, 'tom', 0.6]]
+            shaker: [
+              [0.5, 'shaker', 0.3],
+              [1.5, 'shaker', 0.25],
+              [2.5, 'shaker', 0.3],
+              [3.5, 'shaker', 0.25]
+            ],
+            frame: [
+              [0, 'frame', 0.7],
+              [1.5, 'frame', 0.45],
+              [2, 'frame', 0.6],
+              [3, 'frame', 0.45],
+              [3.5, 'frame', 0.35]
+            ],
+            'frame-light': [
+              [0, 'frame', 0.45],
+              [2, 'frame', 0.35],
+              [3, 'shaker', 0.2]
+            ],
+            'taiko-slow':
+              bar % 2 === 0
+                ? [[0, 'taiko', 0.9]]
+                : [
+                    [0, 'taiko', 0.6],
+                    [2.5, 'tom', 0.4]
+                  ],
+            taiko: [
+              [0, 'taiko', 1],
+              [1.5, 'tom', 0.5],
+              [2, 'taiko', 0.8],
+              [3, 'tom', 0.5],
+              [3.5, 'tom', 0.45]
+            ],
+            battle: [
+              [0, 'taiko', 1],
+              [0.5, 'tom', 0.4],
+              [1, 'taiko', 0.7],
+              [2, 'taiko', 1],
+              [2.5, 'tom', 0.4],
+              [3, 'taiko', 0.7],
+              [3.5, 'tom', 0.6]
+            ]
           }[theme.perc];
           for (const [b, kind, v] of P) events.push({ beat: beat + b, kind: 'drum', drum: kind, vol: v });
         }
@@ -514,7 +721,8 @@
       case 'pad': {
         const freqs = e.notes.map(midi);
         if (theme.pad === 'choir') choir(dest, freqs, t, dur, 0.09);
-        else if (theme.pad === 'shimmer') pad(dest, freqs.concat(freqs.map(f => f * 2)), t, dur, 0.11, 'triangle', 2600);
+        else if (theme.pad === 'shimmer')
+          pad(dest, freqs.concat(freqs.map(f => f * 2)), t, dur, 0.11, 'triangle', 2600);
         else if (theme.pad === 'dark') pad(dest, freqs, t, dur, 0.09, 'sawtooth', 520);
         else if (theme.pad === 'drone') pad(dest, [freqs[0]], t, dur, 0.06, 'sawtooth', 700);
         else if (theme.pad === 'soft') pad(dest, freqs, t, dur, 0.08, 'triangle', 1100);
@@ -529,7 +737,15 @@
         break;
       case 'arp':
         if (theme.arp === 'ostinato') strings(dest, midi(e.note), t, dur * 0.9, 0.06, 0.02);
-        else pluck(dest, midi(e.note + 12), t, dur * 2, theme.arp === 'guitar' ? 0.13 : 0.11, theme.arp === 'guitar' ? 0.25 : theme.arp === 'low' ? 0.1 : 0.55);
+        else
+          pluck(
+            dest,
+            midi(e.note + 12),
+            t,
+            dur * 2,
+            theme.arp === 'guitar' ? 0.13 : 0.11,
+            theme.arp === 'guitar' ? 0.25 : theme.arp === 'low' ? 0.1 : 0.55
+          );
         break;
       case 'lead': {
         const f = midi(e.note + (theme.lead === 'strings' ? 0 : 12));
@@ -553,7 +769,11 @@
     if (!base) return;
     // Chaque donjon et chaque raid : sa tonalité et son tempo, à partir du même caractère.
     const shift = parts[1] ? [0, 3, -2, 5, 1, -4, 2, -3, 4, -1][Number(parts[1]) % 10] : 0;
-    const theme = { ...base, root: base.root + shift, bpm: base.bpm + (parts[1] ? (Number(parts[1]) % 4) * 3 : 0) };
+    const theme = {
+      ...base,
+      root: base.root + shift,
+      bpm: base.bpm + (parts[1] ? (Number(parts[1]) % 4) * 3 : 0)
+    };
     const bus = gain(0);
     bus.connect(musicBus);
     bus.gain.setValueAtTime(0.0001, ac.currentTime);
@@ -565,7 +785,15 @@
       old.bus.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 3);
       setTimeout(() => old.bus.disconnect(), 4000);
     }
-    music.current = { key, theme, events: compose(theme, key), bus, start: ac.currentTime + 0.2, next: 0, loop: 0 };
+    music.current = {
+      key,
+      theme,
+      events: compose(theme, key),
+      bus,
+      start: ac.currentTime + 0.2,
+      next: 0,
+      loop: 0
+    };
   }
   function schedule() {
     const m = music.current;
@@ -667,7 +895,11 @@
       amb.wind.g.gain.setTargetAtTime(0.05, t, 0.5);
       amb.leaves.g.gain.setTargetAtTime(0, t, 0.5);
       amb.water.g.gain.setTargetAtTime(0, t, 0.5);
-      amb.rumble.g.gain.setTargetAtTime(inst && (instances[inst.index]?.raid || inst.arena) ? 0.5 : 0.32, t, 1);
+      amb.rumble.g.gain.setTargetAtTime(
+        inst && (instances[inst.index]?.raid || inst.arena) ? 0.5 : 0.32,
+        t,
+        1
+      );
       // Gouttes d'eau, chaînes lointaines, grondements.
       if (t - lastAmbient > 0.25) {
         lastAmbient = t;
@@ -759,7 +991,8 @@
     const t = ac.currentTime,
       dest = chain(gain(1), spot(), ambBus),
       scale = [0, 2, 4, 6, 7, 9, 11];
-    for (let i = 0; i < 3; i++) bell(dest, midi(84 + scale[Math.floor(Math.random() * 7)]), t + i * 0.12, 0.6, 0.018);
+    for (let i = 0; i < 3; i++)
+      bell(dest, midi(84 + scale[Math.floor(Math.random() * 7)]), t + i * 0.12, 0.6, 0.018);
   }
   function owl() {
     const t = ac.currentTime;
@@ -897,7 +1130,14 @@
       return;
     }
     const [from, to, dur, loud] = SWINGS[type] || SWINGS.sword;
-    whoosh(dest, t, heavy ? from * 0.7 : from, heavy ? to * 0.8 : to, heavy ? dur * 1.4 : dur, loud * v * (heavy ? 1.15 : 1));
+    whoosh(
+      dest,
+      t,
+      heavy ? from * 0.7 : from,
+      heavy ? to * 0.8 : to,
+      heavy ? dur * 1.4 : dur,
+      loud * v * (heavy ? 1.15 : 1)
+    );
   }
   let hitBudget = 0,
     hitClock = 0;
@@ -978,7 +1218,8 @@
       max = Math.max(r, g, b),
       min = Math.min(r, g, b);
     if (max - min < 0.12) return -1;
-    let h = max === r ? (g - b) / (max - min) : max === g ? 2 + (b - r) / (max - min) : 4 + (r - g) / (max - min);
+    let h =
+      max === r ? (g - b) / (max - min) : max === g ? 2 + (b - r) / (max - min) : 4 + (r - g) / (max - min);
     return (h * 60 + 360) % 360;
   }
   let lastSpell = 0;
@@ -1000,7 +1241,8 @@
       return;
     }
     if (h >= 0 && (h < 35 || h > 340)) whoosh(dest, t, 300, 1400, 0.4, 0.4 * vol, 0.7);
-    else if (h >= 170 && h < 230) [88, 95, 91].forEach((n, i) => bell(dest, midi(n), t + i * 0.04, 0.2, 0.035 * vol));
+    else if (h >= 170 && h < 230)
+      [88, 95, 91].forEach((n, i) => bell(dest, midi(n), t + i * 0.04, 0.2, 0.035 * vol));
     else if (h >= 80 && h < 170) healSound(x, y);
     else if (h >= 230 && h <= 340) {
       whoosh(dest, t, 800, 2400, 0.35, 0.22 * vol, 4);
@@ -1010,17 +1252,32 @@
   // Pas : le son dépend du sol sous les pieds.
   function footstep(x, y) {
     const t = ac.currentTime,
-      tile = game.world.instance || canaanUnder() ? 'stone' : (() => {
-        const v = game.world.tiles[Math.floor(y / TS)]?.[Math.floor(x / TS)];
-        return v === 15 || v === 18 ? 'water' : v === 3 ? 'sand' : v === 4 ? 'stone' : v === 2 || v === 16 ? 'dirt' : 'grass';
-      })();
+      tile =
+        game.world.instance || canaanUnder()
+          ? 'stone'
+          : (() => {
+              const v = game.world.tiles[Math.floor(y / TS)]?.[Math.floor(x / TS)];
+              return v === 15 || v === 18
+                ? 'water'
+                : v === 3
+                  ? 'sand'
+                  : v === 4
+                    ? 'stone'
+                    : v === 2 || v === 16
+                      ? 'dirt'
+                      : 'grass';
+            })();
     const vol = 0.16;
     if (tile === 'water') {
       whoosh(fxBus, t, 1600, 500, 0.22, vol * 1.4, 1.5);
       return;
     }
     const n = noiseSource(t, 0.12),
-      f = filter(tile === 'stone' ? 'bandpass' : 'lowpass', tile === 'grass' ? 900 : tile === 'sand' ? 2200 : tile === 'dirt' ? 1200 : 1600, tile === 'stone' ? 2 : 0.8),
+      f = filter(
+        tile === 'stone' ? 'bandpass' : 'lowpass',
+        tile === 'grass' ? 900 : tile === 'sand' ? 2200 : tile === 'dirt' ? 1200 : 1600,
+        tile === 'stone' ? 2 : 0.8
+      ),
       g = gain(0);
     chain(n, f, g, fxBus);
     envelope(g.gain, t, 0.004, vol * (tile === 'grass' ? 1.1 : 1), 0.01, tile === 'sand' ? 0.09 : 0.06);
@@ -1028,7 +1285,16 @@
   }
 
   // ---------------------------------------------------------------- Observation de l'état du jeu
-  const watch = { hp: null, gold: null, bag: null, atk: new WeakMap(), step: 0, chests: 0, monsters: new Map(), dodgeAt: 0 };
+  const watch = {
+    hp: null,
+    gold: null,
+    bag: null,
+    atk: new WeakMap(),
+    step: 0,
+    chests: 0,
+    monsters: new Map(),
+    dodgeAt: 0
+  };
   function observe() {
     if (!ac || !settings.on || !started || paused || document.hidden) return;
     // Pièce du lieu.
@@ -1044,7 +1310,8 @@
     const bag = game.hero.inventory?.length || 0;
     if (watch.bag !== null && bag > watch.bag) lootSound();
     watch.bag = bag;
-    const opened = (game.world.openedChests?.length || 0) + (game.world.chests || []).filter(c => c.opened).length;
+    const opened =
+      (game.world.openedChests?.length || 0) + (game.world.chests || []).filter(c => c.opened).length;
     if (opened > watch.chests && watch.chestsSeen) chestSound();
     watch.chests = opened;
     watch.chestsSeen = true;
@@ -1078,7 +1345,8 @@
       whoosh(fxBus, ac.currentTime, 2400, 700, 0.3, 0.45, 1.2);
       bell(fxBus, 1318, ac.currentTime, 0.1, 0.05);
     }
-    if (watch.caught !== undefined && caught > watch.caught) [84, 88, 91].forEach((n, i) => bell(fxBus, midi(n), ac.currentTime + i * 0.06, 0.2, 0.04));
+    if (watch.caught !== undefined && caught > watch.caught)
+      [84, 88, 91].forEach((n, i) => bell(fxBus, midi(n), ac.currentTime + i * 0.06, 0.2, 0.04));
     watch.line = line;
     watch.caught = caught;
     // Monstres disparus après avoir été bien entamés : chute.
@@ -1096,7 +1364,8 @@
       if (!ac || !settings.on || !started || paused) return;
       const s = String(txt);
       if (/^\+\s?\d/.test(s)) return;
-      if (/^-?\d[\d\s]*!?$/.test(s) || /^\d+\s?(💥|!)/.test(s)) hitSound(x, y, /!|💥/.test(s) || c === '#ffd54a');
+      if (/^-?\d[\d\s]*!?$/.test(s) || /^\d+\s?(💥|!)/.test(s))
+        hitSound(x, y, /!|💥/.test(s) || c === '#ffd54a');
     },
     effect(shape, x, y, c) {
       if (!ac || !settings.on || !started || paused) return;
@@ -1108,7 +1377,8 @@
       if (name === 'dodge') dodgeSound();
       else if (name === 'levelup') levelUpSound();
       // Quêtes : notes des pierres musicales (note1 à note4), énigme résolue, erreur, coffre.
-      else if (/^note[1-4]$/.test(name)) bell(fxBus, midi([60, 64, 67, 72][Number(name[4]) - 1] + 12), ac.currentTime, 0.7, 0.07);
+      else if (/^note[1-4]$/.test(name))
+        bell(fxBus, midi([60, 64, 67, 72][Number(name[4]) - 1] + 12), ac.currentTime, 0.7, 0.07);
       else if (name === 'puzzle') lootSound();
       else if (name === 'chest') chestSound();
       else if (name === 'wrong') bell(fxBus, midi(43), ac.currentTime, 0.35, 0.05);
@@ -1141,7 +1411,8 @@
     }
     music.current = null;
     if (ac) {
-      for (const k of ['wind', 'leaves', 'water', 'rumble']) amb[k]?.g.gain.setTargetAtTime(0, ac.currentTime, 0.3);
+      for (const k of ['wind', 'leaves', 'water', 'rumble'])
+        amb[k]?.g.gain.setTargetAtTime(0, ac.currentTime, 0.3);
     }
   }
   toggle.addEventListener('click', () => {

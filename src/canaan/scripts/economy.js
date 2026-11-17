@@ -14,7 +14,9 @@
     // Niveau de l'objet : entre le niveau requis de l'instance et son niveau de butin (7 à 10 pour la Cave),
     // pour pouvoir porter tout de suite ce qu'on y gagne. Mode héroïque du dernier raid : chance de prestige.
     // Donjon des Tréfonds : un objet du niveau du héros.
-    const level = d.scaled ? clampLevel(hero.level) : reward.level + Math.floor(Math.random() * (reward.dropLevel - reward.level + 1)),
+    const level = d.scaled
+        ? clampLevel(hero.level)
+        : reward.level + Math.floor(Math.random() * (reward.dropLevel - reward.level + 1)),
       rarity = prestigeRoll(reward.prestige) || reward.rarity;
     if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       canaanLootNotice(hero, '🎒 Sac plein : équipement non récupéré');
@@ -24,7 +26,14 @@
     if (!item) return false;
     // Provenance gardée sur l'objet (sans suffixe dans le nom de l'arme).
     item.origin = d.raid ? 'raid' : 'donjon';
-    canaanLootNotice(hero, (rarity === 'Légendaire' || rarity === 'Mythique' ? '🌟 BUTIN ' + rarity.toUpperCase() + ' ! ' : '✨ Butin : ' + rarity + ' · ') + 'niveau ' + level);
+    canaanLootNotice(
+      hero,
+      (rarity === 'Légendaire' || rarity === 'Mythique'
+        ? '🌟 BUTIN ' + rarity.toUpperCase() + ' ! '
+        : '✨ Butin : ' + rarity + ' · ') +
+        'niveau ' +
+        level
+    );
     saveGame();
     return true;
   }

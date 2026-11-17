@@ -9,7 +9,18 @@
 // La carte (game.world.underworld / underdecor) est générée de façon déterministe chez chacun, après l'île.
 (() => {
   'use strict';
-  const T = Object.freeze({ FLOOR: 40, PATH: 41, MUD: 42, RIVER: 43, WALL: 44, STONE: 45, GRAVE: 46, MOSS: 47, LAKE: 48, CHASM: 49 });
+  const T = Object.freeze({
+    FLOOR: 40,
+    PATH: 41,
+    MUD: 42,
+    RIVER: 43,
+    WALL: 44,
+    STONE: 45,
+    GRAVE: 46,
+    MOSS: 47,
+    LAKE: 48,
+    CHASM: 49
+  });
   const OPEN = t => t !== undefined && !SOLID.includes(t);
   const WET = new Set([T.RIVER, T.LAKE, T.CHASM]);
   const C = Object.freeze({ x: 200, y: 200 });
@@ -20,7 +31,10 @@
     c.fillStyle = col;
     c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
   };
-  const polar = (deg, r) => ({ x: Math.round(C.x + Math.cos(deg * RAD) * r), y: Math.round(C.y + Math.sin(deg * RAD) * r) });
+  const polar = (deg, r) => ({
+    x: Math.round(C.x + Math.cos(deg * RAD) * r),
+    y: Math.round(C.y + Math.sin(deg * RAD) * r)
+  });
 
   // ---------------------------------------------------------------- Les quatre biomes et la forteresse
   // floors : palette de chaque sol (paintFloor des donjons) ; wall : paroi ; th : objets des donjons réutilisés.
@@ -42,9 +56,31 @@
       amb: { dark: 0.66, tint: [22, 12, 4], particles: 'dust', color: '#e0c090' },
       map: '#6a5038',
       mapPath: '#8a7050',
-      th: { pillar: ['#5e4430', '#3b2a1d', '#80614a'], flame: ['#e5822e', '#f9c640', '#fff6c5'], rune: '#e0a060', banner: ['#4a3420', '#e0a060'] },
+      th: {
+        pillar: ['#5e4430', '#3b2a1d', '#80614a'],
+        flame: ['#e5822e', '#f9c640', '#fff6c5'],
+        rune: '#e0a060',
+        banner: ['#4a3420', '#e0a060']
+      },
       wallProps: ['lantern', 'beam', 'roots', 'torch'],
-      decor: [0.13, ['stalag', 'stalag2', 'k:rubble', 'k:bones', 'beam', 'roots', 'k:crate', 'k:minecart', 'k:ore', 'stalag', 'shrooms', 'k:pickaxe', 'lanternpost']],
+      decor: [
+        0.13,
+        [
+          'stalag',
+          'stalag2',
+          'k:rubble',
+          'k:bones',
+          'beam',
+          'roots',
+          'k:crate',
+          'k:minecart',
+          'k:ore',
+          'stalag',
+          'shrooms',
+          'k:pickaxe',
+          'lanternpost'
+        ]
+      ],
       structures: ['shack', 'shack', 'shack', 'minehead', 'minehead']
     },
     {
@@ -64,10 +100,38 @@
       amb: { dark: 0.6, tint: [4, 12, 22], particles: 'motes', color: '#a8d8ff' },
       map: '#4e555e',
       mapPath: '#6e7680',
-      th: { pillar: ['#5a626c', '#3a4048', '#7e8894'], flame: ['#3a8ad8', '#7ac8ff', '#e0f4ff'], rune: '#8ac8e8', banner: ['#1e3a5a', '#c9a24a'] },
+      th: {
+        pillar: ['#5a626c', '#3a4048', '#7e8894'],
+        flame: ['#3a8ad8', '#7ac8ff', '#e0f4ff'],
+        rune: '#8ac8e8',
+        banner: ['#1e3a5a', '#c9a24a']
+      },
       wallProps: ['sconce', 'banner', 'chains', 'sconce'],
-      decor: [0.12, ['brokenpillar', 'k:rubble', 'k:statue', 'ruinwall', 'k:rubble', 'k:candles', 'k:pillar', 'k:crate', 'k:bones', 'stalag2']],
-      structures: ['ruinhouse', 'ruinhouse', 'ruinhouse', 'ruinhouse', 'ruinhouse', 'ruinhouse', 'ruintower', 'ruintower']
+      decor: [
+        0.12,
+        [
+          'brokenpillar',
+          'k:rubble',
+          'k:statue',
+          'ruinwall',
+          'k:rubble',
+          'k:candles',
+          'k:pillar',
+          'k:crate',
+          'k:bones',
+          'stalag2'
+        ]
+      ],
+      structures: [
+        'ruinhouse',
+        'ruinhouse',
+        'ruinhouse',
+        'ruinhouse',
+        'ruinhouse',
+        'ruinhouse',
+        'ruintower',
+        'ruintower'
+      ]
     },
     {
       name: 'Nécropole des Oubliés',
@@ -87,9 +151,29 @@
       amb: { dark: 0.72, tint: [4, 14, 10], particles: 'mist', color: '#c0e8d0' },
       map: '#40443a',
       mapPath: '#5e5e56',
-      th: { pillar: ['#4a4c48', '#2c2e2a', '#6c6e68'], flame: ['#3ad87a', '#8affb0', '#e0fff0'], rune: '#a8f0c0', banner: ['#1a2a22', '#a8f0c0'] },
+      th: {
+        pillar: ['#4a4c48', '#2c2e2a', '#6c6e68'],
+        flame: ['#3ad87a', '#8affb0', '#e0fff0'],
+        rune: '#a8f0c0',
+        banner: ['#1a2a22', '#a8f0c0']
+      },
       wallProps: ['skulls', 'sconce', 'chains', 'skulls'],
-      decor: [0.11, ['deadtree', 'tomb', 'grave', 'cross', 'k:bones', 'k:bonepile', 'candles2', 'deadtree', 'grave', 'k:skullpile', 'tomb']],
+      decor: [
+        0.11,
+        [
+          'deadtree',
+          'tomb',
+          'grave',
+          'cross',
+          'k:bones',
+          'k:bonepile',
+          'candles2',
+          'deadtree',
+          'grave',
+          'k:skullpile',
+          'tomb'
+        ]
+      ],
       structures: ['mausoleum', 'mausoleum', 'mausoleum', 'crypt', 'crypt', 'crypt']
     },
     {
@@ -110,9 +194,28 @@
       amb: { dark: 0.64, tint: [16, 4, 20], particles: 'motes', color: '#ff9ae8' },
       map: '#465236',
       mapPath: '#665470',
-      th: { pillar: ['#4e4258', '#302838', '#6e6080'], flame: ['#d84ac0', '#ff8ae8', '#ffe0f8'], rune: '#e870c0', banner: ['#3a1a34', '#e870c0'] },
+      th: {
+        pillar: ['#4e4258', '#302838', '#6e6080'],
+        flame: ['#d84ac0', '#ff8ae8', '#ffe0f8'],
+        rune: '#e870c0',
+        banner: ['#3a1a34', '#e870c0']
+      },
       wallProps: ['roots', 'lantern', 'roots', 'roots'],
-      decor: [0.16, ['giantshroom', 'shrooms', 'shrooms', 'mudreeds', 'k:crystal', 'giantshroom', 'roots', 'shrooms', 'mudreeds', 'k:bones']],
+      decor: [
+        0.16,
+        [
+          'giantshroom',
+          'shrooms',
+          'shrooms',
+          'mudreeds',
+          'k:crystal',
+          'giantshroom',
+          'roots',
+          'shrooms',
+          'mudreeds',
+          'k:bones'
+        ]
+      ],
       structures: ['mycohut', 'mycohut', 'mycohut', 'mycohut']
     }
   ];
@@ -128,20 +231,64 @@
     amb: { dark: 0.4, tint: [30, 16, 4], particles: 'embers', color: '#ffd08a' },
     map: '#8a7660',
     mapPath: '#a8926e',
-    th: { pillar: ['#7a6650', '#4e4030', '#a08a70'], flame: ['#e5522e', '#f9a640', '#fff1b5'], rune: '#ffc65a', banner: ['#7a1a14', '#ffd36d'] },
+    th: {
+      pillar: ['#7a6650', '#4e4030', '#a08a70'],
+      flame: ['#e5522e', '#f9a640', '#fff1b5'],
+      rune: '#ffc65a',
+      banner: ['#7a1a14', '#ffd36d']
+    },
     wallProps: ['torch', 'banner', 'torch', 'banner']
   };
   const themeOf = b => (b === 4 ? FORT : BIOMES[b] || BIOMES[0]);
 
   // Boss mondiaux des Tréfonds (un par biome), au niveau du groupe quand ils apparaissent.
   const BOSSES = [
-    { id: 'u_gorgrath', name: 'Gorgrath, le Ver-Roi des Boues', biome: 0, look: 'horror', pal: ['#9a6a3a', '#5a3a1e', '#c8965a', '#ffd36d', '#ffef60'], opts: { heavy: true }, color: '#c8904a' },
-    { id: 'u_gardien', name: 'Le Gardien d’Argent de Khaz-Ombral', biome: 1, look: 'golem', pal: ['#b8c0cc', '#6a7480', '#e8eef4', '#8ac8e8', '#ffffff'], opts: { crown: true }, color: '#8ac8e8' },
-    { id: 'u_morvane', name: 'Morvane, la Reine-Liche', biome: 2, look: 'robed', pal: ['#3a3e4a', '#1e2028', '#6a7088', '#7affb0', '#d8fff0'], opts: { crown: true }, color: '#7affb0' },
-    { id: 'u_sporemere', name: 'Sporemère, la Myconide Ancestrale', biome: 3, look: 'golem', pal: ['#d04a7a', '#7a2048', '#f08ab0', '#f8e8c8', '#fff0a0'], opts: { leafy: true, crown: true }, color: '#e870c0' }
+    {
+      id: 'u_gorgrath',
+      name: 'Gorgrath, le Ver-Roi des Boues',
+      biome: 0,
+      look: 'horror',
+      pal: ['#9a6a3a', '#5a3a1e', '#c8965a', '#ffd36d', '#ffef60'],
+      opts: { heavy: true },
+      color: '#c8904a'
+    },
+    {
+      id: 'u_gardien',
+      name: 'Le Gardien d’Argent de Khaz-Ombral',
+      biome: 1,
+      look: 'golem',
+      pal: ['#b8c0cc', '#6a7480', '#e8eef4', '#8ac8e8', '#ffffff'],
+      opts: { crown: true },
+      color: '#8ac8e8'
+    },
+    {
+      id: 'u_morvane',
+      name: 'Morvane, la Reine-Liche',
+      biome: 2,
+      look: 'robed',
+      pal: ['#3a3e4a', '#1e2028', '#6a7088', '#7affb0', '#d8fff0'],
+      opts: { crown: true },
+      color: '#7affb0'
+    },
+    {
+      id: 'u_sporemere',
+      name: 'Sporemère, la Myconide Ancestrale',
+      biome: 3,
+      look: 'golem',
+      pal: ['#d04a7a', '#7a2048', '#f08ab0', '#f8e8c8', '#fff0a0'],
+      opts: { leafy: true, crown: true },
+      color: '#e870c0'
+    }
   ];
   // Entrées : une par biome de l'île (ordre des ZONES), posées près de la route à la génération.
-  const ENTRY_NAMES = ['Gouffre des Plaines', 'Puits des Racines', 'Grotte des Brumes', 'Crevasse Rousse', 'Escalier des Sables', 'Faille Étoilée'];
+  const ENTRY_NAMES = [
+    'Gouffre des Plaines',
+    'Puits des Racines',
+    'Grotte des Brumes',
+    'Crevasse Rousse',
+    'Escalier des Sables',
+    'Faille Étoilée'
+  ];
   const ENTRANCES = ENTRY_NAMES.map((name, i) => ({ id: i, name, x: 0, y: 0 }));
   const CHESTS = Array.from({ length: 16 }, (_, i) => ({ id: 'under_' + i, x: 0, y: 0, layer: 'under' }));
 
@@ -223,7 +370,8 @@
     s.box = [(tx - S.w / 2) * TS + 6, (ty - S.foot) * TS, (tx + S.w / 2) * TS - 6, (ty + 0.6) * TS];
     structures.push(s);
     for (let y = Math.floor(ty - S.h); y <= ty + 1; y++)
-      for (let x = Math.floor(tx - S.w / 2 - 1); x <= Math.ceil(tx + S.w / 2 + 1); x++) if (deco()[y]) deco()[y][x] = null;
+      for (let x = Math.floor(tx - S.w / 2 - 1); x <= Math.ceil(tx + S.w / 2 + 1); x++)
+        if (deco()[y]) deco()[y][x] = null;
     const key = Math.floor(tx / 8) + ',' + Math.floor(ty / 8);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(s);
@@ -231,7 +379,9 @@
   }
   // Cases libres pour un bâtiment : sol praticable sur tout le rectangle, loin des lieux importants.
   function roomFor(tx, ty, w, h, keep) {
-    for (let y = ty - h; y <= ty + 1; y++) for (let x = tx - Math.ceil(w / 2) - 1; x <= tx + Math.ceil(w / 2) + 1; x++) if (!OPEN(at(x, y)) || at(x, y) === T.PATH || at(x, y) === T.MUD) return false;
+    for (let y = ty - h; y <= ty + 1; y++)
+      for (let x = tx - Math.ceil(w / 2) - 1; x <= tx + Math.ceil(w / 2) + 1; x++)
+        if (!OPEN(at(x, y)) || at(x, y) === T.PATH || at(x, y) === T.MUD) return false;
     return !keep.some(([x, y, r]) => Math.hypot(x - tx, y - ty) < r);
   }
   function build() {
@@ -256,8 +406,15 @@
           if (b === 1 && field(x, y, 7, 880) > 0.62) t = T.FLOOR;
           if (b === 3 && field(x, y, 6, 850) > 0.6) t = T.MUD;
           if (b === 0 && field(x, y, 6, 851) > 0.76) t = T.MUD;
-          if ((b === 1 && field(x, y, 15, 861) > 0.75) || (b === 3 && field(x, y, 16, 863) > 0.69) || (b === 0 && field(x, y, 17, 860) > 0.77) || (b === 2 && field(x, y, 14, 862) > 0.83)) t = T.LAKE;
-          if ((b === 2 && field(x, y, 12, 870) > 0.82) || (b === 1 && field(x, y, 13, 871) > 0.87)) t = T.CHASM;
+          if (
+            (b === 1 && field(x, y, 15, 861) > 0.75) ||
+            (b === 3 && field(x, y, 16, 863) > 0.69) ||
+            (b === 0 && field(x, y, 17, 860) > 0.77) ||
+            (b === 2 && field(x, y, 14, 862) > 0.83)
+          )
+            t = T.LAKE;
+          if ((b === 2 && field(x, y, 12, 870) > 0.82) || (b === 1 && field(x, y, 13, 871) > 0.87))
+            t = T.CHASM;
         }
         // Rivières de boue des Galeries et de Fangeval : un ruban qui traverse tout, ses berges creusées.
         if (b === 0 || b === 3) {
@@ -273,7 +430,7 @@
         const d = Math.hypot(x - C.x, y - C.y);
         if (d < FORT_R + 0.5) set(x, y, T.STONE);
         else if (d < FORT_R + 2.6) {
-          const a = ((Math.atan2(y - C.y, x - C.x) / RAD) % 360 + 360) % 360,
+          const a = (((Math.atan2(y - C.y, x - C.x) / RAD) % 360) + 360) % 360,
             gate = BIOMES.some(b => Math.abs(((a - b.angle + 540) % 360) - 180) < 8);
           set(x, y, gate ? T.PATH : T.WALL);
         }
@@ -302,7 +459,9 @@
     placeEntrances();
     for (const e of ENTRANCES) {
       clear(e.x, e.y, 3);
-      const near = [...hubs, ...BIOMES.map(b => polar(b.angle + 45, 98))].sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0];
+      const near = [...hubs, ...BIOMES.map(b => polar(b.angle + 45, 98))].sort(
+        (a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y)
+      )[0];
       tunnel(e, near, 1.4, false);
     }
     for (const { d } of portals) clear(d.x, d.y, 3.2, T.STONE);
@@ -316,7 +475,12 @@
       const k = queue[h],
         x = k % MAPW,
         y = (k - x) / MAPW;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1]
+      ]) {
         const nk = (y + dy) * MAPW + x + dx;
         if (!seen[nk] && OPEN(at(x + dx, y + dy))) {
           seen[nk] = 1;
@@ -329,10 +493,25 @@
         const t = tiles()[y][x];
         if (OPEN(t) && !seen[y * MAPW + x]) tiles()[y][x] = T.WALL;
         // Eau et gouffres isolés dans la roche : de la roche.
-        if (WET.has(t) && ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen[(y + dy) * MAPW + x + dx])) tiles()[y][x] = T.WALL;
+        if (
+          WET.has(t) &&
+          ![
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ].some(([dx, dy]) => seen[(y + dy) * MAPW + x + dx])
+        )
+          tiles()[y][x] = T.WALL;
       }
     // 7. Bâtiments, cimetières, décor, lumières, gisements, bancs de poissons, faune et coffres.
-    const keep = [[C.x, C.y, FORT_R + 6], ...ENTRANCES.map(e => [e.x, e.y, 6]), ...portals.map(({ d }) => [d.x, d.y, 6]), ...lairs.map(l => [l.x, l.y, 9]), ...hubs.map(h => [h.x, h.y, 5])];
+    const keep = [
+      [C.x, C.y, FORT_R + 6],
+      ...ENTRANCES.map(e => [e.x, e.y, 6]),
+      ...portals.map(({ d }) => [d.x, d.y, 6]),
+      ...lairs.map(l => [l.x, l.y, 9]),
+      ...hubs.map(h => [h.x, h.y, 5])
+    ];
     fortress();
     placeStructures(keep);
     cemeteries(keep);
@@ -379,10 +558,25 @@
       game.world.tiles = surface;
     }
     // Les entrées sont des PNJ d'interaction (touche E) : descendre à la surface, remonter dans les Tréfonds.
-    for (let i = game.world.npcs.length - 1; i >= 0; i--) if (game.world.npcs[i].type === 'descend' || game.world.npcs[i].type === 'ascend') game.world.npcs.splice(i, 1);
+    for (let i = game.world.npcs.length - 1; i >= 0; i--)
+      if (game.world.npcs[i].type === 'descend' || game.world.npcs[i].type === 'ascend')
+        game.world.npcs.splice(i, 1);
     for (const e of ENTRANCES) {
-      game.world.npcs.push({ x: (e.x + 0.5) * TS, y: (e.y + 0.5) * TS, name: e.name, type: 'descend', entrance: e.id });
-      game.world.npcs.push({ x: (e.x + 0.5) * TS, y: (e.y + 0.5) * TS, name: e.name, type: 'ascend', entrance: e.id, layer: 'under' });
+      game.world.npcs.push({
+        x: (e.x + 0.5) * TS,
+        y: (e.y + 0.5) * TS,
+        name: e.name,
+        type: 'descend',
+        entrance: e.id
+      });
+      game.world.npcs.push({
+        x: (e.x + 0.5) * TS,
+        y: (e.y + 0.5) * TS,
+        name: e.name,
+        type: 'ascend',
+        entrance: e.id,
+        layer: 'under'
+      });
     }
   }
   // Bâtiments de la forteresse (positions relatives au centre, en cases).
@@ -398,11 +592,25 @@
   ];
   function fortress() {
     for (const f of FORT_PLAN) addStructure(f.kind, C.x + f.dx, C.y + f.dy, 4);
-    for (const [dx, dy] of [[-3, 1], [3, 1], [-4, -5], [4, -5], [-3, 11], [3, 11]]) deco()[C.y + dy][C.x + dx] = 'k:brazier';
+    for (const [dx, dy] of [
+      [-3, 1],
+      [3, 1],
+      [-4, -5],
+      [4, -5],
+      [-3, 11],
+      [3, 11]
+    ])
+      deco()[C.y + dy][C.x + dx] = 'k:brazier';
     // Torches et bannières sur le rempart (faces tournées vers la place).
     for (let y = C.y - FORT_R - 3; y <= C.y + FORT_R + 3; y++)
       for (let x = C.x - FORT_R - 3; x <= C.x + FORT_R + 3; x++)
-        if (at(x, y) === T.WALL && OPEN(at(x, y + 1)) && Math.hypot(x - C.x, y - C.y) < FORT_R + 3 && hashU(x, y, 1) < 0.35) deco()[y][x] = 'w:' + FORT.wallProps[Math.floor(hashU(x, y, 2) * 4)];
+        if (
+          at(x, y) === T.WALL &&
+          OPEN(at(x, y + 1)) &&
+          Math.hypot(x - C.x, y - C.y) < FORT_R + 3 &&
+          hashU(x, y, 1) < 0.35
+        )
+          deco()[y][x] = 'w:' + FORT.wallProps[Math.floor(hashU(x, y, 2) * 4)];
   }
   function placeStructures(keep) {
     BIOMES.forEach((b, bi) => {
@@ -413,7 +621,12 @@
           p = polar(a, r),
           kind = b.structures[placed],
           S = STRUCT[kind];
-        if (biomeAt(p.x, p.y) !== bi || !roomFor(p.x, p.y, S.w, S.h, keep) || structures.some(s => Math.hypot(s.tx - p.x, s.ty - p.y) < 9)) continue;
+        if (
+          biomeAt(p.x, p.y) !== bi ||
+          !roomFor(p.x, p.y, S.w, S.h, keep) ||
+          structures.some(s => Math.hypot(s.tx - p.x, s.ty - p.y) < 9)
+        )
+          continue;
         addStructure(kind, p.x, p.y, bi);
         keep.push([p.x, p.y, 4]);
         placed++;
@@ -426,15 +639,37 @@
     for (let tries = 0; tries < 900 && made < 7; tries++) {
       const p = polar(BIOMES[2].angle - 40 + hashU(tries, 5, 5) * 80, 45 + hashU(5, tries, 6) * 95);
       if (biomeAt(p.x, p.y) !== 2 || !roomFor(p.x, p.y, 9, 6, keep)) continue;
-      for (let y = p.y - 5; y <= p.y + 1; y++) for (let x = p.x - 5; x <= p.x + 5; x++) if (OPEN(at(x, y)) && at(x, y) !== T.PATH) set(x, y, T.GRAVE);
-      for (let x = p.x - 5; x <= p.x + 5; x++) if (OPEN(at(x, p.y - 5))) deco()[p.y - 5][x] = x === p.x ? null : 'fence';
-      for (let y = p.y - 3; y <= p.y + 1; y += 2) for (let x = p.x - 4; x <= p.x + 4; x += 2) if (OPEN(at(x, y))) deco()[y][x] = hashU(x, y, 7) < 0.6 ? 'tomb' : hashU(x, y, 8) < 0.5 ? 'cross' : 'grave';
+      for (let y = p.y - 5; y <= p.y + 1; y++)
+        for (let x = p.x - 5; x <= p.x + 5; x++)
+          if (OPEN(at(x, y)) && at(x, y) !== T.PATH) set(x, y, T.GRAVE);
+      for (let x = p.x - 5; x <= p.x + 5; x++)
+        if (OPEN(at(x, p.y - 5))) deco()[p.y - 5][x] = x === p.x ? null : 'fence';
+      for (let y = p.y - 3; y <= p.y + 1; y += 2)
+        for (let x = p.x - 4; x <= p.x + 4; x += 2)
+          if (OPEN(at(x, y)))
+            deco()[y][x] = hashU(x, y, 7) < 0.6 ? 'tomb' : hashU(x, y, 8) < 0.5 ? 'cross' : 'grave';
       deco()[p.y - 4][p.x - 5] = 'deadtree';
       keep.push([p.x, p.y - 2, 6]);
       made++;
     }
   }
-  const SOLID_DECOR = new Set(['stalag', 'deadtree', 'tomb', 'cross', 'fence', 'giantshroom', 'ruinwall', 'brokenpillar', 'lanternpost', 'k:statue', 'k:pillar', 'k:brazier', 'k:minecart', 'k:anvil', 'k:cage']);
+  const SOLID_DECOR = new Set([
+    'stalag',
+    'deadtree',
+    'tomb',
+    'cross',
+    'fence',
+    'giantshroom',
+    'ruinwall',
+    'brokenpillar',
+    'lanternpost',
+    'k:statue',
+    'k:pillar',
+    'k:brazier',
+    'k:minecart',
+    'k:anvil',
+    'k:cage'
+  ]);
   function decorate(keep) {
     for (let y = 4; y < MAPH - 4; y++)
       for (let x = 4; x < MAPW - 4; x++) {
@@ -443,16 +678,37 @@
         if (b === 4) continue;
         // Objets sur les parois (lanternes, appliques, crânes, racines), côté sol.
         if (t === T.WALL) {
-          if (OPEN(at(x, y + 1)) && at(x, y + 1) !== T.PATH && hashU(x, y, 9) < 0.07) deco()[y][x] = 'w:' + BIOMES[b].wallProps[Math.floor(hashU(x, y, 10) * 4)];
+          if (OPEN(at(x, y + 1)) && at(x, y + 1) !== T.PATH && hashU(x, y, 9) < 0.07)
+            deco()[y][x] = 'w:' + BIOMES[b].wallProps[Math.floor(hashU(x, y, 10) * 4)];
           continue;
         }
-        if (!OPEN(t) || t === T.PATH || deco()[y][x] || keep.some(([kx, ky, r]) => Math.hypot(kx - x, ky - y) < r)) continue;
+        if (
+          !OPEN(t) ||
+          t === T.PATH ||
+          deco()[y][x] ||
+          keep.some(([kx, ky, r]) => Math.hypot(kx - x, ky - y) < r)
+        )
+          continue;
         const [density, list] = BIOMES[b].decor;
         if (hashU(x, y, 11) > density) continue;
         let d = list[Math.floor(hashU(x, y, 12) * list.length)];
         // Un objet qui bloque ne se pose ni au bord d'un chemin ni dans un passage étroit.
-        const around = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
-        if (SOLID_DECOR.has(d) && (around.filter(([dx, dy]) => OPEN(at(x + dx, y + dy))).length < 8 || around.some(([dx, dy]) => at(x + dx, y + dy) === T.PATH))) d = b === 3 ? 'shrooms' : b === 2 ? 'grave' : 'stalag2';
+        const around = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [-1, -1],
+          [1, -1],
+          [-1, 1]
+        ];
+        if (
+          SOLID_DECOR.has(d) &&
+          (around.filter(([dx, dy]) => OPEN(at(x + dx, y + dy))).length < 8 ||
+            around.some(([dx, dy]) => at(x + dx, y + dy) === T.PATH))
+        )
+          d = b === 3 ? 'shrooms' : b === 2 ? 'grave' : 'stalag2';
         if (t === T.MUD) d = b === 3 ? (hashU(x, y, 13) < 0.5 ? 'mudreeds' : null) : null;
         deco()[y][x] = d;
       }
@@ -463,8 +719,19 @@
     BIOMES.forEach((b, bi) => {
       for (let n = 0, tries = 0; n < 4 && tries < 600; tries++) {
         const p = polar(b.angle - 42 + hashU(tries, bi, 14) * 84, 40 + hashU(bi, tries, 15) * 105);
-        if (biomeAt(p.x, p.y) !== bi || !OPEN(at(p.x, p.y)) || at(p.x, p.y) === T.PATH || at(p.x, p.y) === T.MUD || deco()[p.y][p.x]) continue;
-        if (keep.some(([x, y, r]) => Math.hypot(x - p.x, y - p.y) < r) || CHESTS.some(c => c.x && Math.hypot(c.x - p.x, c.y - p.y) < 12)) continue;
+        if (
+          biomeAt(p.x, p.y) !== bi ||
+          !OPEN(at(p.x, p.y)) ||
+          at(p.x, p.y) === T.PATH ||
+          at(p.x, p.y) === T.MUD ||
+          deco()[p.y][p.x]
+        )
+          continue;
+        if (
+          keep.some(([x, y, r]) => Math.hypot(x - p.x, y - p.y) < r) ||
+          CHESTS.some(c => c.x && Math.hypot(c.x - p.x, c.y - p.y) < 12)
+        )
+          continue;
         Object.assign(CHESTS[k++], { x: p.x, y: p.y });
         n++;
       }
@@ -480,9 +747,22 @@
       for (let tx = 5; tx < MAPW - 5; tx += 3) {
         const t = at(tx, ty),
           b = biomeAt(tx, ty);
-        if (b === 4 || !OPEN(t) || t === T.PATH || t === T.MUD || bridges.has(ty * MAPW + tx) || deco()[ty][tx]) continue;
+        if (
+          b === 4 ||
+          !OPEN(t) ||
+          t === T.PATH ||
+          t === T.MUD ||
+          bridges.has(ty * MAPW + tx) ||
+          deco()[ty][tx]
+        )
+          continue;
         if (keep.some(([x, y, r]) => Math.hypot(x - tx, y - ty) < r) || structureAt(tx, ty, 2)) continue;
-        const rocky = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => at(tx + dx, ty + dy) === T.WALL),
+        const rocky = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ].some(([dx, dy]) => at(tx + dx, ty + dy) === T.WALL),
           roll = hashU(tx, ty, 16);
         let kind = null;
         if (roll < (rocky ? 0.24 : 0.04)) kind = 'ore';
@@ -494,28 +774,91 @@
   }
   // Bancs de poissons des lacs souterrains, au bord d'une rive praticable.
   const FISH_TABLES = [
-    [['aveugle', 60], ['carpe', 25], ['anguille', 15]],
-    [['lanterne', 40], ['murene', 30], ['aveugle', 30]],
-    [['aveugle', 50], ['murene', 50]],
-    [['fangeux', 50], ['murene', 25], ['lanterne', 25]]
+    [
+      ['aveugle', 60],
+      ['carpe', 25],
+      ['anguille', 15]
+    ],
+    [
+      ['lanterne', 40],
+      ['murene', 30],
+      ['aveugle', 30]
+    ],
+    [
+      ['aveugle', 50],
+      ['murene', 50]
+    ],
+    [
+      ['fangeux', 50],
+      ['murene', 25],
+      ['lanterne', 25]
+    ]
   ];
   function findSpots() {
     spots = [];
     for (let ty = 4; ty < MAPH - 4; ty += 2)
       for (let tx = 4; tx < MAPW - 4; tx += 2) {
         if (at(tx, ty) !== T.LAKE || hashU(tx, ty, 18) > 0.55) continue;
-        const shore = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].some(([dx, dy]) => OPEN(at(tx + dx, ty + dy)));
+        const shore = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [-1, -1],
+          [1, -1],
+          [-1, 1]
+        ].some(([dx, dy]) => OPEN(at(tx + dx, ty + dy)));
         if (!shore || spots.some(s => Math.hypot(s.tx - tx, s.ty - ty) < 6)) continue;
         const b = biomeAt(tx, ty) % 4;
-        spots.push({ tx, ty, x: (tx + 0.5) * TS, y: (ty + 0.5) * TS, kind: 'lake', zone: 6 + b, table: FISH_TABLES[b], layer: 'under' });
+        spots.push({
+          tx,
+          ty,
+          x: (tx + 0.5) * TS,
+          y: (ty + 0.5) * TS,
+          kind: 'lake',
+          zone: 6 + b,
+          table: FISH_TABLES[b],
+          layer: 'under'
+        });
       }
   }
   // Faune : animaux chassables (taupes, salamandres, crapauds) et insectes (lucioles, chauves-souris, spores…).
   const FAUNA = [
-    { ground: [['taupe', 26]], fliers: [['luciole', 26], ['chauve', 18]] },
-    { ground: [['salamandre', 22], ['taupe', 6]], fliers: [['luciole', 18], ['chauve', 14]] },
-    { ground: [['salamandre', 12]], fliers: [['mouche', 30], ['chauve', 22]] },
-    { ground: [['crapaud', 34], ['taupe', 10]], fliers: [['spore', 54], ['papillon', 18, true]] }
+    {
+      ground: [['taupe', 26]],
+      fliers: [
+        ['luciole', 26],
+        ['chauve', 18]
+      ]
+    },
+    {
+      ground: [
+        ['salamandre', 22],
+        ['taupe', 6]
+      ],
+      fliers: [
+        ['luciole', 18],
+        ['chauve', 14]
+      ]
+    },
+    {
+      ground: [['salamandre', 12]],
+      fliers: [
+        ['mouche', 30],
+        ['chauve', 22]
+      ]
+    },
+    {
+      ground: [
+        ['crapaud', 34],
+        ['taupe', 10]
+      ],
+      fliers: [
+        ['spore', 54],
+        ['papillon', 18, true]
+      ]
+    }
   ];
   function placeFauna(keep) {
     fauna = { ground: [], fliers: [] };
@@ -523,8 +866,23 @@
       const spot = (wet, salt) => {
         for (let tries = 0; tries < 300; tries++) {
           const p = polar(b.angle - 44 + hashU(tries, salt, 19) * 88, 30 + hashU(salt, tries, 20) * 118);
-          if (biomeAt(p.x, p.y) !== bi || !OPEN(at(p.x, p.y)) || keep.some(([x, y, r]) => Math.hypot(x - p.x, y - p.y) < r * 0.6)) continue;
-          if (wet && ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => at(p.x + dx, p.y + dy) === T.MUD || at(p.x + dx, p.y + dy) === T.LAKE) && tries < 200) continue;
+          if (
+            biomeAt(p.x, p.y) !== bi ||
+            !OPEN(at(p.x, p.y)) ||
+            keep.some(([x, y, r]) => Math.hypot(x - p.x, y - p.y) < r * 0.6)
+          )
+            continue;
+          if (
+            wet &&
+            ![
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1]
+            ].some(([dx, dy]) => at(p.x + dx, p.y + dy) === T.MUD || at(p.x + dx, p.y + dy) === T.LAKE) &&
+            tries < 200
+          )
+            continue;
           return { x: (p.x + 0.5) * TS, y: (p.y + 0.5) * TS };
         }
         return null;
@@ -538,88 +896,409 @@
       for (const [kind, count, glow] of FAUNA[bi].fliers)
         for (let k = 0; k < count; k++) {
           const p = spot(false, salt++);
-          if (p) fauna.fliers.push({ kind, ...p, glow: !!glow || kind === 'luciole' || kind === 'spore', seed: hashU(k, salt, 21) * 1000, layer: 'under' });
+          if (p)
+            fauna.fliers.push({
+              kind,
+              ...p,
+              glow: !!glow || kind === 'luciole' || kind === 'spore',
+              seed: hashU(k, salt, 21) * 1000,
+              layer: 'under'
+            });
         }
     });
   }
   function structureAt(tx, ty, margin = 0) {
     for (let by = Math.floor(ty / 8) - 1; by <= Math.floor(ty / 8) + 1; by++)
       for (let bx = Math.floor(tx / 8) - 1; bx <= Math.floor(tx / 8) + 1; bx++)
-        for (const s of buckets.get(bx + ',' + by) || []) if (Math.abs(s.tx - tx) <= s.w / 2 + margin && ty >= s.ty - s.h - margin && ty <= s.ty + 1 + margin) return s;
+        for (const s of buckets.get(bx + ',' + by) || [])
+          if (Math.abs(s.tx - tx) <= s.w / 2 + margin && ty >= s.ty - s.h - margin && ty <= s.ty + 1 + margin)
+            return s;
     return null;
   }
 
   // ---------------------------------------------------------------- Nains des cavernes
   // look : barbe, casque, tunique, peau ; tool : outil tenu.
   const DWARF_PLAN = [
-    { name: 'Roi Thrain Barbe-de-Fer', dx: 0, dy: -5, role: 'roi', beard: '#e8e0d0', helm: '#e0b030', tunic: '#7a1a20', tool: 'none', crown: true, lines: [
-      'Bienvenue à Durgrim, voyageur de la surface. Mon peuple garde ces profondeurs depuis mille ans.',
-      'Khaz-Ombral était notre plus belle cité… jusqu’à ce que la pierre se réveille. Ne t’y aventure pas sans arme.',
-      'Morvane, la Reine-Liche, règne sur la Nécropole. Les nôtres qui y sont tombés ne reposent plus en paix.',
-      'Quatre donjons se cachent dans les Tréfonds. Ils s’adaptent à la force de qui y entre : aucun n’est trop tôt pour toi.'
-    ] },
-    { name: 'Hilda Fonte-Rune', dx: -9, dy: 1, role: 'forgeronne', beard: '#c8642a', helm: '#6a4a2a', tunic: '#4a3a2a', tool: 'hammer', fem: true, lines: [
-      'Ma forge vaut bien celle du Camp de l’Aurore : fabrique tes enchantements ici (panneau P, onglet Enchantement).',
-      'Le fer noir des Galeries chante sous le marteau. Les marchands le paient très cher.',
-      'Un bon nain ne sort jamais sans sa pioche. Toi, tu sors sans ? Étrange peuple, celui de la surface.'
-    ] },
-    { name: 'Dorn le Tavernier', dx: 9, dy: 1, role: 'tavernier', beard: '#4a2e1e', helm: '#8a8e96', tunic: '#5a3a1e', tool: 'mug', lines: [
-      'L’âtre de ma taverne est toujours chaud : cuisine tes prises ici, comme à La Marmite dorée.',
-      'Le poisson aveugle des lacs noirs ? Délicieux en papillote. Fais-moi confiance.',
-      'Une chope de bière de champignon ? Non ? Tant pis pour toi.'
-    ] },
-    { name: 'Borin le Marchand', dx: 7, dy: 10, role: 'marchand', beard: '#d8a040', helm: '#8a8e96', tunic: '#2a4a6a', tool: 'none', type: 'shop', lines: [] },
-    { name: 'Gimra la Banquière', dx: -7, dy: 10, role: 'banquière', beard: '#8a8a8a', helm: '#c09030', tunic: '#3a2a5a', tool: 'none', type: 'bank', fem: true, lines: [] },
-    { name: 'Garde Balin', dx: -2, dy: FORT_R - 1, role: 'garde', beard: '#7a4a2a', helm: '#8a8e96', tunic: '#5a2a2a', tool: 'axe', lines: [
-      'Halte ! Ah, un ami de la surface. Passe, mais garde ta lanterne allumée.',
-      'Au sud, la Nécropole. Au nord, Khaz-Ombral. Ne confonds pas, l’un est plus sinistre que l’autre.'
-    ] },
-    { name: 'Garde Dwalin', dx: 2, dy: -FORT_R + 2, role: 'garde', beard: '#2a1f1a', helm: '#8a8e96', tunic: '#5a2a2a', tool: 'axe', lines: [
-      'Les gargouilles de Khaz-Ombral ne dorment jamais. Moi non plus, d’ailleurs.',
-      'Un ver gros comme une maison creuse les Galeries d’Argile. Gorgrath, qu’on l’appelle.'
-    ] },
-    { name: 'Mineur Gloin', dx: -4, dy: 5, role: 'mineur', beard: '#a8442a', helm: '#c8a040', tunic: '#4a4a3a', tool: 'pick', roam: 3, lines: [
-      'Il y a de l’obsidienne dans la Nécropole… si tu oses creuser entre les tombes.',
-      'Les géodes de Fangeval brillent comme des étoiles. Elles valent une fortune !'
-    ] },
-    { name: 'Ancienne Brunhild', dx: 4, dy: 5, role: 'ancienne', beard: '#e8e8e0', helm: '#5a3a5a', tunic: '#3a2e3a', tool: 'staff', fem: true, roam: 2, lines: [
-      'Ma grand-mère disait que l’île de là-haut repose sur le dos des Tréfonds.',
-      'Écoute les âmes errantes : elles pleurent les noms qu’on a oubliés.'
-    ] },
-    { name: 'Petit Fili', dx: 2, dy: 3, role: 'enfant', beard: null, helm: '#3a6a8a', tunic: '#6a8a3a', tool: 'none', scale: 0.8, roam: 4, lines: [
-      'Tu viens vraiment de là-haut ? C’est vrai que le plafond est bleu ?',
-      'Un jour, j’irai voir le soleil. Il paraît qu’il brûle les yeux !'
-    ] }
+    {
+      name: 'Roi Thrain Barbe-de-Fer',
+      dx: 0,
+      dy: -5,
+      role: 'roi',
+      beard: '#e8e0d0',
+      helm: '#e0b030',
+      tunic: '#7a1a20',
+      tool: 'none',
+      crown: true,
+      lines: [
+        'Bienvenue à Durgrim, voyageur de la surface. Mon peuple garde ces profondeurs depuis mille ans.',
+        'Khaz-Ombral était notre plus belle cité… jusqu’à ce que la pierre se réveille. Ne t’y aventure pas sans arme.',
+        'Morvane, la Reine-Liche, règne sur la Nécropole. Les nôtres qui y sont tombés ne reposent plus en paix.',
+        'Quatre donjons se cachent dans les Tréfonds. Ils s’adaptent à la force de qui y entre : aucun n’est trop tôt pour toi.'
+      ]
+    },
+    {
+      name: 'Hilda Fonte-Rune',
+      dx: -9,
+      dy: 1,
+      role: 'forgeronne',
+      beard: '#c8642a',
+      helm: '#6a4a2a',
+      tunic: '#4a3a2a',
+      tool: 'hammer',
+      fem: true,
+      lines: [
+        'Ma forge vaut bien celle du Camp de l’Aurore : fabrique tes enchantements ici (panneau P, onglet Enchantement).',
+        'Le fer noir des Galeries chante sous le marteau. Les marchands le paient très cher.',
+        'Un bon nain ne sort jamais sans sa pioche. Toi, tu sors sans ? Étrange peuple, celui de la surface.'
+      ]
+    },
+    {
+      name: 'Dorn le Tavernier',
+      dx: 9,
+      dy: 1,
+      role: 'tavernier',
+      beard: '#4a2e1e',
+      helm: '#8a8e96',
+      tunic: '#5a3a1e',
+      tool: 'mug',
+      lines: [
+        'L’âtre de ma taverne est toujours chaud : cuisine tes prises ici, comme à La Marmite dorée.',
+        'Le poisson aveugle des lacs noirs ? Délicieux en papillote. Fais-moi confiance.',
+        'Une chope de bière de champignon ? Non ? Tant pis pour toi.'
+      ]
+    },
+    {
+      name: 'Borin le Marchand',
+      dx: 7,
+      dy: 10,
+      role: 'marchand',
+      beard: '#d8a040',
+      helm: '#8a8e96',
+      tunic: '#2a4a6a',
+      tool: 'none',
+      type: 'shop',
+      lines: []
+    },
+    {
+      name: 'Gimra la Banquière',
+      dx: -7,
+      dy: 10,
+      role: 'banquière',
+      beard: '#8a8a8a',
+      helm: '#c09030',
+      tunic: '#3a2a5a',
+      tool: 'none',
+      type: 'bank',
+      fem: true,
+      lines: []
+    },
+    {
+      name: 'Garde Balin',
+      dx: -2,
+      dy: FORT_R - 1,
+      role: 'garde',
+      beard: '#7a4a2a',
+      helm: '#8a8e96',
+      tunic: '#5a2a2a',
+      tool: 'axe',
+      lines: [
+        'Halte ! Ah, un ami de la surface. Passe, mais garde ta lanterne allumée.',
+        'Au sud, la Nécropole. Au nord, Khaz-Ombral. Ne confonds pas, l’un est plus sinistre que l’autre.'
+      ]
+    },
+    {
+      name: 'Garde Dwalin',
+      dx: 2,
+      dy: -FORT_R + 2,
+      role: 'garde',
+      beard: '#2a1f1a',
+      helm: '#8a8e96',
+      tunic: '#5a2a2a',
+      tool: 'axe',
+      lines: [
+        'Les gargouilles de Khaz-Ombral ne dorment jamais. Moi non plus, d’ailleurs.',
+        'Un ver gros comme une maison creuse les Galeries d’Argile. Gorgrath, qu’on l’appelle.'
+      ]
+    },
+    {
+      name: 'Mineur Gloin',
+      dx: -4,
+      dy: 5,
+      role: 'mineur',
+      beard: '#a8442a',
+      helm: '#c8a040',
+      tunic: '#4a4a3a',
+      tool: 'pick',
+      roam: 3,
+      lines: [
+        'Il y a de l’obsidienne dans la Nécropole… si tu oses creuser entre les tombes.',
+        'Les géodes de Fangeval brillent comme des étoiles. Elles valent une fortune !'
+      ]
+    },
+    {
+      name: 'Ancienne Brunhild',
+      dx: 4,
+      dy: 5,
+      role: 'ancienne',
+      beard: '#e8e8e0',
+      helm: '#5a3a5a',
+      tunic: '#3a2e3a',
+      tool: 'staff',
+      fem: true,
+      roam: 2,
+      lines: [
+        'Ma grand-mère disait que l’île de là-haut repose sur le dos des Tréfonds.',
+        'Écoute les âmes errantes : elles pleurent les noms qu’on a oubliés.'
+      ]
+    },
+    {
+      name: 'Petit Fili',
+      dx: 2,
+      dy: 3,
+      role: 'enfant',
+      beard: null,
+      helm: '#3a6a8a',
+      tunic: '#6a8a3a',
+      tool: 'none',
+      scale: 0.8,
+      roam: 4,
+      lines: [
+        'Tu viens vraiment de là-haut ? C’est vrai que le plafond est bleu ?',
+        'Un jour, j’irai voir le soleil. Il paraît qu’il brûle les yeux !'
+      ]
+    }
   ];
   // Habitants des bâtiments de Durgrim : room (pièce), lx/ly (cases dans la pièce).
   const DWARF_HOMES = [
-    { room: 'dur_hall', lx: 6.5, ly: 3.6, name: 'Conseillère Dagny', role: 'conseillère', beard: '#d8a040', helm: '#c09030', tunic: '#3a2a5a', tool: 'staff', fem: true, lines: ['Le Roi tient conseil sur la place, mais c’est ici que se décide l’avenir de Durgrim.', 'Ces piliers portent les noms des vingt rois. Le vingt-et-unième attend encore le sien.'] },
-    { room: 'dur_hall', lx: 10.5, ly: 3.6, name: 'Garde royal Hrolf', role: 'garde', beard: '#4a2e1e', helm: '#e0b030', tunic: '#7a1a20', tool: 'axe', lines: ['Personne ne s’assied sur le trône de pierre. Personne.'] },
-    { room: 'dur_forge', lx: 5.5, ly: 4.6, name: 'Sigrun la Forgeronne', role: 'forgeronne', beard: '#e8a040', helm: '#5a5e66', tunic: '#5a3a2a', tool: 'hammer', fem: true, lines: ['Le fer se plie à qui sait l’écouter. Le reste n’est que du bruit.', 'Hilda t’enchantera tes armes dehors, à la grande forge. Ici, on forge les haches de la garde.'] },
-    { room: 'dur_forge', lx: 9.5, ly: 4.6, name: 'Apprenti Kili', role: 'apprenti', beard: '#a8442a', helm: '#6a4a2a', tunic: '#4a4a3a', tool: 'hammer', lines: ['Trois cents coups de marteau par lame. J’en suis à deux cent douze… je crois.'] },
-    { room: 'dur_taverne', lx: 5.5, ly: 2.6, name: 'Helga la Brasseuse', role: 'brasseuse', beard: '#f0c060', helm: '#8a5a2a', tunic: '#2a5a3a', tool: 'mug', fem: true, lines: ['Bière de champignon, hydromel de mousse ou eau de roche ? Choisis bien, la surface.', 'Dorn dit que c’est sa taverne. Moi, je dis que c’est ma bière.'] },
-    { room: 'dur_taverne', lx: 3.4, ly: 5.4, name: 'Oin le Buveur', role: 'buveur', beard: '#c8642a', helm: '#8a8e96', tunic: '#5a3a1e', tool: 'mug', lines: ['Hic ! Les gargouilles… elles m’ont souri. Je le jure sur ma barbe.'] },
-    { room: 'dur_taverne', lx: 10.4, ly: 5.4, name: 'Frida Chope-Pleine', role: 'buveuse', beard: '#4a2e1e', helm: '#6a4a2a', tunic: '#6a2a3a', tool: 'mug', fem: true, lines: ['Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.'] },
-    { room: 'dur_coffre', lx: 5.5, ly: 6.2, name: 'Gardien Thror', role: 'garde', beard: '#8a8a8a', helm: '#c09030', tunic: '#2a2a3a', tool: 'axe', lines: ['L’or de Durgrim dort ici. Gimra compte, moi je garde. Chacun son métier.'] },
-    { room: 'dur_maison1', lx: 7.5, ly: 4.4, name: 'Ylva Pied-de-Roc', role: 'mère', beard: '#c8642a', helm: '#5a3a5a', tunic: '#4a6a3a', tool: 'none', fem: true, lines: ['Essuie tes bottes, voyageur ! La boue des Galeries, ça ne part jamais.', 'Mon mari est mineur. Il rentre quand la lanterne s’éteint.'] },
-    { room: 'dur_maison1', lx: 3.5, ly: 6.4, name: 'Petite Asa', role: 'enfant', beard: null, helm: '#8a3a5a', tunic: '#c8784a', tool: 'none', scale: 0.8, fem: true, lines: ['Quand je serai grande, j’aurai les plus longues tresses de Durgrim !'] },
-    { room: 'dur_maison2', lx: 7.5, ly: 4.6, name: 'Bombur Marteau-d’Or', role: 'père', beard: '#e0b040', helm: '#8a8e96', tunic: '#2a4a6a', tool: 'none', lines: ['Ma famille forge des marteaux depuis six générations. Le mien est accroché là-haut.'] },
-    { room: 'dur_maison2', lx: 2.5, ly: 5.4, name: 'Grand-mère Astrid', role: 'ancienne', beard: '#e8e8e0', helm: '#5a3a5a', tunic: '#3a2e3a', tool: 'staff', fem: true, lines: ['Assieds-toi, petit. Je vais te raconter la Grande Chute de Khaz-Ombral.', 'Les tresses d’une naine racontent sa vie : une par victoire, une par deuil.'] }
+    {
+      room: 'dur_hall',
+      lx: 6.5,
+      ly: 3.6,
+      name: 'Conseillère Dagny',
+      role: 'conseillère',
+      beard: '#d8a040',
+      helm: '#c09030',
+      tunic: '#3a2a5a',
+      tool: 'staff',
+      fem: true,
+      lines: [
+        'Le Roi tient conseil sur la place, mais c’est ici que se décide l’avenir de Durgrim.',
+        'Ces piliers portent les noms des vingt rois. Le vingt-et-unième attend encore le sien.'
+      ]
+    },
+    {
+      room: 'dur_hall',
+      lx: 10.5,
+      ly: 3.6,
+      name: 'Garde royal Hrolf',
+      role: 'garde',
+      beard: '#4a2e1e',
+      helm: '#e0b030',
+      tunic: '#7a1a20',
+      tool: 'axe',
+      lines: ['Personne ne s’assied sur le trône de pierre. Personne.']
+    },
+    {
+      room: 'dur_forge',
+      lx: 5.5,
+      ly: 4.6,
+      name: 'Sigrun la Forgeronne',
+      role: 'forgeronne',
+      beard: '#e8a040',
+      helm: '#5a5e66',
+      tunic: '#5a3a2a',
+      tool: 'hammer',
+      fem: true,
+      lines: [
+        'Le fer se plie à qui sait l’écouter. Le reste n’est que du bruit.',
+        'Hilda t’enchantera tes armes dehors, à la grande forge. Ici, on forge les haches de la garde.'
+      ]
+    },
+    {
+      room: 'dur_forge',
+      lx: 9.5,
+      ly: 4.6,
+      name: 'Apprenti Kili',
+      role: 'apprenti',
+      beard: '#a8442a',
+      helm: '#6a4a2a',
+      tunic: '#4a4a3a',
+      tool: 'hammer',
+      lines: ['Trois cents coups de marteau par lame. J’en suis à deux cent douze… je crois.']
+    },
+    {
+      room: 'dur_taverne',
+      lx: 5.5,
+      ly: 2.6,
+      name: 'Helga la Brasseuse',
+      role: 'brasseuse',
+      beard: '#f0c060',
+      helm: '#8a5a2a',
+      tunic: '#2a5a3a',
+      tool: 'mug',
+      fem: true,
+      lines: [
+        'Bière de champignon, hydromel de mousse ou eau de roche ? Choisis bien, la surface.',
+        'Dorn dit que c’est sa taverne. Moi, je dis que c’est ma bière.'
+      ]
+    },
+    {
+      room: 'dur_taverne',
+      lx: 3.4,
+      ly: 5.4,
+      name: 'Oin le Buveur',
+      role: 'buveur',
+      beard: '#c8642a',
+      helm: '#8a8e96',
+      tunic: '#5a3a1e',
+      tool: 'mug',
+      lines: ['Hic ! Les gargouilles… elles m’ont souri. Je le jure sur ma barbe.']
+    },
+    {
+      room: 'dur_taverne',
+      lx: 10.4,
+      ly: 5.4,
+      name: 'Frida Chope-Pleine',
+      role: 'buveuse',
+      beard: '#4a2e1e',
+      helm: '#6a4a2a',
+      tunic: '#6a2a3a',
+      tool: 'mug',
+      fem: true,
+      lines: ['Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.']
+    },
+    {
+      room: 'dur_coffre',
+      lx: 5.5,
+      ly: 6.2,
+      name: 'Gardien Thror',
+      role: 'garde',
+      beard: '#8a8a8a',
+      helm: '#c09030',
+      tunic: '#2a2a3a',
+      tool: 'axe',
+      lines: ['L’or de Durgrim dort ici. Gimra compte, moi je garde. Chacun son métier.']
+    },
+    {
+      room: 'dur_maison1',
+      lx: 7.5,
+      ly: 4.4,
+      name: 'Ylva Pied-de-Roc',
+      role: 'mère',
+      beard: '#c8642a',
+      helm: '#5a3a5a',
+      tunic: '#4a6a3a',
+      tool: 'none',
+      fem: true,
+      lines: [
+        'Essuie tes bottes, voyageur ! La boue des Galeries, ça ne part jamais.',
+        'Mon mari est mineur. Il rentre quand la lanterne s’éteint.'
+      ]
+    },
+    {
+      room: 'dur_maison1',
+      lx: 3.5,
+      ly: 6.4,
+      name: 'Petite Asa',
+      role: 'enfant',
+      beard: null,
+      helm: '#8a3a5a',
+      tunic: '#c8784a',
+      tool: 'none',
+      scale: 0.8,
+      fem: true,
+      lines: ['Quand je serai grande, j’aurai les plus longues tresses de Durgrim !']
+    },
+    {
+      room: 'dur_maison2',
+      lx: 7.5,
+      ly: 4.6,
+      name: 'Bombur Marteau-d’Or',
+      role: 'père',
+      beard: '#e0b040',
+      helm: '#8a8e96',
+      tunic: '#2a4a6a',
+      tool: 'none',
+      lines: ['Ma famille forge des marteaux depuis six générations. Le mien est accroché là-haut.']
+    },
+    {
+      room: 'dur_maison2',
+      lx: 2.5,
+      ly: 5.4,
+      name: 'Grand-mère Astrid',
+      role: 'ancienne',
+      beard: '#e8e8e0',
+      helm: '#5a3a5a',
+      tunic: '#3a2e3a',
+      tool: 'staff',
+      fem: true,
+      lines: [
+        'Assieds-toi, petit. Je vais te raconter la Grande Chute de Khaz-Ombral.',
+        'Les tresses d’une naine racontent sa vie : une par victoire, une par deuil.'
+      ]
+    }
   ];
   // Éclaireurs postés au centre de chaque biome.
   const SCOUTS = [
-    ['Éclaireur Nori', ['Les Galeries d’Argile : terre, boue et vieilles mines. Attention aux taupes-garous.', 'La Mine Effondrée de Durgrim est au bout de la route. Grumbar y hante encore ses galeries.']],
-    ['Éclaireuse Dísa', ['Khaz-Ombral, notre cité perdue. Les sentinelles de pierre gardent encore ses rues.', 'Les Halls Engloutis abritent le Roi Ombral. Il ne reconnaît plus les siens.']],
-    ['Éclaireur Óin', ['La Nécropole des Oubliés… Restez sur les dalles, les tombes ont faim.', 'La Crypte des Mille Tombes : le Fossoyeur Éternel y creuse sans fin.']],
-    ['Éclaireuse Thyra', ['Fangeval : la boue est tiède et les champignons brillent. Les spores, elles, piquent.', 'Les Tréfonds Fongiques cachent la Reine des Spores. Brûle-la, si tu peux.']]
+    [
+      'Éclaireur Nori',
+      [
+        'Les Galeries d’Argile : terre, boue et vieilles mines. Attention aux taupes-garous.',
+        'La Mine Effondrée de Durgrim est au bout de la route. Grumbar y hante encore ses galeries.'
+      ]
+    ],
+    [
+      'Éclaireuse Dísa',
+      [
+        'Khaz-Ombral, notre cité perdue. Les sentinelles de pierre gardent encore ses rues.',
+        'Les Halls Engloutis abritent le Roi Ombral. Il ne reconnaît plus les siens.'
+      ]
+    ],
+    [
+      'Éclaireur Óin',
+      [
+        'La Nécropole des Oubliés… Restez sur les dalles, les tombes ont faim.',
+        'La Crypte des Mille Tombes : le Fossoyeur Éternel y creuse sans fin.'
+      ]
+    ],
+    [
+      'Éclaireuse Thyra',
+      [
+        'Fangeval : la boue est tiède et les champignons brillent. Les spores, elles, piquent.',
+        'Les Tréfonds Fongiques cachent la Reine des Spores. Brûle-la, si tu peux.'
+      ]
+    ]
   ];
   function placeDwarves() {
-    for (let i = game.world.npcs.length - 1; i >= 0; i--) if (game.world.npcs[i].dwarf) game.world.npcs.splice(i, 1);
+    for (let i = game.world.npcs.length - 1; i >= 0; i--)
+      if (game.world.npcs[i].dwarf) game.world.npcs.splice(i, 1);
     dwarves = [];
     const add = (d, x, y) => {
-      const v = { ...d, x, y, hx: x, hy: y, tx: x, ty: y, step: 0, face: 1, wait: Math.floor(hashU(x, y, 22) * 200), bubble: null, line: 0, skin: ['#f0c7a0', '#e8b48a', '#c98e62'][Math.floor(hashU(x, y, 23) * 3)] };
+      const v = {
+        ...d,
+        x,
+        y,
+        hx: x,
+        hy: y,
+        tx: x,
+        ty: y,
+        step: 0,
+        face: 1,
+        wait: Math.floor(hashU(x, y, 22) * 200),
+        bubble: null,
+        line: 0,
+        skin: ['#f0c7a0', '#e8b48a', '#c98e62'][Math.floor(hashU(x, y, 23) * 3)]
+      };
       dwarves.push(v);
-      game.world.npcs.push({ x, y, name: d.name, type: d.type || 'dwarf', layer: 'under', dwarf: v, village: FORT.name });
+      game.world.npcs.push({
+        x,
+        y,
+        name: d.name,
+        type: d.type || 'dwarf',
+        layer: 'under',
+        dwarf: v,
+        village: FORT.name
+      });
     };
     for (const d of DWARF_PLAN) add(d, (C.x + d.dx + 0.5) * TS, (C.y + d.dy + 0.5) * TS);
     // Nains qui vivent dans les bâtiments de la forteresse (pièces de house.js, cases de la pièce).
@@ -627,7 +1306,22 @@
       const room = typeof CANAAN_ROOMS !== 'undefined' && CANAAN_ROOMS.find(r => r.id === d.room);
       if (room) add(d, (room.x + d.lx) * TS, (room.y + d.ly) * TS);
     }
-    SCOUTS.forEach(([name, lines], k) => add({ name, role: 'éclaireur', beard: ['#c8642a', '#d8a040', '#4a2e1e', '#e8e0d0'][k], helm: '#6a4a2a', tunic: '#3a4a2a', tool: 'lantern', fem: k % 2 === 1, lines }, (hubs[k].x + 1.5) * TS, (hubs[k].y + 0.5) * TS));
+    SCOUTS.forEach(([name, lines], k) =>
+      add(
+        {
+          name,
+          role: 'éclaireur',
+          beard: ['#c8642a', '#d8a040', '#4a2e1e', '#e8e0d0'][k],
+          helm: '#6a4a2a',
+          tunic: '#3a4a2a',
+          tool: 'lantern',
+          fem: k % 2 === 1,
+          lines
+        },
+        (hubs[k].x + 1.5) * TS,
+        (hubs[k].y + 0.5) * TS
+      )
+    );
   }
   // Une réplique du nain, en bulle au-dessus de lui.
   function talk(npc) {
@@ -804,7 +1498,13 @@
       c.save();
       c.translate(Math.round(v.x), Math.round(v.y + 18));
       if (v.face < 0) c.scale(-1, 1);
-      c.drawImage(spr, Math.round((-spr.width * s) / 2), Math.round(-spr.height * s), Math.round(spr.width * s), Math.round(spr.height * s));
+      c.drawImage(
+        spr,
+        Math.round((-spr.width * s) / 2),
+        Math.round(-spr.height * s),
+        Math.round(spr.width * s),
+        Math.round(spr.height * s)
+      );
       c.restore();
       if (v.tool === 'lantern') canaanLight(v.x - 18, v.y - 4, 120, '#ffd36d');
       const near = Math.hypot(P.x - v.x, P.y - v.y);
@@ -906,7 +1606,13 @@
           c.globalAlpha = 0.25 - k * 0.07;
           c.fillStyle = '#c8c0b0';
           c.beginPath();
-          c.arc(sx + Math.sin(time * 0.02 + k) * 4, sy - 10 - k * 14 - ((time * 0.3) % 14), 6 + k * 2, 0, Math.PI * 2);
+          c.arc(
+            sx + Math.sin(time * 0.02 + k) * 4,
+            sy - 10 - k * 14 - ((time * 0.3) % 14),
+            6 + k * 2,
+            0,
+            Math.PI * 2
+          );
           c.fill();
         }
         c.globalAlpha = 1;
@@ -937,10 +1643,17 @@
       c.fillRect(hx + 14, hy + 30, 44, 34);
       c.restore();
       canaanLight(hx + 36, hy + 30, 240, '#ff8a3c');
-      if (hash(Math.floor(time / 12), 1, 2) > 0.7) for (let k = 0; k < 4; k++) R(c, hx + 10 + Math.random() * 50, hy - Math.random() * 30, 2, 2, '#ffd36b');
+      if (hash(Math.floor(time / 12), 1, 2) > 0.7)
+        for (let k = 0; k < 4; k++)
+          R(c, hx + 10 + Math.random() * 50, hy - Math.random() * 30, 2, 2, '#ffd36b');
       smokeAt(W - 20, 2);
     } else if (s.kind === 'tavern') {
-      for (const [ax, ay] of [[29, 56], [W - 29, 56], [27, 88], [W - 27, 88]]) {
+      for (const [ax, ay] of [
+        [29, 56],
+        [W - 29, 56],
+        [27, 88],
+        [W - 27, 88]
+      ]) {
         const [lx, ly] = at(ax, ay);
         canaanLight(lx, ly, 100, '#ffb84a');
       }
@@ -967,7 +1680,12 @@
     c.beginPath();
     c.ellipse(cx, by, w * 0.55, 14, 0, 0, Math.PI * 2);
     c.fill();
-    if (s.biome === 4 && window.CANAAN_DWARF_ART && CANAAN_DWARF_ART.has(s.kind) && drawFortArt(c, s, cx, by, flameCols)) {
+    if (
+      s.biome === 4 &&
+      window.CANAAN_DWARF_ART &&
+      CANAAN_DWARF_ART.has(s.kind) &&
+      drawFortArt(c, s, cx, by, flameCols)
+    ) {
       c.restore();
       return;
     }
@@ -1033,7 +1751,8 @@
         R(c, left + 18, by - 80, 16, 16, '#0a0c10');
         R(c, left + 18, by - 73, 16, 2, wall.dark);
         R(c, left + w - 30, by - 84, 10, 40, '#4a3a2a');
-        for (let k = 0; k < 6; k++) R(c, left + hash(k, s.tx, 5) * w, by - 10 + hash(s.ty, k, 6) * 10, 10, 6, wall.light);
+        for (let k = 0; k < 6; k++)
+          R(c, left + hash(k, s.tx, 5) * w, by - 10 + hash(s.ty, k, 6) * 10, 10, 6, wall.light);
         break;
       }
       case 'ruintower': {
@@ -1053,7 +1772,8 @@
         R(c, cx - 4, by - 120, 8, 22, '#0a0c10');
         R(c, cx - 30, by - 70, 6, 16, '#0a0c10');
         door(c, cx - 14, by - 52, 28, 52);
-        for (let k = 0; k < 8; k++) R(c, cx - 60 + hash(k, 1, s.seed) * 120, by - 12 + hash(k, 2, s.seed) * 10, 12, 8, wall.light);
+        for (let k = 0; k < 8; k++)
+          R(c, cx - 60 + hash(k, 1, s.seed) * 120, by - 12 + hash(k, 2, s.seed) * 10, 12, 8, wall.light);
         break;
       }
       case 'mausoleum': {
@@ -1106,13 +1826,18 @@
         // Hutte envahie par les champignons : murs de terre, chapeaux géants luisants sur le toit.
         R(c, left + 10, by - 70, w - 20, 70, '#4a3e30');
         door(c, cx - 12, by - 42, 24, 42, '#0c0a08');
-        for (const [dx, dy, r, col] of [[-30, -86, 34, '#c8508a'], [28, -96, 26, '#5ac8b8'], [0, -112, 22, '#d870d0']]) {
+        for (const [dx, dy, r, col] of [
+          [-30, -86, 34, '#c8508a'],
+          [28, -96, 26, '#5ac8b8'],
+          [0, -112, 22, '#d870d0']
+        ]) {
           R(c, cx + dx - 4, by + dy, 8, -dy - 40, '#e8dcc0');
           c.fillStyle = col;
           c.beginPath();
           c.ellipse(cx + dx, by + dy, r, r * 0.5, 0, Math.PI, 0);
           c.fill();
-          for (let k = 0; k < 4; k++) R(c, cx + dx - r * 0.6 + k * r * 0.35, by + dy - r * 0.3, 4, 4, '#fff0f8');
+          for (let k = 0; k < 4; k++)
+            R(c, cx + dx - r * 0.6 + k * r * 0.35, by + dy - r * 0.3, 4, 4, '#fff0f8');
           canaanLight(cx + dx, by + dy, 90, col);
         }
         break;
@@ -1170,7 +1895,9 @@
         R(c, cx + 18, by - 34, 34, 12, '#4a4e56');
         R(c, cx + 24, by - 22, 22, 18, '#3a3e46');
         R(c, cx + 14, by - 38, 44, 6, '#6a6e78');
-        if (hash(Math.floor(time / 12), 1, 2) > 0.7) for (let k = 0; k < 4; k++) R(c, cx - 30 + Math.random() * 40, by - 100 - Math.random() * 40, 2, 2, '#ffd36b');
+        if (hash(Math.floor(time / 12), 1, 2) > 0.7)
+          for (let k = 0; k < 4; k++)
+            R(c, cx - 30 + Math.random() * 40, by - 100 - Math.random() * 40, 2, 2, '#ffd36b');
         break;
       }
       case 'tavern': {
@@ -1206,7 +1933,8 @@
         c.beginPath();
         c.arc(cx, by - 44, 24, 0, Math.PI * 2);
         c.fill();
-        for (let k = 0; k < 8; k++) R(c, cx + Math.cos(k * 0.785) * 28 - 2, by - 44 + Math.sin(k * 0.785) * 28 - 2, 4, 4, '#3a3e46');
+        for (let k = 0; k < 8; k++)
+          R(c, cx + Math.cos(k * 0.785) * 28 - 2, by - 44 + Math.sin(k * 0.785) * 28 - 2, 4, 4, '#3a3e46');
         R(c, cx - 3, by - 60, 6, 32, '#3a3e46');
         R(c, cx - 16, by - 47, 32, 6, '#3a3e46');
         break;
@@ -1216,7 +1944,8 @@
         R(c, left + 6, by - 40, w - 12, 36, '#6a4a2c');
         R(c, left + 6, by - 44, w - 12, 6, '#8a6a40');
         for (const sx of [left + 8, left + w - 14]) R(c, sx, by - 110, 6, 72, '#4a3324');
-        for (let k = 0; k < 6; k++) R(c, left + k * (w / 6), by - 118, w / 6, 22, k % 2 ? '#e0b040' : '#2a4a6a');
+        for (let k = 0; k < 6; k++)
+          R(c, left + k * (w / 6), by - 118, w / 6, 22, k % 2 ? '#e0b040' : '#2a4a6a');
         R(c, left + 20, by - 56, 18, 10, '#e0b040');
         R(c, left + 44, by - 54, 14, 8, '#b8c0c8');
         R(c, left + w - 44, by - 60, 22, 16, '#7a5232');
@@ -1244,7 +1973,13 @@
           c.globalAlpha = 0.25 - k * 0.07;
           c.fillStyle = '#c8c0b0';
           c.beginPath();
-          c.arc(cx + 25 + Math.sin(time * 0.02 + k) * 4, by - 140 - k * 14 - ((time * 0.3) % 14), 6 + k * 2, 0, Math.PI * 2);
+          c.arc(
+            cx + 25 + Math.sin(time * 0.02 + k) * 4,
+            by - 140 - k * 14 - ((time * 0.3) % 14),
+            6 + k * 2,
+            0,
+            Math.PI * 2
+          );
           c.fill();
         }
         c.globalAlpha = 1;
@@ -1284,18 +2019,40 @@
       wall = th.wall;
     if (d.startsWith('k:')) {
       const kind = d.slice(2) === 'skullpile' ? 'bonepile' : d.slice(2);
-      return K().floorProp(c, { x, y, kind }, { ...th.th, wall, floor: th.floors[T.FLOOR] || th.floors[T.STONE], hazard: {} });
+      return K().floorProp(
+        c,
+        { x, y, kind },
+        { ...th.th, wall, floor: th.floors[T.FLOOR] || th.floors[T.STONE], hazard: {} }
+      );
     }
-    if (d.startsWith('w:')) return K().wallProp(c, { x, y, kind: d.slice(2), wall: true }, { ...th.th, wall });
+    if (d.startsWith('w:'))
+      return K().wallProp(c, { x, y, kind: d.slice(2), wall: true }, { ...th.th, wall });
     switch (d) {
       case 'stalag':
       case 'stalag2': {
         const big = d === 'stalag',
           h = big ? 58 + hash(x, y, 2) * 30 : 22 + hash(x, y, 3) * 14;
-        for (const [dx, k] of big ? [[0, 1], [-14, 0.55], [13, 0.4]] : [[-6, 1], [7, 0.7]]) {
+        for (const [dx, k] of big
+          ? [
+              [0, 1],
+              [-14, 0.55],
+              [13, 0.4]
+            ]
+          : [
+              [-6, 1],
+              [7, 0.7]
+            ]) {
           const hh = h * k,
             ww = (big ? 22 : 12) * Math.max(0.6, k);
-          for (let s = 0; s < 5; s++) R(c, cx + dx - (ww * (5 - s)) / 10, by - (hh * (s + 1)) / 5, (ww * (5 - s)) / 5, hh / 5 + 1, s % 2 ? wall.face : wall.light);
+          for (let s = 0; s < 5; s++)
+            R(
+              c,
+              cx + dx - (ww * (5 - s)) / 10,
+              by - (hh * (s + 1)) / 5,
+              (ww * (5 - s)) / 5,
+              hh / 5 + 1,
+              s % 2 ? wall.face : wall.light
+            );
           R(c, cx + dx - ww / 2, by - 3, ww, 3, wall.dark);
         }
         break;
@@ -1321,7 +2078,12 @@
         for (let k = 0; k < 4; k++) {
           c.beginPath();
           c.moveTo(cx - 18 + k * 12, by - 6);
-          c.quadraticCurveTo(cx - 10 + k * 8 + hash(k, x, y) * 14, by - 22, cx - 20 + k * 14, by - 34 - hash(x, k, 4) * 12);
+          c.quadraticCurveTo(
+            cx - 10 + k * 8 + hash(k, x, y) * 14,
+            by - 22,
+            cx - 20 + k * 14,
+            by - 34 - hash(x, k, 4) * 12
+          );
           c.stroke();
         }
         break;
@@ -1333,7 +2095,13 @@
         R(c, cx - 14, by - 6, 28, 6, '#3a3228');
         c.strokeStyle = '#4a4238';
         c.lineCap = 'round';
-        for (const [a, l, w] of [[-2.3, 40, 6], [-0.8, 46, 6], [-1.6, 34, 5], [-2.8, 26, 4], [-0.3, 28, 4]]) {
+        for (const [a, l, w] of [
+          [-2.3, 40, 6],
+          [-0.8, 46, 6],
+          [-1.6, 34, 5],
+          [-2.8, 26, 4],
+          [-0.3, 28, 4]
+        ]) {
           const sx = cx,
             sy = by - 60 - hash(a * 10, x, y) * 10,
             ex = sx + Math.cos(a) * l,
@@ -1390,7 +2158,11 @@
         break;
       }
       case 'candles2': {
-        for (const [dx, h] of [[-10, 14], [0, 20], [9, 11]]) {
+        for (const [dx, h] of [
+          [-10, 14],
+          [0, 20],
+          [9, 11]
+        ]) {
           R(c, cx + dx - 2, by - h, 4, h, '#e8e0c8');
           K().flame(c, cx + dx, by - h, 0.45, th.th.flame, seed + dx);
         }
@@ -1399,7 +2171,11 @@
       }
       case 'giantshroom': {
         // Champignon géant luisant : pied pâle, chapeau coloré tacheté, lueur.
-        const cols = [['#c8508a', '#ff9ad0'], ['#4ab8a8', '#a8fff0'], ['#9a5ad8', '#e0b8ff']][Math.floor(hash(x, y, 6) * 3)],
+        const cols = [
+            ['#c8508a', '#ff9ad0'],
+            ['#4ab8a8', '#a8fff0'],
+            ['#9a5ad8', '#e0b8ff']
+          ][Math.floor(hash(x, y, 6) * 3)],
           h = 56 + hash(x, y, 7) * 26,
           r = 26 + hash(x, y, 8) * 12;
         R(c, cx - 7, by - h, 14, h, '#e8dcc0');
@@ -1409,12 +2185,17 @@
         c.ellipse(cx, by - h, r, r * 0.55, 0, Math.PI, 0);
         c.fill();
         R(c, cx - r, by - h - 2, r * 2, 5, cols[0]);
-        for (let k = 0; k < 5; k++) R(c, cx - r * 0.7 + k * r * 0.33, by - h - r * 0.35 + (k % 2) * 6, 5, 5, cols[1]);
+        for (let k = 0; k < 5; k++)
+          R(c, cx - r * 0.7 + k * r * 0.33, by - h - r * 0.35 + (k % 2) * 6, 5, 5, cols[1]);
         canaanLight(cx, by - h, 130, cols[1]);
         break;
       }
       case 'shrooms': {
-        for (const [dx, h, col] of [[-10, 12, '#c8508a'], [2, 18, '#4ab8a8'], [11, 9, '#d8a040']]) {
+        for (const [dx, h, col] of [
+          [-10, 12, '#c8508a'],
+          [2, 18, '#4ab8a8'],
+          [11, 9, '#d8a040']
+        ]) {
           R(c, cx + dx - 2, by - h, 4, h, '#e8dcc0');
           c.fillStyle = col;
           c.beginPath();
@@ -1464,7 +2245,15 @@
     for (let k = 0; k < 6; k++) {
       g.fillStyle = m.b;
       g.beginPath();
-      g.ellipse(hash(k, v, 31) * 48, hash(v, k, 32) * 48, 6 + hash(k, k, v) * 6, 3 + hash(v, v, k) * 3, 0, 0, Math.PI * 2);
+      g.ellipse(
+        hash(k, v, 31) * 48,
+        hash(v, k, 32) * 48,
+        6 + hash(k, k, v) * 6,
+        3 + hash(v, v, k) * 3,
+        0,
+        0,
+        Math.PI * 2
+      );
       g.fill();
     }
     K().specks(g, 12, [m.c], v + 60, 2);
@@ -1496,7 +2285,8 @@
     } else if (t === T.MUD) art = mk((g, v) => paintMud(g, bio.mud, v));
     else if (t === T.RIVER) art = mk((g, v) => paintFlow(g, bio.river, v));
     else if (t === T.LAKE) art = mk((g, v) => paintFlow(g, bio.lake, v));
-    else if (t === T.CHASM) art = mk((g, v) => K().paintHazard(g, { style: 'chasm', a: '#030304', b: '#0c0c10', c: '#22222a' }, v));
+    else if (t === T.CHASM)
+      art = mk((g, v) => K().paintHazard(g, { style: 'chasm', a: '#030304', b: '#0c0c10', c: '#22222a' }, v));
     else {
       const p = th.floors[t] || th.floors[bio.floor] || th.floors[T.STONE] || Object.values(th.floors)[0];
       art = mk((g, v) => K().paintFloor(g, p, v, p.style));
@@ -1554,7 +2344,14 @@
             continue;
           }
           const open = n => OPEN(n) || WET.has(n),
-            near = [at(x - 1, y), at(x + 1, y), at(x, y - 1), at(x - 1, y + 1), at(x + 1, y + 1), at(x, y + 2)];
+            near = [
+              at(x - 1, y),
+              at(x + 1, y),
+              at(x, y - 1),
+              at(x - 1, y + 1),
+              at(x + 1, y + 1),
+              at(x, y + 2)
+            ];
           if (!near.some(open)) {
             c.drawImage(artOf(b, 'top')[0], X, Y);
             c.globalAlpha = 0.6;
@@ -1601,7 +2398,13 @@
           c.strokeStyle = BIOMES[b % 4].mud.c;
           c.lineWidth = 2;
           c.beginPath();
-          c.arc(X + 10 + hash(y, x, 3) * 28, Y + 10 + hash(x, y, 4) * 28, 3 + (time % 30) / 8, 0, Math.PI * 2);
+          c.arc(
+            X + 10 + hash(y, x, 3) * 28,
+            Y + 10 + hash(x, y, 4) * 28,
+            3 + (time % 30) / 8,
+            0,
+            Math.PI * 2
+          );
           c.stroke();
         }
         if (at(x, y - 1) === T.WALL) c.drawImage(K().shadowTile(), X, Y);
@@ -1654,7 +2457,8 @@
     R(c, x - 7, y - 200, 2, 196, '#a89060');
     R(c, x + 5, y - 200, 2, 196, '#a89060');
     for (let k = 0; k < 18; k++) R(c, x - 7, y - 196 + k * 11, 14, 2, '#c8b890');
-    for (let k = 0; k < 7; k++) R(c, x - 40 + hash(k, e.id, 3) * 80, y + 4 + hash(e.id, k, 4) * 12, 10, 7, '#7a7470');
+    for (let k = 0; k < 7; k++)
+      R(c, x - 40 + hash(k, e.id, 3) * 80, y + 4 + hash(e.id, k, 4) * 12, 10, 7, '#7a7470');
     c.restore();
   }
   function drawLabel(c, x, y, text, sub) {
@@ -1682,7 +2486,14 @@
         y = (e.y + 0.5) * TS;
       if (!inView(x, y)) continue;
       drawHole(c, e, x, y);
-      if (Math.hypot(P.x - x, P.y - y) < 170) drawLabel(c, x, y - 76, '✦ ' + e.name.toUpperCase() + ' ✦', Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Descendre dans les Tréfonds' : null);
+      if (Math.hypot(P.x - x, P.y - y) < 170)
+        drawLabel(
+          c,
+          x,
+          y - 76,
+          '✦ ' + e.name.toUpperCase() + ' ✦',
+          Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Descendre dans les Tréfonds' : null
+        );
     }
   }
 
@@ -1700,7 +2511,10 @@
         const d = deco()[y]?.[x];
         if (d) drawDecor(c, d, x, y, biomeAt(x, y));
       }
-    for (const s of structures.filter(s => inView((s.tx + 0.5) * TS, s.ty * TS, 320)).sort((a, b) => a.ty - b.ty)) drawStructure(c, s);
+    for (const s of structures
+      .filter(s => inView((s.tx + 0.5) * TS, s.ty * TS, 320))
+      .sort((a, b) => a.ty - b.ty))
+      drawStructure(c, s);
     instances.forEach((d, i) => {
       if (!d.under) return;
       const x = d.x * TS,
@@ -1712,7 +2526,14 @@
         y = (e.y + 0.5) * TS;
       if (!inView(x, y, 300)) continue;
       drawShaft(c, e, x, y);
-      if (Math.hypot(P.x - x, P.y - y) < 170) drawLabel(c, x, y - 70, '✦ ' + e.name.toUpperCase() + ' ✦', Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Remonter à la surface' : null);
+      if (Math.hypot(P.x - x, P.y - y) < 170)
+        drawLabel(
+          c,
+          x,
+          y - 70,
+          '✦ ' + e.name.toUpperCase() + ' ✦',
+          Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Remonter à la surface' : null
+        );
     }
     for (const l of lairs) {
       const x = l.x * TS,
@@ -1770,8 +2591,16 @@
     placeGroup((e.x + 0.5) * TS, (e.y + 2.1) * TS);
     spawnMonsters(12);
     spawnWorldBosses();
-    toast(down ? '🏮 Les Tréfonds de Canaan · ' + zoneName(e.x, e.y) : '🌅 Retour à la surface · ' + currentZoneName());
-    if (down) chat('Système', 'Tu descends dans les Tréfonds : créatures, élites et boss y ont ton niveau. Remonte par n’importe quelle entrée (touche E).');
+    toast(
+      down
+        ? '🏮 Les Tréfonds de Canaan · ' + zoneName(e.x, e.y)
+        : '🌅 Retour à la surface · ' + currentZoneName()
+    );
+    if (down)
+      chat(
+        'Système',
+        'Tu descends dans les Tréfonds : créatures, élites et boss y ont ton niveau. Remonte par n’importe quelle entrée (touche E).'
+      );
     saveGame();
     CanaanStages.restartMusic();
     return true;
@@ -1788,7 +2617,9 @@
       cy = P.y / TS,
       lv = clampLevel(game.hero.level);
     for (let i = 0; i < count; i++) {
-      let x, y, tries = 0;
+      let x,
+        y,
+        tries = 0;
       do {
         const a = Math.random() * Math.PI * 2,
           r = 12 + Math.random() * 18;
@@ -1796,7 +2627,11 @@
         y = Math.round(cy + Math.sin(a) * r);
         tries++;
       } while (
-        (!OPEN(at(x, y)) || safe(x, y) || biomeAt(x, y) === 4 || ENTRANCES.some(e => Math.hypot(e.x - x, e.y - y) < 4) || game.world.monsters.some(m => Math.hypot(m.x / TS - x, m.y / TS - y) < 3.5)) &&
+        (!OPEN(at(x, y)) ||
+          safe(x, y) ||
+          biomeAt(x, y) === 4 ||
+          ENTRANCES.some(e => Math.hypot(e.x - x, e.y - y) < 4) ||
+          game.world.monsters.some(m => Math.hypot(m.x / TS - x, m.y / TS - y) < 3.5)) &&
         tries < 80
       );
       if (tries >= 80) continue;
@@ -1806,14 +2641,32 @@
         elite = Math.random() < 0.07,
         level = clampLevel(lv + Math.round(Math.random() * 2 - 1)),
         hp = mobHealth(level, elite, type.hp);
-      game.world.monsters.push({ x: (x + 0.5) * TS, y: (y + 0.5) * TS, hp, mhp: hp, level, t: type.name, r: elite ? 19 : 16, cd: 0, g: Math.round((8 + level * 1.6) * (elite ? 3 : 1)), mobColor: type.color, elite, under: true, _levelHp: true });
+      game.world.monsters.push({
+        x: (x + 0.5) * TS,
+        y: (y + 0.5) * TS,
+        hp,
+        mhp: hp,
+        level,
+        t: type.name,
+        r: elite ? 19 : 16,
+        cd: 0,
+        g: Math.round((8 + level * 1.6) * (elite ? 3 : 1)),
+        mobColor: type.color,
+        elite,
+        under: true,
+        _levelHp: true
+      });
     }
   }
   function spawnBosses() {
     const lv = hostLevel();
     for (const l of lairs) {
       const b = l.boss;
-      if ((game.world.worldBossTimers[b.id] || 0) > Date.now() || game.world.monsters.some(m => m.worldBossId === b.id)) continue;
+      if (
+        (game.world.worldBossTimers[b.id] || 0) > Date.now() ||
+        game.world.monsters.some(m => m.worldBossId === b.id)
+      )
+        continue;
       game.world.monsters.push({
         x: (l.x + 0.5) * TS,
         y: (l.y + 0.5) * TS,
@@ -1848,7 +2701,8 @@
     }
     for (let by = Math.floor(ty / 8) - 1; by <= Math.floor(ty / 8) + 1; by++)
       for (let bx = Math.floor(tx / 8) - 1; bx <= Math.floor(tx / 8) + 1; bx++)
-        for (const s of buckets.get(bx + ',' + by) || []) if (px > s.box[0] && px < s.box[2] && py > s.box[1] && py < s.box[3]) return true;
+        for (const s of buckets.get(bx + ',' + by) || [])
+          if (px > s.box[0] && px < s.box[2] && py > s.box[1] && py < s.box[3]) return true;
     return false;
   }
   function zoneName(tx, ty) {
@@ -1859,7 +2713,8 @@
   const zoneId = (tx, ty) => 6 + (biomeAt(tx, ty) % 4);
   const spawnPoint = () => ({ x: (C.x + 0.5) * TS, y: (C.y + 5.5) * TS });
   const forgeSpot = () => ({ x: (C.x - 9 + 0.5) * TS, y: (C.y - 2 + 1.6) * TS });
-  const nearStove = (x, y) => !game.world.instance && Math.hypot(x - (C.x + 9.5) * TS, y - (C.y - 0.4) * TS) < TS * 3.2;
+  const nearStove = (x, y) =>
+    !game.world.instance && Math.hypot(x - (C.x + 9.5) * TS, y - (C.y - 0.4) * TS) < TS * 3.2;
   // Ambiance : pénombre et teinte du biome, adoucies d'un biome à l'autre.
   const cur = { dark: 0.6, tint: [10, 8, 6], particles: 'dust', color: '#e0c090' };
   function ambience() {
@@ -1870,10 +2725,17 @@
     cur.tint = cur.tint.map((v, i) => v + (target.tint[i] - v) * k);
     cur.particles = target.particles;
     cur.color = target.color;
-    return { dark: cur.dark, tint: cur.tint.map(Math.round).join(','), particles: cur.particles, color: cur.color, heroLight: 300 };
+    return {
+      dark: cur.dark,
+      tint: cur.tint.map(Math.round).join(','),
+      particles: cur.particles,
+      color: cur.color,
+      heroLight: 300
+    };
   }
   // Musique : une pièce par biome (audio.js).
-  const themeKey = () => ['galeries', 'ombral', 'necropole', 'fangeval', 'durgrim'][biomeAt(P.x / TS, P.y / TS)];
+  const themeKey = () =>
+    ['galeries', 'ombral', 'necropole', 'fangeval', 'durgrim'][biomeAt(P.x / TS, P.y / TS)];
 
   // ---------------------------------------------------------------- Carte (mini-carte et touche M)
   function mapColor(t, x, y) {
@@ -1901,15 +2763,31 @@
         const d = instances.find(x => x.under && x.biome === 6 + k),
           boss = BOSSES[k];
         return (
-          '<section class="island-section"><h4>' + (k + 1) + '. ' + safeGearText(b.name) + '</h4><div class="muted">' + safeGearText(b.desc) + '</div>' +
-          (d ? '<div class="entry"><span class="map-dungeon">🔴 Donjon</span> · ' + safeGearText(d.name) + ' <b class="map-ilvl">à ton niveau</b></div>' : '') +
-          '<div class="entry">⭐ Boss : ' + safeGearText(boss.name) + '</div></section>'
+          '<section class="island-section"><h4>' +
+          (k + 1) +
+          '. ' +
+          safeGearText(b.name) +
+          '</h4><div class="muted">' +
+          safeGearText(b.desc) +
+          '</div>' +
+          (d
+            ? '<div class="entry"><span class="map-dungeon">🔴 Donjon</span> · ' +
+              safeGearText(d.name) +
+              ' <b class="map-ilvl">à ton niveau</b></div>'
+            : '') +
+          '<div class="entry">⭐ Boss : ' +
+          safeGearText(boss.name) +
+          '</div></section>'
         );
       }).join('');
     return (
-      '<h2>🗺️ Les Tréfonds de Canaan</h2><p class="muted">🏰 Forteresse de Durgrim (zone sûre) · 🔴 Donjons · ⭐ Boss · ⛏️ Entrées vers la surface · ⚪ Vous — créatures et boss à ton niveau (' + lv + ')</p><div class="map-instance-layout"><div>' +
+      '<h2>🗺️ Les Tréfonds de Canaan</h2><p class="muted">🏰 Forteresse de Durgrim (zone sûre) · 🔴 Donjons · ⭐ Boss · ⛏️ Entrées vers la surface · ⚪ Vous — créatures et boss à ton niveau (' +
+      lv +
+      ')</p><div class="map-instance-layout"><div>' +
       '<div class="map-tools"><button data-action="mapZoom" data-step="-1" title="Dézoomer">➖</button><button data-action="mapZoom" data-step="1" title="Zoomer">➕</button><button data-action="mapCenter">🎯 Me centrer</button><button data-action="mapFit">🗺️ Vue d’ensemble</button><span id="mapZoomLevel" class="muted"></span></div>' +
-      '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>🧭 Quatre biomes sous l’île</h3>' + list + '</div></div>'
+      '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>🧭 Quatre biomes sous l’île</h3>' +
+      list +
+      '</div></div>'
     );
   }
 
@@ -1959,7 +2837,12 @@
         const k = q[h],
           x = k % MAPW,
           y = (k - x) / MAPW;
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ]) {
           const nk = (y + dy) * MAPW + x + dx;
           if (!seen[nk] && OPEN(at(x + dx, y + dy))) {
             seen[nk] = 1;
@@ -1967,8 +2850,16 @@
           }
         }
       }
-      const places = [...ENTRANCES.map(e => ['entrée', e.name, e.x, e.y]), ...instances.filter(d => d.under).map(d => ['portail', d.name, d.x, d.y]), ...lairs.map(l => ['repaire', l.boss.name, l.x, l.y]), ...CHESTS.map(c => ['coffre', c.id, c.x, c.y])];
-      return { unreachable: places.filter(([, , x, y]) => !seen[y * MAPW + x]).map(([k, n]) => k + ' ' + n), open: seen.reduce((n, v) => n + v, 0) };
+      const places = [
+        ...ENTRANCES.map(e => ['entrée', e.name, e.x, e.y]),
+        ...instances.filter(d => d.under).map(d => ['portail', d.name, d.x, d.y]),
+        ...lairs.map(l => ['repaire', l.boss.name, l.x, l.y]),
+        ...CHESTS.map(c => ['coffre', c.id, c.x, c.y])
+      ];
+      return {
+        unreachable: places.filter(([, , x, y]) => !seen[y * MAPW + x]).map(([k, n]) => k + ' ' + n),
+        open: seen.reduce((n, v) => n + v, 0)
+      };
     }
   });
 })();

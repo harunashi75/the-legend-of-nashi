@@ -22,4 +22,25 @@ import * as netMessages from './shared/net/messages.js';
 import * as looks from './shared/data/looks.js';
 import * as skins from './shared/data/skins.js';
 
-Object.assign(globalThis, equipment, itemNames, rubis, arena, world, economy, classes, statsData, statRules, itemRules, economyRules, classRules, quests, questRules, saveSchema, combatRules, netMessages, looks, skins);
+Object.assign(
+  globalThis,
+  equipment,
+  itemNames,
+  rubis,
+  arena,
+  world,
+  economy,
+  classes,
+  statsData,
+  statRules,
+  itemRules,
+  economyRules,
+  classRules,
+  quests,
+  questRules,
+  saveSchema,
+  combatRules,
+  netMessages,
+  looks,
+  skins
+);

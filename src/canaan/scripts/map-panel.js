@@ -46,7 +46,11 @@
       '</h3><section class="island-section"><div class="entry">Ennemis restants : <b>' +
       foes.length +
       '</b></div><div class="entry">' +
-      (boss ? '👑 ' + safeGearText(boss.t) + ' vous attend.' : game.world.instance.cleared ? '✅ Instance terminée : ouvre le coffre puis ressors.' : '👑 Le boss apparaîtra quand la salle sera vide.') +
+      (boss
+        ? '👑 ' + safeGearText(boss.t) + ' vous attend.'
+        : game.world.instance.cleared
+          ? '✅ Instance terminée : ouvre le coffre puis ressors.'
+          : '👑 Le boss apparaîtra quand la salle sera vide.') +
       '</div></section></div></div>'
     );
   }

@@ -350,8 +350,16 @@
       gate: 'portcullis',
       particles: 'dust',
       mobs: [
-        { name: 'Mineur maudit', look: 'skeleton', pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040'] },
-        { name: 'Taupe des galeries', look: 'beast', pal: ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a'] }
+        {
+          name: 'Mineur maudit',
+          look: 'skeleton',
+          pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040']
+        },
+        {
+          name: 'Taupe des galeries',
+          look: 'beast',
+          pal: ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a']
+        }
       ],
       bosses: [{ look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }]
     },
@@ -374,8 +382,16 @@
       gate: 'portcullis',
       particles: 'motes',
       mobs: [
-        { name: 'Garde de pierre', look: 'golem', pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff'] },
-        { name: 'Esprit d’Ombral', look: 'spirit', pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff'] }
+        {
+          name: 'Garde de pierre',
+          look: 'golem',
+          pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff']
+        },
+        {
+          name: 'Esprit d’Ombral',
+          look: 'spirit',
+          pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff']
+        }
       ],
       bosses: [{ look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }]
     },
@@ -398,8 +414,16 @@
       gate: 'portcullis',
       particles: 'motes',
       mobs: [
-        { name: 'Goule des cryptes', look: 'brute', pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0'] },
-        { name: 'Âme sans repos', look: 'spirit', pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff'] }
+        {
+          name: 'Goule des cryptes',
+          look: 'brute',
+          pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0']
+        },
+        {
+          name: 'Âme sans repos',
+          look: 'spirit',
+          pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff']
+        }
       ],
       bosses: [{ look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }]
     },
@@ -422,8 +446,17 @@
       gate: 'barrier',
       particles: 'motes',
       mobs: [
-        { name: 'Porte-spores', look: 'golem', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], leafy: true },
-        { name: 'Larve des fanges', look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] }
+        {
+          name: 'Porte-spores',
+          look: 'golem',
+          pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'],
+          leafy: true
+        },
+        {
+          name: 'Larve des fanges',
+          look: 'slime',
+          pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010']
+        }
       ],
       bosses: [{ look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }]
     }
@@ -437,11 +470,23 @@
         { look: 'robed', pal: ['#5a4a3a', '#2e241a', '#80705a', '#c9a46e', '#a3c7ff'], hood: true },
         { look: 'skeleton', pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'], crown: true }
       ],
-      secrets: [{ look: 'beast', pal: ['#4a3a30', '#2a1e16', '#7a6050', '#d0a040', '#ffd040'], horns: true, crown: true }]
+      secrets: [
+        {
+          look: 'beast',
+          pal: ['#4a3a30', '#2a1e16', '#7a6050', '#d0a040', '#ffd040'],
+          horns: true,
+          crown: true
+        }
+      ]
     },
     mine: {
       bosses: [
-        { look: 'imp', pal: ['#8a7a5a', '#4e4430', '#b0a07a', '#c9a24a', '#9fe8ff'], nowings: true, crown: true },
+        {
+          look: 'imp',
+          pal: ['#8a7a5a', '#4e4430', '#b0a07a', '#c9a24a', '#9fe8ff'],
+          nowings: true,
+          crown: true
+        },
         { look: 'spider', pal: ['#3d4652', '#22282e', '#6a7a8c', '#9fe8ff', '#c8f7ff'] },
         { look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'] }
       ],
@@ -461,7 +506,9 @@
         { look: 'robed', pal: ['#e8e4f0', '#a8a0b8', '#ffffff', '#5a161a', '#b79cff'], hood: true },
         { look: 'knight', pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'], hood: true }
       ],
-      secrets: [{ look: 'skeleton', pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'], hood: true }]
+      secrets: [
+        { look: 'skeleton', pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'], hood: true }
+      ]
     },
     forge: {
       bosses: [
@@ -541,7 +588,9 @@
         { look: 'golem', pal: ['#5e5a5a', '#3a3636', '#86807a', '#e0a060', '#ffd080'] },
         { look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }
       ],
-      secrets: [{ look: 'skeleton', pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'], crown: true }]
+      secrets: [
+        { look: 'skeleton', pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'], crown: true }
+      ]
     },
     ombral: {
       bosses: [
@@ -557,7 +606,9 @@
         { look: 'spirit', pal: ['#2a2e2a', '#141614', '#4a524a', '#a8f0c0', '#ffffff'] },
         { look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }
       ],
-      secrets: [{ look: 'skeleton', pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'], crown: true }]
+      secrets: [
+        { look: 'skeleton', pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'], crown: true }
+      ]
     },
     fongique: {
       bosses: [
@@ -684,14 +735,18 @@
         }
         return a;
       },
-      around = room => shuffle(Object.entries(STEP).map(([dir, [dx, dy]]) => [dir, room.c + dx, room.r + dy])).filter(([, c, r]) => free(c, r)),
+      around = room =>
+        shuffle(Object.entries(STEP).map(([dir, [dx, dy]]) => [dir, room.c + dx, room.r + dy])).filter(
+          ([, c, r]) => free(c, r)
+        ),
       add = (kind, c, r, extra) => {
         const room = { kind, c, r, ...extra };
         taken.set(key(c, r), room);
         rooms.push(room);
         return room;
       },
-      link = (a, b, dir, extra = {}) => links.push({ from: rooms.indexOf(a), to: rooms.indexOf(b), dir, ...extra });
+      link = (a, b, dir, extra = {}) =>
+        links.push({ from: rooms.indexOf(a), to: rooms.indexOf(b), dir, ...extra });
     let cur = add('entry', 3, 4, { stage: -1 }),
       reserved = null;
     for (let s = 0; s < B; s++) {
@@ -744,7 +799,9 @@
       // Passage secret : une salle cachée derrière le mur d'une annexe de cette aile.
       const sk = secretWings.indexOf(s);
       if (sk >= 0) {
-        const host = shuffle(rooms.filter(r => r.kind === 'side' && r.stage === s)).find(h => around(h).length);
+        const host = shuffle(rooms.filter(r => r.kind === 'side' && r.stage === s)).find(
+          h => around(h).length
+        );
         if (!host) return null;
         const at = around(host)[0],
           room = add('secret', at[1], at[2], { stage: s, secret: sk });
@@ -767,7 +824,11 @@
       if (room.kind === 'hub') Object.assign(room, { w: odd(13, 17), h: odd(11, 13) });
       else if (room.kind === 'side') Object.assign(room, { w: odd(11, 15), h: odd(9, 11) });
       else if (room.kind === 'secret') Object.assign(room, { w: 15, h: 13 });
-      else Object.assign(room, d.raid ? (final ? { w: 27, h: 21 } : { w: 23, h: 17 }) : final ? { w: 23, h: 17 } : { w: 21, h: 15 });
+      else
+        Object.assign(
+          room,
+          d.raid ? (final ? { w: 27, h: 21 } : { w: 23, h: 17 }) : final ? { w: 23, h: 17 } : { w: 21, h: 15 }
+        );
       const mx = Math.max(0, Math.floor((CELL.w - room.w) / 2) - 2),
         my = Math.max(0, Math.floor((CELL.h - room.h) / 2) - 2);
       room.cx = CELL.ox + room.c * CELL.w + 15 + Math.round((rnd() * 2 - 1) * mx);
@@ -813,7 +874,10 @@
     sizeRooms(d, rooms, rnd);
     rooms.forEach((r, k) => (r.index = k));
     for (const l of links) l.points = corridorPoints(rooms[l.from], rooms[l.to], l.dir);
-    for (const room of rooms) room.doors = links.filter(l => l.from === room.index || l.to === room.index).map(l => (l.from === room.index ? l.dir : OPPOSITE[l.dir]));
+    for (const room of rooms)
+      room.doors = links
+        .filter(l => l.from === room.index || l.to === room.index)
+        .map(l => (l.from === room.index ? l.dir : OPPOSITE[l.dir]));
     const B = d.raid ? 6 : 3,
       plan = {
         index: i,
@@ -835,8 +899,10 @@
       };
     for (const l of links) {
       if (l.gate !== undefined) plan.gates[l.gate] = { cells: doorCells(rooms[l.from], l), dir: l.dir };
-      if (l.door !== undefined) plan.doors[l.door] = { cells: doorCells(rooms[l.to], l), dir: l.dir, room: l.to };
-      if (l.secret !== undefined) plan.secretWalls[l.secret] = { cells: doorCells(rooms[l.from], l), dir: l.dir, room: l.to };
+      if (l.door !== undefined)
+        plan.doors[l.door] = { cells: doorCells(rooms[l.to], l), dir: l.dir, room: l.to };
+      if (l.secret !== undefined)
+        plan.secretWalls[l.secret] = { cells: doorCells(rooms[l.from], l), dir: l.dir, room: l.to };
     }
     plan.grid = carve(plan, i, rnd);
     return plan;
@@ -865,7 +931,14 @@
     }
     return seen;
   }
-  const near = (seen, x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has((y + dy) * MAPW + x + dx));
+  const near = (seen, x, y) =>
+    [
+      [0, 0],
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1]
+    ].some(([dx, dy]) => seen.has((y + dy) * MAPW + x + dx));
   function openings(list) {
     const out = new Set();
     for (const g of list) if (g) for (const [x, y] of g.cells) out.add(y * MAPW + x);
@@ -874,7 +947,11 @@
   function validPlan(plan) {
     const bossRooms = plan.rooms.filter(r => r.kind === 'boss'),
       secretRooms = plan.rooms.filter(r => r.kind === 'secret');
-    if (plan.gates.filter(Boolean).length !== plan.bossCount - 1 || plan.doors.filter(Boolean).length !== plan.bossCount) return false;
+    if (
+      plan.gates.filter(Boolean).length !== plan.bossCount - 1 ||
+      plan.doors.filter(Boolean).length !== plan.bossCount
+    )
+      return false;
     if ([...plan.gates, ...plan.doors, ...plan.secretWalls].some(g => g && g.cells.length < 2)) return false;
     for (let s = 0; s < plan.bossCount; s++) {
       const before = reachFrom(plan, openings([...plan.gates.slice(0, s), ...plan.doors.slice(0, s)])),
@@ -890,7 +967,11 @@
     if (secretRooms.some(r => near(closed, r.boss.x, r.boss.y))) return false;
     if (!plan.secretWalls.every(w => w.cells.some(([x, y]) => near(closed, x, y)))) return false;
     const open = reachFrom(plan, openings([...plan.gates, ...plan.doors, ...plan.secretWalls]));
-    return secretRooms.every(r => near(open, r.boss.x, r.boss.y)) && plan.trash.every(t => open.has(t.y * MAPW + t.x)) && plan.guardians.every(g => open.has(g.y * MAPW + g.x));
+    return (
+      secretRooms.every(r => near(open, r.boss.x, r.boss.y)) &&
+      plan.trash.every(t => open.has(t.y * MAPW + t.x)) &&
+      plan.guardians.every(g => open.has(g.y * MAPW + g.x))
+    );
   }
   function carve(plan, i, rnd) {
     const th = plan.theme,
@@ -925,7 +1006,8 @@
       eachPathCell(link.points, (x, y) => {
         for (let oy = -1; oy <= 1; oy++)
           for (let ox = -1; ox <= 1; ox++) {
-            const jag = th.shape === 'cave' && Math.abs(ox) + Math.abs(oy) === 2 && hash(x + ox, y + oy, i) < 0.4;
+            const jag =
+              th.shape === 'cave' && Math.abs(ox) + Math.abs(oy) === 2 && hash(x + ox, y + oy, i) < 0.4;
             if (!jag && grid[y + oy]?.[x + ox] !== FLOOR) set(x + ox, y + oy, FLOOR);
           }
       });
@@ -947,7 +1029,8 @@
             set(x, y, HAZARD);
             placed++;
           }
-        if (placed && th.hazard.glow) plan.lights.push({ x: px + 0.5, y: py + 0.5, r: 150, col: th.hazard.glow });
+        if (placed && th.hazard.glow)
+          plan.lights.push({ x: px + 0.5, y: py + 0.5, r: 150, col: th.hazard.glow });
       }
       // La Fosse : un anneau de gouffre autour de l'arène, franchi par quatre passerelles.
       if (th.shape === 'pit' && room.kind === 'boss') {
@@ -958,7 +1041,8 @@
             const dx = (x - room.cx) / rx,
               dy = (y - room.cy) / ry,
               e = Math.sqrt(dx * dx + dy * dy);
-            if (e > 0.62 && e < 0.8 && Math.abs(x - room.cx) > 1 && Math.abs(y - room.cy) > 1) set(x, y, HAZARD);
+            if (e > 0.62 && e < 0.8 && Math.abs(x - room.cx) > 1 && Math.abs(y - room.cy) > 1)
+              set(x, y, HAZARD);
           }
       }
     }
@@ -967,7 +1051,9 @@
       if (link.secret === undefined)
         eachPathCell(link.points, (x, y) => {
           const aw = th.accent.width;
-          for (let oy = -aw; oy <= aw; oy++) for (let ox = -aw; ox <= aw; ox++) if (grid[y + oy]?.[x + ox] === FLOOR) set(x + ox, y + oy, ACCENT);
+          for (let oy = -aw; oy <= aw; oy++)
+            for (let ox = -aw; ox <= aw; ox++)
+              if (grid[y + oy]?.[x + ox] === FLOOR) set(x + ox, y + oy, ACCENT);
         });
     placePuzzles(plan, grid, rnd, solid, set);
     decorate(plan, grid, rnd, solid, set);
@@ -996,8 +1082,20 @@
             y = Math.round(b.y0 + 1 + rnd() * (room.h - 3));
           // Hors de la croix des couloirs, qui doit rester libre.
           if (Math.abs(x - room.cx) <= 1 || Math.abs(y - room.cy) <= 1) continue;
-          if (grid[y]?.[x] !== FLOOR || taken.some(([tx, ty]) => Math.abs(tx - x) < 3 && Math.abs(ty - y) < 3)) continue;
-          if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => WALKABLE(grid[y + dy]?.[x + dx]))) continue;
+          if (
+            grid[y]?.[x] !== FLOOR ||
+            taken.some(([tx, ty]) => Math.abs(tx - x) < 3 && Math.abs(ty - y) < 3)
+          )
+            continue;
+          if (
+            ![
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1]
+            ].every(([dx, dy]) => WALKABLE(grid[y + dy]?.[x + dx]))
+          )
+            continue;
           taken.push([x, y]);
           return { x, y };
         }
@@ -1063,7 +1161,10 @@
   }
   function decorate(plan, grid, rnd, solid, set) {
     const th = plan.theme,
-      free = (x, y) => grid[y]?.[x] === FLOOR && !plan.props.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2) && !plan.plates.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2);
+      free = (x, y) =>
+        grid[y]?.[x] === FLOOR &&
+        !plan.props.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2) &&
+        !plan.plates.some(p => Math.abs(p.x - x) < 2 && Math.abs(p.y - y) < 2);
     const addProp = (x, y, kind, extra = {}) => {
       plan.props.push({ x, y, kind, ...extra });
       if (SOLID_PROPS.has(kind)) {
@@ -1086,10 +1187,16 @@
           }
         }
       // Colonnes des grandes salles, symétriques, hors des portes.
-      if ((th.shape === 'hall' || th.shape === 'void') && room.w >= 13 && room.h >= 11 && room.kind !== 'entry') {
+      if (
+        (th.shape === 'hall' || th.shape === 'void') &&
+        room.w >= 13 &&
+        room.h >= 11 &&
+        room.kind !== 'entry'
+      ) {
         const kind = th.floorProps.includes('pillarlight') && room.kind === 'boss' ? 'pillarlight' : 'pillar';
         for (let y = b.y0 + 3; y <= b.y1 - 3; y += 4)
-          if (Math.abs(y - room.cy) > 2) for (const x of [b.x0 + 3, b.x1 - 3]) if (free(x, y) && grid[y][x] === FLOOR) addProp(x, y, kind);
+          if (Math.abs(y - room.cy) > 2)
+            for (const x of [b.x0 + 3, b.x1 - 3]) if (free(x, y) && grid[y][x] === FLOOR) addProp(x, y, kind);
       }
       if (room.kind === 'entry') {
         plan.decals.push({ x: ENTRY.x, y: ENTRY.y, kind: 'portal' });
@@ -1102,14 +1209,23 @@
         const x = b.x0 + 1 + Math.floor(rnd() * (room.w - 2)),
           y = b.y0 + 1 + Math.floor(rnd() * (room.h - 2));
         if (Math.abs(x - room.cx) <= 2 || Math.abs(y - room.cy) <= 2 || !free(x, y)) continue;
-        if ((room.kind === 'boss' || room.kind === 'secret') && Math.hypot(x - room.cx, y - room.cy) < 5) continue;
+        if ((room.kind === 'boss' || room.kind === 'secret') && Math.hypot(x - room.cx, y - room.cy) < 5)
+          continue;
         // Jamais collé à un mur fissuré : le passage doit rester dégagé.
-        if (plan.secretWalls.some(w => w.cells.some(([cx, cy]) => Math.abs(cx - x) < 3 && Math.abs(cy - y) < 3))) continue;
+        if (
+          plan.secretWalls.some(w => w.cells.some(([cx, cy]) => Math.abs(cx - x) < 3 && Math.abs(cy - y) < 3))
+        )
+          continue;
         addProp(x, y, th.floorProps[Math.floor(rnd() * th.floorProps.length)]);
         n++;
       }
       if (th.hazard.style === 'blood' || th.key === 'fosse')
-        for (let n = 0; n < 3; n++) plan.decals.push({ x: b.x0 + 1 + rnd() * (room.w - 2), y: b.y0 + 1 + rnd() * (room.h - 2), kind: 'splat' });
+        for (let n = 0; n < 3; n++)
+          plan.decals.push({
+            x: b.x0 + 1 + rnd() * (room.w - 2),
+            y: b.y0 + 1 + rnd() * (room.h - 2),
+            kind: 'splat'
+          });
       if (room.kind === 'boss' || room.kind === 'secret') {
         // Pièce maîtresse sur un côté sans porte, de préférence face à l'entrée.
         const entry = room.doors[0],
@@ -1118,7 +1234,12 @@
           [sx, sy] = STEP[side],
           px = room.cx + sx * ((room.w - 1) / 2 - 2),
           py = room.cy + sy * ((room.h - 1) / 2 - 2);
-        plan.props.push({ x: px, y: py, kind: room.kind === 'secret' ? 'treasure' : th.centerpiece, center: room.kind === 'boss' });
+        plan.props.push({
+          x: px,
+          y: py,
+          kind: room.kind === 'secret' ? 'treasure' : th.centerpiece,
+          center: room.kind === 'boss'
+        });
         for (let o = -1; o <= 1; o++) {
           const cx = px + (sy ? o : 0),
             cy = py + (sx ? o : 0);
@@ -1127,16 +1248,27 @@
             solid.add(cy * MAPW + cx);
           }
         }
-        plan.decals.push({ x: room.cx, y: room.cy, kind: room.kind === 'secret' ? 'runecircle' : th.decal || 'runecircle', boss: room.stage });
+        plan.decals.push({
+          x: room.cx,
+          y: room.cy,
+          kind: room.kind === 'secret' ? 'runecircle' : th.decal || 'runecircle',
+          boss: room.stage
+        });
         room.boss = { x: room.cx + sx * 2, y: room.cy + sy * 2 };
         room.chest = { x: room.cx + 0.5, y: room.cy + 0.5 };
         // Gardes du boss dans les raids.
         if (room.kind === 'boss' && instances[plan.index].raid)
-          for (const o of [-3, 3]) plan.trash.push({ x: room.boss.x + (sy ? o : -sx * 2), y: room.boss.y + (sx ? o : -sy * 2), type: o < 0 ? 0 : 1 });
+          for (const o of [-3, 3])
+            plan.trash.push({
+              x: room.boss.x + (sy ? o : -sx * 2),
+              y: room.boss.y + (sx ? o : -sy * 2),
+              type: o < 0 ? 0 : 1
+            });
         return;
       }
       // Groupes d'ennemis dans les salles de passage et les annexes, plus nombreux au fil des instances.
-      const share = (room.kind === 'hub' ? 3 : 2) + Math.floor(plan.index / 5) + (instances[plan.index].raid ? 1 : 0);
+      const share =
+        (room.kind === 'hub' ? 3 : 2) + Math.floor(plan.index / 5) + (instances[plan.index].raid ? 1 : 0);
       for (let n = 0, tries = 0; n < share && tries < 60; tries++) {
         const a = rnd() * Math.PI * 2,
           rr = 1.5 + rnd() * Math.min(room.w, room.h) * 0.28,
@@ -1316,7 +1448,14 @@
       .filter(r => r.kind === 'secret' && !(st && st.hidden & (1 << r.secret)))
       .forEach(r => {
         const hp = Math.round(base * 1.1);
-        game.world.monsters.push(make(r, (d.secrets || [])[r.secret] || 'Boss caché', th.secrets?.[r.secret] || th.bosses[0], { hp, mhp: hp, secretBoss: r.secret, scale: d.raid ? 3.6 : 3.2 }));
+        game.world.monsters.push(
+          make(r, (d.secrets || [])[r.secret] || 'Boss caché', th.secrets?.[r.secret] || th.bosses[0], {
+            hp,
+            mhp: hp,
+            secretBoss: r.secret,
+            scale: d.raid ? 3.6 : 3.2
+          })
+        );
       });
     if (!down) {
       for (const spot of plan.trash) {
@@ -1385,7 +1524,14 @@
         }
         CANAAN_BAG.add(h, 'key', 'secret', 0, 1);
         CANAAN_WARDROBE.drop('secretBoss', h);
-        canaanLootNotice(h, '🗝️ ' + m.t + ' vaincu : clé des secrets dans ton sac ! Elle ouvre un coffre secret de l’île (' + CANAAN_BAG.count(h, 'key', 'secret') + ').');
+        canaanLootNotice(
+          h,
+          '🗝️ ' +
+            m.t +
+            ' vaincu : clé des secrets dans ton sac ! Elle ouvre un coffre secret de l’île (' +
+            CANAAN_BAG.count(h, 'key', 'secret') +
+            ').'
+        );
       }
       burst(m.x, m.y, '#ffd36d', 30);
       return false;
@@ -1404,7 +1550,16 @@
         if (game.world.tiles[y][x] === GATE) game.world.tiles[y][x] = gate.under[k];
         burst((x + 0.5) * TS, (y + 0.5) * TS, THEMES[i].rune, 10);
       });
-    toast('⚔️ ' + m.t + ' vaincu (' + inst.bossesDown + '/' + total + ') — ' + (THEMES[i].gate === 'barrier' ? 'la barrière se dissipe.' : 'la herse se lève.'));
+    toast(
+      '⚔️ ' +
+        m.t +
+        ' vaincu (' +
+        inst.bossesDown +
+        '/' +
+        total +
+        ') — ' +
+        (THEMES[i].gate === 'barrier' ? 'la barrière se dissipe.' : 'la herse se lève.')
+    );
     return false;
   }
   // Portail de retour : il s'ouvre dans la salle du dernier boss quand l'instance est terminée, de l'autre côté du
@@ -1421,7 +1576,11 @@
     for (let r = 0; r < 6 && !best; r++)
       for (let y = want.y - r; y <= want.y + r && !best; y++)
         for (let x = want.x - r; x <= want.x + r; x++)
-          if (WALKABLE(plan.grid[y]?.[x]) && !plan.solid.has(y * MAPW + x) && Math.hypot(x - room.cx, y - room.cy) >= 2.5) {
+          if (
+            WALKABLE(plan.grid[y]?.[x]) &&
+            !plan.solid.has(y * MAPW + x) &&
+            Math.hypot(x - room.cx, y - room.cy) >= 2.5
+          ) {
             best = { x, y };
             break;
           }
@@ -1475,7 +1634,11 @@
     R2(-8, 5, 16, 1, th.pillar[2]);
     // Anneau de pierre cerclé d'encre et ses runes qui tournent.
     c.save();
-    for (const [rx, ry, col] of [[11, 14, '#1a1210'], [10, 13, th.pillar[0]], [8, 11, '#06040a']]) {
+    for (const [rx, ry, col] of [
+      [11, 14, '#1a1210'],
+      [10, 13, th.pillar[0]],
+      [8, 11, '#06040a']
+    ]) {
       c.fillStyle = col;
       c.beginPath();
       c.ellipse(x, y - 14, rx * U, ry * U, 0, 0, Math.PI * 2);
@@ -1534,10 +1697,12 @@
     const inst = game.world.instance;
     if (!inst || inst.arena) return null;
     const plan = planFor(inst.index);
-    if (!inst.dun || inst.dun.locks?.length !== plan.locks.length) inst.dun = { locks: plan.locks.map(() => ({ done: 0, prog: 0, step: 0 })), secrets: 0, hidden: 0 };
+    if (!inst.dun || inst.dun.locks?.length !== plan.locks.length)
+      inst.dun = { locks: plan.locks.map(() => ({ done: 0, prog: 0, step: 0 })), secrets: 0, hidden: 0 };
     return inst.dun;
   }
-  const lockGoal = lock => (lock.type === 'guardian' ? lock.items.length : lock.type === 'runes' ? 4 : lock.items.length);
+  const lockGoal = lock =>
+    lock.type === 'guardian' ? lock.items.length : lock.type === 'runes' ? 4 : lock.items.length;
   const bossName = (i, s) => (instances[i].bosses || [instances[i].boss])[s] || instances[i].boss;
   function openCells(g) {
     let opened = 0;
@@ -1583,13 +1748,28 @@
       const it = lock.items[id];
       burst((it.x + 0.5) * TS, (it.y + 0.5) * TS, SIGILS[id].col, 12);
       if (ls.step >= goal) solveLock(i, s);
-      else canaanLootNotice(hero, SIGILS[id].sym + ' ' + (lock.type === 'levers' ? 'Le levier s’abaisse' : 'La dalle s’illumine') + ' (' + ls.step + '/' + goal + ').');
+      else
+        canaanLootNotice(
+          hero,
+          SIGILS[id].sym +
+            ' ' +
+            (lock.type === 'levers' ? 'Le levier s’abaisse' : 'La dalle s’illumine') +
+            ' (' +
+            ls.step +
+            '/' +
+            goal +
+            ').'
+        );
     } else {
       ls.prog = 0;
       ls.step = 0;
       const it = lock.items[id];
       burst((it.x + 0.5) * TS, (it.y + 0.5) * TS, '#ff4a3a', 16);
-      tellAll('✖ Mauvais ordre : ' + (lock.type === 'levers' ? 'les leviers se relèvent.' : 'les dalles s’éteignent.') + ' Relis la stèle.');
+      tellAll(
+        '✖ Mauvais ordre : ' +
+          (lock.type === 'levers' ? 'les leviers se relèvent.' : 'les dalles s’éteignent.') +
+          ' Relis la stèle.'
+      );
     }
   }
   // Texte de la stèle : l'ordre des symboles, en énigme.
@@ -1598,7 +1778,8 @@
       verb = lock.type === 'levers' ? 'Abaisse les leviers' : 'Foule les dalles';
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
     const lines = [cap(names[0]) + ' ouvre la marche'];
-    for (let k = 1; k < names.length - 1; k++) lines.push(k === 1 ? names[k] + ' le suit' : 'puis ' + names[k]);
+    for (let k = 1; k < names.length - 1; k++)
+      lines.push(k === 1 ? names[k] + ' le suit' : 'puis ' + names[k]);
     lines.push('et ' + names[names.length - 1] + ' ferme le cortège');
     return '📜 « ' + lines.join(', ') + '. » — ' + verb + ' dans cet ordre.';
   }
@@ -1606,14 +1787,29 @@
     const lock = planFor(i).locks[s],
       ls = dunState().locks[s],
       goal = lockGoal(lock),
-      done = lock.type === 'guardian' ? goal - game.world.monsters.filter(m => m.guardian === s && m.hp > 0).length : lock.type === 'braziers' ? bits(ls.prog) : ls.step,
+      done =
+        lock.type === 'guardian'
+          ? goal - game.world.monsters.filter(m => m.guardian === s && m.hp > 0).length
+          : lock.type === 'braziers'
+            ? bits(ls.prog)
+            : ls.step,
       what = {
         braziers: 'allume les ' + goal + ' braseros éteints de cette aile',
         levers: 'abaisse les ' + goal + ' leviers de cette aile dans l’ordre gravé sur la stèle',
         runes: 'foule les 4 dalles gravées dans l’ordre donné par la stèle',
         guardian: 'vaincs les gardiens du sceau dans les salles voisines'
       }[lock.type];
-    return '🔒 La porte de ' + bossName(i, s) + ' est scellée : ' + what + ' (' + Math.max(0, done) + '/' + goal + ').';
+    return (
+      '🔒 La porte de ' +
+      bossName(i, s) +
+      ' est scellée : ' +
+      what +
+      ' (' +
+      Math.max(0, done) +
+      '/' +
+      goal +
+      ').'
+    );
   }
   const bits = n => {
     let c = 0;
@@ -1631,7 +1827,8 @@
       hy = p.y / TS,
       close = (x, y, r) => Math.hypot(hx - (x + 0.5), hy - (y + 0.5)) < r;
     for (let k = 0; k < plan.secretWalls.length; k++)
-      if (!(st.secrets & (1 << k)) && plan.secretWalls[k].cells.some(([x, y]) => close(x, y, 1.6))) return { kind: 'secret', k };
+      if (!(st.secrets & (1 << k)) && plan.secretWalls[k].cells.some(([x, y]) => close(x, y, 1.6)))
+        return { kind: 'secret', k };
     for (let s = 0; s < plan.locks.length; s++) {
       const lock = plan.locks[s],
         ls = st.locks[s];
@@ -1664,7 +1861,10 @@
     } else if (what.kind === 'levers') sequenceStep(i, what.s, what.id, hero);
     else if (what.kind === 'stele') {
       const lock = plan.locks[what.s];
-      canaanLootNotice(hero, lock.type === 'braziers' || lock.type === 'guardian' ? lockHint(i, what.s) : riddle(lock));
+      canaanLootNotice(
+        hero,
+        lock.type === 'braziers' || lock.type === 'guardian' ? lockHint(i, what.s) : riddle(lock)
+      );
     } else if (what.kind === 'door') canaanLootNotice(hero, lockHint(i, what.s));
     return true;
   }
@@ -1691,7 +1891,8 @@
       const lock = plan.locks[s],
         ls = st.locks[s];
       if (ls.done) continue;
-      if (lock.type === 'guardian' && !game.world.monsters.some(m => m.guardian === s && m.hp > 0)) solveLock(i, s);
+      if (lock.type === 'guardian' && !game.world.monsters.some(m => m.guardian === s && m.hp > 0))
+        solveLock(i, s);
       if (lock.type !== 'runes') continue;
       for (const h of members()) {
         if (h.player.dead) continue;
@@ -1716,7 +1917,9 @@
     const plan = planFor(game.world.instance.index);
     raw.l.forEach((v, s) => {
       if (!st.locks[s] || !Array.isArray(v)) return;
-      [st.locks[s].done, st.locks[s].prog, st.locks[s].step] = v.map(n => Math.max(0, Math.floor(Number(n) || 0)));
+      [st.locks[s].done, st.locks[s].prog, st.locks[s].step] = v.map(n =>
+        Math.max(0, Math.floor(Number(n) || 0))
+      );
       if (st.locks[s].done) openCells(plan.doors[s]);
     });
     st.secrets = Math.max(0, Math.floor(Number(raw.s) || 0));
@@ -2024,7 +2227,14 @@
   const mixHex = (a, b, t) => {
     const A = toRgb(a),
       B = toRgb(b);
-    return '#' + A.map((v, k) => Math.round(v + (B[k] - v) * t).toString(16).padStart(2, '0')).join('');
+    return (
+      '#' +
+      A.map((v, k) =>
+        Math.round(v + (B[k] - v) * t)
+          .toString(16)
+          .padStart(2, '0')
+      ).join('')
+    );
   };
   function pxDot(g, x, y, col, w = 1, h = 1) {
     g.fillStyle = col;
@@ -2037,7 +2247,13 @@
     pxDot(g, x, y, mixHex(base, '#ffffff', 0.08), 1, h);
     pxDot(g, x, y + h - 1, mixHex(base, p.b, 0.45), w, 1);
     pxDot(g, x + w - 1, y, mixHex(base, p.b, 0.3), 1, h);
-    if (hash(seed, x, y) > 0.55) pxDot(g, x + 1 + Math.floor(hash(x, seed, y) * (w - 2)), y + 1 + Math.floor(hash(y, x, seed) * (h - 2)), mixHex(base, p.b, 0.5));
+    if (hash(seed, x, y) > 0.55)
+      pxDot(
+        g,
+        x + 1 + Math.floor(hash(x, seed, y) * (w - 2)),
+        y + 1 + Math.floor(hash(y, x, seed) * (h - 2)),
+        mixHex(base, p.b, 0.5)
+      );
     if (hash(x, y, seed + 7) > 0.86 && w > 4) {
       const cx = x + 2 + Math.floor(hash(seed, y, 3) * (w - 4));
       pxDot(g, cx, y + 1, mixHex(base, p.b, 0.7));
@@ -2084,7 +2300,8 @@
           const w = (style === 'stone' ? 4 : 5) + Math.floor(hash(x + 9, row, v) * 5),
             x0 = Math.max(0, x),
             x1 = Math.min(16, x + w);
-          if (x1 - x0 > 1) pxSlab(g, x0, y, x1 - x0 - 1, hgt - 1, slabTone(p, hash(x, row, v + 3)), p, seed + x * 3 + row);
+          if (x1 - x0 > 1)
+            pxSlab(g, x0, y, x1 - x0 - 1, hgt - 1, slabTone(p, hash(x, row, v + 3)), p, seed + x * 3 + row);
           x += w;
         }
         y += hgt;
@@ -2093,7 +2310,8 @@
     }
     // Carreaux carrés (temples, marbre, basalte, arcanes, pierre d'étoiles).
     for (let ty = 0; ty < 2; ty++)
-      for (let tx = 0; tx < 2; tx++) pxSlab(g, tx * 8, ty * 8, 7, 7, slabTone(p, hash(tx + v * 2, ty, 11)), p, seed + tx * 5 + ty);
+      for (let tx = 0; tx < 2; tx++)
+        pxSlab(g, tx * 8, ty * 8, 7, 7, slabTone(p, hash(tx + v * 2, ty, 11)), p, seed + tx * 5 + ty);
     if (style === 'marble') {
       for (let k = 0; k < 6; k++) pxDot(g, 2 + k * 2, 3 + ((k * 3 + v) % 4), mixHex(p.a, p.b, 0.5));
       pxDot(g, 7, 7, p.c, 2, 2);
@@ -2109,7 +2327,9 @@
       pxDot(g, 11, 11, p.glow, 2, 1);
       pxDot(g, 12, 11, p.glow, 1, 2);
     }
-    if (style === 'starstone') for (let k = 0; k < 4; k++) pxDot(g, Math.floor(hash(k, seed, 2) * 15), Math.floor(hash(seed, k, 8) * 15), p.c);
+    if (style === 'starstone')
+      for (let k = 0; k < 4; k++)
+        pxDot(g, Math.floor(hash(k, seed, 2) * 15), Math.floor(hash(seed, k, 8) * 15), p.c);
   }
   // Chemin principal : tapis à motif, rails, dalles runiques ou grille au-dessus des braises.
   function pxAccent(g, p, floor, v) {
@@ -2118,8 +2338,24 @@
     if (p.style === 'carpet') {
       pxDot(g, 0, 0, p.a, 16, 16);
       for (let k = 0; k < 16; k += 4) pxDot(g, k, 0, mixHex(p.a, p.b, 0.4), 2, 16);
-      for (const [x, y] of [[7, 2], [6, 3], [8, 3], [5, 4], [9, 4], [6, 5], [8, 5], [7, 6]]) pxDot(g, x, y, p.c);
-      for (const [x, y] of [[7, 10], [6, 11], [8, 11], [7, 12]]) pxDot(g, x, y, p.b);
+      for (const [x, y] of [
+        [7, 2],
+        [6, 3],
+        [8, 3],
+        [5, 4],
+        [9, 4],
+        [6, 5],
+        [8, 5],
+        [7, 6]
+      ])
+        pxDot(g, x, y, p.c);
+      for (const [x, y] of [
+        [7, 10],
+        [6, 11],
+        [8, 11],
+        [7, 12]
+      ])
+        pxDot(g, x, y, p.b);
       return;
     }
     if (p.style === 'grate') {
@@ -2135,10 +2371,62 @@
     pxDot(g, 0, 0, mixHex(p.b, '#000000', 0.3), 16, 16);
     pxSlab(g, 0, 0, 15, 15, p.a, p, v + 3);
     const glyphs = [
-      [[7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [7, 11], [5, 5], [9, 5], [4, 7], [10, 7], [5, 9], [9, 9]],
-      [[7, 3], [6, 5], [8, 5], [5, 7], [9, 7], [4, 9], [10, 9], [4, 11], [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11]],
-      [[4, 7], [5, 7], [6, 7], [7, 7], [8, 7], [9, 7], [10, 7], [5, 4], [6, 5], [8, 9], [9, 10]],
-      [[6, 6], [7, 6], [8, 6], [6, 7], [8, 7], [6, 8], [7, 8], [8, 8]]
+      [
+        [7, 3],
+        [7, 4],
+        [7, 5],
+        [7, 6],
+        [7, 7],
+        [7, 8],
+        [7, 9],
+        [7, 10],
+        [7, 11],
+        [5, 5],
+        [9, 5],
+        [4, 7],
+        [10, 7],
+        [5, 9],
+        [9, 9]
+      ],
+      [
+        [7, 3],
+        [6, 5],
+        [8, 5],
+        [5, 7],
+        [9, 7],
+        [4, 9],
+        [10, 9],
+        [4, 11],
+        [5, 11],
+        [6, 11],
+        [7, 11],
+        [8, 11],
+        [9, 11],
+        [10, 11]
+      ],
+      [
+        [4, 7],
+        [5, 7],
+        [6, 7],
+        [7, 7],
+        [8, 7],
+        [9, 7],
+        [10, 7],
+        [5, 4],
+        [6, 5],
+        [8, 9],
+        [9, 10]
+      ],
+      [
+        [6, 6],
+        [7, 6],
+        [8, 6],
+        [6, 7],
+        [8, 7],
+        [6, 8],
+        [7, 8],
+        [8, 8]
+      ]
     ];
     for (const [x, y] of glyphs[v]) pxDot(g, x, y, p.c);
   }
@@ -2154,7 +2442,19 @@
         for (let x = -off; x < 16; x += 6) {
           const x0 = Math.max(0, x),
             x1 = Math.min(16, x + 5);
-          if (x1 > x0) pxSlab(g, x0, y, x1 - x0, 2, [w.face, mixHex(w.face, w.light, 0.3), mixHex(w.face, w.dark, 0.3), w.face][Math.floor(hash(x, row, v) * 4)], { b: w.dark }, seed + x + row);
+          if (x1 > x0)
+            pxSlab(
+              g,
+              x0,
+              y,
+              x1 - x0,
+              2,
+              [w.face, mixHex(w.face, w.light, 0.3), mixHex(w.face, w.dark, 0.3), w.face][
+                Math.floor(hash(x, row, v) * 4)
+              ],
+              { b: w.dark },
+              seed + x + row
+            );
         }
       }
     } else if (w.style === 'marble') {
@@ -2174,7 +2474,18 @@
             x1 = Math.min(16, x + bw),
             h = Math.min(hgt, 13 - y);
           if (x1 - x0 > 1 && h > 0) {
-            pxSlab(g, x0, y, x1 - x0 - 1, h, [w.face, mixHex(w.face, w.light, 0.35), mixHex(w.face, w.dark, 0.35)][Math.floor(hash(x, row, v + 1) * 3)], { b: w.dark }, seed + x * 7 + row);
+            pxSlab(
+              g,
+              x0,
+              y,
+              x1 - x0 - 1,
+              h,
+              [w.face, mixHex(w.face, w.light, 0.35), mixHex(w.face, w.dark, 0.35)][
+                Math.floor(hash(x, row, v + 1) * 3)
+              ],
+              { b: w.dark },
+              seed + x * 7 + row
+            );
             pxDot(g, x0, y, joint);
             pxDot(g, x1 - 2, y + h - 1, joint);
           }
@@ -2194,7 +2505,8 @@
   // Dessus des murs : aplat sombre tramé.
   function pxTop(g, w) {
     pxDot(g, 0, 0, w.top, 16, 16);
-    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if ((x + y * 3) % 7 === 0 && hash(x, y, 77) > 0.4) pxDot(g, x, y, w.dark);
+    for (let y = 0; y < 16; y++)
+      for (let x = 0; x < 16; x++) if ((x + y * 3) % 7 === 0 && hash(x, y, 77) > 0.4) pxDot(g, x, y, w.dark);
   }
   function themeArt(i) {
     if (ART[i]) return ART[i];
@@ -2246,7 +2558,15 @@
       const X = x * TS,
         Y = y * TS;
       c.fillStyle = 'rgba(10,8,6,.75)';
-      for (const [px, py, w, h] of [[20, 14, 2, 8], [18, 21, 2, 6], [22, 26, 2, 7], [14, 30, 6, 2], [24, 32, 6, 2], [26, 18, 5, 2]]) c.fillRect(X + px, Y + py, w, h);
+      for (const [px, py, w, h] of [
+        [20, 14, 2, 8],
+        [18, 21, 2, 6],
+        [22, 26, 2, 7],
+        [14, 30, 6, 2],
+        [24, 32, 6, 2],
+        [26, 18, 5, 2]
+      ])
+        c.fillRect(X + px, Y + py, w, h);
       if (Math.floor(time / 9 + x * 3) % 7 === 0) {
         c.fillStyle = 'rgba(220,200,170,.6)';
         c.fillRect(X + 21, Y + 36 + ((time * 0.5) % 10), 2, 2);
@@ -3002,7 +3322,19 @@
     block(c, X + 3, Y + 27, 8, 4, th.pillar[1]);
     px3(c, X + 3, Y + 27, 8, 1, th.pillar[2]);
     // Manche : relevé (vers le haut à gauche) ou abaissé (vers le bas à droite), pommeau coloré.
-    const pts = down ? [[0, 0], [1, 1], [2, 2], [3, 3]] : [[0, 0], [-1, -1], [-2, -2], [-3, -3]];
+    const pts = down
+      ? [
+          [0, 0],
+          [1, 1],
+          [2, 2],
+          [3, 3]
+        ]
+      : [
+          [0, 0],
+          [-1, -1],
+          [-2, -2],
+          [-3, -3]
+        ];
     for (const [dx, dy] of pts) px3(c, X + 15 + dx * 3, Y + 21 + dy * 3 + (down ? 0 : 0), 1, 1, '#6a4a30');
     const [ex, ey] = pts[3];
     block(c, X + 15 + ex * 3 - 1, Y + 21 + ey * 3 - 3, 2, 2, down ? SIGILS[p.id].col : '#c84a3a');
@@ -3083,7 +3415,8 @@
     c.fillStyle = th.pillar[1];
     c.fillRect(X + 3, Y + 3, w - 6, h - 6);
     c.fillStyle = th.pillar[0];
-    for (let k = 0; k < (w > h ? w : h); k += 24) (w > h ? c.fillRect(X + k + 3, Y + 6, 18, h - 15) : c.fillRect(X + 6, Y + k + 3, w - 15, 18));
+    for (let k = 0; k < (w > h ? w : h); k += 24)
+      w > h ? c.fillRect(X + k + 3, Y + 6, 18, h - 15) : c.fillRect(X + 6, Y + k + 3, w - 15, 18);
     c.fillStyle = '#3a3a40';
     if (w > h) c.fillRect(X, Y + h / 2 - 3, w, 6);
     else c.fillRect(X + w / 2 - 3, Y, 6, h);
@@ -3109,7 +3442,9 @@
   function drawExplore(c, plan, th, view) {
     const st = dunState();
     if (!st) return;
-    for (const p of plan.plates) if (view(p.x, p.y)) drawPlate(c, p, th, !!(st.locks[p.lock].prog & (1 << p.id)) || !!st.locks[p.lock].done);
+    for (const p of plan.plates)
+      if (view(p.x, p.y))
+        drawPlate(c, p, th, !!(st.locks[p.lock].prog & (1 << p.id)) || !!st.locks[p.lock].done);
     for (const p of plan.props) {
       if (!view(p.x, p.y, 4)) continue;
       if (p.kind === 'treasure') drawTreasure(c, p);
@@ -3128,7 +3463,10 @@
       else if (p.kind === 'stele') drawStele(c, p, th, plan.locks[p.lock]);
       c.restore();
     }
-    plan.doors.forEach((g, s) => g && game.world.tiles[g.cells[0][1]]?.[g.cells[0][0]] === GATE && drawDoor(c, g, th, plan.locks[s]));
+    plan.doors.forEach(
+      (g, s) =>
+        g && game.world.tiles[g.cells[0][1]]?.[g.cells[0][0]] === GATE && drawDoor(c, g, th, plan.locks[s])
+    );
     // Invitation à agir sur ce qui est à portée de main.
     const what = reachable(P);
     if (!what) return;
@@ -3162,7 +3500,16 @@
   }
   // Objets au sol en gros pixels cernés d'encre, comme le décor de l'île : peints une fois (leurs lumières notées),
   // réduits au tiers sans lissage, contourés, puis réutilisés. Les objets animés restent dessinés à chaque image.
-  const LIVE_PROPS = new Set(['brazier', 'candles', 'gear', 'hourglass', 'orb', 'furnace', 'pillarlight', 'crystal']);
+  const LIVE_PROPS = new Set([
+    'brazier',
+    'candles',
+    'gear',
+    'hourglass',
+    'orb',
+    'furnace',
+    'pillarlight',
+    'crystal'
+  ]);
   let propCache = { key: null, map: new Map() };
   function pixelProp(c, p, th, i) {
     if (LIVE_PROPS.has(p.kind) || typeof window.canaanOutline !== 'function') return drawFloorProp(c, p, th);
@@ -3217,7 +3564,8 @@
         else if (plan.arena) drawFloorProp(c, p, th);
         else pixelProp(c, p, th, i);
       }
-    for (const g of plan.gates) if (g && game.world.tiles[g.cells[0][1]][g.cells[0][0]] === GATE) drawGate(c, g, th);
+    for (const g of plan.gates)
+      if (g && game.world.tiles[g.cells[0][1]][g.cells[0][0]] === GATE) drawGate(c, g, th);
     if (!plan.arena) {
       drawExplore(c, plan, th, view);
       drawExitPortal(c, th);
@@ -3632,7 +3980,12 @@
       ];
     // Pénombre adoucie : on voit le pixel art des salles, les torches gardent leur halo.
     const arena = game.world.instance.arena;
-    return { dark: arena ? th.light.dark : th.light.dark * 0.62, tint: th.light.tint, particles: th.particles, color: col };
+    return {
+      dark: arena ? th.light.dark : th.light.dark * 0.62,
+      tint: th.light.tint,
+      particles: th.particles,
+      color: col
+    };
   }
   function dungeonMinimapColor(t) {
     if (!game.world.instance) return BIOME_COLORS[t];
@@ -3697,7 +4050,18 @@
     // Chance d'équipement de chaque boss, pour chaque héros (fiche des portails).
     CANAAN_BOSS_DROP_CHANCE: BOSS_DROP_CHANCE,
     // Exploration : interaction (E), ce qui est à portée, état copié chez les invités.
-    CANAAN_DUNGEON_EXPLORE: Object.freeze({ exitSpot, exitNear, takeExit, inBossRoom, interact: dungeonInteract, near: p => !!reachable(p), stateOut: dungeonStateOut, stateIn: dungeonStateIn, state: () => dunState(), plan: i => planFor(i) }),
+    CANAAN_DUNGEON_EXPLORE: Object.freeze({
+      exitSpot,
+      exitNear,
+      takeExit,
+      inBossRoom,
+      interact: dungeonInteract,
+      near: p => !!reachable(p),
+      stateOut: dungeonStateOut,
+      stateIn: dungeonStateIn,
+      state: () => dunState(),
+      plan: i => planFor(i)
+    }),
     // Monstres d'une instance (renforts appelés par les boss, boss-mechanics.js).
     CANAAN_DUNGEON_MOBS: i => THEMES[i].mobs,
     // Apparence des boss d'une instance (portraits du bestiaire).

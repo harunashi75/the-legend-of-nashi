@@ -30,8 +30,10 @@
         if (!item.origin) item.origin = old[1] === 'Héritage du raid' ? 'raid' : 'donjon';
       }
     }
-    if (!Number.isFinite(Number(item.level)) && Number.isFinite(Number(item.ilvl))) item.level = levelFromIlvl(item.ilvl);
-    for (const key of ['ilvl', 'ratings52', '_stats52', '_stats52Ilvl', 'upgrade', 'craftPassive']) delete item[key];
+    if (!Number.isFinite(Number(item.level)) && Number.isFinite(Number(item.ilvl)))
+      item.level = levelFromIlvl(item.ilvl);
+    for (const key of ['ilvl', 'ratings52', '_stats52', '_stats52Ilvl', 'upgrade', 'craftPassive'])
+      delete item[key];
     const originalType = item.weaponType,
       originalName = item.name;
     normalizeWeapon(item);
@@ -42,7 +44,8 @@
     // Les noms choisis sont des propriétés persistantes.
     if (weapon && WEAPONS.has(originalType)) item.weaponType = originalType;
     applyItemName(item);
-    if (weapon && WEAPONS.has(originalType) && originalName && !/^Lame\s/.test(originalName)) item.name = originalName;
+    if (weapon && WEAPONS.has(originalType) && originalName && !/^Lame\s/.test(originalName))
+      item.name = originalName;
     window.CANAAN_STATS_PREPARE(item);
     // Enchantement enregistré : vérifié (sinon retiré).
     CANAAN_GATHER.cleanItem(item);
@@ -56,7 +59,8 @@
     if (!item) return item;
     item.level = clampLevel(level);
     // Sans qualité imposée : monstres et coffres donnent du Commun.
-    if (!guaranteed) item.rarity = ['normal', 'chest', 'hidden_common'].includes(source) ? 'Commun' : rarityInfo(item).name;
+    if (!guaranteed)
+      item.rarity = ['normal', 'chest', 'hidden_common'].includes(source) ? 'Commun' : rarityInfo(item).name;
     if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
       const price = gearSellValue(item);
       hero.player.gold += price;

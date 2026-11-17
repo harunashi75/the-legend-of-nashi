@@ -4,7 +4,12 @@
 (() => {
   // network : identifiant d'invité (créé une fois), pseudo et adresse du relais du coopératif.
   // settings : réglages d'affichage du menu Paramètres (secousses de l'écran).
-  const keys = Object.freeze({ audio: 'canaan_audio_v1729', layout: 'canaan_layout_v1729', network: 'canaan_network_v1', settings: 'canaan_settings_v1' });
+  const keys = Object.freeze({
+    audio: 'canaan_audio_v1729',
+    layout: 'canaan_layout_v1729',
+    network: 'canaan_network_v1',
+    settings: 'canaan_settings_v1'
+  });
   function keyOf(name) {
     if (!Object.hasOwn(keys, name)) throw new Error('Préférence inconnue : ' + name);
     return keys[name];

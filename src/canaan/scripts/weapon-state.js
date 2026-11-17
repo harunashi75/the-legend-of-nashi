@@ -49,13 +49,20 @@ function canaanStanceOf() {
 // Petit badge d'une case de compétence : posture en cours (secondes), bonus prêt, ou charges arcaniques.
 function canaanSkillBadge(type, i, st) {
   const sec = v => (v > 0 ? Math.ceil(v) + ' s' : '');
-  const posture = { sword: 'parryReady', dualsword: 'flurry', axe: 'berserk', dualdagger: 'shadow', staff: 'focus' }[type];
+  const posture = {
+    sword: 'parryReady',
+    dualsword: 'flurry',
+    axe: 'berserk',
+    dualdagger: 'shadow',
+    staff: 'focus'
+  }[type];
   if (i === 2 && posture && st[posture] > 0) return { text: sec(st[posture]), on: true };
   if (type === 'shield' && i === 3 && st.shieldGuard > 0) return { text: sec(st.shieldGuard), on: true };
   if (type === 'sword' && i === 3 && st.parryReady > 0) return { text: '600 %', on: true };
   if (type === 'dualsword' && i === 3 && st.combo > 0) return { text: 'COMBO', on: true };
   if (type === 'bow' && i === 0 && st.fastBow > 0) return { text: '360 %', on: true };
-  if (type === 'staff' && i === 3) return { text: '🔮 ' + (st.arcane | 0) + '/3', on: (st.arcane | 0) >= 3, always: true };
+  if (type === 'staff' && i === 3)
+    return { text: '🔮 ' + (st.arcane | 0) + '/3', on: (st.arcane | 0) >= 3, always: true };
   return null;
 }
 function canaanUpdateSkillBadges() {
@@ -76,15 +83,30 @@ function canaanUpdateSkillBadges() {
 // Info-bulle d'une compétence (survol de la barre) : explication, dégâts estimés avec la puissance actuelle,
 // recharge et mana, effet de la classe et état en cours (charges, bonus prêts).
 function canaanSkillTooltip(i) {
-  const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const esc = v =>
+    String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   if (i === 'special') {
     const c = classById(game.hero.classe?.id);
     if (!c) return '';
     return (
-      '<div class="tooltip-name skill-tip-head" style="color:' + c.color + '"><span class="skill-tip-icon">' + (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) + '</span>' + esc(c.special.name) + '</div>' +
-      '<div class="tooltip-sub">Sort de classe · touche F · ' + esc(c.name) + '</div>' +
-      '<div class="skill-tip-desc">' + esc(c.special.desc) + '</div>' +
-      '<div class="skill-tip-meta">Mana ' + c.special.mana + ' · recharge ' + c.special.cooldown + ' s</div>'
+      '<div class="tooltip-name skill-tip-head" style="color:' +
+      c.color +
+      '"><span class="skill-tip-icon">' +
+      (CANAAN_SKILL_ICONS.special(c.special.id) || c.special.icon) +
+      '</span>' +
+      esc(c.special.name) +
+      '</div>' +
+      '<div class="tooltip-sub">Sort de classe · touche F · ' +
+      esc(c.name) +
+      '</div>' +
+      '<div class="skill-tip-desc">' +
+      esc(c.special.desc) +
+      '</div>' +
+      '<div class="skill-tip-meta">Mana ' +
+      c.special.mana +
+      ' · recharge ' +
+      c.special.cooldown +
+      ' s</div>'
     );
   }
   const type = currentWeaponType(),
@@ -96,16 +118,36 @@ function canaanSkillTooltip(i) {
     magic = type === 'staff',
     st = canaanStanceOf();
   let lines =
-    '<div class="tooltip-name skill-tip-head"><span class="skill-tip-icon">' + (CANAAN_SKILL_ICONS.weapon(type, i) || icon) + '</span>' + esc(name) + '</div>' +
-    '<div class="tooltip-sub">Compétence ' + (i + 1) + ' · ' + esc(weapon.name) + ' · ' + (offensive ? 'offensive' : 'utilitaire') + '</div>' +
-    '<div class="skill-tip-desc">' + esc(detail || summary) + '</div>';
+    '<div class="tooltip-name skill-tip-head"><span class="skill-tip-icon">' +
+    (CANAAN_SKILL_ICONS.weapon(type, i) || icon) +
+    '</span>' +
+    esc(name) +
+    '</div>' +
+    '<div class="tooltip-sub">Compétence ' +
+    (i + 1) +
+    ' · ' +
+    esc(weapon.name) +
+    ' · ' +
+    (offensive ? 'offensive' : 'utilitaire') +
+    '</div>' +
+    '<div class="skill-tip-desc">' +
+    esc(detail || summary) +
+    '</div>';
   if (mult > 0 && typeof CANAAN_SKILLS !== 'undefined') {
     const power = CANAAN_SKILLS.power(game.hero, magic),
       extra = type === 'staff' && i === 3 ? 1.4 * (st.arcane | 0) : 0;
     lines +=
-      '<div class="skill-tip-dmg">≈ ' + Math.round(power * (mult + extra)) + ' dégâts par cible' +
+      '<div class="skill-tip-dmg">≈ ' +
+      Math.round(power * (mult + extra)) +
+      ' dégâts par cible' +
       (extra ? ' (avec ' + (st.arcane | 0) + ' charge' + ((st.arcane | 0) > 1 ? 's' : '') + ')' : '') +
-      ' · ' + Math.round((mult + extra) * 100) + ' % de ta Puissance' + (magic ? ' magique' : '') + ' (' + power + ')</div>';
+      ' · ' +
+      Math.round((mult + extra) * 100) +
+      ' % de ta Puissance' +
+      (magic ? ' magique' : '') +
+      ' (' +
+      power +
+      ')</div>';
   }
   lines += '<div class="skill-tip-meta">Recharge ' + cd + ' s · Mana ' + mana + '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
@@ -113,7 +155,8 @@ function canaanSkillTooltip(i) {
   if (type === 'staff')
     lines += '<div class="skill-tip-state">🔮 Charges arcaniques : <b>' + (st.arcane | 0) + ' / 3</b></div>';
   const badge = canaanSkillBadge(type, i, st);
-  if (badge?.on && type !== 'staff') lines += '<div class="skill-tip-state">✦ Bonus prêt : ' + esc(badge.text) + '</div>';
+  if (badge?.on && type !== 'staff')
+    lines += '<div class="skill-tip-state">✦ Bonus prêt : ' + esc(badge.text) + '</div>';
   return lines;
 }
 function showSkillTooltip(i, event) {

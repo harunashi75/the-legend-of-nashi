@@ -14,7 +14,13 @@
   const guest = () => game.mode === 'guest';
   // Un objet de la marchandise : emplacement (et famille d'arme) imposés, qualité Peu commun, niveau du héros.
   function make(level, slot, weaponType = null) {
-    const item = { id: 'shop' + Date.now() + Math.floor(Math.random() * 1e9), name: '', slot, rarity: RARITY, level: clampLevel(level) };
+    const item = {
+      id: 'shop' + Date.now() + Math.floor(Math.random() * 1e9),
+      name: '',
+      slot,
+      rarity: RARITY,
+      level: clampLevel(level)
+    };
     if (weaponType) item.weaponType = weaponType;
     window.CANAAN_GEAR.normalize(item);
     return item;
@@ -24,7 +30,13 @@
     const level = heroLevel(hero);
     let s = stocks.get(hero);
     if (!s || s.level !== level) {
-      s = { level, items: [...SLOTS.map(slot => make(level, slot)), ...CANAAN_GEAR_ENGINE.weaponTypes.map(t => make(level, 'weapon', t))] };
+      s = {
+        level,
+        items: [
+          ...SLOTS.map(slot => make(level, slot)),
+          ...CANAAN_GEAR_ENGINE.weaponTypes.map(t => make(level, 'weapon', t))
+        ]
+      };
       stocks.set(hero, s);
     }
     return s.items;
@@ -36,10 +48,11 @@
     const items = stock(hero),
       item = items[index];
     if (!item) return false;
-    if (!nearMerchant(hero)) return say(hero, '🛍️ Va voir un marchand pour acheter.'), false;
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) return say(hero, '🎒 Sac plein : vends d’abord un objet.'), false;
+    if (!nearMerchant(hero)) return (say(hero, '🛍️ Va voir un marchand pour acheter.'), false);
+    if (canaanBagUsed(hero) >= canaanBagLimit(hero))
+      return (say(hero, '🎒 Sac plein : vends d’abord un objet.'), false);
     const cost = priceOf(hero);
-    if (hero.player.gold < cost) return say(hero, 'Or insuffisant (' + cost + ' or).'), false;
+    if (hero.player.gold < cost) return (say(hero, 'Or insuffisant (' + cost + ' or).'), false);
     hero.player.gold -= cost;
     hero.inventory.push(item);
     // Remplacé par un autre objet du même genre.
@@ -53,8 +66,9 @@
   function sellStack(hero, text) {
     const p = CANAAN_BAG.parse(text);
     if (!p) return false;
-    if (!CANAAN_BAG.sellable(p)) return say(hero, '🗝️ ' + CANAAN_BAG.info(p).name + ' : ne se vend pas.'), false;
-    if (!nearMerchant(hero)) return say(hero, '💰 Va voir un marchand pour vendre !'), false;
+    if (!CANAAN_BAG.sellable(p))
+      return (say(hero, '🗝️ ' + CANAAN_BAG.info(p).name + ' : ne se vend pas.'), false);
+    if (!nearMerchant(hero)) return (say(hero, '💰 Va voir un marchand pour vendre !'), false);
     if (!CANAAN_BAG.remove(hero, p.kind, p.id, p.q, p.n)) return false;
     const gold = CANAAN_BAG.price(p);
     hero.player.gold += gold;
@@ -84,9 +98,31 @@
     const rarity = rarityInfo(item),
       icon = weaponIcon(item) || itemIcon[item.slot];
     return (
-      '<div class="shop-item"><button type="button" class="bag-cell"' + canaanPrestige(item) + ' style="border-color:' + rarity.color + ';--rarity:' + rarity.color + '" data-tooltip-shop="' + i + '" data-action="shopBuy" data-index="' + i + '" title="Acheter ' + esc(gearDisplayName(item)) + '">' +
-      '<span class="bag-icon">' + icon + '</span><span class="bag-name">' + esc(gearDisplayName(item)) + '</span><span class="bag-ilvl">' + itemLevel(item) + '</span></button>' +
-      '<span class="shop-price' + (P.gold < price ? ' poor' : '') + '">🪙 ' + price + '</span></div>'
+      '<div class="shop-item"><button type="button" class="bag-cell"' +
+      canaanPrestige(item) +
+      ' style="border-color:' +
+      rarity.color +
+      ';--rarity:' +
+      rarity.color +
+      '" data-tooltip-shop="' +
+      i +
+      '" data-action="shopBuy" data-index="' +
+      i +
+      '" title="Acheter ' +
+      esc(gearDisplayName(item)) +
+      '">' +
+      '<span class="bag-icon">' +
+      icon +
+      '</span><span class="bag-name">' +
+      esc(gearDisplayName(item)) +
+      '</span><span class="bag-ilvl">' +
+      itemLevel(item) +
+      '</span></button>' +
+      '<span class="shop-price' +
+      (P.gold < price ? ' poor' : '') +
+      '">🪙 ' +
+      price +
+      '</span></div>'
     );
   }
   // Sac du joueur dans la boutique : un clic vend (équipement ou pile).
@@ -96,36 +132,102 @@
         const rarity = rarityInfo(item),
           icon = weaponIcon(item) || itemIcon[item.slot];
         return (
-          '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' + canaanPrestige(item) + ' style="border-color:' + rarity.color + ';--rarity:' + rarity.color + '" data-tooltip-index="' + i + '" data-action="sellInventoryCell" data-index="' + i + '" data-item-id="' + esc(item.id) + '" title="Vendre ' + esc(gearDisplayName(item)) + ' pour ' + gearSellValue(item) + ' or">' +
-          '<span class="bag-icon">' + icon + '</span><span class="bag-name">' + esc(gearDisplayName(item)) + '</span><span class="bag-ilvl">' + itemLevel(item) + '</span></button></div>'
+          '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' +
+          canaanPrestige(item) +
+          ' style="border-color:' +
+          rarity.color +
+          ';--rarity:' +
+          rarity.color +
+          '" data-tooltip-index="' +
+          i +
+          '" data-action="sellInventoryCell" data-index="' +
+          i +
+          '" data-item-id="' +
+          esc(item.id) +
+          '" title="Vendre ' +
+          esc(gearDisplayName(item)) +
+          ' pour ' +
+          gearSellValue(item) +
+          ' or">' +
+          '<span class="bag-icon">' +
+          icon +
+          '</span><span class="bag-name">' +
+          esc(gearDisplayName(item)) +
+          '</span><span class="bag-ilvl">' +
+          itemLevel(item) +
+          '</span></button></div>'
         );
       }),
       // Une pile qui ne se vend pas (clés des secrets) reste visible, sans action de vente.
-      sell = p => '<div class="bag-sale-wrap">' + (CANAAN_BAG.sellable(p) ? CANAAN_BAG.cell(p, 'data-action="shopSellStack" data-token="' + esc(CANAAN_BAG.token(p)) + '" title="Vendre pour ' + CANAAN_BAG.price(p) + ' or"') : CANAAN_BAG.cell(p, 'title="Ne se vend pas"')) + '</div>',
+      sell = p =>
+        '<div class="bag-sale-wrap">' +
+        (CANAAN_BAG.sellable(p)
+          ? CANAAN_BAG.cell(
+              p,
+              'data-action="shopSellStack" data-token="' +
+                esc(CANAAN_BAG.token(p)) +
+                '" title="Vendre pour ' +
+                CANAAN_BAG.price(p) +
+                ' or"'
+            )
+          : CANAAN_BAG.cell(p, 'title="Ne se vend pas"')) +
+        '</div>',
       stacks = CANAAN_BAG.tiles(hero, 'main').map(sell),
       mats = CANAAN_BAG.tiles(hero, 'mat').map(sell),
       empty = Math.max(0, canaanBagLimit(hero) - gear.length - stacks.length);
     return (
-      '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' + (gear.length + stacks.length) + ' / ' + canaanBagLimit(hero) + '</h3>' +
-      '<p class="muted">Clique un objet pour le vendre. Or : <b>🪙 ' + Math.floor(P.gold) + '</b></p>' +
-      '<div class="modern-bag">' + gear.join('') + stacks.join('') + Array.from({ length: empty }, () => '<div class="bag-sale-wrap"><div class="bag-cell empty"><span class="bag-icon">＋</span></div></div>').join('') + '</div>' +
-      '<h3 class="bag-subhead">⟦prof_mining⟧ Matériaux · ' + mats.length + ' / ' + CANAAN_BAG.MAT_LIMIT + '</h3>' +
-      (mats.length ? '<div class="modern-bag">' + mats.join('') + '</div>' : '<p class="muted">Aucun matériau.</p>') +
+      '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' +
+      (gear.length + stacks.length) +
+      ' / ' +
+      canaanBagLimit(hero) +
+      '</h3>' +
+      '<p class="muted">Clique un objet pour le vendre. Or : <b>🪙 ' +
+      Math.floor(P.gold) +
+      '</b></p>' +
+      '<div class="modern-bag">' +
+      gear.join('') +
+      stacks.join('') +
+      Array.from(
+        { length: empty },
+        () =>
+          '<div class="bag-sale-wrap"><div class="bag-cell empty"><span class="bag-icon">＋</span></div></div>'
+      ).join('') +
+      '</div>' +
+      '<h3 class="bag-subhead">⟦prof_mining⟧ Matériaux · ' +
+      mats.length +
+      ' / ' +
+      CANAAN_BAG.MAT_LIMIT +
+      '</h3>' +
+      (mats.length
+        ? '<div class="modern-bag">' + mats.join('') + '</div>'
+        : '<p class="muted">Aucun matériau.</p>') +
       '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div></section>'
     );
   }
   let shown = '';
-  const signature = () => JSON.stringify([myStock()?.items?.map(i => i.id), game.hero.inventory.map(i => i.id), CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p)), Math.floor(P.gold)]);
+  const signature = () =>
+    JSON.stringify([
+      myStock()?.items?.map(i => i.id),
+      game.hero.inventory.map(i => i.id),
+      CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p)),
+      Math.floor(P.gold)
+    ]);
   function render() {
     if (!isOpen()) return;
     const s = myStock();
     shown = signature();
     const name = merchant?.name || 'Marchand';
     showPanel(
-      '<div class="rpg-head"><h2>🛍️ ' + esc(name) + '</h2></div><div class="shop-panel shop-columns">' +
-        '<section class="shop-side"><h3>Marchandise · ' + esc(merchant?.village || CANAAN_CAMP.name) + '</h3>' +
+      '<div class="rpg-head"><h2>🛍️ ' +
+        esc(name) +
+        '</h2></div><div class="shop-panel shop-columns">' +
+        '<section class="shop-side"><h3>Marchandise · ' +
+        esc(merchant?.village || CANAAN_CAMP.name) +
+        '</h3>' +
         (s
-          ? '<p class="muted">Équipement Peu commun de ton niveau. Survole un objet pour le comparer, clique pour l’acheter.</p><div class="modern-bag shop-stock">' + s.items.map((it, i) => stockCell(it, i, s.price)).join('') + '</div>'
+          ? '<p class="muted">Équipement Peu commun de ton niveau. Survole un objet pour le comparer, clique pour l’acheter.</p><div class="modern-bag shop-stock">' +
+            s.items.map((it, i) => stockCell(it, i, s.price)).join('') +
+            '</div>'
           : '<p class="muted">Approche-toi du marchand pour voir sa marchandise.</p>') +
         bagUpgradeHTML() +
         '<p class="muted">Pour devenir plus fort, il faut trouver mieux : monstres, boss mondiaux, donjons et raids lâchent des équipements toujours plus puissants.</p></section>' +
@@ -143,7 +245,9 @@
   function showTooltip(index, event) {
     const item = myStock()?.items?.[index];
     if (!item) return hideGearTooltip();
-    gearTooltip.innerHTML = window.CANAAN_STATS_VIEW.tooltip(item) + (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+    gearTooltip.innerHTML =
+      window.CANAAN_STATS_VIEW.tooltip(item) +
+      (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }

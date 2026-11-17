@@ -64,12 +64,57 @@ const CANAAN_ROOMS = Object.freeze(
     { id: 'grange', name: 'Grange du Camp', kind: 'barn', x: 336, y: 90, w: 15, h: 9 },
     { id: 'poulailler', name: 'Poulailler', kind: 'barn', x: 366, y: 90, w: 11, h: 9 },
     // Forteresse naine de Durgrim, dans les Tréfonds (under) : pièces creusées dans la roche, au nord de la carte.
-    { id: 'dur_hall', name: 'Grand Hall de Durgrim', kind: 'dwarfhall', under: true, x: 10, y: 10, w: 17, h: 11 },
+    {
+      id: 'dur_hall',
+      name: 'Grand Hall de Durgrim',
+      kind: 'dwarfhall',
+      under: true,
+      x: 10,
+      y: 10,
+      w: 17,
+      h: 11
+    },
     { id: 'dur_forge', name: 'Forge de Durgrim', kind: 'dwarfforge', under: true, x: 40, y: 10, w: 13, h: 9 },
-    { id: 'dur_taverne', name: 'Taverne de Dorn', kind: 'dwarftavern', under: true, x: 70, y: 10, w: 13, h: 9 },
-    { id: 'dur_coffre', name: 'Chambre forte de Gimra', kind: 'dwarfvault', under: true, x: 100, y: 10, w: 11, h: 9 },
-    { id: 'dur_maison1', name: 'Maison de la famille Pied-de-Roc', kind: 'dwarfhome', under: true, x: 130, y: 10, w: 11, h: 9 },
-    { id: 'dur_maison2', name: 'Maison de la famille Marteau-d’Or', kind: 'dwarfhome', under: true, x: 160, y: 10, w: 11, h: 9 }
+    {
+      id: 'dur_taverne',
+      name: 'Taverne de Dorn',
+      kind: 'dwarftavern',
+      under: true,
+      x: 70,
+      y: 10,
+      w: 13,
+      h: 9
+    },
+    {
+      id: 'dur_coffre',
+      name: 'Chambre forte de Gimra',
+      kind: 'dwarfvault',
+      under: true,
+      x: 100,
+      y: 10,
+      w: 11,
+      h: 9
+    },
+    {
+      id: 'dur_maison1',
+      name: 'Maison de la famille Pied-de-Roc',
+      kind: 'dwarfhome',
+      under: true,
+      x: 130,
+      y: 10,
+      w: 11,
+      h: 9
+    },
+    {
+      id: 'dur_maison2',
+      name: 'Maison de la famille Marteau-d’Or',
+      kind: 'dwarfhome',
+      under: true,
+      x: 160,
+      y: 10,
+      w: 11,
+      h: 9
+    }
   ].map(r => Object.freeze(r))
 );
 const CANAAN_HOUSE_ROOM = CANAAN_ROOMS[0];
@@ -79,7 +124,9 @@ const CANAAN_HOUSE_ROOM = CANAAN_ROOMS[0];
 function canaanRoomAt(tx, ty) {
   if (game.world.instance) return null;
   const under = game.world.layer === 'under';
-  for (const r of CANAAN_ROOMS) if (!!r.under === under && tx >= r.x - 1 && ty >= r.y - 1 && tx < r.x + r.w + 1 && ty < r.y + r.h + 1) return r;
+  for (const r of CANAAN_ROOMS)
+    if (!!r.under === under && tx >= r.x - 1 && ty >= r.y - 1 && tx < r.x + r.w + 1 && ty < r.y + r.h + 1)
+      return r;
   return null;
 }
 function canaanInHouse(tx, ty) {
@@ -106,7 +153,13 @@ const CANAAN_BASE_MANA = 300;
 // Régénération par seconde, appliquée à chaque tick.
 // Hors combat : 6 mana, et 2 points de vie + 1 % des PV max.
 // En combat (5 s après le dernier coup donné ou reçu, ou tout combat d'Arène) : 3 mana, et 25 % de la régénération de vie.
-const CANAAN_REGEN = Object.freeze({ mana: 6, manaCombat: 3, health: 2, healthPercent: 0.01, healthCombat: 0.25 });
+const CANAAN_REGEN = Object.freeze({
+  mana: 6,
+  manaCombat: 3,
+  health: 2,
+  healthPercent: 0.01,
+  healthCombat: 0.25
+});
 function canaanRegenRates(fighting = CANAAN_RUBIS.inCombat(), player = P) {
   const health = CANAAN_REGEN.health + player.mhp * CANAAN_REGEN.healthPercent;
   return {
@@ -140,7 +193,18 @@ let particles = [],
 // Input
 const keys = {};
 // Touches des fenêtres : la même touche ferme sa fenêtre, une autre passe directement à la sienne.
-const CANAAN_PANEL_KEYS = { t: 'toggleTalents', i: 'toggleInventory', c: 'toggleCharacter', m: 'toggleMap', g: 'toggleGroup', j: 'toggleTrade', p: 'toggleProfessions', l: 'toggleJournal', y: 'toggleAchievements', v: 'toggleWardrobe' };
+const CANAAN_PANEL_KEYS = {
+  t: 'toggleTalents',
+  i: 'toggleInventory',
+  c: 'toggleCharacter',
+  m: 'toggleMap',
+  g: 'toggleGroup',
+  j: 'toggleTrade',
+  p: 'toggleProfessions',
+  l: 'toggleJournal',
+  y: 'toggleAchievements',
+  v: 'toggleWardrobe'
+};
 let canaanPanelOpen = null,
   canaanPanelOpening = null,
   canaanPanelsTracked = false;
@@ -199,8 +263,18 @@ addEventListener('keydown', e => {
     togglePause();
     return;
   }
-  const typing = e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
-  if (!paused && modalOpen() && !typing && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && canaanPanelKey(k)) {
+  const typing =
+    e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
+  if (
+    !paused &&
+    modalOpen() &&
+    !typing &&
+    !e.repeat &&
+    !e.ctrlKey &&
+    !e.altKey &&
+    !e.metaKey &&
+    canaanPanelKey(k)
+  ) {
     e.preventDefault();
     return;
   }
@@ -381,7 +455,9 @@ function canaanHostRespawn(message) {
       canaanRespawnPending = false;
       // Dans les Tréfonds, on se relève à la Forteresse de Durgrim ; sur l'île, au camp, ou à la cité elfique pour un
       // héros de niveau 60 tombé dans la Forêt enchantée ou dans la cité.
-      const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_CITY.respawnFor(game.hero) || CANAAN_SPAWN;
+      const home = canaanUnder()
+        ? CANAAN_UNDER.spawnPoint()
+        : CANAAN_CITY.respawnFor(game.hero) || CANAAN_SPAWN;
       P.x = home.x;
       P.y = home.y;
       P.hp = P.mhp;
@@ -407,7 +483,8 @@ function interact() {
     // Cité elfique : porte (l'hôte la fait passer), Grand Arbre et marchands (fenêtres chez l'invité).
     if (!game.world.instance && !canaanUnder() && CANAAN_CITY.guestUse()) return;
     // Donjon : mur fissuré, brasero, levier, stèle ou porte scellée (l'hôte agit pour lui).
-    if (game.world.instance && CANAAN_DUNGEON_EXPLORE.near(P)) return CANAAN_NET.requestAction({ op: 'dungeon-use' });
+    if (game.world.instance && CANAAN_DUNGEON_EXPLORE.near(P))
+      return CANAAN_NET.requestAction({ op: 'dungeon-use' });
     // Portail de retour : c'est l'hôte qui le prend, pour tout le groupe.
     if (game.world.instance && CANAAN_DUNGEON_EXPLORE.takeExit()) return;
     if (game.world.instance) return;
@@ -416,7 +493,16 @@ function interact() {
     if (CANAAN_HOUSE.interact()) return;
     // Pêche : lancer, ferrer ou remonter la ligne près d'un banc de poissons.
     if (CANAAN_PROF.interact()) return;
-    const npc = game.world.npcs.find(n => (n.type === 'shop' || n.type === 'bank' || n.type === 'dwarf' || n.type === 'descend' || n.type === 'ascend') && canaanHere(n) && Math.hypot(P.x - n.x, P.y - n.y) < 120);
+    const npc = game.world.npcs.find(
+      n =>
+        (n.type === 'shop' ||
+          n.type === 'bank' ||
+          n.type === 'dwarf' ||
+          n.type === 'descend' ||
+          n.type === 'ascend') &&
+        canaanHere(n) &&
+        Math.hypot(P.x - n.x, P.y - n.y) < 120
+    );
     if (npc) openDialog(npc);
     return;
   }
@@ -445,7 +531,17 @@ function interact() {
   }
   if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
   let n = game.world.npcs
-    .filter(n => !game.world.instance && canaanHere(n) && Math.hypot(P.x - n.x, P.y - n.y) < (n.type === 'shop' || n.type === 'bank' ? 120 : n.type === 'descend' || n.type === 'ascend' ? 100 : 85))
+    .filter(
+      n =>
+        !game.world.instance &&
+        canaanHere(n) &&
+        Math.hypot(P.x - n.x, P.y - n.y) <
+          (n.type === 'shop' || n.type === 'bank'
+            ? 120
+            : n.type === 'descend' || n.type === 'ascend'
+              ? 100
+              : 85)
+    )
     .sort((a, b) => Math.hypot(P.x - a.x, P.y - a.y) - Math.hypot(P.x - b.x, P.y - b.y))[0];
   if (n) openDialog(n);
 }
@@ -631,7 +727,8 @@ function loop(timestamp) {
       ctx.fillRect(0, 0, 1, 1);
       return;
     }
-    canaanLastDraw = canaanLastDraw !== null && now - canaanLastDraw < interval * 2 ? canaanLastDraw + interval : now;
+    canaanLastDraw =
+      canaanLastDraw !== null && now - canaanLastDraw < interval * 2 ? canaanLastDraw + interval : now;
   } else canaanLastDraw = now;
   canaanCountFrame(now);
   if (canaanLastFrame === null) {
@@ -679,16 +776,42 @@ function canWalk(x, y) {
     [r, r]
   ].every(([a, b]) => {
     // Tréfonds : la roche et les bâtiments souterrains bloquent ; rien de la surface (quêtes, maisons) ne compte.
-    if (canaanUnder()) return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !CANAAN_UNDER.blocked(x + a, y + b);
+    if (canaanUnder())
+      return (
+        !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) &&
+        !CANAAN_UNDER.blocked(x + a, y + b)
+      );
     // Lieux des quêtes : socles et haies bloquent, nénuphars et pont restauré portent (quests.js).
     const quest = canaanQuestWalk(x + a, y + b);
     if (quest !== null) return quest;
-    return !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) && !canaanHouseBlocked(x + a, y + b) && !canaanTreeBlocked(x + a, y + b) && !canaanPortalBlocked(x + a, y + b) && !CANAAN_CITY.blocked(x + a, y + b);
+    return (
+      !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) &&
+      !canaanHouseBlocked(x + a, y + b) &&
+      !canaanTreeBlocked(x + a, y + b) &&
+      !canaanPortalBlocked(x + a, y + b) &&
+      !CANAAN_CITY.blocked(x + a, y + b)
+    );
   });
 }
 // Grands arbres de l'île (décor) : leur tronc bloque le passage, on les contourne.
 // Arbres elfiques de Sylvaëlle (elven-city.js) : bouleau d'argent, cerisier en fleurs, cyprès, saule lumineux.
-const CANAAN_BIG_TREES = new Set(['tree', 'pine', 'snowpine', 'palm', 'deadwood', 'bigtree', 'twisted', 'autumn_red', 'autumn_orange', 'autumn_gold', 'glowtree', 'elftree', 'blossom', 'elfcypress', 'elfwillow']);
+const CANAAN_BIG_TREES = new Set([
+  'tree',
+  'pine',
+  'snowpine',
+  'palm',
+  'deadwood',
+  'bigtree',
+  'twisted',
+  'autumn_red',
+  'autumn_orange',
+  'autumn_gold',
+  'glowtree',
+  'elftree',
+  'blossom',
+  'elfcypress',
+  'elfwillow'
+]);
 function canaanTreeBlocked(px, py) {
   if (game.world.instance || game.world.layer === 'under') return false;
   const tx = Math.floor(px / TS),
@@ -711,7 +834,16 @@ let canaanQuestWorld = () => {};
 // Vie du Camp de l'Aurore (ferme, enclos, champs, verger, jardin, fontaine, ruisseau) : remplacé par camp-life.js.
 // place : pose sur l'île ; blocked : objets qui bloquent ; farm : cases sans monstres ; animals / fliers : bêtes de la
 // ferme pour life.js ; drawGround : eau, pavés, champs et fleurs (sous tout le reste) ; draw : bâtiments et objets.
-let canaanCampLife = { occluders: () => [], place() {}, blocked: () => false, farm: () => false, animals: () => [], fliers: () => [], drawGround() {}, draw() {} };
+let canaanCampLife = {
+  occluders: () => [],
+  place() {},
+  blocked: () => false,
+  farm: () => false,
+  animals: () => [],
+  fliers: () => [],
+  drawGround() {},
+  draw() {}
+};
 
 // Entrées du joueur → intention du héros (direction voulue et point visé), lue par la simulation.
 function readInput() {
@@ -851,7 +983,9 @@ function update() {
       toast('💀 Tu es à terre : un allié peut te relever (3 s à côté de toi).');
     else
       canaanHostRespawn(
-        game.world.instance?.arena ? '⚔️ Tentative terminée… Résurrection au camp.' : 'Tu es tombé… Résurrection au camp.'
+        game.world.instance?.arena
+          ? '⚔️ Tentative terminée… Résurrection au camp.'
+          : 'Tu es tombé… Résurrection au camp.'
       );
   }
   // projectiles
@@ -883,7 +1017,9 @@ function update() {
   // Or au sol : le premier héros vivant qui passe dessus le ramasse.
   game.world.drops.forEach(d => {
     d.life--;
-    const finder = game.heroes.find(h => !h.player.dead && Math.hypot(d.x - h.player.x, d.y - h.player.y) < 30);
+    const finder = game.heroes.find(
+      h => !h.player.dead && Math.hypot(d.x - h.player.x, d.y - h.player.y) < 30
+    );
     if (finder) {
       finder.player.gold += d.v;
       canaanLootNotice(finder, '+' + d.v + ' or');
@@ -971,7 +1107,8 @@ function draw() {
   const cols = BIOME_COLORS;
   // Sol : par blocs gardés sur l'île (world-look.js), case par case en donjon.
   if (game.world.instance) {
-    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) drawDungeonTile(ctx, x, y, game.world.tiles[y][x]);
+    for (let y = y0; y < y1; y++)
+      for (let x = x0; x < x1; x++) drawDungeonTile(ctx, x, y, game.world.tiles[y][x]);
   } else if (canaanUnder()) CANAAN_UNDER.drawGround(ctx, x0, x1, y0, y1);
   else drawWorldGround(ctx, x0, x1, y0, y1);
   // Villages, maisons, monuments et portails
@@ -1019,7 +1156,12 @@ function draw() {
   if (!game.world.instance)
     game.world.npcs
       // PNJ de la couche affichée ; les nains des Tréfonds sont dessinés par underground.js.
-      .filter(n => (n.type === 'shop' || n.type === 'bank' || n.type === 'portal' || n.type === 'arena') && canaanHere(n) && !n.dwarf)
+      .filter(
+        n =>
+          (n.type === 'shop' || n.type === 'bank' || n.type === 'portal' || n.type === 'arena') &&
+          canaanHere(n) &&
+          !n.dwarf
+      )
       .forEach(n => {
         if (Math.abs(n.x - P.x) > W || Math.abs(n.y - P.y) > H) return;
         // Une seule pièce visible à la fois : le marchand de l'échoppe n'apparaît que chez lui.
@@ -1093,7 +1235,10 @@ function draw() {
   // Vent : feuilles emportées et souffles légers (monde extérieur).
   drawWindLayer(ctx);
   // Obscurité, lumières et particules du biome ou du donjon, sous les nombres flottants.
-  drawCanaanLighting(ctx, game.world.instance ? dungeonAmbience() : canaanUnder() ? CANAAN_UNDER.ambience() : worldAmbience());
+  drawCanaanLighting(
+    ctx,
+    game.world.instance ? dungeonAmbience() : canaanUnder() ? CANAAN_UNDER.ambience() : worldAmbience()
+  );
   // Bulles de dialogue des habitants, lisibles même dans l'obscurité.
   CANAAN_LIFE.drawBubbles(ctx);
   CANAAN_QUESTS.drawBubbles(ctx);

@@ -18,7 +18,11 @@
   let facing = 0;
 
   // ---------------------------------------------------------------- Couleurs
-  const rgb = hex => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  const rgb = hex => [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16)
+  ];
   const LAND = {
     1: '#5f9a4c',
     2: '#c8a26a',
@@ -170,7 +174,12 @@
     out = new Uint32Array(8);
     for (let q = 0; q < 8; q++) {
       const k = lo + ((hi - lo) * q) / 7;
-      out[q] = ((255 << 24) | (Math.min(255, Math.round(b * k)) << 16) | (Math.min(255, Math.round(g * k)) << 8) | Math.min(255, Math.round(r * k))) >>> 0;
+      out[q] =
+        ((255 << 24) |
+          (Math.min(255, Math.round(b * k)) << 16) |
+          (Math.min(255, Math.round(g * k)) << 8) |
+          Math.min(255, Math.round(r * k))) >>>
+        0;
     }
     SHADES.set(key, out);
     return out;
@@ -194,7 +203,8 @@
     }
   }
   function edgeLine(px, w, X, Y, dx, dy, col) {
-    for (let k = 0; k < PX; k++) px[(dy ? Y + (dy > 0 ? PX - 1 : 0) : Y + k) * w + (dx ? X + (dx > 0 ? PX - 1 : 0) : X + k)] = col;
+    for (let k = 0; k < PX; k++)
+      px[(dy ? Y + (dy > 0 ? PX - 1 : 0) : Y + k) * w + (dx ? X + (dx > 0 ? PX - 1 : 0) : X + k)] = col;
   }
   const DX4 = [0, 1, 0, -1],
     DY4 = [-1, 0, 1, 0];
@@ -208,7 +218,9 @@
     // L'île à plat, une fois ; les pièces des maisons (hors de l'île) comptent comme de la mer.
     for (let y = 0; y < MAPH; y++) for (let x = 0; x < MAPW; x++) flat[y * MAPW + x] = tiles[y][x] || 0;
     for (const r of typeof CANAAN_ROOMS !== 'undefined' ? CANAAN_ROOMS.filter(r => !r.under) : [])
-      for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) if (x >= 0 && y >= 0 && x < MAPW && y < MAPH) flat[y * MAPW + x] = 0;
+      for (let y = r.y; y < r.y + r.h; y++)
+        for (let x = r.x; x < r.x + r.w; x++)
+          if (x >= 0 && y >= 0 && x < MAPW && y < MAPH) flat[y * MAPW + x] = 0;
     const g = pixels(cv, (px, w) => {
       const deep = shades('#1d5f96', 0.96, 1.04),
         shallow = shades('#3584bd', 0.96, 1.04),
@@ -222,9 +234,11 @@
           if (water(t)) {
             // Eau : plus claire près des rives, écume sur le bord qui touche la terre.
             let near = false;
-            for (let r = 1; r <= 2 && !near; r++) for (let i = 0; i < 4 && !near; i++) near = !water(tile(x + DX4[i] * r, y + DY4[i] * r));
+            for (let r = 1; r <= 2 && !near; r++)
+              for (let i = 0; i < 4 && !near; i++) near = !water(tile(x + DX4[i] * r, y + DY4[i] * r));
             fillTile(px, w, X, Y, near ? shallow : deep);
-            for (let i = 0; i < 4; i++) if (!water(tile(x + DX4[i], y + DY4[i]))) edgeLine(px, w, X, Y, DX4[i], DY4[i], foam);
+            for (let i = 0; i < 4; i++)
+              if (!water(tile(x + DX4[i], y + DY4[i]))) edgeLine(px, w, X, Y, DX4[i], DY4[i], foam);
             continue;
           }
           const sh = shades(LAND[t] || '#5f9a4c');
@@ -239,7 +253,10 @@
             if (tile(x, y + 1) !== 4) edgeLine(px, w, X, Y, 0, 1, shades(LAND[4], 0.6, 0.6)[0]);
           }
           // Routes : bord plus sombre contre le terrain voisin.
-          if (t === 2) for (let i = 0; i < 4; i++) if (tile(x + DX4[i], y + DY4[i]) !== 2) edgeLine(px, w, X, Y, DX4[i], DY4[i], shades(LAND[2], 0.78, 0.78)[0]);
+          if (t === 2)
+            for (let i = 0; i < 4; i++)
+              if (tile(x + DX4[i], y + DY4[i]) !== 2)
+                edgeLine(px, w, X, Y, DX4[i], DY4[i], shades(LAND[2], 0.78, 0.78)[0]);
           // Arbres, rochers et plantes vus d'en haut.
           const tree = TREES[deco[y]?.[x]];
           if (tree) {
@@ -277,7 +294,16 @@
         h = it.h * PX;
       if (it.kind === 'field') {
         for (let r = 0; r < h; r += 2) {
-          g.fillStyle = it.crop === 'wheat' ? (r % 4 ? '#c89a3a' : '#e8c860') : r % 4 ? '#6b4a2e' : it.crop === 'veg' ? '#5aa03a' : '#c84a4a';
+          g.fillStyle =
+            it.crop === 'wheat'
+              ? r % 4
+                ? '#c89a3a'
+                : '#e8c860'
+              : r % 4
+                ? '#6b4a2e'
+                : it.crop === 'veg'
+                  ? '#5aa03a'
+                  : '#c84a4a';
           g.fillRect(X, Y + r, w, 2);
         }
       } else if (it.kind === 'pen' || it.kind === 'garden') {
@@ -371,7 +397,9 @@
           x1 = Math.max(x1, x);
           y1 = Math.max(y1, y);
         }
-    return x1 < x0 ? { x0: 0, y0: 0, x1: MAPW, y1: MAPH } : { x0: x0 - 3, y0: y0 - 3, x1: x1 + 4, y1: y1 + 4 };
+    return x1 < x0
+      ? { x0: 0, y0: 0, x1: MAPW, y1: MAPH }
+      : { x0: x0 - 3, y0: y0 - 3, x1: x1 + 4, y1: y1 + 4 };
   }
 
   // ---------------------------------------------------------------- Où est le héros
@@ -673,7 +701,8 @@
       }
       for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
       if (v.mini)
-        for (const m of game.world.monsters) if (m.hp > 0) put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
+        for (const m of game.world.monsters)
+          if (m.hp > 0) put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
       if (!v.mini && v.scale <= 3)
         CANAAN_UNDER.BIOMES.forEach(b => {
           const a = (b.angle * Math.PI) / 180,
@@ -684,10 +713,14 @@
       for (const p of PIXEL_PLACES) put(p.type === 'camp' ? 'refuge' : p.type, p.x, p.y, {}, p.name);
       // Entrées des Tréfonds.
       for (const e of CANAAN_UNDER.ENTRANCES) put('stairs', e.x, e.y, {}, e.name);
-      for (const b of houses) if (b.id === 'maison') put('home', b.x + b.w / 2, b.y + b.h / 2, {}, 'Ta maison');
+      for (const b of houses)
+        if (b.id === 'maison') put('home', b.x + b.w / 2, b.y + b.h / 2, {}, 'Ta maison');
       if (!v.mini && v.scale >= 8)
-        for (const b of houses) if (b.name && b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y)) label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
-      for (const n of game.world.npcs) if (n.type === 'shop' && (v.mini || v.scale >= 6)) put('shop', n.x / TS, n.y / TS, {}, null);
+        for (const b of houses)
+          if (b.name && b.id !== 'maison' && !b.place && !canaanRoomAt(b.x, b.y))
+            label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.3), 10, '#f6e2b1');
+      for (const n of game.world.npcs)
+        if (n.type === 'shop' && (v.mini || v.scale >= 6)) put('shop', n.x / TS, n.y / TS, {}, null);
       for (const b of WORLD_BOSSES) put('boss', b.x, b.y, {}, b.name);
       put('arena', CANAAN_ARENA_PORTAL.x, CANAAN_ARENA_PORTAL.y, {}, CANAAN_ARENA_NAME);
       instances.forEach((d, i) => {
@@ -701,13 +734,21 @@
         }
       });
       for (const camp of villages) put('camp', camp.x, camp.y, {}, camp.name);
-      if (window.CANAAN_CITY_PLAN) put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
+      if (window.CANAAN_CITY_PLAN)
+        put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
       for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
       // Personnages des quêtes : « ! » quête à prendre, « ? » quête à rendre.
       for (const npc of Object.values(CANAAN_QUESTS.npcs())) {
         const mode = CANAAN_QUESTS.npcMode(game.hero, npc),
           mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : '';
-        if (mark) put('quest', npc.x / TS, npc.y / TS, { mark, main: npc.quest?.main }, names && v.scale >= 6 ? npc.def.name : null);
+        if (mark)
+          put(
+            'quest',
+            npc.x / TS,
+            npc.y / TS,
+            { mark, main: npc.quest?.main },
+            names && v.scale >= 6 ? npc.def.name : null
+          );
       }
       // Monstres proches, sur la mini-carte seulement.
       if (v.mini)
@@ -805,7 +846,10 @@
     markers(c, { x0, y0, scale: v.scale, w: BIG, h: BIG, mini: false });
     // Échelle et zoom en bas à gauche.
     const zoom = document.getElementById('mapZoomLevel');
-    if (zoom) zoom.textContent = view.fitted ? 'Vue d’ensemble' : '×' + Math.round((v.scale / fitView().scale) * 10) / 10;
+    if (zoom)
+      zoom.textContent = view.fitted
+        ? 'Vue d’ensemble'
+        : '×' + Math.round((v.scale / fitView().scale) * 10) / 10;
   }
   // Zoom d'un cran, autour d'un point de la carte (en pixels du canevas) ou du centre.
   function zoom(dir, at = null) {
@@ -851,7 +895,11 @@
     el.dataset.mapReady = '1';
     const toCanvas = e => {
       const r = el.getBoundingClientRect();
-      return { x: ((e.clientX - r.left) / r.width) * BIG, y: ((e.clientY - r.top) / r.height) * BIG, k: BIG / r.width };
+      return {
+        x: ((e.clientX - r.left) / r.width) * BIG,
+        y: ((e.clientY - r.top) / r.height) * BIG,
+        k: BIG / r.width
+      };
     };
     el.addEventListener(
       'wheel',
@@ -967,6 +1015,14 @@
       { passive: false }
     );
 
-  window.CANAAN_MAP = Object.freeze({ open, zoom: d => zoom(d), center, fit, view: () => ({ ...view, scale: currentView().scale }), miniZoom: () => MINI[miniStep], base: () => ensureBase(true) });
+  window.CANAAN_MAP = Object.freeze({
+    open,
+    zoom: d => zoom(d),
+    center,
+    fit,
+    view: () => ({ ...view, scale: currentView().scale }),
+    miniZoom: () => MINI[miniStep],
+    base: () => ensureBase(true)
+  });
   Object.assign(window, { drawBigMap, drawMinimap });
 })();

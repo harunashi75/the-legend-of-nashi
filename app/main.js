@@ -23,7 +23,11 @@ function adoptOldData() {
     fs.mkdirSync(now, { recursive: true });
     for (const name of ['saves', 'display.json'])
       if (fs.existsSync(path.join(old, name)) && !fs.existsSync(path.join(now, name)))
-        fs.cpSync(path.join(old, name), path.join(now, name), { recursive: true, errorOnExist: false, force: false });
+        fs.cpSync(path.join(old, name), path.join(now, name), {
+          recursive: true,
+          errorOnExist: false,
+          force: false
+        });
   } catch (error) {
     console.error('[données] copie de l’ancien dossier impossible :', error.message);
   }
@@ -91,7 +95,9 @@ const SIZES = [
 ];
 function displayState() {
   const win = mainWindow;
-  const area = win ? screen.getDisplayMatching(win.getBounds()).workAreaSize : screen.getPrimaryDisplay().workAreaSize;
+  const area = win
+    ? screen.getDisplayMatching(win.getBounds()).workAreaSize
+    : screen.getPrimaryDisplay().workAreaSize;
   const [w, h] = win && !win.isFullScreen() ? win.getContentSize() : [display.width, display.height];
   return {
     fullscreen: !!win?.isFullScreen(),
@@ -123,7 +129,11 @@ const SAVE_OPS = Object.freeze({
 for (const [op, run] of Object.entries(SAVE_OPS)) {
   ipcMain.on('saves:' + op, (event, ...args) => {
     // Seule la page du jeu, dans la fenêtre principale, peut toucher aux sauvegardes.
-    if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
+    if (
+      !mainWindow ||
+      event.sender !== mainWindow.webContents ||
+      event.senderFrame !== mainWindow.webContents.mainFrame
+    ) {
       event.returnValue = { ok: false, error: 'Origine refusée' };
       return;
     }
@@ -140,7 +150,10 @@ ipcMain.on('saves:open-folder', event => {
 
 // Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local (hosting.js). L'état est renvoyé à la page.
 let hosting = null;
-const fromGame = event => !!mainWindow && event.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame;
+const fromGame = event =>
+  !!mainWindow &&
+  event.sender === mainWindow.webContents &&
+  event.senderFrame === mainWindow.webContents.mainFrame;
 ipcMain.handle('net:host-tailscale', async event => {
   if (!fromGame(event)) throw new Error('Origine refusée');
   return hosting.startTailscale();

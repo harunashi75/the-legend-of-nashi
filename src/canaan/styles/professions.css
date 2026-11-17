@@ -473,12 +473,16 @@
   border-radius: 10px;
   border: 2px solid #f2c95e;
   background: linear-gradient(135deg, #3a2a10, #1c140a);
-  box-shadow: 0 0 24px rgba(255, 200, 90, 0.45), inset 0 0 14px rgba(255, 210, 110, 0.18);
+  box-shadow:
+    0 0 24px rgba(255, 200, 90, 0.45),
+    inset 0 0 14px rgba(255, 210, 110, 0.18);
   color: #fff4d8;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -16px) scale(0.96);
-  transition: opacity 0.35s, transform 0.35s;
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
 }
 #achPopup.show {
   opacity: 1;

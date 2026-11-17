@@ -11,7 +11,9 @@
   align-items: center;
   justify-content: center;
   gap: 18px;
-  background: radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%), radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%),
+    radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
   color: #f6dc98;
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
   opacity: 1;
@@ -61,14 +63,30 @@
   background: #7de0ff;
   box-shadow: 0 0 8px #7de0ff;
 }
-#bootLoader .boot-rune i:nth-child(1) { transform: rotate(0deg); }
-#bootLoader .boot-rune i:nth-child(2) { transform: rotate(45deg); }
-#bootLoader .boot-rune i:nth-child(3) { transform: rotate(90deg); }
-#bootLoader .boot-rune i:nth-child(4) { transform: rotate(135deg); }
-#bootLoader .boot-rune i:nth-child(5) { transform: rotate(180deg); }
-#bootLoader .boot-rune i:nth-child(6) { transform: rotate(225deg); }
-#bootLoader .boot-rune i:nth-child(7) { transform: rotate(270deg); }
-#bootLoader .boot-rune i:nth-child(8) { transform: rotate(315deg); }
+#bootLoader .boot-rune i:nth-child(1) {
+  transform: rotate(0deg);
+}
+#bootLoader .boot-rune i:nth-child(2) {
+  transform: rotate(45deg);
+}
+#bootLoader .boot-rune i:nth-child(3) {
+  transform: rotate(90deg);
+}
+#bootLoader .boot-rune i:nth-child(4) {
+  transform: rotate(135deg);
+}
+#bootLoader .boot-rune i:nth-child(5) {
+  transform: rotate(180deg);
+}
+#bootLoader .boot-rune i:nth-child(6) {
+  transform: rotate(225deg);
+}
+#bootLoader .boot-rune i:nth-child(7) {
+  transform: rotate(270deg);
+}
+#bootLoader .boot-rune i:nth-child(8) {
+  transform: rotate(315deg);
+}
 #bootLoader .boot-rune b {
   position: absolute;
   left: 32px;
@@ -119,23 +137,46 @@
   opacity: 0;
   animation: boot-tip 16s infinite;
 }
-#bootLoader .boot-tips span:nth-child(2) { animation-delay: 4s; }
-#bootLoader .boot-tips span:nth-child(3) { animation-delay: 8s; }
-#bootLoader .boot-tips span:nth-child(4) { animation-delay: 12s; }
+#bootLoader .boot-tips span:nth-child(2) {
+  animation-delay: 4s;
+}
+#bootLoader .boot-tips span:nth-child(3) {
+  animation-delay: 8s;
+}
+#bootLoader .boot-tips span:nth-child(4) {
+  animation-delay: 12s;
+}
 @keyframes boot-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes boot-pulse {
-  50% { transform: scale(1.35); opacity: 0.7; }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.7;
+  }
 }
 @keyframes boot-slide {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(250%); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
 }
 @keyframes boot-tip {
-  0% { opacity: 0; }
-  4%, 22% { opacity: 1; }
-  27%, 100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  4%,
+  22% {
+    opacity: 1;
+  }
+  27%,
+  100% {
+    opacity: 0;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   #bootLoader .boot-rune,

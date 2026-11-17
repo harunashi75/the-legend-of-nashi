@@ -121,8 +121,13 @@
       const item = hero.inventory.find(it => String(it.id) === action.id);
       return !!item && equipItem(item.id, hero);
     }
-    if (action.op === 'unequip') return Object.hasOwn(hero.equipment, action.slot) && unequip(action.slot, hero);
-    if (action.op === 'reserve') return equipReserveWeapon(hero.inventory.findIndex(it => String(it.id) === action.id), hero);
+    if (action.op === 'unequip')
+      return Object.hasOwn(hero.equipment, action.slot) && unequip(action.slot, hero);
+    if (action.op === 'reserve')
+      return equipReserveWeapon(
+        hero.inventory.findIndex(it => String(it.id) === action.id),
+        hero
+      );
     if (action.op === 'switch') return switchHeroWeapon(hero);
     return false;
   }
@@ -149,7 +154,15 @@
     // Légendaire ou mieux : la fenêtre de confirmation du jeu demande d'abord.
     if (rarityInfo(item).mult >= rarityInfo({ rarity: 'Légendaire' }).mult) {
       canaanConfirm(
-        'Vendre ' + gearDisplayName(item) + ' (' + item.rarity + ', niveau ' + itemLevel(item) + ') pour ' + gearSellValue(item) + ' or ?',
+        'Vendre ' +
+          gearDisplayName(item) +
+          ' (' +
+          item.rarity +
+          ', niveau ' +
+          itemLevel(item) +
+          ') pour ' +
+          gearSellValue(item) +
+          ' or ?',
         sell,
         { title: '💰 Vendre un objet précieux', yes: 'Vendre', no: 'Garder' }
       );

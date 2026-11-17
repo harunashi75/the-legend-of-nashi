@@ -30,82 +30,164 @@
     LE = '#4a2e22';
   const ART = {
     sword: {
-      w: 26, h: 9, px: 3, py: 4,
+      w: 26,
+      h: 9,
+      px: 3,
+      py: 4,
       draw(R) {
-        R(0, 3, 4, 3, LE); R(0, 4, 4, 1, '#6a4434'); R(-1, 3, 1, 3, GO);
-        R(4, 0, 2, 9, GO); R(4, 0, 1, 9, GOD);
-        R(6, 3, 16, 3, ST); R(6, 3, 16, 1, STL); R(6, 5, 16, 1, STD);
-        R(22, 3, 2, 3, ST); R(24, 4, 2, 1, STL);
+        R(0, 3, 4, 3, LE);
+        R(0, 4, 4, 1, '#6a4434');
+        R(-1, 3, 1, 3, GO);
+        R(4, 0, 2, 9, GO);
+        R(4, 0, 1, 9, GOD);
+        R(6, 3, 16, 3, ST);
+        R(6, 3, 16, 1, STL);
+        R(6, 5, 16, 1, STD);
+        R(22, 3, 2, 3, ST);
+        R(24, 4, 2, 1, STL);
       }
     },
     dagger: {
-      w: 16, h: 7, px: 2, py: 3,
+      w: 16,
+      h: 7,
+      px: 2,
+      py: 3,
       draw(R) {
-        R(0, 2, 3, 3, LE); R(3, 0, 2, 7, GO);
-        R(5, 2, 8, 3, ST); R(5, 2, 8, 1, STL); R(5, 4, 8, 1, STD); R(13, 3, 2, 1, STL);
+        R(0, 2, 3, 3, LE);
+        R(3, 0, 2, 7, GO);
+        R(5, 2, 8, 3, ST);
+        R(5, 2, 8, 1, STL);
+        R(5, 4, 8, 1, STD);
+        R(13, 3, 2, 1, STL);
       }
     },
     axe: {
-      w: 25, h: 14, px: 2, py: 9,
+      w: 25,
+      h: 14,
+      px: 2,
+      py: 9,
       draw(R) {
-        R(0, 8, 22, 2, WO); R(0, 9, 22, 1, WOD); R(5, 8, 1, 2, LE); R(9, 8, 1, 2, LE);
+        R(0, 8, 22, 2, WO);
+        R(0, 9, 22, 1, WOD);
+        R(5, 8, 1, 2, LE);
+        R(9, 8, 1, 2, LE);
         // Tête : lame évasée au-dessus du manche, tranchant clair, petit talon dessous.
-        R(16, 4, 5, 4, STD); R(15, 2, 7, 2, ST); R(13, 0, 11, 2, ST); R(13, 0, 11, 1, STL);
-        R(14, 2, 1, 1, ST); R(22, 2, 1, 1, ST); R(17, 4, 3, 3, ST);
-        R(17, 10, 3, 2, STD); R(16, 7, 5, 1, GOD);
+        R(16, 4, 5, 4, STD);
+        R(15, 2, 7, 2, ST);
+        R(13, 0, 11, 2, ST);
+        R(13, 0, 11, 1, STL);
+        R(14, 2, 1, 1, ST);
+        R(22, 2, 1, 1, ST);
+        R(17, 4, 3, 3, ST);
+        R(17, 10, 3, 2, STD);
+        R(16, 7, 5, 1, GOD);
       }
     },
     mace: {
-      w: 24, h: 12, px: 2, py: 6,
+      w: 24,
+      h: 12,
+      px: 2,
+      py: 6,
       draw(R) {
-        R(0, 5, 15, 2, WO); R(0, 6, 15, 1, WOD); R(2, 4, 3, 4, LE);
-        R(15, 2, 7, 8, STD); R(16, 3, 5, 6, ST); R(16, 3, 2, 2, STL);
-        R(17, 0, 3, 2, ST); R(17, 10, 3, 2, ST); R(22, 4, 2, 4, ST); R(13, 4, 2, 4, GO);
+        R(0, 5, 15, 2, WO);
+        R(0, 6, 15, 1, WOD);
+        R(2, 4, 3, 4, LE);
+        R(15, 2, 7, 8, STD);
+        R(16, 3, 5, 6, ST);
+        R(16, 3, 2, 2, STL);
+        R(17, 0, 3, 2, ST);
+        R(17, 10, 3, 2, ST);
+        R(22, 4, 2, 4, ST);
+        R(13, 4, 2, 4, GO);
       }
     },
     spear: {
-      w: 40, h: 9, px: 8, py: 4,
+      w: 40,
+      h: 9,
+      px: 8,
+      py: 4,
       draw(R) {
-        R(0, 4, 32, 1, WO); R(0, 3, 32, 1, WOD); R(0, 5, 32, 1, WOD);
+        R(0, 4, 32, 1, WO);
+        R(0, 3, 32, 1, WOD);
+        R(0, 5, 32, 1, WOD);
         R(30, 2, 2, 5, GO);
-        R(32, 2, 5, 5, ST); R(37, 3, 2, 3, ST); R(39, 4, 1, 1, STL); R(32, 3, 6, 1, STL);
+        R(32, 2, 5, 5, ST);
+        R(37, 3, 2, 3, ST);
+        R(39, 4, 1, 1, STL);
+        R(32, 3, 6, 1, STL);
       }
     },
     staff: {
-      w: 34, h: 12, px: 6, py: 6,
+      w: 34,
+      h: 12,
+      px: 6,
+      py: 6,
       draw(R) {
-        R(0, 5, 26, 2, WO); R(0, 6, 26, 1, WOD); R(8, 4, 3, 4, LE);
-        R(24, 3, 3, 6, GO); R(26, 1, 2, 3, GO); R(26, 8, 2, 3, GO);
-        R(28, 3, 6, 6, '#b38aff'); R(29, 4, 4, 4, '#d9c2ff'); R(29, 4, 2, 2, '#ffffff');
+        R(0, 5, 26, 2, WO);
+        R(0, 6, 26, 1, WOD);
+        R(8, 4, 3, 4, LE);
+        R(24, 3, 3, 6, GO);
+        R(26, 1, 2, 3, GO);
+        R(26, 8, 2, 3, GO);
+        R(28, 3, 6, 6, '#b38aff');
+        R(29, 4, 4, 4, '#d9c2ff');
+        R(29, 4, 2, 2, '#ffffff');
       }
     },
     // Arc : vertical (perpendiculaire à la visée), poignée au pivot ; la corde est dessinée à part (tension).
     bow: {
-      w: 9, h: 34, px: 4, py: 17,
+      w: 9,
+      h: 34,
+      px: 4,
+      py: 17,
       draw(R) {
-        R(2, 0, 2, 3, WOD); R(4, 2, 2, 5, WO); R(5, 6, 2, 8, WO); R(4, 14, 3, 6, LE); R(5, 20, 2, 8, WO); R(4, 27, 2, 5, WO); R(2, 31, 2, 3, WOD);
+        R(2, 0, 2, 3, WOD);
+        R(4, 2, 2, 5, WO);
+        R(5, 6, 2, 8, WO);
+        R(4, 14, 3, 6, LE);
+        R(5, 20, 2, 8, WO);
+        R(4, 27, 2, 5, WO);
+        R(2, 31, 2, 3, WOD);
         R(5, 15, 2, 4, GO);
       }
     },
     // Outils des métiers (pointe vers +x, manche au pivot).
     // Pioche : long manche, tête de fer en croissant aux deux pointes recourbées vers le manche.
     pickaxe: {
-      w: 22, h: 17, px: 2, py: 8,
+      w: 22,
+      h: 17,
+      px: 2,
+      py: 8,
       draw(R) {
-        R(0, 7, 17, 2, WO); R(0, 8, 17, 1, WOD); R(3, 7, 1, 2, LE);
+        R(0, 7, 17, 2, WO);
+        R(0, 8, 17, 1, WOD);
+        R(3, 7, 1, 2, LE);
         // Douille au bout du manche, puis les deux bras du croissant.
-        R(16, 5, 3, 7, STD); R(16, 5, 1, 7, ST);
-        R(15, 3, 2, 2, ST); R(14, 2, 2, 1, ST); R(13, 1, 2, 1, ST); R(11, 0, 2, 1, STL);
-        R(15, 12, 2, 2, ST); R(14, 14, 2, 1, ST); R(13, 15, 2, 1, ST); R(11, 16, 2, 1, STL);
-        R(16, 3, 1, 2, STL); R(16, 12, 1, 2, STD);
+        R(16, 5, 3, 7, STD);
+        R(16, 5, 1, 7, ST);
+        R(15, 3, 2, 2, ST);
+        R(14, 2, 2, 1, ST);
+        R(13, 1, 2, 1, ST);
+        R(11, 0, 2, 1, STL);
+        R(15, 12, 2, 2, ST);
+        R(14, 14, 2, 1, ST);
+        R(13, 15, 2, 1, ST);
+        R(11, 16, 2, 1, STL);
+        R(16, 3, 1, 2, STL);
+        R(16, 12, 1, 2, STD);
       }
     },
     // Faucille : manche court, virole dorée et lame en croissant ouvert qui s'affine jusqu'à la pointe,
     // tranchant clair à l'intérieur.
     sickle: {
-      w: 22, h: 16, px: 2, py: 12,
+      w: 22,
+      h: 16,
+      px: 2,
+      py: 12,
       draw(R) {
-        R(0, 11, 7, 2, WO); R(0, 12, 7, 1, WOD); R(7, 11, 2, 2, GO);
+        R(0, 11, 7, 2, WO);
+        R(0, 12, 7, 1, WOD);
+        R(7, 11, 2, 2, GO);
         // Arc (centre 14,9, rayon 6) du bas vers le haut par la droite, sur 170° : épais au talon, fin à la pointe.
         for (let a = 100; a >= -70; a -= 10) {
           const t = (a * Math.PI) / 180,
@@ -113,33 +195,59 @@
             y = Math.round(9 + Math.sin(t) * 6),
             thick = a > 20 ? 2 : 1;
           R(x, y, thick, thick, ST);
-          if (a < 90 && a > -60) R(Math.round(14 + Math.cos(t) * 4.8), Math.round(9 + Math.sin(t) * 4.8), 1, 1, STL);
+          if (a < 90 && a > -60)
+            R(Math.round(14 + Math.cos(t) * 4.8), Math.round(9 + Math.sin(t) * 4.8), 1, 1, STL);
         }
         R(9, 11, 3, 2, STD);
       }
     },
     hammer: {
-      w: 18, h: 12, px: 2, py: 6,
+      w: 18,
+      h: 12,
+      px: 2,
+      py: 6,
       draw(R) {
-        R(0, 5, 12, 2, WO); R(0, 6, 12, 1, WOD);
-        R(11, 1, 6, 10, STD); R(12, 2, 4, 8, ST); R(12, 2, 4, 1, STL);
+        R(0, 5, 12, 2, WO);
+        R(0, 6, 12, 1, WOD);
+        R(11, 1, 6, 10, STD);
+        R(12, 2, 4, 8, ST);
+        R(12, 2, 4, 1, STL);
       }
     },
     ladle: {
-      w: 18, h: 9, px: 2, py: 4,
+      w: 18,
+      h: 9,
+      px: 2,
+      py: 4,
       draw(R) {
-        R(0, 3, 12, 2, WO); R(0, 4, 12, 1, WOD);
-        R(12, 1, 5, 6, STD); R(13, 2, 3, 4, ST); R(13, 2, 3, 1, STL);
+        R(0, 3, 12, 2, WO);
+        R(0, 4, 12, 1, WOD);
+        R(12, 1, 5, 6, STD);
+        R(13, 2, 3, 4, ST);
+        R(13, 2, 3, 1, STL);
       }
     },
     // Égide : bouclier vu de face, tenu devant soi (ne tourne pas).
     shield: {
-      w: 16, h: 19, px: 8, py: 9,
+      w: 16,
+      h: 19,
+      px: 8,
+      py: 9,
       draw(R) {
-        R(1, 0, 14, 2, GOD); R(0, 1, 16, 10, GOD); R(1, 11, 14, 3, GOD); R(3, 14, 10, 2, GOD); R(5, 16, 6, 2, GOD); R(7, 18, 2, 1, GOD);
-        R(2, 2, 12, 9, '#3f63a8'); R(3, 11, 10, 2, '#3f63a8'); R(5, 13, 6, 2, '#3f63a8'); R(7, 15, 2, 2, '#3f63a8');
+        R(1, 0, 14, 2, GOD);
+        R(0, 1, 16, 10, GOD);
+        R(1, 11, 14, 3, GOD);
+        R(3, 14, 10, 2, GOD);
+        R(5, 16, 6, 2, GOD);
+        R(7, 18, 2, 1, GOD);
+        R(2, 2, 12, 9, '#3f63a8');
+        R(3, 11, 10, 2, '#3f63a8');
+        R(5, 13, 6, 2, '#3f63a8');
+        R(7, 15, 2, 2, '#3f63a8');
         R(2, 2, 12, 2, '#5a82c8');
-        R(7, 3, 2, 12, GO); R(4, 6, 8, 2, GO); R(7, 6, 2, 2, '#fff2b0');
+        R(7, 3, 2, 12, GO);
+        R(4, 6, 8, 2, GO);
+        R(7, 6, 2, 2, '#fff2b0');
       }
     }
   };
@@ -216,7 +324,12 @@
     if (!hero || hero === game.hero) return typeof facingAngleCore === 'function' ? facingAngleCore() : 0;
     if (Number.isFinite(hero.netAim)) return hero.netAim;
     const i = hero.intent || {};
-    if (Number.isFinite(i.aimX) && Number.isFinite(i.aimY) && Math.hypot(i.aimX - body.x, i.aimY - body.y) > 4) return Math.atan2(i.aimY - body.y, i.aimX - body.x);
+    if (
+      Number.isFinite(i.aimX) &&
+      Number.isFinite(i.aimY) &&
+      Math.hypot(i.aimX - body.x, i.aimY - body.y) > 4
+    )
+      return Math.atan2(i.aimY - body.y, i.aimX - body.x);
     return (body.face || 1) === -1 ? Math.PI : 0;
   }
   // Direction du sprite (0 face, 1 droite, 2 dos, 3 gauche) d'après la visée.
@@ -227,11 +340,24 @@
   }
   // Dessin de l'arme d'un héros. layer : 'back' (derrière le corps) ou 'front'. Renvoie rien.
   // Particules d'un travail, au moment de chaque coup : éclats de roche, feuilles, étincelles, vapeur.
-  const chips = { mine: ['#8a9098', '#c8ccd2'], herb: ['#5fcf5a', '#9ae08a'], forge: ['#ffd060', '#ff8a2a'], cook: ['#f4f8ff', '#dfe8f0'] };
+  const chips = {
+    mine: ['#8a9098', '#c8ccd2'],
+    herb: ['#5fcf5a', '#9ae08a'],
+    forge: ['#ffd060', '#ff8a2a'],
+    cook: ['#f4f8ff', '#dfe8f0']
+  };
   function workParticles(kind, x, y) {
     const [a, b] = chips[kind];
     for (let k = 0; k < (kind === 'forge' ? 7 : 4); k++)
-      particles.push({ x, y, vx: (Math.random() - 0.5) * (kind === 'cook' ? 0.8 : 4), vy: kind === 'cook' ? -1 - Math.random() : -1.5 - Math.random() * 2.5, life: 18 + Math.random() * 14, c: k % 2 ? a : b, r: kind === 'cook' ? 3 + Math.random() * 3 : 1.5 + Math.random() * 1.5 });
+      particles.push({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * (kind === 'cook' ? 0.8 : 4),
+        vy: kind === 'cook' ? -1 - Math.random() : -1.5 - Math.random() * 2.5,
+        life: 18 + Math.random() * 14,
+        c: k % 2 ? a : b,
+        r: kind === 'cook' ? 3 + Math.random() * 3 : 1.5 + Math.random() * 1.5
+      });
   }
   // Animation d'un travail : l'outil du métier dans la main, des coups réguliers (un toutes les 0,6 s), une barre
   // d'avancement au-dessus du héros.
@@ -246,7 +372,8 @@
       let rot;
       if (w.kind === 'cook') rot = aim + Math.sin(time * 0.25) * 0.5;
       // Faucille : des coups bas, de côté, au ras des herbes (jamais au-dessus de la tête).
-      else if (w.kind === 'herb') rot = aim + Math.PI * 0.18 * side + side * Math.sin(beat * Math.PI * 2) * 0.55;
+      else if (w.kind === 'herb')
+        rot = aim + Math.PI * 0.18 * side + side * Math.sin(beat * Math.PI * 2) * 0.55;
       else {
         // Lever puis abattre l'outil ; le coup tombe au tiers du battement.
         const swing = beat < 0.7 ? beat / 0.7 : 1 - (beat - 0.7) / 0.3;
@@ -372,7 +499,9 @@
       // Orbe : lueur permanente, éclat au lancer.
       const tipX = px + Math.cos(rot) * 28 * SCALE,
         tipY = py + Math.sin(rot) * 28 * SCALE,
-        glow = attacking ? 10 + 14 * (1 - k) : 6 + Math.sin((typeof time === 'number' ? time : 0) * 0.08) * 1.5;
+        glow = attacking
+          ? 10 + 14 * (1 - k)
+          : 6 + Math.sin((typeof time === 'number' ? time : 0) * 0.08) * 1.5;
       c.save();
       c.globalCompositeOperation = 'lighter';
       const g = c.createRadialGradient(tipX, tipY, 0, tipX, tipY, glow);

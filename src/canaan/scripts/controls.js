@@ -44,10 +44,13 @@
     houseSelect: element => CANAAN_HOUSE.actions.select(actionText(element, 'item')),
     houseRotate: () => CANAAN_HOUSE.actions.rotate(),
     profTab: element => CANAAN_PROF.actions.tab(actionText(element, 'tab')),
-    profCook: element => CANAAN_PROF.actions.cook(actionText(element, 'recipe'), actionInteger(element, 'quality'), 1),
-    profCookAll: element => CANAAN_PROF.actions.cook(actionText(element, 'recipe'), actionInteger(element, 'quality'), 20),
+    profCook: element =>
+      CANAAN_PROF.actions.cook(actionText(element, 'recipe'), actionInteger(element, 'quality'), 1),
+    profCookAll: element =>
+      CANAAN_PROF.actions.cook(actionText(element, 'recipe'), actionInteger(element, 'quality'), 20),
     profCodex: element => CANAAN_PROF.actions.codex(actionText(element, 'kind')),
-    profEat: element => CANAAN_PROF.actions.eat(actionText(element, 'recipe'), actionInteger(element, 'quality')),
+    profEat: element =>
+      CANAAN_PROF.actions.eat(actionText(element, 'recipe'), actionInteger(element, 'quality')),
     tradeRequest: element => CANAAN_TRADE.actions.request(actionText(element, 'hero')),
     tradeAnswer: element => CANAAN_TRADE.actions.answer(actionText(element, 'answer') === 'yes'),
     tradeCancel: () => CANAAN_TRADE.actions.cancel(),
@@ -87,9 +90,13 @@
     // Cité elfique : écouter le Grand Arbre, sa bénédiction, l'armurerie et l'atelier de la Tisseuse.
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),
     cityBless: () => CANAAN_CITY.actions.bless(),
-    cityBuyGear: element => CANAAN_CITY.actions.buyGear(actionText(element, 'slot'), actionText(element, 'rarity')),
+    cityBuyGear: element =>
+      CANAAN_CITY.actions.buyGear(actionText(element, 'slot'), actionText(element, 'rarity')),
     cityBuySkin: element => CANAAN_CITY.actions.buySkin(actionText(element, 'skin')),
-    wearSkin: element => CANAAN_WARDROBE.choose(element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''),
+    wearSkin: element =>
+      CANAAN_WARDROBE.choose(
+        element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''
+      ),
     achTab: element => CANAAN_ACHIEVEMENTS.actions.tab(actionText(element, 'tab')),
     achCat: element => CANAAN_ACHIEVEMENTS.actions.cat(actionText(element, 'cat')),
     achTitle: element => CANAAN_ACHIEVEMENTS.actions.title(actionText(element, 'title')),
@@ -136,7 +143,12 @@
     shopSellStack: element => CANAAN_SHOP.sellToken(element.dataset.token),
     // Enchanteur (panneau P) : statistique, création, enchantement choisi, pièce à enchanter.
     enchantStat: element => CANAAN_GATHER.actions.stat(element.dataset.stat),
-    enchantCraft: element => CANAAN_GATHER.actions.craft(element.dataset.stat, actionInteger(element, 'tier'), element.dataset.count ? actionInteger(element, 'count') : 1),
+    enchantCraft: element =>
+      CANAAN_GATHER.actions.craft(
+        element.dataset.stat,
+        actionInteger(element, 'tier'),
+        element.dataset.count ? actionInteger(element, 'count') : 1
+      ),
     enchantPick: element => CANAAN_GATHER.actions.pick(element.dataset.token),
     enchantApply: element => CANAAN_GATHER.actions.apply(element.dataset.ref),
     bankDeposit: element => CANAAN_BANK.depositRef(element.dataset.ref),
@@ -282,10 +294,14 @@
     else if (!enter) hideGearTooltip();
     else if (element.dataset.tooltipSkill !== undefined)
       showSkillTooltip(element.dataset.tooltipSkill, event);
-    else if (element.dataset.tooltipStack !== undefined) CANAAN_BAG.showTooltip(element.dataset.tooltipStack, event);
-    else if (element.dataset.tooltipShop !== undefined) CANAAN_SHOP.showTooltip(Number(element.dataset.tooltipShop), event);
-    else if (element.dataset.tooltipTrade !== undefined) CANAAN_TRADE.showTooltip(element.dataset.tooltipTrade, event);
-    else if (element.dataset.tooltipBank !== undefined) CANAAN_BANK.showTooltip(element.dataset.tooltipBank, event);
+    else if (element.dataset.tooltipStack !== undefined)
+      CANAAN_BAG.showTooltip(element.dataset.tooltipStack, event);
+    else if (element.dataset.tooltipShop !== undefined)
+      CANAAN_SHOP.showTooltip(Number(element.dataset.tooltipShop), event);
+    else if (element.dataset.tooltipTrade !== undefined)
+      CANAAN_TRADE.showTooltip(element.dataset.tooltipTrade, event);
+    else if (element.dataset.tooltipBank !== undefined)
+      CANAAN_BANK.showTooltip(element.dataset.tooltipBank, event);
     else if (element.dataset.tooltipRubis !== undefined)
       showRubisTooltip(element.dataset.tooltipRubis, event);
     else if (element.dataset.tooltipIndex !== undefined)
@@ -295,7 +311,12 @@
   document.addEventListener('pointerover', event => canaanHover(event, true));
   document.addEventListener('pointerout', event => canaanHover(event, false));
   document.addEventListener('pointermove', event => {
-    if (eventClosest(event, '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]'))
+    if (
+      eventClosest(
+        event,
+        '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]'
+      )
+    )
       moveGearTooltip(event);
   });
   // Noms publics du module ; tout le reste est privé.

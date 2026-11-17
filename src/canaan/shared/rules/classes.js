@@ -1,7 +1,13 @@
 // Règles des classes : emplacements de talents selon le niveau, état de classe valide (sauvegardes, réseau),
 // compétences offensives et élément d'une compétence.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
-import { CLASSES, CLASS_IDS, TALENT_SLOT_LEVELS, TALENTS_PER_CLASS, UTILITY_SKILLS } from '../data/classes.js';
+import {
+  CLASSES,
+  CLASS_IDS,
+  TALENT_SLOT_LEVELS,
+  TALENTS_PER_CLASS,
+  UTILITY_SKILLS
+} from '../data/classes.js';
 
 // Emplacements de talents ouverts : un aux niveaux 1, 10, 20, 30 et 40.
 export function talentSlotsAt(level) {
@@ -17,7 +23,14 @@ export function sanitizeClasse(raw, level) {
     talents = [];
   if (id && Array.isArray(raw.talents))
     for (const t of raw.talents)
-      if (Number.isInteger(t) && t >= 0 && t < TALENTS_PER_CLASS && !talents.includes(t) && talents.length < talentSlotsAt(level)) talents.push(t);
+      if (
+        Number.isInteger(t) &&
+        t >= 0 &&
+        t < TALENTS_PER_CLASS &&
+        !talents.includes(t) &&
+        talents.length < talentSlotsAt(level)
+      )
+        talents.push(t);
   return { id, talents };
 }
 // Une compétence d'arme est offensive si elle inflige des dégâts (les postures et ruées ne comptent pas).

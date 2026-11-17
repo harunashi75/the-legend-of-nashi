@@ -102,9 +102,7 @@ export const ARENA_BOSSES = Object.freeze([
     speed: 1.3,
     color: ARENA_COLORS.poison,
     caster: true,
-    phases: [
-      { hp: 1, gap: 3.3, moves: [['poison'], ['volley', { n: 7 }], ['curse'], ['poison'], ['mist']] }
-    ]
+    phases: [{ hp: 1, gap: 3.3, moves: [['poison'], ['volley', { n: 7 }], ['curse'], ['poison'], ['mist']] }]
   },
   {
     name: 'Valdris, le Chevalier Déchu',

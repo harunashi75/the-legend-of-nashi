@@ -7,12 +7,22 @@ function isSafe(x, y) {
   // Tréfonds : la Forteresse naine de Durgrim est le seul lieu sûr.
   if (canaanUnder()) return CANAAN_UNDER.safe(x, y);
   // La cité elfique de Sylvaëlle (dans sa palissade) est sûre elle aussi.
-  return villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y) || canaanInCity(x, y);
+  return (
+    villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y) || canaanInCity(x, y)
+  );
 }
 // Chaque instance a son portail ; canaan-world-generation le place sur l'île.
 for (let i = 0; i < instances.length; i++) {
   const d = instances[i];
-  game.world.npcs.push({ x: d.x * TS, y: d.y * TS, name: d.name, color: d.color, type: 'portal', instance: i, layer: d.under ? 'under' : undefined });
+  game.world.npcs.push({
+    x: d.x * TS,
+    y: d.y * TS,
+    name: d.name,
+    color: d.color,
+    type: 'portal',
+    instance: i,
+    layer: d.under ? 'under' : undefined
+  });
 }
 // Arène des Épreuves : portail unique près du camp, ouvert à tous ; position fixée par la génération de l'île.
 const CANAAN_ARENA_NAME = 'L’Arène des Épreuves';
@@ -80,7 +90,11 @@ function recordKill(m, hero = game.hero) {
   // Monstre normal ou élite : objet garanti, au niveau du monstre ; en instance, rien (le coffre du boss fait le
   // butin, voir SOURCE_REWARDS).
   if (!m.boss && !m.worldBoss)
-    grantSourceReward(game.world.instance ? 'instanceMob' : m.elite ? 'elite' : 'normal', hero, canaanMobLevel(m));
+    grantSourceReward(
+      game.world.instance ? 'instanceMob' : m.elite ? 'elite' : 'normal',
+      hero,
+      canaanMobLevel(m)
+    );
   // Apparences (garde-robe) : une petite chance sur chaque monstre, plus sur les élites et les boss mondiaux. Les
   // boss d'instance tirent la leur dans dungeons.js, pour chaque héros du groupe.
   if (!m.boss) CANAAN_WARDROBE.drop(m.worldBoss ? 'worldBoss' : m.elite ? 'elite' : 'normal', hero);
@@ -122,9 +136,9 @@ function createRawGear(level, source = 'normal', guaranteed = null, forcedSlot =
         ? 'des Titans'
         : source === 'elfe'
           ? 'de Sylvaëlle'
-        : source === 'dungeon'
-          ? 'des Profondeurs'
-          : ['des Étoiles', 'du Crépuscule', 'du Gardien', 'de l’Aube'][Math.floor(rnd() * 4)]);
+          : source === 'dungeon'
+            ? 'des Profondeurs'
+            : ['des Étoiles', 'du Crépuscule', 'du Gardien', 'de l’Aube'][Math.floor(rnd() * 4)]);
   return { id: 'gear' + Date.now() + Math.floor(rnd() * 999999), name, slot, rarity: rarity.name };
 }
 
@@ -205,7 +219,8 @@ function sellCommonFor(hero) {
   hero.player.gold += value;
   canaanAchieve(hero, 'sell', value);
   hero.inventory = hero.inventory.filter(i => !bulk(i));
-  if (hero !== game.hero) heroNotice(hero, '💰 ' + sold.length + ' objets communs vendus : +' + value + ' or');
+  if (hero !== game.hero)
+    heroNotice(hero, '💰 ' + sold.length + ' objets communs vendus : +' + value + ' or');
   return true;
 }
 function sellBagIndex(i) {
@@ -767,7 +782,11 @@ function spawnWorldBosses() {
   if (canaanUnder()) return CANAAN_UNDER.spawnBosses();
   if (!game.world.instance)
     for (const b of WORLD_BOSSES) {
-      if ((game.world.worldBossTimers[b.id] || 0) > Date.now() || game.world.monsters.some(m => m.worldBossId === b.id)) continue;
+      if (
+        (game.world.worldBossTimers[b.id] || 0) > Date.now() ||
+        game.world.monsters.some(m => m.worldBossId === b.id)
+      )
+        continue;
       let pos = findBossSpot(b);
       game.world.monsters.push({
         x: (pos.x + 0.5) * TS,
@@ -821,7 +840,9 @@ const SECRET_CHEST_RUBIS = 0.25;
 function nearbyChest(p) {
   const list = game.world.instance
     ? game.world.chests.filter(c => !c.opened)
-    : canaanSecretChests().filter(c => !game.world.openedChests.includes(c.id)).map(chestPosition);
+    : canaanSecretChests()
+        .filter(c => !game.world.openedChests.includes(c.id))
+        .map(chestPosition);
   return list.find(c => Math.hypot(p.x / TS - c.x, p.y / TS - c.y) < 2) || null;
 }
 function openNearbyChest(hero = game.hero) {
@@ -837,13 +858,18 @@ function openNearbyChest(hero = game.hero) {
       canaanAchieve(member, 'clear', index);
       // Instance terminée : grosse récompense d'XP pour chacun.
       CANAAN_PROGRESSION.clearInstanceXp(index, member);
-      const gold = instances[index].raid ? 150 + Math.floor(Math.random() * 101) : 60 + Math.floor(Math.random() * 41);
+      const gold = instances[index].raid
+        ? 150 + Math.floor(Math.random() * 101)
+        : 60 + Math.floor(Math.random() * 41);
       member.player.gold += gold;
       canaanLootNotice(member, '💰 +' + gold + ' or dans le coffre');
     }
   } else {
     if (!CANAAN_BAG.count(hero, 'key', 'secret')) {
-      canaanLootNotice(hero, '🔒 Coffre secret verrouillé : il faut une clé des secrets. Les boss cachés des donjons et des raids en donnent une.');
+      canaanLootNotice(
+        hero,
+        '🔒 Coffre secret verrouillé : il faut une clé des secrets. Les boss cachés des donjons et des raids en donnent une.'
+      );
       return true;
     }
     CANAAN_BAG.remove(hero, 'key', 'secret', 0, 1);
@@ -886,7 +912,11 @@ function drawChests() {
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#1a1008';
       // Coffre secret : il faut une clé des secrets.
-      const text = ch.instance ? '[E] Ouvrir' : Number(P.keys) > 0 ? '[E] Ouvrir (🗝️ ' + Math.floor(P.keys) + ')' : '🔒 Clé des secrets requise';
+      const text = ch.instance
+        ? '[E] Ouvrir'
+        : Number(P.keys) > 0
+          ? '[E] Ouvrir (🗝️ ' + Math.floor(P.keys) + ')'
+          : '🔒 Clé des secrets requise';
       ctx.strokeText(text, x, y - 40);
       ctx.fillStyle = '#f6dc98';
       ctx.fillText(text, x, y - 40);

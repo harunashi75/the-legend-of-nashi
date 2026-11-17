@@ -19,7 +19,15 @@ function coastCode(x, y) {
     for (let i = 0; i < 4; i++) {
       const xx = x + COAST_DX[i],
         yy = y + COAST_DY[i];
-      if (xx >= 0 && yy >= 0 && xx < MAPW && yy < MAPH && game.world.tiles[yy][xx] !== 0 && !BRIDGE_TILES.has(yy * MAPW + xx)) return h(x, y, 4) > 0.45 ? 2 : 0;
+      if (
+        xx >= 0 &&
+        yy >= 0 &&
+        xx < MAPW &&
+        yy < MAPH &&
+        game.world.tiles[yy][xx] !== 0 &&
+        !BRIDGE_TILES.has(yy * MAPW + xx)
+      )
+        return h(x, y, 4) > 0.45 ? 2 : 0;
     }
     return h(x, y, 4) > 0.77 ? 2 : 0;
   }
@@ -173,11 +181,21 @@ function coastSprite(w, h, stops) {
   return cv;
 }
 function coastBlob() {
-  if (COAST_BLOB === undefined) COAST_BLOB = coastSprite(112, 112, [[0, 'rgba(8,26,14,.34)'], [0.55, 'rgba(8,26,14,.2)'], [1, 'rgba(8,26,14,0)']]);
+  if (COAST_BLOB === undefined)
+    COAST_BLOB = coastSprite(112, 112, [
+      [0, 'rgba(8,26,14,.34)'],
+      [0.55, 'rgba(8,26,14,.2)'],
+      [1, 'rgba(8,26,14,0)']
+    ]);
   return COAST_BLOB;
 }
 function coastMist() {
-  if (COAST_MIST === undefined) COAST_MIST = coastSprite(150, 54, [[0, 'rgba(220,234,230,1)'], [0.5, 'rgba(220,234,230,.55)'], [1, 'rgba(220,234,230,0)']]);
+  if (COAST_MIST === undefined)
+    COAST_MIST = coastSprite(150, 54, [
+      [0, 'rgba(220,234,230,1)'],
+      [0.5, 'rgba(220,234,230,.55)'],
+      [1, 'rgba(220,234,230,0)']
+    ]);
   return COAST_MIST;
 }
 function drawCoastLive(c, x, y, pass) {

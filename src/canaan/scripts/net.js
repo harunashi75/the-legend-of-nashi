@@ -55,7 +55,8 @@
       code: normalizeRoomCode(saved.code) || ''
     };
     // Anciens réglages Pinggy : retirés au passage.
-    if (value.id !== saved.id || 'pinggyToken' in saved || 'pinggyHost' in saved || 'pinggyMode' in saved) CANAAN_PREFERENCES.write('network', value);
+    if (value.id !== saved.id || 'pinggyToken' in saved || 'pinggyHost' in saved || 'pinggyMode' in saved)
+      CANAAN_PREFERENCES.write('network', value);
     return value;
   }
   function remember(changes) {
@@ -89,10 +90,13 @@
         host = relay.replace(/^wss?:\/\//, '').split(/[:/]/)[0],
         tail = /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host) || /\.ts\.net$/i.test(host);
       setStatus(
-        'Relais injoignable : ' + relay + '. ' +
+        'Relais injoignable : ' +
+          relay +
+          '. ' +
           (tail
             ? 'Adresse Tailscale : Tailscale doit être lancé et connecté chez toi, et tu dois être dans le réseau Tailscale de l’hôte (il t’invite, ou partage sa machine avec toi). Vérifie aussi que l’hôte a bien ouvert son salon.'
-            : 'Vérifie l’adresse, que l’hôte a bien ouvert son salon, et son pare-feu' + (port ? ' (le port ' + port + ' doit accepter les connexions).' : '.'))
+            : 'Vérifie l’adresse, que l’hôte a bien ouvert son salon, et son pare-feu' +
+              (port ? ' (le port ' + port + ' doit accepter les connexions).' : '.'))
       );
     };
     socket.onclose = () => {
@@ -158,7 +162,13 @@
     const hero = net.peers.get(message.peer);
     if (message.t === 'intent' && hero) {
       const intent = sanitizeIntent(message);
-      Object.assign(hero.intent, { dx: intent.dx, dy: intent.dy, attack: intent.attack, aimX: intent.aimX, aimY: intent.aimY });
+      Object.assign(hero.intent, {
+        dx: intent.dx,
+        dy: intent.dy,
+        attack: intent.attack,
+        aimX: intent.aimX,
+        aimY: intent.aimY
+      });
       if (intent.skill !== null) hero.intent.skill = intent.skill;
       if (intent.dodge) CANAAN_COMBAT.heroDodge(hero, intent.dodge.dx, intent.dodge.dy);
       if (intent.seq !== null) {
@@ -204,7 +214,9 @@
   function welcome(message) {
     const refuse = reason => send({ t: 'refuse', peer: message.peer, reason });
     if (message.version !== window.CANAAN_VERSION || message.schema !== SAVE_SCHEMA)
-      return refuse('Versions différentes : hôte ' + window.CANAAN_VERSION + ', invité ' + String(message.version));
+      return refuse(
+        'Versions différentes : hôte ' + window.CANAAN_VERSION + ', invité ' + String(message.version)
+      );
     if (!isGuestId(message.id)) return refuse('Identifiant d’invité invalide.');
     // Le même invité se reconnecte alors que l'ancienne connexion n'est pas encore fermée : la nouvelle la remplace.
     for (const [peer, other] of net.peers)
@@ -215,13 +227,18 @@
     let hero = game.guests[message.id];
     const back = !!hero?.away && game.heroes.includes(hero);
     if (!hero) {
-      hero = CANAAN_GROUP.createRemote(message.id, cleanPseudo(message.pseudo), { ...decodeLook(message.look), wear: '' });
+      hero = CANAAN_GROUP.createRemote(message.id, cleanPseudo(message.pseudo), {
+        ...decodeLook(message.look),
+        wear: ''
+      });
       if (!hero) return refuse('Cette aventure a déjà six héros invités.');
     }
     // L'invité choisit son apparence chez lui : elle suit à chaque connexion. L'apparence portée (garde-robe) reste
     // celle que l'hôte lui connaît : jamais une tenue qu'il ne possède pas.
-    if (typeof message.look === 'string') hero.look = sanitizeLook({ ...decodeLook(message.look), wear: hero.look?.wear || '' });
-    if (!game.heroes.includes(hero) && !CANAAN_GROUP.join(hero.id)) return refuse('Trois invités sont déjà présents.');
+    if (typeof message.look === 'string')
+      hero.look = sanitizeLook({ ...decodeLook(message.look), wear: hero.look?.wear || '' });
+    if (!game.heroes.includes(hero) && !CANAAN_GROUP.join(hero.id))
+      return refuse('Trois invités sont déjà présents.');
     hero.local = false;
     hero.peer = message.peer;
     hero.netBag = null;
@@ -229,7 +246,14 @@
     hero.intentSeq = null;
     hero.away = null;
     net.peers.set(message.peer, hero);
-    send({ t: 'accept', peer: message.peer, heroId: hero.id, name: hero.name, host: window.CANAAN_VERSION, back });
+    send({
+      t: 'accept',
+      peer: message.peer,
+      heroId: hero.id,
+      name: hero.name,
+      host: window.CANAAN_VERSION,
+      back
+    });
     chat('Groupe', hero.name + (back ? ' est de retour : il reprend sa place.' : ' a rejoint la partie.'));
     toast('🌐 ' + hero.name + (back ? ' est de retour' : ' a rejoint la partie'));
     saveGame();
@@ -237,7 +261,12 @@
   function snapshot() {
     const inst = game.world.instance,
       map = inst
-        ? { instance: inst.arena ? 'arena' : inst.index, cleared: !!inst.cleared, bosses: inst.bossesDown || 0, dun: inst.arena ? null : CANAAN_DUNGEON_EXPLORE.stateOut() }
+        ? {
+            instance: inst.arena ? 'arena' : inst.index,
+            cleared: !!inst.cleared,
+            bosses: inst.bossesDown || 0,
+            dun: inst.arena ? null : CANAAN_DUNGEON_EXPLORE.stateOut()
+          }
         : { instance: null, layer: game.world.layer === 'under' ? 'under' : 'surface' };
     for (const m of game.world.monsters) if (!m.netId) m.netId = ++net.monsterCounter;
     return {
@@ -268,15 +297,30 @@
       // Boss : ses effets en cours (barre de boss des invités).
       monsters: game.world.monsters.map(m => {
         const snap = monsterSnapshot(m);
-        if ((m.boss || m.worldBoss || m.arenaBoss) && window.CANAAN_BUFF_BAR) snap.fx = CANAAN_BUFF_BAR.monsterCodes(m);
+        if ((m.boss || m.worldBoss || m.arenaBoss) && window.CANAAN_BUFF_BAR)
+          snap.fx = CANAAN_BUFF_BAR.monsterCodes(m);
         return snap;
       }),
       drops: game.world.drops.map(d => ({ x: Math.round(d.x), y: Math.round(d.y) })),
-      projectiles: game.world.projectiles.slice(0, 60).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), c: p.c, a: Math.round(Math.atan2(p.vy || 0, p.vx || 0) * 100), k: p.kind === 'arrow' ? 1 : 0 })),
+      projectiles: game.world.projectiles.slice(0, 60).map(p => ({
+        x: Math.round(p.x),
+        y: Math.round(p.y),
+        c: p.c,
+        a: Math.round(Math.atan2(p.vy || 0, p.vx || 0) * 100),
+        k: p.kind === 'arrow' ? 1 : 0
+      })),
       fx: net.fx.splice(0),
       // Coffres : coffre de fin d'instance (position, ouvert), et coffres secrets déjà ouverts du monde
       // (envoyés quand la liste change, et toutes les 5 secondes pour un invité qui vient d'arriver).
-      chests: game.world.instance ? game.world.chests.map(c => ({ id: c.id, x: c.x, y: c.y, instance: !!c.instance, opened: !!c.opened })) : [],
+      chests: game.world.instance
+        ? game.world.chests.map(c => ({
+            id: c.id,
+            x: c.x,
+            y: c.y,
+            instance: !!c.instance,
+            opened: !!c.opened
+          }))
+        : [],
       opened: openedListDue() ? [...game.world.openedChests] : undefined,
       // Arène : annonces au sol, projectiles, vague et effets de chaque héros (null hors du colisée).
       arena: CANAAN_ARENA.view(hero => (hero === game.hero ? 'host' : hero.id))
@@ -302,7 +346,9 @@
         y: Math.round(p.y * 10) / 10,
         seq: hero.intentSeq,
         age: hero.intentSeq === null ? 0 : time - hero.intentTick,
-        speed: Math.round(CANAAN_PLAYER_SPEED * (1 + (st.speed || 0) / 100) * CANAAN_PROF.speedMult(hero) * 1000) / 1000,
+        speed:
+          Math.round(CANAAN_PLAYER_SPEED * (1 + (st.speed || 0) / 100) * CANAAN_PROF.speedMult(hero) * 1000) /
+          1000,
         // Pêche et repas en cours (métiers).
         live: CANAAN_PROF.liveOf(hero),
         // Niveau et expérience (l'hôte les fait gagner).
@@ -315,7 +361,20 @@
           return spec ? Math.max(0, Math.round((cooldowns[spec.key] || 0) * 10) / 10) : 0;
         }),
         // Postures et charges des compétences (badges de la barre de l'invité).
-        stance: (st => Object.fromEntries(['arcane', 'parryReady', 'combo', 'fastBow', 'focus', 'shadow', 'berserk', 'flurry', 'shieldGuard'].map(k => [k, Math.round((st[k] || 0) * 10) / 10])))(CANAAN_SKILLS.state(hero)),
+        stance: (st =>
+          Object.fromEntries(
+            [
+              'arcane',
+              'parryReady',
+              'combo',
+              'fastBow',
+              'focus',
+              'shadow',
+              'berserk',
+              'flurry',
+              'shieldGuard'
+            ].map(k => [k, Math.round((st[k] || 0) * 10) / 10])
+          ))(CANAAN_SKILLS.state(hero)),
         dodge: Math.round(CANAAN_COMBAT.dodgeState(hero).ready * 10) / 10,
         revive: p.dead && hero.reviveAt ? Math.max(0, Math.ceil((hero.reviveAt - time) / 60)) : 0
       };
@@ -364,9 +423,11 @@
     if (!action) return false;
     if (action.op.startsWith('trade-')) return CANAAN_TRADE.handle(hero, action);
     if (action.op === 'shop-buy' || action.op === 'sell-stack') return CANAAN_SHOP.handle(hero, action);
-    if (action.op === 'bank-deposit' || action.op === 'bank-withdraw') return CANAAN_BANK.handle(hero, action);
+    if (action.op === 'bank-deposit' || action.op === 'bank-withdraw')
+      return CANAAN_BANK.handle(hero, action);
     if (action.op.startsWith('house-')) return CANAAN_HOUSE.handle(hero, action);
-    if (['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply'].includes(action.op)) return CANAAN_PROF.handle(hero, action);
+    if (['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply'].includes(action.op))
+      return CANAAN_PROF.handle(hero, action);
     if (action.op.startsWith('quest-')) return CANAAN_QUESTS.handle(hero, action);
     if (action.op === 'ach-title') return CANAAN_ACHIEVEMENTS.handle(hero, action);
     if (action.op === 'class-choose') return CANAAN_CLASS.choose(action.cls, hero);
@@ -391,7 +452,8 @@
   };
   // Message pour un seul invité (butin, à terre, sac plein…) : il s'affiche sur son écran.
   game.view.remote = (hero, text) => {
-    if (game.mode === 'host' && hero.peer && net.peers.get(hero.peer) === hero) send({ t: 'notice', peer: hero.peer, text: cleanChat(text) });
+    if (game.mode === 'host' && hero.peer && net.peers.get(hero.peer) === hero)
+      send({ t: 'notice', peer: hero.peer, text: cleanChat(text) });
   };
 
   // ---------------------------------------------------------------- Invité
@@ -418,13 +480,25 @@
       relay,
       () => {
         setStatus('Salon ' + room + ' : en attente de l’hôte…');
-        send({ t: 'join', code: room, id: me.id, pseudo: name, look: me.look, version: window.CANAAN_VERSION, schema: SAVE_SCHEMA });
+        send({
+          t: 'join',
+          code: room,
+          id: me.id,
+          pseudo: name,
+          look: me.look,
+          version: window.CANAAN_VERSION,
+          schema: SAVE_SCHEMA
+        });
       },
       guestMessage,
       () => {
-        if (game.mode === 'guest') leaveAfter('Connexion perdue avec l’hôte. Ta place est gardée 2 minutes : rejoins avec le même code.');
+        if (game.mode === 'guest')
+          leaveAfter(
+            'Connexion perdue avec l’hôte. Ta place est gardée 2 minutes : rejoins avec le même code.'
+          );
         // La fermeture garde le message qui l'explique (relais injoignable, salon introuvable, refus…).
-        else if (!net.unreachable && !/introuvable|complet|refus|Versions|déjà|injoignable/.test(net.status)) setStatus('Connexion fermée.');
+        else if (!net.unreachable && !/introuvable|complet|refus|Versions|déjà|injoignable/.test(net.status))
+          setStatus('Connexion fermée.');
       }
     );
   }
@@ -436,8 +510,10 @@
     else if (message.t === 'state' && game.mode === 'guest') applyState(message);
     else if (message.t === 'me' && game.mode === 'guest') applyPrivate(message);
     else if (message.t === 'notice' && game.mode === 'guest') toast(cleanChat(message.text));
-    else if (message.t === 'chat' && game.mode === 'guest') showChat(cleanPseudo(message.from), cleanChat(message.text));
-    else if (message.t === 'closed' || message.t === 'kick') leaveAfter(message.reason || 'L’hôte a fermé sa partie.');
+    else if (message.t === 'chat' && game.mode === 'guest')
+      showChat(cleanPseudo(message.from), cleanChat(message.text));
+    else if (message.t === 'closed' || message.t === 'kick')
+      leaveAfter(message.reason || 'L’hôte a fermé sa partie.');
   }
   function enterGuestMode(message) {
     game.mode = 'guest';
@@ -491,11 +567,22 @@
       CANAAN_UNDER.setLayer(map.layer === 'under' ? 'under' : 'surface');
     } else if (map.instance === 'arena') {
       // Colisée de l'Arène : même plan que chez l'hôte ; la herse suit la vue de l'arène.
-      game.world.instance = { index: 'arena', arena: true, cleared: !!map.cleared, bossesDown: 0, guestView: true };
+      game.world.instance = {
+        index: 'arena',
+        arena: true,
+        cleared: !!map.cleared,
+        bossesDown: 0,
+        guestView: true
+      };
       game.world.tiles = makeDungeon('arena');
       game.world.decor = Array.from({ length: MAPH }, () => Array(MAPW).fill(null));
     } else if (Number.isInteger(map.instance) && instances[map.instance]) {
-      game.world.instance = { index: map.instance, cleared: !!map.cleared, bossesDown: bosses, guestView: true };
+      game.world.instance = {
+        index: map.instance,
+        cleared: !!map.cleared,
+        bossesDown: bosses,
+        guestView: true
+      };
       game.world.tiles = makeDungeon(map.instance);
       openDungeonGates(map.instance, bosses);
       if (map.dun) CANAAN_DUNGEON_EXPLORE.stateIn(map.dun);
@@ -524,19 +611,40 @@
       const mine = h.id === net.heroId;
       let hero = mine ? game.hero : net.remote.get(h.id);
       if (!hero) {
-        hero = { id: h.id, name: '', color: '', player: { x: h.x, y: h.y, vx: 0, vy: 0, anim: 0, atk: 0 }, intent: {}, equipment: {} };
+        hero = {
+          id: h.id,
+          name: '',
+          color: '',
+          player: { x: h.x, y: h.y, vx: 0, vy: 0, anim: 0, atk: 0 },
+          intent: {},
+          equipment: {}
+        };
         net.remote.set(h.id, hero);
       }
       if (!mine) {
         hero.away = Number.isFinite(h.away) && h.away > 0 ? { left: h.away } : null;
         hero.name = cleanPseudo(h.name);
         hero.color = /^#[0-9a-f]{6}$/i.test(h.color) ? h.color : '#8068db';
-        hero.fishView = Array.isArray(h.fish) && Number.isInteger(h.fish[0]) ? { spot: h.fish[0], bite: !!h.fish[1] } : null;
-        hero.netWeapon = typeof WEAPON_DEFINITIONS !== 'undefined' && Object.hasOwn(WEAPON_DEFINITIONS, h.wpn) ? h.wpn : 'sword';
+        hero.fishView =
+          Array.isArray(h.fish) && Number.isInteger(h.fish[0])
+            ? { spot: h.fish[0], bite: !!h.fish[1] }
+            : null;
+        hero.netWeapon =
+          typeof WEAPON_DEFINITIONS !== 'undefined' && Object.hasOwn(WEAPON_DEFINITIONS, h.wpn)
+            ? h.wpn
+            : 'sword';
         hero.netAim = Number.isFinite(h.aim) ? h.aim / 100 : null;
         hero.netAct =
-          Array.isArray(h.act) && ['mine', 'herb', 'forge', 'cook'].includes(h.act[0]) && h.act.slice(1).every(Number.isFinite)
-            ? { kind: h.act[0], p: Math.max(0, Math.min(1, h.act[1])), tx: h.act[2], ty: h.act[3], node: h.act[4] | 0 }
+          Array.isArray(h.act) &&
+          ['mine', 'herb', 'forge', 'cook'].includes(h.act[0]) &&
+          h.act.slice(1).every(Number.isFinite)
+            ? {
+                kind: h.act[0],
+                p: Math.max(0, Math.min(1, h.act[1])),
+                tx: h.act[2],
+                ty: h.act[3],
+                node: h.act[4] | 0
+              }
             : null;
         if (hero.lookCode !== h.look) {
           hero.lookCode = h.look;
@@ -549,7 +657,8 @@
         if ((game.hero.look?.wear || '') !== wear) game.hero.look = sanitizeLook({ ...game.hero.look, wear });
       }
       const p = hero.player;
-      for (const key of ['hp', 'mhp', 'mp', 'mmp', 'gold', 'keys', 'vx', 'vy', 'face', 'atk']) if (Number.isFinite(h[key])) p[key] = h[key];
+      for (const key of ['hp', 'mhp', 'mp', 'mmp', 'gold', 'keys', 'vx', 'vy', 'face', 'atk'])
+        if (Number.isFinite(h[key])) p[key] = h[key];
       p.dead = !!h.dead;
       p.form = h.form ? 'feral' : null;
       p.veiled = !!h.veil;
@@ -581,14 +690,30 @@
       return m;
     });
     game.world.drops = (state.drops || []).map(d => ({ x: d.x, y: d.y, t: 'or', v: 0, life: 99 }));
-    game.world.projectiles = (state.projectiles || []).map(p => ({ x: p.x, y: p.y, vx: 0, vy: 0, c: p.c, life: 2, a: Number.isFinite(p.a) ? p.a / 100 : 0, kind: p.k ? 'arrow' : 'orb' }));
+    game.world.projectiles = (state.projectiles || []).map(p => ({
+      x: p.x,
+      y: p.y,
+      vx: 0,
+      vy: 0,
+      c: p.c,
+      life: 2,
+      a: Number.isFinite(p.a) ? p.a / 100 : 0,
+      kind: p.k ? 'arrow' : 'orb'
+    }));
     if (Array.isArray(state.fx)) playEffects(state.fx);
     if (game.world.instance && Array.isArray(state.chests))
       game.world.chests = state.chests
         .filter(c => c && Number.isFinite(c.x) && Number.isFinite(c.y))
         .slice(0, 8)
-        .map(c => ({ id: String(c.id).slice(0, 40), x: c.x, y: c.y, instance: !!c.instance, opened: !!c.opened }));
-    if (Array.isArray(state.opened)) game.world.openedChests = state.opened.filter(id => typeof id === 'string').slice(0, 200);
+        .map(c => ({
+          id: String(c.id).slice(0, 40),
+          x: c.x,
+          y: c.y,
+          instance: !!c.instance,
+          opened: !!c.opened
+        }));
+    if (Array.isArray(state.opened))
+      game.world.openedChests = state.opened.filter(id => typeof id === 'string').slice(0, 200);
     CANAAN_ARENA.applyView(state.arena || null, net.heroId);
   }
   // Effets de combat de l'hôte rejoués chez l'invité.
@@ -596,8 +721,10 @@
     for (const e of list.slice(0, FX_LIMIT)) {
       if (!Array.isArray(e)) continue;
       const [kind, ...d] = e;
-      if (kind === 'f' && Number.isFinite(d[0]) && Number.isFinite(d[1])) float(d[0], d[1], String(d[2] ?? '').slice(0, 40), String(d[3] || '#fff'));
-      else if (kind === 'b' && Number.isFinite(d[0]) && Number.isFinite(d[1])) burst(d[0], d[1], String(d[2] || '#fff'), Math.min(40, d[3] | 0));
+      if (kind === 'f' && Number.isFinite(d[0]) && Number.isFinite(d[1]))
+        float(d[0], d[1], String(d[2] ?? '').slice(0, 40), String(d[3] || '#fff'));
+      else if (kind === 'b' && Number.isFinite(d[0]) && Number.isFinite(d[1]))
+        burst(d[0], d[1], String(d[2] || '#fff'), Math.min(40, d[3] | 0));
       else if (kind === 'v') CANAAN_SKILLS.remoteEffect(d);
     }
   }
@@ -606,7 +733,11 @@
     if (Number.isFinite(me.speed)) net.speed = Math.max(0, Math.min(20, me.speed));
     if (Array.isArray(me.cds)) SKILLS.forEach((s, i) => (s.cd = Number.isFinite(me.cds[i]) ? me.cds[i] : 0));
     if (me.stance && typeof me.stance === 'object')
-      canaanGuestStance = Object.fromEntries(Object.entries(me.stance).filter(([, v]) => Number.isFinite(v)).map(([k, v]) => [k, Math.max(0, Math.min(99, v))]));
+      canaanGuestStance = Object.fromEntries(
+        Object.entries(me.stance)
+          .filter(([, v]) => Number.isFinite(v))
+          .map(([k, v]) => [k, Math.max(0, Math.min(99, v))])
+      );
     net.revive = Number.isFinite(me.revive) ? me.revive : 0;
     if (Number.isInteger(me.level) && Number.isInteger(me.exp)) {
       game.hero.level = clampLevel(me.level);
@@ -643,7 +774,13 @@
         net.lastWeapon = weapon;
         refreshWeaponBar();
       }
-      if (modalOpen() && (currentGearPanel === 'inventory' || currentGearPanel === 'character') && !CANAAN_SHOP.isOpen() && !CANAAN_BANK.isOpen()) refreshGearPanel();
+      if (
+        modalOpen() &&
+        (currentGearPanel === 'inventory' || currentGearPanel === 'character') &&
+        !CANAAN_SHOP.isOpen() &&
+        !CANAAN_BANK.isOpen()
+      )
+        refreshGearPanel();
       if (modalOpen() && document.querySelector('#window .classes')) renderTalents();
     }
     if (Number.isFinite(me.x) && Number.isFinite(me.y)) correct(me);
@@ -659,8 +796,12 @@
     }
     if (r && r.owned && typeof r.owned === 'object' && Array.isArray(r.equipped))
       game.hero.rubis = {
-        owned: Object.fromEntries(Object.entries(r.owned).filter(([id, n]) => CANAAN_RUBIS.get(id) && Number.isInteger(n) && n > 0)),
-        equipped: Array.from({ length: CANAAN_RUBIS.slots }, (_, k) => (CANAAN_RUBIS.get(r.equipped[k]) ? r.equipped[k] : null))
+        owned: Object.fromEntries(
+          Object.entries(r.owned).filter(([id, n]) => CANAAN_RUBIS.get(id) && Number.isInteger(n) && n > 0)
+        ),
+        equipped: Array.from({ length: CANAAN_RUBIS.slots }, (_, k) =>
+          CANAAN_RUBIS.get(r.equipped[k]) ? r.equipped[k] : null
+        )
       };
   }
   // Réconciliation : la position confirmée par l'hôte est comparée à celle que l'invité avait prédite au même moment.
@@ -770,9 +911,13 @@
       state: ['off', 'starting', 'online', 'closed', 'error'].includes(s.state) ? s.state : 'off',
       // tailscale : relais sur l'adresse Tailscale de l'hôte ; lan : relais ouvert au réseau local.
       kind: s.kind === 'lan' ? 'lan' : s.kind === 'tailscale' ? 'tailscale' : null,
-      addresses: Array.isArray(s.addresses) ? s.addresses.map(normalizeRelayUrl).filter(Boolean).slice(0, 4) : [],
+      addresses: Array.isArray(s.addresses)
+        ? s.addresses.map(normalizeRelayUrl).filter(Boolean).slice(0, 4)
+        : [],
       // Commandes pour laisser passer les invités dans les pare-feux actifs (Linux), et système de l'hôte.
-      firewall: Array.isArray(s.firewall) ? s.firewall.filter(c => typeof c === 'string' && /^sudo [\w .=/&+-]+$/.test(c)).slice(0, 3) : [],
+      firewall: Array.isArray(s.firewall)
+        ? s.firewall.filter(c => typeof c === 'string' && /^sudo [\w .=/&+-]+$/.test(c)).slice(0, 3)
+        : [],
       platform: typeof s.platform === 'string' ? s.platform.slice(0, 16) : '',
       local: typeof s.local === 'string' ? s.local : null,
       relay: typeof s.relay === 'string' ? normalizeRelayUrl(s.relay) : null,
@@ -792,7 +937,11 @@
   async function openHosted(kind) {
     if (!desktop || game.mode === 'guest') return false;
     if (game.mode === 'host') closeRoom();
-    setStatus(kind === 'lan' ? 'Ouverture du relais sur ton réseau local…' : 'Ouverture du relais sur ton réseau Tailscale…');
+    setStatus(
+      kind === 'lan'
+        ? 'Ouverture du relais sur ton réseau local…'
+        : 'Ouverture du relais sur ton réseau Tailscale…'
+    );
     let st;
     try {
       st = internetStatus(await (kind === 'lan' ? desktop.startLan() : desktop.startTailscale()));

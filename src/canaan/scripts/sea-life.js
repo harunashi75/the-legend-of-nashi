@@ -14,7 +14,8 @@
       }
     return true;
   }
-  const visible = (x, y, margin) => Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
+  const visible = (x, y, margin) =>
+    Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
   const TARGET = { school: 7, dolphin: 3, whale: 1 };
   let clock = 0;
   function spawn() {
@@ -24,7 +25,8 @@
       for (let tries = 0; tries < 12; tries++) {
         const x = camX - 200 + Math.random() * (W + 400),
           y = camY - 200 + Math.random() * (H + 400);
-        const ok = kind === 'school' ? open(x, y, 1, false) : kind === 'dolphin' ? open(x, y, 3) : open(x, y, 6);
+        const ok =
+          kind === 'school' ? open(x, y, 1, false) : kind === 'dolphin' ? open(x, y, 3) : open(x, y, 6);
         if (!ok) continue;
         const a = Math.random() * Math.PI * 2;
         creatures.push({
@@ -34,7 +36,14 @@
           a,
           speed: kind === 'school' ? 0.5 : kind === 'dolphin' ? 1.4 : 0.35,
           t: Math.floor(Math.random() * 400),
-          fish: kind === 'school' ? Array.from({ length: 6 + Math.floor(Math.random() * 5) }, () => [Math.random() * Math.PI * 2, 8 + Math.random() * 22, 0.6 + Math.random() * 0.8]) : null,
+          fish:
+            kind === 'school'
+              ? Array.from({ length: 6 + Math.floor(Math.random() * 5) }, () => [
+                  Math.random() * Math.PI * 2,
+                  8 + Math.random() * 22,
+                  0.6 + Math.random() * 0.8
+                ])
+              : null,
           glow: tileAt(x, y) === 18
         });
         break;
@@ -59,7 +68,10 @@
         c.a += Math.sin(c.t * 0.013 + c.x * 0.001) * 0.01;
         const nx = c.x + Math.cos(c.a) * c.speed,
           ny = c.y + Math.sin(c.a) * c.speed,
-          ok = c.kind === 'school' ? DEEP.has(tileAt(nx + Math.cos(c.a) * 30, ny + Math.sin(c.a) * 30)) : open(nx + Math.cos(c.a) * 60, ny + Math.sin(c.a) * 60, c.kind === 'whale' ? 3 : 1);
+          ok =
+            c.kind === 'school'
+              ? DEEP.has(tileAt(nx + Math.cos(c.a) * 30, ny + Math.sin(c.a) * 30))
+              : open(nx + Math.cos(c.a) * 60, ny + Math.sin(c.a) * 60, c.kind === 'whale' ? 3 : 1);
         if (!ok) c.a += Math.PI * (0.6 + Math.random() * 0.4);
         else {
           c.x = nx;
@@ -186,7 +198,12 @@
               const h = Math.sin(s * Math.PI) * 50 * (0.6 + (k % 5) * 0.1),
                 spread = (k - 7) * 2.2 * s;
               g.globalAlpha = (1 - s) * 0.85;
-              g.fillRect(Math.round(c.x + 18 + spread), Math.round(c.y - 18 - h + Math.abs(spread) * 0.8), 3, 3);
+              g.fillRect(
+                Math.round(c.x + 18 + spread),
+                Math.round(c.y - 18 - h + Math.abs(spread) * 0.8),
+                3,
+                3
+              );
             }
           }
         } else if (cycle >= 820 && cycle < 880) {

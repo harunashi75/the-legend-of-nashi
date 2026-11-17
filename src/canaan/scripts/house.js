@@ -24,7 +24,7 @@
     g.fillStyle = col;
     g.fillRect(rx, ry, rw, rh);
     if (MAT && g === MAT.g && g.globalAlpha >= 1 && col.length < 9) {
-      const code = col === '#22160e' ? 0 : MAT.map.get(col) ?? MAT.def;
+      const code = col === '#22160e' ? 0 : (MAT.map.get(col) ?? MAT.def);
       MAT.id = (MAT.id % 250) + 1;
       MAT.m.fillStyle = 'rgb(' + code + ',' + MAT.id + ',0)';
       MAT.m.fillRect(rx, ry, rw, rh);
@@ -238,7 +238,15 @@
         for (let row = 0; row < 3; row++) {
           const ry = y - 34 + row * 24;
           R(g, x + 6, ry, W - 12, 20, '#2a1a10');
-          for (let k = 0; k < 9; k++) R(g, x + 8 + k * 9, ry + 3 + ((k * 7 + row) % 4), 7, 17 - ((k * 7 + row) % 4), colors[(k + row * 2) % colors.length]);
+          for (let k = 0; k < 9; k++)
+            R(
+              g,
+              x + 8 + k * 9,
+              ry + 3 + ((k * 7 + row) % 4),
+              7,
+              17 - ((k * 7 + row) % 4),
+              colors[(k + row * 2) % colors.length]
+            );
           R(g, x + 4, ry + 20, W - 8, 3, '#7a5230');
         }
       }
@@ -307,7 +315,7 @@
       fire: true,
       draw(g, x, y, W, H) {
         R(g, x + 2, y - 40, W - 4, H + 38, '#7a7a80');
-        for (let k = 0; k < 6; k++) R(g, x + 2 + ((k % 2) * 20), y - 36 + k * 14, W - 4, 2, '#5a5a62');
+        for (let k = 0; k < 6; k++) R(g, x + 2 + (k % 2) * 20, y - 36 + k * 14, W - 4, 2, '#5a5a62');
         R(g, x + 16, y - 8, W - 32, 46, '#1a1414');
         fire(g, x + 22, y + 10, W - 44, 26);
         R(g, x + 22, y + 34, W - 44, 4, '#5a3a22');
@@ -341,7 +349,13 @@
         R(g, x + 14, y + 28, W - 28, 16, '#a8603a');
         R(g, x + 12, y + 26, W - 24, 4, '#c8784a');
         g.fillStyle = '#3e7a3e';
-        for (const [dx, dy, r] of [[0, -6, 12], [-9, 4, 9], [9, 4, 9], [-5, -18, 8], [6, -16, 8]]) {
+        for (const [dx, dy, r] of [
+          [0, -6, 12],
+          [-9, 4, 9],
+          [9, 4, 9],
+          [-5, -18, 8],
+          [6, -16, 8]
+        ]) {
           g.beginPath();
           g.arc(x + W / 2 + dx + sway, y + 14 + dy, r, 0, Math.PI * 2);
           g.fill();
@@ -430,7 +444,13 @@
       w: 2,
       h: 2,
       draw(g, x, y, W, H) {
-        for (const [r, col] of [[0, '#3e5a9a'], [7, '#d8e0f0'], [11, '#5a7ac0'], [22, '#d8e0f0'], [26, '#3e5a9a']]) {
+        for (const [r, col] of [
+          [0, '#3e5a9a'],
+          [7, '#d8e0f0'],
+          [11, '#5a7ac0'],
+          [22, '#d8e0f0'],
+          [26, '#3e5a9a']
+        ]) {
           g.fillStyle = col;
           g.beginPath();
           g.ellipse(x + W / 2, y + H / 2, W / 2 - 4 - r, H / 2 - 8 - r * 0.8, 0, 0, Math.PI * 2);
@@ -465,7 +485,12 @@
       quest: 3,
       draw(g, x, y, W) {
         R(g, x + 10, y + 18, W - 20, 16, '#f0ece4');
-        for (const [dx, dy] of [[12, 15], [20, 13], [28, 15]]) R(g, x + dx, y + dy, 8, 6, '#ffffff');
+        for (const [dx, dy] of [
+          [12, 15],
+          [20, 13],
+          [28, 15]
+        ])
+          R(g, x + dx, y + dy, 8, 6, '#ffffff');
         R(g, x + W - 14, y + 16, 9, 10, '#3a3030');
         R(g, x + W - 11, y + 19, 2, 2, '#ffffff');
         for (const dx of [12, 18, 26, 32]) R(g, x + dx, y + 34, 3, 7, '#3a3030');
@@ -561,7 +586,8 @@
         R(g, x + 20, y + 2, W - 40, 10, '#9ad0f0');
         R(g, x + 19, y - 2, W - 38, 5, '#8a5a34');
         g.globalAlpha = 0.6;
-        for (let k = 0; k < 3; k++) R(g, x + 20 + ((time * 0.4 + k * 6) % 10), y + 16 + k * 8, 6, 2, '#ffffff');
+        for (let k = 0; k < 3; k++)
+          R(g, x + 20 + ((time * 0.4 + k * 6) % 10), y + 16 + k * 8, 6, 2, '#ffffff');
         g.globalAlpha = 1;
       }
     },
@@ -695,7 +721,15 @@
         R(g, x + W - 14, y + 57, 4, 8, '#5a3a22');
         R(g, x + 10, y + 38, 10, 14, '#c8784a');
         R(g, x + 12, y + 30, 6, 8, '#4f8a42');
-        for (let k = 0; k < 5; k++) R(g, x + 30 + k * 6, y + 36 + (k % 2) * 3, 5, 16 - (k % 2) * 3, ['#a8442a', '#3e5a9a', '#4f8a42', '#c9a24a', '#7a4a8a'][k]);
+        for (let k = 0; k < 5; k++)
+          R(
+            g,
+            x + 30 + k * 6,
+            y + 36 + (k % 2) * 3,
+            5,
+            16 - (k % 2) * 3,
+            ['#a8442a', '#3e5a9a', '#4f8a42', '#c9a24a', '#7a4a8a'][k]
+          );
         R(g, x + W - 26, y + 42, 12, 10, '#e8e0d0');
         R(g, x + W - 24, y + 40, 8, 3, '#d8d0c0');
       }
@@ -789,7 +823,11 @@
         R(g, x + 6, y - 6, 6, 3, '#c9a24a');
         R(g, x + 22, y - 5, 6, 3, '#c9a24a');
         for (let k = 0; k < 4; k++) R(g, x + 44 + k * 3, y + 2 - k * 2, 8, 3, k % 2 ? '#f0d070' : '#d8b048');
-        for (const [dx, col] of [[78, '#c84a5a'], [88, '#4a7ad8'], [98, '#5ab04a']]) {
+        for (const [dx, col] of [
+          [78, '#c84a5a'],
+          [88, '#4a7ad8'],
+          [98, '#5ab04a']
+        ]) {
           R(g, x + dx, y - 4, 7, 10, col);
           R(g, x + dx + 2, y - 8, 3, 4, '#e8e0d0');
           R(g, x + dx + 1, y - 2, 2, 3, '#ffffff88');
@@ -872,7 +910,11 @@
       w: 1,
       h: 1,
       draw(g, x, y, W, H) {
-        for (const [dx, dy] of [[4, 18], [20, 16], [12, 6]]) {
+        for (const [dx, dy] of [
+          [4, 18],
+          [20, 16],
+          [12, 6]
+        ]) {
           R(g, x + dx, y + dy + 4, 22, 22, '#c8b088');
           R(g, x + dx + 2, y + dy, 18, 6, '#b09870');
           R(g, x + dx + 8, y + dy - 3, 6, 4, '#8a7050');
@@ -888,7 +930,11 @@
       h: 2,
       draw(g, x, y, W, H) {
         R(g, x + 6, y + 18, W - 12, 4, '#5a3a22');
-        for (const [dx, r, col] of [[14, 9, '#b8783a'], [38, 11, '#a0a0a8'], [64, 8, '#c8884a']]) {
+        for (const [dx, r, col] of [
+          [14, 9, '#b8783a'],
+          [38, 11, '#a0a0a8'],
+          [64, 8, '#c8884a']
+        ]) {
           R(g, x + dx, y + 22, 2, 10, '#3a3a40');
           R(g, x + dx - r + 1, y + 32, r * 2, r * 2 - 4, col);
           R(g, x + dx - r + 3, y + 34, 4, r - 2, '#ffffff44');
@@ -911,7 +957,8 @@
         R(g, x + 6, y + 27, 10, 18, '#a8483a');
         R(g, x + 8, y + 29, 4, 12, '#c8685a');
         R(g, x + 22, y + 19, 2, 6, '#c8b088');
-        for (let k = 0; k < 4; k++) R(g, x + 18 + k * 3, y + 25, 3, 20 - k * 2, k % 2 ? '#5a8a3a' : '#6aa04a');
+        for (let k = 0; k < 4; k++)
+          R(g, x + 18 + k * 3, y + 25, 3, 20 - k * 2, k % 2 ? '#5a8a3a' : '#6aa04a');
         R(g, x + 34, y + 19, 2, 6, '#c8b088');
         for (let k = 0; k < 3; k++) R(g, x + 31, y + 25 + k * 7, 8, 7, '#f0ecd8');
       }
@@ -959,7 +1006,11 @@
       w: 1,
       h: 1,
       draw(g, x, y, W, H) {
-        for (const [ax, bx] of [[12, 22], [36, 26], [24, 24]]) {
+        for (const [ax, bx] of [
+          [12, 22],
+          [36, 26],
+          [24, 24]
+        ]) {
           g.strokeStyle = '#6a4426';
           g.lineWidth = 3;
           g.beginPath();
@@ -1213,7 +1264,7 @@
         R(g, x + 18, y - 10, 12, 10, '#ffd36d');
         R(g, x + 21, y - 8, 6, 6, '#fff4b0');
       }
-    },
+    }
   };
   const CATS = [
     ['meubles', '🛏️ Meubles'],
@@ -1231,7 +1282,10 @@
   // ---------------------------------------------------------------- Pièces intérieures
   // Chaque pièce (CANAAN_ROOMS, game-core) : mur du fond sur 2 rangées, sol de 1 à w-2 en x et de 2 à h-2 en y,
   // murs latéraux, mur du bas avec la porte au milieu.
-  const geo = room => ({ floor: { x0: 1, x1: room.w - 2, y0: 2, y1: room.h - 2 }, door: { x: Math.floor(room.w / 2), y: room.h - 2 } });
+  const geo = room => ({
+    floor: { x0: 1, x1: room.w - 2, y0: 2, y1: room.h - 2 },
+    door: { x: Math.floor(room.w / 2), y: room.h - 2 }
+  });
   const ROOM = Object.fromEntries(CANAAN_ROOMS.map(r => [r.id, r]));
   const HOME = ROOM.maison;
   // Pièces de l'île seulement : en donjon, les mêmes coordonnées désignent la carte de l'instance.
@@ -1256,92 +1310,697 @@
   const WOOD_EDGE = { top: '#3a2416', dark: '#24160c', light: '#7a5634' };
   const INTERIOR = Object.fromEntries(
     Object.entries({
-      home: { floor: { style: 'planks', a: '#8a5a34', b: '#5e3c22', c: '#aa7a48' }, wall: { style: 'paper', face: '#dcc89e', dark: '#b8a276', light: '#efe2c0', top: '#4a2e1a' }, wains: ['#7a5230', '#553620', '#9a6c42'], edge: WOOD_EDGE },
-      shop: { floor: { style: 'planks', a: '#a07444', b: '#74502e', c: '#c0905c' }, wall: { style: 'paper', face: '#a8bc94', dark: '#879c74', light: '#c4d4b0', top: '#3e2a18' }, wains: ['#6a4428', '#4a2e1a', '#8a5e38'], edge: WOOD_EDGE },
-      kitchen: { floor: { style: 'flagstone', a: '#b8b0a0', b: '#8e8678', c: '#d4ccbc' }, wall: { style: 'brick', face: '#e8e2d4', dark: '#b8b0a0', light: '#fbf8f0', top: '#5a5248' }, wains: ['#d8dee6', '#8a94a4', '#ffffff'], edge: { top: '#4a443c', dark: '#2a2620', light: '#8a8478' }, faience: true },
-      aubepines: { floor: { style: 'planks', a: '#94603a', b: '#683e22', c: '#b47c4c' }, wall: { style: 'paper', face: '#e6c2b6', dark: '#c8a094', light: '#f6dcd2', top: '#4a2e1a' }, wains: ['#7a5230', '#553620', '#9a6c42'], edge: WOOD_EDGE },
-      puits: { floor: { style: 'planks', a: '#7e5634', b: '#563820', c: '#9c7048' }, wall: { style: 'paper', face: '#b8c8e0', dark: '#94a6c2', light: '#d6e2f2', top: '#2e2438' }, wains: ['#5a4a6a', '#3e3048', '#7a6890'], edge: { top: '#2e2438', dark: '#1a1420', light: '#6a5a80' } },
-      refuge: { floor: { style: 'logs', a: '#7a5636', b: '#523820', c: '#9a7248' }, wall: { style: 'logs', face: '#8a6440', dark: '#74522f', light: '#b08458', top: '#3a2414' }, wains: ['#5a3c24', '#3a2414', '#7a5634'], edge: WOOD_EDGE },
+      home: {
+        floor: { style: 'planks', a: '#8a5a34', b: '#5e3c22', c: '#aa7a48' },
+        wall: { style: 'paper', face: '#dcc89e', dark: '#b8a276', light: '#efe2c0', top: '#4a2e1a' },
+        wains: ['#7a5230', '#553620', '#9a6c42'],
+        edge: WOOD_EDGE
+      },
+      shop: {
+        floor: { style: 'planks', a: '#a07444', b: '#74502e', c: '#c0905c' },
+        wall: { style: 'paper', face: '#a8bc94', dark: '#879c74', light: '#c4d4b0', top: '#3e2a18' },
+        wains: ['#6a4428', '#4a2e1a', '#8a5e38'],
+        edge: WOOD_EDGE
+      },
+      kitchen: {
+        floor: { style: 'flagstone', a: '#b8b0a0', b: '#8e8678', c: '#d4ccbc' },
+        wall: { style: 'brick', face: '#e8e2d4', dark: '#b8b0a0', light: '#fbf8f0', top: '#5a5248' },
+        wains: ['#d8dee6', '#8a94a4', '#ffffff'],
+        edge: { top: '#4a443c', dark: '#2a2620', light: '#8a8478' },
+        faience: true
+      },
+      aubepines: {
+        floor: { style: 'planks', a: '#94603a', b: '#683e22', c: '#b47c4c' },
+        wall: { style: 'paper', face: '#e6c2b6', dark: '#c8a094', light: '#f6dcd2', top: '#4a2e1a' },
+        wains: ['#7a5230', '#553620', '#9a6c42'],
+        edge: WOOD_EDGE
+      },
+      puits: {
+        floor: { style: 'planks', a: '#7e5634', b: '#563820', c: '#9c7048' },
+        wall: { style: 'paper', face: '#b8c8e0', dark: '#94a6c2', light: '#d6e2f2', top: '#2e2438' },
+        wains: ['#5a4a6a', '#3e3048', '#7a6890'],
+        edge: { top: '#2e2438', dark: '#1a1420', light: '#6a5a80' }
+      },
+      refuge: {
+        floor: { style: 'logs', a: '#7a5636', b: '#523820', c: '#9a7248' },
+        wall: { style: 'logs', face: '#8a6440', dark: '#74522f', light: '#b08458', top: '#3a2414' },
+        wains: ['#5a3c24', '#3a2414', '#7a5634'],
+        edge: WOOD_EDGE
+      },
       // Refuges du marais (pilotis), de l'automne (bardeaux roux) et de la Forêt enchantée (pierre lilas).
-      pilotis: { floor: { style: 'planks', a: '#6a6440', b: '#46422a', c: '#8a8458' }, wall: { style: 'logs', face: '#6a6a48', dark: '#545436', light: '#8a8a62', top: '#2e2e1c' }, wains: ['#4a4a30', '#30301e', '#6a6a48'], edge: { top: '#2e2e1c', dark: '#1a1a10', light: '#6a6a48' } },
-      rousses: { floor: { style: 'planks', a: '#9a5a30', b: '#6a3a1c', c: '#ba7a48' }, wall: { style: 'paper', face: '#e8b878', dark: '#c89058', light: '#f8d4a0', top: '#5a2e18' }, wains: ['#8a4a24', '#5a2e14', '#aa6a3a'], edge: WOOD_EDGE },
-      cristaux: { floor: { style: 'flagstone', a: '#b8a8d8', b: '#8a7aac', c: '#d8ccf0' }, wall: { style: 'brick', face: '#c8b8e8', dark: '#9a88c0', light: '#e8dcff', top: '#3a2a58' }, wains: ['#7a6aa8', '#4a3a78', '#a898d8'], edge: { top: '#3a2a58', dark: '#20163a', light: '#8a7ab8' } },
+      pilotis: {
+        floor: { style: 'planks', a: '#6a6440', b: '#46422a', c: '#8a8458' },
+        wall: { style: 'logs', face: '#6a6a48', dark: '#545436', light: '#8a8a62', top: '#2e2e1c' },
+        wains: ['#4a4a30', '#30301e', '#6a6a48'],
+        edge: { top: '#2e2e1c', dark: '#1a1a10', light: '#6a6a48' }
+      },
+      rousses: {
+        floor: { style: 'planks', a: '#9a5a30', b: '#6a3a1c', c: '#ba7a48' },
+        wall: { style: 'paper', face: '#e8b878', dark: '#c89058', light: '#f8d4a0', top: '#5a2e18' },
+        wains: ['#8a4a24', '#5a2e14', '#aa6a3a'],
+        edge: WOOD_EDGE
+      },
+      cristaux: {
+        floor: { style: 'flagstone', a: '#b8a8d8', b: '#8a7aac', c: '#d8ccf0' },
+        wall: { style: 'brick', face: '#c8b8e8', dark: '#9a88c0', light: '#e8dcff', top: '#3a2a58' },
+        wains: ['#7a6aa8', '#4a3a78', '#a898d8'],
+        edge: { top: '#3a2a58', dark: '#20163a', light: '#8a7ab8' }
+      },
       // Sylvaëlle : bois clair et lambris de feuilles (leaf), marbre et or dans la demeure de la Reine, pierre de lune au
       // temple, bleu nuit étoilé dans la tour, racines dans la Maison des Racines.
-      palace: { floor: { style: 'flagstone', a: '#ece8e0', b: '#cfc8bc', c: '#ffffff' }, wall: { style: 'leaf', face: '#f4f0e6', dark: '#d8ccb0', light: '#ffffff', top: '#8a6a1e', vine: '#5ea44a', gold: '#f0d060' }, wains: ['#c8a038', '#8a6a1e', '#f0d060'], edge: { top: '#6a5a3a', dark: '#3a2e1c', light: '#c8b088' } },
-      elftavern: { floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' }, wall: { style: 'leaf', face: '#f2e6ca', dark: '#dccaa4', light: '#fffaf0', top: '#5a3c24', vine: '#4e8a3a', gold: '#f0d060' }, wains: ['#8a5e38', '#5e3c22', '#b8844e'], edge: WOOD_EDGE },
-      elfshop: { floor: { style: 'planks', a: '#c89a62', b: '#94643a', c: '#e0b882' }, wall: { style: 'leaf', face: '#e8f0dc', dark: '#c8d8b4', light: '#f8fff0', top: '#3a5a2a', vine: '#3e7a36', gold: '#f0d060' }, wains: ['#7a5a34', '#5a3c24', '#a87a48'], edge: WOOD_EDGE },
-      elfhome: { floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' }, wall: { style: 'leaf', face: '#f2e6ca', dark: '#dccaa4', light: '#fffaf0', top: '#4a3020', vine: '#5ea44a', gold: '#f6a0d8' }, wains: ['#8a5e38', '#5e3c22', '#b8844e'], edge: WOOD_EDGE },
-      elfroots: { floor: { style: 'logs', a: '#7a5636', b: '#523820', c: '#9a7248' }, wall: { style: 'leaf', face: '#c8a878', dark: '#a8885a', light: '#e0c498', top: '#3a2414', vine: '#3e7a36', gold: '#a8d878' }, wains: ['#5a3c24', '#3a2414', '#7a5634'], edge: WOOD_EDGE },
-      elfstar: { floor: { style: 'flagstone', a: '#4a5a8a', b: '#34426a', c: '#6a7aaa' }, wall: { style: 'leaf', face: '#2a3a6a', dark: '#1e2a50', light: '#5a6aa8', top: '#141c38', vine: '#8a9ad8', gold: '#fff4b0' }, wains: ['#3a2e5a', '#241c3a', '#5a4a8a'], edge: { top: '#141c38', dark: '#0a0e20', light: '#4a5a8a' } },
-      temple: { floor: { style: 'flagstone', a: '#d8dcf0', b: '#b0b4d0', c: '#f4f6ff' }, wall: { style: 'leaf', face: '#e4e8f8', dark: '#c0c6e0', light: '#ffffff', top: '#4a4e78', vine: '#9aa8d8', gold: '#eef4ff' }, wains: ['#8a90b8', '#5a6088', '#b0b8e0'], edge: { top: '#4a4e78', dark: '#2a2e50', light: '#9aa0c8' } },
+      palace: {
+        floor: { style: 'flagstone', a: '#ece8e0', b: '#cfc8bc', c: '#ffffff' },
+        wall: {
+          style: 'leaf',
+          face: '#f4f0e6',
+          dark: '#d8ccb0',
+          light: '#ffffff',
+          top: '#8a6a1e',
+          vine: '#5ea44a',
+          gold: '#f0d060'
+        },
+        wains: ['#c8a038', '#8a6a1e', '#f0d060'],
+        edge: { top: '#6a5a3a', dark: '#3a2e1c', light: '#c8b088' }
+      },
+      elftavern: {
+        floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' },
+        wall: {
+          style: 'leaf',
+          face: '#f2e6ca',
+          dark: '#dccaa4',
+          light: '#fffaf0',
+          top: '#5a3c24',
+          vine: '#4e8a3a',
+          gold: '#f0d060'
+        },
+        wains: ['#8a5e38', '#5e3c22', '#b8844e'],
+        edge: WOOD_EDGE
+      },
+      elfshop: {
+        floor: { style: 'planks', a: '#c89a62', b: '#94643a', c: '#e0b882' },
+        wall: {
+          style: 'leaf',
+          face: '#e8f0dc',
+          dark: '#c8d8b4',
+          light: '#f8fff0',
+          top: '#3a5a2a',
+          vine: '#3e7a36',
+          gold: '#f0d060'
+        },
+        wains: ['#7a5a34', '#5a3c24', '#a87a48'],
+        edge: WOOD_EDGE
+      },
+      elfhome: {
+        floor: { style: 'planks', a: '#b8844e', b: '#8a5e34', c: '#d8a470' },
+        wall: {
+          style: 'leaf',
+          face: '#f2e6ca',
+          dark: '#dccaa4',
+          light: '#fffaf0',
+          top: '#4a3020',
+          vine: '#5ea44a',
+          gold: '#f6a0d8'
+        },
+        wains: ['#8a5e38', '#5e3c22', '#b8844e'],
+        edge: WOOD_EDGE
+      },
+      elfroots: {
+        floor: { style: 'logs', a: '#7a5636', b: '#523820', c: '#9a7248' },
+        wall: {
+          style: 'leaf',
+          face: '#c8a878',
+          dark: '#a8885a',
+          light: '#e0c498',
+          top: '#3a2414',
+          vine: '#3e7a36',
+          gold: '#a8d878'
+        },
+        wains: ['#5a3c24', '#3a2414', '#7a5634'],
+        edge: WOOD_EDGE
+      },
+      elfstar: {
+        floor: { style: 'flagstone', a: '#4a5a8a', b: '#34426a', c: '#6a7aaa' },
+        wall: {
+          style: 'leaf',
+          face: '#2a3a6a',
+          dark: '#1e2a50',
+          light: '#5a6aa8',
+          top: '#141c38',
+          vine: '#8a9ad8',
+          gold: '#fff4b0'
+        },
+        wains: ['#3a2e5a', '#241c3a', '#5a4a8a'],
+        edge: { top: '#141c38', dark: '#0a0e20', light: '#4a5a8a' }
+      },
+      temple: {
+        floor: { style: 'flagstone', a: '#d8dcf0', b: '#b0b4d0', c: '#f4f6ff' },
+        wall: {
+          style: 'leaf',
+          face: '#e4e8f8',
+          dark: '#c0c6e0',
+          light: '#ffffff',
+          top: '#4a4e78',
+          vine: '#9aa8d8',
+          gold: '#eef4ff'
+        },
+        wains: ['#8a90b8', '#5a6088', '#b0b8e0'],
+        edge: { top: '#4a4e78', dark: '#2a2e50', light: '#9aa0c8' }
+      },
       // Ferme du camp : planches brutes, foin.
-      barn: { floor: { style: 'planks', a: '#9a6a3e', b: '#6a4426', c: '#b8844e' }, wall: { style: 'logs', face: '#a85a3a', dark: '#8a4428', light: '#c87a52', top: '#4a2414' }, wains: ['#6a3a20', '#4a2414', '#8a5030'], edge: WOOD_EDGE },
+      barn: {
+        floor: { style: 'planks', a: '#9a6a3e', b: '#6a4426', c: '#b8844e' },
+        wall: { style: 'logs', face: '#a85a3a', dark: '#8a4428', light: '#c87a52', top: '#4a2414' },
+        wains: ['#6a3a20', '#4a2414', '#8a5030'],
+        edge: WOOD_EDGE
+      },
       // Durgrim : pierre taillée à runes dorées (rune), dalles et braises.
-      dwarfhall: { floor: { style: 'flagstone', a: '#7a6e64', b: '#5a5048', c: '#9a8e80' }, wall: { style: 'rune', face: '#6a5e54', dark: '#4a4038', light: '#8a7e70', top: '#2a221c', gold: '#e0b040' }, wains: ['#5a3a22', '#3a2414', '#7a5232'], edge: { top: '#2a221c', dark: '#16100c', light: '#6a5e54' } },
-      dwarfforge: { floor: { style: 'stone', a: '#5a5048', b: '#3e3630', c: '#786c60' }, wall: { style: 'rune', face: '#5a4e46', dark: '#3a322c', light: '#7a6e64', top: '#1e1814', gold: '#ff9a4a' }, wains: ['#4a3a2e', '#2a221c', '#6a5a4a'], edge: { top: '#1e1814', dark: '#0e0a08', light: '#5a4e46' } },
-      dwarftavern: { floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' }, wall: { style: 'rune', face: '#6e6258', dark: '#4e443c', light: '#8e8274', top: '#2a221c', gold: '#e0b040' }, wains: ['#6a4428', '#4a2e1a', '#8a5e38'], edge: { top: '#2a221c', dark: '#16100c', light: '#6e6258' } },
-      dwarfvault: { floor: { style: 'flagstone', a: '#6a6e78', b: '#4a4e58', c: '#8a8e98' }, wall: { style: 'rune', face: '#5a5e68', dark: '#3a3e48', light: '#7a7e88', top: '#1e2028', gold: '#f0d060' }, wains: ['#4a4e58', '#2a2e38', '#6a6e78'], edge: { top: '#1e2028', dark: '#0e1018', light: '#5a5e68' } },
-      dwarfhome: { floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' }, wall: { style: 'rune', face: '#7a6e64', dark: '#5a5048', light: '#9a8e80', top: '#2a221c', gold: '#c8a060' }, wains: ['#6a4428', '#4a2e1a', '#8a5e38'], edge: { top: '#2a221c', dark: '#16100c', light: '#7a6e64' } },
-      adobe: { floor: { style: 'flagstone', a: '#dcb884', b: '#b8945e', c: '#f0d4a4' }, wall: { style: 'adobe', face: '#e8c890', dark: '#c8a46c', light: '#f8e4b8', top: '#8a5a34' }, wains: ['#c07a44', '#8a5230', '#e09a5a'], edge: { top: '#8a6440', dark: '#5a3c22', light: '#c8a070' } }
+      dwarfhall: {
+        floor: { style: 'flagstone', a: '#7a6e64', b: '#5a5048', c: '#9a8e80' },
+        wall: {
+          style: 'rune',
+          face: '#6a5e54',
+          dark: '#4a4038',
+          light: '#8a7e70',
+          top: '#2a221c',
+          gold: '#e0b040'
+        },
+        wains: ['#5a3a22', '#3a2414', '#7a5232'],
+        edge: { top: '#2a221c', dark: '#16100c', light: '#6a5e54' }
+      },
+      dwarfforge: {
+        floor: { style: 'stone', a: '#5a5048', b: '#3e3630', c: '#786c60' },
+        wall: {
+          style: 'rune',
+          face: '#5a4e46',
+          dark: '#3a322c',
+          light: '#7a6e64',
+          top: '#1e1814',
+          gold: '#ff9a4a'
+        },
+        wains: ['#4a3a2e', '#2a221c', '#6a5a4a'],
+        edge: { top: '#1e1814', dark: '#0e0a08', light: '#5a4e46' }
+      },
+      dwarftavern: {
+        floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' },
+        wall: {
+          style: 'rune',
+          face: '#6e6258',
+          dark: '#4e443c',
+          light: '#8e8274',
+          top: '#2a221c',
+          gold: '#e0b040'
+        },
+        wains: ['#6a4428', '#4a2e1a', '#8a5e38'],
+        edge: { top: '#2a221c', dark: '#16100c', light: '#6e6258' }
+      },
+      dwarfvault: {
+        floor: { style: 'flagstone', a: '#6a6e78', b: '#4a4e58', c: '#8a8e98' },
+        wall: {
+          style: 'rune',
+          face: '#5a5e68',
+          dark: '#3a3e48',
+          light: '#7a7e88',
+          top: '#1e2028',
+          gold: '#f0d060'
+        },
+        wains: ['#4a4e58', '#2a2e38', '#6a6e78'],
+        edge: { top: '#1e2028', dark: '#0e1018', light: '#5a5e68' }
+      },
+      dwarfhome: {
+        floor: { style: 'planks', a: '#7a5232', b: '#553620', c: '#9a6c42' },
+        wall: {
+          style: 'rune',
+          face: '#7a6e64',
+          dark: '#5a5048',
+          light: '#9a8e80',
+          top: '#2a221c',
+          gold: '#c8a060'
+        },
+        wains: ['#6a4428', '#4a2e1a', '#8a5e38'],
+        edge: { top: '#2a221c', dark: '#16100c', light: '#7a6e64' }
+      },
+      adobe: {
+        floor: { style: 'flagstone', a: '#dcb884', b: '#b8945e', c: '#f0d4a4' },
+        wall: { style: 'adobe', face: '#e8c890', dark: '#c8a46c', light: '#f8e4b8', top: '#8a5a34' },
+        wains: ['#c07a44', '#8a5230', '#e09a5a'],
+        edge: { top: '#8a6440', dark: '#5a3c22', light: '#c8a070' }
+      }
     }).map(([id, spec]) => [id, { id, ...spec }])
   );
-  const interiorOf = room => (DESERT.has(room.id) ? INTERIOR.adobe : INTERIOR[room.id] || INTERIOR[room.kind] || INTERIOR.home);
+  const interiorOf = room =>
+    DESERT.has(room.id) ? INTERIOR.adobe : INTERIOR[room.id] || INTERIOR[room.kind] || INTERIOR.home;
 
   // Meubles fixes des bâtiments du jeu [objet, x, y, orientation] (coordonnées de la pièce), et habitants à l'intérieur
   // [rôle, x, y] ; le marchand Lira (progression-economy.js) se tient derrière le comptoir de l'échoppe.
-  const CABIN = [['lit', 1, 2], ['coffre', 2, 2], ['cheminee', 4, 2], ['tonneau', 8, 2], ['sacs', 9, 2], ['trophee', 2, 0], ['fenetre', 7, 0], ['herbes', 9, 0], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['banc', 7, 6], ['lampe', 9, 5]];
-  const ADOBE = [['lit', 1, 2], ['pot_fleurs', 2, 2], ['cuisiniere', 4, 2], ['marmite', 5, 2], ['tonneau', 8, 2], ['sacs', 9, 2], ['fenetre', 2, 0], ['herbes', 7, 0], ['cadre', 9, 0], ['tapis_rond', 3, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 5, 5, 1], ['plante', 9, 7], ['lampe', 1, 6]];
+  const CABIN = [
+    ['lit', 1, 2],
+    ['coffre', 2, 2],
+    ['cheminee', 4, 2],
+    ['tonneau', 8, 2],
+    ['sacs', 9, 2],
+    ['trophee', 2, 0],
+    ['fenetre', 7, 0],
+    ['herbes', 9, 0],
+    ['tapis', 3, 4],
+    ['table', 3, 5],
+    ['chaise', 2, 5, 3],
+    ['chaise', 5, 5, 1],
+    ['banc', 7, 6],
+    ['lampe', 9, 5]
+  ];
+  const ADOBE = [
+    ['lit', 1, 2],
+    ['pot_fleurs', 2, 2],
+    ['cuisiniere', 4, 2],
+    ['marmite', 5, 2],
+    ['tonneau', 8, 2],
+    ['sacs', 9, 2],
+    ['fenetre', 2, 0],
+    ['herbes', 7, 0],
+    ['cadre', 9, 0],
+    ['tapis_rond', 3, 4],
+    ['table_ronde', 4, 5],
+    ['chaise', 3, 5, 3],
+    ['chaise', 5, 5, 1],
+    ['plante', 9, 7],
+    ['lampe', 1, 6]
+  ];
   const FURNISH = {
-    echoppe: [['presentoir', 1, 2], ['presentoir', 10, 2], ['etagere', 5, 0], ['fenetre', 3, 0], ['fenetre', 8, 0], ['horloge', 9, 0], ['comptoir', 5, 4], ['pot_fleurs', 4, 2], ['caisse', 8, 2], ['tonneau', 1, 6], ['sacs', 2, 7], ['caisse', 11, 6], ['coffre', 10, 7], ['tapis_long', 5, 6], ['lampe', 11, 4]],
-    marmite: [['cheminee', 1, 2], ['cuisiniere', 4, 2], ['cuisiniere', 5, 2], ['marmite', 7, 2], ['tonneau', 10, 2], ['tonneau', 11, 2], ['sacs', 11, 3], ['casseroles', 4, 0], ['herbes', 7, 0], ['fenetre', 9, 0], ['herbes', 11, 0], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['table', 8, 5], ['chaise', 7, 5, 3], ['chaise', 10, 5, 1], ['pot_fleurs', 1, 7], ['lampe', 11, 7]],
-    aubepines: [['lit', 1, 2], ['commode', 2, 2], ['bibliotheque', 6, 2], ['armoire', 9, 2], ['fenetre', 3, 0], ['rideaux', 3, 0], ['cadre', 5, 0], ['horloge', 8, 0], ['tapis_rond', 3, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 5, 5, 1], ['plante', 1, 7], ['pot_fleurs', 9, 7], ['lampe', 9, 5]],
-    puits: [['lit_double', 1, 2], ['commode', 3, 2], ['cuisiniere', 8, 2], ['tonneau', 9, 2], ['grande_fenetre', 4, 0], ['rideaux_bleus', 4, 0], ['rideaux_bleus', 5, 0], ['grand_tableau', 6, 0], ['tapis', 5, 4], ['table', 5, 5], ['chaise', 4, 5, 3], ['chaise', 7, 5, 1], ['coffre', 1, 6], ['plante', 9, 7], ['aquarium', 1, 7]],
+    echoppe: [
+      ['presentoir', 1, 2],
+      ['presentoir', 10, 2],
+      ['etagere', 5, 0],
+      ['fenetre', 3, 0],
+      ['fenetre', 8, 0],
+      ['horloge', 9, 0],
+      ['comptoir', 5, 4],
+      ['pot_fleurs', 4, 2],
+      ['caisse', 8, 2],
+      ['tonneau', 1, 6],
+      ['sacs', 2, 7],
+      ['caisse', 11, 6],
+      ['coffre', 10, 7],
+      ['tapis_long', 5, 6],
+      ['lampe', 11, 4]
+    ],
+    marmite: [
+      ['cheminee', 1, 2],
+      ['cuisiniere', 4, 2],
+      ['cuisiniere', 5, 2],
+      ['marmite', 7, 2],
+      ['tonneau', 10, 2],
+      ['tonneau', 11, 2],
+      ['sacs', 11, 3],
+      ['casseroles', 4, 0],
+      ['herbes', 7, 0],
+      ['fenetre', 9, 0],
+      ['herbes', 11, 0],
+      ['table', 3, 5],
+      ['chaise', 2, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['table', 8, 5],
+      ['chaise', 7, 5, 3],
+      ['chaise', 10, 5, 1],
+      ['pot_fleurs', 1, 7],
+      ['lampe', 11, 7]
+    ],
+    aubepines: [
+      ['lit', 1, 2],
+      ['commode', 2, 2],
+      ['bibliotheque', 6, 2],
+      ['armoire', 9, 2],
+      ['fenetre', 3, 0],
+      ['rideaux', 3, 0],
+      ['cadre', 5, 0],
+      ['horloge', 8, 0],
+      ['tapis_rond', 3, 4],
+      ['table_ronde', 4, 5],
+      ['chaise', 3, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['plante', 1, 7],
+      ['pot_fleurs', 9, 7],
+      ['lampe', 9, 5]
+    ],
+    puits: [
+      ['lit_double', 1, 2],
+      ['commode', 3, 2],
+      ['cuisiniere', 8, 2],
+      ['tonneau', 9, 2],
+      ['grande_fenetre', 4, 0],
+      ['rideaux_bleus', 4, 0],
+      ['rideaux_bleus', 5, 0],
+      ['grand_tableau', 6, 0],
+      ['tapis', 5, 4],
+      ['table', 5, 5],
+      ['chaise', 4, 5, 3],
+      ['chaise', 7, 5, 1],
+      ['coffre', 1, 6],
+      ['plante', 9, 7],
+      ['aquarium', 1, 7]
+    ],
     chene: CABIN,
     clairieres: CABIN,
     oasis: ADOBE,
     dunes: ADOBE,
-    pilotis: [['lit', 1, 2], ['tonneau', 2, 2], ['cheminee', 4, 2], ['aquarium', 8, 2], ['sacs', 9, 2], ['fenetre', 2, 0], ['herbes', 7, 0], ['trophee', 9, 0], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['banc', 7, 6], ['lampe', 9, 5]],
-    rousses: [['lit', 1, 2], ['commode', 2, 2], ['cheminee', 4, 2], ['tonneau', 8, 2], ['sacs', 9, 2], ['fenetre', 7, 0], ['cadre', 2, 0], ['herbes', 9, 0], ['tapis_rond', 3, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 5, 5, 1], ['plante', 9, 7], ['lampe', 1, 6]],
+    pilotis: [
+      ['lit', 1, 2],
+      ['tonneau', 2, 2],
+      ['cheminee', 4, 2],
+      ['aquarium', 8, 2],
+      ['sacs', 9, 2],
+      ['fenetre', 2, 0],
+      ['herbes', 7, 0],
+      ['trophee', 9, 0],
+      ['tapis', 3, 4],
+      ['table', 3, 5],
+      ['chaise', 2, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['banc', 7, 6],
+      ['lampe', 9, 5]
+    ],
+    rousses: [
+      ['lit', 1, 2],
+      ['commode', 2, 2],
+      ['cheminee', 4, 2],
+      ['tonneau', 8, 2],
+      ['sacs', 9, 2],
+      ['fenetre', 7, 0],
+      ['cadre', 2, 0],
+      ['herbes', 9, 0],
+      ['tapis_rond', 3, 4],
+      ['table_ronde', 4, 5],
+      ['chaise', 3, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['plante', 9, 7],
+      ['lampe', 1, 6]
+    ],
     // Sylvaëlle.
     sylv_palais: [
-      ['grande_fenetre', 2, 0], ['rideaux', 2, 0], ['banniere_elfe', 5, 0], ['miroir', 7, 0], ['banniere_elfe', 11, 0], ['grande_fenetre', 13, 0],
-      ['rideaux', 14, 0], ['trone', 8, 2], ['statue_elfe', 6, 2], ['statue_elfe', 10, 2], ['harpe', 4, 2], ['plante', 1, 2], ['plante', 15, 2],
-      ['bibliotheque', 13, 2], ['tapis_long', 8, 4], ['tapis_long', 8, 6], ['table', 12, 6], ['chaise', 11, 6, 3], ['chaise', 14, 6, 1],
-      ['coffre', 1, 6], ['pot_fleurs', 1, 9], ['pot_fleurs', 15, 9], ['lampe', 4, 8], ['lampe', 12, 8], ['statue_elfe', 2, 4]
+      ['grande_fenetre', 2, 0],
+      ['rideaux', 2, 0],
+      ['banniere_elfe', 5, 0],
+      ['miroir', 7, 0],
+      ['banniere_elfe', 11, 0],
+      ['grande_fenetre', 13, 0],
+      ['rideaux', 14, 0],
+      ['trone', 8, 2],
+      ['statue_elfe', 6, 2],
+      ['statue_elfe', 10, 2],
+      ['harpe', 4, 2],
+      ['plante', 1, 2],
+      ['plante', 15, 2],
+      ['bibliotheque', 13, 2],
+      ['tapis_long', 8, 4],
+      ['tapis_long', 8, 6],
+      ['table', 12, 6],
+      ['chaise', 11, 6, 3],
+      ['chaise', 14, 6, 1],
+      ['coffre', 1, 6],
+      ['pot_fleurs', 1, 9],
+      ['pot_fleurs', 15, 9],
+      ['lampe', 4, 8],
+      ['lampe', 12, 8],
+      ['statue_elfe', 2, 4]
     ],
     sylv_taverne: [
-      ['fenetre', 2, 0], ['etagere', 5, 0], ['banniere_elfe', 8, 0], ['fenetre', 10, 0], ['tonneau', 1, 2], ['tonneau', 2, 2], ['comptoir', 4, 3],
-      ['cheminee', 8, 2], ['tonneau', 11, 2], ['harpe', 10, 2], ['table_ronde', 2, 5], ['chaise', 1, 5, 3], ['chaise', 3, 5, 1],
-      ['table_ronde', 9, 5], ['chaise', 8, 5, 3], ['chaise', 10, 5, 1], ['plante', 11, 7], ['lampe', 1, 7], ['tapis_rond', 6, 5]
+      ['fenetre', 2, 0],
+      ['etagere', 5, 0],
+      ['banniere_elfe', 8, 0],
+      ['fenetre', 10, 0],
+      ['tonneau', 1, 2],
+      ['tonneau', 2, 2],
+      ['comptoir', 4, 3],
+      ['cheminee', 8, 2],
+      ['tonneau', 11, 2],
+      ['harpe', 10, 2],
+      ['table_ronde', 2, 5],
+      ['chaise', 1, 5, 3],
+      ['chaise', 3, 5, 1],
+      ['table_ronde', 9, 5],
+      ['chaise', 8, 5, 3],
+      ['chaise', 10, 5, 1],
+      ['plante', 11, 7],
+      ['lampe', 1, 7],
+      ['tapis_rond', 6, 5]
     ],
-    sylv_armurerie: [['rack_armes', 2, 0], ['rack_armes', 4, 0], ['fenetre', 6, 0], ['rack_armes', 8, 0], ['rack_armes', 10, 0], ['enclume', 2, 3], ['presentoir', 9, 2], ['presentoir', 10, 2], ['tonneau', 1, 2], ['comptoir', 5, 3], ['caisse', 1, 6], ['coffre', 11, 6], ['tapis_long', 6, 5], ['lampe', 11, 4], ['plante', 1, 7]],
-    sylv_couture: [['fenetre', 3, 0], ['rideaux', 3, 0], ['cadre', 6, 0], ['banniere_elfe', 9, 0], ['metier', 2, 2], ['mannequin', 5, 2], ['mannequin', 6, 2], ['mannequin', 7, 2], ['armoire', 10, 2], ['table', 3, 5], ['chaise', 2, 5, 3], ['tapis_rond', 7, 4], ['sacs', 11, 5], ['pot_fleurs', 1, 7], ['lampe', 11, 7]],
-    sylv_tour: [['grand_tableau', 2, 0], ['grande_fenetre', 5, 0], ['grande_fenetre', 8, 0], ['bibliotheque', 1, 2], ['bibliotheque', 2, 2], ['telescope', 6, 2], ['coffre', 10, 2], ['lampe', 11, 2], ['table', 9, 4], ['chaise', 8, 4, 3], ['lit', 1, 5], ['tapis_rond', 5, 5], ['plante', 11, 7]],
-    sylv_temple: [['banniere_elfe', 2, 0], ['grande_fenetre', 5, 0], ['banniere_elfe', 10, 0], ['statue_elfe', 2, 2], ['autel', 5, 2], ['statue_elfe', 10, 2], ['tapis_long', 6, 4], ['banc', 2, 5], ['banc', 9, 5], ['plante', 1, 7], ['plante', 11, 7], ['lampe', 4, 3], ['lampe', 8, 3]],
-    sylv_maison: [['fenetre', 2, 0], ['rideaux', 2, 0], ['cadre', 5, 0], ['fenetre', 9, 0], ['lit', 1, 2], ['commode', 2, 2], ['cheminee', 5, 2], ['bibliotheque', 9, 2], ['harpe', 11, 2], ['tapis_rond', 4, 4], ['table_ronde', 5, 5], ['chaise', 4, 5, 3], ['chaise', 6, 5, 1], ['plante', 1, 7], ['pot_fleurs', 11, 7], ['lampe', 9, 6]],
-    sylv_racines: [['herbes', 2, 0], ['fenetre', 5, 0], ['herbes', 9, 0], ['lit', 1, 2], ['plante', 3, 2], ['cuisiniere', 6, 2], ['marmite', 7, 2], ['tonneau', 10, 2], ['tapis', 4, 4], ['table', 4, 5], ['chaise', 3, 5, 3], ['chaise', 6, 5, 1], ['plante', 11, 5], ['pot_fleurs', 1, 7], ['plante', 11, 7], ['lampe', 9, 6]],
+    sylv_armurerie: [
+      ['rack_armes', 2, 0],
+      ['rack_armes', 4, 0],
+      ['fenetre', 6, 0],
+      ['rack_armes', 8, 0],
+      ['rack_armes', 10, 0],
+      ['enclume', 2, 3],
+      ['presentoir', 9, 2],
+      ['presentoir', 10, 2],
+      ['tonneau', 1, 2],
+      ['comptoir', 5, 3],
+      ['caisse', 1, 6],
+      ['coffre', 11, 6],
+      ['tapis_long', 6, 5],
+      ['lampe', 11, 4],
+      ['plante', 1, 7]
+    ],
+    sylv_couture: [
+      ['fenetre', 3, 0],
+      ['rideaux', 3, 0],
+      ['cadre', 6, 0],
+      ['banniere_elfe', 9, 0],
+      ['metier', 2, 2],
+      ['mannequin', 5, 2],
+      ['mannequin', 6, 2],
+      ['mannequin', 7, 2],
+      ['armoire', 10, 2],
+      ['table', 3, 5],
+      ['chaise', 2, 5, 3],
+      ['tapis_rond', 7, 4],
+      ['sacs', 11, 5],
+      ['pot_fleurs', 1, 7],
+      ['lampe', 11, 7]
+    ],
+    sylv_tour: [
+      ['grand_tableau', 2, 0],
+      ['grande_fenetre', 5, 0],
+      ['grande_fenetre', 8, 0],
+      ['bibliotheque', 1, 2],
+      ['bibliotheque', 2, 2],
+      ['telescope', 6, 2],
+      ['coffre', 10, 2],
+      ['lampe', 11, 2],
+      ['table', 9, 4],
+      ['chaise', 8, 4, 3],
+      ['lit', 1, 5],
+      ['tapis_rond', 5, 5],
+      ['plante', 11, 7]
+    ],
+    sylv_temple: [
+      ['banniere_elfe', 2, 0],
+      ['grande_fenetre', 5, 0],
+      ['banniere_elfe', 10, 0],
+      ['statue_elfe', 2, 2],
+      ['autel', 5, 2],
+      ['statue_elfe', 10, 2],
+      ['tapis_long', 6, 4],
+      ['banc', 2, 5],
+      ['banc', 9, 5],
+      ['plante', 1, 7],
+      ['plante', 11, 7],
+      ['lampe', 4, 3],
+      ['lampe', 8, 3]
+    ],
+    sylv_maison: [
+      ['fenetre', 2, 0],
+      ['rideaux', 2, 0],
+      ['cadre', 5, 0],
+      ['fenetre', 9, 0],
+      ['lit', 1, 2],
+      ['commode', 2, 2],
+      ['cheminee', 5, 2],
+      ['bibliotheque', 9, 2],
+      ['harpe', 11, 2],
+      ['tapis_rond', 4, 4],
+      ['table_ronde', 5, 5],
+      ['chaise', 4, 5, 3],
+      ['chaise', 6, 5, 1],
+      ['plante', 1, 7],
+      ['pot_fleurs', 11, 7],
+      ['lampe', 9, 6]
+    ],
+    sylv_racines: [
+      ['herbes', 2, 0],
+      ['fenetre', 5, 0],
+      ['herbes', 9, 0],
+      ['lit', 1, 2],
+      ['plante', 3, 2],
+      ['cuisiniere', 6, 2],
+      ['marmite', 7, 2],
+      ['tonneau', 10, 2],
+      ['tapis', 4, 4],
+      ['table', 4, 5],
+      ['chaise', 3, 5, 3],
+      ['chaise', 6, 5, 1],
+      ['plante', 11, 5],
+      ['pot_fleurs', 1, 7],
+      ['plante', 11, 7],
+      ['lampe', 9, 6]
+    ],
     // Ferme du camp.
-    grange: [['trophee', 3, 0], ['herbes', 6, 0], ['fenetre', 9, 0], ['foin', 1, 2], ['foin', 2, 2], ['foin', 1, 3], ['sacs', 4, 2], ['tonneau', 10, 2], ['caisse', 11, 2], ['foin', 12, 2], ['foin', 13, 2], ['foin', 13, 3], ['banc', 3, 6], ['foin', 11, 6], ['coffre', 1, 7], ['lampe', 13, 7]],
-    poulailler: [['fenetre', 5, 0], ['herbes', 8, 0], ['nichoir_poules', 1, 2], ['foin', 4, 2], ['nichoir_poules', 7, 2], ['sacs', 1, 6], ['foin', 9, 6], ['tonneau', 9, 4], ['lampe', 1, 4]],
+    grange: [
+      ['trophee', 3, 0],
+      ['herbes', 6, 0],
+      ['fenetre', 9, 0],
+      ['foin', 1, 2],
+      ['foin', 2, 2],
+      ['foin', 1, 3],
+      ['sacs', 4, 2],
+      ['tonneau', 10, 2],
+      ['caisse', 11, 2],
+      ['foin', 12, 2],
+      ['foin', 13, 2],
+      ['foin', 13, 3],
+      ['banc', 3, 6],
+      ['foin', 11, 6],
+      ['coffre', 1, 7],
+      ['lampe', 13, 7]
+    ],
+    poulailler: [
+      ['fenetre', 5, 0],
+      ['herbes', 8, 0],
+      ['nichoir_poules', 1, 2],
+      ['foin', 4, 2],
+      ['nichoir_poules', 7, 2],
+      ['sacs', 1, 6],
+      ['foin', 9, 6],
+      ['tonneau', 9, 4],
+      ['lampe', 1, 4]
+    ],
     // Forteresse naine de Durgrim.
     dur_hall: [
-      ['banniere_naine', 3, 0], ['trophee', 6, 0], ['banniere_naine', 8, 0], ['trophee', 10, 0], ['banniere_naine', 13, 0], ['trone', 8, 2],
-      ['pilier_nain', 3, 3], ['pilier_nain', 13, 3], ['pilier_nain', 3, 7], ['pilier_nain', 13, 7], ['tonneau', 1, 2], ['tonneau', 15, 2],
-      ['lingots', 10, 2], ['coffre', 6, 2], ['tapis_long', 8, 4], ['tapis_long', 8, 6], ['table', 5, 6], ['chaise', 4, 6, 3], ['table', 10, 6],
-      ['chaise', 12, 6, 1], ['lampe', 1, 9], ['lampe', 15, 9]
+      ['banniere_naine', 3, 0],
+      ['trophee', 6, 0],
+      ['banniere_naine', 8, 0],
+      ['trophee', 10, 0],
+      ['banniere_naine', 13, 0],
+      ['trone', 8, 2],
+      ['pilier_nain', 3, 3],
+      ['pilier_nain', 13, 3],
+      ['pilier_nain', 3, 7],
+      ['pilier_nain', 13, 7],
+      ['tonneau', 1, 2],
+      ['tonneau', 15, 2],
+      ['lingots', 10, 2],
+      ['coffre', 6, 2],
+      ['tapis_long', 8, 4],
+      ['tapis_long', 8, 6],
+      ['table', 5, 6],
+      ['chaise', 4, 6, 3],
+      ['table', 10, 6],
+      ['chaise', 12, 6, 1],
+      ['lampe', 1, 9],
+      ['lampe', 15, 9]
     ],
-    dur_forge: [['banniere_naine', 1, 0], ['rack_armes', 6, 0], ['rack_armes', 9, 0], ['cheminee', 2, 2], ['enclume', 4, 3], ['enclume', 8, 3], ['tonneau', 10, 2], ['caisse', 11, 2], ['lingots', 11, 4], ['sacs', 1, 6], ['coffre', 11, 6], ['lampe', 1, 4]],
-    dur_taverne: [['banniere_naine', 2, 0], ['etagere', 5, 0], ['banniere_naine', 9, 0], ['tonneau', 1, 2], ['tonneau', 2, 2], ['comptoir', 4, 3], ['cheminee', 8, 2], ['tonneau', 10, 2], ['tonneau', 11, 2], ['table', 2, 5], ['chaise', 1, 5, 3], ['table', 9, 5], ['chaise', 8, 5, 3], ['chaise', 11, 5, 1], ['lampe', 11, 7], ['sacs', 1, 7]],
-    dur_coffre: [['banniere_naine', 2, 0], ['banniere_naine', 8, 0], ['lingots', 1, 2], ['lingots', 2, 2], ['coffre', 4, 2], ['coffre', 6, 2], ['lingots', 8, 2], ['lingots', 9, 2], ['comptoir', 4, 4], ['caisse', 1, 6], ['caisse', 9, 6], ['lampe', 9, 4]],
-    dur_maison1: [['banniere_naine', 2, 0], ['cadre', 5, 0], ['herbes', 8, 0], ['lit', 1, 2], ['cheminee', 4, 2], ['tonneau', 8, 2], ['coffre', 9, 2], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['lit', 9, 5], ['lampe', 1, 6]],
-    dur_maison2: [['cadre', 2, 0], ['banniere_naine', 5, 0], ['etagere', 8, 0], ['lit_double', 1, 2], ['cheminee', 5, 2], ['marmite', 6, 2], ['tonneau', 9, 2], ['tapis_rond', 4, 4], ['table_ronde', 4, 5], ['chaise', 3, 5, 3], ['chaise', 6, 5, 1], ['coffre', 9, 6], ['lampe', 1, 6]],
-    cristaux: [['lit', 1, 2], ['bibliotheque', 3, 2], ['cuisiniere', 6, 2], ['marmite', 7, 2], ['armoire', 9, 2], ['fenetre', 5, 0], ['cadre', 2, 0], ['horloge', 8, 0], ['tapis', 3, 4], ['table', 3, 5], ['chaise', 2, 5, 3], ['chaise', 5, 5, 1], ['plante', 9, 7], ['lampe', 9, 5]]
+    dur_forge: [
+      ['banniere_naine', 1, 0],
+      ['rack_armes', 6, 0],
+      ['rack_armes', 9, 0],
+      ['cheminee', 2, 2],
+      ['enclume', 4, 3],
+      ['enclume', 8, 3],
+      ['tonneau', 10, 2],
+      ['caisse', 11, 2],
+      ['lingots', 11, 4],
+      ['sacs', 1, 6],
+      ['coffre', 11, 6],
+      ['lampe', 1, 4]
+    ],
+    dur_taverne: [
+      ['banniere_naine', 2, 0],
+      ['etagere', 5, 0],
+      ['banniere_naine', 9, 0],
+      ['tonneau', 1, 2],
+      ['tonneau', 2, 2],
+      ['comptoir', 4, 3],
+      ['cheminee', 8, 2],
+      ['tonneau', 10, 2],
+      ['tonneau', 11, 2],
+      ['table', 2, 5],
+      ['chaise', 1, 5, 3],
+      ['table', 9, 5],
+      ['chaise', 8, 5, 3],
+      ['chaise', 11, 5, 1],
+      ['lampe', 11, 7],
+      ['sacs', 1, 7]
+    ],
+    dur_coffre: [
+      ['banniere_naine', 2, 0],
+      ['banniere_naine', 8, 0],
+      ['lingots', 1, 2],
+      ['lingots', 2, 2],
+      ['coffre', 4, 2],
+      ['coffre', 6, 2],
+      ['lingots', 8, 2],
+      ['lingots', 9, 2],
+      ['comptoir', 4, 4],
+      ['caisse', 1, 6],
+      ['caisse', 9, 6],
+      ['lampe', 9, 4]
+    ],
+    dur_maison1: [
+      ['banniere_naine', 2, 0],
+      ['cadre', 5, 0],
+      ['herbes', 8, 0],
+      ['lit', 1, 2],
+      ['cheminee', 4, 2],
+      ['tonneau', 8, 2],
+      ['coffre', 9, 2],
+      ['tapis', 3, 4],
+      ['table', 3, 5],
+      ['chaise', 2, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['lit', 9, 5],
+      ['lampe', 1, 6]
+    ],
+    dur_maison2: [
+      ['cadre', 2, 0],
+      ['banniere_naine', 5, 0],
+      ['etagere', 8, 0],
+      ['lit_double', 1, 2],
+      ['cheminee', 5, 2],
+      ['marmite', 6, 2],
+      ['tonneau', 9, 2],
+      ['tapis_rond', 4, 4],
+      ['table_ronde', 4, 5],
+      ['chaise', 3, 5, 3],
+      ['chaise', 6, 5, 1],
+      ['coffre', 9, 6],
+      ['lampe', 1, 6]
+    ],
+    cristaux: [
+      ['lit', 1, 2],
+      ['bibliotheque', 3, 2],
+      ['cuisiniere', 6, 2],
+      ['marmite', 7, 2],
+      ['armoire', 9, 2],
+      ['fenetre', 5, 0],
+      ['cadre', 2, 0],
+      ['horloge', 8, 0],
+      ['tapis', 3, 4],
+      ['table', 3, 5],
+      ['chaise', 2, 5, 3],
+      ['chaise', 5, 5, 1],
+      ['plante', 9, 7],
+      ['lampe', 9, 5]
+    ]
   };
   const RESIDENTS = {
     echoppe: [['villageois', 2.5, 4.5]],
-    marmite: [['cuisinier', 6, 3.7], ['villageois', 9, 6.6]],
-    aubepines: [['ancien', 6.5, 4.6], ['enfant', 2.5, 6.4]],
+    marmite: [
+      ['cuisinier', 6, 3.7],
+      ['villageois', 9, 6.6]
+    ],
+    aubepines: [
+      ['ancien', 6.5, 4.6],
+      ['enfant', 2.5, 6.4]
+    ],
     puits: [['villageois', 3.5, 4.6]],
     chene: [['villageois', 6.5, 4.6]],
     clairieres: [['villageois', 6.5, 4.6]],
@@ -1367,7 +2026,8 @@
   };
   function valid(k, x, y, list = items, r = 0, room = HOME, limit = MAX_ITEMS) {
     const c = CATALOG[k];
-    if (!c || !Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(r) || r < 0 || r >= turns(c)) return false;
+    if (!c || !Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(r) || r < 0 || r >= turns(c))
+      return false;
     const { floor: F, door: D } = geo(room),
       d = dims(c, r),
       wall = onWall(c);
@@ -1390,7 +2050,8 @@
   }
   for (const [id, list] of Object.entries(FURNISH)) {
     const out = [];
-    for (const [k, x, y, r = 0] of list) if (valid(k, x, y, out, r, ROOM[id], 999)) out.push({ k, x, y: onWall(CATALOG[k]) ? 0 : y, r });
+    for (const [k, x, y, r = 0] of list)
+      if (valid(k, x, y, out, r, ROOM[id], 999)) out.push({ k, x, y: onWall(CATALOG[k]) ? 0 : y, r });
     FIXED[id] = out;
   }
   // Passage bloqué : meubles des pièces, et dehors les objets du camp (feu, souches, banc, torches).
@@ -1406,7 +2067,12 @@
   const ORDER = ['curtain', 'wall', 'floor', 'rug'];
   function topAt(lx, ly, list = items) {
     let best = null;
-    for (const it of list) if (cover(it, lx, ly) && (!best || ORDER.indexOf(CATALOG[it.k].layer) < ORDER.indexOf(CATALOG[best.k].layer))) best = it;
+    for (const it of list)
+      if (
+        cover(it, lx, ly) &&
+        (!best || ORDER.indexOf(CATALOG[it.k].layer) < ORDER.indexOf(CATALOG[best.k].layer))
+      )
+        best = it;
     return best;
   }
   function changed() {
@@ -1474,7 +2140,15 @@
   };
   let buildings = [];
   // Modèle de chaque refuge, accordé à son biome et à son nom.
-  const REFUGE_FORM = { chene: 'tree', clairieres: 'gable', oasis: 'dome', dunes: 'tent', pilotis: 'round', rousses: 'gambrel', cristaux: 'tower' };
+  const REFUGE_FORM = {
+    chene: 'tree',
+    clairieres: 'gable',
+    oasis: 'dome',
+    dunes: 'tent',
+    pilotis: 'round',
+    rousses: 'gambrel',
+    cristaux: 'tower'
+  };
   const homeB = () => buildings.find(b => b.room === HOME);
   const groundOk = (x, y) => {
     const t = game.world.overworld[y]?.[x];
@@ -1492,7 +2166,8 @@
           fx = Math.round(tx + Math.cos(a) * r) - 2,
           fy = Math.round(ty + Math.sin(a) * r) - 1;
         let good = regionAt(fx + 2, fy + 1) === ZONES[0];
-        for (let y = fy - 1; y <= fy + 5 && good; y++) for (let x = fx - 1; x <= fx + 4 && good; x++) good = ok(x, y);
+        for (let y = fy - 1; y <= fy + 5 && good; y++)
+          for (let x = fx - 1; x <= fx + 4 && good; x++) good = ok(x, y);
         if (!good || Math.hypot(fx + 2 - CANAAN_CAMP.x, fy + 1 - CANAAN_CAMP.y) < CANAAN_CAMP.r + 6) continue;
         if (instances.some(d => Math.hypot(d.x - fx - 2, d.y - fy - 1) < 32)) continue;
         if (Math.hypot(CANAAN_ARENA_PORTAL.x - fx - 2, CANAAN_ARENA_PORTAL.y - fy - 1) < 16) continue;
@@ -1503,11 +2178,21 @@
   }
   // Cabane d'un refuge : juste au nord du lieu (sa porte donne sur lui), sinon à côté, sur la terre ferme.
   function findCabin(p) {
-    for (const [dx, dy] of [[-2, -4], [-1, -4], [-3, -4], [-2, -5], [-2, -3], [-4, -2], [1, -2], [-2, 1]]) {
+    for (const [dx, dy] of [
+      [-2, -4],
+      [-1, -4],
+      [-3, -4],
+      [-2, -5],
+      [-2, -3],
+      [-4, -2],
+      [1, -2],
+      [-2, 1]
+    ]) {
       const fx = p.x + dx,
         fy = p.y + dy;
       let good = groundOk(fx + 2, fy + 3) && groundOk(fx + 1, fy + 3);
-      for (let y = fy; y < fy + 3 && good; y++) for (let x = fx; x < fx + 4 && good; x++) good = groundOk(x, y);
+      for (let y = fy; y < fy + 3 && good; y++)
+        for (let x = fx; x < fx + 4 && good; x++) good = groundOk(x, y);
       if (good) return { x: fx, y: fy };
     }
     return { x: p.x - 2, y: p.y - 4 };
@@ -1522,7 +2207,8 @@
       const { floor: F } = geo(room);
       for (let ly = 0; ly < room.h; ly++)
         for (let lx = 0; lx < room.w; lx++) {
-          tiles[room.y + ly][room.x + lx] = lx >= F.x0 && lx <= F.x1 && ly >= F.y0 && ly <= F.y1 ? FLOOR_TILE : WALL_TILE;
+          tiles[room.y + ly][room.x + lx] =
+            lx >= F.x0 && lx <= F.x1 && ly >= F.y0 && ly <= F.y1 ? FLOOR_TILE : WALL_TILE;
           deco[room.y + ly][room.x + lx] = null;
         }
     }
@@ -1544,7 +2230,19 @@
     }
     buildings = [];
     const home = findHome();
-    for (const v of VILLAGE) buildings.push({ room: ROOM[v.room], style: v.style, form: v.form, w: v.w, h: v.h, x: CANAAN_CAMP.x + v.dx, y: CANAAN_CAMP.y + v.dy, sign: v.sign, label: ROOM[v.room].name, village: true });
+    for (const v of VILLAGE)
+      buildings.push({
+        room: ROOM[v.room],
+        style: v.style,
+        form: v.form,
+        w: v.w,
+        h: v.h,
+        x: CANAAN_CAMP.x + v.dx,
+        y: CANAAN_CAMP.y + v.dy,
+        sign: v.sign,
+        label: ROOM[v.room].name,
+        village: true
+      });
     buildings.push({ room: HOME, style: 'chaume', w: 4, h: 3, x: home.x, y: home.y, label: '🏠 Ta maison' });
     // Chaque refuge prend l'architecture de son biome.
     const BIOME_STYLE = ['chaume', 'foret', 'marais', 'automne', 'desert', 'enchantee'];
@@ -1553,11 +2251,22 @@
       if (!id) continue;
       const at = findCabin(p),
         zone = Math.max(0, ZONES.indexOf(regionAt(at.x + 2, at.y + 1)));
-      buildings.push({ room: ROOM[id], style: BIOME_STYLE[zone], form: REFUGE_FORM[id], w: 4, h: 3, x: at.x, y: at.y, label: p.name, place: p });
+      buildings.push({
+        room: ROOM[id],
+        style: BIOME_STYLE[zone],
+        form: REFUGE_FORM[id],
+        w: 4,
+        h: 3,
+        x: at.x,
+        y: at.y,
+        label: p.name,
+        place: p
+      });
     }
     // Emprise au sol (pleine) et décor dégagé autour.
     for (const b of buildings) {
-      for (let y = b.y - 1; y <= b.y + b.h + 1; y++) for (let x = b.x - 1; x <= b.x + b.w; x++) if (deco[y]) deco[y][x] = null;
+      for (let y = b.y - 1; y <= b.y + b.h + 1; y++)
+        for (let x = b.x - 1; x <= b.x + b.w; x++) if (deco[y]) deco[y][x] = null;
       for (let y = b.y; y < b.y + b.h; y++) for (let x = b.x; x < b.x + b.w; x++) tiles[y][x] = OUTSIDE_TILE;
     }
     // Puis un sentier de terre de chaque porte jusqu'au chemin le plus proche (ou au sentier d'un bâtiment déjà relié).
@@ -1620,7 +2329,12 @@
       }
     }
     const paint = (x, y) => {
-      for (const [ax, ay] of [[x, y], [x + 1, y], [x, y + 1], [x + 1, y + 1]])
+      for (const [ax, ay] of [
+        [x, y],
+        [x + 1, y],
+        [x, y + 1],
+        [x + 1, y + 1]
+      ])
         if (land(ax, ay)) {
           tiles[ay][ax] = 2;
           if (deco[ay]) deco[ay][ax] = null;
@@ -1659,11 +2373,15 @@
   // naine (underground.js, sous terre). Même règle de porte : au milieu du bas du bâtiment.
   function externals() {
     const out = [],
-      add = (id, x, y, w, h, under = false) => ROOM[id] && out.push({ room: ROOM[id], x, y, w, h, under, external: true, label: ROOM[id].name });
+      add = (id, x, y, w, h, under = false) =>
+        ROOM[id] && out.push({ room: ROOM[id], x, y, w, h, under, external: true, label: ROOM[id].name });
     const plan = window.CANAAN_CITY_PLAN;
     if (plan) for (const b of plan.buildings) add('sylv_' + b.id.replace('elfe_', ''), b.x, b.y, b.w, b.h);
     const camp = window.CANAAN_CAMP_LIFE ? CANAAN_CAMP_LIFE.items() : [];
-    for (const [kind, id] of [['barn', 'grange'], ['coop', 'poulailler']]) {
+    for (const [kind, id] of [
+      ['barn', 'grange'],
+      ['coop', 'poulailler']
+    ]) {
       const it = camp.find(i => i.kind === kind);
       if (it) add(id, it.x, it.y, it.w, it.h);
     }
@@ -1730,7 +2448,15 @@
       if (now === HOME) toast('🏠 Bienvenue chez toi ! Appuie sur H pour décorer.');
       else if (now) toast('🚪 ' + now.name);
       if (now !== HOME && editing) toggle();
-    } else canaanLootNotice(hero, now === HOME ? '🏠 Tu entres dans la maison (H pour décorer).' : now ? '🚪 ' + now.name : '🚪 Tu sors.');
+    } else
+      canaanLootNotice(
+        hero,
+        now === HOME
+          ? '🏠 Tu entres dans la maison (H pour décorer).'
+          : now
+            ? '🚪 ' + now.name
+            : '🚪 Tu sors.'
+      );
     return true;
   }
   function handle(hero, action) {
@@ -1746,7 +2472,8 @@
     const out = [];
     for (const it of Array.isArray(raw?.items) ? raw.items : []) {
       const r = Number.isInteger(it?.r) ? it.r : 0;
-      if (it && Object.hasOwn(CATALOG, it.k) && valid(it.k, it.x, it.y, out, r)) out.push({ k: it.k, x: it.x, y: onWall(CATALOG[it.k]) ? 0 : it.y, r });
+      if (it && Object.hasOwn(CATALOG, it.k) && valid(it.k, it.x, it.y, out, r))
+        out.push({ k: it.k, x: it.x, y: onWall(CATALOG[it.k]) ? 0 : it.y, r });
     }
     return out;
   }
@@ -1766,7 +2493,9 @@
   }
   function applyRemote(view) {
     if (!view || !Array.isArray(view.items)) return;
-    items = sanitize({ items: view.items.map(a => (Array.isArray(a) ? { k: a[0], x: a[1], y: a[2], r: a[3] || 0 } : null)) });
+    items = sanitize({
+      items: view.items.map(a => (Array.isArray(a) ? { k: a[0], x: a[1], y: a[2], r: a[3] || 0 } : null))
+    });
   }
   const guest = () => game.mode === 'guest';
   // Touche E : porte d'un bâtiment ou porte intérieure. Renvoie vrai si E a servi.
@@ -1791,7 +2520,10 @@
       const c = CATALOG[it.k];
       if (!c.fire) return false;
       const d = dims(c, it.r);
-      return Math.hypot(px(room, it.x + d.w / 2) - x, py(room, it.y + d.h / 2) - y) < 1.9 * TS + (d.w - 1) * TS * 0.5;
+      return (
+        Math.hypot(px(room, it.x + d.w / 2) - x, py(room, it.y + d.h / 2) - y) <
+        1.9 * TS + (d.w - 1) * TS * 0.5
+      );
     });
   }
 
@@ -1948,7 +2680,8 @@
           r(x + 2, 14, 20, 40, w.dark);
           g.globalAlpha = 1;
           r(x + 4, 18, 16, 34, w.face);
-          for (let k = 0; k < 8; k++) r(x + 12 + Math.round(Math.sin(k * 1.3) * 4), 20 + k * 2, 2, 2, w.light);
+          for (let k = 0; k < 8; k++)
+            r(x + 12 + Math.round(Math.sin(k * 1.3) * 4), 20 + k * 2, 2, 2, w.light);
           r(x + 10, 13, 4, 3, w.gold);
         }
         for (let y = 12; y < 56; y += 3) {
@@ -2128,11 +2861,24 @@
         c.fill();
         c.globalAlpha = alpha;
       }
-      if (cat.layer !== 'rug') for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) c.drawImage(e.b, X - PADX + dx, Y - PADT + dy);
+      if (cat.layer !== 'rug')
+        for (const [dx, dy] of [
+          [-2, 0],
+          [2, 0],
+          [0, -2],
+          [0, 2]
+        ])
+          c.drawImage(e.b, X - PADX + dx, Y - PADT + dy);
       c.drawImage(e.a, X - PADX, Y - PADT);
     }
     c.globalAlpha = 1;
-    if (alpha === 1 && (cat.light || cat.fire)) canaanLight(X + w / 2, Y + (wall ? 50 : 10), cat.fire ? 130 : cat.light === '#e8f4ff' ? 110 : 120, cat.fire ? '#ffa850' : cat.light);
+    if (alpha === 1 && (cat.light || cat.fire))
+      canaanLight(
+        X + w / 2,
+        Y + (wall ? 50 : 10),
+        cat.fire ? 130 : cat.light === '#e8f4ff' ? 110 : 120,
+        cat.fire ? '#ffa850' : cat.light
+      );
   }
   function drawRoom(c) {
     const room = current();
@@ -2141,7 +2887,8 @@
       { floor: F } = geo(room);
     c.save();
     c.imageSmoothingEnabled = false;
-    for (const layer of ['rug', 'wall', 'curtain', 'floor']) for (const it of list) if (CATALOG[it.k].layer === layer) drawItem(c, room, it);
+    for (const layer of ['rug', 'wall', 'curtain', 'floor'])
+      for (const it of list) if (CATALOG[it.k].layer === layer) drawItem(c, room, it);
     // Mode décoration : grille, aperçu vert (possible) ou rouge (impossible), case visée en mode retrait.
     if (editing && room === HOME) {
       c.globalAlpha = 0.12;
@@ -2202,18 +2949,108 @@
   // Forêt enchantée. Les bâtiments du camp ont chacun leur caractère (échoppe, auberge, demeures).
   const OUT = '#22160e';
   const LOOKS = {
-    chaume: { wall: 'timber', face: ['#f2e6ca', '#e2d2b0', '#c9b690'], beam: ['#6e4628', '#4a2e1a'], roof: 'thatch', tones: ['#e6c062', '#d0a64a', '#b28a38', '#86662a'], ground: 'plaines', chimney: 'stone', flowers: '#e05a7a' },
-    echoppe: { wall: 'timber', face: ['#f4e4c0', '#e4d0a6', '#c9b48a'], beam: ['#5e3c22', '#3c2614'], roof: 'tiles', tones: ['#de6c4e', '#c2543c', '#9e402e', '#70281e'], ground: 'plaines', awning: true, crates: true },
-    auberge: { wall: 'stone', face: ['#cac4b4', '#b0aa9a', '#8e887a'], beam: ['#5e3c22', '#3c2614'], roof: 'slate', tones: ['#7a8aaa', '#627294', '#4c5a7c', '#343e5a'], ground: 'plaines', chimney: 'brick', barrels: true },
-    demeure: { wall: 'timber', face: ['#f6ecd8', '#e6dac2', '#cdbea2'], beam: ['#7e4c2c', '#56321c'], roof: 'tiles', tones: ['#cc7a50', '#ae623e', '#8c4c30', '#64341e'], ground: 'plaines', chimney: 'brick', flowers: '#f0c040' },
-    demeure_bleue: { wall: 'timber', face: ['#eee8f2', '#ddd5e4', '#c2b8cc'], beam: ['#5e4c6c', '#3e3048'], roof: 'slate', tones: ['#6496bc', '#4e7ea2', '#3c6686', '#2a4a66'], ground: 'plaines', chimney: 'stone', flowers: '#9a7ae0' },
-    foret: { wall: 'logs', face: ['#946a42', '#7a5634', '#5c3e24'], beam: ['#4e3420', '#33210f'], roof: 'shingles', tones: ['#806040', '#6a4e32', '#543c26', '#38281a'], ground: 'foret', chimney: 'stone', moss: true, wood: true },
-    marais: { wall: 'planks', face: ['#7a6446', '#64503a', '#4a3a28'], beam: ['#3e2e1e', '#2a1e12'], roof: 'reeds', tones: ['#b0a262', '#968850', '#7a6e40', '#585030'], ground: 'marais', stilts: true },
-    automne: { wall: 'timber', face: ['#f0dcc0', '#dcc4a4', '#c0a684'], beam: ['#6a3e22', '#462614'], roof: 'shingles', tones: ['#d8803c', '#be662e', '#9e5024', '#723818'], ground: 'automne', chimney: 'stone', leaves: true },
-    desert: { wall: 'adobe', face: ['#ecc690', '#d8ae76', '#ba905c'], beam: ['#7a4e2c', '#54321a'], roof: 'flat', tones: ['#f2d6a2', '#dcbc88', '#c2a06c', '#946e44'], ground: 'desert', awning: 'toile' },
-    enchantee: { wall: 'stone', face: ['#bdb4d8', '#a198bc', '#81789c'], beam: ['#4a3a6a', '#2e2448'], roof: 'shingles', tones: ['#8a64c4', '#7250a8', '#5a3e8a', '#3e2a64'], ground: 'enchantee', chimney: 'stone', glow: true }
+    chaume: {
+      wall: 'timber',
+      face: ['#f2e6ca', '#e2d2b0', '#c9b690'],
+      beam: ['#6e4628', '#4a2e1a'],
+      roof: 'thatch',
+      tones: ['#e6c062', '#d0a64a', '#b28a38', '#86662a'],
+      ground: 'plaines',
+      chimney: 'stone',
+      flowers: '#e05a7a'
+    },
+    echoppe: {
+      wall: 'timber',
+      face: ['#f4e4c0', '#e4d0a6', '#c9b48a'],
+      beam: ['#5e3c22', '#3c2614'],
+      roof: 'tiles',
+      tones: ['#de6c4e', '#c2543c', '#9e402e', '#70281e'],
+      ground: 'plaines',
+      awning: true,
+      crates: true
+    },
+    auberge: {
+      wall: 'stone',
+      face: ['#cac4b4', '#b0aa9a', '#8e887a'],
+      beam: ['#5e3c22', '#3c2614'],
+      roof: 'slate',
+      tones: ['#7a8aaa', '#627294', '#4c5a7c', '#343e5a'],
+      ground: 'plaines',
+      chimney: 'brick',
+      barrels: true
+    },
+    demeure: {
+      wall: 'timber',
+      face: ['#f6ecd8', '#e6dac2', '#cdbea2'],
+      beam: ['#7e4c2c', '#56321c'],
+      roof: 'tiles',
+      tones: ['#cc7a50', '#ae623e', '#8c4c30', '#64341e'],
+      ground: 'plaines',
+      chimney: 'brick',
+      flowers: '#f0c040'
+    },
+    demeure_bleue: {
+      wall: 'timber',
+      face: ['#eee8f2', '#ddd5e4', '#c2b8cc'],
+      beam: ['#5e4c6c', '#3e3048'],
+      roof: 'slate',
+      tones: ['#6496bc', '#4e7ea2', '#3c6686', '#2a4a66'],
+      ground: 'plaines',
+      chimney: 'stone',
+      flowers: '#9a7ae0'
+    },
+    foret: {
+      wall: 'logs',
+      face: ['#946a42', '#7a5634', '#5c3e24'],
+      beam: ['#4e3420', '#33210f'],
+      roof: 'shingles',
+      tones: ['#806040', '#6a4e32', '#543c26', '#38281a'],
+      ground: 'foret',
+      chimney: 'stone',
+      moss: true,
+      wood: true
+    },
+    marais: {
+      wall: 'planks',
+      face: ['#7a6446', '#64503a', '#4a3a28'],
+      beam: ['#3e2e1e', '#2a1e12'],
+      roof: 'reeds',
+      tones: ['#b0a262', '#968850', '#7a6e40', '#585030'],
+      ground: 'marais',
+      stilts: true
+    },
+    automne: {
+      wall: 'timber',
+      face: ['#f0dcc0', '#dcc4a4', '#c0a684'],
+      beam: ['#6a3e22', '#462614'],
+      roof: 'shingles',
+      tones: ['#d8803c', '#be662e', '#9e5024', '#723818'],
+      ground: 'automne',
+      chimney: 'stone',
+      leaves: true
+    },
+    desert: {
+      wall: 'adobe',
+      face: ['#ecc690', '#d8ae76', '#ba905c'],
+      beam: ['#7a4e2c', '#54321a'],
+      roof: 'flat',
+      tones: ['#f2d6a2', '#dcbc88', '#c2a06c', '#946e44'],
+      ground: 'desert',
+      awning: 'toile'
+    },
+    enchantee: {
+      wall: 'stone',
+      face: ['#bdb4d8', '#a198bc', '#81789c'],
+      beam: ['#4a3a6a', '#2e2448'],
+      roof: 'shingles',
+      tones: ['#8a64c4', '#7250a8', '#5a3e8a', '#3e2a64'],
+      ground: 'enchantee',
+      chimney: 'stone',
+      glow: true
+    }
   };
-  const visible = (x, y, m) => Math.abs(x - camX - W / 2) < W / 2 + m && Math.abs(y - camY - H / 2) < H / 2 + m;
+  const visible = (x, y, m) =>
+    Math.abs(x - camX - W / 2) < W / 2 + m && Math.abs(y - camY - H / 2) < H / 2 + m;
   // Tirage fixe par position (textures qui ne scintillent pas).
   const rnd = (a, b) => {
     let h = (a * 374761393 + b * 668265263) | 0;
@@ -2245,7 +3082,10 @@
       }
       const g = c.createRadialGradient(px, py, 0, px, py, r);
       const shade = 225 - Math.round(life * 40);
-      g.addColorStop(0, 'rgba(' + shade + ',' + shade + ',' + (shade + 6) + ',' + (0.5 * (1 - life)).toFixed(3) + ')');
+      g.addColorStop(
+        0,
+        'rgba(' + shade + ',' + shade + ',' + (shade + 6) + ',' + (0.5 * (1 - life)).toFixed(3) + ')'
+      );
       g.addColorStop(1, 'rgba(' + shade + ',' + shade + ',' + (shade + 6) + ',0)');
       c.fillStyle = g;
       c.fillRect(px - r, py - r, r * 2, r * 2);
@@ -2292,7 +3132,12 @@
     c.moveTo(x1, y);
     c.quadraticCurveTo((x1 + x2) / 2, y + 6, x2, y);
     c.stroke();
-    [['#e8e4dc', 12, 14], ['#c85a4a', 10, 12], ['#5a8ac0', 14, 10], ['#f0d070', 8, 12]].forEach(([col, w, h], k) => {
+    [
+      ['#e8e4dc', 12, 14],
+      ['#c85a4a', 10, 12],
+      ['#5a8ac0', 14, 10],
+      ['#f0d070', 8, 12]
+    ].forEach(([col, w, h], k) => {
       const cx = x1 + ((k + 1) * (x2 - x1)) / 5,
         sway = Math.sin(time * 0.08 + k * 1.3) * 2.5;
       c.save();
@@ -2340,7 +3185,8 @@
     R(c, X + 4, top, Wd - 8, h, f0);
     if (L.wall === 'timber') {
       // Enduit taché, poutres sombres, croix de Saint-André sur les côtés.
-      for (let k = 0; k < 18; k++) R(c, X + 8 + rnd(seed, k) * (Wd - 20), top + 4 + rnd(k, seed) * (h - 12), 4, 2, f1);
+      for (let k = 0; k < 18; k++)
+        R(c, X + 8 + rnd(seed, k) * (Wd - 20), top + 4 + rnd(k, seed) * (h - 12), 4, 2, f1);
       R(c, X + 4, top, Wd - 8, 5, b0);
       R(c, X + 4, top + 34, Wd - 8, 4, b0);
       R(c, X + 4, top + 34, Wd - 8, 1, f1);
@@ -2448,9 +3294,14 @@
   // Soubassement de pierres (ou pilotis du marais).
   function drawBase(c, L, X, Wd, bot, seed) {
     if (L.stilts) return;
-    const stones = L.ground === 'desert' ? ['#b89a70', '#a2865e', '#c8aa80'] : L.ground === 'enchantee' ? ['#8a84a4', '#746e90', '#9e98b8'] : ['#8e8a84', '#76726c', '#a4a09a'];
+    const stones =
+      L.ground === 'desert'
+        ? ['#b89a70', '#a2865e', '#c8aa80']
+        : L.ground === 'enchantee'
+          ? ['#8a84a4', '#746e90', '#9e98b8']
+          : ['#8e8a84', '#76726c', '#a4a09a'];
     R(c, X + 2, bot - 10, Wd - 4, 12, OUT);
-    for (let x = X + 4; x < X + Wd - 4; ) {
+    for (let x = X + 4; x < X + Wd - 4;) {
       const w = 12 + Math.floor(rnd(x, seed) * 10),
         x1 = Math.min(X + Wd - 4, x + w);
       R(c, x, bot - 9, x1 - x - 1, 9, pick(stones, x, seed + 3));
@@ -2490,7 +3341,13 @@
     for (let y = top; y < eave; y += STEP) {
       const t = (y - top) / H,
         inset = Math.round(((1 - t) * 34) / 2) * 2;
-      rows.push({ y, x0: rx + inset, x1: rx + rw - inset, hip: Math.round(inset * 0.6 + 6), back: y < ridge });
+      rows.push({
+        y,
+        x0: rx + inset,
+        x1: rx + rw - inset,
+        hip: Math.round(inset * 0.6 + 6),
+        back: y < ridge
+      });
     }
     for (const r of rows) R(c, r.x0 - 2, r.y - 2, r.x1 - r.x0 + 4, STEP + 4, OUT);
     rows.forEach((r, i) => {
@@ -2502,12 +3359,21 @@
         R(c, r.x0, r.y, w, STEP, T[1]);
         // Texture du pan avant.
         if (L.roof === 'thatch' || L.roof === 'reeds') {
-          for (let x = r.x0 + (i % 2) * 2; x < r.x1 - 1; x += 4) R(c, x, r.y + (rnd(x, i) < 0.5 ? 1 : 0), 1, STEP - 1, rnd(i, x) < 0.5 ? T[2] : T[0]);
+          for (let x = r.x0 + (i % 2) * 2; x < r.x1 - 1; x += 4)
+            R(c, x, r.y + (rnd(x, i) < 0.5 ? 1 : 0), 1, STEP - 1, rnd(i, x) < 0.5 ? T[2] : T[0]);
         } else {
           const tile = L.roof === 'tiles' ? 12 : L.roof === 'slate' ? 10 : 9;
           for (let x = r.x0 + (i % 2 ? tile / 2 : 0); x < r.x1; x += tile) {
             R(c, Math.max(r.x0, x), r.y, 1, STEP, T[2]);
-            if (rnd(x, i + seed) < 0.22) R(c, Math.max(r.x0, x + 1), r.y, Math.min(tile - 1, r.x1 - x - 1), STEP - 1, rnd(i, x) < 0.5 ? T[0] : T[2]);
+            if (rnd(x, i + seed) < 0.22)
+              R(
+                c,
+                Math.max(r.x0, x + 1),
+                r.y,
+                Math.min(tile - 1, r.x1 - x - 1),
+                STEP - 1,
+                rnd(i, x) < 0.5 ? T[0] : T[2]
+              );
           }
           R(c, r.x0, r.y + STEP - 1, w, 1, T[2]);
           if (L.roof === 'tiles') R(c, r.x0, r.y, w, 1, T[0]);
@@ -2526,7 +3392,8 @@
     // Avant-toit et frange (chaume, roseaux).
     R(c, rx, eave - 3, rw, 3, T[3]);
     if (L.roof === 'thatch' || L.roof === 'reeds')
-      for (let x = rx; x < rx + rw; x += 4) R(c, x, eave - 2, 3, 3 + Math.floor(rnd(x, seed) * (L.roof === 'reeds' ? 7 : 4)), T[2]);
+      for (let x = rx; x < rx + rw; x += 4)
+        R(c, x, eave - 2, 3, 3 + Math.floor(rnd(x, seed) * (L.roof === 'reeds' ? 7 : 4)), T[2]);
     // Mousse, feuilles mortes ou éclats de magie sur le toit.
     if (L.moss || L.leaves || L.glow)
       for (let k = 0; k < 14; k++) {
@@ -2552,7 +3419,8 @@
     R(c, X, y0, Wd, 2, T[0]);
     R(c, X + 7, y0 + 7, Wd - 14, eave - y0 - 16, T[2]);
     R(c, X + 7, y0 + 7, Wd - 14, 2, T[3]);
-    for (let k = 0; k < 5; k++) R(c, X + 76 + rnd(k, seed) * (Wd - 100), y0 + 12 + rnd(seed, k) * 12, 6, 1, T[3]);
+    for (let k = 0; k < 5; k++)
+      R(c, X + 76 + rnd(k, seed) * (Wd - 100), y0 + 12 + rnd(seed, k) * 12, 6, 1, T[3]);
     // Tapis étendu et jarres.
     const tx = X + Wd - 96;
     R(c, tx - 1, y0 + 11, 46, 18, OUT);
@@ -2561,7 +3429,10 @@
     R(c, tx + 3, y0 + 15, 38, 1, '#e0c060');
     R(c, tx + 3, y0 + 24, 38, 1, '#e0c060');
     for (let k = 0; k < 4; k++) R(c, tx + 8 + k * 9, y0 + 18, 4, 4, '#3a4a8a');
-    for (const [jx, jh] of [[X + Wd - 40, 16], [X + Wd - 24, 12]]) {
+    for (const [jx, jh] of [
+      [X + Wd - 40, 16],
+      [X + Wd - 24, 12]
+    ]) {
       R(c, jx - 1, eave - 10 - jh, 12, jh + 2, OUT);
       R(c, jx, eave - 9 - jh, 10, jh, '#c8783a');
       R(c, jx + 2, eave - 12 - jh, 6, 4, '#a8602c');
@@ -2583,7 +3454,8 @@
     R(c, tx0, ty0, tw, eave - ty0 - 2, f0);
     R(c, tx0, ty0, 3, eave - ty0 - 2, '#fff2d8');
     R(c, tx0 + tw - 9, ty0, 9, eave - ty0 - 2, f2);
-    for (let k = 0; k < 6; k++) R(c, tx0 + 8 + rnd(k, seed + 9) * 36, ty0 + 10 + rnd(seed + 9, k) * 30, 5, 1, f2);
+    for (let k = 0; k < 6; k++)
+      R(c, tx0 + 8 + rnd(k, seed + 9) * 36, ty0 + 10 + rnd(seed + 9, k) * 30, 5, 1, f2);
     // Créneaux de la tour.
     for (let k = 0; k < 4; k++) {
       R(c, tx0 + k * 16 - 1, ty0 - 9, 11, 10, OUT);
@@ -2678,11 +3550,25 @@
   function gableAt(c, L, mid, eave) {
     if (L.roof === 'flat') return;
     const rows = 7;
-    for (let k = 0; k < rows; k++) R(c, mid - (8 + k * 4) - 3, eave - 30 + k * 4 - 2, (8 + k * 4) * 2 + 6, 6, OUT);
+    for (let k = 0; k < rows; k++)
+      R(c, mid - (8 + k * 4) - 3, eave - 30 + k * 4 - 2, (8 + k * 4) * 2 + 6, 6, OUT);
     for (let k = 0; k < rows; k++) {
       const hw = 8 + k * 4,
         y = eave - 30 + k * 4;
-      R(c, mid - hw + 3, y, hw * 2 - 6, 4, L.wall === 'logs' ? L.face[k % 2] : L.wall === 'stone' ? L.face[1] : L.wall === 'planks' ? L.face[1] : L.face[0]);
+      R(
+        c,
+        mid - hw + 3,
+        y,
+        hw * 2 - 6,
+        4,
+        L.wall === 'logs'
+          ? L.face[k % 2]
+          : L.wall === 'stone'
+            ? L.face[1]
+            : L.wall === 'planks'
+              ? L.face[1]
+              : L.face[0]
+      );
       R(c, mid - hw, y, 4, 4, L.tones[2]);
       R(c, mid + hw - 4, y, 4, 4, L.tones[3]);
     }
@@ -2776,22 +3662,35 @@
   // Chaque biome a plusieurs silhouettes (form) : maison à quatre pans, maison à étage à colombages, chalet au
   // grand pignon, grange à toit brisé, hutte ronde au toit conique, maison à dôme, tour ronde, maison-champignon,
   // terrasse du désert. La porte reste au milieu du bas (même emprise, mêmes collisions).
-  const STONE_LOOK = L => ({ ...L, wall: 'stone', face: L.ground === 'desert' ? ['#d8b47e', '#c49e6a', '#a8844f'] : L.ground === 'enchantee' ? ['#a49cc0', '#8c84aa', '#6e668e'] : ['#b4ae9e', '#9c9686', '#7e786a'] });
+  const STONE_LOOK = L => ({
+    ...L,
+    wall: 'stone',
+    face:
+      L.ground === 'desert'
+        ? ['#d8b47e', '#c49e6a', '#a8844f']
+        : L.ground === 'enchantee'
+          ? ['#a49cc0', '#8c84aa', '#6e668e']
+          : ['#b4ae9e', '#9c9686', '#7e786a']
+  });
   // Rangées d'un triangle (toit conique ou pignon) : demi-largeur de la pointe à la base, par pas de 4 px.
   function cone(c, L, mid, apex, base, half, seed, fringe) {
     const T = L.tones,
       rows = [];
-    for (let y = apex; y < base; y += 4) rows.push([y, Math.max(3, Math.round(((y - apex + 4) / (base - apex)) * half / 2) * 2)]);
+    for (let y = apex; y < base; y += 4)
+      rows.push([y, Math.max(3, Math.round((((y - apex + 4) / (base - apex)) * half) / 2) * 2)]);
     for (const [y, hw] of rows) R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
     rows.forEach(([y, hw], i) => {
       R(c, mid - hw, y, hw * 2, 4, T[1]);
       R(c, mid - hw, y, Math.max(2, Math.round(hw * 0.45)), 4, T[0]);
       R(c, mid + hw - Math.max(2, Math.round(hw * 0.4)), y, Math.max(2, Math.round(hw * 0.4)), 4, T[2]);
       for (let x = mid - hw + (i % 2) * 3; x < mid + hw - 2; x += 6) R(c, x, y + 3, 3, 1, T[3]);
-      if (rnd(i, seed) < 0.4) R(c, mid - hw + 4 + rnd(seed, i) * Math.max(1, hw * 2 - 10), y + 1, 4, 2, T[i % 2 ? 0 : 2]);
+      if (rnd(i, seed) < 0.4)
+        R(c, mid - hw + 4 + rnd(seed, i) * Math.max(1, hw * 2 - 10), y + 1, 4, 2, T[i % 2 ? 0 : 2]);
     });
     R(c, mid - half / 2 - 2, base - 2, half + 4, 4, T[3]);
-    if (fringe) for (let x = mid - half / 2; x < mid + half / 2; x += 4) R(c, x, base, 3, 2 + Math.floor(rnd(x, seed) * 6), T[2]);
+    if (fringe)
+      for (let x = mid - half / 2; x < mid + half / 2; x += 4)
+        R(c, x, base, 3, 2 + Math.floor(rnd(x, seed) * 6), T[2]);
   }
   // Mur arrondi (hutte, tour) : bandes verticales plus sombres vers les bords pour le volume.
   function roundWall(c, L, x0, w, top, bot, seed) {
@@ -2801,7 +3700,8 @@
       const t = x / w,
         col = t < 0.15 ? f1 : t > 0.78 ? f2 : t < 0.35 ? f0 : rnd(x, seed) < 0.5 ? f0 : f1;
       R(c, x0 + x, top, Math.min(4, w - x), bot - top, col);
-      if (L.wall === 'stone') for (let y = top + ((x / 4) % 2) * 6; y < bot; y += 12) R(c, x0 + x, y, 4, 1, f2);
+      if (L.wall === 'stone')
+        for (let y = top + ((x / 4) % 2) * 6; y < bot; y += 12) R(c, x0 + x, y, 4, 1, f2);
       else R(c, x0 + x + 3, top, 1, bot - top, L.beam[1]);
     }
     R(c, x0 + 2, top, 3, bot - top, '#ffffff30');
@@ -2858,7 +3758,8 @@
           band = Math.min(hw, 26);
         // Pignon (bois) au centre, pans de toit de chaque côté.
         R(c, mid - hw, y, hw * 2, 4, L.wall === 'logs' ? L.face[i % 3 === 0 ? 1 : 0] : L.face[0]);
-        if (L.wall !== 'logs') for (let x = mid - hw + band; x < mid + hw - band; x += 10) R(c, x, y, 1, 4, L.face[2]);
+        if (L.wall !== 'logs')
+          for (let x = mid - hw + band; x < mid + hw - band; x += 10) R(c, x, y, 1, 4, L.face[2]);
         R(c, mid - hw, y, band, 4, L.tones[i % 2 ? 0 : 1]);
         R(c, mid + hw - band, y, band, 4, L.tones[i % 2 ? 2 : 3]);
         R(c, mid - hw + band - 2, y, 2, 4, L.tones[3]);
@@ -2913,7 +3814,16 @@
       R(c, mid - 10, lowTop - 16, 20, 20, '#3a2414');
       R(c, mid - 10, lowTop - 4, 20, 8, '#e0c060');
       R(c, mid - 1, lowTop - 30, 2, 12, L.beam[1]);
-      if (L.leaves) for (let k = 0; k < 10; k++) R(c, X + rnd(k, seed) * Wd, lowTop + rnd(seed, k) * 34, 3, 3, pick(['#e8a040', '#c84a2a', '#f0c040'], k, seed));
+      if (L.leaves)
+        for (let k = 0; k < 10; k++)
+          R(
+            c,
+            X + rnd(k, seed) * Wd,
+            lowTop + rnd(seed, k) * 34,
+            3,
+            3,
+            pick(['#e8a040', '#c84a2a', '#f0c040'], k, seed)
+          );
       return upTop - 8;
     }
     if (form === 'round') {
@@ -2944,13 +3854,20 @@
         rows = [];
       for (let y = cy - Math.round(R0 * 0.82); y < cy; y += 4) {
         const t = (cy - y) / (R0 * 0.82);
-        rows.push([y, Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * R0 / 2) * 2]);
+        rows.push([y, Math.round((Math.sqrt(Math.max(0, 1 - t * t)) * R0) / 2) * 2]);
       }
       for (const [y, hw] of rows) R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
       rows.forEach(([y, hw]) => {
         R(c, mid - hw, y, hw * 2, 4, '#f4ecda');
         R(c, mid - hw, y, Math.max(3, Math.round(hw * 0.35)), 4, '#ffffff');
-        R(c, mid + hw - Math.max(4, Math.round(hw * 0.38)), y, Math.max(4, Math.round(hw * 0.38)), 4, '#d6c6a4');
+        R(
+          c,
+          mid + hw - Math.max(4, Math.round(hw * 0.38)),
+          y,
+          Math.max(4, Math.round(hw * 0.38)),
+          4,
+          '#d6c6a4'
+        );
       });
       for (let k = 0; k < 6; k++) R(c, mid - R0 * 0.6 + k * R0 * 0.24, cy - 18, 6, 9, '#3a3a5a');
       const ty = cy - Math.round(R0 * 0.82);
@@ -2969,7 +3886,8 @@
       top = bot - 132;
       drawWall(c, STONE_LOOK(L), X, bot - 56, 52, bot, seed + 3);
       R(c, X - 6, bot - 66, 60, 12, OUT);
-      for (let y = bot - 64, i = 0; y < bot - 56; y += 4, i++) R(c, X - 4 + i * 2, y, 56 - i * 2, 4, L.tones[i % 2 ? 1 : 2]);
+      for (let y = bot - 64, i = 0; y < bot - 56; y += 4, i++)
+        R(c, X - 4 + i * 2, y, 56 - i * 2, 4, L.tones[i % 2 ? 1 : 2]);
       roundWall(c, STONE_LOOK(L), x0, tw, top, bot, seed);
       drawBase(c, L, x0, tw, bot, seed);
       doorAt(c, L, mid, bot);
@@ -2984,7 +3902,13 @@
       if (L.glow) {
         light(mid, apex - 18, 50, '#9af0ff');
         // Cristaux qui poussent au pied et contre la tour, avec leur halo.
-        for (const [cx, ch, cw, col] of [[x0 - 14, 46, 12, '#9af0ff'], [x0 - 2, 30, 9, '#c89aff'], [x0 + tw + 4, 52, 13, '#9af0ff'], [x0 + tw + 18, 28, 9, '#ffb0f0'], [X + 6, 24, 8, '#c89aff']]) {
+        for (const [cx, ch, cw, col] of [
+          [x0 - 14, 46, 12, '#9af0ff'],
+          [x0 - 2, 30, 9, '#c89aff'],
+          [x0 + tw + 4, 52, 13, '#9af0ff'],
+          [x0 + tw + 18, 28, 9, '#ffb0f0'],
+          [X + 6, 24, 8, '#c89aff']
+        ]) {
           for (let k = 0; k < ch; k += 4) {
             const hw = Math.max(1, Math.round((cw / 2) * Math.min(1, (k + 6) / 14)));
             R(c, cx - hw - 1, bot - ch + k - 1, hw * 2 + 2, 6, OUT);
@@ -3011,15 +3935,23 @@
         const t = x / tw,
           col = t < 0.18 ? '#7a5434' : t > 0.75 ? '#3e2a18' : rnd(x, seed) < 0.5 ? '#5e3e24' : '#664428';
         R(c, x0 + x, top, 4, bot - top, col);
-        for (let y = top + Math.floor(rnd(seed, x) * 10); y < bot; y += 14 + Math.floor(rnd(x, y) * 8)) R(c, x0 + x, y, 4, 2, '#2e1e10');
+        for (let y = top + Math.floor(rnd(seed, x) * 10); y < bot; y += 14 + Math.floor(rnd(x, y) * 8))
+          R(c, x0 + x, y, 4, 2, '#2e1e10');
       }
-      for (const [rx, rw] of [[x0 - 22, 30], [x0 + tw - 8, 30], [x0 + 20, 18]]) {
+      for (const [rx, rw] of [
+        [x0 - 22, 30],
+        [x0 + tw - 8, 30],
+        [x0 + 20, 18]
+      ]) {
         R(c, rx - 1, bot - 13, rw + 2, 15, OUT);
         R(c, rx, bot - 12, rw, 12, '#5e3e24');
         R(c, rx, bot - 12, rw, 3, '#7a5434');
       }
       doorAt(c, L, mid, bot);
-      for (const [wx, wy] of [[x0 + 10, top + 14], [x0 + tw - 32, top + 30]]) {
+      for (const [wx, wy] of [
+        [x0 + 10, top + 14],
+        [x0 + tw - 32, top + 30]
+      ]) {
         R(c, wx - 3, wy - 3, 28, 28, OUT);
         R(c, wx, wy, 22, 22, '#ffd890');
         R(c, wx + 10, wy, 2, 22, '#5e3e24');
@@ -3030,9 +3962,15 @@
       }
       // Ramure : grosses touffes de feuilles en trois tons, éclairées en haut à gauche.
       const blobs = [];
-      for (let k = 0; k < 14; k++) blobs.push([mid + (rnd(k, seed) - 0.5) * (Wd + 60), top - 24 - rnd(seed, k) * 74, 26 + rnd(k + 3, seed) * 16]);
+      for (let k = 0; k < 14; k++)
+        blobs.push([
+          mid + (rnd(k, seed) - 0.5) * (Wd + 60),
+          top - 24 - rnd(seed, k) * 74,
+          26 + rnd(k + 3, seed) * 16
+        ]);
       blobs.sort((a, b) => a[1] - b[1]);
-      const leaf = L.ground === 'automne' ? ['#e08a3a', '#c0602a', '#8a4020'] : ['#5a9a44', '#3e7a34', '#2a5426'];
+      const leaf =
+        L.ground === 'automne' ? ['#e08a3a', '#c0602a', '#8a4020'] : ['#5a9a44', '#3e7a34', '#2a5426'];
       for (const [bx, by, br] of blobs) {
         for (let y = -br; y < br; y += 4) {
           const hw = Math.round(Math.sqrt(Math.max(0, br * br - y * y)) / 2) * 2;
@@ -3045,7 +3983,8 @@
           R(c, bx - hw, by + y, hw * 2, 4, leaf[1]);
           if (y < 0) R(c, bx - hw, by + y, Math.round(hw * 0.9), 4, leaf[0]);
           if (y > br * 0.3) R(c, bx - hw, by + y, hw * 2, 4, leaf[2]);
-          for (let x = bx - hw + ((y / 4) % 2) * 4; x < bx + hw - 2; x += 8) R(c, x, by + y + 1, 2, 2, y < 0 ? '#8ac860' : leaf[2]);
+          for (let x = bx - hw + ((y / 4) % 2) * 4; x < bx + hw - 2; x += 8)
+            R(c, x, by + y + 1, 2, 2, y < 0 ? '#8ac860' : leaf[2]);
         }
       return top - 110;
     }
@@ -3098,7 +4037,15 @@
       const w = Wd - 56,
         x0 = mid - w / 2;
       top = bot - 60;
-      roundWall(c, { ...L, wall: 'cream', face: ['#f2e8d0', '#e0d2b2', '#c4b28e'], beam: ['#8a6a4a', '#6a4e34'] }, x0, w, top, bot, seed);
+      roundWall(
+        c,
+        { ...L, wall: 'cream', face: ['#f2e8d0', '#e0d2b2', '#c4b28e'], beam: ['#8a6a4a', '#6a4e34'] },
+        x0,
+        w,
+        top,
+        bot,
+        seed
+      );
       doorAt(c, L, mid, bot);
       for (const wx of [x0 + 8, x0 + w - 26]) {
         R(c, wx - 2, top + 12, 22, 22, OUT);
@@ -3113,12 +4060,12 @@
         T = L.tones;
       for (let y = cy - ry; y < cy + 8; y += 4) {
         const t = Math.min(1, (cy - y) / ry),
-          hw = Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * rx / 2) * 2;
+          hw = Math.round((Math.sqrt(Math.max(0, 1 - t * t)) * rx) / 2) * 2;
         R(c, mid - hw - 2, y - 2, hw * 2 + 4, 8, OUT);
       }
       for (let y = cy - ry, i = 0; y < cy + 8; y += 4, i++) {
         const t = Math.min(1, (cy - y) / ry),
-          hw = Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * rx / 2) * 2;
+          hw = Math.round((Math.sqrt(Math.max(0, 1 - t * t)) * rx) / 2) * 2;
         R(c, mid - hw, y, hw * 2, 4, y > cy ? T[3] : T[1]);
         R(c, mid - hw, y, Math.round(hw * 0.4), 4, y > cy ? T[3] : T[0]);
         R(c, mid + hw - Math.round(hw * 0.35), y, Math.round(hw * 0.35), 4, T[2]);
@@ -3241,7 +4188,11 @@
       R(c, x + 8, y - 30, 9, 2, '#d4d4dc');
     },
     sacks(c, x, y) {
-      for (const [dx, dy] of [[0, 0], [14, 0], [7, -12]]) {
+      for (const [dx, dy] of [
+        [0, 0],
+        [14, 0],
+        [7, -12]
+      ]) {
         R(c, x + dx - 1, y + dy - 15, 16, 16, OUT);
         R(c, x + dx, y + dy - 14, 14, 14, '#c8a878');
         R(c, x + dx + 4, y + dy - 16, 6, 3, '#a8885a');
@@ -3282,8 +4233,14 @@
       R(c, x + 3, y + 2, w - 6, 4, '#d8a040');
     },
     palm(c, x, y) {
-      for (let k = 0; k < 40; k += 4) R(c, x + Math.round(Math.sin(k * 0.05) * 4) - 3, y - k - 4, 6, 4, k % 8 ? '#8a6a3a' : '#a8844a');
-      for (const [dx, dy, w] of [[-22, -46, 24], [2, -48, 24], [-14, -54, 28], [-6, -42, 12]]) {
+      for (let k = 0; k < 40; k += 4)
+        R(c, x + Math.round(Math.sin(k * 0.05) * 4) - 3, y - k - 4, 6, 4, k % 8 ? '#8a6a3a' : '#a8844a');
+      for (const [dx, dy, w] of [
+        [-22, -46, 24],
+        [2, -48, 24],
+        [-14, -54, 28],
+        [-6, -42, 12]
+      ]) {
         R(c, x + dx - 1, y + dy - 1, w + 2, 7, OUT);
         R(c, x + dx, y + dy, w, 5, '#3e7a34');
         R(c, x + dx, y + dy, w, 2, '#5a9a44');
@@ -3328,7 +4285,13 @@
         PROP.bed(c, X - 48, y, 40, ['#9a7ae0', '#ffffff']);
         return true;
       case 'chene':
-        for (const [dx, col] of [[-50, '#c83a2a'], [-34, '#e85a7a'], [Wd + 14, '#c83a2a'], [Wd + 30, '#f0c040']]) PROP.mushroom(c, X + dx, y - 6, col, false);
+        for (const [dx, col] of [
+          [-50, '#c83a2a'],
+          [-34, '#e85a7a'],
+          [Wd + 14, '#c83a2a'],
+          [Wd + 30, '#f0c040']
+        ])
+          PROP.mushroom(c, X + dx, y - 6, col, false);
         PROP.lantern(c, X - 18, y);
         if (FX) FX.push([7, X - 40, b.y * TS - 120, Wd + 80, 200, ['#5a9a44', '#8ac860', '#e0c040'], b.x]);
         return true;
@@ -3361,7 +4324,13 @@
         if (FX) FX.push([7, X - 50, b.y * TS - 90, Wd + 100, 170, ['#e8a040', '#c84a2a', '#f0c040'], b.x]);
         return true;
       case 'cristaux':
-        for (const [dx, col] of [[-56, '#c89aff'], [-40, '#9af0ff'], [Wd + 30, '#ff9af0'], [Wd + 46, '#c89aff']]) PROP.mushroom(c, X + dx, y - 4, col, true);
+        for (const [dx, col] of [
+          [-56, '#c89aff'],
+          [-40, '#9af0ff'],
+          [Wd + 30, '#ff9af0'],
+          [Wd + 46, '#c89aff']
+        ])
+          PROP.mushroom(c, X + dx, y - 4, col, true);
         return true;
     }
     return false;
@@ -3407,7 +4376,10 @@
     const decorated = surroundings(c, b, L, { X, Wd, base, mid, seed });
     // Détails propres à chaque lieu.
     if (L.crates)
-      for (const [dx, dy] of [[Wd - 4, 0], [Wd + 14, 6]]) {
+      for (const [dx, dy] of [
+        [Wd - 4, 0],
+        [Wd + 14, 6]
+      ]) {
         R(c, X + dx - 1, base - 31 + dy, 24, 24, OUT);
         R(c, X + dx, base - 30 + dy, 22, 22, '#a07444');
         R(c, X + dx, base - 30 + dy, 22, 3, '#c8945a');
@@ -3437,22 +4409,119 @@
   }
   // ---------------------------------------------------------------- Matières et finition
   // Codes des matières (canal rouge de l'image jumelle).
-  const M = { none: 0, plaster: 1, stone: 2, wood: 3, logs: 4, thatch: 5, tiles: 6, slate: 7, shingles: 8, glass: 9, metal: 10, leaves: 11, cloth: 12, crystal: 13, adobe: 14, bark: 15, reeds: 16, plain: 17, cap: 18 };
+  const M = {
+    none: 0,
+    plaster: 1,
+    stone: 2,
+    wood: 3,
+    logs: 4,
+    thatch: 5,
+    tiles: 6,
+    slate: 7,
+    shingles: 8,
+    glass: 9,
+    metal: 10,
+    leaves: 11,
+    cloth: 12,
+    crystal: 13,
+    adobe: 14,
+    bark: 15,
+    reeds: 16,
+    plain: 17,
+    cap: 18
+  };
   // Relief de chaque matière : hauteur du biseau des blocs et force du grain en relief.
   const BEVEL = [0, 0.4, 1.4, 1, 1.3, 0.6, 1.1, 1.1, 1, 0.3, 0.6, 0.9, 0.3, 1.2, 0.5, 1.1, 0.6, 0.4, 0.5];
-  const BUMP = [0, 0.25, 0.6, 0.45, 0.5, 0.9, 0.35, 0.3, 0.45, 0, 0.2, 0.8, 0.3, 0, 0.35, 0.9, 0.9, 0.15, 0.2];
+  const BUMP = [
+    0, 0.25, 0.6, 0.45, 0.5, 0.9, 0.35, 0.3, 0.45, 0, 0.2, 0.8, 0.3, 0, 0.35, 0.9, 0.9, 0.15, 0.2
+  ];
   // Couleur → matière, pour un bâtiment donné (murs, poutres, toit selon son allure ; détails communs).
   function matsFor(b, L) {
     const map = new Map(),
       put = (cols, m) => cols.forEach(c => map.set(c, m)),
-      wall = { timber: M.plaster, stone: M.stone, logs: M.logs, planks: M.wood, adobe: M.adobe }[L.wall] ?? M.plaster,
-      roof = { thatch: M.thatch, reeds: M.reeds, tiles: M.tiles, slate: M.slate, shingles: M.shingles, flat: M.adobe }[L.roof] ?? M.shingles;
-    put(['#9a9aa0', '#c4c4ca', '#8e8a84', '#76726c', '#a4a09a', '#b89a70', '#a2865e', '#c8aa80', '#8a84a4', '#746e90', '#9e98b8', '#b4ae9e', '#9c9686', '#7e786a', '#d8b47e', '#c49e6a', '#a8844f', '#a49cc0', '#8c84aa', '#6e668e', '#9a5a44', '#6a3a2c', '#8a8680', '#64605a', '#5a5a62'], M.stone);
-    put(['#8a5a34', '#a87444', '#5e3c22', '#7a5230', '#b08250', '#a07444', '#c8945a', '#8a5a34', '#a8743e', '#6a4226', '#7a5638', '#c8a070', '#6a4a2a', '#3a2a1e', '#4a3020', '#7a6446', '#c8a878'], M.wood);
+      wall =
+        { timber: M.plaster, stone: M.stone, logs: M.logs, planks: M.wood, adobe: M.adobe }[L.wall] ??
+        M.plaster,
+      roof =
+        {
+          thatch: M.thatch,
+          reeds: M.reeds,
+          tiles: M.tiles,
+          slate: M.slate,
+          shingles: M.shingles,
+          flat: M.adobe
+        }[L.roof] ?? M.shingles;
+    put(
+      [
+        '#9a9aa0',
+        '#c4c4ca',
+        '#8e8a84',
+        '#76726c',
+        '#a4a09a',
+        '#b89a70',
+        '#a2865e',
+        '#c8aa80',
+        '#8a84a4',
+        '#746e90',
+        '#9e98b8',
+        '#b4ae9e',
+        '#9c9686',
+        '#7e786a',
+        '#d8b47e',
+        '#c49e6a',
+        '#a8844f',
+        '#a49cc0',
+        '#8c84aa',
+        '#6e668e',
+        '#9a5a44',
+        '#6a3a2c',
+        '#8a8680',
+        '#64605a',
+        '#5a5a62'
+      ],
+      M.stone
+    );
+    put(
+      [
+        '#8a5a34',
+        '#a87444',
+        '#5e3c22',
+        '#7a5230',
+        '#b08250',
+        '#a07444',
+        '#c8945a',
+        '#8a5a34',
+        '#a8743e',
+        '#6a4226',
+        '#7a5638',
+        '#c8a070',
+        '#6a4a2a',
+        '#3a2a1e',
+        '#4a3020',
+        '#7a6446',
+        '#c8a878'
+      ],
+      M.wood
+    );
     put(['#ffd890', '#fff0c0', '#f0c070'], M.glass);
     put(['#3a3a40', '#e0c060', '#4a4a52', '#c9a24a', '#f0d070', '#fff2a0'], M.metal);
     put(['#7a5434', '#5e3e24', '#3e2a18', '#664428', '#2e1e10'], M.bark);
-    put(['#5a9a44', '#3e7a34', '#2a5426', '#8ac860', '#e08a3a', '#c0602a', '#8a4020', '#4f8a42', '#6aa852', '#4e7434', '#6e9a48'], M.leaves);
+    put(
+      [
+        '#5a9a44',
+        '#3e7a34',
+        '#2a5426',
+        '#8ac860',
+        '#e08a3a',
+        '#c0602a',
+        '#8a4020',
+        '#4f8a42',
+        '#6aa852',
+        '#4e7434',
+        '#6e9a48'
+      ],
+      M.leaves
+    );
     put(['#e8dcc0', '#b8423a', '#3a6a9a', '#a8343a', '#d8a040'], M.cloth);
     put(['#9af0ff', '#c89aff', '#ffb0f0', '#9ae0ff', '#e0f8ff'], M.crystal);
     put(['#f4ecda', '#d6c6a4', '#f6eedc', '#d8c8a8', '#fff2d8'], M.adobe);
@@ -3517,11 +4586,13 @@
           m = code[i];
         if (!m || d[i * 4 + 3] < 200) continue;
         const me = id[i],
-          same = (u, v) => u >= 0 && v >= 0 && u < W2 && v < H2 && id[v * W2 + u] === me && code[v * W2 + u] === m;
+          same = (u, v) =>
+            u >= 0 && v >= 0 && u < W2 && v < H2 && id[v * W2 + u] === me && code[v * W2 + u] === m;
         let dist = 3,
           h = 0,
           v = 0;
-        for (let k = 1; k <= 3 && dist === 3; k++) if (!same(x - k, y) || !same(x + k, y) || !same(x, y - k) || !same(x, y + k)) dist = k - 1;
+        for (let k = 1; k <= 3 && dist === 3; k++)
+          if (!same(x - k, y) || !same(x + k, y) || !same(x, y - k) || !same(x, y + k)) dist = k - 1;
         for (let k = 1; k <= 8; k++) {
           if (same(x - k, y)) h++;
           if (same(x + k, y)) h++;
@@ -3562,7 +4633,8 @@
             case M.stone:
               f *= 0.93 + hsh(me, 1, 11) * 0.14;
               if (hsh(x, y, 12) > 0.975) f *= 0.72;
-              if (mossy && vn(x / 7, y / 7, 13) > 0.62 && (y > groundY - 30 || hsh(me, 2, 14) > 0.7)) (tint = [78, 120, 54]), (tintK = 0.45);
+              if (mossy && vn(x / 7, y / 7, 13) > 0.62 && (y > groundY - 30 || hsh(me, 2, 14) > 0.7))
+                ((tint = [78, 120, 54]), (tintK = 0.45));
               break;
             case M.plaster:
             case M.adobe:
@@ -3571,9 +4643,16 @@
               break;
             case M.wood:
             case M.logs:
-              f *= 1 + Math.sin((runH[i] >= runV[i] ? y * 1.7 + vn(x / 10, y, 18) * 5 : x * 1.7 + vn(x, y / 10, 18) * 5) + me) * 0.06;
+              f *=
+                1 +
+                Math.sin(
+                  (runH[i] >= runV[i] ? y * 1.7 + vn(x / 10, y, 18) * 5 : x * 1.7 + vn(x, y / 10, 18) * 5) +
+                    me
+                ) *
+                  0.06;
               if (hsh(x >> 1, y >> 1, 19) > 0.985) f *= 0.75;
-              if (mossy && wet > 0 && vn(x / 6, y / 4, 20) > 0.58) (tint = [70, 100, 48]), (tintK = 0.35 * wet);
+              if (mossy && wet > 0 && vn(x / 6, y / 4, 20) > 0.58)
+                ((tint = [70, 100, 48]), (tintK = 0.35 * wet));
               break;
             case M.thatch:
             case M.reeds:
@@ -3583,11 +4662,11 @@
             case M.slate:
             case M.shingles:
               f *= 0.92 + hsh(me, 3, 22) * 0.16;
-              if (mossy && vn(x / 5, y / 5, 23) > 0.66) (tint = [84, 118, 60]), (tintK = 0.4);
-              else if (vn(x / 4, y / 4, 24) > 0.78) (tint = [196, 190, 150]), (tintK = 0.25);
+              if (mossy && vn(x / 5, y / 5, 23) > 0.66) ((tint = [84, 118, 60]), (tintK = 0.4));
+              else if (vn(x / 4, y / 4, 24) > 0.78) ((tint = [196, 190, 150]), (tintK = 0.25));
               break;
             case M.glass:
-              if (((x + y) % 16) < 3) f *= 1.22;
+              if ((x + y) % 16 < 3) f *= 1.22;
               f *= 1.05 - Math.min(0.12, ((y % 24) / 24) * 0.12);
               break;
             case M.cloth:
@@ -3608,7 +4687,7 @@
           }
           // Humidité au pied des murs ; poussière claire au désert.
           if (wet > 0 && m !== M.glass && m !== M.crystal) {
-            if (dusty) (tint = tint || [226, 200, 150]), (tintK = Math.max(tintK, 0.3 * wet));
+            if (dusty) ((tint = tint || [226, 200, 150]), (tintK = Math.max(tintK, 0.3 * wet)));
             else f *= 1 - 0.14 * wet;
           }
         } else if (y > groundY - 14) f *= 0.84 + 0.16 * Math.max(0, (groundY - y) / 14);
@@ -3635,7 +4714,16 @@
     if (CANAAN_BUILDING_ART.has(b.room?.id)) {
       const art = CANAAN_BUILDING_ART.paint(b, b.x * TS, (b.y + b.h) * TS, b.w * TS);
       if (art) {
-        s = { cv: art.canvas, x0: art.x0, y0: art.y0, w: art.canvas.width * art.scale, h: art.canvas.height * art.scale, fx: art.fx, roofTop: art.roofTop, art: true };
+        s = {
+          cv: art.canvas,
+          x0: art.x0,
+          y0: art.y0,
+          w: art.canvas.width * art.scale,
+          h: art.canvas.height * art.scale,
+          fx: art.fx,
+          roofTop: art.roofTop,
+          art: true
+        };
         BUILT.set(b, s);
         return s;
       }
@@ -3671,7 +4759,14 @@
       FX = null;
       MAT = null;
     }
-    finish(cv, mg ? mat : null, 70, b.w * TS, (b.y + b.h) * TS - y0 - 6, Math.max(0, ZONES.indexOf(regionAt(b.x + 2, b.y + 1))));
+    finish(
+      cv,
+      mg ? mat : null,
+      70,
+      b.w * TS,
+      (b.y + b.h) * TS - y0 - 6,
+      Math.max(0, ZONES.indexOf(regionAt(b.x + 2, b.y + 1)))
+    );
     BUILT.set(b, s);
     return s;
   }
@@ -3714,7 +4809,8 @@
           c.restore();
         } else if (e[0] === 6) laundry(c, e[1], e[2], e[3]);
         else if (e[0] === 7) leaves(c, e[1], e[2], e[3], e[4], e[5], e[6]);
-        else if (e[0] === 8) canaanLight(e[1], e[2], e[3] * (0.75 + 0.25 * Math.sin(time * 0.06 + e[5])), e[4]);
+        else if (e[0] === 8)
+          canaanLight(e[1], e[2], e[3] * (0.75 + 0.25 * Math.sin(time * 0.06 + e[5])), e[4]);
         else if (e[0] === 9) flag(c, e[1], e[2], e[3], e[4]);
         else if (e[0] === 10) campfire(c, e[1], e[2]);
       }
@@ -3722,10 +4818,12 @@
     } else roofTop = paintBuilding(c, b);
     // Nom du lieu (de près pour les demeures) et invitation à entrer (pas pour les maisons fermées des hameaux).
     const near = Math.hypot(P.x - mid, P.y - base) < 320;
-    if (!b.closed && (b.place || b.sign || b.room === HOME || near)) label(c, b.place ? b.place.name : b.label, mid, roofTop - 8);
+    if (!b.closed && (b.place || b.sign || b.room === HOME || near))
+      label(c, b.place ? b.place.name : b.label, mid, roofTop - 8);
     if (!b.closed) {
       const d = outsideDoor(b);
-      if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Entrer', d.x, s?.art ? base - 52 : base - 86, '#fff2cb');
+      if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
+        label(c, '[E] Entrer', d.x, s?.art ? base - 52 : base - 86, '#fff2cb');
     }
     c.restore();
   }
@@ -3738,7 +4836,8 @@
       for (const b of externals()) {
         if (!!b.under !== (game.world.layer === 'under')) continue;
         const d = outsideDoor(b);
-        if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
+        if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
+          label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
       }
       c.restore();
     }
@@ -3796,19 +4895,46 @@
     bar.innerHTML =
       '<div class="house-head"><b>🏠 Décorer ta maison</b><span>Clic gauche : poser · clic sur un meuble : le déplacer · R : tourner · clic droit ou Échap : annuler · H : terminer</span></div>' +
       '<div class="house-tabs">' +
-      CATS.map(([id, text]) => '<button type="button" class="' + (ui.cat === id ? 'on' : '') + '" data-action="houseCat" data-cat="' + id + '">' + text + '</button>').join('') +
+      CATS.map(
+        ([id, text]) =>
+          '<button type="button" class="' +
+          (ui.cat === id ? 'on' : '') +
+          '" data-action="houseCat" data-cat="' +
+          id +
+          '">' +
+          text +
+          '</button>'
+      ).join('') +
       '<button type="button" class="house-tool" data-action="houseRotate">⟳ Tourner (R)</button>' +
-      '<button type="button" class="house-tool' + (ui.tool === 'remove' ? ' on' : '') + '" data-action="houseTool" data-tool="' + (ui.tool === 'remove' ? 'move' : 'remove') + '">🗑 Retirer</button>' +
-      '<span class="house-count">' + items.length + ' / ' + MAX_ITEMS + ' objets</span></div>' +
+      '<button type="button" class="house-tool' +
+      (ui.tool === 'remove' ? ' on' : '') +
+      '" data-action="houseTool" data-tool="' +
+      (ui.tool === 'remove' ? 'move' : 'remove') +
+      '">🗑 Retirer</button>' +
+      '<span class="house-count">' +
+      items.length +
+      ' / ' +
+      MAX_ITEMS +
+      ' objets</span></div>' +
       '<div class="house-items">' +
       list
         .map(([k, c]) => {
           const url = preview(k),
             locked = c.quest && !CANAAN_QUESTS.hasDeco(game.hero, k);
           return (
-            '<button type="button" class="house-item' + (ui.selected === k ? ' on' : '') + (locked ? ' locked' : '') + '" data-action="houseSelect" data-item="' + k + '"' +
-            (locked ? ' title="Récompense de quête : ' + esc(questById(c.quest).title) + '"' : '') + '>' +
-            (url ? '<img src="' + url + '" alt="">' : '') + '<span>' + (locked ? '🔒 ' : '') + esc(c.name) + '</span></button>'
+            '<button type="button" class="house-item' +
+            (ui.selected === k ? ' on' : '') +
+            (locked ? ' locked' : '') +
+            '" data-action="houseSelect" data-item="' +
+            k +
+            '"' +
+            (locked ? ' title="Récompense de quête : ' + esc(questById(c.quest).title) + '"' : '') +
+            '>' +
+            (url ? '<img src="' + url + '" alt="">' : '') +
+            '<span>' +
+            (locked ? '🔒 ' : '') +
+            esc(c.name) +
+            '</span></button>'
           );
         })
         .join('') +
@@ -3930,8 +5056,16 @@
   function residents() {
     const out = [];
     for (const b of [...buildings, ...externals().filter(e => !e.under)])
-      for (const [role, lx, ly] of RESIDENTS[b.room.id] || []) out.push({ role, tx: b.room.x + lx - 0.5, ty: b.room.y + ly - 0.5, place: b.place || null, inside: true });
-    for (const b of buildings) if (b.place) out.push({ role: null, tx: b.place.x, ty: b.place.y + 1, place: b.place, inside: false });
+      for (const [role, lx, ly] of RESIDENTS[b.room.id] || [])
+        out.push({
+          role,
+          tx: b.room.x + lx - 0.5,
+          ty: b.room.y + ly - 0.5,
+          place: b.place || null,
+          inside: true
+        });
+    for (const b of buildings)
+      if (b.place) out.push({ role: null, tx: b.place.x, ty: b.place.y + 1, place: b.place, inside: false });
     return out;
   }
   window.CANAAN_HOUSE = Object.freeze({
@@ -3946,11 +5080,29 @@
       for (const b of buildings) {
         const s = BUILT.get(b);
         if (!s || !visible((b.x + b.w / 2) * TS, (b.y + b.h / 2) * TS, 340)) continue;
-        out.push({ x0: s.x0 + 30, x1: s.x0 + s.w - 30, y0: s.y0, base: (b.y + b.h) * TS - 4, draw: c => (s.art ? c.drawImage(s.cv, s.x0, s.y0, s.w, s.h) : c.drawImage(s.cv, s.x0, s.y0)) });
+        out.push({
+          x0: s.x0 + 30,
+          x1: s.x0 + s.w - 30,
+          y0: s.y0,
+          base: (b.y + b.h) * TS - 4,
+          draw: c => (s.art ? c.drawImage(s.cv, s.x0, s.y0, s.w, s.h) : c.drawImage(s.cv, s.x0, s.y0))
+        });
       }
       return out;
     },
-    buildings: () => buildings.map(b => ({ id: b.room.id, name: b.room.name, kind: b.room.kind, style: b.style, x: b.x, y: b.y, w: b.w, h: b.h, door: outsideDoor(b), inside: insideDoor(b.room) })),
+    buildings: () =>
+      buildings.map(b => ({
+        id: b.room.id,
+        name: b.room.name,
+        kind: b.room.kind,
+        style: b.style,
+        x: b.x,
+        y: b.y,
+        w: b.w,
+        h: b.h,
+        door: outsideDoor(b),
+        inside: insideDoor(b.room)
+      })),
     outsideDoor: id => outsideDoor(id ? buildings.find(b => b.room.id === id) : homeB()),
     insideDoor: id => insideDoor(id ? ROOM[id] : HOME),
     inside,
@@ -3964,7 +5116,8 @@
     items: () => items.map(it => ({ ...it })),
     roomItems: id => itemsOf(ROOM[id]).map(it => ({ ...it })),
     // Aperçu d'une façade (tests et outils) : style de LOOKS, posée sur la case (tx, ty).
-    drawFacade: (c, style, tx, ty) => drawBuilding(c, { style, x: tx, y: ty, w: 4, h: 3, room: ROOM.chene, label: style }),
+    drawFacade: (c, style, tx, ty) =>
+      drawBuilding(c, { style, x: tx, y: ty, w: 4, h: 3, room: ROOM.chene, label: style }),
     styles: () => Object.keys(LOOKS),
     residents,
     layout,
@@ -3976,7 +5129,16 @@
     nearStove,
     drawTile,
     stampUnder,
-    entrances: () => entrances().map(b => ({ id: b.room.id, x: b.x, y: b.y, w: b.w, h: b.h, under: !!b.under, door: outsideDoor(b) })),
+    entrances: () =>
+      entrances().map(b => ({
+        id: b.room.id,
+        x: b.x,
+        y: b.y,
+        w: b.w,
+        h: b.h,
+        under: !!b.under,
+        door: outsideDoor(b)
+      })),
     draw,
     click,
     toggle,

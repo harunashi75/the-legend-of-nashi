@@ -27,7 +27,8 @@ export function rollRarity(rng) {
 }
 // Une arme sans famille connue devient une épée.
 export function ensureWeaponType(item) {
-  if (item && item.slot === 'weapon' && !Object.hasOwn(WEAPON_TYPES, item.weaponType)) item.weaponType = 'sword';
+  if (item && item.slot === 'weapon' && !Object.hasOwn(WEAPON_TYPES, item.weaponType))
+    item.weaponType = 'sword';
 }
 // Niveau d'un objet (1 à 60) ; 0 pour un emplacement vide.
 export function itemLevel(item) {

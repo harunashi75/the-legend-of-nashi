@@ -76,7 +76,8 @@ function toggleTalents() {
 // Les portails d'instances et de l'Arène restent intacts ; le seul autre PNJ est le marchand du Camp de l'Aurore,
 // derrière le comptoir de son échoppe (pièce « echoppe », voir house.js).
 for (let i = game.world.npcs.length - 1; i >= 0; i--)
-  if (game.world.npcs[i].type !== 'portal' && game.world.npcs[i].type !== 'arena') game.world.npcs.splice(i, 1);
+  if (game.world.npcs[i].type !== 'portal' && game.world.npcs[i].type !== 'arena')
+    game.world.npcs.splice(i, 1);
 game.world.npcs.push({
   x: (CANAAN_ROOMS[1].x + 6.5) * TS,
   y: (CANAAN_ROOMS[1].y + 3.45) * TS,
@@ -93,6 +94,9 @@ function onWorldBossKilled(m, hero = game.hero) {
   hero.player.gold += gold;
   grantSourceReward('worldBoss', hero, canaanMobLevel(m));
   canaanLootNotice(hero, '🏆 ' + m.t + ' : +' + gold + ' or !');
-  chat('Boss mondial', m.t + ' vaincu ! ' + gold + ' or et un objet Rare reçus. Réapparition dans 3 minutes.');
+  chat(
+    'Boss mondial',
+    m.t + ' vaincu ! ' + gold + ' or et un objet Rare reçus. Réapparition dans 3 minutes.'
+  );
   saveGame();
 }

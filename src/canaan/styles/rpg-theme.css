@@ -8,7 +8,8 @@
     rgba(0, 0, 0, 0.04) 2px 5px,
     rgba(255, 220, 160, 0.015) 5px 9px
   );
-  --rpg-rivets: radial-gradient(circle at 9px 9px, #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
+  --rpg-rivets:
+    radial-gradient(circle at 9px 9px, #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
     radial-gradient(circle at calc(100% - 9px) 9px, #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
     radial-gradient(circle at 9px calc(100% - 9px), #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
     radial-gradient(
@@ -23,8 +24,9 @@
   --rpg-ink: #f3e6c8;
   --rpg-muted: #b8a483;
   --rpg-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
-  --rpg-frame: 0 0 0 1px #0c0805, inset 0 0 0 1px rgba(255, 226, 160, 0.18),
-    inset 0 0 0 3px rgba(0, 0, 0, 0.35), inset 0 0 28px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.55);
+  --rpg-frame:
+    0 0 0 1px #0c0805, inset 0 0 0 1px rgba(255, 226, 160, 0.18), inset 0 0 0 3px rgba(0, 0, 0, 0.35),
+    inset 0 0 28px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.55);
 }
 html,
 body {
@@ -427,7 +429,8 @@ body {
 
 /* Écran titre et menu pause. */
 #title {
-  background: radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%),
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%),
     radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
 }
 #title h1 {
@@ -565,7 +568,9 @@ body {
 #settingsCard {
   background: var(--rpg-rivets), var(--rpg-grain), var(--rpg-wood);
   border: 2px solid var(--rpg-gold-dark);
-  box-shadow: var(--rpg-frame), 0 30px 100px rgba(0, 0, 0, 0.7);
+  box-shadow:
+    var(--rpg-frame),
+    0 30px 100px rgba(0, 0, 0, 0.7);
   color: var(--rpg-ink);
 }
 #settingsCard h2,
@@ -613,7 +618,11 @@ body {
   justify-content: center;
   border-width: 2px;
   border-radius: 8px;
-  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--rarity, #3a2c20) 32%, #2a1e14), #140e09 78%);
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(in srgb, var(--rarity, #3a2c20) 32%, #2a1e14),
+    #140e09 78%
+  );
 }
 #window#window .bag-cell .bag-icon {
   line-height: 1;
@@ -694,7 +703,11 @@ body {
   justify-content: center;
   border-width: 2px;
   border-radius: 8px;
-  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--rarity, transparent) 32%, #2a1e14), #140e09 78%);
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(in srgb, var(--rarity, transparent) 32%, #2a1e14),
+    #140e09 78%
+  );
 }
 #window#window .equip-square .eq-icon {
   line-height: 1;
@@ -718,7 +731,9 @@ body {
   white-space: nowrap;
 }
 #window#window .equip-square.active-weapon {
-  box-shadow: 0 0 0 2px #45e1db66, 0 0 12px #45e1db55;
+  box-shadow:
+    0 0 0 2px #45e1db66,
+    0 0 12px #45e1db55;
 }
 /* Noms des Rubis sous leur emplacement : coupés entre les mots seulement. */
 #window .rubis-slot em {
@@ -842,7 +857,9 @@ body {
   filter: drop-shadow(0 0 3px #c890ff);
 }
 #window#window .ench-pick .bag-sale-wrap.picked .bag-cell {
-  box-shadow: 0 0 0 3px #d9a8ff, 0 0 14px #c890ff;
+  box-shadow:
+    0 0 0 3px #d9a8ff,
+    0 0 14px #c890ff;
 }
 #window#window .ench-pick,
 #window#window .ench-targets {
@@ -890,13 +907,13 @@ body {
   transform: skewX(-18deg);
   animation: prestige-shine 3.2s ease-in-out infinite;
 }
-#window#window [data-prestige="legendaire"] {
+#window#window [data-prestige='legendaire'] {
   --glow-a: #ff983d88;
   --glow-b: #ffd76a77;
   --wave: #ffb35a2a;
   animation: prestige-pulse-leg 2.4s ease-in-out infinite;
 }
-#window#window [data-prestige="mythique"] {
+#window#window [data-prestige='mythique'] {
   --glow-a: #45e1db88;
   --glow-b: #c890ff77;
   --wave: #7af0ff2a;
@@ -931,19 +948,27 @@ body {
 @keyframes prestige-pulse-leg {
   0%,
   100% {
-    box-shadow: 0 0 6px #ff983d88, inset 0 0 8px #ff983d55;
+    box-shadow:
+      0 0 6px #ff983d88,
+      inset 0 0 8px #ff983d55;
   }
   50% {
-    box-shadow: 0 0 16px #ffb35acc, inset 0 0 14px #ffd76a88;
+    box-shadow:
+      0 0 16px #ffb35acc,
+      inset 0 0 14px #ffd76a88;
   }
 }
 @keyframes prestige-pulse-myth {
   0%,
   100% {
-    box-shadow: 0 0 6px #45e1db88, inset 0 0 8px #45e1db55;
+    box-shadow:
+      0 0 6px #45e1db88,
+      inset 0 0 8px #45e1db55;
   }
   50% {
-    box-shadow: 0 0 18px #7af0ffcc, inset 0 0 14px #c890ff88;
+    box-shadow:
+      0 0 18px #7af0ffcc,
+      inset 0 0 14px #c890ff88;
   }
 }
 @media (prefers-reduced-motion: reduce) {

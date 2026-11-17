@@ -35,7 +35,9 @@
   function bossMaxHealth(m) {
     const { raid, level } = bossTier(m);
     if (m.worldBoss) return bossHealth(level, 'world');
-    return Math.round(bossHealth(level, raid ? 'raid' : 'dungeon') * (instanceDifficulty()?.hp || 1) * canaanGroupScale().hp);
+    return Math.round(
+      bossHealth(level, raid ? 'raid' : 'dungeon') * (instanceDifficulty()?.hp || 1) * canaanGroupScale().hp
+    );
   }
   function scaleBossHp(m) {
     // Les boss de l'Arène ont des PV fixes.
@@ -77,5 +79,11 @@
     }
   };
   // Noms publics du module ; tout le reste est privé.
-  Object.assign(window, { bossTier, scaleBossHp, canaanMobLevel: mobLevel, canaanSetupMob: setupMob, canaanZoneIndexAt: zoneIndexAt });
+  Object.assign(window, {
+    bossTier,
+    scaleBossHp,
+    canaanMobLevel: mobLevel,
+    canaanSetupMob: setupMob,
+    canaanZoneIndexAt: zoneIndexAt
+  });
 })();

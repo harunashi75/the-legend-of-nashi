@@ -15,7 +15,17 @@
 
   // ---------------------------------------------------------------- Plan (cases depuis le centre du camp)
   // Ruisseau : ligne médiane de la source à la mare.
-  const STREAM = [[-19, -15], [-18, -11], [-16, -7], [-15, -3], [-16, 1], [-17, 5], [-17, 9], [-19, 12], [-20, 14]];
+  const STREAM = [
+    [-19, -15],
+    [-18, -11],
+    [-16, -7],
+    [-15, -3],
+    [-16, 1],
+    [-17, 5],
+    [-17, 9],
+    [-19, 12],
+    [-20, 14]
+  ];
   const POND = { at: [-20, 14], r: 2.5 };
   // Chemins de terre : allée de la ferme, allée du verger, sentier du jardin et cour de la ferme.
   const PATHS = [
@@ -30,7 +40,9 @@
   // Places de rechange de la forge autour du camp (cases depuis le camp), des plus proches aux plus lointaines.
   const FORGE_SPOTS = [];
   for (let dy = -12; dy <= 12; dy += 2) for (let dx = -26; dx <= 26; dx += 2) FORGE_SPOTS.push([dx, dy]);
-  FORGE_SPOTS.sort((a, b) => Math.abs(a[0] - 9) + Math.abs(a[1] - 1) - (Math.abs(b[0] - 9) + Math.abs(b[1] - 1)));
+  FORGE_SPOTS.sort(
+    (a, b) => Math.abs(a[0] - 9) + Math.abs(a[1] - 1) - (Math.abs(b[0] - 9) + Math.abs(b[1] - 1))
+  );
   const PROPS = [
     { kind: 'barn', x: 2, y: 6, w: 5, h: 4, block: true },
     { kind: 'silo', x: 7, y: 8, w: 2, h: 2, block: true },
@@ -71,15 +83,95 @@
     // Embellissements du camp (posés seulement s'ils trouvent leur place) : jardinières fleuries, étal du marché,
     // panneau d'affichage, poteau indicateur, bancs autour de la fontaine. Jamais sur les rangées du point d'apparition
     // (2 à 4 cases sous le centre), où l'on arrive et repart.
-    ...[[-4, -9], [3, -9], [4, -7], [10, -6], [-13, -4], [-8, -5], [-13, 5], [-8, 5], [3, -4], [-9, -9]].map(([x, y]) => ({ kind: 'planter', x, y, w: 1, h: 1, block: true, optional: true })),
-    { kind: 'stall', x: 6, y: -5, w: 3, h: 1, block: true, optional: true, alt: [[11, -4], [5, -3], [-12, -1], [6, 4]] },
-    { kind: 'board', x: -9, y: 0, w: 2, h: 1, block: true, optional: true, alt: [[-10, -2], [6, 0], [-9, 2], [7, -2]] },
-    { kind: 'signpost', x: 5, y: 1, w: 1, h: 1, block: true, optional: true, alt: [[8, 1], [-7, 1]] },
-    { kind: 'bench', x: -9, y: -6, w: 2, h: 1, block: true, optional: true, alt: [[-9, -4], [-1, -6]] },
-    { kind: 'bench', x: -1, y: -4, w: 2, h: 1, block: true, optional: true, alt: [[-1, -3], [-8, -2]] }
+    ...[
+      [-4, -9],
+      [3, -9],
+      [4, -7],
+      [10, -6],
+      [-13, -4],
+      [-8, -5],
+      [-13, 5],
+      [-8, 5],
+      [3, -4],
+      [-9, -9]
+    ].map(([x, y]) => ({ kind: 'planter', x, y, w: 1, h: 1, block: true, optional: true })),
+    {
+      kind: 'stall',
+      x: 6,
+      y: -5,
+      w: 3,
+      h: 1,
+      block: true,
+      optional: true,
+      alt: [
+        [11, -4],
+        [5, -3],
+        [-12, -1],
+        [6, 4]
+      ]
+    },
+    {
+      kind: 'board',
+      x: -9,
+      y: 0,
+      w: 2,
+      h: 1,
+      block: true,
+      optional: true,
+      alt: [
+        [-10, -2],
+        [6, 0],
+        [-9, 2],
+        [7, -2]
+      ]
+    },
+    {
+      kind: 'signpost',
+      x: 5,
+      y: 1,
+      w: 1,
+      h: 1,
+      block: true,
+      optional: true,
+      alt: [
+        [8, 1],
+        [-7, 1]
+      ]
+    },
+    {
+      kind: 'bench',
+      x: -9,
+      y: -6,
+      w: 2,
+      h: 1,
+      block: true,
+      optional: true,
+      alt: [
+        [-9, -4],
+        [-1, -6]
+      ]
+    },
+    {
+      kind: 'bench',
+      x: -1,
+      y: -4,
+      w: 2,
+      h: 1,
+      block: true,
+      optional: true,
+      alt: [
+        [-1, -3],
+        [-8, -2]
+      ]
+    }
   ];
   // Zones de la ferme où aucun monstre n'apparaît (cases depuis le camp).
-  const CALM = [[-15, 3, 9, 20], [-28, 0, -19, 13], [-9, -20, 3, -13], [-22, -16, -14, 16]];
+  const CALM = [
+    [-15, 3, 9, 20],
+    [-28, 0, -19, 13],
+    [-9, -20, 3, -13],
+    [-22, -16, -14, 16]
+  ];
 
   // ---------------------------------------------------------------- État posé sur l'île
   let ground = new Map(); // case → { type: 'stream' | 'pond' | 'plaza' | 'field' | 'gpath' | 'bed' | 'flowers', ... }
@@ -106,7 +198,12 @@
         const t = j / 12,
           t2 = t * t,
           t3 = t2 * t;
-        const f = k => 0.5 * (2 * b[k] + (-a[k] + d[k]) * t + (2 * a[k] - 5 * b[k] + 4 * d[k] - e[k]) * t2 + (-a[k] + 3 * b[k] - 3 * d[k] + e[k]) * t3);
+        const f = k =>
+          0.5 *
+          (2 * b[k] +
+            (-a[k] + d[k]) * t +
+            (2 * a[k] - 5 * b[k] + 4 * d[k] - e[k]) * t2 +
+            (-a[k] + 3 * b[k] - 3 * d[k] + e[k]) * t3);
         out.push([f(0), f(1)]);
       }
     }
@@ -133,12 +230,22 @@
       sites = Object.values(CANAAN_QUESTS.sites()),
       taken = tools.taken();
     // Une case libre : sur l'île, ni roche ni eau, hors des bâtiments, des lieux de quête et des coffres.
-    const house = (x, y) => houses.some(b => x >= b.x - 1 && x <= b.x + b.w && y >= b.y - 1 && y <= b.y + b.h);
-    const quest = (x, y) => sites.some(s => Math.hypot(s.x - x, s.y - y) <= s.r + 1.5) || canaanQuestWalk((x + 0.5) * T, (y + 0.5) * T) !== null;
+    const house = (x, y) =>
+      houses.some(b => x >= b.x - 1 && x <= b.x + b.w && y >= b.y - 1 && y <= b.y + b.h);
+    const quest = (x, y) =>
+      sites.some(s => Math.hypot(s.x - x, s.y - y) <= s.r + 1.5) ||
+      canaanQuestWalk((x + 0.5) * T, (y + 0.5) * T) !== null;
     const spot = (x, y) => taken.some(([a, b]) => Math.abs(a - x) <= 1 && Math.abs(b - y) <= 1);
-    const land = (x, y) => tools.valid(x, y) && !SOLID.includes(tiles[y][x]) && tiles[y][x] !== 15 && !BRIDGE_TILES.has(key(x, y));
+    const land = (x, y) =>
+      tools.valid(x, y) && !SOLID.includes(tiles[y][x]) && tiles[y][x] !== 15 && !BRIDGE_TILES.has(key(x, y));
     // La pelouse du jardin accueille ses propres objets (pommiers, banc, bain d'oiseaux).
-    const free = (x, y) => land(x, y) && !house(x, y) && !quest(x, y) && !spot(x, y) && (ground.get(key(x, y))?.type || 'lawn') === 'lawn' && !solid.has(key(x, y));
+    const free = (x, y) =>
+      land(x, y) &&
+      !house(x, y) &&
+      !quest(x, y) &&
+      !spot(x, y) &&
+      (ground.get(key(x, y))?.type || 'lawn') === 'lawn' &&
+      !solid.has(key(x, y));
     const clear = (x, y) => {
       if (grid[y]) grid[y][x] = null;
     };
@@ -163,7 +270,8 @@
         len = Math.hypot(nx - px, ny - py) || 1;
       for (let y = Math.floor(fy) - 2; y <= Math.ceil(fy) + 2; y++)
         for (let x = Math.floor(fx) - 2; x <= Math.ceil(fx) + 2; x++)
-          if (Math.hypot(x - fx, y - fy) < 1) water(cx + x, cy + y, { type: 'stream', fx: (nx - px) / len, fy: (ny - py) / len });
+          if (Math.hypot(x - fx, y - fy) < 1)
+            water(cx + x, cy + y, { type: 'stream', fx: (nx - px) / len, fy: (ny - py) / len });
     });
     // Une route qui coupe le ruisseau passe tout entière sur un pont (de la rive amont à la rive aval).
     const bridgeAcross = () => {
@@ -171,7 +279,12 @@
         if (g.type !== 'stream' && g.type !== 'pond') continue;
         const x = k % MAPW,
           y = (k - x) / MAPW;
-        for (const [dx, dy] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+        for (const [dx, dy] of [
+          [0, 1],
+          [1, 0],
+          [0, -1],
+          [-1, 0]
+        ]) {
           const run = [];
           let n = 1;
           for (; n <= 5; n++) {
@@ -180,7 +293,8 @@
             run.push(key(x + dx * n, y + dy * n));
           }
           const after = ground.get(key(x + dx * n, y + dy * n));
-          if (run.length && after && (after.type === 'stream' || after.type === 'pond')) for (const r of run) BRIDGE_TILES.add(r);
+          if (run.length && after && (after.type === 'stream' || after.type === 'pond'))
+            for (const r of run) BRIDGE_TILES.add(r);
         }
       }
     };
@@ -198,7 +312,16 @@
       }
     // Source : un tas de rochers au bout du ruisseau.
     const [sx, sy] = STREAM[0];
-    items.push({ kind: 'spring', tx: cx + sx, ty: cy + sy, w: 1, h: 1, x: (cx + sx) * T, y: (cy + sy) * T, base: (cy + sy) * T + 6 });
+    items.push({
+      kind: 'spring',
+      tx: cx + sx,
+      ty: cy + sy,
+      w: 1,
+      h: 1,
+      x: (cx + sx) * T,
+      y: (cy + sy) * T,
+      base: (cy + sy) * T + 6
+    });
 
     // Chemins de terre ; un chemin qui croise le ruisseau passe sur un pont droit, aussi large que le chemin.
     for (const [x0, y0, x1, y1] of PATHS) {
@@ -236,13 +359,22 @@
     // Objets : toute l'emprise doit être libre (et hors des chemins pour ce qui bloque).
     for (const p of PROPS) {
       const path = (x, y) => tiles[y][x] === 2;
-      const fits = (x, y) => (p.on && ground.get(key(x, y))?.type === p.on ? land(x, y) && !solid.has(key(x, y)) : free(x, y));
+      const fits = (x, y) =>
+        p.on && ground.get(key(x, y))?.type === p.on ? land(x, y) && !solid.has(key(x, y)) : free(x, y);
       const cellsAt = (x0, y0) => {
         const out = [];
         for (let y = y0; y < y0 + p.h; y++) for (let x = x0; x < x0 + p.w; x++) out.push([x, y]);
         return out;
       };
-      const fitsAt = list => list.every(([x, y]) => (p.onRoad ? land(x, y) && !solid.has(key(x, y)) : p.kind === 'arch' ? land(x, y) || ground.get(key(x, y))?.type === 'gpath' : fits(x, y) && (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))));
+      const fitsAt = list =>
+        list.every(([x, y]) =>
+          p.onRoad
+            ? land(x, y) && !solid.has(key(x, y))
+            : p.kind === 'arch'
+              ? land(x, y) || ground.get(key(x, y))?.type === 'gpath'
+              : fits(x, y) &&
+                (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))
+        );
       // Place prévue, puis les places de rechange (alt) dans l'ordre : la première libre.
       let x0 = cx + p.x,
         y0 = cy + p.y,
@@ -263,7 +395,8 @@
         continue;
       }
       // Les arbres et buissons sauvages autour sont dégagés.
-      for (let y = y0 - 1; y <= y0 + p.h; y++) for (let x = x0 - 1; x <= x0 + p.w; x++) if (!ground.has(key(x, y))) clear(x, y);
+      for (let y = y0 - 1; y <= y0 + p.h; y++)
+        for (let x = x0 - 1; x <= x0 + p.w; x++) if (!ground.has(key(x, y))) clear(x, y);
       const item = { ...p, tx: x0, ty: y0, x: x0 * T, y: y0 * T, base: (y0 + p.h) * T };
       if (p.block) for (const [x, y] of cells) solid.add(key(x, y));
       if (p.kind === 'pen' || p.kind === 'garden')
@@ -275,13 +408,28 @@
           if (gate) ground.set(key(x, y), { type: 'gpath' });
         }
       if (p.kind === 'field')
-        for (const [x, y] of cells) ground.set(key(x, y), { type: 'field', crop: p.crop, row: y - y0, col: x - x0, last: y === y0 + p.h - 1 });
+        for (const [x, y] of cells)
+          ground.set(key(x, y), {
+            type: 'field',
+            crop: p.crop,
+            row: y - y0,
+            col: x - x0,
+            last: y === y0 + p.h - 1
+          });
       if (p.kind === 'mud') for (const [x, y] of cells) ground.set(key(x, y), { type: 'mud' });
-      if (p.kind === 'arch' || p.kind === 'pen' || p.kind === 'garden') item.base = p.kind === 'arch' ? (y0 + 1) * T - 4 : (y0 + p.h) * T;
+      if (p.kind === 'arch' || p.kind === 'pen' || p.kind === 'garden')
+        item.base = p.kind === 'arch' ? (y0 + 1) * T - 4 : (y0 + p.h) * T;
       if (p.kind !== 'mud') items.push(item);
     }
     // Pen et jardin : la clôture se dessine en deux fois (le fond derrière les bêtes, le devant à sa place).
-    items = items.flatMap(it => (it.kind === 'pen' || it.kind === 'garden' ? [{ ...it, part: 'back', base: it.y + T }, { ...it, part: 'front' }] : [it]));
+    items = items.flatMap(it =>
+      it.kind === 'pen' || it.kind === 'garden'
+        ? [
+            { ...it, part: 'back', base: it.y + T },
+            { ...it, part: 'front' }
+          ]
+        : [it]
+    );
     // Allées du jardin et parterres.
     // Le sol du jardin (allée courbe, placette ronde, massifs arrondis) est peint d'une pièce (gardenArt) : ses cases
     // ne reçoivent plus de touffes de fleurs au hasard ; la porte reste une allée (l'arche s'y pose).
@@ -298,20 +446,40 @@
     for (let y = cy - 20; y <= cy + 20; y++)
       for (let x = cx - 28; x <= cx + 10; x++) {
         if (!free(x, y) || tiles[y][x] !== 1) continue;
-        const nearPath = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tiles[y + dy]?.[x + dx] === 2 || ground.get(key(x + dx, y + dy))?.type === 'plaza');
+        const nearPath = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ].some(
+          ([dx, dy]) => tiles[y + dy]?.[x + dx] === 2 || ground.get(key(x + dx, y + dy))?.type === 'plaza'
+        );
         const chance = nearPath ? 0.22 : Math.hypot(x - cx, y - cy) < 14 ? 0.08 : 0.04;
         if (hash(x, y, 9) >= chance) continue;
         clear(x, y);
-        ground.set(key(x, y), { type: 'flowers', flower: flowers[Math.floor(hash(x, y, 10) * flowers.length)], n: 2 + Math.floor(hash(x, y, 11) * 3) });
+        ground.set(key(x, y), {
+          type: 'flowers',
+          flower: flowers[Math.floor(hash(x, y, 10) * flowers.length)],
+          n: 2 + Math.floor(hash(x, y, 11) * 3)
+        });
       }
     // Roseaux et massettes au bord de la mare et du ruisseau.
     for (const [k, g] of ground) {
       if (g.type !== 'pond' && g.type !== 'stream') continue;
       const x = k % MAPW,
         y = (k - x) / MAPW;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1]
+      ]) {
         const nk = key(x + dx, y + dy);
-        if (!ground.has(nk) && free(x + dx, y + dy) && tiles[y + dy][x + dx] === 1 && hash(x + dx, y + dy, g.type === 'pond' ? 12 : 13) < (g.type === 'pond' ? 0.45 : 0.12)) {
+        if (
+          !ground.has(nk) &&
+          free(x + dx, y + dy) &&
+          tiles[y + dy][x + dx] === 1 &&
+          hash(x + dx, y + dy, g.type === 'pond' ? 12 : 13) < (g.type === 'pond' ? 0.45 : 0.12)
+        ) {
           clear(x + dx, y + dy);
           ground.set(nk, { type: 'reeds' });
         }
@@ -322,15 +490,46 @@
     // Bêtes de la ferme : l'enclos (moutons, vaches, cochons) et les poules autour du poulailler.
     const at = (x, y) => ({ x: (cx + x + 0.5) * T, y: (cy + y + 0.5) * T });
     if (items.some(it => it.kind === 'pen')) {
-      for (const [kind, x, y, variant] of [['mouton', -11, 10, 0], ['mouton', -10, 11, 0], ['mouton', -9, 10, 0], ['vache', -7, 11, 0], ['vache', -8, 12, 1], ['cochon', -10, 12, 0], ['cochon', -11, 12, 0]])
+      for (const [kind, x, y, variant] of [
+        ['mouton', -11, 10, 0],
+        ['mouton', -10, 11, 0],
+        ['mouton', -9, 10, 0],
+        ['vache', -7, 11, 0],
+        ['vache', -8, 12, 1],
+        ['cochon', -10, 12, 0],
+        ['cochon', -11, 12, 0]
+      ])
         animalsList.push({ kind, ...at(x, y), roam: 1.5, variant });
     }
     if (items.some(it => it.kind === 'coop'))
-      for (const [x, y, variant] of [[-2, 10, 0], [-3, 10, 1], [-1, 11, 0]]) animalsList.push({ kind: 'poule', ...at(x, y), roam: 2, variant });
+      for (const [x, y, variant] of [
+        [-2, 10, 0],
+        [-3, 10, 1],
+        [-1, 11, 0]
+      ])
+        animalsList.push({ kind: 'poule', ...at(x, y), roam: 2, variant });
     // Chats et chien du camp.
-    for (const [kind, x, y, variant] of [['chat', -4, -2, 0], ['chat', 6, -6, 1], ['chien', 3, 2, 0]]) animalsList.push({ kind, ...at(x, y), roam: 3, variant });
-    for (const [x, y, k] of [[-3, -16, 1], [1, -15, 2], [-10, 16, 3], [-4, 17, 4], [5, 17, 5], [-6, -4, 6]]) fliersList.push({ kind: 'papillon', ...at(x, y), seed: k * 97.3 });
-    for (const [x, y, k] of [[-20, 14, 7], [-17, 6, 8], [-16, -4, 9]]) fliersList.push({ kind: 'libellule', ...at(x, y), seed: k * 61.7 });
+    for (const [kind, x, y, variant] of [
+      ['chat', -4, -2, 0],
+      ['chat', 6, -6, 1],
+      ['chien', 3, 2, 0]
+    ])
+      animalsList.push({ kind, ...at(x, y), roam: 3, variant });
+    for (const [x, y, k] of [
+      [-3, -16, 1],
+      [1, -15, 2],
+      [-10, 16, 3],
+      [-4, 17, 4],
+      [5, 17, 5],
+      [-6, -4, 6]
+    ])
+      fliersList.push({ kind: 'papillon', ...at(x, y), seed: k * 97.3 });
+    for (const [x, y, k] of [
+      [-20, 14, 7],
+      [-17, 6, 8],
+      [-16, -4, 9]
+    ])
+      fliersList.push({ kind: 'libellule', ...at(x, y), seed: k * 61.7 });
   }
 
   // ---------------------------------------------------------------- Collisions et calme
@@ -361,7 +560,8 @@
     // Disque et ellipse pleins, case par case.
     const E = (ex, ey, rx, ry, col) => {
       for (let y = Math.floor(ey - ry); y <= ey + ry; y++)
-        for (let x = Math.floor(ex - rx); x <= ex + rx; x++) if (((x + 0.5 - ex) / rx) ** 2 + ((y + 0.5 - ey) / ry) ** 2 <= 1) R(x, y, 1, 1, col);
+        for (let x = Math.floor(ex - rx); x <= ex + rx; x++)
+          if (((x + 0.5 - ex) / rx) ** 2 + ((y + 0.5 - ey) / ry) ** 2 <= 1) R(x, y, 1, 1, col);
     };
     const D = (dx, dy, r, col) => E(dx, dy, r, r, col);
     // Trait en escalier.
@@ -376,7 +576,25 @@
     return s;
   }
   // Hauteur des objets du camp qui cachent un personnage passé derrière eux (pixels au-dessus de leur pied).
-  const TALL_ITEMS = { barn: 270, silo: 220, coop: 150, apple: 190, forge: 150, fountain: 160, stall: 110, board: 100, signpost: 112, lantern: 100, scarecrow: 90, woodpile: 60, hay: 60, cart: 60, birdbath: 70, bench: 50, planter: 46 };
+  const TALL_ITEMS = {
+    barn: 270,
+    silo: 220,
+    coop: 150,
+    apple: 190,
+    forge: 150,
+    fountain: 160,
+    stall: 110,
+    board: 100,
+    signpost: 112,
+    lantern: 100,
+    scarecrow: 90,
+    woodpile: 60,
+    hay: 60,
+    cart: 60,
+    birdbath: 70,
+    bench: 50,
+    planter: 46
+  };
   let redrawing = false;
   function occluders() {
     if (game.world.instance || !items.length || canaanInHouse(P.x / TS, P.y / TS)) return [];
@@ -385,7 +603,13 @@
       const hgt = TALL_ITEMS[it.kind];
       if (!hgt || it.part) continue;
       const bottom = it.y + it.h * T;
-      if (it.x + it.w * T < camX - 200 || it.x > camX + W + 200 || bottom < camY - 60 || bottom - hgt > camY + H + 60) continue;
+      if (
+        it.x + it.w * T < camX - 200 ||
+        it.x > camX + W + 200 ||
+        bottom < camY - 60 ||
+        bottom - hgt > camY + H + 60
+      )
+        continue;
       out.push({
         x0: it.x - 30,
         x1: it.x + it.w * T + 30,
@@ -435,7 +659,8 @@
         R(xl, y + top, xr - xl, 1, first ? '#a85a40' : last ? '#552a1e' : band % 2 ? '#7a3a2a' : '#8a4432');
         R(xl, y + top, 4, 1, '#b8684a');
         R(xr - 5, y + top, 5, 1, '#4a2418');
-        if (!first && !last) for (let x = xl + ((band * 7) % 9); x < xr; x += 9) R(x, y + top, 1, 1, '#5a2a1e');
+        if (!first && !last)
+          for (let x = xl + ((band * 7) % 9); x < xr; x += 9) R(x, y + top, 1, 1, '#5a2a1e');
       }
       R(22, 4 + top, 76, 3, '#4a2418');
       R(22, 4 + top, 76, 1, '#7a3a2a');
@@ -459,7 +684,14 @@
       // Avant-toit.
       R(0, 82 + top, 120, 3, '#3a1a12');
       // Mur de façade en planches.
-      for (let x = 4; x < 116; x++) R(x, 85 + top, 1, 40, x < 12 ? '#c4503c' : x > 106 ? '#7a2a22' : (x - 4) % 5 === 0 ? '#7a2a22' : '#a8382c');
+      for (let x = 4; x < 116; x++)
+        R(
+          x,
+          85 + top,
+          1,
+          40,
+          x < 12 ? '#c4503c' : x > 106 ? '#7a2a22' : (x - 4) % 5 === 0 ? '#7a2a22' : '#a8382c'
+        );
       R(4, 85 + top, 112, 2, '#5a1e16');
       R(4, 85 + top, 4, 40, '#ece4d4');
       R(7, 85 + top, 1, 40, '#b8ae9c');
@@ -524,7 +756,8 @@
     });
   const coopSprite = () =>
     sprite('poulailler', 50, 56, (R, D, E, L) => {
-      for (let y = 26; y < 52; y++) R(4, y, 42, 1, (y - 26) % 5 === 0 ? '#7a5634' : y < 30 ? '#d0a066' : '#b8864e');
+      for (let y = 26; y < 52; y++)
+        R(4, y, 42, 1, (y - 26) % 5 === 0 ? '#7a5634' : y < 30 ? '#d0a066' : '#b8864e');
       R(4, 26, 4, 26, '#d8aa70');
       R(42, 26, 4, 26, '#8a6438');
       for (let y = 6; y < 28; y++) {
@@ -556,7 +789,8 @@
     for (let k = 3; k < r; k += 3)
       for (let a = 0; a < 24; a++) {
         const ang = (a / 24) * Math.PI * 2;
-        if ((a + k) % 3) R(Math.round(x + Math.cos(ang) * k), Math.round(y + Math.sin(ang) * k), 1, 1, '#c89a38');
+        if ((a + k) % 3)
+          R(Math.round(x + Math.cos(ang) * k), Math.round(y + Math.sin(ang) * k), 1, 1, '#c89a38');
       }
     R(x - r + 1, y - 1, r * 2 - 2, 1, '#8a6a2a');
   };
@@ -605,15 +839,33 @@
       L(23, 36, 14, 26, '#6e4c32', 2);
       L(23, 34, 31, 25, '#5a3e28', 2);
       // Feuillage : masses sombres, moyennes puis reflets.
-      for (const [x, y, r] of [[23, 20, 17], [12, 24, 10], [34, 24, 10], [23, 30, 10]]) D(x, y, r, '#3a7230');
-      for (const [x, y, r] of [[23, 18, 15], [13, 21, 8], [32, 21, 8], [22, 27, 8]]) D(x, y, r, '#529a3a');
-      for (const [x, y, r] of [[18, 12, 6], [28, 11, 4], [11, 18, 3]]) D(x, y, r, '#78c050');
+      for (const [x, y, r] of [
+        [23, 20, 17],
+        [12, 24, 10],
+        [34, 24, 10],
+        [23, 30, 10]
+      ])
+        D(x, y, r, '#3a7230');
+      for (const [x, y, r] of [
+        [23, 18, 15],
+        [13, 21, 8],
+        [32, 21, 8],
+        [22, 27, 8]
+      ])
+        D(x, y, r, '#529a3a');
+      for (const [x, y, r] of [
+        [18, 12, 6],
+        [28, 11, 4],
+        [11, 18, 3]
+      ])
+        D(x, y, r, '#78c050');
       let h = variant * 13 + 5;
       const rnd = () => {
         h = (h * 9301 + 49297) % 233280;
         return h / 233280;
       };
-      for (let k = 0; k < 40; k++) R(6 + rnd() * 34, 5 + rnd() * 30, 1, 1, rnd() < 0.5 ? '#2e5e26' : '#8ad060');
+      for (let k = 0; k < 40; k++)
+        R(6 + rnd() * 34, 5 + rnd() * 30, 1, 1, rnd() < 0.5 ? '#2e5e26' : '#8ad060');
       // Pommes rouges.
       for (let k = 0; k < 11; k++) {
         const a = rnd() * Math.PI * 2,
@@ -643,9 +895,15 @@
   const basketSprite = () =>
     sprite('panier', 22, 20, (R, D, E, L) => {
       E(11, 7, 9, 4, '#7a5634');
-      for (let y = 7; y < 18; y++) R(2 + (y - 7) / 4, y, 18 - (y - 7) / 2, 1, (y % 2 ? '#c8964e' : '#a87838'));
+      for (let y = 7; y < 18; y++) R(2 + (y - 7) / 4, y, 18 - (y - 7) / 2, 1, y % 2 ? '#c8964e' : '#a87838');
       for (let x = 4; x < 19; x += 3) R(x, 8, 1, 9, '#8a6030');
-      for (const [x, y] of [[6, 4], [10, 3], [14, 4], [8, 6], [12, 6]]) {
+      for (const [x, y] of [
+        [6, 4],
+        [10, 3],
+        [14, 4],
+        [8, 6],
+        [12, 6]
+      ]) {
         D(x, y, 2, '#c8281e');
         R(x - 1, y - 1, 1, 1, '#ff8a7a');
       }
@@ -664,7 +922,18 @@
     sprite('buches', 50, 30, (R, D) => {
       R(4, 10, 42, 18, '#6e4c32');
       R(4, 10, 42, 2, '#9a7248');
-      for (const [x, y] of [[9, 23], [19, 23], [29, 23], [39, 23], [14, 15], [24, 15], [34, 15], [19, 7], [29, 7]]) logEnd(R, D, x, y, 5);
+      for (const [x, y] of [
+        [9, 23],
+        [19, 23],
+        [29, 23],
+        [39, 23],
+        [14, 15],
+        [24, 15],
+        [34, 15],
+        [19, 7],
+        [29, 7]
+      ])
+        logEnd(R, D, x, y, 5);
     });
   const woodpileSprite = () =>
     sprite('tas-de-bois', 74, 40, (R, D) => {
@@ -694,7 +963,12 @@
       R(9, 9, 6, 5, '#8a8a92');
       R(9, 9, 6, 1, '#c4c4cc');
       R(14, 10, 1, 4, '#5a5a62');
-      for (const [x, y] of [[1, 26], [24, 25], [3, 29]]) R(x, y, 3, 2, '#c9a06c');
+      for (const [x, y] of [
+        [1, 26],
+        [24, 25],
+        [3, 29]
+      ])
+        R(x, y, 3, 2, '#c9a06c');
     });
   // Forge : fourneau de pierre à la gueule rougeoyante, cheminée, soufflet de cuir, enclume et marteau.
   const forgeSprite = () =>
@@ -704,7 +978,8 @@
       R(10, 2, 18, 3, '#8a8a92');
       R(26, 2, 2, 30, '#4a4a52');
       R(4, 28, 44, 42, '#7a7a82');
-      for (let y = 30; y < 70; y += 8) for (let x = 4 + ((y / 8) % 2) * 6; x < 46; x += 12) R(x, y, 11, 7, '#86868e');
+      for (let y = 30; y < 70; y += 8)
+        for (let x = 4 + ((y / 8) % 2) * 6; x < 46; x += 12) R(x, y, 11, 7, '#86868e');
       R(4, 28, 44, 3, '#9a9aa2');
       R(46, 28, 2, 42, '#56565e');
       // Gueule du fourneau (le feu s'anime par-dessus).
@@ -772,10 +1047,34 @@
       R(2, 12, 18, 2, '#c89058');
       R(2, 19, 18, 2, '#6a4426');
       for (const x of [5, 10, 15]) R(x, 14, 1, 5, '#7a5230');
-      const cols = [['#f06a8a', '#ffe070'], ['#9a7ae0', '#ffffff'], ['#ff9a4a', '#ffd0e0']][v % 3];
-      for (const [x, y, r] of [[5, 9, 3], [11, 7, 4], [17, 9, 3], [8, 5, 2], [14, 4, 2]]) D(x, y, r, '#4e8a3a');
-      for (const [x, y, r] of [[5, 8, 2], [11, 6, 3], [17, 8, 2]]) D(x - 1, y - 1, r - 1, '#74b04e');
-      for (const [x, y, k] of [[4, 7, 0], [7, 4, 1], [11, 5, 0], [14, 3, 1], [17, 7, 0], [9, 9, 1], [13, 9, 0]]) {
+      const cols = [
+        ['#f06a8a', '#ffe070'],
+        ['#9a7ae0', '#ffffff'],
+        ['#ff9a4a', '#ffd0e0']
+      ][v % 3];
+      for (const [x, y, r] of [
+        [5, 9, 3],
+        [11, 7, 4],
+        [17, 9, 3],
+        [8, 5, 2],
+        [14, 4, 2]
+      ])
+        D(x, y, r, '#4e8a3a');
+      for (const [x, y, r] of [
+        [5, 8, 2],
+        [11, 6, 3],
+        [17, 8, 2]
+      ])
+        D(x - 1, y - 1, r - 1, '#74b04e');
+      for (const [x, y, k] of [
+        [4, 7, 0],
+        [7, 4, 1],
+        [11, 5, 0],
+        [14, 3, 1],
+        [17, 7, 0],
+        [9, 9, 1],
+        [13, 9, 0]
+      ]) {
         R(x, y, 2, 2, cols[k]);
         R(x, y, 1, 1, '#ffffff');
       }
@@ -794,7 +1093,12 @@
       R(6, 30, 60, 1, '#d8a066');
       R(8, 36, 56, 12, '#8e5a30');
       for (let x = 10; x < 64; x += 6) R(x, 36, 1, 12, '#663c1e');
-      const crates = [['#e0503c', '#f07a5a'], ['#ffd060', '#fff0a0'], ['#7ad070', '#a8e890'], ['#c88ae8', '#e8b8ff']];
+      const crates = [
+        ['#e0503c', '#f07a5a'],
+        ['#ffd060', '#fff0a0'],
+        ['#7ad070', '#a8e890'],
+        ['#c88ae8', '#e8b8ff']
+      ];
       crates.forEach(([a, b], k) => {
         const x = 9 + k * 14;
         R(x, 24, 12, 6, '#a8703e');
@@ -813,7 +1117,12 @@
       R(2, 8, 46, 2, '#b84a32');
       R(5, 14, 40, 24, '#8e5a30');
       R(7, 16, 36, 20, '#c89a64');
-      for (const [x, y, w, h, col] of [[9, 17, 10, 12, '#fff6e4'], [21, 18, 9, 8, '#f6e0a0'], [32, 17, 9, 13, '#fff6e4'], [20, 28, 11, 7, '#e8f0ff']]) {
+      for (const [x, y, w, h, col] of [
+        [9, 17, 10, 12, '#fff6e4'],
+        [21, 18, 9, 8, '#f6e0a0'],
+        [32, 17, 9, 13, '#fff6e4'],
+        [20, 28, 11, 7, '#e8f0ff']
+      ]) {
         R(x, y, w, h, col);
         R(x + 1, y + 3, w - 2, 1, '#9a8a70');
         R(x + 1, y + 5, w - 3, 1, '#9a8a70');
@@ -825,7 +1134,11 @@
     sprite('poteau-indicateur', 44, 56, R => {
       R(20, 6, 4, 48, '#6a4426');
       R(20, 6, 1, 48, '#9a6a40');
-      for (const [x, y, w, dir, col] of [[22, 8, 20, 1, '#c89058'], [2, 18, 20, -1, '#b47c46'], [22, 28, 18, 1, '#c89058']]) {
+      for (const [x, y, w, dir, col] of [
+        [22, 8, 20, 1, '#c89058'],
+        [2, 18, 20, -1, '#b47c46'],
+        [22, 28, 18, 1, '#c89058']
+      ]) {
         R(x - (dir < 0 ? 0 : 0), y, w, 7, col);
         R(x, y, w, 1, '#e0b078');
         if (dir > 0) {
@@ -839,7 +1152,7 @@
       }
     });
   const benchSprite = () =>
-    sprite('banc-jardin', 50, 26, (R) => {
+    sprite('banc-jardin', 50, 26, R => {
       R(4, 2, 42, 4, '#8a6440');
       R(4, 2, 42, 1, '#b08858');
       R(4, 8, 42, 3, '#7a5634');
@@ -871,7 +1184,13 @@
     });
   const springSprite = () =>
     sprite('source', 40, 26, (R, D) => {
-      for (const [x, y, r, k] of [[9, 16, 8, 0], [30, 15, 9, 1], [20, 9, 8, 2], [33, 21, 5, 3], [6, 22, 5, 4]]) {
+      for (const [x, y, r, k] of [
+        [9, 16, 8, 0],
+        [30, 15, 9, 1],
+        [20, 9, 8, 2],
+        [33, 21, 5, 3],
+        [6, 22, 5, 4]
+      ]) {
         D(x, y, r, '#5e5e5a');
         D(x - 1, y - 1, r - 1, k % 2 ? '#8a8a84' : '#9e9a90');
         D(x - 2, y - 2, r - 4, '#c4c0b4');
@@ -882,7 +1201,7 @@
       R(17, 16, 2, 10, '#9fd4ea');
     });
   const troughSprite = () =>
-    sprite('abreuvoir', 26, 16, (R) => {
+    sprite('abreuvoir', 26, 16, R => {
       R(1, 3, 24, 10, '#6e4c32');
       R(1, 3, 24, 2, '#9a7248');
       R(3, 5, 20, 4, '#2f7aa8');
@@ -943,7 +1262,7 @@
       for (let k = 0; k < 4; k++) R(10 + k * 3, 19, 1, 3, '#e8c860');
     });
   const fenceSprite = garden =>
-    sprite(garden ? 'cloture-blanche' : 'cloture', 24, 22, (R) => {
+    sprite(garden ? 'cloture-blanche' : 'cloture', 24, 22, R => {
       const [l, m, d] = garden ? ['#ffffff', '#ece6d8', '#9a9282'] : ['#b08858', '#8a6440', '#5e4430'];
       if (garden) {
         // Piquets blancs pointus, reliés par une traverse.
@@ -969,7 +1288,7 @@
       }
     });
   const fencePost = garden =>
-    sprite(garden ? 'piquet-blanc' : 'piquet', 8, 26, (R) => {
+    sprite(garden ? 'piquet-blanc' : 'piquet', 8, 26, R => {
       const [l, m, d] = garden ? ['#ffffff', '#ece6d8', '#9a9282'] : ['#b08858', '#8a6440', '#5e4430'];
       R(1, 2, 6, 24, m);
       R(1, 2, 2, 24, l);
@@ -1003,7 +1322,11 @@
       Y = y * T;
     const wet = (dx, dy) => {
       const n = ground.get(key(x + dx, y + dy));
-      return (n && (n.type === 'stream' || n.type === 'pond')) || BRIDGE_TILES.has(key(x + dx, y + dy)) || game.world.overworld[y + dy]?.[x + dx] === 0;
+      return (
+        (n && (n.type === 'stream' || n.type === 'pond')) ||
+        BRIDGE_TILES.has(key(x + dx, y + dy)) ||
+        game.world.overworld[y + dy]?.[x + dx] === 0
+      );
     };
     R(X, Y, T, T, WATER[1]);
     // Reflets qui descendent le courant ; ronds lents sur la mare.
@@ -1029,16 +1352,28 @@
         c.globalAlpha = 1;
       }
     }
-    if (hash(x, y, Math.floor(time / 40)) < 0.15) R(X + hash(x, y, 2) * 40, Y + hash(x, y, 4) * 40, 3, 3, '#e8f8ff');
+    if (hash(x, y, Math.floor(time / 40)) < 0.15)
+      R(X + hash(x, y, 2) * 40, Y + hash(x, y, 4) * 40, 3, 3, '#e8f8ff');
     // Berges : terre, galets en trois tons et herbe qui déborde.
-    const sides = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    const sides = [
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, 0]
+    ];
     sides.forEach(([dx, dy], i) => {
       if (wet(dx, dy)) return;
       const hor = dy !== 0,
         bx = dx === 1 ? X + T - 8 : X,
         by = dy === 1 ? Y + T - 8 : Y;
       R(hor ? X : bx, hor ? by : Y, hor ? T : 8, hor ? 8 : T, '#6b5a3a');
-      R(hor ? X : dx === 1 ? bx - 3 : bx + 8, hor ? (dy === 1 ? by - 3 : by + 8) : Y, hor ? T : 3, hor ? 3 : T, WATER[0]);
+      R(
+        hor ? X : dx === 1 ? bx - 3 : bx + 8,
+        hor ? (dy === 1 ? by - 3 : by + 8) : Y,
+        hor ? T : 3,
+        hor ? 3 : T,
+        WATER[0]
+      );
       for (let k = 0; k < 3; k++) {
         const o = 4 + k * 15 + hash(x, y, i * 3 + k) * 8,
           px = hor ? X + o : bx + 1,
@@ -1074,10 +1409,17 @@
   }
   // Fleurs : tige, feuilles et pétales de chaque espèce.
   const PETALS = {
-    tulipe: [['#e0303a', '#ff7a7a'], ['#f0c030', '#fff08a'], ['#e86ab0', '#ffb0d8']],
+    tulipe: [
+      ['#e0303a', '#ff7a7a'],
+      ['#f0c030', '#fff08a'],
+      ['#e86ab0', '#ffb0d8']
+    ],
     marguerite: [['#ffffff', '#ffffff']],
     lavande: [['#9a6ad8', '#c8a8f0']],
-    rose: [['#c8203a', '#f05a70'], ['#f0a0b8', '#ffd0dc']],
+    rose: [
+      ['#c8203a', '#f05a70'],
+      ['#f0a0b8', '#ffd0dc']
+    ],
     bleuet: [['#3a6ae0', '#8ab0ff']],
     tournesol: [['#f0c020', '#ffe070']]
   };
@@ -1132,7 +1474,14 @@
     R(X, Y + 20, T, 20, '#7a5634');
     R(X, Y + 20, T, 3, '#946a42');
     R(X, Y + 38, T, 3, '#4a3220');
-    for (let k = 0; k < 4; k++) R(X + 4 + hash(x, y, k + 50) * 38, Y + 24 + hash(x, y, k + 60) * 12, 3, 2, k % 2 ? '#8a6440' : '#5a3e28');
+    for (let k = 0; k < 4; k++)
+      R(
+        X + 4 + hash(x, y, k + 50) * 38,
+        Y + 24 + hash(x, y, k + 60) * 12,
+        3,
+        2,
+        k % 2 ? '#8a6440' : '#5a3e28'
+      );
     // Bordure de planches autour du champ.
     const same = (dx, dy) => {
       const n = ground.get(key(x + dx, y + dy));
@@ -1155,7 +1504,10 @@
       R(X + T - 5, Y, 1, T, '#7a5634');
     }
     // Plantes sur la butte ; chaque rang a son espèce.
-    const kinds = g.crop === 'veg' ? ['carotte', 'chou', 'tomate', 'courge', 'salade'] : ['fraise', 'melon', 'framboisier', 'pasteque', 'myrtille'],
+    const kinds =
+        g.crop === 'veg'
+          ? ['carotte', 'chou', 'tomate', 'courge', 'salade']
+          : ['fraise', 'melon', 'framboisier', 'pasteque', 'myrtille'],
       kind = kinds[g.row % 5];
     // Petites plantes deux par case ; les grosses une seule, décalée d'un rang à l'autre (la terre se voit entre elles).
     const small = ['carotte', 'salade', 'fraise'].includes(kind),
@@ -1192,7 +1544,13 @@
       h: 14,
       draw(R, D, E, L, v) {
         // Fanes plumeuses, puis le haut orange de la racine qui dépasse de la terre.
-        for (const [x1, y1, c] of [[2, 2, 0], [5, 0, 1], [7, 1, 2], [9, 0, 1], [12, 3, 0]]) {
+        for (const [x1, y1, c] of [
+          [2, 2, 0],
+          [5, 0, 1],
+          [7, 1, 2],
+          [9, 0, 1],
+          [12, 3, 0]
+        ]) {
           L(7, 10, x1, y1, LEAF[c]);
           D(x1, y1 + 1, 1.6, LEAF[c]);
           D(x1 + (x1 < 7 ? 1 : -1), y1 + 3, 1.3, LEAF[(c + 1) % 3]);
@@ -1224,12 +1582,30 @@
         // Tuteur, tiges feuillues et grappes de tomates.
         R(6, 0, 2, 24, '#8a6440');
         R(6, 0, 1, 24, '#b08858');
-        for (const [x, y, r] of [[4, 5, 3.5], [10, 8, 3.5], [3, 13, 3.5], [10, 16, 3.5], [6, 19, 3]]) {
+        for (const [x, y, r] of [
+          [4, 5, 3.5],
+          [10, 8, 3.5],
+          [3, 13, 3.5],
+          [10, 16, 3.5],
+          [6, 19, 3]
+        ]) {
           D(x, y, r, LEAF[0]);
           D(x - 0.5, y - 0.5, r - 1, LEAF[1]);
           R(x - 1, y - 2, 2, 1, LEAF[2]);
         }
-        for (const [x, y] of v ? [[3, 8], [11, 11], [4, 16], [9, 19]] : [[10, 5], [4, 11], [11, 15], [5, 19]]) {
+        for (const [x, y] of v
+          ? [
+              [3, 8],
+              [11, 11],
+              [4, 16],
+              [9, 19]
+            ]
+          : [
+              [10, 5],
+              [4, 11],
+              [11, 15],
+              [5, 19]
+            ]) {
           D(x, y, 2, '#b81a14');
           D(x - 0.3, y - 0.3, 1.5, '#e8382a');
           R(x - 1, y - 1, 1, 1, '#ffa090');
@@ -1273,12 +1649,28 @@
       h: 11,
       draw(R, D, E, L, v) {
         // Feuilles en trèfle, fraises en cœur avec leurs graines, une fleur blanche.
-        for (const [x, y] of [[3, 4], [7, 2], [11, 3], [13, 6], [5, 7]]) {
+        for (const [x, y] of [
+          [3, 4],
+          [7, 2],
+          [11, 3],
+          [13, 6],
+          [5, 7]
+        ]) {
           D(x, y, 2.4, LEAF[0]);
           D(x - 0.4, y - 0.4, 1.8, LEAF[1]);
           R(x - 1, y - 1, 1, 1, LEAF[2]);
         }
-        for (const [x, y] of v ? [[4, 8], [10, 8], [13, 9]] : [[6, 8], [11, 7], [2, 9]]) {
+        for (const [x, y] of v
+          ? [
+              [4, 8],
+              [10, 8],
+              [13, 9]
+            ]
+          : [
+              [6, 8],
+              [11, 7],
+              [2, 9]
+            ]) {
           R(x - 1, y - 1, 4, 3, '#c81a24');
           R(x, y + 2, 2, 1, '#c81a24');
           R(x - 1, y - 1, 2, 1, '#ff6a6a');
@@ -1312,12 +1704,33 @@
         R(14, 4, 1, 20, '#8a6440');
         R(1, 8, 14, 1, '#a07850');
         R(1, 15, 14, 1, '#a07850');
-        for (const [x, y, r] of [[5, 6, 4], [11, 7, 4], [8, 12, 4.5], [4, 16, 4], [12, 17, 4], [8, 20, 3.5]]) {
+        for (const [x, y, r] of [
+          [5, 6, 4],
+          [11, 7, 4],
+          [8, 12, 4.5],
+          [4, 16, 4],
+          [12, 17, 4],
+          [8, 20, 3.5]
+        ]) {
           D(x, y, r, LEAF[0]);
           D(x - 0.5, y - 0.6, r - 1.2, LEAF[1]);
           R(x - 2, y - 3, 2, 1, LEAF[2]);
         }
-        for (const [x, y] of v ? [[4, 9], [11, 10], [7, 15], [12, 19], [3, 19]] : [[6, 8], [12, 12], [4, 13], [9, 18], [13, 16]]) {
+        for (const [x, y] of v
+          ? [
+              [4, 9],
+              [11, 10],
+              [7, 15],
+              [12, 19],
+              [3, 19]
+            ]
+          : [
+              [6, 8],
+              [12, 12],
+              [4, 13],
+              [9, 18],
+              [13, 16]
+            ]) {
           D(x, y, 1.6, '#a8102a');
           R(x - 1, y - 1, 1, 1, '#f0506a');
           R(x, y, 1, 1, '#d8203a');
@@ -1332,7 +1745,8 @@
         E(9, 7, 8.5, 5, '#1e4a1e');
         E(9, 6.6, 8, 4.5, '#2e6a2e');
         for (let k = -2; k <= 2; k++)
-          for (let y = 3; y <= 10; y++) R(9 + k * 3 + Math.round(Math.sin((y - 6.5) * 0.5) * (k * 0.6)), y, 1, 1, '#5aa04a');
+          for (let y = 3; y <= 10; y++)
+            R(9 + k * 3 + Math.round(Math.sin((y - 6.5) * 0.5) * (k * 0.6)), y, 1, 1, '#5aa04a');
         E(6, 5, 2.5, 1.5, '#8ad07a');
         if (v) {
           // Une tranche ouverte posée devant.
@@ -1347,8 +1761,18 @@
       w: 16,
       h: 15,
       draw(R, D, E, L, v) {
-        for (const [x, y, r] of [[8, 8, 6.5], [4, 10, 4], [12, 10, 4]]) D(x, y, r, '#2a5a2a');
-        for (const [x, y, r] of [[7.5, 7, 5], [4, 9, 3], [12, 9, 3]]) D(x, y, r, '#3e7a36');
+        for (const [x, y, r] of [
+          [8, 8, 6.5],
+          [4, 10, 4],
+          [12, 10, 4]
+        ])
+          D(x, y, r, '#2a5a2a');
+        for (const [x, y, r] of [
+          [7.5, 7, 5],
+          [4, 9, 3],
+          [12, 9, 3]
+        ])
+          D(x, y, r, '#3e7a36');
         D(6, 5, 2.5, '#5a9a46');
         for (let k = 0; k < 9; k++) {
           const x = 3 + ((k * 5 + v * 3) % 11),
@@ -1401,7 +1825,15 @@
           right = ground.get(key(x + 1, y))?.type === 'mud';
         c.fillStyle = '#4e3420';
         c.beginPath();
-        c.ellipse(X + T / 2 + (left ? -6 : 0) + (right ? 6 : 0), Y + 26, left || right ? 30 : 20, 13, 0, 0, Math.PI * 2);
+        c.ellipse(
+          X + T / 2 + (left ? -6 : 0) + (right ? 6 : 0),
+          Y + 26,
+          left || right ? 30 : 20,
+          13,
+          0,
+          0,
+          Math.PI * 2
+        );
         c.fill();
         c.fillStyle = '#6b4a2e';
         c.beginPath();
@@ -1416,7 +1848,8 @@
         if (g.hidden) break;
         // Allée de terre battue et pas japonais ronds, aux couleurs des chemins.
         R(X, Y, T, T, '#b8925e');
-        for (let k = 0; k < 10; k++) R(X + hash(x, y, k + 5) * 44, Y + hash(y, x, k + 6) * 44, 2, 2, k % 2 ? '#a07c4a' : '#cca674');
+        for (let k = 0; k < 10; k++)
+          R(X + hash(x, y, k + 5) * 44, Y + hash(y, x, k + 6) * 44, 2, 2, k % 2 ? '#a07c4a' : '#cca674');
         for (let k = 0; k < 2; k++) {
           const sx = X + 8 + k * 18 + hash(x, y, k) * 4,
             sy = Y + 8 + k * 16 + hash(x, y, k + 2) * 4;
@@ -1432,10 +1865,19 @@
       case 'bed':
         R(X + 2, Y + 4, T - 4, T - 6, '#5a3e28');
         R(X + 2, Y + 4, T - 4, 2, '#8a6440');
-        for (let k = 0; k < 6; k++) flower(R, g.flower, X + 9 + (k % 3) * 14, Y + 24 + Math.floor(k / 3) * 18, k + x, sway);
+        for (let k = 0; k < 6; k++)
+          flower(R, g.flower, X + 9 + (k % 3) * 14, Y + 24 + Math.floor(k / 3) * 18, k + x, sway);
         break;
       case 'flowers':
-        for (let k = 0; k < g.n; k++) flower(R, g.flower, X + 8 + hash(x, y, k + 20) * 30, Y + 22 + hash(x, y, k + 30) * 22, Math.floor(hash(x, y, k + 40) * 3), sway);
+        for (let k = 0; k < g.n; k++)
+          flower(
+            R,
+            g.flower,
+            X + 8 + hash(x, y, k + 20) * 30,
+            Y + 22 + hash(x, y, k + 30) * 22,
+            Math.floor(hash(x, y, k + 40) * 3),
+            sway
+          );
         break;
       case 'reeds':
         for (let k = 0; k < 4; k++) {
@@ -1530,12 +1972,18 @@
     for (let i = 0; i <= 40; i++) {
       const t = i / 40,
         u = 1 - t;
-      path.push([u * u * gate[0] + 2 * u * t * (gate[0] + 6) + t * t * (bx - 18), u * u * gate[1] + 2 * u * t * (by + 20) + t * t * (by + 6)]);
+      path.push([
+        u * u * gate[0] + 2 * u * t * (gate[0] + 6) + t * t * (bx - 18),
+        u * u * gate[1] + 2 * u * t * (by + 20) + t * t * (by + 6)
+      ]);
     }
     const spur = [];
     for (let i = 0; i <= 14; i++) {
       const t = i / 14;
-      spur.push([bx - 14 + (bench[0] + 12 - (bx - 14)) * t, by - 2 + (bench[1] + 16 - (by - 2)) * t - Math.sin(t * Math.PI) * 4]);
+      spur.push([
+        bx - 14 + (bench[0] + 12 - (bx - 14)) * t,
+        by - 2 + (bench[1] + 16 - (by - 2)) * t - Math.sin(t * Math.PI) * 4
+      ]);
     }
     const stroke = (pts, r, col) => pts.forEach(([x, y]) => disc(x, y, r, col));
     stroke(path, 10, '#8a6a42');
@@ -1555,7 +2003,11 @@
     // Gravier et pas japonais ronds le long de l'allée.
     for (let i = 0; i < 260; i++) {
       const p = path[Math.floor(hash(i, 1, 61) * path.length)];
-      px(p[0] + (hash(i, 2, 61) - 0.5) * 14, p[1] + (hash(i, 3, 61) - 0.5) * 14, i % 3 ? '#b0905e' : '#e0c896');
+      px(
+        p[0] + (hash(i, 2, 61) - 0.5) * 14,
+        p[1] + (hash(i, 3, 61) - 0.5) * 14,
+        i % 3 ? '#b0905e' : '#e0c896'
+      );
     }
     for (let i = 4; i < path.length - 3; i += 6) {
       const [x, y] = path[i];
@@ -1565,10 +2017,26 @@
     }
     // Massifs arrondis : terre, feuillage serré, fleurs mêlées, bordure de galets.
     const FL = {
-      rose: [['#c8203a', '#f05a70'], ['#f0a0b8', '#ffd0dc'], ['#ffffff', '#ffe8ec']],
-      tulipe: [['#e0303a', '#ff7a7a'], ['#f0c030', '#fff08a'], ['#e86ab0', '#ffb0d8']],
-      lavande: [['#9a6ad8', '#c8a8f0'], ['#7a5ac8', '#b098f0']],
-      champetre: [['#ffffff', '#ffffff'], ['#3a6ae0', '#8ab0ff'], ['#f0c030', '#fff08a'], ['#e86ab0', '#ffb0d8']]
+      rose: [
+        ['#c8203a', '#f05a70'],
+        ['#f0a0b8', '#ffd0dc'],
+        ['#ffffff', '#ffe8ec']
+      ],
+      tulipe: [
+        ['#e0303a', '#ff7a7a'],
+        ['#f0c030', '#fff08a'],
+        ['#e86ab0', '#ffb0d8']
+      ],
+      lavande: [
+        ['#9a6ad8', '#c8a8f0'],
+        ['#7a5ac8', '#b098f0']
+      ],
+      champetre: [
+        ['#ffffff', '#ffffff'],
+        ['#3a6ae0', '#8ab0ff'],
+        ['#f0c030', '#fff08a'],
+        ['#e86ab0', '#ffb0d8']
+      ]
     };
     const [l1x, l1y] = at(-3, -15),
       [r1x, r1y] = at(1, -16),
@@ -1583,7 +2051,8 @@
     for (const [cx0, cy0, rx, ry, kind, seed] of beds) {
       const pts = blob(cx0, cy0, rx, ry, seed);
       for (let y = Math.floor(cy0 - ry * 1.3); y <= cy0 + ry * 1.3; y++)
-        for (let x = Math.floor(cx0 - rx * 1.3); x <= cx0 + rx * 1.3; x++) if (inside(pts, x + 0.5, y + 0.5)) px(x, y, hash(x, y, 62) > 0.5 ? '#4a3420' : '#5a3e28');
+        for (let x = Math.floor(cx0 - rx * 1.3); x <= cx0 + rx * 1.3; x++)
+          if (inside(pts, x + 0.5, y + 0.5)) px(x, y, hash(x, y, 62) > 0.5 ? '#4a3420' : '#5a3e28');
       // Feuillage.
       for (let i = 0; i < rx * ry * 0.9; i++) {
         const x = cx0 + (hash(i, seed, 63) - 0.5) * rx * 2,
@@ -1649,7 +2118,11 @@
     const art = gardenArt(gd);
     if (art) c.drawImage(art, (gd.tx + 1) * T, (gd.ty + 1) * T, art.width * 2, art.height * 2);
   }
-  const fieldSway = (x, y) => Math.round(Math.sin(time * 0.05 + x * 0.9 + y * 0.4) * 1.5 + (typeof windAt === 'function' ? windAt(x * T, y * T) * 2 : 0));
+  const fieldSway = (x, y) =>
+    Math.round(
+      Math.sin(time * 0.05 + x * 0.9 + y * 0.4) * 1.5 +
+        (typeof windAt === 'function' ? windAt(x * T, y * T) * 2 : 0)
+    );
   function drawGround(c) {
     if (game.world.instance || !ground.size || canaanInHouse(P.x / TS, P.y / TS)) return;
     const x0 = Math.max(0, Math.floor(camX / T) - 1),
@@ -1800,8 +2273,17 @@
         shadow(c, cx, bottom - 4, w * 0.5, 12);
         {
           // Grange, silo et poulailler : modèles en pixel art des maisons (building-art.js).
-          const art = (it.kind === 'barn' || it.kind === 'silo' || it.kind === 'coop') && CANAAN_BUILDING_ART.farm(it.kind, w);
-          if (art) c.drawImage(art.canvas, Math.round(cx - art.canvas.width), Math.round(bottom + 4 - art.canvas.height * 2), art.canvas.width * 2, art.canvas.height * 2);
+          const art =
+            (it.kind === 'barn' || it.kind === 'silo' || it.kind === 'coop') &&
+            CANAAN_BUILDING_ART.farm(it.kind, w);
+          if (art)
+            c.drawImage(
+              art.canvas,
+              Math.round(cx - art.canvas.width),
+              Math.round(bottom + 4 - art.canvas.height * 2),
+              art.canvas.width * 2,
+              art.canvas.height * 2
+            );
           else put(c, BIG[it.kind](), cx, bottom + (it.kind === 'barn' ? 2 : 0));
         }
         if (it.kind === 'barn') {
@@ -1848,12 +2330,19 @@
       case 'apple': {
         shadow(c, cx, bottom - 6, 36, 10);
         const s = appleSprite((it.tx + it.ty) % 3),
-          bend = (typeof windAt === 'function' ? windAt(X, Y) * 0.03 : 0) + Math.sin(time * 0.04 + it.tx) * 0.02;
+          bend =
+            (typeof windAt === 'function' ? windAt(X, Y) * 0.03 : 0) + Math.sin(time * 0.04 + it.tx) * 0.02;
         c.save();
         c.translate(cx, bottom - 2);
         c.transform(1, 0, -bend, 1, 0, 0);
         // Pommier agrandi (une fois et demie : ses pixels de 2 deviennent des pixels de 3, nets), comme les arbres.
-        c.drawImage(s, Math.round(-s.width * 0.75), Math.round(-s.height * 1.5), Math.round(s.width * 1.5), Math.round(s.height * 1.5));
+        c.drawImage(
+          s,
+          Math.round(-s.width * 0.75),
+          Math.round(-s.height * 1.5),
+          Math.round(s.width * 1.5),
+          Math.round(s.height * 1.5)
+        );
         c.restore();
         break;
       }
@@ -1961,7 +2450,13 @@
     c.save();
     c.imageSmoothingEnabled = false;
     for (const it of items) {
-      if (it.x + it.w * T < camX - 200 || it.x > camX + W + 200 || it.y + it.h * T < camY - 60 || it.y > camY + H + 220) continue;
+      if (
+        it.x + it.w * T < camX - 200 ||
+        it.x > camX + W + 200 ||
+        it.y + it.h * T < camY - 60 ||
+        it.y > camY + H + 220
+      )
+        continue;
       drawItem(c, it);
     }
     drawGarlands(c);
@@ -1989,7 +2484,13 @@
       garlandsFor = items;
     }
     for (const [x0, y0, x1, y1] of garlands) {
-      if (Math.max(x0, x1) < camX - 100 || Math.min(x0, x1) > camX + W + 100 || Math.max(y0, y1) < camY - 100 || Math.min(y0, y1) > camY + H + 100) continue;
+      if (
+        Math.max(x0, x1) < camX - 100 ||
+        Math.min(x0, x1) > camX + W + 100 ||
+        Math.max(y0, y1) < camY - 100 ||
+        Math.min(y0, y1) > camY + H + 100
+      )
+        continue;
       const len = Math.hypot(x1 - x0, y1 - y0),
         sag = 18 + len * 0.06,
         at = t => [x0 + (x1 - x0) * t, y0 + (y1 - y0) * t + Math.sin(t * Math.PI) * sag];
@@ -2066,7 +2567,8 @@
   window.CANAAN_CAMP_LIFE = Object.freeze({
     audit,
     layout,
-    items: () => items.map(it => ({ kind: it.kind, crop: it.crop || null, x: it.tx, y: it.ty, w: it.w, h: it.h })),
+    items: () =>
+      items.map(it => ({ kind: it.kind, crop: it.crop || null, x: it.tx, y: it.ty, w: it.w, h: it.h })),
     solidAt: (tx, ty) => solid.has(key(tx, ty)),
     // Forge du camp (centre, en pixels), ou null si elle n'a pas trouvé sa place.
     forge() {

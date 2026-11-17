@@ -67,7 +67,8 @@ function createSaveStore(dir) {
       name = prefix + '-' + stamp() + '-' + reason + '-' + ++index + '.json';
     const target = path.join(backups, name);
     atomicWrite(target, text);
-    if (fs.readFileSync(target, 'utf8') !== text) throw new Error('La copie de secours n’a pas pu être vérifiée.');
+    if (fs.readFileSync(target, 'utf8') !== text)
+      throw new Error('La copie de secours n’a pas pu être vérifiée.');
     prune(prefix);
     return name;
   }

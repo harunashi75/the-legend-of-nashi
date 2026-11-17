@@ -18,7 +18,16 @@
   const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key'];
   const PROF_BAG = { fish: 'fish', meat: 'meat', meal: 'meals', ore: 'ore', herb: 'herb', ench: 'ench' };
   // Prix de vente d'une unité au marchand, selon le genre et la qualité (0 à 7).
-  const UNIT_PRICE = { fish: q => 4 + 4 * q, meat: q => 5 + 5 * q, meal: q => 10 + 8 * q, rubis: () => 300, ore: q => 6 + 5 * q, herb: q => 4 + 4 * q, ench: q => 60 + 40 * q, key: () => 0 };
+  const UNIT_PRICE = {
+    fish: q => 4 + 4 * q,
+    meat: q => 5 + 5 * q,
+    meal: q => 10 + 8 * q,
+    rubis: () => 300,
+    ore: q => 6 + 5 * q,
+    herb: q => 4 + 4 * q,
+    ench: q => 60 + 40 * q,
+    key: () => 0
+  };
   // Les clés des secrets ne se vendent pas.
   const sellable = p => p.kind !== 'key';
   const profOf = hero => hero.prof || (hero.prof = canaanFreshProf());
@@ -30,7 +39,8 @@
   // ---------------------------------------------------------------- Lecture
   // Quantité d'une pile (Rubis : ceux qui ne sont pas équipés).
   function count(hero, kind, id, q = 0) {
-    if (kind === 'key') return id === 'secret' && !q ? Math.max(0, Math.floor(Number(hero.player?.keys) || 0)) : 0;
+    if (kind === 'key')
+      return id === 'secret' && !q ? Math.max(0, Math.floor(Number(hero.player?.keys) || 0)) : 0;
     if (kind === 'rubis') {
       const r = rubisOf(hero);
       return Math.max(0, (r.owned[id] || 0) - (r.equipped.includes(id) ? 1 : 0));
@@ -62,7 +72,8 @@
     const out = [];
     for (const p of piles(hero)) {
       if (section && (section === 'mat') !== isMat(p.kind)) continue;
-      for (let left = p.n, size = stackOf(p.kind); left > 0; left -= size) out.push({ ...p, n: Math.min(size, left) });
+      for (let left = p.n, size = stackOf(p.kind); left > 0; left -= size)
+        out.push({ ...p, n: Math.min(size, left) });
     }
     return out;
   }
@@ -128,7 +139,14 @@
     if (!KINDS.includes(p.kind)) return false;
     if (p.kind === 'key') return p.id === 'secret' && p.q === 0;
     if (p.kind === 'rubis') return !!RUBIS_CATALOG.find(r => r.id === p.id) && p.q === 0;
-    const cat = { fish: CANAAN_PROF.FISH, meat: CANAAN_PROF.MEAT, meal: CANAAN_PROF.RECIPES, ore: CANAAN_GATHER.ORES, herb: CANAAN_GATHER.HERBS, ench: CANAAN_GATHER.ENCHANTS }[p.kind];
+    const cat = {
+      fish: CANAAN_PROF.FISH,
+      meat: CANAAN_PROF.MEAT,
+      meal: CANAAN_PROF.RECIPES,
+      ore: CANAAN_GATHER.ORES,
+      herb: CANAAN_GATHER.HERBS,
+      ench: CANAAN_GATHER.ENCHANTS
+    }[p.kind];
     // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité.
     return Object.hasOwn(cat, p.id) && (p.kind !== 'ench' || p.q <= 5);
   }
@@ -137,29 +155,73 @@
   // ---------------------------------------------------------------- Présentation
   function info(p) {
     if (p.kind === 'key')
-      return { name: 'Clé des secrets', icon: '🗝️', color: '#f0c040', sub: 'Clé · piles de 20', desc: 'Ouvre un coffre secret de l’île ou des Tréfonds (E devant le coffre). Les boss cachés des donjons et des raids en donnent une à chaque héros.', quality: null };
+      return {
+        name: 'Clé des secrets',
+        icon: '🗝️',
+        color: '#f0c040',
+        sub: 'Clé · piles de 20',
+        desc: 'Ouvre un coffre secret de l’île ou des Tréfonds (E devant le coffre). Les boss cachés des donjons et des raids en donnent une à chaque héros.',
+        quality: null
+      };
     const qual = p.kind === 'rubis' ? null : { name: qualityName(p.q), color: qualityColor(p.q) };
     if (p.kind === 'rubis') {
       const r = RUBIS_CATALOG.find(x => x.id === p.id),
         f = RUBIS_FAMILIES[r.family];
-      return { name: r.name, icon: r.icon, color: f.light, sub: 'Rubis ' + f.short.toLowerCase(), desc: r.desc, quality: null };
+      return {
+        name: r.name,
+        icon: r.icon,
+        color: f.light,
+        sub: 'Rubis ' + f.short.toLowerCase(),
+        desc: r.desc,
+        quality: null
+      };
     }
     if (p.kind === 'fish') {
       const f = CANAAN_PROF.FISH[p.id];
-      return { name: f.name, icon: f.icon, color: qual.color, sub: 'Poisson · ' + qual.name, desc: 'À cuisiner près d’une cuisinière (panneau P).', quality: qual };
+      return {
+        name: f.name,
+        icon: f.icon,
+        color: qual.color,
+        sub: 'Poisson · ' + qual.name,
+        desc: 'À cuisiner près d’une cuisinière (panneau P).',
+        quality: qual
+      };
     }
     if (p.kind === 'meat') {
       const m = CANAAN_PROF.MEAT[p.id];
-      return { name: m.name, icon: m.icon, color: qual.color, sub: 'Viande · ' + qual.name, desc: 'À cuisiner près d’une cuisinière (panneau P).', quality: qual };
+      return {
+        name: m.name,
+        icon: m.icon,
+        color: qual.color,
+        sub: 'Viande · ' + qual.name,
+        desc: 'À cuisiner près d’une cuisinière (panneau P).',
+        quality: qual
+      };
     }
     if (p.kind === 'ore') {
       const o = CANAAN_GATHER.ORES[p.id];
-      const desc = o.rare ? 'Minerai rare des Tréfonds : il se vend ' + o.value + ' fois plus cher qu’un minerai de l’île.' : 'Pour l’enchanteur : 3 minerais de ' + o.metal + ' donnent un enchantement (panneau P).';
-      return { name: o.name, icon: o.icon, color: qual.color, sub: 'Minerai · ' + qual.name, desc, quality: qual };
+      const desc = o.rare
+        ? 'Minerai rare des Tréfonds : il se vend ' + o.value + ' fois plus cher qu’un minerai de l’île.'
+        : 'Pour l’enchanteur : 3 minerais de ' + o.metal + ' donnent un enchantement (panneau P).';
+      return {
+        name: o.name,
+        icon: o.icon,
+        color: qual.color,
+        sub: 'Minerai · ' + qual.name,
+        desc,
+        quality: qual
+      };
     }
     if (p.kind === 'herb') {
       const h = CANAAN_GATHER.HERBS[p.id];
-      return { name: h.name, icon: h.icon, color: qual.color, sub: 'Herbe · ' + qual.name, desc: 'À cuisiner en infusion près d’une cuisinière (panneau P).', quality: qual };
+      return {
+        name: h.name,
+        icon: h.icon,
+        color: qual.color,
+        sub: 'Herbe · ' + qual.name,
+        desc: 'À cuisiner en infusion près d’une cuisinière (panneau P).',
+        quality: qual
+      };
     }
     if (p.kind === 'ench') {
       const e = CANAAN_GATHER.ENCHANTS[p.id],
@@ -170,23 +232,49 @@
         icon: e.icon,
         color,
         sub: 'Enchantement · ' + metal,
-        desc: 'Ajoute ' + SECONDARY_STATS[p.id].name + ' en troisième statistique secondaire (' + Math.round(CANAAN_GATHER.ENCH_MULT[p.q] * 100) + ' % de la base de l’objet). Clic : choisir la pièce à enchanter.',
+        desc:
+          'Ajoute ' +
+          SECONDARY_STATS[p.id].name +
+          ' en troisième statistique secondaire (' +
+          Math.round(CANAAN_GATHER.ENCH_MULT[p.q] * 100) +
+          ' % de la base de l’objet). Clic : choisir la pièce à enchanter.',
         quality: null
       };
     }
     const r = CANAAN_PROF.RECIPES[p.id];
-    return { name: r.name, icon: '⟦prof_cooking⟧', color: qual.color, sub: 'Repas · ' + qual.name, desc: CANAAN_PROF.effect(p.id, p.q, game.hero).text + '. Clic : manger.', quality: qual };
+    return {
+      name: r.name,
+      icon: '⟦prof_cooking⟧',
+      color: qual.color,
+      sub: 'Repas · ' + qual.name,
+      desc: CANAAN_PROF.effect(p.id, p.q, game.hero).text + '. Clic : manger.',
+      quality: qual
+    };
   }
   // Minerais rares des Tréfonds : leur prix est multiplié (value).
-  const unitPrice = p => UNIT_PRICE[p.kind](p.q) * (p.kind === 'ore' ? CANAAN_GATHER.ORES[p.id]?.value || 1 : 1);
+  const unitPrice = p =>
+    UNIT_PRICE[p.kind](p.q) * (p.kind === 'ore' ? CANAAN_GATHER.ORES[p.id]?.value || 1 : 1);
   const price = p => unitPrice(p) * p.n;
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const esc = s =>
+    String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   // Case d'une pile : icône, bordure de sa qualité (ou famille), quantité en bas à droite.
   function cell(p, attrs = '') {
     const it = info(p);
     return (
-      '<button type="button" class="bag-cell stack-cell" style="border-color:' + it.color + ';--rarity:' + it.color + '" data-tooltip-stack="' + esc(token(p)) + '" ' + attrs + '>' +
-      '<span class="bag-icon">' + it.icon + '</span><span class="bag-name">' + esc(it.name) + '</span>' +
+      '<button type="button" class="bag-cell stack-cell" style="border-color:' +
+      it.color +
+      ';--rarity:' +
+      it.color +
+      '" data-tooltip-stack="' +
+      esc(token(p)) +
+      '" ' +
+      attrs +
+      '>' +
+      '<span class="bag-icon">' +
+      it.icon +
+      '</span><span class="bag-name">' +
+      esc(it.name) +
+      '</span>' +
       (p.n > 1 ? '<span class="bag-ilvl stack-count">' + p.n + '</span>' : '') +
       '</button>'
     );
@@ -197,10 +285,29 @@
     const it = info(p),
       merchant = typeof nearMerchant === 'function' && nearMerchant();
     return (
-      '<div class="tooltip-name skill-tip-head" style="color:' + it.color + '"><span class="skill-tip-icon">' + CANAAN_ICONS.html(it.icon) + '</span>' + esc(it.name) + '</div>' +
-      '<div class="tooltip-sub">' + esc(it.sub) + ' · ×' + p.n + '</div>' +
-      '<div class="skill-tip-desc">' + esc(it.desc) + '</div>' +
-      '<div class="skill-tip-meta">' + (sellable(p) ? 'Vente : ' + unitPrice(p) + ' or l’unité' + (merchant ? ' · clic droit ou bouton pièce chez le marchand' : '') : 'Ne se vend pas.') + '</div>'
+      '<div class="tooltip-name skill-tip-head" style="color:' +
+      it.color +
+      '"><span class="skill-tip-icon">' +
+      CANAAN_ICONS.html(it.icon) +
+      '</span>' +
+      esc(it.name) +
+      '</div>' +
+      '<div class="tooltip-sub">' +
+      esc(it.sub) +
+      ' · ×' +
+      p.n +
+      '</div>' +
+      '<div class="skill-tip-desc">' +
+      esc(it.desc) +
+      '</div>' +
+      '<div class="skill-tip-meta">' +
+      (sellable(p)
+        ? 'Vente : ' +
+          unitPrice(p) +
+          ' or l’unité' +
+          (merchant ? ' · clic droit ou bouton pièce chez le marchand' : '')
+        : 'Ne se vend pas.') +
+      '</div>'
     );
   }
   function showTooltip(text, event) {
@@ -221,7 +328,8 @@
     if (p.kind === 'rubis') return equipRubis(p.id);
     if (p.kind === 'meal') return CANAAN_PROF.actions.eat(p.id, p.q);
     if (p.kind === 'ench') return CANAAN_GATHER.actions.use(text);
-    if (p.kind === 'key') return toast('🗝️ Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.'), false;
+    if (p.kind === 'key')
+      return (toast('🗝️ Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.'), false);
     toast(info(p).name + ' : à cuisiner près d’une cuisinière (panneau P).');
     return false;
   }

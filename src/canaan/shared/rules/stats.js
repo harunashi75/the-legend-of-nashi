@@ -47,12 +47,16 @@ export function rollSecondaries(level, rarity, rng) {
 export function validSecondaries(sec) {
   if (!sec || typeof sec !== 'object' || Array.isArray(sec)) return false;
   const keys = Object.keys(sec);
-  return keys.length === 2 && keys.every(k => SECONDARY_KEYS.includes(k) && Number.isInteger(sec[k]) && sec[k] > 0);
+  return (
+    keys.length === 2 && keys.every(k => SECONDARY_KEYS.includes(k) && Number.isInteger(sec[k]) && sec[k] > 0)
+  );
 }
 // Enchantement d'un objet (enchanteur) : une statistique secondaire de plus, ou null.
 export function itemEnchant(item) {
   const e = item?.ench;
-  return e && SECONDARY_KEYS.includes(e.stat) && Number.isInteger(e.value) && e.value > 0 ? { stat: e.stat, value: e.value } : null;
+  return e && SECONDARY_KEYS.includes(e.stat) && Number.isInteger(e.value) && e.value > 0
+    ? { stat: e.stat, value: e.value }
+    : null;
 }
 // Toutes les statistiques d'un objet : principales calculées, secondaires enregistrées, plus l'enchantement
 // (ajouté aux secondaires ; à part dans enchant pour l'info-bulle).
@@ -141,7 +145,9 @@ export function levelGapFactor(heroLevel, mobLevel) {
 export function xpToNext(level) {
   const lv = clampLevel(level);
   if (lv >= MAX_LEVEL) return 0;
-  return Math.round((35 * Math.pow(lv, 1.65) + 25) * XP_BRACKETS[Math.min(XP_BRACKETS.length - 1, Math.floor((lv - 1) / 10))]);
+  return Math.round(
+    (35 * Math.pow(lv, 1.65) + 25) * XP_BRACKETS[Math.min(XP_BRACKETS.length - 1, Math.floor((lv - 1) / 10))]
+  );
 }
 // XP d'un monstre vaincu ; un monstre bien plus faible que le héros n'en donne presque plus.
 export function mobXp(mobLevel, heroLevel, elite = false) {

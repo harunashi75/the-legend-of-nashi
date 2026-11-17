@@ -228,7 +228,11 @@
   padding: 6px 4px 8px;
   border: 2px solid var(--rarity);
   border-radius: 8px;
-  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rarity) 22%, transparent), rgba(16, 12, 10, 0.55) 70%);
+  background: radial-gradient(
+    circle at 50% 35%,
+    color-mix(in srgb, var(--rarity) 22%, transparent),
+    rgba(16, 12, 10, 0.55) 70%
+  );
   color: #f3e6c4;
   cursor: var(--cursor-pointer);
 }
@@ -238,7 +242,9 @@
   image-rendering: pixelated;
 }
 #window .skin-card.worn {
-  box-shadow: 0 0 0 2px #fff2cb, 0 0 14px var(--rarity);
+  box-shadow:
+    0 0 0 2px #fff2cb,
+    0 0 14px var(--rarity);
 }
 #window .skin-card.locked {
   cursor: var(--cursor-default);

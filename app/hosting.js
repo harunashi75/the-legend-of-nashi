@@ -14,8 +14,11 @@ const LAN_PORTS = [8787, 8788, 8789, 8790, 8791];
 function lanAddresses(interfaces = os.networkInterfaces()) {
   const out = [];
   for (const list of Object.values(interfaces))
-    for (const a of list || []) if ((a.family === 'IPv4' || a.family === 4) && !a.internal && !isTailscaleIp(a.address)) out.push(a.address);
-  const rank = ip => (/^192\.168\./.test(ip) ? 0 : /^10\./.test(ip) ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(ip) ? 2 : 3);
+    for (const a of list || [])
+      if ((a.family === 'IPv4' || a.family === 4) && !a.internal && !isTailscaleIp(a.address))
+        out.push(a.address);
+  const rank = ip =>
+    /^192\.168\./.test(ip) ? 0 : /^10\./.test(ip) ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(ip) ? 2 : 3;
   return [...new Set(out)].sort((x, y) => rank(x) - rank(y));
 }
 // Pare-feux actifs sous Linux (firewalld, ufw) : ils bloquent par défaut les connexions entrantes du réseau.
@@ -25,7 +28,16 @@ function linuxFirewalls(run = require('node:child_process').execFileSync) {
   const active = [];
   for (const name of ['firewalld', 'ufw'])
     try {
-      if (String(run('systemctl', ['is-active', name], { encoding: 'utf8', timeout: 2000, stdio: ['ignore', 'pipe', 'ignore'] })).trim() === 'active') active.push(name);
+      if (
+        String(
+          run('systemctl', ['is-active', name], {
+            encoding: 'utf8',
+            timeout: 2000,
+            stdio: ['ignore', 'pipe', 'ignore']
+          })
+        ).trim() === 'active'
+      )
+        active.push(name);
     } catch {
       // Service absent ou inactif : rien à faire.
     }
@@ -53,17 +65,35 @@ function tailscaleCommands() {
 }
 // Adresse Tailscale de ce PC et son nom (MagicDNS), ou { ip: null, why } si Tailscale n'est pas prêt.
 // Lecture seule : l'interface réseau d'abord, puis « tailscale status --json » pour le nom et l'état.
-function tailscaleInfo({ interfaces = os.networkInterfaces(), run = execFileSync, commands = tailscaleCommands() } = {}) {
+function tailscaleInfo({
+  interfaces = os.networkInterfaces(),
+  run = execFileSync,
+  commands = tailscaleCommands()
+} = {}) {
   let ip = null;
   for (const [name, list] of Object.entries(interfaces))
     for (const a of list || [])
-      if ((a.family === 'IPv4' || a.family === 4) && isTailscaleIp(a.address) && (!ip || /tailscale|utun/i.test(name))) ip = a.address;
+      if (
+        (a.family === 'IPv4' || a.family === 4) &&
+        isTailscaleIp(a.address) &&
+        (!ip || /tailscale|utun/i.test(name))
+      )
+        ip = a.address;
   let name = '',
     state = '',
     found = false;
   for (const cmd of commands) {
     try {
-      const st = JSON.parse(String(run(cmd, ['status', '--json'], { encoding: 'utf8', timeout: 3000, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] })));
+      const st = JSON.parse(
+        String(
+          run(cmd, ['status', '--json'], {
+            encoding: 'utf8',
+            timeout: 3000,
+            windowsHide: true,
+            stdio: ['ignore', 'pipe', 'ignore']
+          })
+        )
+      );
       found = true;
       state = String(st.BackendState || '');
       name = String(st.Self?.DNSName || '').replace(/\.$/, '');
@@ -85,11 +115,12 @@ function tailscaleInfo({ interfaces = os.networkInterfaces(), run = execFileSync
   }
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(name)) name = '';
   if (ip && (!state || state === 'Running')) return { ip, name };
-  const why = !found && !ip
-    ? 'Tailscale n’est pas installé sur ce PC : installe-le (tailscale.com/download) et connecte-toi.'
-    : state === 'NeedsLogin'
-      ? 'Tailscale attend que tu te connectes : ouvre Tailscale et connecte-toi à ton compte.'
-      : 'Tailscale est arrêté : ouvre Tailscale et active la connexion (« Connect »).';
+  const why =
+    !found && !ip
+      ? 'Tailscale n’est pas installé sur ce PC : installe-le (tailscale.com/download) et connecte-toi.'
+      : state === 'NeedsLogin'
+        ? 'Tailscale attend que tu te connectes : ouvre Tailscale et connecte-toi à ton compte.'
+        : 'Tailscale est arrêté : ouvre Tailscale et active la connexion (« Connect »).';
   return { ip: null, name: '', why };
 }
 // Commandes pour laisser passer les amis Tailscale dans les pare-feux actifs (Linux).
@@ -101,7 +132,12 @@ function tailscaleFirewallCommands(firewalls, port) {
   );
 }
 
-function createHosting({ onStatus = () => {}, log = () => {}, tailscale = () => tailscaleInfo(), firewalls = () => linuxFirewalls() } = {}) {
+function createHosting({
+  onStatus = () => {},
+  log = () => {},
+  tailscale = () => tailscaleInfo(),
+  firewalls = () => linuxFirewalls()
+} = {}) {
   let relay = null,
     relayHost = null,
     status = { state: 'off' };
@@ -127,7 +163,12 @@ function createHosting({ onStatus = () => {}, log = () => {}, tailscale = () => 
         await candidate.close().catch(() => {});
       }
     }
-    throw new Error('Impossible d’ouvrir le relais : ' + (lastError?.code === 'EADDRINUSE' ? 'ports ' + ports.join(', ') + ' déjà utilisés.' : lastError?.message));
+    throw new Error(
+      'Impossible d’ouvrir le relais : ' +
+        (lastError?.code === 'EADDRINUSE'
+          ? 'ports ' + ports.join(', ') + ' déjà utilisés.'
+          : lastError?.message)
+    );
   }
   // Tailscale : relais sur l'adresse Tailscale de ce PC ; l'hôte s'y branche lui aussi (même adresse).
   async function startTailscale() {
@@ -140,7 +181,14 @@ function createHosting({ onStatus = () => {}, log = () => {}, tailscale = () => 
     try {
       await startRelay(info.ip, LAN_PORTS);
     } catch (error) {
-      emit({ state: 'error', kind: 'tailscale', local: null, relay: null, addresses: [], message: error.message });
+      emit({
+        state: 'error',
+        kind: 'tailscale',
+        local: null,
+        relay: null,
+        addresses: [],
+        message: error.message
+      });
       return { ...status };
     }
     const port = relay.port,
@@ -164,7 +212,14 @@ function createHosting({ onStatus = () => {}, log = () => {}, tailscale = () => 
       port = relay.port,
       local = 'ws://127.0.0.1:' + port;
     if (!addresses.length) {
-      emit({ state: 'error', kind: 'lan', local, relay: null, addresses: [], message: 'Aucun réseau local trouvé : vérifie le Wi-Fi ou le câble.' });
+      emit({
+        state: 'error',
+        kind: 'lan',
+        local,
+        relay: null,
+        addresses: [],
+        message: 'Aucun réseau local trouvé : vérifie le Wi-Fi ou le câble.'
+      });
       return { ...status };
     }
     emit({
@@ -191,4 +246,13 @@ function createHosting({ onStatus = () => {}, log = () => {}, tailscale = () => 
   return { startTailscale, startLan, stop, status: () => ({ ...status }) };
 }
 
-module.exports = { createHosting, tailscaleInfo, isTailscaleIp, tailscaleFirewallCommands, lanAddresses, linuxFirewalls, firewallCommands, LAN_PORTS };
+module.exports = {
+  createHosting,
+  tailscaleInfo,
+  isTailscaleIp,
+  tailscaleFirewallCommands,
+  lanAddresses,
+  linuxFirewalls,
+  firewallCommands,
+  LAN_PORTS
+};

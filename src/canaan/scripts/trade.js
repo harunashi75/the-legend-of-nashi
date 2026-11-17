@@ -14,7 +14,11 @@
   const sessionOf = hero => [...sessions].find(s => s.a === hero || s.b === hero) || null;
   const other = (s, hero) => (s.a === hero ? s.b : s.a);
   // Joueurs avec qui échanger : présents, connectés (pas un compagnon local) et pas déconnectés.
-  const tradable = hero => !!hero && game.heroes.includes(hero) && !hero.away && (hero === game.hero ? game.mode === 'host' : !hero.local && !!hero.peer);
+  const tradable = hero =>
+    !!hero &&
+    game.heroes.includes(hero) &&
+    !hero.away &&
+    (hero === game.hero ? game.mode === 'host' : !hero.local && !!hero.peer);
   function note(hero, text) {
     hero.tradeNote = text;
     if (hero === game.hero) toast('🤝 ' + text);
@@ -30,10 +34,25 @@
     const to = heroById(toId);
     if (!tradable(from) || !tradable(to) || to === from) return false;
     if (sessionOf(from) || sessionOf(to)) {
-      note(from, (sessionOf(to) ? nameOf(to) + ' est déjà en train d’échanger.' : 'Termine d’abord ton échange en cours.'));
+      note(
+        from,
+        sessionOf(to)
+          ? nameOf(to) + ' est déjà en train d’échanger.'
+          : 'Termine d’abord ton échange en cours.'
+      );
       return false;
     }
-    sessions.add({ a: from, b: to, open: false, offers: new Map([[from, { items: [], gold: 0 }], [to, { items: [], gold: 0 }]]), ready: new Set(), at: time });
+    sessions.add({
+      a: from,
+      b: to,
+      open: false,
+      offers: new Map([
+        [from, { items: [], gold: 0 }],
+        [to, { items: [], gold: 0 }]
+      ]),
+      ready: new Set(),
+      at: time
+    });
     note(to, nameOf(from) + ' te propose un échange (touche J).');
     note(from, 'Demande d’échange envoyée à ' + nameOf(to) + '.');
     return true;
@@ -76,7 +95,15 @@
   }
   function offer(hero, items, gold) {
     const s = sessionOf(hero);
-    if (!s || !s.open || !Array.isArray(items) || items.length > TRADE_ITEMS || !Number.isInteger(gold) || gold < 0) return false;
+    if (
+      !s ||
+      !s.open ||
+      !Array.isArray(items) ||
+      items.length > TRADE_ITEMS ||
+      !Number.isInteger(gold) ||
+      gold < 0
+    )
+      return false;
     if (!resolve(hero, items) || gold > Math.floor(hero.player.gold)) return false;
     s.offers.set(hero, { items: [...items], gold });
     // Une offre changée : les deux validations tombent.
@@ -109,7 +136,8 @@
       return false;
     };
     if (!ga || !gb) return fail('Un objet proposé n’est plus dans le sac : échange suspendu.');
-    if (oa.gold > Math.floor(s.a.player.gold) || ob.gold > Math.floor(s.b.player.gold)) return fail('Or insuffisant : échange suspendu.');
+    if (oa.gold > Math.floor(s.a.player.gold) || ob.gold > Math.floor(s.b.player.gold))
+      return fail('Or insuffisant : échange suspendu.');
     // Les objets et les piles changent de main ; si un sac déborde, tout revient comme avant.
     const move = (from, to, give) => {
       const gear = give.filter(x => x.gear).map(x => x.gear);
@@ -122,7 +150,9 @@
     };
     move(s.a, s.b, ga);
     move(s.b, s.a, gb);
-    const full = [s.a, s.b].find(hero => canaanBagUsed(hero) > canaanBagLimit(hero) || CANAAN_BAG.matUsed(hero) > CANAAN_BAG.MAT_LIMIT);
+    const full = [s.a, s.b].find(
+      hero => canaanBagUsed(hero) > canaanBagLimit(hero) || CANAAN_BAG.matUsed(hero) > CANAAN_BAG.MAT_LIMIT
+    );
     if (full) {
       move(s.b, s.a, ga);
       move(s.a, s.b, gb);
@@ -136,11 +166,26 @@
       if (hero === game.hero) recomputeStats();
       else recomputeHeroStats(hero);
     }
-    const summary = (o, g) => (g.length ? g.length + ' objet' + (g.length > 1 ? 's' : '') : '') + (g.length && o.gold ? ' et ' : '') + (o.gold ? o.gold + ' or' : '') || 'rien';
-    close(s, 'Échange réussi : ' + nameOf(s.a) + ' donne ' + summary(oa, ga) + ', ' + nameOf(s.b) + ' donne ' + summary(ob, gb) + '.');
+    const summary = (o, g) =>
+      (g.length ? g.length + ' objet' + (g.length > 1 ? 's' : '') : '') +
+        (g.length && o.gold ? ' et ' : '') +
+        (o.gold ? o.gold + ' or' : '') || 'rien';
+    close(
+      s,
+      'Échange réussi : ' +
+        nameOf(s.a) +
+        ' donne ' +
+        summary(oa, ga) +
+        ', ' +
+        nameOf(s.b) +
+        ' donne ' +
+        summary(ob, gb) +
+        '.'
+    );
     chat('Échange', nameOf(s.a) + ' ⇄ ' + nameOf(s.b) + ' : échange conclu.');
     saveGame();
-    if (modalOpen() && (currentGearPanel === 'inventory' || currentGearPanel === 'character')) refreshGearPanel();
+    if (modalOpen() && (currentGearPanel === 'inventory' || currentGearPanel === 'character'))
+      refreshGearPanel();
     return true;
   }
   // Action d'un joueur (l'hôte directement, un invité par le réseau) ; renvoie vrai si elle a été prise en compte.
@@ -167,7 +212,9 @@
     const s = sessionOf(hero),
       out = { note: hero.tradeNote || '' };
     if (!s) {
-      out.partners = game.heroes.filter(h => h !== hero && tradable(h)).map(h => ({ id: idOf(h), name: nameOf(h) }));
+      out.partners = game.heroes
+        .filter(h => h !== hero && tradable(h))
+        .map(h => ({ id: idOf(h), name: nameOf(h) }));
       return out;
     }
     const them = other(s, hero),
@@ -178,7 +225,11 @@
     if (s.open)
       Object.assign(out, {
         mine: { items: mine.items, gold: mine.gold, ready: s.ready.has(hero) },
-        theirs: { items: (resolve(them, theirs.items) || []).map(itemView), gold: theirs.gold, ready: s.ready.has(them) }
+        theirs: {
+          items: (resolve(them, theirs.items) || []).map(itemView),
+          gold: theirs.gold,
+          ready: s.ready.has(them)
+        }
       });
     return out;
   }
@@ -204,7 +255,14 @@
     return (
       '<div class="trade-partners">' +
       v.partners
-        .map(p => '<button type="button" data-action="tradeRequest" data-hero="' + esc(p.id) + '">🤝 Échanger avec ' + esc(p.name) + '</button>')
+        .map(
+          p =>
+            '<button type="button" data-action="tradeRequest" data-hero="' +
+            esc(p.id) +
+            '">🤝 Échanger avec ' +
+            esc(p.name) +
+            '</button>'
+        )
         .join('') +
       '</div>'
     );
@@ -218,8 +276,24 @@
     const rarity = rarityInfo(x),
       icon = weaponIcon(x) || itemIcon[x.slot];
     return (
-      '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' + canaanPrestige(x) + ' style="border-color:' + rarity.color + ';--rarity:' + rarity.color + '" data-tooltip-trade="' + esc(x.id) + '" ' + attrs + '>' +
-      '<span class="bag-icon">' + icon + '</span><span class="bag-name">' + esc(x.name || gearDisplayName(x)) + '</span><span class="bag-ilvl">' + itemLevel(x) + '</span></button></div>'
+      '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' +
+      canaanPrestige(x) +
+      ' style="border-color:' +
+      rarity.color +
+      ';--rarity:' +
+      rarity.color +
+      '" data-tooltip-trade="' +
+      esc(x.id) +
+      '" ' +
+      attrs +
+      '>' +
+      '<span class="bag-icon">' +
+      icon +
+      '</span><span class="bag-name">' +
+      esc(x.name || gearDisplayName(x)) +
+      '</span><span class="bag-ilvl">' +
+      itemLevel(x) +
+      '</span></button></div>'
     );
   }
   // Ce qui reste dans le sac une fois l'offre retirée : équipements non proposés et piles diminuées.
@@ -228,7 +302,8 @@
       offered = resolve(hero, mine.items) || [],
       gear = hero.inventory.filter(it => it && it.id && !offered.some(x => x.gear === it)),
       minus = new Map();
-    for (const { stack: p } of offered.filter(x => x.stack)) minus.set(p.kind + ':' + p.id + ':' + p.q, (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0) + p.n);
+    for (const { stack: p } of offered.filter(x => x.stack))
+      minus.set(p.kind + ':' + p.id + ':' + p.q, (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0) + p.n);
     const stacks = [];
     for (const p of CANAAN_BAG.piles(hero)) {
       let n = p.n - (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0);
@@ -240,37 +315,100 @@
     const { gear, stacks, offered } = bagLeft(v.mine),
       full = offered.length >= TRADE_ITEMS,
       gold = ui.gold === null ? v.mine.gold : ui.gold,
-      grid = list => '<div class="modern-bag trade-grid">' + (list.length ? list.join('') : '<p class="trade-empty">Aucun objet.</p>') + '</div>';
-    const mineTiles = offered.map((x, k) => tile(x.stack ? { token: x.id } : x.gear, 'data-action="tradeRemove" data-index="' + k + '" title="Retirer de l’offre"')),
+      grid = list =>
+        '<div class="modern-bag trade-grid">' +
+        (list.length ? list.join('') : '<p class="trade-empty">Aucun objet.</p>') +
+        '</div>';
+    const mineTiles = offered.map((x, k) =>
+        tile(
+          x.stack ? { token: x.id } : x.gear,
+          'data-action="tradeRemove" data-index="' + k + '" title="Retirer de l’offre"'
+        )
+      ),
       theirTiles = v.theirs.items.map(x => tile(x, 'title="Proposé par ' + esc(v.with) + '"')),
       bagTiles = [
-        ...gear.map(it => tile(it, 'data-action="tradeAddId" data-id="' + esc(it.id) + '"' + (full ? ' disabled' : '') + ' title="Proposer"')),
-        ...stacks.map(p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, 'data-action="tradeAddId" data-id="' + esc(CANAAN_BAG.token(p)) + '"' + (full ? ' disabled' : '') + ' title="Proposer"') + '</div>')
+        ...gear.map(it =>
+          tile(
+            it,
+            'data-action="tradeAddId" data-id="' +
+              esc(it.id) +
+              '"' +
+              (full ? ' disabled' : '') +
+              ' title="Proposer"'
+          )
+        ),
+        ...stacks.map(
+          p =>
+            '<div class="bag-sale-wrap">' +
+            CANAAN_BAG.cell(
+              p,
+              'data-action="tradeAddId" data-id="' +
+                esc(CANAAN_BAG.token(p)) +
+                '"' +
+                (full ? ' disabled' : '') +
+                ' title="Proposer"'
+            ) +
+            '</div>'
+        )
       ];
     return (
       '<div class="trade-columns shop-columns">' +
       '<section class="shop-side trade-offers">' +
-      '<div class="trade-side' + (v.mine.ready ? ' ready' : '') + '"><h3>Ton offre ' + (v.mine.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '<small> · ' + offered.length + ' / ' + TRADE_ITEMS + '</small></h3>' + grid(mineTiles) +
-      '<div class="trade-gold"><label for="tradeGold">💰 Or (tu as ' + Math.floor(P.gold) + ')</label><input id="tradeGold" type="number" min="0" step="1" value="' + Number(gold) + '">' +
+      '<div class="trade-side' +
+      (v.mine.ready ? ' ready' : '') +
+      '"><h3>Ton offre ' +
+      (v.mine.ready ? '<span class="trade-ok">✅ Validé</span>' : '') +
+      '<small> · ' +
+      offered.length +
+      ' / ' +
+      TRADE_ITEMS +
+      '</small></h3>' +
+      grid(mineTiles) +
+      '<div class="trade-gold"><label for="tradeGold">💰 Or (tu as ' +
+      Math.floor(P.gold) +
+      ')</label><input id="tradeGold" type="number" min="0" step="1" value="' +
+      Number(gold) +
+      '">' +
       '<button type="button" data-action="tradeGold">Proposer</button></div></div>' +
-      '<div class="trade-side' + (v.theirs.ready ? ' ready' : '') + '"><h3>Offre de ' + esc(v.with) + ' ' + (v.theirs.ready ? '<span class="trade-ok">✅ Validé</span>' : '') + '</h3>' + grid(theirTiles) +
-      '<p class="trade-gold-them">💰 ' + Number(v.theirs.gold) + ' or</p></div>' +
-      '<div class="trade-actions"><button type="button" class="' + (v.mine.ready ? '' : 'trade-primary') + '" data-action="tradeReady">' + (v.mine.ready ? 'Ne plus valider' : '✅ Valider l’échange') + '</button>' +
+      '<div class="trade-side' +
+      (v.theirs.ready ? ' ready' : '') +
+      '"><h3>Offre de ' +
+      esc(v.with) +
+      ' ' +
+      (v.theirs.ready ? '<span class="trade-ok">✅ Validé</span>' : '') +
+      '</h3>' +
+      grid(theirTiles) +
+      '<p class="trade-gold-them">💰 ' +
+      Number(v.theirs.gold) +
+      ' or</p></div>' +
+      '<div class="trade-actions"><button type="button" class="' +
+      (v.mine.ready ? '' : 'trade-primary') +
+      '" data-action="tradeReady">' +
+      (v.mine.ready ? 'Ne plus valider' : '✅ Valider l’échange') +
+      '</button>' +
       '<button type="button" class="trade-danger" data-action="tradeCancel">Annuler</button></div>' +
       '<p class="trade-hint">L’échange se fait quand vous avez validé tous les deux. Changer une offre annule les validations.</p></section>' +
       '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · clique un objet pour le proposer</h3>' +
-      '<p class="muted">Les objets portés ne s’échangent pas. Une pile se propose entière (100 au plus).</p>' + grid(bagTiles) + '</section></div>'
+      '<p class="muted">Les objets portés ne s’échangent pas. Une pile se propose entière (100 au plus).</p>' +
+      grid(bagTiles) +
+      '</section></div>'
     );
   }
   function body(v) {
     if (v.state === 'incoming')
       return (
-        '<p class="trade-ask">' + esc(v.with) + ' te propose un échange.</p><div class="trade-actions">' +
+        '<p class="trade-ask">' +
+        esc(v.with) +
+        ' te propose un échange.</p><div class="trade-actions">' +
         '<button type="button" class="trade-primary" data-action="tradeAnswer" data-answer="yes">Accepter</button>' +
         '<button type="button" class="trade-danger" data-action="tradeAnswer" data-answer="no">Refuser</button></div>'
       );
     if (v.state === 'outgoing')
-      return '<p class="trade-ask">En attente de la réponse de ' + esc(v.with) + '…</p><div class="trade-actions"><button type="button" class="trade-danger" data-action="tradeCancel">Annuler la demande</button></div>';
+      return (
+        '<p class="trade-ask">En attente de la réponse de ' +
+        esc(v.with) +
+        '…</p><div class="trade-actions"><button type="button" class="trade-danger" data-action="tradeCancel">Annuler la demande</button></div>'
+      );
     if (v.state === 'open') return openTrade(v);
     return partnerList(v);
   }
@@ -280,7 +418,14 @@
     const open = modalOpen() && document.querySelector('#window .trade-panel');
     if (!open) return;
     const v = myView();
-    shown = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + CANAAN_BAG.tiles(game.hero).length + '|' + Math.floor(P.gold);
+    shown =
+      JSON.stringify(v) +
+      '|' +
+      (game.hero.inventory || []).length +
+      '|' +
+      CANAAN_BAG.tiles(game.hero).length +
+      '|' +
+      Math.floor(P.gold);
     showPanel(
       '<div class="rpg-head"><h2>🤝 Échange</h2></div><div class="rpg-paper trade-panel">' +
         (v.note ? '<p class="trade-note" role="status">' + esc(v.note) + '</p>' : '') +
@@ -305,7 +450,14 @@
     if (!guest()) check();
     if (!modalOpen() || !document.querySelector('#window .trade-panel')) return;
     const v = myView(),
-      now = JSON.stringify(v) + '|' + (game.hero.inventory || []).length + '|' + CANAAN_BAG.tiles(game.hero).length + '|' + Math.floor(P.gold);
+      now =
+        JSON.stringify(v) +
+        '|' +
+        (game.hero.inventory || []).length +
+        '|' +
+        CANAAN_BAG.tiles(game.hero).length +
+        '|' +
+        Math.floor(P.gold);
     if (now !== shown && document.activeElement?.id !== 'tradeGold') render();
   }, 250);
   // Demande reçue : prévenir même fenêtre fermée (chez un invité, la note arrive avec sa vue).
@@ -364,9 +516,13 @@
     // Info-bulle d'un équipement proposé (le sien ou celui de l'autre joueur).
     showTooltip(id, event) {
       const v = myView(),
-        item = game.hero.inventory.find(it => it && it.id === id) || v.theirs?.items?.find(x => x.id === id && !x.token);
+        item =
+          game.hero.inventory.find(it => it && it.id === id) ||
+          v.theirs?.items?.find(x => x.id === id && !x.token);
       if (!item) return hideGearTooltip();
-      gearTooltip.innerHTML = window.CANAAN_STATS_VIEW.tooltip(item) + (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      gearTooltip.innerHTML =
+        window.CANAAN_STATS_VIEW.tooltip(item) +
+        (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
       gearTooltip.style.display = 'block';
       moveGearTooltip(event);
     },

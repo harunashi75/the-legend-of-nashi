@@ -16,7 +16,11 @@
   const tileKey = (tx, ty) => ty * MAPW + tx;
   const now = () => time;
   const guest = () => game.mode === 'guest';
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const esc = s =>
+    String(s).replace(
+      /[&<>"']/g,
+      c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+    );
   const fresh = () => ({ active: {}, done: {}, flags: {}, deco: [], choices: {}, track: null });
   const stateOf = hero => (hero.quetes ??= fresh());
   // État du monde : drapeaux (pont, lanternes, sanctuaires ouverts…) et énigmes résolues.
@@ -61,7 +65,8 @@
     for (let r = 0; r <= 4; r++)
       for (let y = ty - r; y <= ty + r; y++)
         for (let x = tx - r; x <= tx + r; x++)
-          if (Math.max(Math.abs(x - tx), Math.abs(y - ty)) === r && tools.walkableLand(x, y)) return [x - site.x, y - site.y];
+          if (Math.max(Math.abs(x - tx), Math.abs(y - ty)) === r && tools.walkableLand(x, y))
+            return [x - site.x, y - site.y];
     return [dx, dy];
   }
   function roomy(tools, x, y, r) {
@@ -79,7 +84,13 @@
   function clearSite(site, r, tools) {
     for (let y = site.y - r; y <= site.y + r; y++)
       for (let x = site.x - r; x <= site.x + r; x++) {
-        if (!tools.valid(x, y) || Math.hypot(x - site.x, y - site.y) > r + 0.4 || BRIDGE_TILES.has(y * MAPW + x) || game.world.overworld[y][x] === CANAAN_WOOD_TILE) continue;
+        if (
+          !tools.valid(x, y) ||
+          Math.hypot(x - site.x, y - site.y) > r + 0.4 ||
+          BRIDGE_TILES.has(y * MAPW + x) ||
+          game.world.overworld[y][x] === CANAAN_WOOD_TILE
+        )
+          continue;
         if (game.world.overworld[y][x] !== 2) game.world.overworld[y][x] = ZONES[site.zone].t;
         game.world.overdecor[y][x] = null;
       }
@@ -105,7 +116,15 @@
         roomy(tools, x, y, def.r) &&
         (!free || !taken.some(([a, b]) => Math.hypot(a - x, b - y) < def.r + 5));
       const spot = tools.nearestSpot(target.x, target.y, def.zone, accept);
-      const site = { id, x: spot.x, y: spot.y, zone: def.zone, r: def.r, objs: [], quest: QUESTS.find(q => q.site === id) };
+      const site = {
+        id,
+        x: spot.x,
+        y: spot.y,
+        zone: def.zone,
+        r: def.r,
+        objs: [],
+        quest: QUESTS.find(q => q.site === id)
+      };
       SITES[id] = site;
       taken.push([site.x, site.y]);
       clearSite(site, def.r + (id === 'q8' ? 1 : 0), tools);
@@ -116,7 +135,15 @@
       let at = def.at || [0, 0];
       if (def.camp) at = [camp.x + def.camp[0] - site.x, camp.y + def.camp[1] - site.y];
       const [dx, dy] = walkableNear(site, at[0], at[1], tools);
-      NPCS[id] = { id, def, x: px(site, dx), y: py(site, dy), face: 0, quest: QUESTS.find(q => q.npc === id), site };
+      NPCS[id] = {
+        id,
+        def,
+        x: px(site, dx),
+        y: py(site, dy),
+        face: 0,
+        quest: QUESTS.find(q => q.npc === id),
+        site
+      };
     }
     // Pierre de passage du camp (raccourci de la quête 8), au bord de la clairière.
     const w = tools.nearestSpot(camp.x - 4, camp.y - 9, 0, (x, y) => tools.walkableLand(x, y));
@@ -159,16 +186,37 @@
   ST = freshStates();
   const BUILD = {
     q1(site) {
-      [['lune', 0, -2], ['soleil', 2, 0], ['pluie', 0, 2], ['vent', -2, 0]].forEach(([sym, dx, dy]) => addObj(site, 'p_' + sym, 'stone', dx, dy, { sym, solid: true }));
+      [
+        ['lune', 0, -2],
+        ['soleil', 2, 0],
+        ['pluie', 0, 2],
+        ['vent', -2, 0]
+      ].forEach(([sym, dx, dy]) => addObj(site, 'p_' + sym, 'stone', dx, dy, { sym, solid: true }));
       addObj(site, 'stele', 'stele', -3, -2, { solid: true });
       addObj(site, 'crystal', 'crystal', 0, 0, { solid: true });
     },
     q2(site) {
-      [['etoile', -4, -3], ['lune', 4, -2], ['flamme', 1, 4]].forEach(([s, dx, dy], i) => addObj(site, 'sym_' + s, 'relic', dx, dy, { sym: i }));
-      [[0, -2], [-2, 0], [2, 0]].forEach(([dx, dy], i) => addObj(site, 'ped' + i, 'pedestal', dx, dy, { i, solid: true }));
+      [
+        ['etoile', -4, -3],
+        ['lune', 4, -2],
+        ['flamme', 1, 4]
+      ].forEach(([s, dx, dy], i) => addObj(site, 'sym_' + s, 'relic', dx, dy, { sym: i }));
+      [
+        [0, -2],
+        [-2, 0],
+        [2, 0]
+      ].forEach(([dx, dy], i) => addObj(site, 'ped' + i, 'pedestal', dx, dy, { i, solid: true }));
     },
     q3(site) {
-      const N = { pen: [-4, 3], j1: [-1, 3], d1: [3, 3], j2: [-1, 0], d2: [-1, -4], t1: [3, 0], top: [3, -4] };
+      const N = {
+        pen: [-4, 3],
+        j1: [-1, 3],
+        d1: [3, 3],
+        j2: [-1, 0],
+        d2: [-1, -4],
+        t1: [3, 0],
+        top: [3, -4]
+      };
       site.nodes = N;
       const line = (a, b) => {
         const [x0, y0] = N[a],
@@ -176,7 +224,14 @@
         for (let k = 0; k <= Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); k++)
           setTile(site.x + x0 + Math.sign(x1 - x0) * k, site.y + y0 + Math.sign(y1 - y0) * k, 2);
       };
-      [['pen', 'j1'], ['j1', 'd1'], ['j1', 'j2'], ['j2', 'd2'], ['j2', 't1'], ['t1', 'top']].forEach(([a, b]) => line(a, b));
+      [
+        ['pen', 'j1'],
+        ['j1', 'd1'],
+        ['j1', 'j2'],
+        ['j2', 'd2'],
+        ['j2', 't1'],
+        ['t1', 'top']
+      ].forEach(([a, b]) => line(a, b));
       addObj(site, 'gate0', 'gate', 1, 3, { i: 0, horiz: false });
       addObj(site, 'gate1', 'gate', -1, -2, { i: 1, horiz: true });
       addObj(site, 'gate2', 'gate', 1, 0, { i: 2, horiz: false });
@@ -184,20 +239,43 @@
       addObj(site, 'flag', 'hilltop', 4, -5, { solid: true });
     },
     q4(site) {
-      for (const [dx, dy] of [[-4, -3], [4, -3], [-3, 4]]) {
+      for (const [dx, dy] of [
+        [-4, -3],
+        [4, -3],
+        [-3, 4]
+      ]) {
         wall(site, dx, dy, ZONES[0].t, 'tree');
         site.objs.push({ id: 'tree' + dx, kind: 'shadowtree', dx, dy, x: px(site, dx), y: py(site, dy) });
       }
       addObj(site, 'dig', 'dig', 2, 1);
     },
     q5(site) {
-      for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) if (Math.hypot(x, y) < 2.3) setTile(site.x + x, site.y + y, 0);
-      [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]].forEach(([dx, dy], i) => addObj(site, 'ripple' + i, 'ripple', dx, dy, { i, range: 3.3 }));
+      for (let y = -2; y <= 2; y++)
+        for (let x = -2; x <= 2; x++) if (Math.hypot(x, y) < 2.3) setTile(site.x + x, site.y + y, 0);
+      [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+        [0, 0]
+      ].forEach(([dx, dy], i) => addObj(site, 'ripple' + i, 'ripple', dx, dy, { i, range: 3.3 }));
     },
     q6(site, tools) {
       const pitch = [3, 1, 4, 2];
-      [[0, -2], [2, 0], [0, 2], [-2, 0]].forEach(([dx, dy], i) => addObj(site, 'chime' + i, 'chime', dx, dy, { pitch: pitch[i], solid: true }));
-      [[-9, -5], [8, -7], [9, 5], [-7, 8]].forEach(([dx, dy], i) => {
+      [
+        [0, -2],
+        [2, 0],
+        [0, 2],
+        [-2, 0]
+      ].forEach(([dx, dy], i) =>
+        addObj(site, 'chime' + i, 'chime', dx, dy, { pitch: pitch[i], solid: true })
+      );
+      [
+        [-9, -5],
+        [8, -7],
+        [9, 5],
+        [-7, 8]
+      ].forEach(([dx, dy], i) => {
         const [x, y] = walkableNear(site, dx, dy, tools);
         addObj(site, 'mstone' + (i + 1), 'mstone', x, y, { pitch: i + 1 });
       });
@@ -205,7 +283,11 @@
     },
     q7(site) {
       addObj(site, 'sun', 'sun', -4, -2, { solid: true });
-      [[-1, -2], [-1, 1], [2, 1]].forEach(([dx, dy], i) => addObj(site, 'mirror' + i, 'mirror', dx, dy, { i, solid: true }));
+      [
+        [-1, -2],
+        [-1, 1],
+        [2, 1]
+      ].forEach(([dx, dy], i) => addObj(site, 'mirror' + i, 'mirror', dx, dy, { i, solid: true }));
       wall(site, 2, -2, ZONES[1].t, 'bigtree');
       site.objs.push({ id: 'gtree', kind: 'gtree', dx: 2, dy: -2, x: px(site, 2), y: py(site, -2) });
     },
@@ -221,7 +303,12 @@
       while (stack.length) {
         const [cx, cy] = stack[stack.length - 1];
         maze[cy * 2 + 1][cx * 2 + 1] = false;
-        const next = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => {
+        const next = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ].filter(([dx, dy]) => {
           const nx = cx + dx,
             ny = cy + dy;
           return nx >= 0 && ny >= 0 && nx < 7 && ny < 7 && !seen.has(nx + ',' + ny);
@@ -251,7 +338,12 @@
       while (queue.length) {
         const [u, v] = queue.shift();
         if (u === 7 && v === 0) break;
-        for (const [du, dv] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (const [du, dv] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ]) {
           const nu = u + du,
             nv = v + dv;
           if (nu < 0 || nv < 0 || nu >= N || nv >= N || maze[nv][nu] || prev.has(nu + ',' + nv)) continue;
@@ -265,8 +357,14 @@
       const onPath = new Set(path.map(p => p.join(',')));
       site.signs = [];
       for (const [u, v] of path) {
-        const exits = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([du, dv]) => !maze[v + dv]?.[u + du] && !onPath.has(u + du + ',' + (v + dv)));
-        if (exits.length && site.signs.length < 6 && (u + v) % 3 === 0) site.signs.push({ dx: u - 7, dy: v - 7, dir: exits[0] });
+        const exits = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ].filter(([du, dv]) => !maze[v + dv]?.[u + du] && !onPath.has(u + du + ',' + (v + dv)));
+        if (exits.length && site.signs.length < 6 && (u + v) % 3 === 0)
+          site.signs.push({ dx: u - 7, dy: v - 7, dir: exits[0] });
       }
       addObj(site, 'waystone', 'waystone', 0, -9, { solid: true });
       WAYSTONE.forest = { x: px(site, 0), y: py(site, -8) };
@@ -287,8 +385,17 @@
       addObj(site, 'easel', 'easel', -2, 3, { solid: true });
     },
     q11(site) {
-      [[-3, 2], [0, 2], [3, 2]].forEach(([dx, dy], i) => addObj(site, 'valve' + i, 'valve', dx, dy, { i, solid: true }));
-      [[-3, -2], [-1, -3], [1, -3], [3, -2]].forEach(([dx, dy], i) => addObj(site, 'lantern' + i, 'lantern', dx, dy, { i, solid: true }));
+      [
+        [-3, 2],
+        [0, 2],
+        [3, 2]
+      ].forEach(([dx, dy], i) => addObj(site, 'valve' + i, 'valve', dx, dy, { i, solid: true }));
+      [
+        [-3, -2],
+        [-1, -3],
+        [1, -3],
+        [3, -2]
+      ].forEach(([dx, dy], i) => addObj(site, 'lantern' + i, 'lantern', dx, dy, { i, solid: true }));
       shrine(site, 'reflets');
     },
     q12(site) {
@@ -296,18 +403,34 @@
       [-3, -1, 1, 3].forEach((dx, i) => addObj(site, 'frame' + i, 'frame', dx, -1, { i, solid: true }));
     },
     q13(site) {
-      for (let y = -6; y <= 6; y++) for (let x = -2; x <= 1; x++) if (Math.hypot(x, y) < 6.4) setTile(site.x + x, site.y + y, 0);
+      for (let y = -6; y <= 6; y++)
+        for (let x = -2; x <= 1; x++) if (Math.hypot(x, y) < 6.4) setTile(site.x + x, site.y + y, 0);
       [-2, -1, 0, 1].forEach((dx, i) => {
         addObj(site, 'plank' + i, 'plank', dx, 0, { i, range: 2.4 });
         solid(site, dx, 0, () => !!qworld.flags.bridge);
       });
     },
     q14(site) {
-      for (const c of GHOST_CLUES) addObj(site, 'clue_' + c.id, c.who ? 'witness' : 'clue', c.at[0], c.at[1], { clue: c.id, solid: !c.who });
+      for (const c of GHOST_CLUES)
+        addObj(site, 'clue_' + c.id, c.who ? 'witness' : 'clue', c.at[0], c.at[1], {
+          clue: c.id,
+          solid: !c.who
+        });
     },
     q15(site) {
-      for (let y = -3; y <= 3; y++) for (let x = -3; x <= 5; x++) if (!(x >= 3 && x <= 4 && y >= -1 && y <= 0)) setTile(site.x + x, site.y + y, 0);
-      const pads = [[-3, 0], [-2, 0], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [2, 0]];
+      for (let y = -3; y <= 3; y++)
+        for (let x = -3; x <= 5; x++)
+          if (!(x >= 3 && x <= 4 && y >= -1 && y <= 0)) setTile(site.x + x, site.y + y, 0);
+      const pads = [
+        [-3, 0],
+        [-2, 0],
+        [-1, 0],
+        [-1, 1],
+        [0, 1],
+        [1, 1],
+        [1, 0],
+        [2, 0]
+      ];
       ST.q15.pads = pads.map(() => ({ t: 0, sunk: 0 }));
       site.pads = pads;
       pads.forEach(([dx, dy], i) => solid(site, dx, dy, () => !ST.q15.pads[i].sunk));
@@ -318,7 +441,15 @@
   // Sanctuaire : alcôve de rochers fermée par une porte de pierre, autel au fond (au nord du lieu).
   function shrine(site, id) {
     const s = SANCTUARIES.find(s => s.id === id);
-    for (const [dx, dy] of [[-1, -4], [1, -4], [-1, -5], [1, -5], [-1, -6], [1, -6], [0, -7]]) {
+    for (const [dx, dy] of [
+      [-1, -4],
+      [1, -4],
+      [-1, -5],
+      [1, -5],
+      [-1, -6],
+      [1, -6],
+      [0, -7]
+    ]) {
       wall(site, dx, dy, ZONES[site.zone].t, 'rock');
     }
     addObj(site, 'door', 'door', 0, -4, { solid: () => !!qworld.flags['sanct_' + id], sanct: id });
@@ -340,9 +471,19 @@
   };
 
   // ---------------------------------------------------------------- Chapitres IV à VI : lieux et énigmes
-  const VILLAGE_OBJS = [['enclume', '⚒️'], ['cloche', '🔔'], ['berceau', '🧺'], ['harpe', '🎵']];
+  const VILLAGE_OBJS = [
+    ['enclume', '⚒️'],
+    ['cloche', '🔔'],
+    ['berceau', '🧺'],
+    ['harpe', '🎵']
+  ];
   const HOUSES = ['puits', 'four', 'jardin', 'tour'];
-  const SEASONS = [['🌸', 'Printemps'], ['☀️', 'Été'], ['🍂', 'Automne'], ['❄️', 'Hiver']];
+  const SEASONS = [
+    ['🌸', 'Printemps'],
+    ['☀️', 'Été'],
+    ['🍂', 'Automne'],
+    ['❄️', 'Hiver']
+  ];
   const GEARS = ['vide', 'petit', 'grand'];
   // Héros d'un objet porté (quête 16) : l'hôte, ou l'identifiant d'un invité.
   const keyOf = h => (h === game.hero ? (guest() ? CANAAN_NET.state().heroId : 'host') : h.id || 'host');
@@ -356,12 +497,32 @@
     q29: [0, 1, 2, 3]
   };
   // Constellation du lac (quête 30) : pierres dans l'ordre où leurs étoiles s'allument.
-  const CONSTELLATION = [[-2, -1], [0, -2], [1, 0], [0, 1], [2, 1]];
+  const CONSTELLATION = [
+    [-2, -1],
+    [0, -2],
+    [1, 0],
+    [0, 1],
+    [2, 1]
+  ];
   // Leviers du monde à l'envers (quête 28) : chaque levier bascule des rochers de l'autre clairière (inversés).
   const MIRROR_LEVERS = [
-    [[4, 1], [4, -2], [3, 0], [5, 1]],
-    [[4, 1], [5, 2], [5, 0]],
-    [[5, -2], [3, 1], [4, 2], [5, 1]]
+    [
+      [4, 1],
+      [4, -2],
+      [3, 0],
+      [5, 1]
+    ],
+    [
+      [4, 1],
+      [5, 2],
+      [5, 0]
+    ],
+    [
+      [5, -2],
+      [3, 1],
+      [4, 2],
+      [5, 1]
+    ]
   ];
   const MIRROR_ROCKS = [];
   for (const x of [3, 4, 5]) for (let y = -2; y <= 2; y++) MIRROR_ROCKS.push([x, y]);
@@ -374,14 +535,34 @@
     return on;
   }
   // Bassin du bateau (quête 23) : x de -3 à 2, y de -2 à 1 ; rochers ; quai en bas à droite.
-  const BASIN = { x0: -3, x1: 2, y0: -2, y1: 1, rocks: [[-1, -2], [1, -1], [-2, 1], [0, 1]], dock: [2, 1], start: [-3, -2] };
+  const BASIN = {
+    x0: -3,
+    x1: 2,
+    y0: -2,
+    y1: 1,
+    rocks: [
+      [-1, -2],
+      [1, -1],
+      [-2, 1],
+      [0, 1]
+    ],
+    dock: [2, 1],
+    start: [-3, -2]
+  };
   function slide(b, dir) {
     let [x, y] = b;
     const [dx, dy] = dir;
     for (let n = 0; n < 8; n++) {
       const nx = x + dx,
         ny = y + dy;
-      if (nx < BASIN.x0 || nx > BASIN.x1 || ny < BASIN.y0 || ny > BASIN.y1 || BASIN.rocks.some(([rx, ry]) => rx === nx && ry === ny)) break;
+      if (
+        nx < BASIN.x0 ||
+        nx > BASIN.x1 ||
+        ny < BASIN.y0 ||
+        ny > BASIN.y1 ||
+        BASIN.rocks.some(([rx, ry]) => rx === nx && ry === ny)
+      )
+        break;
       x = nx;
       y = ny;
     }
@@ -396,7 +577,16 @@
     path.push('c');
     return g[2] ? [...path, 'basin'] : [...path, 'leakC'];
   }
-  const AQ = { src: [-5, -3], a: [-3, -3], leakA: [-3, 0], b: [0, -3], leakB: [0, -5], c: [0, 0], leakC: [-2, 2], basin: [3, 2] };
+  const AQ = {
+    src: [-5, -3],
+    a: [-3, -3],
+    leakA: [-3, 0],
+    b: [0, -3],
+    leakB: [0, -5],
+    c: [0, 0],
+    leakC: [-2, 2],
+    basin: [3, 2]
+  };
   // Rayon des miroirs : quête 7 (pierre solaire → arbre gardien) et quête 24 (→ porte du temple).
   const BEAMS = {
     q7: { sun: [-4, -2], dir: [1, 0], target: [2, -2], key: 'm', bound: [6, 5] },
@@ -417,31 +607,46 @@
   });
   function freshMore() {
     return {
-    q16: { pos: [-1, -1, -1, -1], hold: {} },
-    q17: { p: [0, 0, 0, 0] },
-    q18: { t: 0 },
-    q19: { g: [0, 0, 0] },
-    q21: { o: [2, 0, 1] },
-    q22: { r: [3, 1, 4] },
-    q23: { b: [...BASIN.start] },
-    q24: { m: [2, 2, 2, 1] },
-    q25: { g: [0, 0, 0] },
-    q27: { on: false, wave: 0, hp: [100, 100, 100, 100, 100, 100], next: 0 },
-    q28: { l: [0, 0, 0] },
-    q29: { h: [2, 0, 3, 1], fly: null },
-    q30: { seq: 0, last: {} }
+      q16: { pos: [-1, -1, -1, -1], hold: {} },
+      q17: { p: [0, 0, 0, 0] },
+      q18: { t: 0 },
+      q19: { g: [0, 0, 0] },
+      q21: { o: [2, 0, 1] },
+      q22: { r: [3, 1, 4] },
+      q23: { b: [...BASIN.start] },
+      q24: { m: [2, 2, 2, 1] },
+      q25: { g: [0, 0, 0] },
+      q27: { on: false, wave: 0, hp: [100, 100, 100, 100, 100, 100], next: 0 },
+      q28: { l: [0, 0, 0] },
+      q29: { h: [2, 0, 3, 1], fly: null },
+      q30: { seq: 0, last: {} }
     };
   }
   Object.assign(ST, freshMore());
   Object.assign(BUILD, {
     q16(site) {
-      [[-4, -2], [4, -2], [-4, 2], [4, 2]].forEach(([dx, dy], i) => addObj(site, 'house' + i, 'house', dx, dy, { i, solid: true }));
-      [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy], i) => addObj(site, 'vobj' + i, 'vobj', dx, dy, { i }));
+      [
+        [-4, -2],
+        [4, -2],
+        [-4, 2],
+        [4, 2]
+      ].forEach(([dx, dy], i) => addObj(site, 'house' + i, 'house', dx, dy, { i, solid: true }));
+      [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1]
+      ].forEach(([dx, dy], i) => addObj(site, 'vobj' + i, 'vobj', dx, dy, { i }));
       for (const m of VILLAGE_MEMORIES) addObj(site, m.id, 'leaf', m.at[0], m.at[1], { what: m.what });
       shrine(site, 'saisons');
     },
     q17(site, tools) {
-      [[0, -2], [2, 0], [0, 2], [-2, 0]].forEach(([dx, dy], i) => addObj(site, 'pillar' + i, 'pillar', dx, dy, { i, solid: true }));
+      [
+        [0, -2],
+        [2, 0],
+        [0, 2],
+        [-2, 0]
+      ].forEach(([dx, dy], i) => addObj(site, 'pillar' + i, 'pillar', dx, dy, { i, solid: true }));
       for (const f of FRESCO) {
         const [x, y] = walkableNear(site, f.at[0], f.at[1], tools);
         addObj(site, f.id, 'fresco', x, y, { what: f.what });
@@ -460,48 +665,100 @@
       [-2, 0, 2].forEach((dx, i) => addObj(site, 'gear' + i, 'gear', dx, 0, { i, solid: true }));
     },
     q20(site) {
-      for (let y = -6; y <= 6; y++) if (Math.hypot(3, y) < 6.4 && y !== 1) setTile(site.x + 3, site.y + y, 15);
+      for (let y = -6; y <= 6; y++)
+        if (Math.hypot(3, y) < 6.4 && y !== 1) setTile(site.x + 3, site.y + y, 15);
       setTile(site.x + 3, site.y + 1, 2);
       wall(site, -5, -3, ZONES[3].t, 'autumn_red');
-      for (const t of TRAVELERS) addObj(site, t.id, 'traveler', t.at[0], t.at[1], { who: t.who, what: t.what });
-      [[2, -3, 'Grosse citrouille près du ruisseau', 'pumpkin'], [-4, -2, 'Grosse citrouille sous le chêne roux', 'pumpkin'], [3, 1, 'Sous le pont du ruisseau', 'bridge'], [-3, 3, 'Tas de feuilles', 'leaves']].forEach(([dx, dy, name, look], i) =>
+      for (const t of TRAVELERS)
+        addObj(site, t.id, 'traveler', t.at[0], t.at[1], { who: t.who, what: t.what });
+      [
+        [2, -3, 'Grosse citrouille près du ruisseau', 'pumpkin'],
+        [-4, -2, 'Grosse citrouille sous le chêne roux', 'pumpkin'],
+        [3, 1, 'Sous le pont du ruisseau', 'bridge'],
+        [-3, 3, 'Tas de feuilles', 'leaves']
+      ].forEach(([dx, dy, name, look], i) =>
         addObj(site, 'hide' + i, 'hide', dx, dy, { i, name, look, solid: look === 'pumpkin' })
       );
     },
     q21(site, tools) {
-      [[-5, 0], [5, 0], [0, 5]].forEach(([dx, dy], i) => addObj(site, 'obelisk' + i, 'obelisk', dx, dy, { i, solid: true }));
+      [
+        [-5, 0],
+        [5, 0],
+        [0, 5]
+      ].forEach(([dx, dy], i) => addObj(site, 'obelisk' + i, 'obelisk', dx, dy, { i, solid: true }));
       addObj(site, 'plate', 'starplate', 0, 0);
       shrine(site, 'etoiles');
     },
     q22(site) {
       [-2, 0, 2].forEach((dx, i) => addObj(site, 'ring' + i, 'ringlever', dx, 3, { i, solid: true }));
-      for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) solid(site, dx, dy);
+      for (const [dx, dy] of [
+        [-1, -1],
+        [0, -1],
+        [1, -1],
+        [-1, 0],
+        [0, 0],
+        [1, 0],
+        [-1, 1],
+        [0, 1],
+        [1, 1]
+      ])
+        solid(site, dx, dy);
       site.objs.push({ id: 'machine', kind: 'machine', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
       addObj(site, 'treasure', 'treasure', 0, -3, { solid: true });
     },
     q23(site) {
-      for (let y = BASIN.y0; y <= BASIN.y1; y++) for (let x = BASIN.x0; x <= BASIN.x1; x++) setTile(site.x + x, site.y + y, 0);
+      for (let y = BASIN.y0; y <= BASIN.y1; y++)
+        for (let x = BASIN.x0; x <= BASIN.x1; x++) setTile(site.x + x, site.y + y, 0);
       site.objs.push({ id: 'basin', kind: 'basin', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
-      [['fanW', -5, -1, [1, 0]], ['fanE', 4, -1, [-1, 0]], ['fanN', 0, -4, [0, 1]], ['fanS', 0, 3, [0, -1]]].forEach(([id, dx, dy, push]) => addObj(site, id, 'fan', dx, dy, { push, solid: true }));
+      [
+        ['fanW', -5, -1, [1, 0]],
+        ['fanE', 4, -1, [-1, 0]],
+        ['fanN', 0, -4, [0, 1]],
+        ['fanS', 0, 3, [0, -1]]
+      ].forEach(([id, dx, dy, push]) => addObj(site, id, 'fan', dx, dy, { push, solid: true }));
       addObj(site, 'bell', 'bell', -5, 2, { solid: true });
     },
     q24(site) {
       addObj(site, 'sun', 'sun', -4, 2, { solid: true });
-      [[-1, 2], [-1, -2], [2, -2], [2, 2]].forEach(([dx, dy], i) => addObj(site, 'mirror' + i, 'mirror', dx, dy, { i, solid: true }));
+      [
+        [-1, 2],
+        [-1, -2],
+        [2, -2],
+        [2, 2]
+      ].forEach(([dx, dy], i) => addObj(site, 'mirror' + i, 'mirror', dx, dy, { i, solid: true }));
       addObj(site, 'tdoor', 'templedoor', 2, -4, { solid: true });
       for (const dx of [0, 1, 3, 4]) wall(site, dx, -4, ZONES[4].t, 'ruin');
     },
     q25(site) {
-      for (const [dx, dy] of [[3, 2], [4, 2], [3, 3], [4, 3]]) {
+      for (const [dx, dy] of [
+        [3, 2],
+        [4, 2],
+        [3, 3],
+        [4, 3]
+      ]) {
         setTile(site.x + dx, site.y + dy, 3);
         solid(site, dx, dy, () => false);
       }
-      for (const [dx, dy] of [[5, 1], [5, 4], [2, 4]]) setTile(site.x + dx, site.y + dy, ZONES[4].t, 'palm');
+      for (const [dx, dy] of [
+        [5, 1],
+        [5, 4],
+        [2, 4]
+      ])
+        setTile(site.x + dx, site.y + dy, ZONES[4].t, 'palm');
       site.objs.push({ id: 'aqueduct', kind: 'aqueduct', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
-      [['a', -3, -2], ['b', 0, -2], ['c', 1, 0]].forEach(([n, dx, dy], i) => addObj(site, 'agate' + i, 'agate', dx, dy, { i, solid: true }));
+      [
+        ['a', -3, -2],
+        ['b', 0, -2],
+        ['c', 1, 0]
+      ].forEach(([n, dx, dy], i) => addObj(site, 'agate' + i, 'agate', dx, dy, { i, solid: true }));
     },
     q26(site) {
-      [[-3, 1], [3, 1], [-4, -2], [4, -2]].forEach(([dx, dy], i) => addObj(site, 'trial' + i, 'trial', dx, dy, { i, solid: true }));
+      [
+        [-3, 1],
+        [3, 1],
+        [-4, -2],
+        [4, -2]
+      ].forEach(([dx, dy], i) => addObj(site, 'trial' + i, 'trial', dx, dy, { i, solid: true }));
       addObj(site, 'altar', 'altar', 0, -2, { solid: true });
       shrine(site, 'lumieres');
     },
@@ -510,13 +767,20 @@
       addObj(site, 'altar27', 'altar27', 0, 1, { solid: true });
       for (let k = 0; k < 6; k++) {
         const a = (k * Math.PI) / 3 + Math.PI / 6;
-        addObj(site, 'cc' + k, 'ccrystal', Math.round(Math.cos(a) * 3), Math.round(Math.sin(a) * 3) + 1, { i: k, solid: true });
+        addObj(site, 'cc' + k, 'ccrystal', Math.round(Math.cos(a) * 3), Math.round(Math.sin(a) * 3) + 1, {
+          i: k,
+          solid: true
+        });
       }
       shrine(site, 'aurore');
     },
     q28(site) {
       for (let y = -3; y <= 3; y++) wall(site, 0, y, 4);
-      [[-5, -2], [-4, 0], [-5, 2]].forEach(([dx, dy], i) => addObj(site, 'lever' + i, 'lever', dx, dy, { i, solid: true }));
+      [
+        [-5, -2],
+        [-4, 0],
+        [-5, 2]
+      ].forEach(([dx, dy], i) => addObj(site, 'lever' + i, 'lever', dx, dy, { i, solid: true }));
       for (const [dx, dy] of MIRROR_ROCKS) {
         addObj(site, 'mrock' + dx + '_' + (dy + 2), 'mrock', dx, dy);
         solid(site, dx, dy, () => !mirrorRocks(ST.q28.l).has(dx + ',' + dy));
@@ -599,7 +863,8 @@
         const c = at(hero, q, 'collect');
         if (o.kind === 'obelisk' && !c) {
           if (qworld.solved.q21) return creditSolved(hero, site);
-          if (stepOf(hero, q) < 1 && !st.done[21]) return tell(hero, '🗿 Un obélisque à moitié enseveli. Il faut d’abord le dégager.');
+          if (stepOf(hero, q) < 1 && !st.done[21])
+            return tell(hero, '🗿 Un obélisque à moitié enseveli. Il faut d’abord le dégager.');
           S.o[o.i] = (S.o[o.i] + 1) % 4;
           cue(hero, 'note' + (S.o[o.i] + 1));
           if (S.o.every((v, i) => v === ANSWER.q21[i])) {
@@ -614,12 +879,15 @@
         cue(hero, 'note' + c.got.length);
         if (o.kind === 'obelisk') tell(hero, '🗿 Obélisque dégagé (' + c.got.length + ' / 3)');
         if (c.got.length >= q.steps[c.step].n) advance(hero, q);
-        return o.what ? panel(hero, o.kind === 'leaf' ? '🍂 Souvenir des feuilles' : '🧩 Fragment de la fresque', o.what) : true;
+        return o.what
+          ? panel(hero, o.kind === 'leaf' ? '🍂 Souvenir des feuilles' : '🧩 Fragment de la fresque', o.what)
+          : true;
       }
       case 'vobj':
       case 'house': {
         if (qworld.solved.q16) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1 && !st.done[16]) return tell(hero, '🍂 Touche d’abord les feuilles dorées : elles savent à qui sont ces objets.');
+        if (stepOf(hero, q) < 1 && !st.done[16])
+          return tell(hero, '🍂 Touche d’abord les feuilles dorées : elles savent à qui sont ces objets.');
         const k = keyOf(hero),
           held = S.hold[k];
         if (o.kind === 'vobj') {
@@ -631,7 +899,11 @@
         }
         const there = S.pos.indexOf(o.i);
         if (held === undefined) {
-          if (there < 0) return tell(hero, '🏚️ La maison du ' + HOUSES[o.i] + '. Il manque quelque chose devant sa porte.');
+          if (there < 0)
+            return tell(
+              hero,
+              '🏚️ La maison du ' + HOUSES[o.i] + '. Il manque quelque chose devant sa porte.'
+            );
           S.pos[there] = -2;
           S.hold[k] = there;
           return changed();
@@ -649,7 +921,8 @@
       }
       case 'pillar':
         if (qworld.solved.q17) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1 && !st.done[17]) return tell(hero, '🧩 Il manque les fragments de la fresque pour savoir où va chaque saison.');
+        if (stepOf(hero, q) < 1 && !st.done[17])
+          return tell(hero, '🧩 Il manque les fragments de la fresque pour savoir où va chaque saison.');
         S.p[o.i] = (S.p[o.i] + 1) % 4;
         cue(hero, 'note' + (S.p[o.i] + 1));
         if (S.p.every((v, i) => v === ANSWER.q17[i])) {
@@ -659,9 +932,14 @@
         }
         return changed();
       case 'archive':
-        return qworld.solved.q17 ? panel(hero, '📚 Archives anciennes', questById(17).memory) : tell(hero, '📚 Une bibliothèque scellée par le mécanisme des saisons.');
+        return qworld.solved.q17
+          ? panel(hero, '📚 Archives anciennes', questById(17).memory)
+          : tell(hero, '📚 Une bibliothèque scellée par le mécanisme des saisons.');
       case 'vane':
-        return tell(hero, '🌬️ La girouette tourne : le vent fait tournoyer la feuille dans le sens des aiguilles d’une montre.');
+        return tell(
+          hero,
+          '🌬️ La girouette tourne : le vent fait tournoyer la feuille dans le sens des aiguilles d’une montre.'
+        );
       case 'goldleaf': {
         if (!at(hero, q, 'catch')) return false;
         const l = leafAt(site, S.t);
@@ -711,7 +989,12 @@
         }
         return changed();
       case 'treasure':
-        return tell(hero, qworld.solved.q22 ? '💰 La salle du trésor est ouverte.' : '🔒 Une porte ronde, scellée par la machine.');
+        return tell(
+          hero,
+          qworld.solved.q22
+            ? '💰 La salle du trésor est ouverte.'
+            : '🔒 Une porte ronde, scellée par la machine.'
+        );
       case 'fan': {
         if (qworld.solved.q23) return creditSolved(hero, site);
         S.b = slide(S.b, o.push);
@@ -731,12 +1014,20 @@
         if (qworld.solved[site.id]) return creditSolved(hero, site);
         S.m[o.i] = (S.m[o.i] + 1) % 4;
         if (beamOf(site).lit) {
-          tell(hero, site.id === 'q7' ? '☀️ La lumière atteint l’arbre gardien ! Ses racines s’illuminent d’or.' : '☀️ Le rayon frappe le soleil de la porte : le temple s’ouvre !');
+          tell(
+            hero,
+            site.id === 'q7'
+              ? '☀️ La lumière atteint l’arbre gardien ! Ses racines s’illuminent d’or.'
+              : '☀️ Le rayon frappe le soleil de la porte : le temple s’ouvre !'
+          );
           solve(site);
         }
         return changed();
       case 'templedoor':
-        return tell(hero, qworld.solved.q24 ? '🚪 La porte du temple est ouverte.' : '☀️ Un soleil gravé attend la lumière.');
+        return tell(
+          hero,
+          qworld.solved.q24 ? '🚪 La porte du temple est ouverte.' : '☀️ Un soleil gravé attend la lumière.'
+        );
       case 'agate':
         if (qworld.solved.q25) return creditSolved(hero, site);
         S.g[o.i] = S.g[o.i] ? 0 : 1;
@@ -749,7 +1040,11 @@
       case 'trial': {
         const t = q.trials[o.i],
           c = at(hero, q, 'trials');
-        if (!c) return tell(hero, c === null && st.done[26] ? '✨ L’épreuve est réussie.' : '✨ Une stèle : « ' + t.q + ' »');
+        if (!c)
+          return tell(
+            hero,
+            c === null && st.done[26] ? '✨ L’épreuve est réussie.' : '✨ Une stèle : « ' + t.q + ' »'
+          );
         if (c.got.includes('trial' + o.i)) return tell(hero, '✨ Cette épreuve est réussie.');
         if (o.answer === undefined) return hero === game.hero ? trialPanel(o.i, t) : false;
         if (o.answer !== t.ok) {
@@ -762,7 +1057,13 @@
         return true;
       }
       case 'altar':
-        if (!at(hero, q, 'spot')) return tell(hero, st.done[26] ? '✨ Les étoiles brillent sur l’autel.' : '✨ Six alvéoles vides attendent leurs étoiles.');
+        if (!at(hero, q, 'spot'))
+          return tell(
+            hero,
+            st.done[26]
+              ? '✨ Les étoiles brillent sur l’autel.'
+              : '✨ Six alvéoles vides attendent leurs étoiles.'
+          );
         if (starCount(st) < 5) return tell(hero, '✨ Il te manque des étoiles du Cœur.');
         burst(o.x, o.y - 20, '#fff0a0', 34);
         tell(hero, '✨ Tu poses les étoiles : six lumières s’allument en cercle.');
@@ -772,11 +1073,23 @@
       case 'fresco27':
         if (at(hero, q, 'spot')) {
           advance(hero, q);
-          return panel(hero, '🖼️ La fresque du gardien', 'Auralis, gardien du Cœur, refusa de partir quand les anciens le dispersèrent. Il veilla seul des siècles, devenu lumière lui-même, en attendant qu’une étincelle revienne.');
+          return panel(
+            hero,
+            '🖼️ La fresque du gardien',
+            'Auralis, gardien du Cœur, refusa de partir quand les anciens le dispersèrent. Il veilla seul des siècles, devenu lumière lui-même, en attendant qu’une étincelle revienne.'
+          );
         }
-        return panel(hero, '🖼️ La fresque du gardien', 'Un gardien seul devant le Cœur, entouré de six cristaux.');
+        return panel(
+          hero,
+          '🖼️ La fresque du gardien',
+          'Un gardien seul devant le Cœur, entouré de six cristaux.'
+        );
       case 'altar27':
-        if (!at(hero, q, 'defense')) return tell(hero, qworld.solved.q27 ? '✨ Le Cœur bat doucement.' : '✨ L’autel du Cœur, entouré de six cristaux.');
+        if (!at(hero, q, 'defense'))
+          return tell(
+            hero,
+            qworld.solved.q27 ? '✨ Le Cœur bat doucement.' : '✨ L’autel du Cœur, entouré de six cristaux.'
+          );
         if (S.on) return tell(hero, '⚔️ Défends les cristaux !');
         startDefense(site);
         return changed();
@@ -795,7 +1108,8 @@
         cue(hero, 'note' + (o.i + 1));
         return changed();
       case 'echest':
-        if (!at(hero, q, 'puzzle')) return tell(hero, st.done[28] ? '📦 Le coffre enchanté est vide.' : '📦 Un coffre enchanté.');
+        if (!at(hero, q, 'puzzle'))
+          return tell(hero, st.done[28] ? '📦 Le coffre enchanté est vide.' : '📦 Un coffre enchanté.');
         tell(hero, '📦 Tu as traversé le miroir !');
         solve(site);
         return true;
@@ -815,22 +1129,41 @@
         float(o.x, o.y - 50, '📯 Tuuuuut !', '#ffffff');
         return changed();
       case 'lake':
-        return tell(hero, '🌌 Le reflet montre le Cerf des neiges. Ses étoiles s’allument l’une après l’autre.');
+        return tell(
+          hero,
+          '🌌 Le reflet montre le Cerf des neiges. Ses étoiles s’allument l’une après l’autre.'
+        );
     }
     return false;
   }
   // Épreuves du sanctuaire (quête 26) : la question et ses réponses, chez le joueur.
   function trialPanel(i, t) {
     modernPanel(
-      '<div class="quest-dialog"><h2>✨ Épreuve ' + (i + 1) + '</h2><p class="quest-text">« ' + esc(t.q) + ' »</p><div class="quest-buttons">' +
-        t.a.map((a, k) => '<button data-action="questTrial" data-trial="' + i + '" data-choice="' + k + '">' + esc(a) + '</button>').join('') +
+      '<div class="quest-dialog"><h2>✨ Épreuve ' +
+        (i + 1) +
+        '</h2><p class="quest-text">« ' +
+        esc(t.q) +
+        ' »</p><div class="quest-buttons">' +
+        t.a
+          .map(
+            (a, k) =>
+              '<button data-action="questTrial" data-trial="' +
+              i +
+              '" data-choice="' +
+              k +
+              '">' +
+              esc(a) +
+              '</button>'
+          )
+          .join('') +
         '<button data-action="closePanels">Réfléchir encore</button></div></div>'
     );
     return true;
   }
   window.questTrial = (i, a) => {
     closePanels();
-    if (guest()) return CANAAN_NET.requestAction({ op: 'quest-act', site: 'q26', obj: 'trial' + i + '_a' + a });
+    if (guest())
+      return CANAAN_NET.requestAction({ op: 'quest-act', site: 'q26', obj: 'trial' + i + '_a' + a });
     const site = SITES.q26,
       o = site.objs.find(o => o.id === 'trial' + i);
     if (o) act(game.hero, site, { ...o, answer: a });
@@ -840,7 +1173,9 @@
     const S = ST.q27;
     Object.assign(S, { on: true, wave: 0, hp: [100, 100, 100, 100, 100, 100], next: now() + 90 });
     tell(game.hero, '⚔️ Les échos de l’Ombre arrivent ! Protège les cristaux.');
-    for (const h of game.heroes) if (h !== game.hero && Math.hypot(h.player.x - px(site, 0), h.player.y - py(site, 0)) < 14 * T) tell(h, '⚔️ Les échos de l’Ombre arrivent ! Protège les cristaux.');
+    for (const h of game.heroes)
+      if (h !== game.hero && Math.hypot(h.player.x - px(site, 0), h.player.y - py(site, 0)) < 14 * T)
+        tell(h, '⚔️ Les échos de l’Ombre arrivent ! Protège les cristaux.');
   }
   function stopDefense(site, win) {
     const S = ST.q27;
@@ -849,7 +1184,12 @@
     if (win) {
       S.hp = [100, 100, 100, 100, 100, 100];
       for (const hero of game.heroes)
-        if (!hero.player.dead && Math.hypot(hero.player.x - px(site, 0), hero.player.y - py(site, 0)) < 16 * T && at(hero, site.quest, 'defense')) advance(hero, site.quest);
+        if (
+          !hero.player.dead &&
+          Math.hypot(hero.player.x - px(site, 0), hero.player.y - py(site, 0)) < 16 * T &&
+          at(hero, site.quest, 'defense')
+        )
+          advance(hero, site.quest);
       tell(game.hero, '✨ Les échos se dissipent. Les cristaux brillent de toute leur lumière !');
     } else tell(game.hero, '💔 Les cristaux se sont éteints… Le Cœur se rendort. Réessaie depuis l’autel.');
     changed();
@@ -859,16 +1199,21 @@
     if (!S.on) return;
     const cx = px(site, 0),
       cy = py(site, 0),
-      near = game.heroes.filter(h => !h.player.dead && !h.away && Math.hypot(h.player.x - cx, h.player.y - cy) < 16 * T);
+      near = game.heroes.filter(
+        h => !h.player.dead && !h.away && Math.hypot(h.player.x - cx, h.player.y - cy) < 16 * T
+      );
     if (!near.length) return stopDefense(site, false);
     const echoes = game.world.monsters.filter(m => m.questEcho && m.hp > 0),
       crystals = site.objs.filter(o => o.kind === 'ccrystal');
     // Les échos marchent vers le cristal le plus proche et le rongent ; un héros tout près les détourne.
     for (const m of echoes) {
-      const c = crystals.filter(c => S.hp[c.i] > 0).sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))[0];
+      const c = crystals
+        .filter(c => S.hp[c.i] > 0)
+        .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))[0];
       if (!c) break;
       const d = Math.hypot(c.x - m.x, c.y - m.y);
-      if (game.heroes.some(h => !h.player.dead && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 2.5 * T)) continue;
+      if (game.heroes.some(h => !h.player.dead && Math.hypot(h.player.x - m.x, h.player.y - m.y) < 2.5 * T))
+        continue;
       if (d > 1.2 * T) {
         const nx = m.x + ((c.x - m.x) / d) * 1.1,
           ny = m.y + ((c.y - m.y) / d) * 1.1;
@@ -894,7 +1239,21 @@
         x = cx + Math.cos(a) * 6.5 * T,
         y = cy + Math.sin(a) * 6.5 * T;
       const hp = mobHealth(level, false, type.hp);
-      game.world.monsters.push({ x, y, hp, mhp: hp, level, t: type.name, r: 16, cd: 1, g: 20, mobColor: '#6a3aa0', elite: false, questEcho: true, _levelHp: true });
+      game.world.monsters.push({
+        x,
+        y,
+        hp,
+        mhp: hp,
+        level,
+        t: type.name,
+        r: 16,
+        cd: 1,
+        g: 20,
+        mobColor: '#6a3aa0',
+        elite: false,
+        questEcho: true,
+        _levelHp: true
+      });
     }
     float(cx, cy - 80, '🌑 Vague ' + S.wave + ' / 3', '#c8a0ff');
     changed();
@@ -934,7 +1293,10 @@
   function stepMore() {
     const t = now(),
       leafSite = SITES.q18;
-    if (leafSite && game.heroes.some(h => Math.hypot(h.player.x - px(leafSite, 0), h.player.y - py(leafSite, 0)) < 14 * T)) {
+    if (
+      leafSite &&
+      game.heroes.some(h => Math.hypot(h.player.x - px(leafSite, 0), h.player.y - py(leafSite, 0)) < 14 * T)
+    ) {
       ST.q18.t++;
       if (t % 6 === 0) changed();
     }
@@ -954,7 +1316,11 @@
     // Le monde à l'envers : un héros qui atteint le coffre de l'autre clairière.
     for (const h of game.heroes) {
       const site = SITES.q28;
-      if (site && at(h, site.quest, 'puzzle') && Math.hypot(h.player.x - px(site, 5), h.player.y - py(site, 0)) < 0.8 * T) {
+      if (
+        site &&
+        at(h, site.quest, 'puzzle') &&
+        Math.hypot(h.player.x - px(site, 5), h.player.y - py(site, 0)) < 0.8 * T
+      ) {
         tell(h, '📦 Tu as traversé le miroir !');
         solve(site);
       }
@@ -980,7 +1346,12 @@
     st.step++;
     st.got = [];
     const npc = QUEST_NPCS[q.npc];
-    tell(hero, st.step >= q.steps.length ? '📜 ' + q.title + ' : retourne voir ' + npc.name + '.' : '📜 Objectif accompli : ' + q.steps[st.step - 1].text);
+    tell(
+      hero,
+      st.step >= q.steps.length
+        ? '📜 ' + q.title + ' : retourne voir ' + npc.name + '.'
+        : '📜 Objectif accompli : ' + q.steps[st.step - 1].text
+    );
     if (hero === game.hero) CANAAN_SOUND.cue('puzzle');
     window.CANAAN_PERSISTENCE.requestSave();
     return true;
@@ -989,7 +1360,8 @@
     const q = quest(id),
       st = stateOf(hero),
       npc = q && NPCS[q.npc];
-    if (!q || !canStart(st, q) || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T) return false;
+    if (!q || !canStart(st, q) || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T)
+      return false;
     st.active[q.id] = { step: 0, got: [] };
     if (!st.track) st.track = q.id;
     tell(hero, '📜 Nouvelle quête : ' + q.title);
@@ -1000,7 +1372,13 @@
     const q = quest(id),
       st = stateOf(hero),
       npc = q && NPCS[q.npc];
-    if (!q || !questReady(st, q) || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T) return false;
+    if (
+      !q ||
+      !questReady(st, q) ||
+      !npc ||
+      Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T
+    )
+      return false;
     delete st.active[q.id];
     st.done[q.id] = Date.now();
     if (st.track === q.id) st.track = Object.keys(st.active).map(Number)[0] || null;
@@ -1020,14 +1398,16 @@
     if (r.jewel) giveJewel(hero, q);
     if (r.deco && !st.deco.includes(r.deco)) st.deco.push(r.deco);
     if (r.item) giveGear(clampLevel(hero.level), 'quest', r.item, hero);
-    if (r.fishXp || r.goldenFish) CANAAN_PROF.questReward(hero, { fishXp: r.fishXp || 0, goldenFish: r.goldenFish || 0 });
+    if (r.fishXp || r.goldenFish)
+      CANAAN_PROF.questReward(hero, { fishXp: r.fishXp || 0, goldenFish: r.goldenFish || 0 });
     canaanGrantXp(hero, questXp(q), hero.player);
     tell(hero, '🏆 Quête terminée : ' + q.title + ' · +' + (r.gold || 0) + ' or · ' + r.text);
     if (hero === game.hero) {
       CANAAN_SOUND.cue('levelup');
       burst(hero.player.x, hero.player.y - 20, '#ffe08a', 30);
     }
-    if (r.flags?.some(f => f.startsWith('star'))) tell(hero, '✦ Une étoile du Cœur de l’Aurore te rejoint (' + starCount(st) + ' / 6).');
+    if (r.flags?.some(f => f.startsWith('star')))
+      tell(hero, '✦ Une étoile du Cœur de l’Aurore te rejoint (' + starCount(st) + ' / 6).');
   }
   // Bijou du lac aux mille étoiles : Légendaire, au niveau du héros, avec deux secondaires tirées au hasard.
   function giveJewel(hero, q) {
@@ -1052,7 +1432,12 @@
     changed();
     burst(px(site, 0), py(site, 0), '#ffe9a0', 34);
     for (const hero of game.heroes) {
-      if (hero.player.dead || hero.away || Math.hypot(hero.player.x - px(site, 0), hero.player.y - py(site, 0)) > 14 * T) continue;
+      if (
+        hero.player.dead ||
+        hero.away ||
+        Math.hypot(hero.player.x - px(site, 0), hero.player.y - py(site, 0)) > 14 * T
+      )
+        continue;
       if (at(hero, site.quest, 'puzzle')) advance(hero, site.quest);
     }
     window.CANAAN_PERSISTENCE.requestSave();
@@ -1073,7 +1458,12 @@
       case 'stele':
         return panel(hero, '🪨 Stèle ancienne', q.hint);
       case 'crystal':
-        return tell(hero, stateOf(hero).flags.lumi ? '✨ Il ne reste que des éclats de lumière.' : '✨ Une petite lumière tremble dans le cristal. Les pierres l’entourent…');
+        return tell(
+          hero,
+          stateOf(hero).flags.lumi
+            ? '✨ Il ne reste que des éclats de lumière.'
+            : '✨ Une petite lumière tremble dans le cristal. Les pierres l’entourent…'
+        );
       case 'stone':
         if (qworld.solved.q1) return creditSolved(hero, site);
         S.seq.push(o.sym);
@@ -1115,7 +1505,10 @@
         float(o.x, o.y - 40, '🎵 Fiiiiiiou !', '#ffffff');
         return changed();
       case 'dig': {
-        if (!at(hero, q, 'spot')) return stateOf(hero).done[q.id] ? tell(hero, 'Le trou est vide : tu as déjà trouvé le trésor.') : false;
+        if (!at(hero, q, 'spot'))
+          return stateOf(hero).done[q.id]
+            ? tell(hero, 'Le trou est vide : tu as déjà trouvé le trésor.')
+            : false;
         cue(hero, 'chest');
         burst(o.x, o.y, '#c8a060', 20);
         return advance(hero, q);
@@ -1135,13 +1528,21 @@
         cue(hero, 'note' + o.pitch);
         if (!st || st.got.includes(o.id)) return float(o.x, o.y - 40, '♪', '#c8f0a0');
         st.got.push(o.id);
-        tell(hero, '🎵 Pierre musicale trouvée (' + st.got.length + ' / 4). Son : ' + ['grave', 'doux', 'clair', 'aigu'][o.pitch - 1] + '.');
+        tell(
+          hero,
+          '🎵 Pierre musicale trouvée (' +
+            st.got.length +
+            ' / 4). Son : ' +
+            ['grave', 'doux', 'clair', 'aigu'][o.pitch - 1] +
+            '.'
+        );
         if (st.got.length >= 4) advance(hero, q);
         return true;
       }
       case 'chime':
         if (qworld.solved.q6) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1 && !stateOf(hero).done[q.id]) return tell(hero, '🎵 Le socle attend sa pierre musicale. Retrouve-les dans la forêt.');
+        if (stepOf(hero, q) < 1 && !stateOf(hero).done[q.id])
+          return tell(hero, '🎵 Le socle attend sa pierre musicale. Retrouve-les dans la forêt.');
         cue(hero, 'note' + o.pitch);
         float(o.x, o.y - 40, '♪', '#c8f0a0');
         S.seq.push(o.pitch);
@@ -1166,7 +1567,10 @@
         return advance(hero, q);
       case 'viewpoint':
         if (!at(hero, q, 'spot')) return false;
-        tell(hero, '🐦 L’ombre de l’arbre déploie ses ailes : un oiseau parfait. Théon accourt avec ses pinceaux !');
+        tell(
+          hero,
+          '🐦 L’ombre de l’arbre déploie ses ailes : un oiseau parfait. Théon accourt avec ses pinceaux !'
+        );
         return advance(hero, q);
       case 'valve': {
         if (qworld.solved.q11) return creditSolved(hero, site);
@@ -1175,7 +1579,10 @@
         if (lanterns(S.v).every(Boolean)) {
           qworld.flags.lanterns = true;
           qworld.flags.sanct_reflets = true;
-          tell(hero, '🏮 Les quatre lanternes brillent ! Un chemin de lumière mène au Sanctuaire des Reflets.');
+          tell(
+            hero,
+            '🏮 Les quatre lanternes brillent ! Un chemin de lumière mène au Sanctuaire des Reflets.'
+          );
           solve(site);
         }
         return changed();
@@ -1210,7 +1617,12 @@
       case 'shrine':
         return visitShrine(hero, o);
       case 'door':
-        return tell(hero, qworld.flags['sanct_' + o.sanct] ? '' : '🗿 Une lourde porte de pierre. Elle ne bougera pas toute seule.');
+        return tell(
+          hero,
+          qworld.flags['sanct_' + o.sanct]
+            ? ''
+            : '🗿 Une lourde porte de pierre. Elle ne bougera pas toute seule.'
+        );
       case 'islechest':
         return tell(hero, '📦 Le coffre de l’îlot.');
     }
@@ -1222,11 +1634,21 @@
   // Panneau de texte (stèle, indice) : chez le joueur concerné seulement.
   function panel(hero, title, text) {
     if (hero !== game.hero) return canaanLootNotice(hero, title + ' — ' + text);
-    modernPanel('<div class="quest-dialog"><h2>' + esc(title) + '</h2><p class="quest-text">' + esc(text) + '</p><div class="quest-buttons"><button data-action="closePanels">D’accord</button></div></div>');
+    modernPanel(
+      '<div class="quest-dialog"><h2>' +
+        esc(title) +
+        '</h2><p class="quest-text">' +
+        esc(text) +
+        '</p><div class="quest-buttons"><button data-action="closePanels">D’accord</button></div></div>'
+    );
     return true;
   }
   function travel(hero, to) {
-    if (!stateOf(hero).flags.shortcut) return tell(hero, '🪨 Une pierre de passage endormie. On dit qu’une fois réveillée, elle relie la forêt au camp.');
+    if (!stateOf(hero).flags.shortcut)
+      return tell(
+        hero,
+        '🪨 Une pierre de passage endormie. On dit qu’une fois réveillée, elle relie la forêt au camp.'
+      );
     const dest = WAYSTONE[to];
     if (!dest) return false;
     hero.player.x = dest.x;
@@ -1247,7 +1669,12 @@
       window.CANAAN_PERSISTENCE.requestSave();
     }
     const lit = st.flags[s.star];
-    return panel(hero, '🏛️ ' + s.name, s.lore + (lit ? ' L’autel brille : son étoile est revenue.' : ' L’autel est éteint, il attend son étoile.'));
+    return panel(
+      hero,
+      '🏛️ ' + s.name,
+      s.lore +
+        (lit ? ' L’autel brille : son étoile est revenue.' : ' L’autel est éteint, il attend son étoile.')
+    );
   }
   // Mouton de Milo : il suit le chemin ouvert à chaque carrefour.
   function sheepRoute(site, g) {
@@ -1262,7 +1689,12 @@
     return r.map(n => [px(site, N[n][0]), py(site, N[n][1])]).concat([[r.at(-1) === 'top' ? 1 : 0, 0]]);
   }
   // Lanternes du marais selon les trois vannes.
-  const lanterns = v => [v[0] === 2, (v[0] + v[1]) % 3 === 2, (v[1] + v[2]) % 3 === 1, (v[2] * 2 + v[0]) % 3 === 1];
+  const lanterns = v => [
+    v[0] === 2,
+    (v[0] + v[1]) % 3 === 2,
+    (v[1] + v[2]) % 3 === 1,
+    (v[2] * 2 + v[0]) % 3 === 1
+  ];
   // ---------------------------------------------------------------- Étape de simulation (hôte)
   function stepTrails(hero) {
     for (const [id, st] of Object.entries(stateOf(hero).active)) {
@@ -1274,9 +1706,16 @@
       if (step.k === 'trail') {
         const end = q.id === 1 ? [px(site, 0), py(site, 0)] : site.trail.at(-1);
         if (Math.hypot(p.x - end[0], p.y - end[1]) < 2.4 * T) advance(hero, q);
-      } else if (step.k === 'reach' && Math.hypot(p.x - px(site, step.at[0]), p.y - py(site, step.at[1])) < 1.2 * T) {
+      } else if (
+        step.k === 'reach' &&
+        Math.hypot(p.x - px(site, step.at[0]), p.y - py(site, step.at[1])) < 1.2 * T
+      ) {
         if (q.id === 7 && !qworld.solved.q7) continue;
-        if (q.id === 7) tell(hero, '🌳 L’arbre gardien parle : « Petite étincelle… Le Cœur de l’Aurore attend. Rassemble les six étoiles. »');
+        if (q.id === 7)
+          tell(
+            hero,
+            '🌳 L’arbre gardien parle : « Petite étincelle… Le Cœur de l’Aurore attend. Rassemble les six étoiles. »'
+          );
         if (q.id === 15) cue(hero, 'chest');
         advance(hero, q);
       }
@@ -1335,7 +1774,12 @@
             return;
           }
           const [dx, dy] = site.pads[i],
-            on = game.heroes.some(h => !h.player.dead && Math.floor(h.player.x / T) === site.x + dx && Math.floor(h.player.y / T) === site.y + dy);
+            on = game.heroes.some(
+              h =>
+                !h.player.dead &&
+                Math.floor(h.player.x / T) === site.x + dx &&
+                Math.floor(h.player.y / T) === site.y + dy
+            );
           const before = Math.floor(pad.t * 4);
           pad.t = on ? pad.t + 1 / 60 : Math.max(0, pad.t - 1 / 120);
           if (pad.t >= 2) {
@@ -1379,7 +1823,8 @@
     }
     if (WAYSTONE.camp) {
       const d = Math.hypot(p.x - WAYSTONE.camp.x, p.y - WAYSTONE.camp.y);
-      if (d < 1.6 * T && d < bd) best = { site: null, o: { id: 'campstone', kind: 'campstone', ...WAYSTONE.camp } };
+      if (d < 1.6 * T && d < bd)
+        best = { site: null, o: { id: 'campstone', kind: 'campstone', ...WAYSTONE.camp } };
     }
     return best;
   }
@@ -1470,7 +1915,10 @@
         gear: 'Changer l’engrenage',
         traveler: 'Écouter ' + (o.who || ''),
         hide: 'Fouiller : ' + (o.name || ''),
-        obelisk: o.kind === 'obelisk' && at(hero, n.site?.quest, 'collect') ? 'Dégager l’obélisque' : 'Tourner l’obélisque',
+        obelisk:
+          o.kind === 'obelisk' && at(hero, n.site?.quest, 'collect')
+            ? 'Dégager l’obélisque'
+            : 'Tourner l’obélisque',
         ringlever: 'Tourner l’anneau',
         treasure: 'Porte du trésor',
         fan: 'Déboucher la bouteille',
@@ -1515,7 +1963,12 @@
     }
     if (a.op === 'quest-choice') return choose(hero, a.q, a.choice);
     if (a.op === 'quest-act') {
-      if (a.site === 'camp' && a.obj === 'campstone') return WAYSTONE.camp && Math.hypot(hero.player.x - WAYSTONE.camp.x, hero.player.y - WAYSTONE.camp.y) < 2 * T && travel(hero, 'forest');
+      if (a.site === 'camp' && a.obj === 'campstone')
+        return (
+          WAYSTONE.camp &&
+          Math.hypot(hero.player.x - WAYSTONE.camp.x, hero.player.y - WAYSTONE.camp.y) < 2 * T &&
+          travel(hero, 'forest')
+        );
       const site = SITES[a.site],
         trial = /^trial(\d)_a(\d)$/.exec(a.obj),
         o = site?.objs.find(o => o.id === (trial ? 'trial' + trial[1] : a.obj));
@@ -1523,7 +1976,12 @@
         if (Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > 2.2 * T) return false;
         return act(hero, site, { ...o, answer: Number(trial[2]) }) !== false;
       }
-      if (!o || Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > ((o.range || 1.6) + 0.6) * T || !usable(hero, site, o)) return false;
+      if (
+        !o ||
+        Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > ((o.range || 1.6) + 0.6) * T ||
+        !usable(hero, site, o)
+      )
+        return false;
       return act(hero, site, o) !== false;
     }
     return false;
@@ -1533,7 +1991,13 @@
     const q = quest(id),
       st = q && at(hero, q, 'choice'),
       npc = q && NPCS[q.npc];
-    if (!st || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T || !Number.isInteger(choice)) return false;
+    if (
+      !st ||
+      !npc ||
+      Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T ||
+      !Number.isInteger(choice)
+    )
+      return false;
     if (choice !== q.answer) {
       tell(hero, '👻 « Non… ce n’est pas ça. Je crois que non. »');
       return true;
@@ -1559,12 +2023,19 @@
       hero = game.hero,
       st = stateOf(hero),
       mode = npcState(hero, q),
-      lumi = st.flags.lumi ? '<p class="quest-lumi">✨ Lumi tinte doucement près de ' + esc(npc.def.name) + '.</p>' : '';
+      lumi = st.flags.lumi
+        ? '<p class="quest-lumi">✨ Lumi tinte doucement près de ' + esc(npc.def.name) + '.</p>'
+        : '';
     let body = '',
       buttons = '';
     if (mode === 'locked') {
       const before = quest(q.requires);
-      body = '<p class="quest-text">« Bonjour, voyageur. Le vent tourne, ces temps-ci… »</p><p class="quest-note">Cette partie de l’histoire commence plus tard : termine d’abord « ' + esc(before.title) + ' » (' + esc(QUEST_NPCS[before.npc].name) + ').</p>';
+      body =
+        '<p class="quest-text">« Bonjour, voyageur. Le vent tourne, ces temps-ci… »</p><p class="quest-note">Cette partie de l’histoire commence plus tard : termine d’abord « ' +
+        esc(before.title) +
+        ' » (' +
+        esc(QUEST_NPCS[before.npc].name) +
+        ').</p>';
     } else if (mode === 'offer') {
       body = q.talk.offer.map(t => '<p class="quest-text">« ' + esc(t) + ' »</p>').join('') + card(q, st);
       buttons = '<button data-action="questAccept" data-quest="' + q.id + '">Accepter la quête</button>';
@@ -1572,32 +2043,81 @@
       const step = q.steps[st.active[q.id].step];
       if (step.k === 'choice') {
         body = '<p class="quest-text">« Alors… tu sais qui j’étais ? »</p>';
-        buttons = q.choices.map((c, i) => '<button data-action="questChoice" data-quest="' + q.id + '" data-choice="' + i + '">' + esc(c) + '</button>').join('');
+        buttons = q.choices
+          .map(
+            (c, i) =>
+              '<button data-action="questChoice" data-quest="' +
+              q.id +
+              '" data-choice="' +
+              i +
+              '">' +
+              esc(c) +
+              '</button>'
+          )
+          .join('');
       } else body = '<p class="quest-text">« ' + esc(q.talk.active) + ' »</p>' + card(q, st);
     } else if (mode === 'ready') {
-      body = '<p class="quest-text">« ' + esc(q.talk.ready) + ' »</p><p class="quest-reward">🏆 ' + esc(rewardLine(q)) + '</p>';
+      body =
+        '<p class="quest-text">« ' +
+        esc(q.talk.ready) +
+        ' »</p><p class="quest-reward">🏆 ' +
+        esc(rewardLine(q)) +
+        '</p>';
       buttons = '<button data-action="questTurnIn" data-quest="' + q.id + '">Terminer la quête</button>';
     } else body = '<p class="quest-text">« ' + esc(q.talk.after) + ' »</p>';
     modernPanel(
-      '<div class="quest-dialog"><h2>' + esc(npc.def.name) + (mode === 'offer' || mode === 'active' || mode === 'ready' ? ' <small>· ' + esc(q.title) + '</small>' : '') + '</h2>' +
-        body + lumi + '<div class="quest-buttons">' + buttons + '<button data-action="closePanels">' + (buttons ? 'Plus tard' : 'Au revoir') + '</button></div></div>'
+      '<div class="quest-dialog"><h2>' +
+        esc(npc.def.name) +
+        (mode === 'offer' || mode === 'active' || mode === 'ready'
+          ? ' <small>· ' + esc(q.title) + '</small>'
+          : '') +
+        '</h2>' +
+        body +
+        lumi +
+        '<div class="quest-buttons">' +
+        buttons +
+        '<button data-action="closePanels">' +
+        (buttons ? 'Plus tard' : 'Au revoir') +
+        '</button></div></div>'
     );
   }
   function card(q, st) {
     const a = st.active[q.id],
       chapter = CHAPTERS[q.chapter];
     return (
-      '<div class="quest-card' + (q.main ? ' main' : '') + '"><b>' + (q.main ? '📖 Histoire · Chapitre ' + chapter.n : '🍃 Quête secondaire') + ' — ' + esc(q.title) + '</b>' +
-      '<span class="quest-level">Niveau conseillé ' + q.level + '</span><p>' + esc(q.summary) + '</p><ul>' +
+      '<div class="quest-card' +
+      (q.main ? ' main' : '') +
+      '"><b>' +
+      (q.main ? '📖 Histoire · Chapitre ' + chapter.n : '🍃 Quête secondaire') +
+      ' — ' +
+      esc(q.title) +
+      '</b>' +
+      '<span class="quest-level">Niveau conseillé ' +
+      q.level +
+      '</span><p>' +
+      esc(q.summary) +
+      '</p><ul>' +
       q.steps
         .map((s, i) => {
           const done = st.done[q.id] || (a && a.step > i),
             cur = a && a.step === i;
-          return '<li class="' + (done ? 'done' : cur ? 'current' : '') + '">' + (done ? '✓ ' : cur ? '➤ ' : '◦ ') + esc(s.text) + (cur && s.n ? ' (' + a.got.length + ' / ' + s.n + ')' : '') + '</li>';
+          return (
+            '<li class="' +
+            (done ? 'done' : cur ? 'current' : '') +
+            '">' +
+            (done ? '✓ ' : cur ? '➤ ' : '◦ ') +
+            esc(s.text) +
+            (cur && s.n ? ' (' + a.got.length + ' / ' + s.n + ')' : '') +
+            '</li>'
+          );
         })
         .join('') +
-      (a && a.step >= q.steps.length ? '<li class="current">➤ Retourner voir ' + esc(QUEST_NPCS[q.npc].name) + '</li>' : '') +
-      '</ul><p class="quest-reward">🏆 ' + esc(rewardLine(q)) + '</p></div>'
+      (a && a.step >= q.steps.length
+        ? '<li class="current">➤ Retourner voir ' + esc(QUEST_NPCS[q.npc].name) + '</li>'
+        : '') +
+      '</ul><p class="quest-reward">🏆 ' +
+      esc(rewardLine(q)) +
+      '</p></div>'
     );
   }
   function request(op, extra) {
@@ -1638,49 +2158,116 @@
         const a = st.active[q.id];
         return (
           card(q, st) +
-          (a ? '<button class="quest-track' + (st.track === q.id ? ' on' : '') + '" data-action="questTrack" data-quest="' + q.id + '">' + (st.track === q.id ? '📍 Suivie' : 'Suivre') + '</button>' : '')
+          (a
+            ? '<button class="quest-track' +
+              (st.track === q.id ? ' on' : '') +
+              '" data-action="questTrack" data-quest="' +
+              q.id +
+              '">' +
+              (st.track === q.id ? '📍 Suivie' : 'Suivre') +
+              '</button>'
+            : '')
         );
       };
     let html = '';
     if (tab === 'main') {
       const stars = starCount(st);
       html += '<p class="quest-intro"><b>' + esc(STORY_TITLE) + '</b> — ' + esc(STORY_INTRO) + '</p>';
-      html += '<p class="quest-stars">Étoiles du Cœur : ' + '★'.repeat(stars) + '☆'.repeat(6 - stars) + (st.flags.lumi ? ' · ✨ Lumi t’accompagne' : '') + '</p>';
+      html +=
+        '<p class="quest-stars">Étoiles du Cœur : ' +
+        '★'.repeat(stars) +
+        '☆'.repeat(6 - stars) +
+        (st.flags.lumi ? ' · ✨ Lumi t’accompagne' : '') +
+        '</p>';
       if (st.flags.starmap)
         html +=
           '<div class="quest-map"><b>🗺️ Carte des sanctuaires</b><ul>' +
           SANCTUARIES.map(s => {
             const open = qworld.flags['sanct_' + s.id],
               lit = st.flags[s.star];
-            return '<li>' + (lit ? '★' : open ? '◇' : '·') + ' ' + esc(s.name) + ' — ' + esc(ZONES[s.zone].name) + (open ? (st.flags['visit_' + s.id] ? ' (visité)' : ' (ouvert)') : '') + '</li>';
+            return (
+              '<li>' +
+              (lit ? '★' : open ? '◇' : '·') +
+              ' ' +
+              esc(s.name) +
+              ' — ' +
+              esc(ZONES[s.zone].name) +
+              (open ? (st.flags['visit_' + s.id] ? ' (visité)' : ' (ouvert)') : '') +
+              '</li>'
+            );
           }).join('') +
           '</ul></div>';
       CHAPTERS.forEach((c, i) => {
         const qs = QUESTS.filter(q => q.main && q.chapter === i);
-        html += '<h3 class="quest-chapter">Chapitre ' + c.n + ' — ' + esc(c.title) + ' <small>· ' + esc(ZONES[c.zone].name) + ', niveaux ' + c.levels.join(' à ') + '</small></h3>';
+        html +=
+          '<h3 class="quest-chapter">Chapitre ' +
+          c.n +
+          ' — ' +
+          esc(c.title) +
+          ' <small>· ' +
+          esc(ZONES[c.zone].name) +
+          ', niveaux ' +
+          c.levels.join(' à ') +
+          '</small></h3>';
         if (!qs.length) html += '<p class="quest-note">Ce chapitre s’écrira bientôt…</p>';
         for (const q of qs) {
           if (st.active[q.id]) html += list(q);
           else if (st.done[q.id]) html += '<p class="quest-done-line">✓ ' + esc(q.title) + '</p>';
-          else if (canStart(st, q)) html += '<p class="quest-note">➤ À découvrir : parle à ' + esc(QUEST_NPCS[q.npc].name) + ' (' + esc(ZONES[SITES[q.site].zone].name) + ').</p>';
+          else if (canStart(st, q))
+            html +=
+              '<p class="quest-note">➤ À découvrir : parle à ' +
+              esc(QUEST_NPCS[q.npc].name) +
+              ' (' +
+              esc(ZONES[SITES[q.site].zone].name) +
+              ').</p>';
         }
       });
     } else if (tab === 'side') {
       const side = QUESTS.filter(q => !q.main && st.active[q.id]);
-      html += side.length ? side.map(list).join('') : '<p class="quest-note">Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.</p>';
+      html += side.length
+        ? side.map(list).join('')
+        : '<p class="quest-note">Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.</p>';
     } else {
       const done = QUESTS.filter(q => st.done[q.id]);
       html += done.length
         ? done
-            .map(q => '<div class="quest-card done"><b>✓ ' + esc(q.title) + '</b><p>' + esc(q.summary) + '</p><p class="quest-reward">🏆 ' + esc(rewardLine(q)) + '</p>' + (q.memory ? '<p class="quest-memory">📜 Souvenir : ' + esc(q.memory) + '</p>' : '') + '</div>')
+            .map(
+              q =>
+                '<div class="quest-card done"><b>✓ ' +
+                esc(q.title) +
+                '</b><p>' +
+                esc(q.summary) +
+                '</p><p class="quest-reward">🏆 ' +
+                esc(rewardLine(q)) +
+                '</p>' +
+                (q.memory ? '<p class="quest-memory">📜 Souvenir : ' + esc(q.memory) + '</p>' : '') +
+                '</div>'
+            )
             .join('')
         : '<p class="quest-note">Aucune quête terminée pour l’instant.</p>';
     }
-    const tabs = [['main', '📖 Histoire principale'], ['side', '🍃 Quêtes secondaires'], ['done', '✓ Terminées']];
+    const tabs = [
+      ['main', '📖 Histoire principale'],
+      ['side', '🍃 Quêtes secondaires'],
+      ['done', '✓ Terminées']
+    ];
     modernPanel(
       '<div class="quest-journal"><h2>📜 Journal de quêtes</h2><div class="quest-tabs">' +
-        tabs.map(([id, t]) => '<button class="' + (tab === id ? 'on' : '') + '" data-action="questTab" data-tab="' + id + '">' + t + '</button>').join('') +
-        '</div><div class="quest-body">' + html + '</div></div>'
+        tabs
+          .map(
+            ([id, t]) =>
+              '<button class="' +
+              (tab === id ? 'on' : '') +
+              '" data-action="questTab" data-tab="' +
+              id +
+              '">' +
+              t +
+              '</button>'
+          )
+          .join('') +
+        '</div><div class="quest-body">' +
+        html +
+        '</div></div>'
     );
   }
 
@@ -1689,7 +2276,8 @@
     c.fillStyle = col;
     c.fillRect(Math.round(x), Math.round(y), w, h);
   };
-  const visible = (x, y, m = 80) => Math.abs(x - camX - W / 2) < W / 2 + m && Math.abs(y - camY - H / 2) < H / 2 + m;
+  const visible = (x, y, m = 80) =>
+    Math.abs(x - camX - W / 2) < W / 2 + m && Math.abs(y - camY - H / 2) < H / 2 + m;
   function prompt(c, x, y, text) {
     c.font = 'bold 12px system-ui';
     c.textAlign = 'center';
@@ -1848,7 +2436,14 @@
       st = stateOf(hero);
     switch (o.kind) {
       case 'stone':
-        return standing(c, x, y, PAL.stone, { soleil: '☀', pluie: '💧', vent: '🌬', lune: '☾' }[o.sym], S.seq.includes(o.sym) || qworld.solved.q1);
+        return standing(
+          c,
+          x,
+          y,
+          PAL.stone,
+          { soleil: '☀', pluie: '💧', vent: '🌬', lune: '☾' }[o.sym],
+          S.seq.includes(o.sym) || qworld.solved.q1
+        );
       case 'stele':
         shadowAt(c, x, y + 14, 14, 5);
         block(c, x - 11, y - 30, 22, 44, PAL.stone);
@@ -1856,7 +2451,8 @@
         return;
       case 'crystal':
         if (st.flags.lumi) {
-          for (let k = 0; k < 5; k++) block(c, x - 14 + k * 6, y + 4 - (k % 2) * 4, 4, 6, ['#bfe8ff', '#ffffff', '#7ab0d0']);
+          for (let k = 0; k < 5; k++)
+            block(c, x - 14 + k * 6, y + 4 - (k % 2) * 4, 4, 6, ['#bfe8ff', '#ffffff', '#7ab0d0']);
           return;
         }
         return crystalArt(c, x, y, '#cfefff');
@@ -1933,7 +2529,8 @@
       case 'mstone': {
         const col = ['#9ad8ff', '#a8f0a0', '#f0e08a', '#f0a8d8'][o.pitch - 1];
         if (o.kind === 'mstone' && !usable(hero, site, o)) return;
-        if (o.kind === 'chime' && !(qworld.solved.q6 || stepOf(hero, q) >= 1 || st.done[6])) return pedestalArt(c, x, y, PAL.moss, null);
+        if (o.kind === 'chime' && !(qworld.solved.q6 || stepOf(hero, q) >= 1 || st.done[6]))
+          return pedestalArt(c, x, y, PAL.moss, null);
         pedestalArt(c, x, y, PAL.moss, null);
         glow(c, x, y - 12, 26, col, 0.45 + 0.2 * Math.sin(time * 0.1 + o.pitch));
         block(c, x - 6, y - 18, 12, 9, [col, '#ffffff', PAL.moss[2]]);
@@ -2046,7 +2643,14 @@
         const sc = SCENES_Q12[S.f[o.i]];
         shadowAt(c, x, y + 12, 18, 4);
         block(c, x - 20, y - 42, 40, 52, PAL.gold);
-        block(c, x - 15, y - 37, 30, 42, qworld.solved.q12 ? ['#e8f4ff', '#ffffff', '#b8c8d8'] : ['#b8c8d8', '#d8e4f0', '#8a9aac']);
+        block(
+          c,
+          x - 15,
+          y - 37,
+          30,
+          42,
+          qworld.solved.q12 ? ['#e8f4ff', '#ffffff', '#b8c8d8'] : ['#b8c8d8', '#d8e4f0', '#8a9aac']
+        );
         rune(c, x, y - 12, sc[0], '#1a2430', 18);
         c.font = 'bold 9px system-ui';
         c.fillStyle = '#1a2430';
@@ -2073,7 +2677,17 @@
         return block(c, x - 22, y - 6, 44, 12, PAL.wood);
       case 'witness': {
         const w = GHOST_CLUES.find(g => g.id === o.clue);
-        personArt(c, x, y, { sex: o.clue === 'vieille' ? 'f' : 'm', hair: o.clue === 'vieille' ? '#e8e8e0' : '#5a4030', outfit: 'cuir' }, o.clue === 'pecheur' ? 'rod' : 'none');
+        personArt(
+          c,
+          x,
+          y,
+          {
+            sex: o.clue === 'vieille' ? 'f' : 'm',
+            hair: o.clue === 'vieille' ? '#e8e8e0' : '#5a4030',
+            outfit: 'cuir'
+          },
+          o.clue === 'pecheur' ? 'rod' : 'none'
+        );
         if (Math.hypot(P.x - x, P.y - y) < 4 * T) nameTag(c, x, y - 48, w.who);
         return;
       }
@@ -2112,7 +2726,16 @@
       case 'archive':
         shadowAt(c, x, y + 14, 24, 5);
         block(c, x - 22, y - 34, 44, 48, PAL.wood);
-        for (let k = 0; k < 3; k++) for (let b = 0; b < 6; b++) R(c, x - 18 + b * 6, y - 30 + k * 14, 5, 11, qworld.solved.q17 ? ['#a83a2a', '#3a6aa8', '#c8a040', '#4a8a4a'][(b + k) % 4] : '#3a2a1a');
+        for (let k = 0; k < 3; k++)
+          for (let b = 0; b < 6; b++)
+            R(
+              c,
+              x - 18 + b * 6,
+              y - 30 + k * 14,
+              5,
+              11,
+              qworld.solved.q17 ? ['#a83a2a', '#3a6aa8', '#c8a040', '#4a8a4a'][(b + k) % 4] : '#3a2a1a'
+            );
         return;
       case 'vane': {
         shadowAt(c, x, y + 12, 8, 3);
@@ -2191,7 +2814,18 @@
         return;
       }
       case 'traveler':
-        personArt(c, x, y, { sex: o.who === 'Mila' ? 'f' : 'm', race: o.who === 'Hector' ? 'orc' : 'humain', hair: '#5a3a20', outfit: o.who === 'Gaspard' ? 'rose' : 'foret' }, o.who === 'Hector' ? 'spear' : 'none');
+        personArt(
+          c,
+          x,
+          y,
+          {
+            sex: o.who === 'Mila' ? 'f' : 'm',
+            race: o.who === 'Hector' ? 'orc' : 'humain',
+            hair: '#5a3a20',
+            outfit: o.who === 'Gaspard' ? 'rose' : 'foret'
+          },
+          o.who === 'Hector' ? 'spear' : 'none'
+        );
         if (Math.hypot(P.x - x, P.y - y) < 4 * T) nameTag(c, x, y - 48, o.who);
         return;
       case 'hide':
@@ -2202,7 +2836,12 @@
         }
         if (o.look === 'leaves') {
           shadowAt(c, x, y + 8, 18, 4);
-          for (let k = 0; k < 6; k++) block(c, x - 16 + (k % 3) * 10, y - 4 - Math.floor(k / 3) * 6, 10, 6, ['#c86a2a', '#e89a4a', '#8a3a10']);
+          for (let k = 0; k < 6; k++)
+            block(c, x - 16 + (k % 3) * 10, y - 4 - Math.floor(k / 3) * 6, 10, 6, [
+              '#c86a2a',
+              '#e89a4a',
+              '#8a3a10'
+            ]);
           return;
         }
         return block(c, x - 22, y - 6, 44, 10, PAL.wood);
@@ -2293,7 +2932,15 @@
       case 'aqueduct': {
         const path = aqueduct(S.g),
           wet = qworld.solved.q25 ? aqueduct(ANSWER.q25) : path;
-        const edges = [['src', 'a'], ['a', 'leakA'], ['a', 'b'], ['b', 'leakB'], ['b', 'c'], ['c', 'leakC'], ['c', 'basin']];
+        const edges = [
+          ['src', 'a'],
+          ['a', 'leakA'],
+          ['a', 'b'],
+          ['b', 'leakB'],
+          ['b', 'c'],
+          ['c', 'leakC'],
+          ['c', 'basin']
+        ];
         for (const [a, b] of edges) {
           const [x0, y0] = AQ[a],
             [x1, y1] = AQ[b],
@@ -2311,7 +2958,14 @@
         const end = wet.at(-1);
         if (end !== 'basin') glow(c, px(site, AQ[end][0]), py(site, AQ[end][1]), 30, '#8ab0c0', 0.5);
         const full = qworld.flags.oasis;
-        block(c, px(site, 3) - 22, py(site, 2) - 22, 92, 92, full ? ['#3a8ac8', '#7ac0f0', '#1a5a8a'] : PAL.sand);
+        block(
+          c,
+          px(site, 3) - 22,
+          py(site, 2) - 22,
+          92,
+          92,
+          full ? ['#3a8ac8', '#7ac0f0', '#1a5a8a'] : PAL.sand
+        );
         return block(c, px(site, -5) - 14, py(site, -3) - 18, 28, 30, PAL.stone);
       }
       case 'agate': {
@@ -2322,7 +2976,8 @@
         return block(c, x - 10, open ? y - 18 : y, 20, 12, PAL.wood);
       }
       case 'trial': {
-        const done = st.done[26] || (at(hero, q, 'trials') && at(hero, q, 'trials').got.includes('trial' + o.i));
+        const done =
+          st.done[26] || (at(hero, q, 'trials') && at(hero, q, 'trials').got.includes('trial' + o.i));
         return standing(c, x, y, PAL.lilac, ['✦', '♪', '☾', '6'][o.i], done, '#e8d8ff');
       }
       case 'altar': {
@@ -2422,10 +3077,18 @@
         if (h) rune(c, h.player.x, h.player.y - 56, VILLAGE_OBJS[i][1], '#ffffff', 20);
       }
     }
-    if (site.id === 'q21' && (qworld.solved.q21 || stepOf(game.hero, site.quest) >= 1 || stateOf(game.hero).done[21])) {
+    if (
+      site.id === 'q21' &&
+      (qworld.solved.q21 || stepOf(game.hero, site.quest) >= 1 || stateOf(game.hero).done[21])
+    ) {
       const S = ST.q21;
       for (const o of site.objs.filter(o => o.kind === 'obelisk')) {
-        const [dx, dy] = [[0, -1], [1, 0], [0, 1], [-1, 0]][S.o[o.i]];
+        const [dx, dy] = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0]
+        ][S.o[o.i]];
         c.save();
         c.globalAlpha = 0.6;
         c.strokeStyle = '#fff0a0';
@@ -2448,7 +3111,9 @@
       c.shadowColor = '#ffd84a';
       c.shadowBlur = 14;
       c.beginPath();
-      b.pts.forEach(([dx, dy], i) => (i ? c.lineTo(px(site, dx), py(site, dy) - 8) : c.moveTo(px(site, dx), py(site, dy) - 8)));
+      b.pts.forEach(([dx, dy], i) =>
+        i ? c.lineTo(px(site, dx), py(site, dy) - 8) : c.moveTo(px(site, dx), py(site, dy) - 8)
+      );
       c.stroke();
       c.restore();
     }
@@ -2529,7 +3194,11 @@
         c.font = 'bold 9px system-ui';
         c.textAlign = 'center';
         c.fillStyle = '#2a1a0a';
-        c.fillText(s.dir[0] > 0 ? 'Sortie →' : s.dir[0] < 0 ? '← Sortie' : s.dir[1] < 0 ? '↑ Sortie' : '↓ Sortie', x + s.dir[0] * 6, y - 22);
+        c.fillText(
+          s.dir[0] > 0 ? 'Sortie →' : s.dir[0] < 0 ? '← Sortie' : s.dir[1] < 0 ? '↑ Sortie' : '↓ Sortie',
+          x + s.dir[0] * 6,
+          y - 22
+        );
       }
     }
     if (site.id === 'q9' && at(hero, site.quest, 'trail')) {
@@ -2593,13 +3262,15 @@
       drawSiteExtras(c, site);
       for (const o of site.objs) if (visible(o.x, o.y)) drawObj(c, site, o);
     }
-    if (WAYSTONE.camp && visible(WAYSTONE.camp.x, WAYSTONE.camp.y)) drawObj(c, SITES.q8, { kind: 'waystone', x: WAYSTONE.camp.x, y: WAYSTONE.camp.y });
+    if (WAYSTONE.camp && visible(WAYSTONE.camp.x, WAYSTONE.camp.y))
+      drawObj(c, SITES.q8, { kind: 'waystone', x: WAYSTONE.camp.x, y: WAYSTONE.camp.y });
     for (const npc of Object.values(NPCS)) {
       if (!visible(npc.x, npc.y)) continue;
       const def = npc.def,
         dx = P.x - npc.x,
         dy = P.y - npc.y;
-      if (Math.hypot(dx, dy) < 3 * T) npc.face = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy < 0 ? 2 : 0;
+      if (Math.hypot(dx, dy) < 3 * T)
+        npc.face = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy < 0 ? 2 : 0;
       const s = def.child ? 0.8 : 1,
         spr = canaanHeroSprite(sanitizeLook(def.look), npc.face, 0, { tool: def.tool || 'none' });
       if (def.spirit) {
@@ -2612,10 +3283,16 @@
         c.fill();
         canaanLight(npc.x, yy, 110, '#bfe8ff');
       } else {
-      c.globalAlpha = def.ghost ? 0.55 + 0.15 * Math.sin(time * 0.06) : 1;
-      if (def.ghost) glow(c, npc.x, npc.y - 20, 40, '#bfe8ff', 0.35);
-      c.drawImage(spr, Math.round(npc.x - 26 * s), Math.round(npc.y + 18 - 60 * s + (def.ghost ? Math.sin(time * 0.05) * 3 : 0)), Math.round(52 * s), Math.round(64 * s));
-      c.globalAlpha = 1;
+        c.globalAlpha = def.ghost ? 0.55 + 0.15 * Math.sin(time * 0.06) : 1;
+        if (def.ghost) glow(c, npc.x, npc.y - 20, 40, '#bfe8ff', 0.35);
+        c.drawImage(
+          spr,
+          Math.round(npc.x - 26 * s),
+          Math.round(npc.y + 18 - 60 * s + (def.ghost ? Math.sin(time * 0.05) * 3 : 0)),
+          Math.round(52 * s),
+          Math.round(64 * s)
+        );
+        c.globalAlpha = 1;
       }
       const mode = npcState(game.hero, npc.quest),
         mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : mode === 'active' ? '…' : '';
@@ -2680,7 +3357,10 @@
     ctx.translate(Math.round(-camX), Math.round(-camY));
     for (const hero of game.heroes) {
       const p = hero.player,
-        flags = hero === game.hero ? stateOf(hero).flags : { lumi: hero.questLook & 1, blessing: hero.questLook & 2, aurora: hero.questLook & 4 };
+        flags =
+          hero === game.hero
+            ? stateOf(hero).flags
+            : { lumi: hero.questLook & 1, blessing: hero.questLook & 2, aurora: hero.questLook & 4 };
       if (p.dead) continue;
       // Aura du Gardien de l'Aurore : anneau de lumière dorée et rose sous les pieds.
       if (flags.aurora) {
@@ -2692,7 +3372,16 @@
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
-      if (flags.blessing && time % 14 === 0) particles.push({ x: p.x + (Math.random() - 0.5) * 34, y: p.y + 14, vx: 0, vy: -0.4, life: 34, c: '#ffd84a', r: 2 });
+      if (flags.blessing && time % 14 === 0)
+        particles.push({
+          x: p.x + (Math.random() - 0.5) * 34,
+          y: p.y + 14,
+          vx: 0,
+          vy: -0.4,
+          life: 34,
+          c: '#ffd84a',
+          r: 2
+        });
       if (!flags.lumi) continue;
       const l = lumiAt.get(hero) || { x: p.x, y: p.y };
       const tx = p.x - 26 * (p.face || 1),
@@ -2718,19 +3407,32 @@
     if (!q || !st.active[q.id]) return null;
     const a = st.active[q.id],
       site = SITES[q.site];
-    if (a.step >= q.steps.length) return { x: NPCS[q.npc].x, y: NPCS[q.npc].y, text: 'Retourne voir ' + QUEST_NPCS[q.npc].name, q };
+    if (a.step >= q.steps.length)
+      return { x: NPCS[q.npc].x, y: NPCS[q.npc].y, text: 'Retourne voir ' + QUEST_NPCS[q.npc].name, q };
     const step = q.steps[a.step];
     if (step.k === 'collect') {
-      const left = site.objs.find(o => ['relic', 'mstone', 'leaf', 'fresco', 'obelisk', 'ccrystal'].includes(o.kind) && !a.got.includes(o.id));
+      const left = site.objs.find(
+        o =>
+          ['relic', 'mstone', 'leaf', 'fresco', 'obelisk', 'ccrystal'].includes(o.kind) &&
+          !a.got.includes(o.id)
+      );
       if (left) return { x: left.x, y: left.y, text: step.text, q, vague: true };
     }
-    if (step.at) return { x: px(site, step.at[0]), y: py(site, step.at[1]), text: step.text, q, vague: step.k === 'spot' };
+    if (step.at)
+      return {
+        x: px(site, step.at[0]),
+        y: py(site, step.at[1]),
+        text: step.text,
+        q,
+        vague: step.k === 'spot'
+      };
     if (step.k === 'catch') return { x: site.leaf.x, y: site.leaf.y, text: step.text, q };
     if (step.k === 'defense') {
       const altar = site.objs.find(o => o.kind === 'altar27');
       return { x: altar.x, y: altar.y, text: step.text, q };
     }
-    if (step.k === 'search' || step.k === 'trials') return { x: px(site, 0), y: py(site, 0), text: step.text, q, vague: true };
+    if (step.k === 'search' || step.k === 'trials')
+      return { x: px(site, 0), y: py(site, 0), text: step.text, q, vague: true };
     return { x: px(site, 0), y: py(site, 0), text: step.text, q };
   }
   const trackerEl = document.createElement('div');
@@ -2744,8 +3446,19 @@
     const d = Math.round(Math.hypot(tr.x - P.x, tr.y - P.y) / T),
       a = Math.atan2(tr.y - P.y, tr.x - P.x),
       html =
-        '<b>' + (tr.q.main ? '📖 ' : '🍃 ') + esc(tr.q.title) + '</b><span>' + esc(tr.text) + '</span><em>' +
-        (d <= 2 ? 'Tu y es' : '<i style="transform:rotate(' + a.toFixed(2) + 'rad)">➤</i> ' + (tr.vague && d < 8 ? 'tout près' : d + ' cases')) + '</em>';
+        '<b>' +
+        (tr.q.main ? '📖 ' : '🍃 ') +
+        esc(tr.q.title) +
+        '</b><span>' +
+        esc(tr.text) +
+        '</span><em>' +
+        (d <= 2
+          ? 'Tu y es'
+          : '<i style="transform:rotate(' +
+            a.toFixed(2) +
+            'rad)">➤</i> ' +
+            (tr.vague && d < 8 ? 'tout près' : d + ' cases')) +
+        '</em>';
     if (trackerEl.innerHTML !== html) trackerEl.innerHTML = html;
   }
 
@@ -2755,14 +3468,29 @@
   }
   function importWorld(d) {
     qworld = { flags: {}, solved: {} };
-    const flags = ['sanct_murmures', 'sanct_reflets', 'sanct_saisons', 'sanct_etoiles', 'sanct_lumieres', 'sanct_aurore', 'lanterns', 'bridge', 'shortcut', 'archives', 'grenier', 'oasis', 'pyria'];
+    const flags = [
+      'sanct_murmures',
+      'sanct_reflets',
+      'sanct_saisons',
+      'sanct_etoiles',
+      'sanct_lumieres',
+      'sanct_aurore',
+      'lanterns',
+      'bridge',
+      'shortcut',
+      'archives',
+      'grenier',
+      'oasis',
+      'pyria'
+    ];
     if (d && typeof d === 'object') {
       for (const f of flags) if (d.flags?.[f]) qworld.flags[f] = true;
       for (const id of Object.keys(SITES)) if (d.solved?.[id]) qworld.solved[id] = true;
     }
     ST = { ...freshStates(), ...freshMore() };
     if (SITES.q15) ST.q15.pads = SITES.q15.pads.map(() => ({ t: 0, sunk: 0 }));
-    for (const id of Object.keys(qworld.solved)) if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
+    for (const id of Object.keys(qworld.solved))
+      if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
     changed();
   }
   // État des lieux envoyé aux invités quand il change (et de temps en temps pour un invité qui arrive).
@@ -2777,7 +3505,11 @@
       s: {
         q1: ST.q1.seq.length,
         q2: ST.q2.p,
-        q3: [ST.q3.g, ST.q3.top ? 1 : 0, ST.q3.run ? [ST.q3.run.path, Math.round(ST.q3.run.i * 100) / 100] : 0],
+        q3: [
+          ST.q3.g,
+          ST.q3.top ? 1 : 0,
+          ST.q3.run ? [ST.q3.run.path, Math.round(ST.q3.run.i * 100) / 100] : 0
+        ],
         q5: [ST.q5.gold, Math.max(0, ST.q5.until - time)],
         q6: ST.q6.seq.length,
         q7: ST.q7.m,
@@ -2801,7 +3533,10 @@
       }
     };
   }
-  const ints = (a, n, max) => (Array.isArray(a) && a.length === n && a.every(v => Number.isInteger(v) && v >= 0 && v <= max) ? [...a] : null);
+  const ints = (a, n, max) =>
+    Array.isArray(a) && a.length === n && a.every(v => Number.isInteger(v) && v >= 0 && v <= max)
+      ? [...a]
+      : null;
   function applyRemote(v) {
     if (!v || typeof v !== 'object') return;
     if (v.w) {
@@ -2809,7 +3544,9 @@
       qworld = { flags: {}, solved: {} };
       for (const f of Object.keys(v.w.flags || {})) if (/^[a-z_]{2,24}$/.test(f)) qworld.flags[f] = true;
       for (const id of Object.keys(v.w.solved || {})) if (SITES[id]) qworld.solved[id] = true;
-      if (before !== JSON.stringify(qworld.solved)) for (const id of Object.keys(qworld.solved)) if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
+      if (before !== JSON.stringify(qworld.solved))
+        for (const id of Object.keys(qworld.solved))
+          if (SOLVED_STATE[id]) Object.assign(ST[id], SOLVED_STATE[id]());
     }
     const s = v.s;
     if (!s) return;
@@ -2822,7 +3559,12 @@
       ST.q3.g = ints(s.q3[0], 3, 1) || ST.q3.g;
       ST.q3.top = !!s.q3[1];
       const run = s.q3[2];
-      ST.q3.run = Array.isArray(run) && Array.isArray(run[0]) && run[0].every(p => Array.isArray(p) && p.every(Number.isFinite)) ? { path: run[0], i: Number(run[1]) || 0, back: 0 } : null;
+      ST.q3.run =
+        Array.isArray(run) &&
+        Array.isArray(run[0]) &&
+        run[0].every(p => Array.isArray(p) && p.every(Number.isFinite))
+          ? { path: run[0], i: Number(run[1]) || 0, back: 0 }
+          : null;
     }
     if (Array.isArray(s.q5)) {
       ST.q5.gold = Number.isInteger(s.q5[0]) ? s.q5[0] : -1;
@@ -2840,23 +3582,39 @@
     if (Array.isArray(s.q23) && s.q23.length === 2 && s.q23.every(Number.isInteger)) ST.q23.b = [...s.q23];
     if (Number.isFinite(s.q18)) ST.q18.t = s.q18;
     if (Number.isInteger(s.q30)) ST.q30.seq = Math.max(0, Math.min(CONSTELLATION.length, s.q30));
-    if (Array.isArray(s.q16) && Array.isArray(s.q16[0]) && s.q16[0].length === 4 && s.q16[0].every(v => Number.isInteger(v) && v >= -2 && v <= 3)) {
+    if (
+      Array.isArray(s.q16) &&
+      Array.isArray(s.q16[0]) &&
+      s.q16[0].length === 4 &&
+      s.q16[0].every(v => Number.isInteger(v) && v >= -2 && v <= 3)
+    ) {
       ST.q16.pos = [...s.q16[0]];
       ST.q16.hold = {};
-      for (const [k, v] of Object.entries(s.q16[1] || {})) if (Number.isInteger(v) && v >= 0 && v <= 3) ST.q16.hold[String(k).slice(0, 64)] = v;
+      for (const [k, v] of Object.entries(s.q16[1] || {}))
+        if (Number.isInteger(v) && v >= 0 && v <= 3) ST.q16.hold[String(k).slice(0, 64)] = v;
     }
     if (Array.isArray(s.q27)) {
       ST.q27.on = !!s.q27[0];
-      if (Array.isArray(s.q27[1]) && s.q27[1].length === 6) ST.q27.hp = s.q27[1].map(v => Math.max(0, Math.min(100, Number(v) || 0)));
+      if (Array.isArray(s.q27[1]) && s.q27[1].length === 6)
+        ST.q27.hp = s.q27[1].map(v => Math.max(0, Math.min(100, Number(v) || 0)));
     }
     if (Array.isArray(s.q29)) {
       ST.q29.h = ints(s.q29[0], 4, 3) || ST.q29.h;
       ST.q29.fly = Number(s.q29[1]) >= 0 ? { t: Number(s.q29[1]) } : null;
     }
-    if (Array.isArray(s.q15)) s.q15.forEach((p, i) => ST.q15.pads[i] && Array.isArray(p) && Object.assign(ST.q15.pads[i], { t: Number(p[0]) || 0, sunk: p[1] ? 1 : 0 }));
+    if (Array.isArray(s.q15))
+      s.q15.forEach(
+        (p, i) =>
+          ST.q15.pads[i] &&
+          Array.isArray(p) &&
+          Object.assign(ST.q15.pads[i], { t: Number(p[0]) || 0, sunk: p[1] ? 1 : 0 })
+      );
   }
   // Apparence visible chez les autres : Lumi (1) et bénédiction des racines d'or (2).
-  const questLook = hero => (stateOf(hero).flags.lumi ? 1 : 0) | (stateOf(hero).flags.blessing ? 2 : 0) | (stateOf(hero).flags.aurora ? 4 : 0);
+  const questLook = hero =>
+    (stateOf(hero).flags.lumi ? 1 : 0) |
+    (stateOf(hero).flags.blessing ? 2 : 0) |
+    (stateOf(hero).flags.aurora ? 4 : 0);
 
   // Lieux posés sur l'île ; une île régénérée (même graine) les reçoit à nouveau, à l'identique.
   function rebuild() {

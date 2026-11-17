@@ -25,9 +25,25 @@
     crabe: {
       w: 15,
       h: 10,
-      pal: [['#d8582e', '#9e3a1c', '#f08a52'], ['#c8743a', '#8a4a22', '#e8a060']],
+      pal: [
+        ['#d8582e', '#9e3a1c', '#f08a52'],
+        ['#c8743a', '#8a4a22', '#e8a060']
+      ],
       draw(R, f, [m, d, l]) {
-        for (const [x, y] of f ? [[1, 4], [2, 7], [11, 3], [12, 6]] : [[1, 5], [2, 8], [11, 4], [12, 7]]) R(x, y, 2, 1, d);
+        for (const [x, y] of f
+          ? [
+              [1, 4],
+              [2, 7],
+              [11, 3],
+              [12, 6]
+            ]
+          : [
+              [1, 5],
+              [2, 8],
+              [11, 4],
+              [12, 7]
+            ])
+          R(x, y, 2, 1, d);
         R(4, 3, 7, 6, m);
         R(3, 4, 9, 4, m);
         R(5, 3, 4, 2, l);
@@ -48,7 +64,10 @@
     chat: {
       w: 14,
       h: 10,
-      pal: [['#e89a4a', '#b86a2a', '#f8c890'], ['#4a4a52', '#2a2a30', '#7a7a84']],
+      pal: [
+        ['#e89a4a', '#b86a2a', '#f8c890'],
+        ['#4a4a52', '#2a2a30', '#7a7a84']
+      ],
       draw(R, f, [m, d, l]) {
         R(2, 4, 8, 4, m);
         R(3, 4, 6, 1, l);
@@ -88,7 +107,10 @@
     lapin: {
       w: 13,
       h: 11,
-      pal: [['#9a8068', '#6e5a48', '#c8b49a'], ['#d8d0c4', '#a8a098', '#ffffff']],
+      pal: [
+        ['#9a8068', '#6e5a48', '#c8b49a'],
+        ['#d8d0c4', '#a8a098', '#ffffff']
+      ],
       draw(R, f, [m, d, l]) {
         R(2, 5, 8, 5, m);
         R(3, 9, 6, 1, d);
@@ -110,7 +132,15 @@
       draw(R, f, [m, d, l]) {
         R(2, 3, 12, 7, m);
         R(1, 4, 14, 5, m);
-        for (const [x, y] of [[3, 2], [7, 2], [11, 2], [2, 8], [6, 9], [10, 9]]) R(x, y, 3, 2, l);
+        for (const [x, y] of [
+          [3, 2],
+          [7, 2],
+          [11, 2],
+          [2, 8],
+          [6, 9],
+          [10, 9]
+        ])
+          R(x, y, 3, 2, l);
         R(2, 9, 12, 1, d);
         R(13, 3, 4, 5, '#3a3030');
         R(14, 4, 1, 1, '#f0f0f0');
@@ -124,7 +154,10 @@
     poule: {
       w: 10,
       h: 11,
-      pal: [['#f4f0e8', '#c8c0b0', '#ffffff'], ['#a8643a', '#7a4628', '#c8844a']],
+      pal: [
+        ['#f4f0e8', '#c8c0b0', '#ffffff'],
+        ['#a8643a', '#7a4628', '#c8844a']
+      ],
       draw(R, f, [m, d, l]) {
         R(1, 4, 7, 5, m);
         R(0, 3, 3, 3, d);
@@ -141,7 +174,10 @@
     cerf: {
       w: 19,
       h: 19,
-      pal: [['#a07850', '#704e30', '#c8a07a'], ['#9ad8ff', '#5a9ad0', '#e0f8ff']],
+      pal: [
+        ['#a07850', '#704e30', '#c8a07a'],
+        ['#9ad8ff', '#5a9ad0', '#e0f8ff']
+      ],
       draw(R, f, [m, d, l], opts) {
         R(2, 8, 12, 6, m);
         R(3, 7, 10, 2, d);
@@ -159,7 +195,13 @@
         R(f ? 6 : 5, 14, 2, 5, m);
         R(10, 14, 2, 5, d);
         R(f ? 12 : 13, 14, 2, 5, m);
-        if (opts.glow) for (const [x, y] of [[5, 9], [9, 10], [7, 8]]) R(x, y, 1, 1, '#ffffff');
+        if (opts.glow)
+          for (const [x, y] of [
+            [5, 9],
+            [9, 10],
+            [7, 8]
+          ])
+            R(x, y, 1, 1, '#ffffff');
       }
     },
     renard: {
@@ -293,7 +335,10 @@
     tortue_mer: {
       w: 21,
       h: 11,
-      pal: [['#4a7a52', '#2e5238', '#78a870'], ['#6a7a42', '#46542a', '#98a860']],
+      pal: [
+        ['#4a7a52', '#2e5238', '#78a870'],
+        ['#6a7a42', '#46542a', '#98a860']
+      ],
       draw(R, f, [m, d, l]) {
         R(4, 2, 12, 5, m);
         R(6, 1, 8, 1, m);
@@ -432,7 +477,10 @@
     vache: {
       w: 20,
       h: 15,
-      pal: [['#f4f0e8', '#c8c0b4', '#ffffff', '#2a2224'], ['#b07a4e', '#7e5232', '#d0a070', '#f2ebe0']],
+      pal: [
+        ['#f4f0e8', '#c8c0b4', '#ffffff', '#2a2224'],
+        ['#b07a4e', '#7e5232', '#d0a070', '#f2ebe0']
+      ],
       draw(R, f, [m, d, l, s]) {
         R(2, 4, 13, 7, m);
         R(3, 3, 11, 1, m);
@@ -578,9 +626,24 @@
         if (tx < 2 || ty < 2 || tx >= MAPW - 2 || ty >= MAPH - 2) break;
         const x = (tx + 0.5) * TS,
           y = (ty + 0.5) * TS;
-        if (!sea(tx, ty) && walkable(x, y) && !isSafe(tx, ty) && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([u, v]) => sea(tx + u, ty + v))) best = { x, y };
+        if (
+          !sea(tx, ty) &&
+          walkable(x, y) &&
+          !isSafe(tx, ty) &&
+          [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ].some(([u, v]) => sea(tx + u, ty + v))
+        )
+          best = { x, y };
       }
-      if (best && !(coastPath.length && Math.hypot(coastPath.at(-1).x - best.x, coastPath.at(-1).y - best.y) < 6)) coastPath.push(best);
+      if (
+        best &&
+        !(coastPath.length && Math.hypot(coastPath.at(-1).x - best.x, coastPath.at(-1).y - best.y) < 6)
+      )
+        coastPath.push(best);
     }
     return coastPath;
   }
@@ -618,7 +681,7 @@
       return;
     }
     const seg = Math.max(1, Math.hypot(to.x - from.x, to.y - from.y) / TS);
-    a.i += (a.dir * a.sp.speed * (a.flee > 0 ? 3 : 1)) / (TS * seg) * 2.2;
+    a.i += ((a.dir * a.sp.speed * (a.flee > 0 ? 3 : 1)) / (TS * seg)) * 2.2;
     if (a.flee > 0) a.flee--;
     a.i = (a.i + path.length) % path.length;
     const j = Math.floor(a.i),
@@ -633,12 +696,67 @@
   }
   // Biomes (ordre des ZONES) : [espèce, nombre, variante, options] ; puis insectes volants.
   const FAUNA = [
-    { ground: [['lapin', 32, 0], ['mouton', 10, 0], ['cerf', 12, 0], ['renard', 6, 0]], fliers: [['papillon', 36]] },
-    { ground: [['cerf', 24, 0], ['renard', 16, 0], ['ecureuil', 28, 0], ['lapin', 12, 0], ['faisan', 14, 0]], fliers: [['papillon', 12], ['luciole', 28]] },
-    { ground: [['grenouille', 44, 0], ['heron', 18, 0], ['tortue', 18, 0], ['canard', 22, 0]], fliers: [['libellule', 40]] },
-    { ground: [['renard', 18, 0], ['herisson', 20, 0], ['cerf', 16, 0], ['ecureuil', 20, 0], ['faisan', 14, 0]], fliers: [['papillon', 16]] },
-    { ground: [['lezard', 36, 0], ['fennec', 18, 0], ['chameau', 6, 0], ['chevre', 10, 0]], fliers: [] },
-    { ground: [['cerf', 18, 1, { glow: true }], ['lapin', 20, 1, { glow: true }], ['ecureuil', 8, 0]], fliers: [['luciole', 52], ['papillon', 24, true]] }
+    {
+      ground: [
+        ['lapin', 32, 0],
+        ['mouton', 10, 0],
+        ['cerf', 12, 0],
+        ['renard', 6, 0]
+      ],
+      fliers: [['papillon', 36]]
+    },
+    {
+      ground: [
+        ['cerf', 24, 0],
+        ['renard', 16, 0],
+        ['ecureuil', 28, 0],
+        ['lapin', 12, 0],
+        ['faisan', 14, 0]
+      ],
+      fliers: [
+        ['papillon', 12],
+        ['luciole', 28]
+      ]
+    },
+    {
+      ground: [
+        ['grenouille', 44, 0],
+        ['heron', 18, 0],
+        ['tortue', 18, 0],
+        ['canard', 22, 0]
+      ],
+      fliers: [['libellule', 40]]
+    },
+    {
+      ground: [
+        ['renard', 18, 0],
+        ['herisson', 20, 0],
+        ['cerf', 16, 0],
+        ['ecureuil', 20, 0],
+        ['faisan', 14, 0]
+      ],
+      fliers: [['papillon', 16]]
+    },
+    {
+      ground: [
+        ['lezard', 36, 0],
+        ['fennec', 18, 0],
+        ['chameau', 6, 0],
+        ['chevre', 10, 0]
+      ],
+      fliers: []
+    },
+    {
+      ground: [
+        ['cerf', 18, 1, { glow: true }],
+        ['lapin', 20, 1, { glow: true }],
+        ['ecureuil', 8, 0]
+      ],
+      fliers: [
+        ['luciole', 52],
+        ['papillon', 24, true]
+      ]
+    }
   ];
   // Animaux de compagnie du camp (chats, chien) : ils se promènent dans le camp, hors de l'enclos.
   const PETS = new Set(['chat', 'chien']);
@@ -658,11 +776,26 @@
             r = 6 + rng() * 70,
             tx = Math.round(z.x + Math.cos(a) * r),
             ty = Math.round(z.y + Math.sin(a) * r);
-          if (tx < 3 || ty < 3 || tx >= MAPW - 3 || ty >= MAPH - 3 || regionAt(tx, ty) !== z || isSafe(tx, ty)) continue;
+          if (
+            tx < 3 ||
+            ty < 3 ||
+            tx >= MAPW - 3 ||
+            ty >= MAPH - 3 ||
+            regionAt(tx, ty) !== z ||
+            isSafe(tx, ty)
+          )
+            continue;
           const x = (tx + 0.5) * TS,
             y = (ty + 0.5) * TS;
           if (!walkable(x, y)) continue;
-          const wet = WATERY.has(tileOf(x, y)) || [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => WATERY.has(tileOf(x + dx * TS, y + dy * TS)));
+          const wet =
+            WATERY.has(tileOf(x, y)) ||
+            [
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1]
+            ].some(([dx, dy]) => WATERY.has(tileOf(x + dx * TS, y + dy * TS)));
           if (water && !wet && tries < 300) continue;
           return { x, y };
         }
@@ -678,14 +811,31 @@
             const x = at.x + (h ? (rng() - 0.5) * TS * 2 : 0),
               y = at.y + (h ? (rng() - 0.5) * TS * 2 : 0);
             if (!walkable(x, y)) continue;
-            animals.push({ kind, sp, variant, opts, x, y, hx: x, hy: y, tx: x, ty: y, wait: Math.floor(rng() * 200), dir: rng() < 0.5 ? 1 : -1, step: 0, flee: 0, rng: seeded(animals.length * 977 + 13) });
+            animals.push({
+              kind,
+              sp,
+              variant,
+              opts,
+              x,
+              y,
+              hx: x,
+              hy: y,
+              tx: x,
+              ty: y,
+              wait: Math.floor(rng() * 200),
+              dir: rng() < 0.5 ? 1 : -1,
+              step: 0,
+              flee: 0,
+              rng: seeded(animals.length * 977 + 13)
+            });
           }
         }
       }
       for (const [kind, count, glow] of fauna.fliers)
         for (let k = 0; k < count; k++) {
           const at = spot(kind === 'libellule');
-          if (at) fliers.push({ kind, x: at.x, y: at.y, seed: rng() * 1000, glow: !!glow || kind === 'luciole' });
+          if (at)
+            fliers.push({ kind, x: at.x, y: at.y, seed: rng() * 1000, glow: !!glow || kind === 'luciole' });
         }
     }
     // Crabes des plages, répartis tout autour de l'île.
@@ -695,12 +845,48 @@
       for (let k = 0; path.length > 40 && k < 32; k++) {
         const i = Math.floor(((k + 0.5) / 32) * path.length + rng() * 8) % path.length,
           p = path[i];
-        animals.push({ kind: 'tortue_mer', sp: SPECIES.tortue_mer, variant: k % 4 === 0 ? 1 : 0, opts: {}, x: p.x, y: p.y, hx: p.x, hy: p.y, tx: p.x, ty: p.y, i, seed: rng() * 10, wait: Math.floor(rng() * 120), dir: rng() < 0.5 ? 1 : -1, step: 0, flee: 0, rng: seeded(k * 197 + 31) });
+        animals.push({
+          kind: 'tortue_mer',
+          sp: SPECIES.tortue_mer,
+          variant: k % 4 === 0 ? 1 : 0,
+          opts: {},
+          x: p.x,
+          y: p.y,
+          hx: p.x,
+          hy: p.y,
+          tx: p.x,
+          ty: p.y,
+          i,
+          seed: rng() * 10,
+          wait: Math.floor(rng() * 120),
+          dir: rng() < 0.5 ? 1 : -1,
+          step: 0,
+          flee: 0,
+          rng: seeded(k * 197 + 31)
+        });
       }
       for (let k = 0; path.length > 40 && k < 36; k++) {
         const i = Math.floor((k / 36) * path.length + rng() * 8) % path.length,
           p = path[i];
-        animals.push({ kind: 'crabe', sp: SPECIES.crabe, variant: k % 3 === 0 ? 1 : 0, opts: {}, x: p.x, y: p.y, hx: p.x, hy: p.y, tx: p.x, ty: p.y, i, seed: rng() * 10, wait: Math.floor(rng() * 200), dir: rng() < 0.5 ? 1 : -1, step: 0, flee: 0, rng: seeded(k * 131 + 17) });
+        animals.push({
+          kind: 'crabe',
+          sp: SPECIES.crabe,
+          variant: k % 3 === 0 ? 1 : 0,
+          opts: {},
+          x: p.x,
+          y: p.y,
+          hx: p.x,
+          hy: p.y,
+          tx: p.x,
+          ty: p.y,
+          i,
+          seed: rng() * 10,
+          wait: Math.floor(rng() * 200),
+          dir: rng() < 0.5 ? 1 : -1,
+          step: 0,
+          flee: 0,
+          rng: seeded(k * 131 + 17)
+        });
       }
     }
     // Poules du Camp de l'Aurore.
@@ -708,21 +894,76 @@
       const x = (CANAAN_CAMP.x - 3 + k * 1.6) * TS,
         y = (CANAAN_CAMP.y + 4.5) * TS;
       if (walkable(x, y))
-        animals.push({ kind: 'poule', sp: SPECIES.poule, variant: k % 2, opts: {}, x, y, hx: x, hy: y, tx: x, ty: y, wait: k * 40, dir: 1, step: 0, flee: 0, rng: seeded(k + 99) });
+        animals.push({
+          kind: 'poule',
+          sp: SPECIES.poule,
+          variant: k % 2,
+          opts: {},
+          x,
+          y,
+          hx: x,
+          hy: y,
+          tx: x,
+          ty: y,
+          wait: k * 40,
+          dir: 1,
+          step: 0,
+          flee: 0,
+          rng: seeded(k + 99)
+        });
     }
     // Ferme du camp (camp-life.js) : bêtes de l'enclos et poules du poulailler, qui restent chez elles ;
     // papillons du jardin et des champs, libellules au-dessus du ruisseau et de la mare.
     canaanCampLife.animals().forEach((f, k) => {
       if (walkable(f.x, f.y))
-        animals.push({ kind: f.kind, sp: { ...SPECIES[f.kind], roam: f.roam }, variant: f.variant || 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 37, dir: k % 2 ? -1 : 1, step: 0, flee: 0, farm: !PETS.has(f.kind), pet: PETS.has(f.kind), rng: seeded(k * 53 + 7) });
+        animals.push({
+          kind: f.kind,
+          sp: { ...SPECIES[f.kind], roam: f.roam },
+          variant: f.variant || 0,
+          opts: {},
+          x: f.x,
+          y: f.y,
+          hx: f.x,
+          hy: f.y,
+          tx: f.x,
+          ty: f.y,
+          wait: k * 37,
+          dir: k % 2 ? -1 : 1,
+          step: 0,
+          flee: 0,
+          farm: !PETS.has(f.kind),
+          pet: PETS.has(f.kind),
+          rng: seeded(k * 53 + 7)
+        });
     });
-    for (const f of canaanCampLife.fliers()) fliers.push({ kind: f.kind, x: f.x, y: f.y, seed: f.seed, glow: false });
+    for (const f of canaanCampLife.fliers())
+      fliers.push({ kind: f.kind, x: f.x, y: f.y, seed: f.seed, glow: false });
     // Faune des Tréfonds (underground.js) : sur leur propre carte, marquée layer: 'under'.
     const under = CANAAN_UNDER.fauna();
-    under.ground.forEach((f, k) => animals.push({ kind: f.kind, sp: SPECIES[f.kind], variant: 0, opts: {}, x: f.x, y: f.y, hx: f.x, hy: f.y, tx: f.x, ty: f.y, wait: k * 23, dir: 1, step: 0, flee: 0, layer: 'under', rng: seeded(k * 71 + 5) }));
+    under.ground.forEach((f, k) =>
+      animals.push({
+        kind: f.kind,
+        sp: SPECIES[f.kind],
+        variant: 0,
+        opts: {},
+        x: f.x,
+        y: f.y,
+        hx: f.x,
+        hy: f.y,
+        tx: f.x,
+        ty: f.y,
+        wait: k * 23,
+        dir: 1,
+        step: 0,
+        flee: 0,
+        layer: 'under',
+        rng: seeded(k * 71 + 5)
+      })
+    );
     for (const f of under.fliers) fliers.push({ ...f });
   }
-  const near = (x, y, margin) => Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
+  const near = (x, y, margin) =>
+    Math.abs(x - camX - W / 2) < W / 2 + margin && Math.abs(y - camY - H / 2) < H / 2 + margin;
   function stepAnimal(a) {
     if (a.dead) return;
     if (a.sp.coast) return stepCrab(a);
@@ -826,7 +1067,13 @@
       } else if (f.kind === 'mouche') {
         c.globalAlpha = 0.8;
         c.fillStyle = '#1a1c18';
-        for (let k = 0; k < 3; k++) c.fillRect(Math.round(x + Math.sin(t * 7 + k * 2) * 6), Math.round(y + Math.cos(t * 6 + k) * 5), 2, 2);
+        for (let k = 0; k < 3; k++)
+          c.fillRect(
+            Math.round(x + Math.sin(t * 7 + k * 2) * 6),
+            Math.round(y + Math.cos(t * 6 + k) * 5),
+            2,
+            2
+          );
       } else if (f.kind === 'spore') {
         // Spore luisante qui monte lentement et retombe.
         const rise = ((time * 0.3 + f.seed * 37) % 120) / 120,
@@ -851,7 +1098,9 @@
         c.fillRect(Math.round(x + 2), Math.round(y - 2 - flap), 3, 2);
         c.fillRect(Math.round(x + 2), Math.round(y + 2 + flap), 3, 2);
       } else {
-        const colors = f.glow ? ['#c99bff', '#9ff4e4', '#ffd8f8'] : ['#f0c040', '#ffffff', '#e86a9a', '#7ab0f0'],
+        const colors = f.glow
+            ? ['#c99bff', '#9ff4e4', '#ffd8f8']
+            : ['#f0c040', '#ffffff', '#e86a9a', '#7ab0f0'],
           col = colors[Math.floor(f.seed) % colors.length],
           flap = Math.abs(Math.sin(time * 0.5 + f.seed)) * 3;
         c.globalAlpha = 0.95;
@@ -997,10 +1246,44 @@
     'Les fées sauvages ne sont pas aussi gentilles qu’elles en ont l’air.'
   ];
   const NAMES = {
-    f: ['Mira', 'Elwen', 'Sacha', 'Lorna', 'Isaure', 'Yuna', 'Brune', 'Talia', 'Nora', 'Zelie', 'Anouk', 'Ondine'],
-    m: ['Aldric', 'Brann', 'Tobin', 'Gaspard', 'Oren', 'Milo', 'Rurik', 'Corentin', 'Hugo', 'Basile', 'Fenwick', 'Tom']
+    f: [
+      'Mira',
+      'Elwen',
+      'Sacha',
+      'Lorna',
+      'Isaure',
+      'Yuna',
+      'Brune',
+      'Talia',
+      'Nora',
+      'Zelie',
+      'Anouk',
+      'Ondine'
+    ],
+    m: [
+      'Aldric',
+      'Brann',
+      'Tobin',
+      'Gaspard',
+      'Oren',
+      'Milo',
+      'Rurik',
+      'Corentin',
+      'Hugo',
+      'Basile',
+      'Fenwick',
+      'Tom'
+    ]
   };
-  const TITLES = { cuisinier: 'Cuisinier', garde: 'Garde', ancien: 'Vieux', enfant: 'Petit', pecheur: 'Pêcheur', ermite: 'Ermite', eclaireuse: 'Éclaireuse' };
+  const TITLES = {
+    cuisinier: 'Cuisinier',
+    garde: 'Garde',
+    ancien: 'Vieux',
+    enfant: 'Petit',
+    pecheur: 'Pêcheur',
+    ermite: 'Ermite',
+    eclaireuse: 'Éclaireuse'
+  };
   const villagers = [];
   let settled = false;
   function settle() {
@@ -1012,7 +1295,19 @@
       look.outfit = r.outfits[Math.floor(rng() * r.outfits.length)];
       if (role === 'eclaireuse') look.sex = 'f';
       const first = NAMES[look.sex][Math.floor(rng() * NAMES[look.sex].length)],
-        title = TITLES[role] ? (role === 'enfant' ? (look.sex === 'f' ? 'Petite' : 'Petit') : role === 'ancien' ? (look.sex === 'f' ? 'Vieille' : 'Vieux') : role === 'cuisinier' && look.sex === 'f' ? 'Cuisinière' : TITLES[role]) + ' ' : '';
+        title = TITLES[role]
+          ? (role === 'enfant'
+              ? look.sex === 'f'
+                ? 'Petite'
+                : 'Petit'
+              : role === 'ancien'
+                ? look.sex === 'f'
+                  ? 'Vieille'
+                  : 'Vieux'
+                : role === 'cuisinier' && look.sex === 'f'
+                  ? 'Cuisinière'
+                  : TITLES[role]) + ' '
+          : '';
       // Une case libre près du point demandé.
       for (let k = 0; k < 30; k++) {
         const spread = exact ? 1 : 4,
@@ -1058,7 +1353,16 @@
         continue;
       }
       const p = r.place,
-        wet = [[3, 0], [-3, 0], [0, 3], [0, -3]].some(([dx, dy]) => WATERY.has(tileOf((p.x + dx) * TS, (p.y + dy) * TS)) || tileOf((p.x + dx) * TS, (p.y + dy) * TS) === 0);
+        wet = [
+          [3, 0],
+          [-3, 0],
+          [0, 3],
+          [0, -3]
+        ].some(
+          ([dx, dy]) =>
+            WATERY.has(tileOf((p.x + dx) * TS, (p.y + dy) * TS)) ||
+            tileOf((p.x + dx) * TS, (p.y + dy) * TS) === 0
+        );
       add(wet || zoneOf(p) === 2 ? 'pecheur' : 'voyageur', r.tx + 2, r.ty, extra);
     }
     // Ruines et tours de l'île.
@@ -1077,7 +1381,12 @@
     const r = v.role,
       rng = v.rng;
     // Le héros proche : l'habitant s'arrête, se tourne vers lui et parle.
-    const hero = game.heroes.filter(h => !h.player.dead).sort((a, b) => Math.hypot(a.player.x - v.x, a.player.y - v.y) - Math.hypot(b.player.x - v.x, b.player.y - v.y))[0];
+    const hero = game.heroes
+      .filter(h => !h.player.dead)
+      .sort(
+        (a, b) =>
+          Math.hypot(a.player.x - v.x, a.player.y - v.y) - Math.hypot(b.player.x - v.x, b.player.y - v.y)
+      )[0];
     const d = hero ? Math.hypot(hero.player.x - v.x, hero.player.y - v.y) : 1e9;
     v.vx = v.vy = 0;
     if (d < TALK) {
@@ -1143,7 +1452,13 @@
       c.ellipse(v.x, v.y + 17 * s, 15 * s, 5 * s, 0, 0, Math.PI * 2);
       c.fill();
       c.globalAlpha = 1;
-      c.drawImage(spr, Math.round(v.x - 26 * s), Math.round(v.y + 18 - 60 * s), Math.round(52 * s), Math.round(64 * s));
+      c.drawImage(
+        spr,
+        Math.round(v.x - 26 * s),
+        Math.round(v.y + 18 - 60 * s),
+        Math.round(52 * s),
+        Math.round(64 * s)
+      );
       // Nom au-dessus, quand le héros est proche.
       if (Math.hypot(P.x - v.x, P.y - v.y) < TALK * 1.6) {
         c.font = 'bold 11px sans-serif';
@@ -1239,7 +1554,9 @@
     if (ticks && --chatter <= 0 && !canaanUnder()) {
       chatter = 600 + Math.floor(Math.random() * 600);
       const here = canaanRoomAt(P.x / TS, P.y / TS),
-        idle = villagers.filter(v => near(v.x, v.y, -40) && !v.bubble && canaanRoomAt(v.x / TS, v.y / TS) === here);
+        idle = villagers.filter(
+          v => near(v.x, v.y, -40) && !v.bubble && canaanRoomAt(v.x / TS, v.y / TS) === here
+        );
       if (idle.length) say(idle[Math.floor(Math.random() * idle.length)], false);
     }
   }
