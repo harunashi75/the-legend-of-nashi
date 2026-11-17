@@ -287,8 +287,13 @@
     },
     {
       "kind": "script",
+      "id": "canaan-house-render",
+      "file": "scripts/house/render.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-house",
-      "file": "scripts/house.js"
+      "file": "scripts/house/house.js"
     },
     {
       "kind": "script",
