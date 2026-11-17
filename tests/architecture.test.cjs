@@ -187,7 +187,12 @@ test('Sources modulaires : HTML généré à jour et identifiants descriptifs',(
 
 test('Version actuelle, actions sans onclick et CSS sans important',()=>{
  // Sources formatées : aucune ligne démesurée dans le code assemblé (les longues chaînes HTML restent tolérées jusqu'à 400 caractères).
- for(const m of scripts)for(const line of m[2].split('\n'))assert.ok(line.length<=400,m[1]+' : ligne de '+line.length+' caractères');
+ // Le bloc des modules ES est réécrit par esbuild : ce sont ses sources (shared/, client/, le pont) qui sont vérifiées.
+ for(const m of scripts)if(!m[1].includes('"canaan-modules"'))for(const line of m[2].split('\n'))assert.ok(line.length<=400,m[1]+' : ligne de '+line.length+' caractères');
+ const esSources=[];(function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=path.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))esSources.push(f)}})(path.join(__dirname,'..','src','canaan','shared'));
+ (function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=path.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))esSources.push(f)}})(path.join(__dirname,'..','src','canaan','client'));
+ esSources.push(path.join(__dirname,'..','src','canaan','bridge.js'));
+ for(const f of esSources)fs.readFileSync(f,'utf8').split('\n').forEach((line,i)=>assert.ok(line.length<=400,f+':'+(i+1)+' : ligne de '+line.length+' caractères'));
  assert.ok(script('canaan-runtime-config').includes("CANAAN_VERSION = '"+version+"'"));
  assert.doesNotMatch(source,/\bonclick\s*=\s*["']/i);
  assert.doesNotMatch(source,/!important/);

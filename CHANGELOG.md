@@ -19,6 +19,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - ESLint (`npm run lint`), Prettier (`npm run format`, `npm run format:check`) et `npm test`.
 - Intégration continue GitHub Actions (lint, assemblage, régressions) et publication automatique sur tag `vX.Y.Z`.
 - Le README est raccourci ; la documentation détaillée est dans `docs/GAMEPLAY.md` et `docs/ARCHITECTURE.md`.
+- Migration en modules ES commencée : icônes et pixel art des bâtiments convertis dans `src/canaan/client/` (imports explicites, aucune variable globale implicite) ; outils `tools/module_graph.cjs` (graphe des dépendances entre scripts) et `tools/convert_leaf.cjs` (conversion d’une feuille).
 - `shared/` vérifié par TypeScript en mode strict (`npm run typecheck`, en CI) : `// @ts-check` et JSDoc sur tous les fichiers, types communs dans `shared/types.js`.
 - Tests rangés par système (`tests/*.test.cjs`) et lancés en parallèle ; démarrage du jeu dans les tests 10× plus rapide (contexte `vm` sans intercepteurs). La suite complète passe de 12 min à une vingtaine de secondes.
 - Deux tests instables stabilisés : attentes de connexion au relais (10 s au lieu de 0,5 s) et doublon de Rubis tiré au hasard.

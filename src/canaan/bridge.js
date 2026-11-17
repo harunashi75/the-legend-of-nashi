@@ -1,6 +1,7 @@
 // Point d'entrée des modules ES, regroupés par esbuild en un seul bloc du HTML autonome.
 // Pont transitoire : tant que tous les fichiers ne sont pas convertis, les exports des modules
-// partagés sont aussi exposés en variables globales pour les anciens scripts (scripts/*.js).
+// partagés (shared/) et des modules client convertis (client/) sont aussi exposés en variables globales pour les
+// anciens scripts (scripts/*.js).
 // Chaque conversion ajoute ici son module ; le pont disparaîtra quand plus aucun ancien script n'en dépendra.
 import * as equipment from './shared/data/equipment.js';
 import * as itemNames from './shared/data/item-names.js';
@@ -24,6 +25,12 @@ import * as skins from './shared/data/skins.js';
 import * as houseData from './shared/data/house.js';
 import * as houseRules from './shared/rules/house.js';
 import * as dungeonData from './shared/data/dungeons.js';
+// Modules client convertis (src/canaan/client/) : navigateur, sans variable globale implicite.
+import * as iconArt from './client/icons/icon-art.js';
+import * as icons from './client/icons/icons.js';
+import * as skillIcons from './client/icons/skill-icons.js';
+import * as buildingArt from './client/art/building-art.js';
+import * as dwarfArt from './client/art/dwarf-art.js';
 
 Object.assign(
   globalThis,
@@ -48,5 +55,10 @@ Object.assign(
   skins,
   houseData,
   houseRules,
-  dungeonData
+  dungeonData,
+  iconArt,
+  icons,
+  skillIcons,
+  buildingArt,
+  dwarfArt
 );

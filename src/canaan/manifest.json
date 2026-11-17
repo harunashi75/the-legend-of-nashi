@@ -22,16 +22,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-icon-art",
-      "file": "client/icons/icon-art.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-icons",
-      "file": "client/icons/icons.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-runtime-config",
       "file": "scripts/runtime-config.js"
     },
@@ -134,11 +124,6 @@
       "kind": "script",
       "id": "canaan-item-rules",
       "file": "scripts/item-rules.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-skill-icons",
-      "file": "client/icons/skill-icons.js"
     },
     {
       "kind": "script",
@@ -262,11 +247,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-building-art",
-      "file": "client/art/building-art.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-portal-art",
       "file": "scripts/portal-art.js"
     },
@@ -379,11 +359,6 @@
       "kind": "script",
       "id": "canaan-gear-engine",
       "file": "scripts/gear-engine.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-dwarf-art",
-      "file": "client/art/dwarf-art.js"
     },
     {
       "kind": "script",

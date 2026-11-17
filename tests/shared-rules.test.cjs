@@ -86,9 +86,18 @@ test('Architecture : shared/ pur (aucun navigateur, aucun autre dossier), charge
   const typesOnly=/^export \{\};?$/m.test(code)&&!/^export (?:const|function|let|class)\b/m.test(code);
   assert.ok(typesOnly||Object.keys(mod).length>0,rel);
  }
- // Le pont importe uniquement des modules partagés, et chaque export arrive dans le jeu.
+ // Le pont importe uniquement des modules partagés (shared/) et des modules client convertis (client/), et chaque
+ // export partagé arrive dans le jeu.
  const bridge=fs.readFileSync(path.join(root,'bridge.js'),'utf8');
- for(const [,spec] of bridge.matchAll(/\bfrom\s+'([^']+)'/g))assert.match(spec,/^\.\/shared\//);
+ for(const [,spec] of bridge.matchAll(/\bfrom\s+'([^']+)'/g))assert.match(spec,/^\.\/(?:shared|client)\//);
+ // Modules client : ils n'importent que shared/ et client/, et ne posent rien sur window (le pont expose leurs exports).
+ const clientDir=path.join(root,'client');
+ (function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){walk(p);continue}if(!e.name.endsWith('.js'))continue;
+  const code=fs.readFileSync(p,'utf8'),rel=path.relative(root,p);
+  for(const [,spec] of code.matchAll(/\bfrom\s+'([^']+)'/g)){const to=path.resolve(path.dirname(p),spec);assert.ok(to.startsWith(sharedDir+path.sep)||to.startsWith(clientDir+path.sep),rel+' importe hors de shared/ et client/ : '+spec)}
+  assert.doesNotMatch(code.replace(/\/\/.*$/gm,''),/\b(?:window|globalThis)\.\w+\s*=[^=]/,rel+' pose une variable sur window');
+  assert.match(code,/^export /m,rel+' sans export');
+ }})(clientDir);
  const {g,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  for(const file of files){
   const mod=await import(require('node:url').pathToFileURL(file).href);

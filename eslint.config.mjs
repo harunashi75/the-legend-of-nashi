@@ -25,7 +25,7 @@ export default [
   // globaux inconnus (no-undef) et les déclarations globales jamais lues ici (no-unused-vars) ne sont pas vérifiés.
   {
     // group-bot.js pilote des héros dans le contexte du jeu chargé par les tests : mêmes noms globaux.
-    files: ['src/canaan/scripts/**/*.js', 'src/canaan/client/**/*.js', 'tests/helpers/group-bot.js'],
+    files: ['src/canaan/scripts/**/*.js', 'tests/helpers/group-bot.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -36,6 +36,12 @@ export default [
       'no-unused-vars': ['warn', { vars: 'local', args: 'none', caughtErrors: 'none' }],
       'no-redeclare': 'off'
     }
+  },
+  // Modules client convertis (src/canaan/client/) : modules ES du navigateur. Tout nom extérieur doit être importé :
+  // no-undef reste actif, seuls les noms du navigateur sont connus (aucune variable globale des anciens scripts).
+  {
+    files: ['src/canaan/client/**/*.js'],
+    languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.browser } }
   },
   // Modules ES : shared/ (règles et données pures, sans écran ni stockage) et le pont bridge.js.
   {

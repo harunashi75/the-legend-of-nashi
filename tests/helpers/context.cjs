@@ -82,7 +82,6 @@ function game() {
   g.game.hero.level = 10;g.game.hero.exp = 0;
   vm.createContext(g);
   vm.runInContext(script('canaan-modules'),g);
-  vm.runInContext(script('canaan-skill-icons'), g);
   vm.runInContext(section('function currentWeaponType()', "// Étape du pipeline : effets des sorts d'armes sur les monstres."), g);
   vm.runInContext(section("// Étape du pipeline : effets des sorts d'armes sur les monstres.", "// Fin des effets d'armes. Les PV des monstres viennent de leur niveau (monster-scaling.js)."), g);
   vm.runInContext(script('canaan-weapon-actions'), g);
