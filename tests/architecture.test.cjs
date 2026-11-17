@@ -410,3 +410,20 @@ test('Application de bureau : Electron épinglé, version unique, fenêtre isol�
  assert.match(main,/event\.sender !== mainWindow\.webContents/);
  assert.match(fs.readFileSync(path.join(root,'tools','run_app.cjs'),'utf8'),/delete env\.ELECTRON_RUN_AS_NODE/);
 });
+
+test('Graphe des scripts : aucun nom lu sans être défini (scripts classiques, pont, modules ES)',()=>{
+ // no-undef ne peut pas s'appliquer aux scripts classiques (ils partagent un espace global) : l'outil de graphe relève
+ // chaque nom lu et vérifie qu'un script, le pont ou le navigateur le définit. Une déclaration retirée sans remplacer
+ // ses lectures, ou un import oublié dans le pont, est attrapé ici.
+ const out=require('node:child_process').execFileSync(process.execPath,[path.join(__dirname,'..','tools','module_graph.cjs')],{encoding:'utf8'});
+ assert.match(out.trim().split('\n').at(-1),/^Aucun nom lu sans définition\.$/,out.trim().split('\n').at(-1));
+});
+
+test('Compositeur (client/audio/music.js) : même pièce pour une même graine, événements dans l’ordre',async()=>{
+ const M=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','client','audio','music.js')).href);
+ for(const key of M.MUSIC_BIOME_THEMES)assert.ok(M.MUSIC_THEMES[key],key);
+ const a=M.composeMusic(M.MUSIC_THEMES.plaines,'plaines'),b=M.composeMusic(M.MUSIC_THEMES.plaines,'plaines'),c=M.composeMusic(M.MUSIC_THEMES.plaines,'ailleurs');
+ assert.deepEqual(a,b);assert.notDeepEqual(a,c);assert.ok(a.length>100);
+ assert.ok(a.every((e,i)=>i===0||a[i-1].beat<=e.beat),'triés par temps');assert.ok(a.every(e=>e.beat>=0&&e.beat<32*4),'sur 32 mesures');
+ assert.equal(M.midiFrequency(69),440);assert.equal(M.midiFrequency(81),880);
+});

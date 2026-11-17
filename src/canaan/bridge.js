@@ -36,6 +36,7 @@ import * as skillIcons from './client/icons/skill-icons.js';
 import * as buildingArt from './client/art/building-art.js';
 import * as dwarfArt from './client/art/dwarf-art.js';
 import * as preferences from './client/preferences.js';
+import * as music from './client/audio/music.js';
 
 Object.assign(
   globalThis,
@@ -70,5 +71,6 @@ Object.assign(
   skillIcons,
   buildingArt,
   dwarfArt,
-  preferences
+  preferences,
+  music
 );
