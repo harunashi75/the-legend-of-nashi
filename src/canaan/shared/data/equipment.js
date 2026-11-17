@@ -454,6 +454,7 @@ export const RARITY_WEIGHTS = Object.freeze([45, 32, 20, 3, 0, 0]);
 /** @type {Readonly<Record<string, string>>} */
 export const LEGACY_RARITY = Object.freeze({ Héroïque: 'Épique', Céleste: 'Mythique' });
 // Butin de prestige : chance, par objet du coffre, d'une qualité supérieure (dernier raid en héroïque, Arène).
+/** @type {Readonly<Record<string, ReadonlyArray<readonly [string, number]>>>} */
 export const PRESTIGE_DROPS = Object.freeze({
   raidHeroic: [
     ['Mythique', 0.01],

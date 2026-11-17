@@ -234,3 +234,25 @@ test('Butin individuel : objets et or de chaque victime vont au héros qui l’a
  run('giveGear(1,"normal","Commun")');assert.equal(run('game.hero.inventory.length'),host.inv+1);
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Règles partagées de l’économie : butin garanti d’une instance, prestige et bourse des boss mondiaux',async()=>{
+ const {pathToFileURL}=require('node:url'),p=require('node:path');
+ const shared=f=>import(pathToFileURL(p.join(__dirname,'..','src','canaan','shared',f)).href);
+ const E=await shared('rules/economy.js'),W=await shared('data/world.js');
+ const seq=v=>{let i=0;return ()=>v[i++%v.length]};
+ // Prestige : un tirage par qualité possible, de la plus rare à la plus courante ; aucune pour une source inconnue.
+ assert.equal(E.rollPrestige('raidHeroic',seq([0.005])),'Mythique');assert.equal(E.rollPrestige('raidHeroic',seq([0.5,0.03])),'Légendaire');
+ assert.equal(E.rollPrestige('raidHeroic',seq([0.5,0.5])),null);assert.equal(E.rollPrestige('inconnu',seq([0])),null);assert.equal(E.rollPrestige(undefined,seq([0])),null);
+ // Butin d'instance : niveau entre le niveau requis et le niveau de butin, qualité de l'instance, provenance.
+ const cave=W.INSTANCE_DEFS[0];
+ assert.deepEqual(E.instanceLoot(cave,null,1,seq([0])),{level:cave.level,rarity:cave.rarity,origin:'donjon'});
+ assert.equal(E.instanceLoot(cave,null,1,seq([0.9999])).level,cave.dropLevel);
+ const raid=W.INSTANCE_DEFS.find(d=>d.raid&&!d.difficulties);assert.equal(E.instanceLoot(raid,null,1,seq([0])).origin,'raid');
+ // Instance à difficultés : la difficulté jouée, sinon la normale ; donjon des Tréfonds : niveau du héros.
+ const hard=W.INSTANCE_DEFS.find(d=>d.difficulties);
+ assert.equal(E.instanceLoot(hard,null,1,seq([0,0.9])).level,hard.difficulties.normal.level);
+ assert.equal(E.instanceLoot(hard,hard.difficulties.heroic,1,seq([0,0.005])).rarity,'Mythique');
+ const deep=W.INSTANCE_DEFS.find(d=>d.scaled);assert.equal(E.instanceLoot(deep,null,44,seq([0.9])).level,44);
+ // Boss mondial : 1 000 à 1 500 or.
+ assert.equal(E.worldBossGold(seq([0])),1000);assert.equal(E.worldBossGold(seq([0.99999])),1500);
+});

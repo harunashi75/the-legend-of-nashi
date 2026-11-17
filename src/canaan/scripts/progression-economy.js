@@ -90,7 +90,7 @@ game.world.npcs.push({
 // Boss mondiaux : or et objet Rare garanti.
 function onWorldBossKilled(m, hero = game.hero) {
   game.world.worldBossTimers[m.worldBossId] = Date.now() + BOSS_RESPAWN_MS;
-  const gold = 1000 + Math.floor(Math.random() * 501);
+  const gold = worldBossGold(Math.random);
   hero.player.gold += gold;
   grantSourceReward('worldBoss', hero, canaanMobLevel(m));
   canaanLootNotice(hero, '🏆 ' + m.t + ' : +' + gold + ' or !');

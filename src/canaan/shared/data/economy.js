@@ -32,3 +32,5 @@ export const SOURCE_REWARDS = deepFreeze({
 export const LEGACY_MATERIAL_GOLD = Object.freeze({ ore: 10, wood: 10, essence: 50, core: 200 });
 // Prix des neuf agrandissements du sac (10 places chacun).
 export const BAG_PRICES = Object.freeze([250, 500, 900, 1500, 2400, 3600, 5200, 7200, 9500]);
+// Bourse d'or d'un boss mondial : de 1 000 à 1 500 or (bornes comprises).
+export const WORLD_BOSS_GOLD = Object.freeze([1000, 1500]);

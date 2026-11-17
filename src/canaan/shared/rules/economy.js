@@ -1,7 +1,9 @@
 // @ts-check
 // Règles économiques : qualité du butin par source, prix de vente et de la boutique.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
-import { GEAR_RARITIES } from '../data/equipment.js';
+import { GEAR_RARITIES, PRESTIGE_DROPS } from '../data/equipment.js';
+import { WORLD_BOSS_GOLD } from '../data/economy.js';
+import { clampLevel } from './stats.js';
 import { rarityInfo } from './items.js';
 
 // Qualité d'un butin hors instance selon sa source.
@@ -44,4 +46,42 @@ export function sellValue(item, level) {
  */
 export function shopPriceAt(level) {
   return 60 + Math.round(Math.max(1, Number(level) || 1) * 9);
+}
+// Qualité de prestige tirée pour un butin (null : la qualité normale de la source). Un tirage par qualité possible,
+// de la plus rare à la plus courante.
+/**
+ * @param {string | undefined} kind clé de PRESTIGE_DROPS (raidHeroic, arenaFinal, underground…)
+ * @param {() => number} rng
+ * @returns {string | null}
+ */
+export function rollPrestige(kind, rng) {
+  for (const [rarity, chance] of PRESTIGE_DROPS[kind ?? ''] || []) if (rng() < chance) return rarity;
+  return null;
+}
+// Butin garanti d'un coffre de boss d'instance : récompense de l'instance (ou de la difficulté jouée), niveau tiré
+// entre le niveau requis et le niveau de butin (niveau du héros dans un donjon des Tréfonds), puis qualité, avec sa
+// chance de prestige. Les tirages se font dans cet ordre : niveau, puis prestige.
+/**
+ * @param {any} def instance (INSTANCE_DEFS)
+ * @param {any} difficulty récompense de la difficulté jouée, pour une instance à difficultés (null sinon)
+ * @param {number} heroLevel
+ * @param {() => number} rng
+ * @returns {{ level: number, rarity: string, origin: 'raid' | 'donjon' }}
+ */
+export function instanceLoot(def, difficulty, heroLevel, rng) {
+  const reward = def.difficulties ? difficulty || def.difficulties.normal : def;
+  const level = def.scaled
+      ? clampLevel(heroLevel)
+      : reward.level + Math.floor(rng() * (reward.dropLevel - reward.level + 1)),
+    rarity = rollPrestige(reward.prestige, rng) || reward.rarity;
+  return { level, rarity, origin: def.raid ? 'raid' : 'donjon' };
+}
+// Bourse d'or d'un boss mondial.
+/**
+ * @param {() => number} rng
+ * @returns {number}
+ */
+export function worldBossGold(rng) {
+  const [lo, hi] = WORLD_BOSS_GOLD;
+  return lo + Math.floor(rng() * (hi - lo + 1));
 }
