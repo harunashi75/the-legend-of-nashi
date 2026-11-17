@@ -32,8 +32,13 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
   host.run('const C=[["paladin",[2,9]],["druide",[1,3]],["elementaliste",[0,5]],["assassin",[1,4]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
   // Débit de l'hôte : octets envoyés au relais.
   host.run('{const s=CANAAN_NET.debug.socket,o=s.send.bind(s);globalThis.__bytes=0;s.send=d=>{__bytes+=d.length;o(d)}}');
+  // Le relais est un vrai WebSocket : avant que l'hôte avance, chaque intention envoyée par un invité doit lui être
+  // arrivée (sinon un invité joue avec un tick de retard selon la charge de la machine, et l'issue varie).
+  const received=sent=>ids.every((id,k)=>host.run('game.guests["'+id+'"]?.intentSeq||0')>=sent[k]);
   const tick=async()=>{
    for(const g of guests)g.run('time++;CANAAN_NET.tick()');
+   const sent=guests.map(g=>g.run('CANAAN_NET.debug.seq')),deadline=Date.now()+2000;
+   while(!received(sent)&&Date.now()<deadline)await turn();
    host.run('time++;simulateStep();updateWorld();CANAAN_NET.tick()');
    await turn();
   };
