@@ -11,7 +11,12 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
  // Le test avance le temps bien plus vite que le jeu : limite de fréquence relevée pour ce relais.
  const relay=createRelay({port:0,rate:100000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms)),turn=()=>new Promise(r=>setImmediate(r));
- const boot=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run,){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;return side};
+ // Hasard à graine fixe pour chaque côté (hôte, invités) : avec les intentions synchronisées, le donjon se joue
+ // toujours de la même façon ; sans graine, une mauvaise série de coups pouvait faire tomber l'hôte.
+ let seed=0;
+ const boot=()=>{const mine=++seed*7919;let first=true;const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){
+  if(first){first=false;run('{let s='+mine+';Math.random=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648}}')}}});
+  side.g.WebSocket=WebSocket;side.g.Event=Event;return side};
  const host=boot(),guests=[boot(),boot(),boot()];
  try{
   host.run(fs.readFileSync(path.join(__dirname,'helpers','group-bot.js'),'utf8'));
