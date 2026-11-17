@@ -638,7 +638,7 @@ const CANAAN_SNAP_DISTANCE = 96;
 let canaanPrevCamX = null,
   canaanPrevCamY = null;
 function canaanInterpolatedEntities() {
-  return [P, ...monsters, ...projectiles, ...CANAAN_ARENA.entities()];
+  return [P, ...game.world.monsters, ...game.world.projectiles, ...CANAAN_ARENA.entities()];
 }
 function canaanRememberPositions() {
   for (const e of canaanInterpolatedEntities()) {

@@ -5,6 +5,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 ## [Non publié]
 
 ### Corrigé
+- Trois lectures des anciens noms globaux (`monsters`, `projectiles`, `inventory`) avaient échappé au garde-fou : une expression régulière ignorait `...monsters`. Le garde-fou analyse maintenant les portées de tous les scripts du manifeste, sous-dossiers compris.
 - La récompense de la quête 10 (tableau « L’oiseau d’ombre ») était écrasée par le « Grand tableau », qui portait la même clé ; celui-ci devient `grand_tableau`.
 
 ### Refactorisation

@@ -62,7 +62,7 @@ window.CANAAN_GEAR = {
     return window.CANAAN_GEAR_ENGINE.normalize(item);
   },
   normalizeAll() {
-    for (const item of [...inventory, ...Object.values(game.hero.equipment)]) this.normalize(item);
+    for (const item of [...game.hero.inventory, ...Object.values(game.hero.equipment)]) this.normalize(item);
   },
   grant(level, source = 'normal', rarity = null, hero = game.hero) {
     return window.CANAAN_GEAR_ENGINE.grant(level, source, rarity, hero);

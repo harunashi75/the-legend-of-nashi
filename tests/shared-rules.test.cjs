@@ -166,11 +166,19 @@ test('Règles partagées dans Node : objets, statistiques, niveaux, XP, économi
 
 test('Objet game : game.hero porte le héros, statistiques de n’importe quel héros, anciens noms en raccourcis transitoires',()=>{
  // Plus aucun script n'utilise les anciens noms globaux : seuls les raccourcis de game-state.js les définissent.
- const dir=path.join(__dirname,'..','src','canaan','scripts');
- for(const file of fs.readdirSync(dir).filter(f=>f.endsWith('.js')&&f!=='game-state.js')){
-  const code=fs.readFileSync(path.join(dir,file),'utf8').split('\n').filter(l=>!l.trim().startsWith('//')).map(l=>l.split(' // ')[0]).join('\n');
-  assert.doesNotMatch(code,/(?<![.\w'"$-])\b(?:equipment|inventory|materials|kills|world|decor|overworld|overdecor|monsters|projectiles|drops|npcs|chests|openedChests|worldBossTimers|instanceState|returnPos|worldClock)\b(?!\s*:)/,file);
+ // Analyse des portées (eslint-scope) sur tous les scripts du manifeste : une variable locale du même nom ne compte
+ // pas, une lecture du nom global compte toujours (y compris dans ...monsters ou { monsters }).
+ const espree=require('espree'),escope=require('eslint-scope');
+ const legacy=new Set(['equipment','inventory','materials','kills','world','decor','overworld','overdecor','monsters','projectiles','drops','npcs','chests','openedChests','worldBossTimers','instanceState','returnPos','worldClock']);
+ const root=path.join(__dirname,'..','src','canaan'),dir=path.join(root,'scripts');
+ const uses=[];
+ for(const m of require('../src/canaan/manifest.json').modules.filter(m=>m.kind==='script'&&m.id!=='canaan-game-state')){
+  const code=fs.readFileSync(path.join(root,m.file),'utf8');
+  const ast=espree.parse(code,{ecmaVersion:2024,sourceType:'script',range:true,loc:true});
+  for(const scope of escope.analyze(ast,{ecmaVersion:2024}).scopes)for(const ref of scope.references)
+   if(!ref.resolved&&legacy.has(ref.identifier.name))uses.push(m.file+':'+ref.identifier.loc.start.line+' '+ref.identifier.name);
  }
+ assert.deepEqual(uses,[],'anciens noms globaux encore lus');
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  assert.equal(run('game.hero.player===P'),true);
  // Le monde : carte, entités simulées, coffres, boss de monde et instance, regroupés dans game.world.
