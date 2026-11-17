@@ -1,20 +1,28 @@
 {
   "name": "the-legend-of-nashi",
   "productName": "The Legend of Nashi",
-  "version": "1.9.0",
+  "version": "1.9.7",
   "private": true,
   "description": "The Legend of Nashi — application de bureau (Electron).",
   "main": "app/main.js",
   "scripts": {
     "build": "python3 tools/build_canaan.py",
     "check": "python3 tools/check_canaan.py",
+    "test": "node tests/canaan-regressions.cjs",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
+    "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "start": "python3 tools/build_canaan.py && node tools/run_app.cjs",
     "app": "node tools/run_app.cjs",
     "relay": "node relay/server.cjs"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "electron": "44.9.3",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "eslint": "10.13.0",
+    "globals": "17.14.0",
+    "prettier": "3.9.10"
   },
   "dependencies": {
     "ws": "8.22.0"

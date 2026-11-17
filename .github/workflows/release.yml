@@ -1,0 +1,60 @@
+# Release : pousser un tag vX.Y.Z (identique à CANAAN_VERSION de runtime-config.js) assemble le HTML
+# autonome, relance les régressions, puis publie une release GitHub avec le HTML en pièce jointe.
+#   git tag v1.9.6 && git push origin v1.9.6
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Dépendances
+        run: npm ci
+
+      - name: Tag et version du jeu identiques
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "Le tag ${GITHUB_REF_NAME} ne correspond pas à la version ${version}." >&2
+            exit 1
+          fi
+
+      - name: Assemblage du HTML autonome
+        run: npm run build
+
+      - name: Régressions
+        run: npm test
+
+      - name: Publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          file=$(ls CANAAN_ONLINE_V*.html)
+          notes=$(awk -v v="${GITHUB_REF_NAME#v}" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md)
+          gh release create "${GITHUB_REF_NAME}" "${file}" \
+            --title "The Legend of Nashi ${GITHUB_REF_NAME}" \
+            --notes "${notes:-Voir CHANGELOG.md}"

@@ -885,7 +885,7 @@ test('Carte M zoomable et mini-carte qui suit le héros, sur l’île comme en d
 test('Version actuelle, actions sans onclick et CSS sans important',()=>{
  // Sources formatées : aucune ligne démesurée dans le code assemblé (les longues chaînes HTML restent tolérées jusqu'à 400 caractères).
  for(const m of scripts)for(const line of m[2].split('\n'))assert.ok(line.length<=400,m[1]+' : ligne de '+line.length+' caractères');
- assert.match(script('canaan-runtime-config'),/CANAAN_VERSION\s*=\s*'1\.9\.0'/);
+ assert.ok(script('canaan-runtime-config').includes("CANAAN_VERSION = '"+version+"'"));
  assert.doesNotMatch(source,/\bonclick\s*=\s*["']/i);
  assert.doesNotMatch(source,/!important/);
  // Le CSS vit dans les feuilles du template ; le JavaScript n'injecte ni feuille ni style en ligne complet.
@@ -981,7 +981,7 @@ test('Nettoyage : systèmes morts absents et progression par équipement conserv
  g.CANAAN_BAG_STATE.import(3);run('updateCapacity()');assert.equal(run('BAG_LIMIT'),40);
  run('started=true');assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(g.localStorage.getItem(g.CANAAN_PERSISTENCE.key));
- assert.equal(saved.schema,10);assert.equal(saved.version,'1.9.0');
+ assert.equal(saved.schema,10);assert.equal(saved.version,version);
  // Les mêmes 36 compétences avec tous les vrais modules, sans doublure de visée.
  for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield']){
   for(let index=0;index<4;index++){
@@ -1152,6 +1152,8 @@ test('Finitions : HUD en niveaux avec barre d’XP, plus d’iLvl, aucune variab
  assert.doesNotMatch(source,/delete\s+item\.(?:lvl|reqLvl|secondaryStats)\b/);
  assert.equal(path.basename(builtFile),'CANAAN_ONLINE_V'+version.replace(/\./g,'_')+'.html');
  assert.match(source,new RegExp("CANAAN_VERSION\\s*=\\s*'"+version.replace(/\./g,'\\.')+"'"));
+ // Une seule version : package.json (application de bureau) suit runtime-config.js.
+ assert.equal(require('../package.json').version,version);
 });
 
 test('Version 1.9.0 : fonctions partagées définies une fois dans leur module, sans entrée en attente',()=>{
@@ -1172,11 +1174,11 @@ test('Version 1.9.0 : fonctions partagées définies une fois dans leur module, 
   assert.doesNotMatch(source,new RegExp('(?:^|[^.\\w])'+name+'\\s*=[^=>]'),name+' réassigné');
   assert.doesNotMatch(bindings,new RegExp("'"+name+"'"),name+' encore dans les liaisons requises');
  }
- assert.match(source,/<title>THE LEGEND OF NASHI V1\.9\.0<\/title>/);
+ assert.ok(source.includes('<title>THE LEGEND OF NASHI V'+version+'</title>'));assert.doesNotMatch(source,/\{\{VERSION\}\}/);
  assert.doesNotMatch(source,/Statistiques Ratings52|STATS RATINGS52/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.equal(g.document.title,'THE LEGEND OF NASHI V1.9.0');
+ assert.equal(g.document.title,'THE LEGEND OF NASHI V'+version);
  for(const names of Object.values(owners))for(const name of names)assert.equal(run('typeof '+name),'function',name);
 });
 
@@ -1968,7 +1970,7 @@ test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintie
  run('monsters[0].hp=1e6');for(let i=0;i<90;i++)run('time++;runUpdatePipeline()');run('canaanBasicAttack(false)');
  assert.ok(heavy>1e6-run('monsters[0].hp'),'lourde '+heavy);
  // Le clic de la souris ne lance plus la compétence 1.
- assert.doesNotMatch(source,/mouseWorldY = e\.clientY \+ camY;\n  useSkill\(0\);/);
+ assert.doesNotMatch(source,/mouseWorldY = e\.clientY \+ camY;\n {2}useSkill\(0\);/);
  assert.match(source,/canaanHoldBasicAttack\(e\.button, true, e\.clientX, e\.clientY\)/);
  assert.equal(errors.length,0,errors.join('\n'));
 });

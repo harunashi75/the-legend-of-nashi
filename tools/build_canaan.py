@@ -10,16 +10,18 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'src' / 'canaan'
 
 
-def output_path():
-    """Nom du HTML généré, déduit de la version unique déclarée dans runtime-config.js."""
+def read_version():
+    """Version unique de l'application, déclarée dans runtime-config.js."""
     config = (SOURCE / 'scripts' / 'runtime-config.js').read_text(encoding='utf-8')
     match = re.search(r"CANAAN_VERSION\s*=\s*'(\d+(?:\.\d+)*[a-z]?)'", config)
     if not match:
         raise ValueError('Version introuvable dans scripts/runtime-config.js')
-    return ROOT / ('CANAAN_ONLINE_V' + match.group(1).replace('.', '_') + '.html')
+    return match.group(1)
 
 
-OUTPUT = output_path()
+VERSION = read_version()
+# Nom du HTML généré, déduit de la version.
+OUTPUT = ROOT / ('CANAAN_ONLINE_V' + VERSION.replace('.', '_') + '.html')
 ESBUILD = ROOT / 'node_modules' / '.bin' / 'esbuild'
 
 
@@ -37,7 +39,8 @@ def bundle(entry):
 
 
 def render():
-    html = (SOURCE / 'template.html').read_text(encoding='utf-8')
+    # {{VERSION}} : la version du template vient de runtime-config.js, jamais écrite en dur.
+    html = (SOURCE / 'template.html').read_text(encoding='utf-8').replace('{{VERSION}}', VERSION)
     modules = json.loads((SOURCE / 'manifest.json').read_text(encoding='utf-8'))['modules']
     markers = re.findall(r'<!-- canaan:(script|style|module):(canaan-[a-z0-9-]+) -->', html)
     if markers != [(module['kind'], module['id']) for module in modules]:
