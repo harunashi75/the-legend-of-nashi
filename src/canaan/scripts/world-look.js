@@ -545,8 +545,27 @@
     }
   }
   // Décor d'une case : arbres, buissons et herbes qui ploient dans le vent, lueurs.
+  // Variante d'un décor pour une case (nature-art.js) : version de la région s'il y en a une, puis une des trois
+  // variantes selon la case ; gardée pour toute l'île.
+  const VARIANT = new Map();
+  let variantFor = null;
+  function decorSprite(d, x, y) {
+    const V = window.PIXEL_DECOR_VARIANTS;
+    if (!V?.[d]) return PIXEL_DECOR[d];
+    if (variantFor !== game.world.overworld) {
+      VARIANT.clear();
+      variantFor = game.world.overworld;
+    }
+    const key = y * MAPW + x,
+      got = VARIANT.get(key);
+    if (got && got.d === d) return got.cv;
+    const list = V[d + '@' + ZONES.indexOf(regionAt(x, y))] || V[d],
+      cv = list[Math.floor(h(x, y, 17) * list.length)];
+    VARIANT.set(key, { d, cv });
+    return cv;
+  }
   function paintDecor(c, x, y, X, Y, d) {
-    const sprite = PIXEL_DECOR[d],
+    const sprite = decorSprite(d, x, y),
       bend = SWAY[d] ? SWAY[d] * (0.03 * windAt(X, Y) + 0.03 * Math.sin(time * 0.05 + x * 1.7 + y * 0.9)) : 0,
       // Ancrage par le pied : milieu de la case, bas du dessin au bas de la case (les grands arbres débordent vers le haut).
       sx = sprite ? X + 24 - Math.round(sprite.width / 2) : X - 10,
@@ -926,6 +945,8 @@
   // Décors : volume, grain et contour, une seule fois au chargement.
   function polishDecor() {
     for (const [name, sprite] of Object.entries(PIXEL_DECOR)) {
+      // Décors de nature-art.js : déjà modelés et cernés.
+      if (sprite.canaanPolished) continue;
       canaanPolish(sprite, 2, name.length);
       PIXEL_DECOR[name] = canaanOutline(sprite, 2);
     }

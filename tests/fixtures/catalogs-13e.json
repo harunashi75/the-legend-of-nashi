@@ -244,8 +244,8 @@
   {
    "name": "La Mine Effondrée de Durgrim",
    "biome": 6,
-   "x": 89,
-   "y": 182,
+   "x": 102,
+   "y": 185,
    "boss": "Grumbar, le Contremaître Maudit",
    "bosses": [
     "Le Chef d’Équipe Brisepierre",
@@ -267,8 +267,8 @@
   {
    "name": "Les Halls Engloutis de Khaz-Ombral",
    "biome": 7,
-   "x": 218,
-   "y": 89,
+   "x": 214,
+   "y": 101,
    "boss": "Ombral, le Roi sous la Pierre",
    "bosses": [
     "Le Héraut des Profondeurs",
@@ -290,8 +290,8 @@
   {
    "name": "La Crypte des Mille Tombes",
    "biome": 8,
-   "x": 311,
-   "y": 218,
+   "x": 298,
+   "y": 213,
    "boss": "Le Fossoyeur Éternel",
    "bosses": [
     "Le Pilleur de Tombes",
@@ -313,8 +313,8 @@
   {
    "name": "Les Tréfonds Fongiques",
    "biome": 9,
-   "x": 182,
-   "y": 311,
+   "x": 186,
+   "y": 297,
    "boss": "La Reine des Spores",
    "bosses": [
     "Le Champignon Hurleur",

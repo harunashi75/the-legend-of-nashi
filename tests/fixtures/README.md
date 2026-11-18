@@ -7,3 +7,7 @@ La référence conserve les instances après placement, les qualités, les armur
 ## Passage aux niveaux (1 à 60)
 
 Avec la suppression de l’iLvl et de Ratings52, les parties `instances`, `rarities`, `sales`, `fullBag` et `loot` ont été reprises une fois, volontairement, depuis le jeu : instances avec leur niveau requis, le niveau de leurs ennemis et le niveau de leur récompense ; qualités sans palier d’iLvl ; prix de vente selon le niveau de l’objet ; butins décrits par leur niveau. Les armes, les compétences et `craft` gardent les valeurs d’origine de la 13e.
+
+## Tréfonds réorganisés
+
+Les Tréfonds sont devenus des cavernes reliées par des galeries : les quatre portails des donjons souterrains (`under`) ont changé de place. Seuls leurs `x` et `y` ont été repris depuis le jeu.

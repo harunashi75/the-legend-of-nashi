@@ -307,8 +307,13 @@
         y += Math.cos(time * 0.013 + k) * 20;
       }
       if (kind === 'mist') {
-        c.globalAlpha = 0.06 + 0.05 * Math.sin(time * 0.01 + k);
-        c.fillRect(camX + x, camY + y, 160 + sx * 140, 26 + sy * 20);
+        // Nappe de brume : ovale aux bords fondus (dégradé), qui dérive lentement.
+        const mw = 160 + sx * 140,
+          mh = 26 + sy * 20,
+          puff = mistPuff(col);
+        c.globalAlpha = 0.1 + 0.07 * Math.sin(time * 0.01 + k);
+        if (puff) c.drawImage(puff, camX + x - mw * 0.2, camY + y - mh * 0.5, mw * 1.4, mh * 2);
+        else c.fillRect(camX + x, camY + y, mw, mh);
         continue;
       }
       c.globalAlpha = 0.25 + 0.35 * Math.abs(Math.sin(time * 0.03 + k));
@@ -317,6 +322,26 @@
       c.fillRect(camX + x, camY + y, s, kind === 'feathers' || kind === 'leaves' ? 3 : s);
     }
     c.restore();
+  }
+  // Nappe de brume floue (dégradé radial dans une petite toile), une par couleur.
+  const MIST = new Map();
+  function mistPuff(col) {
+    if (MIST.has(col)) return MIST.get(col);
+    let cv = null;
+    if (typeof col === 'string' && col[0] === '#') {
+      cv = makeCanvas(64, 32);
+      const g = cv.getContext('2d'),
+        grad = g?.createRadialGradient?.(32, 16, 2, 32, 16, 32);
+      if (grad && g.setTransform) {
+        grad.addColorStop(0, col);
+        grad.addColorStop(1, col + '00');
+        g.setTransform(1, 0, 0, 0.5, 0, 8);
+        g.fillStyle = grad;
+        g.fillRect(0, 0, 64, 64);
+      } else cv = null;
+    }
+    MIST.set(col, cv);
+    return cv;
   }
   // Barre de boss en haut de l'écran : boss d'instance (progression du raid) ou boss mondial proche.
   function drawCanaanBossFrame(c) {

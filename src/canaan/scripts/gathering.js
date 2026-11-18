@@ -433,67 +433,105 @@
     else startGather(game.hero, i);
     return true;
   }
+  // Gisements en pixel art (kit commun : pixels d'art de 2, modelé, contour) : rocher à facettes veiné du métal,
+  // plante feuillue aux fleurs de la couleur de l'herbe ; restes après récolte. Taille en pixels d'art.
   const sprites = new Map();
   function sprite(kind, id, empty) {
     const key = kind + id + (empty ? '-' : '');
     if (sprites.has(key)) return sprites.get(key);
-    const cv = document.createElement('canvas');
-    cv.width = 22;
-    cv.height = 18;
-    const g = cv.getContext('2d'),
-      R = (x, y, w, h, c) => {
-        g.fillStyle = c;
-        g.fillRect(x, y, w, h);
-      };
-    if (kind === 'ore') {
-      const col = ORES[id].color;
+    const K = CANAAN_PIXEL_KIT,
+      ore = kind === 'ore',
+      w = ore ? 28 : 24,
+      h = ore ? 22 : 20,
+      k = K.brush(w, h);
+    if (!k.g?.getImageData) return (sprites.set(key, null), null);
+    const shadow = (cx, cy, rx) => {
+      k.g.fillStyle = 'rgba(16,22,14,.35)';
+      for (let x = -rx; x <= rx; x++) k.g.fillRect(cx + x, cy, 1, 1 + (Math.abs(x) < rx - 2 ? 1 : 0));
+    };
+    if (ore) {
+      const col = ORES[id].color,
+        V = [K.mix(col, '#ffffff', 0.6), col, K.mix(col, '#000000', 0.35)],
+        R = ['#a8aeb4', '#848a94', '#646a74', '#484e58', '#30343c'],
+        rock = (cx, cy, rx, ry, seed) => {
+          for (let y = -ry; y <= Math.round(ry * 0.4); y++)
+            for (let x = -rx; x <= rx; x++) {
+              const nx = x / rx,
+                ny = y / ry,
+                d = nx * nx + ny * ny,
+                j = (K.hashGrid((x >> 1) + seed, (y >> 1) + seed * 3) - 0.5) * 0.25;
+              if (d > 1 + j) continue;
+              const facet = (K.hashGrid((x + rx) >> 2, (y + ry) >> 2) - 0.5) * 0.45,
+                lit = -0.5 * nx - 0.7 * ny + 0.4 * Math.sqrt(Math.max(0, 1 - d)) + facet;
+              k.px(cx + x, cy + y, lit > 0.75 ? R[0] : lit > 0.4 ? R[1] : lit > 0.05 ? R[2] : R[3]);
+            }
+        };
+      shadow(14, 19, 12);
       if (empty) {
-        R(5, 12, 4, 3, '#7a7e86');
-        R(10, 13, 5, 2, '#6a6e76');
-        R(15, 11, 3, 4, '#8a8e96');
+        rock(8, 17, 4, 3, 1);
+        rock(17, 18, 5, 3, 2);
+        rock(13, 15, 3, 2, 3);
+        k.px(16, 16, V[2]);
       } else {
-        R(4, 6, 14, 10, '#7a7e86');
-        R(3, 9, 16, 6, '#7a7e86');
-        R(6, 4, 9, 3, '#8a8e96');
-        R(5, 6, 6, 3, '#9aa0a8');
-        R(4, 14, 15, 2, '#5a5e66');
+        rock(13, 15, 11, 10, 4);
+        rock(21, 17, 5, 4, 5);
+        // Veines de métal : éclats en losange, reflet clair.
         for (const [x, y] of [
-          [7, 8],
-          [12, 6],
-          [14, 11],
-          [9, 12],
-          [16, 9]
+          [8, 10],
+          [14, 7],
+          [17, 12],
+          [10, 15],
+          [21, 15],
+          [13, 11]
         ]) {
-          R(x, y, 2, 2, col);
-          R(x, y, 1, 1, '#ffffffaa');
+          k.rect(x, y, 2, 2, V[1]);
+          k.px(x + 2, y + 1, V[2]);
+          k.px(x, y + 2, V[2]);
+          k.px(x, y, V[0]);
         }
+        k.line(8, 11, 13, 12, V[2]);
       }
     } else {
-      const col = HERBS[id].color;
-      R(8, 15, 7, 2, '#3a2a1e55');
+      const col = HERBS[id].color,
+        F = [K.mix(col, '#ffffff', 0.55), col, K.mix(col, '#000000', 0.35)],
+        G = ['#8ac868', '#5a9a4a', '#3a7a3a', '#245226'];
+      shadow(12, 18, 7);
       if (empty) {
-        R(10, 11, 1, 5, '#5a7a3a');
-        R(12, 12, 1, 4, '#5a7a3a');
+        for (const x of [9, 12, 15]) {
+          k.rect(x, 14, 1, 4, G[2]);
+          k.px(x, 14, '#c8b878');
+        }
       } else {
-        R(10, 6, 1, 10, '#3a7a3a');
-        R(7, 9, 4, 2, '#4a9a4a');
-        R(11, 7, 4, 2, '#4a9a4a');
-        R(6, 12, 4, 2, '#3a8a3a');
-        R(12, 11, 4, 2, '#3a8a3a');
-        for (const [x, y] of [
-          [9, 4],
-          [13, 5],
-          [7, 7],
-          [14, 9]
+        // Feuilles en rosette, tiges et fleurs.
+        for (const [x, y, dx] of [
+          [5, 15, 1],
+          [16, 15, -1],
+          [7, 12, 1],
+          [14, 12, -1],
+          [10, 16, 0]
         ]) {
-          R(x, y, 2, 2, col);
-          R(x, y, 1, 1, '#ffffffaa');
+          k.rect(x, y, 4, 2, G[1]);
+          k.rect(x + (dx > 0 ? 0 : 2), y, 2, 1, G[0]);
+          k.px(x + (dx > 0 ? 3 : 0), y + 1, G[3]);
+        }
+        for (const [x, top] of [
+          [9, 5],
+          [12, 3],
+          [15, 6],
+          [7, 8]
+        ]) {
+          k.rect(x, top + 2, 1, 16 - top, G[2]);
+          k.rect(x - 1, top, 3, 2, F[1]);
+          k.px(x, top - 1, F[1]);
+          k.px(x - 1, top, F[0]);
+          k.px(x + 1, top + 1, F[2]);
         }
       }
     }
-    const out = typeof canaanOutline === 'function' ? canaanOutline(cv, 1) : cv;
-    sprites.set(key, out);
-    return out;
+    K.polish(k.cv, 1, id.length + (empty ? 7 : 0));
+    K.outline(k);
+    sprites.set(key, k.cv);
+    return k.cv;
   }
   // Fissures d'un filon selon l'avancement du minage : des traits sombres qui s'allongent et se ramifient.
   const CRACKS = [
@@ -573,7 +611,8 @@
       const empty = gone.has(i),
         img = sprite(n.kind, n.id, empty),
         bob = !empty && n.kind === 'herb' ? Math.sin(time * 0.05 + i) * 0.6 : 0;
-      const k = n.kind === 'ore' ? 2.6 : 2.3;
+      if (!img) return;
+      const k = 2;
       // Filon ou herbe en cours de récolte : il tremble à chaque coup, et le minerai se fissure peu à peu.
       const job = works.get(i),
         hitShake = job ? Math.max(0, Math.sin(job.p * Math.PI * 2 * (WORK.mine / 0.6))) : 0,

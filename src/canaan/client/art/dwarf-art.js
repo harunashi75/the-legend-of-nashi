@@ -430,6 +430,349 @@ const MODELS = {
     }
   ]
 };
+// ---------------------------------------------------------------- Bâtiments des biomes des Tréfonds
+const SLATESTONE = ['#aab2be', '#88909c', '#68707c', '#4c5462', '#30363f'];
+const MOSSY = ['#b6bcae', '#94998c', '#73786c', '#555950', '#3a3d36'];
+const PLANK = ['#c8945a', '#a0703e', '#7a522c', '#56381c', '#36220f'];
+const MOSS = ['#8ab070', '#5e8a4a', '#3e6634'];
+// Planches verticales d'un mur de bois : planches inégales, joints, nœuds, plus sombre vers la droite.
+function planks(k, x, y, w, h, seed = 0) {
+  for (let xx = x; xx < x + w; xx += 5) {
+    const side = (xx - x) / Math.max(1, w),
+      t = side < 0.3 ? 1 : side < 0.75 ? 2 : 3,
+      top = y + Math.floor(noise(xx, seed) * 3);
+    k.rect(xx, top, 4, y + h - top, PLANK[t]);
+    k.rect(xx, top, 1, y + h - top, PLANK[t - 1]);
+    k.rect(xx + 4, y, 1, h, PLANK[4]);
+    if (noise(xx, seed + 1) > 0.6) k.px(xx + 2, y + Math.floor(noise(seed, xx) * h), PLANK[4]);
+  }
+}
+// Haut d'un mur écroulé : on efface des blocs en dents de scie au-dessus de la ligne.
+function broken(k, x, y, w, depth, seed) {
+  for (let xx = x; xx < x + w; xx += 3) {
+    const d = Math.floor(noise(xx >> 2, seed) * depth);
+    k.g.clearRect(xx, y - 1, 3, d + 1);
+  }
+}
+function rubble(k, x, y, n, ramp, seed) {
+  for (let i = 0; i < n; i++) {
+    const rx = x + Math.floor(noise(i, seed) * 30) - 15,
+      ry = y - Math.floor(noise(seed, i) * 3),
+      r = 2 + Math.floor(noise(i, i + seed) * 3);
+    k.disc(rx, ry, r, ramp[2]);
+    k.disc(rx - 1, ry - 1, Math.max(1, r - 1), ramp[1]);
+  }
+}
+Object.assign(MODELS, {
+  // Cabane de mineur des Galeries : planches, toit de planches goudronnées, porte, fenêtre à lanterne, caisses.
+  shack: [
+    88,
+    92,
+    k => {
+      const B = 90;
+      blocks(k, 8, B - 8, 72, 8, STONE, 21, 4);
+      planks(k, 10, 40, 68, B - 48, 22);
+      k.poly(
+        [
+          [2, 44],
+          [40, 14],
+          [86, 44],
+          [86, 48],
+          [2, 48]
+        ],
+        PLANK[3]
+      );
+      for (let y = 18; y < 46; y += 4)
+        k.rect(Math.max(4, 40 - (y - 14) * 1.25), y, Math.min(80, (y - 14) * 2.5), 1, PLANK[4]);
+      k.poly(
+        [
+          [2, 44],
+          [40, 14],
+          [44, 16],
+          [8, 46]
+        ],
+        PLANK[2]
+      );
+      k.rect(36, 12, 10, 4, PLANK[1]);
+      // Porte de planches et fenêtre à la lanterne.
+      k.rect(18, B - 36, 20, 28, PLANK[4]);
+      k.rect(20, B - 34, 16, 26, PLANK[2]);
+      for (let x = 22; x < 36; x += 4) k.rect(x, B - 34, 1, 26, PLANK[3]);
+      k.line(20, B - 30, 35, B - 12, PLANK[1]);
+      k.px(33, B - 22, GOLD[1]);
+      windowAt(k, 52, 54, 14, 12);
+      // Caisses et pioche contre le mur.
+      for (const [x, y, w] of [
+        [62, B - 16, 14],
+        [66, B - 26, 10]
+      ]) {
+        k.rect(x, y, w, w > 12 ? 14 : 10, PLANK[2]);
+        k.rect(x, y, w, 1, PLANK[0]);
+        k.line(x + 1, y + (w > 12 ? 13 : 9), x + w - 2, y + 1, PLANK[3]);
+      }
+      k.line(44, B - 4, 50, B - 26, PLANK[2], 2);
+      k.line(46, B - 27, 54, B - 23, IRON[1], 2);
+    }
+  ],
+  // Chevalement du puits de mine : deux jambes de bois en A, molette à rayons, câble qui plonge dans le puits.
+  minehead: [
+    88,
+    116,
+    k => {
+      const B = 114,
+        cx = 44;
+      // Bouche du puits cerclée de planches.
+      k.rect(16, B - 16, 56, 14, PLANK[3]);
+      k.rect(18, B - 14, 52, 10, '#0a0806');
+      k.rect(16, B - 16, 56, 2, PLANK[1]);
+      for (let x = 20; x < 70; x += 8) k.rect(x, B - 4, 6, 3, PLANK[2]);
+      // Jambes du chevalement et entretoises.
+      for (const s2 of [-1, 1]) {
+        k.line(cx + s2 * 30, B - 6, cx + s2 * 6, 22, PLANK[2], 4);
+        k.line(cx + s2 * 30, B - 6, cx + s2 * 6, 22, PLANK[1], 1);
+      }
+      for (const y of [48, 76]) {
+        const w = Math.round(((y - 22) / (B - 28)) * 24) + 6;
+        k.rect(cx - w, y, w * 2, 3, PLANK[3]);
+        k.rect(cx - w, y, w * 2, 1, PLANK[1]);
+      }
+      k.line(cx - 22, 76, cx + 14, 50, PLANK[3], 2);
+      // Molette.
+      k.disc(cx, 20, 14, IRON[3]);
+      k.disc(cx, 20, 12, '#00000000');
+      for (let a = 0; a < 8; a++) {
+        const ang = (a / 8) * Math.PI * 2;
+        k.line(cx, 20, cx + Math.cos(ang) * 12, 20 + Math.sin(ang) * 12, IRON[2]);
+      }
+      for (let a = 0; a < 48; a++) {
+        const ang = (a / 48) * Math.PI * 2;
+        k.px(cx + Math.cos(ang) * 13, 20 + Math.sin(ang) * 13, a < 20 ? IRON[0] : IRON[2]);
+      }
+      k.disc(cx, 20, 3, IRON[1]);
+      k.rect(cx - 16, 4, 32, 4, PLANK[3]);
+      k.rect(cx - 16, 4, 32, 1, PLANK[1]);
+      // Câble jusqu'au fond, seau de minerai.
+      k.rect(cx + 12, 22, 1, B - 34, '#c8b080');
+      k.rect(cx + 9, B - 30, 8, 7, IRON[2]);
+      k.rect(cx + 10, B - 31, 6, 2, '#c8a060');
+      // Lanterne à la jambe gauche.
+      k.rect(cx - 22, 58, 1, 4, IRON[3]);
+      k.rect(cx - 25, 62, 7, 8, IRON[2]);
+      k.rect(cx - 24, 63, 5, 6, '#ffd36d');
+    }
+  ],
+  // Maison naine abandonnée de Khaz-Ombral : blocs bleu-gris au faîte écroulé, toit d'ardoise effondré d'un côté,
+  // porte béante, fenêtre éteinte, mousse et éboulis.
+  ruinhouse: [
+    112,
+    90,
+    k => {
+      const W = 112,
+        B = 88;
+      blocks(k, 8, 26, W - 16, B - 26, SLATESTONE, 31, 6);
+      shingles(
+        k,
+        [
+          [4, 30],
+          [30, 8],
+          [56, 8],
+          [62, 30]
+        ],
+        SLATE,
+        { w: 6, h: 5 }
+      );
+      broken(k, 56, 26, W - 64, 16, 32);
+      broken(k, 4, 8, 30, 6, 33);
+      runes(k, 8, 34, 48, ['#9ab8d0', '#6a8aa8', '#4a6888', '#2a4058']);
+      // Porte béante en arc.
+      k.rect(30, B - 34, 22, 34, SLATESTONE[4]);
+      k.disc(41, B - 34, 11, SLATESTONE[4]);
+      k.rect(33, B - 32, 16, 32, '#06080c');
+      k.disc(41, B - 32, 8, '#06080c');
+      // Fenêtre éteinte, barreaux tordus.
+      k.rect(70, 44, 14, 14, SLATESTONE[4]);
+      k.rect(72, 46, 10, 10, '#0c1218');
+      k.line(76, 46, 78, 56, IRON[2]);
+      k.rect(68, 59, 18, 2, SLATESTONE[1]);
+      rubble(k, 92, B - 2, 7, SLATESTONE, 34);
+      rubble(k, 14, B - 1, 4, SLATESTONE, 35);
+      for (let x = 10; x < W - 10; x += 6) k.rect(x, B - 3 - (x % 4), 3, 2, '#4a6a5a');
+    }
+  ],
+  // Tour de guet écroulée : fût de blocs, meurtrières, couronne brisée, applique à flamme bleue.
+  ruintower: [
+    88,
+    140,
+    k => {
+      const B = 138;
+      blocks(k, 14, 18, 60, B - 18, SLATESTONE, 41, 6);
+      for (let x = 12; x < 78; x += 9) k.rect(x, 14, 6, 6, SLATESTONE[2]);
+      k.rect(12, 20, 64, 3, SLATESTONE[1]);
+      broken(k, 14, 14, 60, 30, 42);
+      for (const y of [40, 72]) {
+        k.rect(40, y, 6, 16, '#06080c');
+        k.rect(39, y - 1, 8, 1, SLATESTONE[1]);
+      }
+      k.rect(30, B - 30, 26, 30, SLATESTONE[4]);
+      k.disc(43, B - 30, 13, SLATESTONE[4]);
+      k.rect(33, B - 28, 20, 28, '#06080c');
+      k.disc(43, B - 28, 10, '#06080c');
+      k.rect(20, 96, 8, 3, SLATESTONE[1]);
+      k.rect(22, 92, 4, 4, IRON[2]);
+      rubble(k, 72, B - 2, 6, SLATESTONE, 43);
+      rubble(k, 16, B - 2, 4, SLATESTONE, 44);
+    }
+  ],
+  // Mausolée de la Nécropole : marches, quatre colonnes, fronton au crâne, porte de bronze, mousse.
+  mausoleum: [
+    112,
+    112,
+    k => {
+      const W = 112,
+        B = 110,
+        cx = 56;
+      for (let s2 = 0; s2 < 3; s2++) k.rect(6 + s2 * 4, B - 4 - s2 * 4, W - 12 - s2 * 8, 4, MOSSY[s2 + 1]);
+      blocks(k, 18, 40, W - 36, B - 52, MOSSY, 51, 6);
+      k.poly(
+        [
+          [8, 40],
+          [cx, 10],
+          [W - 8, 40]
+        ],
+        MOSSY[1]
+      );
+      k.poly(
+        [
+          [18, 38],
+          [cx, 16],
+          [W - 18, 38]
+        ],
+        MOSSY[3]
+      );
+      k.line(8, 40, cx, 10, MOSSY[0]);
+      k.rect(8, 40, W - 16, 4, MOSSY[1]);
+      k.rect(8, 40, W - 16, 1, MOSSY[0]);
+      // Crâne au tympan.
+      k.rect(cx - 4, 26, 9, 7, '#e8e0c8');
+      k.rect(cx - 2, 28, 2, 2, '#1a1410');
+      k.rect(cx + 2, 28, 2, 2, '#1a1410');
+      k.rect(cx - 2, 33, 5, 2, '#c8c0a8');
+      for (const x of [20, 34, W - 42, W - 28]) {
+        k.rect(x, 46, 8, B - 60, MOSSY[2]);
+        k.rect(x, 46, 2, B - 60, MOSSY[0]);
+        k.rect(x + 6, 46, 2, B - 60, MOSSY[3]);
+        k.rect(x - 1, 44, 10, 3, MOSSY[1]);
+        k.rect(x - 1, B - 16, 10, 3, MOSSY[1]);
+      }
+      // Porte de bronze vert-de-gris.
+      k.rect(cx - 10, B - 44, 20, 32, MOSSY[4]);
+      k.rect(cx - 8, B - 42, 16, 30, '#3a6a5a');
+      k.rect(cx - 8, B - 42, 1, 30, '#5a9a80');
+      k.rect(cx, B - 42, 1, 30, '#24443a');
+      k.px(cx - 3, B - 28, GOLD[1]);
+      k.px(cx + 3, B - 28, GOLD[1]);
+      for (let x = 10; x < W - 10; x += 4) k.rect(x, 38 - (x % 3), 2, 2, MOSS[noise(x, 5) > 0.5 ? 1 : 2]);
+      for (let x = 22; x < W - 22; x += 5) k.rect(x, B - 14 - (x % 3), 3, 2, MOSS[1]);
+    }
+  ],
+  // Crypte à demi enterrée : bloc de pierre au toit de dalles, escalier qui descend dans le noir, grille, croix.
+  crypt: [
+    88,
+    92,
+    k => {
+      const B = 90,
+        cx = 44;
+      k.disc(cx, B - 4, 40, '#3a3428');
+      k.g.clearRect(0, B - 2, 88, 4);
+      blocks(k, 14, 38, 60, B - 44, MOSSY, 61, 6);
+      k.poly(
+        [
+          [8, 40],
+          [cx, 18],
+          [80, 40]
+        ],
+        MOSSY[2]
+      );
+      for (let y = 22; y < 40; y += 4) {
+        const w = ((y - 18) / 22) * 36;
+        k.rect(cx - w, y, w * 2, 1, MOSSY[3]);
+      }
+      k.line(8, 40, cx, 18, MOSSY[0]);
+      k.rect(cx - 1, 6, 3, 14, MOSSY[1]);
+      k.rect(cx - 6, 10, 13, 3, MOSSY[1]);
+      k.rect(cx - 1, 6, 1, 14, MOSSY[0]);
+      // Escalier qui s'enfonce.
+      k.rect(cx - 12, B - 34, 24, 28, '#06080a');
+      for (let i = 0; i < 4; i++) {
+        k.rect(cx - 11 + i, B - 12 - i * 5, 22 - i * 2, 2, MOSSY[3 - Math.min(2, i)]);
+      }
+      for (let x = cx - 12; x <= cx + 11; x += 3) k.rect(x, B - 34, 1, 24, IRON[2]);
+      k.rect(cx - 12, B - 34, 24, 1, IRON[1]);
+      k.rect(cx - 12, B - 22, 24, 1, IRON[2]);
+      for (let x = 16; x < 72; x += 5) k.rect(x, 36 - (x % 3), 3, 2, MOSS[1]);
+    }
+  ],
+  // Hutte-champignon de Fangeval : chapeau tacheté en guise de toit, mur rond de pied de champignon, porte ronde,
+  // hublot lumineux, petits champignons au pied.
+  mycohut: [
+    88,
+    100,
+    k => {
+      const B = 98,
+        cx = 44,
+        cap = ['#ffc0e4', '#f07ab8', '#c8488e', '#8a2860', '#561638'],
+        stem = ['#fff6e4', '#efe0c4', '#d4c09c', '#a89270', '#6e5c40'];
+      for (let y = 44; y < B; y++) {
+        const w = 24 + Math.round((y - 44) * 0.12);
+        for (let x = -w; x <= w; x++) {
+          const t = (x + w) / (2 * w);
+          k.px(cx + x, y, t < 0.22 ? stem[1] : t < 0.7 ? stem[2] : stem[3]);
+        }
+      }
+      for (let y = 50; y < B; y += 7) k.rect(cx - 22, y, 44, 1, stem[3]);
+      // Chapeau.
+      for (let y = -30; y <= 4; y++)
+        for (let x = -42; x <= 42; x++) {
+          const nx = x / 42,
+            ny = y / 30;
+          if (nx * nx + ny * ny > 1) continue;
+          const lit = -0.45 * nx - 0.75 * ny;
+          k.px(cx + x, 46 + y, lit > 0.55 ? cap[1] : lit > 0.05 ? cap[2] : cap[3]);
+        }
+      for (let x = -38; x <= 38; x += 3) k.rect(cx + x, 50, 1, 3, cap[4]);
+      for (const [x, y, r] of [
+        [-24, 34, 4],
+        [-6, 24, 5],
+        [14, 28, 4],
+        [28, 38, 3],
+        [-34, 44, 2],
+        [4, 40, 3]
+      ]) {
+        k.disc(cx + x, y, r, '#fff0f8');
+        k.px(cx + x - 1, y - 1, '#ffffff');
+      }
+      // Porte ronde et hublot.
+      k.disc(cx - 6, B - 14, 11, stem[4]);
+      k.rect(cx - 17, B - 14, 23, 14, stem[4]);
+      k.disc(cx - 6, B - 14, 9, PLANK[2]);
+      k.rect(cx - 15, B - 14, 19, 14, PLANK[2]);
+      for (let x = cx - 13; x < cx + 2; x += 4) k.rect(x, B - 22, 1, 22, PLANK[3]);
+      k.px(cx - 1, B - 10, GOLD[1]);
+      k.disc(cx + 14, 66, 6, stem[4]);
+      k.disc(cx + 14, 66, 4, '#ffb0e8');
+      k.rect(cx + 12, 64, 2, 2, '#ffffff');
+      for (const [x, h, col] of [
+        [8, 8, '#7affe8'],
+        [14, 5, '#ff8ae8'],
+        [76, 7, '#fff08a'],
+        [81, 10, '#7affe8']
+      ]) {
+        k.rect(x, B - h, 2, h, stem[1]);
+        k.rect(x - 2, B - h - 3, 6, 3, col);
+      }
+    }
+  ]
+});
 // Image d'un bâtiment de la forteresse (pixels d'art ; null sans canevas).
 function art(kind) {
   const m = MODELS[kind];

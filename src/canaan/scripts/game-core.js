@@ -809,9 +809,9 @@ function canaanTreeBlocked(px, py) {
     ly = py - ty * TS;
   return lx >= 16 && lx <= 32 && ly >= 26 && ly <= 46;
 }
-// Entrées des donjons, des raids et de l'Arène sur l'île : leur pied bloque le passage (portal-art.js).
+// Entrées des donjons, des raids et de l'Arène (île et Tréfonds) : leur pied bloque le passage (portal-art.js).
 function canaanPortalBlocked(px, py) {
-  return !game.world.instance && game.world.layer !== 'under' && CANAAN_PORTAL_ART.blocked(px, py);
+  return !game.world.instance && CANAAN_PORTAL_ART.blocked(px, py);
 }
 // Meubles des bâtiments et objets du camp qui bloquent le passage (remplacé par house.js).
 let canaanHouseBlocked = () => false;

@@ -53,7 +53,7 @@
       mud: { a: '#4a3420', b: '#5e4428', c: '#7a5a36' },
       river: { a: '#24160a', b: '#4a2e14', c: '#b08850' },
       lake: { a: '#14262a', b: '#22404a', c: '#5a8a94' },
-      amb: { dark: 0.66, tint: [22, 12, 4], particles: 'dust', color: '#e0c090' },
+      amb: { dark: 0.54, tint: [22, 12, 4], particles: 'dust', color: '#e0c090' },
       map: '#6a5038',
       mapPath: '#8a7050',
       th: {
@@ -97,7 +97,7 @@
       mud: { a: '#2e343a', b: '#3e464e', c: '#5a646e' },
       river: { a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0' },
       lake: { a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0' },
-      amb: { dark: 0.6, tint: [4, 12, 22], particles: 'motes', color: '#a8d8ff' },
+      amb: { dark: 0.5, tint: [4, 12, 22], particles: 'motes', color: '#a8d8ff' },
       map: '#4e555e',
       mapPath: '#6e7680',
       th: {
@@ -148,7 +148,7 @@
       mud: { a: '#2a2c24', b: '#3a3c30', c: '#4e5244' },
       river: { a: '#1a2420', b: '#28362e', c: '#5a7a68' },
       lake: { a: '#101a16', b: '#1e2e26', c: '#5a8a70' },
-      amb: { dark: 0.72, tint: [4, 14, 10], particles: 'mist', color: '#c0e8d0' },
+      amb: { dark: 0.6, tint: [4, 14, 10], particles: 'mist', color: '#c0e8d0' },
       map: '#40443a',
       mapPath: '#5e5e56',
       th: {
@@ -191,7 +191,7 @@
       mud: { a: '#3a4220', b: '#4e5a28', c: '#6e7a3a' },
       river: { a: '#161c08', b: '#34401a', c: '#a8b850' },
       lake: { a: '#1e2e1a', b: '#34502a', c: '#88b060' },
-      amb: { dark: 0.64, tint: [16, 4, 20], particles: 'motes', color: '#ff9ae8' },
+      amb: { dark: 0.52, tint: [16, 4, 20], particles: 'motes', color: '#ff9ae8' },
       map: '#465236',
       mapPath: '#665470',
       th: {
@@ -223,12 +223,12 @@
   const FORT = {
     name: 'Forteresse de Durgrim',
     floors: {
-      [T.STONE]: { style: 'flagstone', a: '#6a5a48', b: '#4a3e30', c: '#8a7660' },
-      [T.PATH]: { style: 'tiles', a: '#7a6650', b: '#56473a', c: '#9a8468' },
+      [T.STONE]: { style: 'tiles', a: '#6a5a48', b: '#4a3e30', c: '#8a7660' },
+      [T.PATH]: { style: 'flagstone', a: '#7a6650', b: '#56473a', c: '#9a8468' },
       [T.FLOOR]: { style: 'flagstone', a: '#6a5a48', b: '#4a3e30', c: '#8a7660' }
     },
     wall: { style: 'brick', top: '#1a120c', face: '#5e4a36', dark: '#3a2e22', light: '#86705a' },
-    amb: { dark: 0.4, tint: [30, 16, 4], particles: 'embers', color: '#ffd08a' },
+    amb: { dark: 0.32, tint: [30, 16, 4], particles: 'embers', color: '#ffd08a' },
     map: '#8a7660',
     mapPath: '#a8926e',
     th: {
@@ -311,17 +311,15 @@
     if (x > 2 && y > 2 && x < MAPW - 3 && y < MAPH - 3) tiles()[y][x] = t;
   };
   const biomeAt = (x, y) => (x < 0 || y < 0 || x >= MAPW || y >= MAPH ? 0 : BMAP[(y | 0) * MAPW + (x | 0)]);
+  // Biome d'une case : secteur de 90° autour de la forteresse, frontière ondulée (± 12°).
   function sectorOf(x, y) {
-    const a = Math.atan2(y - C.y, x - C.x) / RAD + (field(x, y, 37, 791) - 0.5) * 40,
+    const a = Math.atan2(y - C.y, x - C.x) / RAD + (field(x, y, 37, 791) - 0.5) * 24,
       rel = (((a - (BIOMES[0].angle - 45)) % 360) + 360) % 360;
     return Math.min(3, Math.floor(rel / 90));
   }
-  const radius = (x, y) => {
-    const a = Math.atan2(y - C.y, x - C.x);
-    return 152 + 8 * Math.sin(3 * a + 0.7) + 5 * Math.cos(5 * a) + (field(x, y, 21, 792) - 0.5) * 12;
-  };
   const floorOf = (x, y) => (biomeAt(x, y) === 4 ? T.STONE : BIOMES[biomeAt(x, y)].floor);
-  // Couloir sinueux de a à b : creuse la roche ; sur l'eau ou un gouffre, un pont.
+  // Couloir sinueux de a à b : creuse la roche (largeur qui respire le long du chemin) ; sur l'eau ou un gouffre, un
+  // pont étroit. road : chaussée (dalles, gravier) au milieu.
   function tunnel(a, b, width, road) {
     const n = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 9)),
       pts = [[a.x, a.y]];
@@ -338,12 +336,15 @@
         steps = Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 2);
       for (let s = 0; s <= steps; s++) {
         const fx = x0 + ((x1 - x0) * s) / steps,
-          fy = y0 + ((y1 - y0) * s) / steps;
-        for (let y = Math.floor(fy - width); y <= Math.ceil(fy + width); y++)
-          for (let x = Math.floor(fx - width); x <= Math.ceil(fx + width); x++) {
-            if (Math.hypot(x - fx, y - fy) > width) continue;
+          fy = y0 + ((y1 - y0) * s) / steps,
+          w = road ? width : width * (0.8 + 0.6 * field(fx, fy, 5, 795));
+        for (let y = Math.floor(fy - w); y <= Math.ceil(fy + w); y++)
+          for (let x = Math.floor(fx - w); x <= Math.ceil(fx + w); x++) {
+            const d = Math.hypot(x - fx, y - fy);
+            if (d > w) continue;
             const t = at(x, y);
             if (WET.has(t) || bridges.has(y * MAPW + x)) {
+              if (d > 0.8) continue;
               if (!bridges.has(y * MAPW + x)) bridges.set(y * MAPW + x, t);
               set(x, y, T.PATH);
             } else if (road) set(x, y, T.PATH);
@@ -384,6 +385,59 @@
         if (!OPEN(at(x, y)) || at(x, y) === T.PATH || at(x, y) === T.MUD) return false;
     return !keep.some(([x, y, r]) => Math.hypot(x - tx, y - ty) < r);
   }
+
+  // ---------------------------------------------------------------- Plan des cavernes
+  // Chaque biome : une caverne-porte au sortir de la forteresse, un carrefour (son éclaireur), un village (ses
+  // bâtiments), un lac, une caverne profonde, la salle du portail de son donjon et le repaire de son boss ; une caverne
+  // de passage entre deux biomes voisins. Des galeries sinueuses, plus ou moins larges, les relient : on se repère
+  // d'une grande salle à l'autre au lieu d'errer dans un dédale de poches.
+  let caverns = [];
+  const VILLAGE_R = [14, 17, 15, 14];
+  function plan() {
+    caverns = [];
+    const add = (p, r, b, kind) => {
+      const c = { x: p.x, y: p.y, r, b, kind };
+      caverns.push(c);
+      return c;
+    };
+    return BIOMES.map((B, k) => ({
+      gate: add(polar(B.angle, 32), 7, k, 'gate'),
+      hub: add(polar(B.angle, 60), 12, k, 'hub'),
+      village: add(polar(B.angle - 21, 81), VILLAGE_R[k], k, 'village'),
+      lake: add(polar(B.angle + 27, 64), 12, k, 'lake'),
+      deep: add(polar(B.angle + 1, 100), 10, k, 'deep'),
+      portal: add(polar(B.angle + 23, 99), 8.5, k, 'portal'),
+      lair: add(polar(B.angle - 26, 104), 10.5, k, 'lair'),
+      pass: add(polar(B.angle + 45, 86), 10, k, 'pass')
+    }));
+  }
+  // Caverne qui contient une case (null : galerie ou roche).
+  function cavernAt(x, y, k = 1.15) {
+    for (const c of caverns) if (Math.hypot(x - c.x, (y - c.y) * 1.12) < c.r * k) return c;
+    return null;
+  }
+  // Salle aux bords organiques : rayon qui ondule tout autour, un peu plus large que haute.
+  function carveCavern(c) {
+    const m = Math.ceil(c.r * 1.4);
+    for (let y = Math.floor(c.y) - m; y <= Math.ceil(c.y) + m; y++)
+      for (let x = Math.floor(c.x) - m; x <= Math.ceil(c.x) + m; x++) {
+        const a = Math.atan2(y - c.y, x - c.x),
+          edge =
+            c.r * (0.8 + 0.4 * field(c.x * 5 + Math.cos(a) * 2.6, c.y * 5 + Math.sin(a) * 2.6, 1.6, 811)) +
+            (field(x, y, 3, 812) - 0.5) * 2.2;
+        if (Math.hypot(x - c.x, (y - c.y) * 1.12) < edge) set(x, y, floorOf(x, y));
+      }
+  }
+  // Tache organique d'un terrain (lac, boue, gouffre) dans une salle : seulement sur le sol déjà creusé.
+  function blob(cx, cy, r, tile, seed) {
+    const m = Math.ceil(r * 1.5);
+    for (let y = Math.floor(cy) - m; y <= Math.ceil(cy) + m; y++)
+      for (let x = Math.floor(cx) - m; x <= Math.ceil(cx) + m; x++) {
+        const a = Math.atan2(y - cy, x - cx),
+          edge = r * (0.75 + 0.5 * field(cx * 7 + Math.cos(a) * 2, cy * 7 + Math.sin(a) * 2, 1.4, seed));
+        if (Math.hypot(x - cx, y - cy) < edge && OPEN(at(x, y)) && at(x, y) !== T.PATH) set(x, y, tile);
+      }
+  }
   function build() {
     game.world.underworld = Array.from({ length: MAPH }, () => Array(MAPW).fill(T.WALL));
     game.world.underdecor = Array.from({ length: MAPH }, () => Array(MAPW).fill(null));
@@ -392,39 +446,57 @@
     structures.length = 0;
     lights.length = 0;
     buckets.clear();
-    // 1. Biomes et cavernes : la roche est creusée là où le bruit dépasse un seuil propre au biome.
+    // 1. Carte des biomes : la forteresse au centre, quatre secteurs autour.
+    for (let y = 0; y < MAPH; y++)
+      for (let x = 0; x < MAPW; x++)
+        BMAP[y * MAPW + x] = Math.hypot(x - C.x, y - C.y) < FORT_R + 4 ? 4 : sectorOf(x, y);
+    // 2. Cavernes creusées dans la roche.
+    const P = plan();
+    for (const c of caverns) carveCavern(c);
+    // Piliers de roche dans les grandes salles de passage : on en fait le tour.
+    for (const c of caverns)
+      if (c.kind === 'deep' || c.kind === 'pass' || c.kind === 'gate')
+        for (let k = 0; k < 3; k++) {
+          const a = hashU(c.x, k, 30) * Math.PI * 2,
+            d = c.r * (0.35 + hashU(k, c.y, 31) * 0.25),
+            px = Math.round(c.x + Math.cos(a) * d),
+            py = Math.round(c.y + Math.sin(a) * d),
+            pr = 0.9 + hashU(px, py, 32) * 0.8;
+          for (let y = py - 2; y <= py + 2; y++)
+            for (let x = px - 2; x <= px + 2; x++) if (Math.hypot(x - px, y - py) < pr) set(x, y, T.WALL);
+        }
+    // 3. Eaux, boue et gouffres : dans les salles (jamais au portail, au repaire, au carrefour ni aux portes).
+    P.forEach((p, k) => {
+      const L = p.lake,
+        out = Math.atan2(L.y - C.y, L.x - C.x);
+      blob(L.x + Math.cos(out) * L.r * 0.42, L.y + Math.sin(out) * L.r * 0.42, L.r * 0.46, T.LAKE, 820 + k);
+      if (k === 1) blob(p.deep.x, p.deep.y + 2, 4.2, T.LAKE, 824);
+      if (k === 3) blob(p.pass.x, p.pass.y, 4.5, T.LAKE, 825);
+      if (k === 0) blob(p.deep.x + 3, p.deep.y, 3.6, T.LAKE, 826);
+      if (k === 1) blob(p.pass.x - 2, p.pass.y + 1, 3.4, T.CHASM, 827);
+      if (k === 2) blob(p.deep.x, p.deep.y, 3.8, T.CHASM, 828);
+      if (k === 2) blob(p.pass.x + 1, p.pass.y - 1, 3.2, T.LAKE, 829);
+    });
     for (let y = 3; y < MAPH - 3; y++)
       for (let x = 3; x < MAPW - 3; x++) {
-        const d = Math.hypot(x - C.x, y - C.y),
-          b = d < FORT_R + 4 ? 4 : sectorOf(x, y);
-        BMAP[y * MAPW + x] = b;
-        if (d >= radius(x, y) || b === 4) continue;
-        const n = 0.55 * field(x, y, 10, 801) + 0.3 * field(x, y, 4, 802) + 0.15 * field(x, y, 24, 803),
-          th = [0.52, 0.47, 0.5, 0.49][b];
-        let t = n > th ? BIOMES[b].floor : T.WALL;
-        if (t !== T.WALL) {
-          if (b === 1 && field(x, y, 7, 880) > 0.62) t = T.FLOOR;
-          if (b === 3 && field(x, y, 6, 850) > 0.6) t = T.MUD;
-          if (b === 0 && field(x, y, 6, 851) > 0.76) t = T.MUD;
-          if (
-            (b === 1 && field(x, y, 15, 861) > 0.75) ||
-            (b === 3 && field(x, y, 16, 863) > 0.69) ||
-            (b === 0 && field(x, y, 17, 860) > 0.77) ||
-            (b === 2 && field(x, y, 14, 862) > 0.83)
-          )
-            t = T.LAKE;
-          if ((b === 2 && field(x, y, 12, 870) > 0.82) || (b === 1 && field(x, y, 13, 871) > 0.87))
-            t = T.CHASM;
-        }
-        // Rivières de boue des Galeries et de Fangeval : un ruban qui traverse tout, ses berges creusées.
-        if (b === 0 || b === 3) {
-          const band = Math.abs(field(x, y, 34, 840 + b) - 0.5);
-          if (band < 0.021) t = T.RIVER;
-          else if (band < 0.05 && t === T.WALL) t = BIOMES[b].floor;
-        }
-        tiles()[y][x] = t;
+        const t = at(x, y),
+          b = biomeAt(x, y);
+        if (b === 4 || !OPEN(t) || t === T.LAKE || t === T.CHASM) continue;
+        const cv = cavernAt(x, y, 1.3),
+          calm = !cv || cv.kind === 'portal' || cv.kind === 'lair' || cv.kind === 'hub' || cv.kind === 'gate';
+        // Sols de chaque biome : plaques de gravier, de dalles ou de terre.
+        if (b === 1 && field(x, y, 7, 880) > 0.62) set(x, y, T.FLOOR);
+        if (b === 0 && field(x, y, 8, 881) > 0.66) set(x, y, T.STONE);
+        if (b === 3 && field(x, y, 7, 882) > 0.68) set(x, y, T.FLOOR);
+        if (b === 2 && field(x, y, 9, 883) > 0.66) set(x, y, T.FLOOR);
+        if (calm) continue;
+        if (b === 3 && cv.kind !== 'village' && field(x, y, 6, 850) > 0.6) set(x, y, T.MUD);
+        if (b === 0 && field(x, y, 6, 851) > 0.72) set(x, y, T.MUD);
+        // Ruisseaux de boue des Galeries et de Fangeval : ils sortent de la roche et y retournent.
+        if ((b === 0 || b === 3) && cv.kind !== 'village' && Math.abs(field(x, y, 26, 840 + b) - 0.5) < 0.03)
+          set(x, y, T.RIVER);
       }
-    // 2. Forteresse de Durgrim : place dallée, rempart circulaire et quatre portes vers les biomes.
+    // 4. Forteresse de Durgrim : place dallée, rempart circulaire et quatre portes vers les biomes.
     for (let y = C.y - FORT_R - 4; y <= C.y + FORT_R + 4; y++)
       for (let x = C.x - FORT_R - 4; x <= C.x + FORT_R + 4; x++) {
         const d = Math.hypot(x - C.x, y - C.y);
@@ -435,39 +507,71 @@
           set(x, y, gate ? T.PATH : T.WALL);
         }
       }
-    // 3. Lieux : centre de chaque biome, portail de son donjon, repaire de son boss.
-    hubs = BIOMES.map(b => polar(b.angle, 80));
-    lairs = BOSSES.map(b => ({ ...polar(BIOMES[b.biome].angle - 26, 124), boss: b }));
+    // 5. Lieux : carrefour de chaque biome, portail de son donjon, repaire de son boss.
+    hubs = P.map(p => ({ x: p.hub.x, y: p.hub.y }));
+    lairs = BOSSES.map(b => ({ x: P[b.biome].lair.x, y: P[b.biome].lair.y, boss: b }));
     const portals = instances.map((d, i) => ({ d, i })).filter(v => v.d.under);
     portals.forEach(({ d }, k) => {
-      const p = polar(BIOMES[k].angle + 24, 112);
-      d.x = p.x;
-      d.y = p.y;
+      d.x = P[k].portal.x;
+      d.y = P[k].portal.y - 1;
     });
-    // 4. Routes : des portes de la forteresse aux centres des biomes, puis vers portails et repaires.
-    BIOMES.forEach((b, k) => {
-      const gate = polar(b.angle, FORT_R + 3);
-      tunnel(polar(b.angle, FORT_R - 2), gate, 1.2, true);
-      tunnel(gate, hubs[k], 1.4, true);
-      tunnel(hubs[k], portals[k].d, 1.2, true);
-      tunnel(hubs[k], lairs[k], 1.6, false);
-      // Un passage entre biomes voisins, à mi-chemin.
-      tunnel(hubs[k], polar(b.angle + 45, 98), 1.3, false);
-      tunnel(polar(b.angle + 45, 98), hubs[(k + 1) % 4], 1.3, false);
+    // 6. Galeries : une route dallée des portes de la forteresse au portail du donjon, par le carrefour ; des galeries
+    // plus larges vers chaque salle, et vers les biomes voisins par la caverne de passage.
+    P.forEach((p, k) => {
+      const A = BIOMES[k].angle,
+        next = P[(k + 1) % 4];
+      tunnel(p.gate, p.hub, 2.88, false);
+      tunnel(p.hub, p.village, 2.75, false);
+      tunnel(p.hub, p.lake, 2.5, false);
+      tunnel(p.hub, p.deep, 2.62, false);
+      tunnel(p.village, p.lair, 2.75, false);
+      tunnel(p.deep, p.lair, 2.25, false);
+      tunnel(p.deep, p.portal, 2.38, false);
+      tunnel(p.lake, p.portal, 2.5, false);
+      tunnel(p.hub, p.portal, 2.75, false);
+      tunnel(p.lake, p.pass, 2.62, false);
+      tunnel(p.pass, next.village, 2.62, false);
+      tunnel(polar(A, FORT_R - 2), polar(A, FORT_R + 3), 1.2, true);
+      tunnel(polar(A, FORT_R + 3), p.gate, 1.2, true);
+      tunnel(p.gate, p.hub, 1.15, true);
+      tunnel(p.hub, p.portal, 1.15, true);
     });
-    // 5. Entrées depuis l'île : même case qu'à la surface, reliée au réseau le plus proche.
+    // 7. Entrées depuis l'île : même case qu'à la surface, une petite salle reliée à la caverne la plus proche.
     placeEntrances();
     for (const e of ENTRANCES) {
-      clear(e.x, e.y, 3);
-      const near = [...hubs, ...BIOMES.map(b => polar(b.angle + 45, 98))].sort(
-        (a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y)
-      )[0];
-      tunnel(e, near, 1.4, false);
+      carveCavern({ x: e.x, y: e.y, r: 4.5, b: biomeAt(e.x, e.y) });
+      clear(e.x, e.y, 2.5);
+      const near = caverns
+        .filter(c => c.kind !== 'portal' && c.kind !== 'lair')
+        .sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0];
+      tunnel(e, near, 2, false);
     }
-    for (const { d } of portals) clear(d.x, d.y, 3.2, T.STONE);
+    for (const { d } of portals) clear(d.x, d.y + 1, 4.2, T.STONE);
     for (const l of lairs) clear(l.x, l.y, 7.5);
     for (const h of hubs) clear(h.x, h.y, 4);
-    // 6. Seules les cases accessibles depuis la forteresse restent ouvertes.
+    // 8. Alcôves : la roche s'effrite par endroits au bord des salles et des galeries (jamais de poche isolée : on ne
+    // garde que ce qui touche déjà le réseau).
+    const near = new Uint8Array(MAPW * MAPH);
+    for (let y = 4; y < MAPH - 4; y++)
+      for (let x = 4; x < MAPW - 4; x++) if (OPEN(at(x, y)) || WET.has(at(x, y))) near[y * MAPW + x] = 1;
+    for (let pass = 0; pass < 2; pass++) {
+      const add = [];
+      for (let y = 4; y < MAPH - 4; y++)
+        for (let x = 4; x < MAPW - 4; x++) {
+          if (at(x, y) !== T.WALL || biomeAt(x, y) === 4 || Math.hypot(x - C.x, y - C.y) > 116) continue;
+          const touch =
+            near[y * MAPW + x - 1] ||
+            near[y * MAPW + x + 1] ||
+            near[(y - 1) * MAPW + x] ||
+            near[(y + 1) * MAPW + x];
+          if (touch && 0.6 * field(x, y, 4, 801) + 0.4 * field(x, y, 2, 802) > 0.6) add.push([x, y]);
+        }
+      for (const [x, y] of add) {
+        set(x, y, floorOf(x, y));
+        near[y * MAPW + x] = 1;
+      }
+    }
+    // 9. Seules les cases accessibles depuis la forteresse restent ouvertes.
     const seen = new Uint8Array(MAPW * MAPH),
       queue = [C.y * MAPW + C.x];
     seen[queue[0]] = 1;
@@ -504,7 +608,7 @@
         )
           tiles()[y][x] = T.WALL;
       }
-    // 7. Bâtiments, cimetières, décor, lumières, gisements, bancs de poissons, faune et coffres.
+    // 10. Bâtiments, cimetières, décor, lumières, gisements, bancs de poissons, faune et coffres.
     const keep = [
       [C.x, C.y, FORT_R + 6],
       ...ENTRANCES.map(e => [e.x, e.y, 6]),
@@ -527,6 +631,15 @@
     }
     // Pièces des bâtiments de la forteresse (house.js), creusées dans la roche du nord de la carte.
     if (window.CANAAN_HOUSE) CANAAN_HOUSE.stampUnder();
+  }
+  // Un point du sol d'un biome, tiré dans l'une de ses salles (n : numéro du tirage, salt : famille de tirages).
+  function pick(bi, n, salt, kinds) {
+    const list = caverns.filter(c => c.b === bi && (!kinds || kinds.includes(c.kind)));
+    if (!list.length) return null;
+    const c = list[Math.floor(hashU(n, salt, 40) * list.length)],
+      a = hashU(salt, n, 41) * Math.PI * 2,
+      d = Math.sqrt(hashU(n + 7, salt, 42)) * c.r * 0.92;
+    return { x: Math.round(c.x + Math.cos(a) * d), y: Math.round(c.y + (Math.sin(a) * d) / 1.12) };
   }
   // Entrées à la surface : terre ferme accessible depuis le camp, près de la route, loin des autres lieux.
   function placeEntrances() {
@@ -615,16 +728,16 @@
   function placeStructures(keep) {
     BIOMES.forEach((b, bi) => {
       let placed = 0;
+      // Le village d'abord, puis les autres grandes salles.
       for (let tries = 0; tries < 1400 && placed < b.structures.length; tries++) {
-        const a = b.angle - 40 + hashU(tries, bi, 3) * 80,
-          r = 40 + hashU(bi, tries, 4) * 100,
-          p = polar(a, r),
+        const p = pick(bi, tries, 3 + bi, tries < 700 ? ['village'] : ['village', 'deep', 'lake', 'pass']),
           kind = b.structures[placed],
           S = STRUCT[kind];
         if (
+          !p ||
           biomeAt(p.x, p.y) !== bi ||
           !roomFor(p.x, p.y, S.w, S.h, keep) ||
-          structures.some(s => Math.hypot(s.tx - p.x, s.ty - p.y) < 9)
+          structures.some(s => Math.abs(s.tx - p.x) < (s.w + S.w) / 2 + 2 && Math.abs(s.ty - p.y) < 6)
         )
           continue;
         addStructure(kind, p.x, p.y, bi);
@@ -636,9 +749,9 @@
   // Nécropole : carrés de tombes alignées, avec une grille de fer sur le haut.
   function cemeteries(keep) {
     let made = 0;
-    for (let tries = 0; tries < 900 && made < 7; tries++) {
-      const p = polar(BIOMES[2].angle - 40 + hashU(tries, 5, 5) * 80, 45 + hashU(5, tries, 6) * 95);
-      if (biomeAt(p.x, p.y) !== 2 || !roomFor(p.x, p.y, 9, 6, keep)) continue;
+    for (let tries = 0; tries < 1500 && made < 5; tries++) {
+      const p = pick(2, tries, 5);
+      if (!p || biomeAt(p.x, p.y) !== 2 || !roomFor(p.x, p.y, 9, 6, keep)) continue;
       for (let y = p.y - 5; y <= p.y + 1; y++)
         for (let x = p.x - 5; x <= p.x + 5; x++)
           if (OPEN(at(x, y)) && at(x, y) !== T.PATH) set(x, y, T.GRAVE);
@@ -718,8 +831,9 @@
     let k = 0;
     BIOMES.forEach((b, bi) => {
       for (let n = 0, tries = 0; n < 4 && tries < 600; tries++) {
-        const p = polar(b.angle - 42 + hashU(tries, bi, 14) * 84, 40 + hashU(bi, tries, 15) * 105);
+        const p = pick(bi, tries, 14 + bi, ['village', 'lake', 'deep', 'pass', 'gate']);
         if (
+          !p ||
           biomeAt(p.x, p.y) !== bi ||
           !OPEN(at(p.x, p.y)) ||
           at(p.x, p.y) === T.PATH ||
@@ -765,7 +879,7 @@
           ].some(([dx, dy]) => at(tx + dx, ty + dy) === T.WALL),
           roll = hashU(tx, ty, 16);
         let kind = null;
-        if (roll < (rocky ? 0.24 : 0.04)) kind = 'ore';
+        if (roll < (rocky ? 0.3 : 0.05)) kind = 'ore';
         else if (roll > 0.955) kind = 'herb';
         if (!kind || nodes.some(n => Math.hypot(n.tx - tx, n.ty - ty) < (kind === 'ore' ? 6 : 5))) continue;
         const id = kind === 'herb' ? HERB_OF[b] : hashU(tx, ty, 17) < 0.68 ? ORE_OF[b] : METAL_OF[b];
@@ -865,8 +979,9 @@
     BIOMES.forEach((b, bi) => {
       const spot = (wet, salt) => {
         for (let tries = 0; tries < 300; tries++) {
-          const p = polar(b.angle - 44 + hashU(tries, salt, 19) * 88, 30 + hashU(salt, tries, 20) * 118);
+          const p = pick(bi, tries, salt);
           if (
+            !p ||
             biomeAt(p.x, p.y) !== bi ||
             !OPEN(at(p.x, p.y)) ||
             keep.some(([x, y, r]) => Math.hypot(x - p.x, y - p.y) < r * 0.6)
@@ -1666,6 +1781,32 @@
       canaanLight(lx, ly, 70, '#ffd36d');
       smokeAt(W - 22, 2);
     } else if (s.kind === 'kingstatue') canaanLight(cx, by - 40, 60, '#ffd36d');
+    // Bâtiments des biomes : lueurs des fenêtres, lanternes, appliques, bougies et champignons.
+    else if (s.kind === 'shack') {
+      const [lx, ly] = at(59, 60);
+      canaanLight(lx, ly, 90, '#ffb84a');
+    } else if (s.kind === 'minehead') {
+      const [lx, ly] = at(22, 66);
+      canaanLight(lx, ly, 110, '#ffc860');
+    } else if (s.kind === 'ruintower') {
+      const [fx, fy] = at(24, 92);
+      K().flame(c, fx, fy, 0.8, flameCols, s.tx);
+      canaanLight(fx, fy - 6, 130, flameCols[1]);
+    } else if (s.kind === 'mausoleum') {
+      for (const ax of [14, W - 14]) {
+        const [fx, fy] = at(ax, 98);
+        K().flame(c, fx, fy, 0.5, flameCols, ax + s.ty);
+        canaanLight(fx, fy - 4, 90, flameCols[1]);
+      }
+    } else if (s.kind === 'crypt') {
+      const [lx, ly] = at(44, 70);
+      canaanLight(lx, ly, 70, flameCols[1]);
+    } else if (s.kind === 'mycohut') {
+      const [hx, hy] = at(58, 66),
+        [gx, gy] = at(44, 30);
+      canaanLight(hx, hy, 90, '#ffb0e8');
+      canaanLight(gx, gy, 150, '#ff8ae8');
+    }
     return true;
   }
   function drawStructure(c, s) {
@@ -1682,12 +1823,7 @@
     c.beginPath();
     c.ellipse(cx, by, w * 0.55, 14, 0, 0, Math.PI * 2);
     c.fill();
-    if (
-      s.biome === 4 &&
-      window.CANAAN_DWARF_ART &&
-      CANAAN_DWARF_ART.has(s.kind) &&
-      drawFortArt(c, s, cx, by, flameCols)
-    ) {
+    if (window.CANAAN_DWARF_ART && CANAAN_DWARF_ART.has(s.kind) && drawFortArt(c, s, cx, by, flameCols)) {
       c.restore();
       return;
     }
@@ -2019,6 +2155,8 @@
       th = themeOf(b),
       seed = x * 5 + y * 3,
       wall = th.wall;
+    // Décor en pixel art (under-art.js) ; les dessins ci-dessous restent en secours.
+    if (CANAAN_UNDER_ART.draw(c, d, x, y, b, th)) return;
     if (d.startsWith('k:')) {
       const kind = d.slice(2) === 'skullpile' ? 'bonepile' : d.slice(2);
       return K().floorProp(
@@ -2328,7 +2466,24 @@
       }
     }
   }
+  // Sol peint pixel par pixel comme l'île (under-look.js) ; dans une pièce de la forteresse, ou sans canevas, le
+  // dessin case par case ci-dessous.
+  let LOOK = null;
+  const look = () =>
+    LOOK ||
+    (LOOK = CANAAN_UNDER_LOOK.create({
+      T,
+      at,
+      biomeAt,
+      bridges,
+      themeOf,
+      BIOMES,
+      WET,
+      isRoom: (x, y) => at(x, y) < T.FLOOR || at(x, y) > T.CHASM,
+      houseTile: (g, x, y) => CANAAN_HOUSE.drawTile(g, x, y, at(x, y))
+    }));
   function drawGround(c, x0, x1, y0, y1) {
+    if (!canaanInHouse(P.x / TS, P.y / TS) && look().drawGround(c, x0, x1, y0, y1)) return;
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
         // Pièce d'un bâtiment nain (house.js) : son sol et ses murs ; le reste dans le noir quand on y est.
@@ -2415,7 +2570,8 @@
 
   // ---------------------------------------------------------------- Entrées (dessin, île et Tréfonds)
   function drawHole(c, e, x, y) {
-    // À la surface : trou béant cerclé de rochers, cadre de bois, échelle et lanterne.
+    // À la surface : gouffre en pixel art (under-art.js), habillé de l'herbe de la région ; sinon l'ancien dessin.
+    if (CANAAN_UNDER_ART.hole(c, x, y, Math.max(0, ZONES.indexOf(regionAt(e.x, e.y))))) return;
     c.save();
     c.fillStyle = 'rgba(0,0,0,.35)';
     c.beginPath();
@@ -2483,6 +2639,8 @@
   const inView = (x, y, m = 200) => x > camX - m && x < camX + W + m && y > camY - m && y < camY + H + m;
   // Entrées vues de l'île (appelé par la boucle de rendu, à la surface).
   function drawSurface(c) {
+    // Les blocs de sol des Tréfonds ne servent plus à la surface : ils sont oubliés (repeints en redescendant).
+    LOOK?.release();
     for (const e of ENTRANCES) {
       const x = (e.x + 0.5) * TS,
         y = (e.y + 0.5) * TS;
@@ -2492,7 +2650,7 @@
         drawLabel(
           c,
           x,
-          y - 76,
+          y - 96,
           '✦ ' + translateText(e.name).toUpperCase() + ' ✦',
           Math.hypot(P.x - x, P.y - y) < 95 ? '[E] Descendre dans les Tréfonds' : null
         );
@@ -2521,7 +2679,8 @@
       if (!d.under) return;
       const x = d.x * TS,
         y = d.y * TS;
-      if (inView(x, y)) drawDungeonEntrance(c, i, x, y);
+      // Entrée en pixel art habillée du biome souterrain (portal-art.js) ; l'ancien dessin reste en secours.
+      if (inView(x, y) && !CANAAN_PORTAL_ART.draw(c, i, x, y)) drawDungeonEntrance(c, i, x, y);
     });
     for (const e of ENTRANCES) {
       const x = (e.x + 0.5) * TS,
