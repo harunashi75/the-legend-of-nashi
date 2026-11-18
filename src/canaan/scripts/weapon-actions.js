@@ -202,21 +202,35 @@
       splash(AP.x, AP.y, 42, '#77ffa9');
     }
   }
+  // Monstres dans le cône : un point de leur corps (pieds → tête) à portée et dans l'angle, élargi de sa carrure.
   function targets(range, angle, width) {
-    return game.world.monsters
-      .slice()
-      .filter(
-        m =>
-          m.hp > 0 &&
-          Math.hypot(m.x - AP.x, m.y - AP.y) <= range + (m.r || 0) &&
-          Math.abs(
-            Math.atan2(
-              Math.sin(Math.atan2(m.y - AP.y, m.x - AP.x) - angle),
-              Math.cos(Math.atan2(m.y - AP.y, m.x - AP.x) - angle)
-            )
-          ) <=
-            width / 2
+    return game.world.monsters.slice().filter(
+      m =>
+        m.hp > 0 &&
+        canaanBodyPoints(m).some(q => {
+          const d = Math.hypot(q.x - AP.x, q.y - AP.y),
+            off = Math.atan2(q.y - AP.y, q.x - AP.x) - angle;
+          return (
+            d <= range + q.radius &&
+            (d <= q.radius ||
+              Math.abs(Math.atan2(Math.sin(off), Math.cos(off))) <=
+                width / 2 + Math.asin(Math.min(1, q.radius / d)))
+          );
+        })
+    );
+  }
+  // Un point du corps dans la bande partant de (x, y) selon a : longueur [from, len], demi-largeur width.
+  function inBand(m, x, y, a, from, len, width) {
+    return canaanBodyPoints(m).some(q => {
+      const dx = q.x - x,
+        dy = q.y - y,
+        t = dx * Math.cos(a) + dy * Math.sin(a);
+      return (
+        t >= from - q.radius &&
+        t <= len + q.radius &&
+        Math.abs(dx * Math.sin(a) - dy * Math.cos(a)) <= width + q.radius
       );
+    });
   }
   // Couleur d'un effet : l'élément de la classe pour une compétence, sinon la couleur de l'arme.
   const fxColor = () =>
@@ -236,7 +250,7 @@
     ring(radius, fxColor());
     let total = 0;
     for (const m of game.world.monsters.slice())
-      if (m.hp > 0 && Math.hypot(m.x - AP.x, m.y - AP.y) < radius + (m.r || 0)) {
+      if (m.hp > 0 && canaanBodyGap(m, AP.x, AP.y) < radius) {
         total += dmg(m, mult);
         cb?.(m);
       }
@@ -246,11 +260,7 @@
     beam(AP.x, AP.y, a, len, width, fxColor());
     let total = 0;
     for (const m of game.world.monsters.slice()) {
-      const dx = m.x - AP.x,
-        dy = m.y - AP.y,
-        t = dx * Math.cos(a) + dy * Math.sin(a),
-        cross = Math.abs(dx * Math.sin(a) - dy * Math.cos(a));
-      if (m.hp > 0 && t >= 0 && t <= len + (m.r || 0) && cross <= width + (m.r || 0)) {
+      if (m.hp > 0 && inBand(m, AP.x, AP.y, a, 0, len, width)) {
         total += dmg(m, mult);
         cb?.(m);
       }
@@ -341,7 +351,7 @@
           z.tick += 1;
           const owner = game.heroes.includes(z.owner) ? z.owner : game.hero;
           for (const m of game.world.monsters.slice())
-            if (m.hp > 0 && Math.hypot(m.x - z.x, m.y - z.y) < z.r + (m.r || 0))
+            if (m.hp > 0 && canaanBodyGap(m, z.x, z.y) < z.r)
               withActor(owner, () => withCastContext(z.context, () => dmg(m, 0.6, true)));
           // Le sol consacré soigne chaque héros du groupe qui s'y tient.
           for (const hero of game.heroes) {
@@ -608,13 +618,7 @@
         : type === 'mace' || type === 'shield'
           ? 135
           : 125;
-    ctx.globalAlpha = 0.17;
-    ctx.fillStyle = c;
-    ctx.beginPath();
-    ctx.moveTo(P.x, P.y);
-    ctx.arc(P.x, P.y, r, a - 0.2, a + 0.2);
-    ctx.closePath();
-    ctx.fill();
+    // Ligne pointillée et cercle au bout, sans cône plein (trop intense une fois allongé).
     ctx.globalAlpha = 0.72;
     ctx.strokeStyle = c;
     ctx.lineWidth = 1.6;
@@ -1061,16 +1065,7 @@
           // Tout ce qui se trouve sur la trajectoire et devant le point d'arrivée, touché une seule fois.
           const hitOnce = new Set();
           for (const m of game.world.monsters.slice()) {
-            const dx = m.x - p.x,
-              dy = m.y - p.y,
-              t = dx * Math.cos(a) + dy * Math.sin(a),
-              cross = Math.abs(dx * Math.sin(a) - dy * Math.cos(a));
-            if (
-              m.hp > 0 &&
-              t >= -20 &&
-              t <= Math.hypot(AP.x - p.x, AP.y - p.y) + 120 + (m.r || 0) &&
-              cross <= 40 + (m.r || 0)
-            )
+            if (m.hp > 0 && inBand(m, p.x, p.y, a, -20, Math.hypot(AP.x - p.x, AP.y - p.y) + 120, 40))
               hitOnce.add(m);
           }
           for (const m of hitOnce) dmg(m, 2.4);
@@ -1132,7 +1127,7 @@
           rep(4, 0.5, () => {
             splash(x, y, 115, col);
             for (const m of game.world.monsters.slice())
-              if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < 115 + (m.r || 0)) dmg(m, 0.9);
+              if (m.hp > 0 && canaanBodyGap(m, x, y) < 115) dmg(m, 0.9);
           });
         }
         if (i === 2) {
@@ -1213,7 +1208,7 @@
           rep(5, 0.5, () => {
             splash(x, y, r, col);
             for (const m of game.world.monsters.slice())
-              if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < r + (m.r || 0)) dmg(m, 1, true);
+              if (m.hp > 0 && canaanBodyGap(m, x, y) < r) dmg(m, 1, true);
             for (const h of groupNear(3, x, y)) healHero(h, h.player.mhp * 0.02);
           });
         }
@@ -1241,7 +1236,7 @@
           splash(x, y, 135, col);
           if (charges) float(x, y - 60, '🌌 ×' + charges + ' CHARGE' + (charges > 1 ? 'S' : ''), '#d6aaff');
           for (const m of game.world.monsters.slice())
-            if (m.hp > 0 && Math.hypot(m.x - x, m.y - y) < 135 + (m.r || 0)) dmg(m, mult, true);
+            if (m.hp > 0 && canaanBodyGap(m, x, y) < 135) dmg(m, mult, true);
         }
         break;
     }

@@ -83,3 +83,42 @@ export function heroPower(attack) {
 export function heroMagicPower(attack, intellect = 0) {
   return Math.max(8, Math.round(heroPower(attack) + Math.max(0, intellect) * 0.85));
 }
+// Corps touchable d'un monstre : un axe vertical des pieds (m.x, m.y) jusqu'à la tête, épaissi d'un rayon. Les
+// coups du héros visent la silhouette entière, pas seulement les pieds. L'échelle suit le dessin (sprite-kit.js).
+/** @typedef {{ x: number, y: number, r?: number, boss?: boolean, worldBoss?: boolean, elite?: boolean, scale?: number }} BodyMob */
+/**
+ * @param {BodyMob} m
+ * @returns {number}
+ */
+export function canaanMobScale(m) {
+  return m.boss ? m.scale || 3.3 : m.worldBoss ? 3.6 : m.elite ? 1.95 : 1.5;
+}
+/**
+ * @param {BodyMob} m
+ * @returns {{ height: number, radius: number }}
+ */
+export function canaanBody(m) {
+  const scale = canaanMobScale(m);
+  return { height: 42 * scale * 0.7, radius: Math.max(m.r || 0, 34 * scale * 0.28) };
+}
+// Écart entre un point et la surface du corps (négatif dedans) : touché quand il est sous le rayon du coup.
+/**
+ * @param {BodyMob} m
+ * @param {number} x
+ * @param {number} y
+ * @returns {number}
+ */
+export function canaanBodyGap(m, x, y) {
+  const b = canaanBody(m),
+    cy = Math.max(m.y - b.height, Math.min(m.y, y));
+  return Math.hypot(m.x - x, cy - y) - b.radius;
+}
+// Points de l'axe du corps (pieds → tête), pour les coups en cône ou en ligne.
+/**
+ * @param {BodyMob} m
+ * @returns {{ x: number, y: number, radius: number }[]}
+ */
+export function canaanBodyPoints(m) {
+  const b = canaanBody(m);
+  return [0, 0.25, 0.5, 0.75, 1].map(k => ({ x: m.x, y: m.y - b.height * k, radius: b.radius }));
+}

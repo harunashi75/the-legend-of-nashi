@@ -409,8 +409,7 @@
     CANAAN_SKILLS.fx('ring', x, y, 0, TILES(tiles), 0, elementColor(element), 0.55);
     burst(x, y, elementColor(element), 18);
     for (const m of game.world.monsters.slice())
-      if (m !== except && alive(m) && Math.hypot(m.x - x, m.y - y) < TILES(tiles) + (m.r || 0))
-        effectHit(m, amount, element);
+      if (m !== except && alive(m) && canaanBodyGap(m, x, y) < TILES(tiles)) effectHit(m, amount, element);
   }
   function onKill(m, burned) {
     spreadPlague(m);
@@ -992,7 +991,7 @@
         within(z.owner, () => {
           const atk = characterStats(me()).attack * 0.15;
           for (const m of game.world.monsters.slice())
-            if (alive(m) && Math.hypot(m.x - z.x, m.y - z.y) < z.r + (m.r || 0)) effectHit(m, atk, 'holy');
+            if (alive(m) && canaanBodyGap(m, z.x, z.y) < z.r) effectHit(m, atk, 'holy');
         });
       }
     }

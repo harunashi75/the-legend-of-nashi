@@ -564,7 +564,7 @@
     const opts = m.lookOpts || {},
       spr = actor(m.look, m.pal, opts),
       big = m.boss || m.worldBoss,
-      scale = m.boss ? m.scale || 3.3 : m.worldBoss ? 3.6 : m.elite ? 1.95 : 1.5,
+      scale = canaanMobScale(m),
       floats = m.look === 'spirit' || m.look === 'angel' || m.look === 'horror' || m.look === 'flyer',
       bob = floats ? Math.sin(time * 0.08 + m.x) * (big ? 6 : 3) : 0,
       w = 34 * scale,

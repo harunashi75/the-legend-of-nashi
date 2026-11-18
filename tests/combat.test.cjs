@@ -234,6 +234,10 @@ test('Règle partagée des coups infligés : Puissance, écart de niveau, armure
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99).damage,85);
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99,0.92).damage,86);
  assert.equal(c.heroPower(18),23);assert.equal(c.heroPower(100),105);assert.equal(c.heroMagicPower(18),23);assert.equal(c.heroMagicPower(100),c.heroPower(100));assert.equal(c.heroPower(0),8);
+ // Corps touchable : la tête d'un boss de monde compte, pas seulement ses pieds.
+ const boss={x:0,y:0,r:29,worldBoss:true};
+ assert.ok(c.canaanBodyGap(boss,0,-120)<0);assert.ok(c.canaanBodyGap(boss,0,-60)<0);
+ assert.ok(c.canaanBodyGap(boss,0,80)>20);assert.equal(c.canaanBodyPoints({x:0,y:0,r:16}).length,5);
 });
 
 test('Compétences : attaques de base renforcées, info-bulles claires, charges du bâton visibles, postures utiles',()=>{

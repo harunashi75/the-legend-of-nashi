@@ -261,7 +261,7 @@
       if (has('onde') && done > 0 && ++rt.hits % 8 === 0) {
         const wave = characterStats(cur).attack * 0.4;
         for (const o of game.world.monsters.slice())
-          if (o.hp > 0 && Math.hypot(o.x - HP.x, o.y - HP.y) < 140 + (o.r || 0)) secondary(o, wave);
+          if (o.hp > 0 && canaanBodyGap(o, HP.x, HP.y) < 140) secondary(o, wave);
         burst(HP.x, HP.y, '#ffd890', 16);
       }
       if (has('lame_ardente') && done > 0 && m.hp > 0 && Math.random() < 0.15)

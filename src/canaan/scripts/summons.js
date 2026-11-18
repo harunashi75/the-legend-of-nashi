@@ -23,9 +23,18 @@
   // Ordre de l'instantané réseau (indice de la sorte) : les nouvelles sortes s'ajoutent à la fin.
   const ORDER = Object.freeze(['skeleton', 'rat', 'totem', 'abomination', 'crow']);
   const POISON = '#a4e83c';
-  // Distances en cases : chasse autour du maître, laisse (retour), disparition (carte changée), totem ;
-  // durée (s) de la ruée des corbeaux vers le point visé.
-  const RANGE = Object.freeze({ hunt: 7, leash: 9, lost: 16, totemCast: 8, totemHaste: 3, crowRush: 1.2 });
+  // Distances en cases : chasse autour du maître (nouvelle cible), poursuite d'une cible déjà engagée, laisse
+  // (retour), disparition (carte changée), totem ; durée (s) de la ruée des corbeaux vers le point visé.
+  // Le maître peut se tenir loin du combat : ses invocations continuent tant que la cible reste à portée de chasse.
+  const RANGE = Object.freeze({
+    hunt: 12,
+    keep: 14,
+    leash: 17,
+    lost: 26,
+    totemCast: 8,
+    totemHaste: 3,
+    crowRush: 1.2
+  });
   let list = [],
     serial = 0,
     // Vue d'un invité : invocations reçues de l'hôte (id → état affiché, interpolé).
@@ -243,9 +252,10 @@
       stepTo(s, s.goal.x, s.goal.y, k.speed * 1.3, k.fly);
       return;
     }
-    if (t >= s.retarget || !alive(s.target) || dist(s.target, p) > tiles(RANGE.hunt)) {
+    if (!alive(s.target) || dist(s.target, p) > tiles(RANGE.keep)) s.target = null;
+    if (t >= s.retarget || !s.target) {
       s.retarget = t + 0.25;
-      s.target = pickTarget(s);
+      s.target = pickTarget(s) || s.target;
     }
     const m = s.target;
     if (!m) {

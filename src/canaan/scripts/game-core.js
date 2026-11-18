@@ -901,7 +901,7 @@ function projectileStrike(p, m, value) {
 function projectileBlast(p, first) {
   CANAAN_SKILLS.fx('ring', p.x, p.y, 0, p.splash, 0, p.c, 0.45);
   for (const o of game.world.monsters.slice())
-    if (o !== first && o.hp > 0 && Math.hypot(o.x - p.x, o.y - p.y) < p.splash + (o.r || 0))
+    if (o !== first && o.hp > 0 && canaanBodyGap(o, p.x, p.y) < p.splash)
       projectileStrike(p, o, Math.max(1, Math.round(p.dmg * 0.5)));
 }
 // Sillage : une poussière fine pour la flèche et l'orbe, une traînée épaisse pour la comète et la peste.
@@ -1023,7 +1023,7 @@ function update() {
     }
     projectileTrail(p);
     game.world.monsters.slice().forEach(m => {
-      if (p.life > 0 && Math.hypot(m.x - p.x, m.y - p.y) < m.r + (p.size || 8)) {
+      if (p.life > 0 && m.hp > 0 && canaanBodyGap(m, p.x, p.y) < (p.size || 8)) {
         projectileStrike(p, m, p.dmg);
         if (p.splash) projectileBlast(p, m);
         p.life = 0;
