@@ -924,7 +924,46 @@ const I = {
   orangeDot: dot('#ff9a3a'),
   greenDot: dot('#4fd07a'),
   orangeDiamond: p('M12 3 L21 12 L12 21 L3 12 Z', '#ff9a3a') + hi('M8 10 L11 7', 1.4),
-  redSquare: r(4, 4, 16, 16, RED, 2) + hi('M7 7.5 L11 7.5', 1.4)
+  redSquare: r(4, 4, 16, 16, RED, 2) + hi('M7 7.5 L11 7.5', 1.4),
+  // Coquillage chantant : éventail nacré à côtes.
+  shell:
+    p('M12 20 L4 11 C4 6 8 3.5 12 3.5 C16 3.5 20 6 20 11 Z', '#f6d8e6') +
+    l('M12 19 L7 6.5 M12 19 L10 5 M12 19 L14 5 M12 19 L17 6.5', '#c890aa', 1.1) +
+    p('M9 19 L15 19 L14 21.5 L10 21.5 Z', '#e8b8cc') +
+    hi('M7 9 C8 7 9.5 6 11 5.6', 1.3),
+  // Pelote de laine : boule et fils enroulés, un bout qui pend.
+  yarn:
+    c(11, 12, 7.5, '#e88aa8') +
+    l('M5 9 C9 12 13 13 18 11 M4.5 13 C9 16 14 16 18.5 14 M8 5.5 C11 9 12 14 11 19.5', '#b85a7a', 1.1) +
+    l('M17 17 C19 19 21 19 22 21', '#e88aa8', 1.4) +
+    hi('M7 8 C8 6.5 9.5 5.5 11 5.3', 1.3),
+  // Pot de miel : pot ventru, couvercle de tissu, coulure dorée.
+  honey:
+    p('M6 10 C4 13 5 20 12 20.5 C19 20 20 13 18 10 Z', '#f0b030') +
+    r(5.5, 7, 13, 3.5, '#e5e0d0', 1) +
+    l('M5.5 8.8 L18.5 8.8', '#b08a50', 1) +
+    p('M9 10.5 L11 10.5 L10.5 14.5 C10.5 15.5 9.5 15.5 9.5 14.5 Z', '#ffd860') +
+    hi('M7.5 13 C7.5 15 8 16.5 9 17.5', 1.3),
+  // Bouteille de brise : flacon ventru bouché, tourbillon d'air.
+  bottle:
+    r(10, 2.5, 4, 3, '#a8743f', 0.8) +
+    p(
+      'M10 5.5 L14 5.5 L14 8 C18 9.5 19 13 19 15.5 C19 19 16 21 12 21 C8 21 5 19 5 15.5 C5 13 6 9.5 10 8 Z',
+      '#bfe6f4'
+    ) +
+    l('M8.5 15 C9 12.5 13 12 14 14 C15 16 12 17.5 11 16', '#5aa8d0', 1.2) +
+    hi('M7.5 12 C7.8 11 8.4 10.2 9.2 9.8', 1.3),
+  // Palmier aux dattes.
+  palm:
+    l('M12 21 C12.5 16 13 12 12 9', '#8a5a34', 2.6) +
+    p('M12 9 C8 4 3 5 2 9 C5 7.5 8 8 12 9 Z', LEAF) +
+    p('M12 9 C16 4 21 5 22 9 C19 7.5 16 8 12 9 Z', LEAF) +
+    p('M12 9 C9 9 4.5 11 4 15.5 C7 12 9.5 10.5 12 9 Z', LEAFD) +
+    p('M12 9 C15 9 19.5 11 20 15.5 C17 12 14.5 10.5 12 9 Z', LEAFD) +
+    p('M12 9 C9.5 7 9.5 3 12 1.8 C13.5 4 13.5 7 12 9 Z', LEAF) +
+    c(10.5, 10.5, 1.4, '#e0a030') +
+    c(13.3, 10.8, 1.4, '#e0a030') +
+    l('M4 21.5 L20 21.5', '#d8b878', 1.6)
 };
 delete I.cat2;
 // ---------------------------------------------------------------- Émojis du jeu → icônes
@@ -1096,6 +1135,11 @@ const MAP = {
   '🧺': 'basket',
   '🪣': 'bucket',
   '🏮': 'lantern',
+  '🐚': 'shell',
+  '🧶': 'yarn',
+  '🍯': 'honey',
+  '🍶': 'bottle',
+  '🌴': 'palm',
   '🌉': 'bridge',
   '⛵': 'boat',
   '⛲': 'fountain',

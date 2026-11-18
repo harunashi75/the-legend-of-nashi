@@ -180,3 +180,97 @@
   display: inline-block;
   font-style: normal;
 }
+/* Grand troc : l'échange proposé par l'habitant. */
+#window .quest-trade {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: 1px dashed #b8a070;
+  background: rgba(60, 42, 20, 0.55);
+}
+/* Fanfare « objet obtenu » et carte de titre des gardiens. */
+#questFanfare {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 260px;
+  max-width: min(480px, 92vw);
+  padding: 14px 26px 16px;
+  border: 2px solid var(--rpg-gold-light, #f0d070);
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 230, 150, 0.28), rgba(26, 16, 8, 0.94) 70%);
+  box-shadow:
+    0 0 28px rgba(255, 214, 110, 0.45),
+    0 8px 24px rgba(0, 0, 0, 0.6);
+  color: #f6e8c8;
+  font-family: var(--rpg-serif, Georgia, serif);
+  text-align: center;
+  pointer-events: none;
+  animation: questFanfareIn 0.35s ease-out;
+}
+/* Sans cette règle, display: flex l'emporte sur l'attribut hidden : la bannière vide resterait à l'écran. */
+#questFanfare[hidden] {
+  display: none;
+}
+#questFanfare i {
+  font-style: normal;
+  font-size: calc(40px * var(--font-scale, 1));
+  line-height: 1;
+  animation: questFanfareRaise 0.6s ease-out;
+}
+#questFanfare small {
+  color: #c9b48a;
+  font-size: calc(12px * var(--font-scale, 1));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#questFanfare b {
+  color: #ffe9a0;
+  font-size: calc(20px * var(--font-scale, 1));
+}
+#questFanfare span {
+  font-size: calc(13px * var(--font-scale, 1));
+  font-style: italic;
+  line-height: 1.45;
+}
+#questFanfare.boss {
+  border-color: #b070ff;
+  background: radial-gradient(circle at 50% 0%, rgba(160, 90, 255, 0.3), rgba(14, 8, 22, 0.95) 70%);
+  box-shadow: 0 0 30px rgba(150, 80, 255, 0.5);
+}
+#questFanfare.boss b {
+  color: #e8c8ff;
+  font-size: calc(24px * var(--font-scale, 1));
+}
+@keyframes questFanfareIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+@keyframes questFanfareRaise {
+  from {
+    transform: translateY(18px) scale(0.6);
+  }
+  60% {
+    transform: translateY(-6px) scale(1.15);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #questFanfare,
+  #questFanfare i {
+    animation: none;
+  }
+}

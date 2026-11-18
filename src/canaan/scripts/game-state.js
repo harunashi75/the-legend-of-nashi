@@ -36,7 +36,7 @@ const game = {
     // Classe (Druide, Paladin, Assassin, Élémentaliste) et talents équipés (5 au plus, selon le niveau).
     classe: { id: null, talents: [] },
     // Quêtes et histoire (shared/rules/quests.js : sanitizeQuests).
-    quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null },
+    quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null, troc: 0, shells: [], paid: 0 },
     // Rubis : nombre d'exemplaires possédés par identifiant et six emplacements.
     rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
     // Records de l'Arène des Épreuves.
@@ -119,7 +119,7 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
     kills: 0,
     intent: { dx: 0, dy: 0, attack: null, skill: null, aimX: x, aimY: y },
     classe: { id: null, talents: [] },
-    quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null },
+    quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null, troc: 0, shells: [], paid: 0 },
     rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
     arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
     prof: profFresh()

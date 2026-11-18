@@ -21,8 +21,23 @@
       /[&<>"']/g,
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
     );
-  const fresh = () => ({ active: {}, done: {}, flags: {}, choices: {}, track: null });
-  const stateOf = hero => (hero.quetes ??= fresh());
+  const fresh = () => ({
+    active: {},
+    done: {},
+    flags: {},
+    choices: {},
+    track: null,
+    troc: 0,
+    shells: [],
+    paid: 0
+  });
+  const stateOf = hero => {
+    const st = (hero.quetes ??= fresh());
+    st.troc ??= 0;
+    st.shells ??= [];
+    st.paid ??= 0;
+    return st;
+  };
   // État du monde : drapeaux (pont, lanternes, sanctuaires ouverts…) et énigmes résolues.
   let qworld = { flags: {}, solved: {} };
   // État vivant des énigmes partagées (non sauvegardé, sauf ce qui est résolu).
@@ -145,11 +160,63 @@
         site
       };
     }
+    placeAdventure(tools, reach);
     // Pierre de passage du camp (raccourci de la quête 8), au bord de la clairière.
     const w = tools.nearestSpot(camp.x - 4, camp.y - 9, 0, (x, y) => tools.walkableLand(x, y));
     WAYSTONE.camp = { x: (w.x + 0.5) * T, y: (w.y + 0.5) * T };
   }
   const WAYSTONE = { camp: null, forest: null };
+  // Sceaux des gardiens (au bord de leur clairière, loin des objets et des PNJ) et coquillages chantants (cachés
+  // juste hors du lieu, sur une case qu'on peut atteindre depuis le camp). Mêmes cases chez chacun.
+  function placeAdventure(tools, reach) {
+    const free = (site, dx, dy, gap) =>
+      !site.objs.some(o => Math.hypot(o.x - px(site, dx), o.y - py(site, dy)) < gap * T) &&
+      !Object.values(NPCS).some(n => Math.hypot(n.x - px(site, dx), n.y - py(site, dy)) < gap * T);
+    for (const id of Object.keys(GUARDIANS)) {
+      const q = questById(Number(id)),
+        site = q && SITES[q.site];
+      if (!site) continue;
+      let spot = null;
+      for (let k = 0; k < 24 && !spot; k++) {
+        const a = ((90 + k * 37) * Math.PI) / 180,
+          d = Math.max(2, site.r - 2 + (k % 2)),
+          dx = Math.round(Math.cos(a) * d),
+          dy = Math.round(Math.sin(a) * d);
+        if (
+          tools.walkableLand(site.x + dx, site.y + dy) &&
+          !WALK.has(tileKey(site.x + dx, site.y + dy)) &&
+          free(site, dx, dy, 2)
+        )
+          spot = [dx, dy];
+      }
+      const [dx, dy] = spot || walkableNear(site, 0, site.r - 1, tools);
+      addObj(site, 'gseal', 'gseal', dx, dy, { range: 1.4 });
+    }
+    for (const sh of SHELLS) {
+      const site = SITES[sh.site];
+      if (!site) continue;
+      let h = 7;
+      for (const ch of sh.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      let spot = null;
+      for (let k = 0; k < 24 && !spot; k++) {
+        const a = (((h % 360) + k * 47) * Math.PI) / 180,
+          d = site.r + 2 + (((h >> 5) + k) % 3),
+          x = Math.round(site.x + Math.cos(a) * d),
+          y = Math.round(site.y + Math.sin(a) * d);
+        if (
+          tools.valid(x, y) &&
+          tools.walkableLand(x, y) &&
+          reach[y * MAPW + x] === 1 &&
+          !WALK.has(tileKey(x, y)) &&
+          !isSafe(x, y) &&
+          free(site, x - site.x, y - site.y, 1.5)
+        )
+          spot = [x - site.x, y - site.y];
+      }
+      const [dx, dy] = spot || walkableNear(site, 0, site.r + 1, tools);
+      addObj(site, 'shell', 'shell', dx, dy, { shell: sh.id, range: 1.1 });
+    }
+  }
 
   // ---------------------------------------------------------------- Lieux et énigmes
   const ORDER_Q1 = PUZZLE_ORDER_Q1;
@@ -1112,6 +1179,7 @@
       if (t % 6 === 0) changed();
     }
     if (SITES.q27) stepDefense(SITES.q27);
+    stepGuardians();
     if (SITES.q30) stepLake(SITES.q30);
     const fly = ST.q29.fly;
     if (fly) {
@@ -1136,6 +1204,442 @@
         solve(site);
       }
     }
+  }
+
+  // ---------------------------------------------------------------- Au fil de l'aventure : gardiens, troc, coquillages
+  // Gardiens de l'Ombre (GUARDIANS) : un sceau dans le lieu de chaque fin de chapitre ; le briser (E) appelle le
+  // gardien, un vrai boss (barre en haut de l'écran, PV et coups de boss) avec ses attaques annoncées au sol. Vaincu :
+  // l'étape avance pour chaque héros proche qui l'a en cours, et chacun reçoit son Cœur d'Aurore (PV max), même s'il
+  // avait fini la quête avant l'arrivée des gardiens. Perdu (tout le monde à terre ou parti) : le sceau attend.
+  const FIGHTS = {};
+  // Attaques annoncées : centre, rayon, explosion à l'instant `at`, multiplicateur du coup du gardien.
+  const zones = [];
+  // Un gardien a 60 % des PV d'un boss de donjon de son niveau : un vrai combat, pas une épreuve d'endurance.
+  const GUARDIAN_HP = 0.6;
+  const heartFlag = q => 'heart_q' + q.id;
+  const guardianOf = q => (q ? GUARDIANS[q.id] || null : null);
+  const heroesNear = (x, y, r, dead = false) =>
+    game.heroes.filter(
+      h => (dead || !h.player.dead) && !h.away && Math.hypot(h.player.x - x, h.player.y - y) < r
+    );
+  // Le héros peut défier le gardien : il en est à cette étape, ou il a fini la quête sans en avoir le cœur.
+  function guardianDue(hero, q) {
+    if (!guardianOf(q)) return false;
+    const st = stateOf(hero);
+    return !!at(hero, q, 'guardian') || (!!st.done[q.id] && !st.flags[heartFlag(q)]);
+  }
+  function summonGuardian(site, hero) {
+    const q = site.quest,
+      g = guardianOf(q),
+      seal = site.objs.find(o => o.kind === 'gseal');
+    if (!g || !seal || FIGHTS[site.id] || !guardianDue(hero, q)) return false;
+    const cx = px(site, 0),
+      cy = py(site, 0),
+      // Au niveau de la quête, ou du héros le plus fort présent : le gardien reste un défi.
+      level = clampLevel(Math.max(q.level, ...heroesNear(cx, cy, 16 * T).map(h => clampLevel(h.level)))),
+      m = {
+        x: seal.x,
+        y: seal.y - T,
+        hp: 1,
+        mhp: 1,
+        level,
+        t: g.name,
+        r: 24,
+        cd: 1.2,
+        g: 40 + level * 8,
+        boss: true,
+        questGuardian: site.id,
+        look: g.look,
+        pal: [...g.pal],
+        lookOpts: { ...g.opts },
+        mobColor: g.color,
+        bossColor: g.color,
+        scale: g.scale
+      };
+    game.world.monsters.push(m);
+    scaleBossHp(m);
+    m.mhp = m.hp = Math.max(1, Math.round(m.mhp * GUARDIAN_HP));
+    const t = now();
+    FIGHTS[site.id] = { m, adds: 0, slam: t + 180, rain: t + 360, nova: t + 300, blink: t + 480 };
+    burst(m.x, m.y, g.color, 40);
+    burst(seal.x, seal.y, '#2a1a3e', 30);
+    for (const h of heroesNear(cx, cy, 16 * T)) tell(h, '⚔️ ' + g.intro);
+    changed();
+    return true;
+  }
+  function warn(m, x, y, r, delay, mult) {
+    zones.push({ m, x, y, r, at: now() + delay, start: now(), mult });
+    if (typeof CANAAN_SKILLS !== 'undefined') CANAAN_SKILLS.fx('ring', x, y, 0, r, 0, '#ff3a2a', delay / 60);
+  }
+  function explode(z) {
+    burst(z.x, z.y, '#ff6a3a', 22);
+    if (typeof CANAAN_SKILLS !== 'undefined') CANAAN_SKILLS.fx('ring', z.x, z.y, 0, z.r, 0, '#ffb070', 0.4);
+    if (!z.m || z.m.hp <= 0) return;
+    const raw = CANAAN_ENEMY_RAW_DAMAGE(z.m) * z.mult;
+    for (const hero of heroesNear(z.x, z.y, z.r))
+      CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(z.m, raw, {}, hero), z.m, hero);
+  }
+  // Renforts : deux créatures de l'espèce du gardien, à son niveau.
+  function spawnAdds(site, m, g) {
+    const type = MOB_TYPES.find(t => t.name === g.adds) || MOB_TYPES[0];
+    for (let k = 0; k < 2; k++) {
+      const a = Math.random() * Math.PI * 2;
+      let x = m.x + Math.cos(a) * 2.5 * T,
+        y = m.y + Math.sin(a) * 2.5 * T;
+      if (!canWalk(x, y)) [x, y] = [m.x, m.y];
+      const hp = mobHealth(m.level, false, type.hp);
+      game.world.monsters.push({
+        x,
+        y,
+        hp,
+        mhp: hp,
+        level: m.level,
+        t: type.name,
+        r: 16,
+        cd: 1,
+        g: 0,
+        mobColor: type.color,
+        elite: false,
+        questAdd: site.id,
+        _levelHp: true
+      });
+    }
+    float(m.x, m.y - 80, '📯 ' + m.t + ' appelle des renforts !', '#ffb0ff');
+  }
+  // Disparaît dans un nuage d'ombre et réapparaît ailleurs dans le lieu.
+  function blink(site, m) {
+    for (let tries = 0; tries < 12; tries++) {
+      const a = Math.random() * Math.PI * 2,
+        d = (1 + Math.random() * Math.max(1, site.r - 1)) * T,
+        x = px(site, 0) + Math.cos(a) * d,
+        y = py(site, 0) + Math.sin(a) * d;
+      if (!canWalk(x, y)) continue;
+      burst(m.x, m.y, m.bossColor, 24);
+      [m.x, m.y] = [x, y];
+      burst(x, y, m.bossColor, 24);
+      float(x, y - 90, '🌀 ' + m.t + ' disparaît !', '#c8a0ff');
+      return;
+    }
+  }
+  function stepGuardians() {
+    const t = now();
+    for (const [id, F] of Object.entries(FIGHTS)) {
+      const site = SITES[id],
+        m = F.m,
+        g = guardianOf(site.quest),
+        cx = px(site, 0),
+        cy = py(site, 0);
+      if (m.hp <= 0) {
+        endFight(site, true);
+        continue;
+      }
+      // Retiré du monde sans être vaincu (héros trop loin), ou plus personne debout près du lieu : le sceau attend.
+      if (!game.world.monsters.includes(m) || !heroesNear(cx, cy, (site.r + 12) * T).length) {
+        endFight(site, false);
+        continue;
+      }
+      // Le gardien ne quitte pas son lieu.
+      if (Math.hypot(m.x - cx, m.y - cy) > (site.r + 5) * T) {
+        burst(m.x, m.y, g.color, 16);
+        [m.x, m.y] = [cx, cy];
+      }
+      const ratio = m.hp / m.mhp,
+        pace = m.enraged ? 0.7 : 1,
+        targets = heroesNear(m.x, m.y, 12 * T);
+      if (!targets.length) continue;
+      const pick = () => targets[Math.floor(Math.random() * targets.length)];
+      if (g.moves.includes('slam') && t >= F.slam) {
+        F.slam = t + 300 * pace;
+        const h = pick();
+        warn(m, h.player.x, h.player.y, 1.8 * T, 80, 1.6);
+        float(m.x, m.y - 80, '⚠️ Coup de l’Ombre !', '#ff8a6a');
+      }
+      if (g.moves.includes('rain') && t >= F.rain) {
+        F.rain = t + 600 * pace;
+        for (const h of targets)
+          warn(
+            m,
+            h.player.x + (Math.random() - 0.5) * 40,
+            h.player.y + (Math.random() - 0.5) * 40,
+            1.3 * T,
+            75,
+            1.1
+          );
+        float(m.x, m.y - 80, '⚠️ Pluie d’éclats !', '#ff8a6a');
+      }
+      if (g.moves.includes('nova') && t >= F.nova) {
+        F.nova = t + 540 * pace;
+        warn(m, m.x, m.y, 3.4 * T, 90, 1.4);
+        float(m.x, m.y - 90, '⚠️ Onde de l’Ombre !', '#ff8a6a');
+      }
+      if (g.moves.includes('blink') && t >= F.blink) {
+        F.blink = t + 480 * pace;
+        blink(site, m);
+      }
+      const stage = ratio < 0.33 ? 2 : ratio < 0.66 ? 1 : 0;
+      if (stage > F.adds) {
+        F.adds = stage;
+        spawnAdds(site, m, g);
+      }
+      if (ratio < 0.25 && !m.enraged) {
+        m.enraged = true;
+        float(m.x, m.y - 100, '😡 ' + m.t + ' entre en rage !', '#ff4a3a');
+        burst(m.x, m.y, '#ff2a1a', 30);
+      }
+    }
+    for (let i = zones.length - 1; i >= 0; i--)
+      if (now() >= zones[i].at) {
+        const [z] = zones.splice(i, 1);
+        explode(z);
+      }
+  }
+  function endFight(site, win) {
+    const F = FIGHTS[site.id],
+      q = site.quest,
+      g = guardianOf(q);
+    delete FIGHTS[site.id];
+    game.world.monsters = game.world.monsters.filter(x => x !== F.m && x.questAdd !== site.id);
+    for (let i = zones.length - 1; i >= 0; i--) if (zones[i].m === F.m) zones.splice(i, 1);
+    const around = heroesNear(px(site, 0), py(site, 0), (site.r + 16) * T, true);
+    if (win) {
+      burst(F.m.x, F.m.y, '#ffe9a0', 50);
+      for (const h of around) {
+        if (!guardianDue(h, q)) continue;
+        tell(h, '✨ ' + g.defeat);
+        const st = stateOf(h);
+        if (!st.flags[heartFlag(q)]) {
+          st.flags[heartFlag(q)] = true;
+          recomputeHeroStats(h);
+          tell(h, '❤️ Cœur d’Aurore : PV max +3 % (' + heartCount(st) + ' / ' + HEART_FLAGS.length + ')');
+        }
+        if (at(h, q, 'guardian')) advance(h, q);
+      }
+      window.CANAAN_PERSISTENCE.requestSave();
+    } else
+      for (const h of around) tell(h, '🌑 ' + g.name + ' retourne dans l’ombre… Le sceau attend ton retour.');
+    changed();
+  }
+  // Annonces au sol chez l'hôte : remplissage rouge qui monte jusqu'à l'explosion (les invités voient l'anneau).
+  function drawZones(c) {
+    for (const z of zones) {
+      const k = Math.min(1, (now() - z.start) / Math.max(1, z.at - z.start));
+      c.globalAlpha = 0.16 + 0.24 * k;
+      c.fillStyle = '#ff2a1a';
+      c.beginPath();
+      c.arc(z.x, z.y, z.r * k, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.globalAlpha = 1;
+  }
+
+  // Le grand troc (TRADE_CHAIN) : chaque habitant donne son objet contre celui du précédent.
+  const tradeAt = (hero, npcId) => {
+    const t = TRADE_CHAIN[stateOf(hero).troc];
+    return t && t.npc === npcId ? t : null;
+  };
+  function trade(hero, npcId) {
+    const st = stateOf(hero),
+      t = tradeAt(hero, npcId),
+      npc = NPCS[npcId];
+    if (!t || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T) return false;
+    st.troc++;
+    tell(hero, '🎁 ' + t.gives.icon + ' ' + t.gives.name + ' — ' + t.hint);
+    if (st.troc >= TRADE_CHAIN.length) {
+      hero.player.gold += TRADE_FINAL.gold;
+      giveGear(clampLevel(hero.level), 'quest', TRADE_FINAL.item, hero);
+      tell(hero, '🏆 Grand troc terminé · +' + TRADE_FINAL.gold + ' or · ' + TRADE_FINAL.text);
+    }
+    if (hero === game.hero) CANAAN_SOUND.cue('fanfare');
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Coquillages chantants (SHELLS) : un par lieu, ramassé par chacun pour soi.
+  const hasLoupe = hero => stateOf(hero).troc >= TRADE_CHAIN.length;
+  function pickShell(hero, o) {
+    const st = stateOf(hero);
+    if (st.shells.includes(o.shell)) return false;
+    st.shells.push(o.shell);
+    tell(hero, '🐚 Coquillage chantant ! (' + st.shells.length + ' / ' + SHELLS.length + ')');
+    if (shellRewardsDue(st).length)
+      tell(hero, '🐚 Madame Nacre, au Camp de l’Aurore, aimerait voir ta collection.');
+    burst(o.x, o.y, '#ffd8f0', 18);
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Paliers de la collection, récompensés par Madame Nacre.
+  function claimShells(hero) {
+    const st = stateOf(hero),
+      npc = NPCS.nacre,
+      due = shellRewardsDue(st);
+    if (!npc || !due.length || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T)
+      return false;
+    for (const r of due) {
+      st.paid++;
+      hero.player.gold += r.gold;
+      if (r.item) giveGear(clampLevel(hero.level), 'quest', r.item, hero);
+      if (r.heart) {
+        st.flags[r.heart] = true;
+        recomputeHeroStats(hero);
+      }
+      tell(hero, '🐚 Palier de ' + r.n + ' coquillages · +' + r.gold + ' or · ' + r.text);
+    }
+    if (hero === game.hero) CANAAN_SOUND.cue('fanfare');
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Coquillage le plus proche pas encore trouvé (boussole de la Loupe d'Orven), à moins de 60 cases.
+  function shellTarget(hero) {
+    if (!hasLoupe(hero)) return null;
+    const st = stateOf(hero);
+    let best = null,
+      bd = 60 * T;
+    for (const site of Object.values(SITES))
+      for (const o of site.objs) {
+        if (o.kind !== 'shell' || st.shells.includes(o.shell)) continue;
+        const d = Math.hypot(hero.player.x - o.x, hero.player.y - o.y);
+        if (d < bd) [best, bd] = [o, d];
+      }
+    return (
+      best && {
+        x: best.x,
+        y: best.y,
+        text: 'La Loupe d’Orven entend un coquillage',
+        q: { title: 'Coquillage chantant', main: false }
+      }
+    );
+  }
+  function drawShell(c, o) {
+    const st = stateOf(game.hero);
+    if (st.shells.includes(o.shell)) return;
+    const d = Math.hypot(P.x - o.x, P.y - o.y),
+      loupe = hasLoupe(game.hero);
+    // Caché dans l'herbe : un éclat de temps en temps quand on passe à côté, visible de près (de loin avec la loupe).
+    if (d > (loupe ? 14 : 2.6) * T) {
+      if (d < 6 * T && (time + o.x) % 150 < 8) glow(c, o.x, o.y - 4, 16, '#ffe8f4', 0.7);
+      return;
+    }
+    if (loupe) glow(c, o.x, o.y - 4, 30 + Math.sin(time * 0.1) * 6, '#ffd0ec', 0.45);
+    shadowAt(c, o.x, o.y + 8, 9, 3);
+    rune(c, o.x, o.y + 6 + Math.sin(time * 0.08) * 1.5, '🐚', '#ffffff', 18);
+    if (time % 40 < 20) R(c, o.x + 6, o.y - 10, 2, 2, '#ffffff');
+  }
+  function drawSeal(c, site, o) {
+    const q = site.quest,
+      due = guardianDue(game.hero, q),
+      fight = !!FIGHTS[site.id] || game.world.monsters.some(m => m.boss && m.t === guardianOf(q).name),
+      done = stateOf(game.hero).flags[heartFlag(q)];
+    shadowAt(c, o.x, o.y + 10, 20, 6);
+    block(c, o.x - 16, o.y - 2, 32, 12, PAL.dark);
+    if (done) return rune(c, o.x, o.y + 7, '✦', '#ffe9a0', 14);
+    // Sceau de l'Ombre : une rune violette qui pulse, plus fort quand le gardien attend ce héros.
+    const pulse = 0.5 + 0.5 * Math.sin(time * (due ? 0.12 : 0.05));
+    glow(c, o.x, o.y + 2, due ? 40 : 22, '#8a4aff', fight ? 0.15 : 0.25 + 0.3 * pulse);
+    rune(c, o.x, o.y + 8, '۞', fight ? '#3a2a4e' : '#c8a0ff', 16);
+  }
+
+  // Fanfare « objet obtenu » : à chaque objet du troc, coquillage, Cœur d'Aurore ou étoile, le héros brandit sa
+  // trouvaille au-dessus de sa tête et une bannière s'affiche. Tirée de l'état du héros local (hôte comme invité,
+  // qui reçoit le sien de l'hôte) : rien de plus à envoyer sur le réseau.
+  const fanfareEl = document.createElement('div');
+  fanfareEl.id = 'questFanfare';
+  fanfareEl.hidden = true;
+  document.body.appendChild(fanfareEl);
+  const fanfares = [];
+  let fanfareUntil = 0,
+    raised = null,
+    seen = null;
+  const stateMark = st => ({
+    troc: st.troc,
+    shells: st.shells.length,
+    hearts: heartCount(st),
+    stars: starCount(st),
+    lumi: !!st.flags.lumi
+  });
+  function fanfare(icon, title, text, kind = 'item') {
+    fanfares.push({ icon, title, text, kind });
+  }
+  function watchFanfare() {
+    if (!started) {
+      seen = null;
+      return;
+    }
+    const st = stateOf(game.hero),
+      cur = stateMark(st);
+    if (seen) {
+      // Une aventure chargée (beaucoup de changements d'un coup) ne déclenche rien.
+      const jumps =
+        cur.troc -
+        seen.troc +
+        (cur.shells - seen.shells) +
+        (cur.hearts - seen.hearts) +
+        (cur.stars - seen.stars);
+      if (jumps > 0 && jumps <= 3) {
+        if (cur.troc > seen.troc) {
+          const t = TRADE_CHAIN[cur.troc - 1];
+          fanfare(t.gives.icon, t.gives.name, t.desc);
+        }
+        if (cur.shells > seen.shells)
+          fanfare(
+            '🐚',
+            'Coquillage chantant',
+            cur.shells + ' / ' + SHELLS.length + ' — Madame Nacre, au Camp de l’Aurore, les collectionne.'
+          );
+        if (cur.hearts > seen.hearts)
+          fanfare('❤️', 'Cœur d’Aurore', 'PV max +3 % (' + cur.hearts + ' / ' + HEART_FLAGS.length + ')');
+        if (cur.stars > seen.stars)
+          fanfare(
+            '✦',
+            'Étoile du Cœur',
+            'Une étoile du Cœur de l’Aurore te rejoint (' + cur.stars + ' / 6).'
+          );
+      }
+      if (cur.lumi && !seen.lumi)
+        fanfare('✨', 'Lumi', 'Une petite lumière tombée du ciel devient ta compagne de voyage.');
+    }
+    seen = cur;
+    // Carte de titre d'un gardien qui apparaît près du héros.
+    for (const m of game.world.monsters)
+      if (m.boss && !m._questIntro && GUARDIAN_NAMES.has(m.t) && Math.hypot(m.x - P.x, m.y - P.y) < 16 * T) {
+        m._questIntro = true;
+        const g = Object.values(GUARDIANS).find(g => g.name === m.t);
+        fanfare('⚔️', g.name, g.title, 'boss');
+      }
+    if (time < fanfareUntil || !fanfares.length) {
+      if (time >= fanfareUntil && !fanfareEl.hidden) fanfareEl.hidden = true;
+      return;
+    }
+    const f = fanfares.shift();
+    fanfareUntil = time + (f.kind === 'boss' ? 150 : 170);
+    raised = f.kind === 'boss' ? null : { icon: f.icon, until: fanfareUntil };
+    fanfareEl.className = f.kind;
+    fanfareEl.innerHTML =
+      '<i>' +
+      esc(f.icon) +
+      '</i><small>' +
+      (f.kind === 'boss' ? 'Gardien de l’Ombre' : 'Tu as obtenu') +
+      '</small><b>' +
+      esc(f.title) +
+      '</b><span>' +
+      esc(f.text) +
+      '</span>';
+    fanfareEl.hidden = false;
+    CANAAN_SOUND.cue(f.kind === 'boss' ? 'wrong' : 'fanfare');
+    if (f.kind !== 'boss') burst(P.x, P.y - 60, '#ffe9a0', 26);
+  }
+  const GUARDIAN_NAMES = new Set(Object.values(GUARDIANS).map(g => g.name));
+  // Le héros brandit sa trouvaille au-dessus de sa tête.
+  function drawRaised(c) {
+    if (!raised || time >= raised.until || P.dead) return;
+    const k = Math.min(1, (raised.until - time) / 20),
+      y = P.y - 78 - Math.min(14, (170 - (raised.until - time)) * 0.8);
+    c.globalAlpha = k;
+    glow(c, P.x, y - 8, 46, '#fff2b0', 0.6);
+    for (let i = 0; i < 8; i++) {
+      const a = time * 0.03 + (i * Math.PI) / 4;
+      R(c, P.x + Math.cos(a) * 28, y - 8 + Math.sin(a) * 28, 3, 3, '#fff6c8');
+    }
+    rune(c, P.x, y, raised.icon, '#ffffff', 28);
+    c.globalAlpha = 1;
   }
 
   // ---------------------------------------------------------------- Progression d'un héros
@@ -1265,6 +1769,10 @@
     const q = site.quest,
       S = ST[site.id];
     switch (o.kind) {
+      case 'gseal':
+        return summonGuardian(site, hero);
+      case 'shell':
+        return pickShell(hero, o);
       case 'stele':
         return panel(hero, '🪨 Stèle ancienne', q.hint);
       case 'crystal':
@@ -1671,6 +2179,15 @@
       case 'fresco27':
       case 'altar27':
         return true;
+      case 'gseal':
+        // Un seul gardien à la fois (chez l'invité, FIGHTS est vide : le boss présent suffit).
+        return (
+          guardianDue(hero, q) &&
+          !FIGHTS[site.id] &&
+          !game.world.monsters.some(m => m.boss && m.t === guardianOf(q).name)
+        );
+      case 'shell':
+        return !st.shells.includes(o.shell);
     }
     return true;
   }
@@ -1731,7 +2248,9 @@
         lever: 'Actionner le levier',
         echest: 'Ouvrir le coffre',
         perch: 'Régler le perchoir',
-        horn: 'Sonner le cor'
+        horn: 'Sonner le cor',
+        gseal: 'Briser le sceau de l’Ombre',
+        shell: 'Ramasser le coquillage'
       }[o.kind] || 'Agir'
     );
   }
@@ -1760,6 +2279,8 @@
       return true;
     }
     if (a.op === 'quest-choice') return choose(hero, a.q, a.choice);
+    if (a.op === 'quest-trade') return trade(hero, a.npc);
+    if (a.op === 'quest-shells') return claimShells(hero);
     if (a.op === 'quest-act') {
       if (a.site === 'camp' && a.obj === 'campstone')
         return (
@@ -1806,6 +2327,7 @@
 
   // ---------------------------------------------------------------- Dialogues des PNJ
   function npcState(hero, q) {
+    if (!q) return 'none';
     const st = stateOf(hero);
     if (st.done[q.id]) return 'after';
     if (questReady(st, q)) return 'ready';
@@ -1815,7 +2337,75 @@
   function rewardLine(q) {
     return '+' + questXp(q) + ' XP · +' + q.reward.gold + ' or · ' + q.reward.text;
   }
+  // Madame Nacre : la collection de coquillages chantants et ses paliers.
+  function talkCollector(npc) {
+    const st = stateOf(game.hero),
+      due = shellRewardsDue(st),
+      n = st.shells.length;
+    const body =
+      '<p class="quest-text">« ' +
+      esc(
+        n
+          ? due.length
+            ? 'Oh ! Ils chantent si fort, tes coquillages ! Montre-les-moi, j’ai quelque chose pour toi.'
+            : 'Écoute-les… chacun fredonne un petit bout de la vieille chanson. Il en reste d’autres, j’en suis sûre.'
+          : 'Bonjour, voyageur ! Tu n’aurais pas entendu un coquillage chanter, par hasard ?'
+      ) +
+      ' »</p><p class="quest-note">' +
+      esc(SHELL_LORE) +
+      '</p><div class="quest-card"><b>🐚 Coquillages chantants : ' +
+      n +
+      ' / ' +
+      SHELLS.length +
+      '</b><ul>' +
+      SHELL_REWARDS.map(
+        (r, i) =>
+          '<li class="' +
+          (i < st.paid ? 'done' : n >= r.n ? 'current' : '') +
+          '">' +
+          (i < st.paid ? '✓ ' : n >= r.n ? '➤ ' : '◦ ') +
+          r.n +
+          ' coquillages · +' +
+          r.gold +
+          ' or · ' +
+          esc(r.text) +
+          '</li>'
+      ).join('') +
+      '</ul><p class="quest-note">Chaque lieu de quête cache un coquillage, un peu à l’écart. De près, ils scintillent.</p></div>';
+    modernPanel(
+      '<div class="quest-dialog"><h2>' +
+        esc(npc.def.name) +
+        '</h2>' +
+        body +
+        '<div class="quest-buttons">' +
+        (due.length ? '<button data-action="questShells">Montrer mes coquillages</button>' : '') +
+        '<button data-action="closePanels">Au revoir</button></div></div>'
+    );
+  }
+  // Échange du grand troc proposé par cet habitant (si c'est son tour).
+  function tradeHtml(hero, npc) {
+    const t = tradeAt(hero, npc.id);
+    if (!t) return { body: '', button: '' };
+    const held = tradeItem(stateOf(hero));
+    return {
+      body:
+        '<div class="quest-trade">' +
+        (held ? '<p class="quest-note">🎁 Tu tiens : ' + esc(held.icon + ' ' + held.name) + '</p>' : '') +
+        '<p class="quest-text">« ' +
+        esc(t.line) +
+        ' »</p></div>',
+      button:
+        '<button data-action="questTrade" data-npc="' +
+        npc.id +
+        '">' +
+        esc(
+          held ? 'Donner : ' + held.icon + ' ' + held.name : 'Prendre : ' + t.gives.icon + ' ' + t.gives.name
+        ) +
+        '</button>'
+    };
+  }
   function talkTo(id) {
+    if (NPCS[id].def.collector) return talkCollector(NPCS[id]);
     const npc = NPCS[id],
       q = npc.quest,
       hero = game.hero,
@@ -1863,6 +2453,9 @@
         '</p>';
       buttons = '<button data-action="questTurnIn" data-quest="' + q.id + '">Terminer la quête</button>';
     } else body = '<p class="quest-text">« ' + esc(q.talk.after) + ' »</p>';
+    const swap = tradeHtml(hero, npc);
+    body += swap.body;
+    buttons += swap.button;
     modernPanel(
       '<div class="quest-dialog"><h2>' +
         esc(npc.def.name) +
@@ -1933,6 +2526,14 @@
   window.questChoice = (id, choice) => {
     closePanels();
     if (request('quest-choice', { q: id, choice }) === null) choose(game.hero, id, choice);
+  };
+  window.questTrade = npcId => {
+    closePanels();
+    if (request('quest-trade', { npc: npcId }) === null) trade(game.hero, npcId);
+  };
+  window.questShells = () => {
+    closePanels();
+    if (request('quest-shells', {}) === null) claimShells(game.hero);
   };
   window.questTrack = id => {
     const st = stateOf(game.hero);
@@ -2025,6 +2626,101 @@
       html += side.length
         ? side.map(list).join('')
         : '<p class="quest-note">Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.</p>';
+    } else if (tab === 'treasure') {
+      // Grand troc : l'objet tenu et à qui le porter.
+      const held = tradeItem(st),
+        next = TRADE_CHAIN[st.troc];
+      html +=
+        '<div class="quest-card"><b>🎁 Le grand troc · ' +
+        st.troc +
+        ' / ' +
+        TRADE_CHAIN.length +
+        '</b>' +
+        (held
+          ? '<p>Tu tiens : ' +
+            esc(held.icon + ' ' + held.name) +
+            ' — <i>' +
+            esc(TRADE_CHAIN[st.troc - 1].desc) +
+            '</i></p>'
+          : '') +
+        '<p class="quest-note">' +
+        esc(
+          held
+            ? TRADE_CHAIN[st.troc - 1].hint
+            : 'Les habitants de l’île aiment échanger. Milo, le berger des Plaines verdoyantes, a toujours de la laine en trop…'
+        ) +
+        '</p>' +
+        (!next
+          ? '<p class="quest-reward">🔎 La Loupe d’Orven fait briller les coquillages chantants de loin.</p>'
+          : '') +
+        '</div>';
+      // Cœurs d'Aurore et gardiens de l'Ombre.
+      const hearts = heartCount(st);
+      html +=
+        '<div class="quest-card"><b>❤️ Cœurs d’Aurore · ' +
+        hearts +
+        ' / ' +
+        HEART_FLAGS.length +
+        '</b><p>PV max +' +
+        Math.round(heartBonus(st) * 100) +
+        ' %. Chaque gardien de l’Ombre vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.</p><ul>' +
+        Object.entries(GUARDIANS)
+          .map(([id, g]) => {
+            const q = quest(Number(id)),
+              won = st.flags['heart_q' + id],
+              known = won || st.done[q.id] || st.active[q.id];
+            return (
+              '<li class="' +
+              (won ? 'done' : '') +
+              '">' +
+              (won ? '✓ ' : '◦ ') +
+              (known ? esc(g.name + ', ' + g.title) : '???') +
+              ' — ' +
+              esc(ZONES[CHAPTERS[q.chapter].zone].name) +
+              '</li>'
+            );
+          })
+          .join('') +
+        '</ul></div>';
+      // Coquillages chantants : par région, ceux qui restent (avec la loupe, on sait où chercher).
+      const loupe = hasLoupe(game.hero);
+      html +=
+        '<div class="quest-card"><b>🐚 Coquillages chantants · ' +
+        st.shells.length +
+        ' / ' +
+        SHELLS.length +
+        '</b><p>' +
+        esc(SHELL_LORE) +
+        '</p><ul>' +
+        ZONES.slice(0, 6)
+          .map((z, i) => {
+            const all = SHELLS.filter(sh => QUEST_SITES[sh.site].zone === i),
+              got = all.filter(sh => st.shells.includes(sh.id)).length;
+            return (
+              '<li class="' +
+              (got === all.length ? 'done' : '') +
+              '">' +
+              (got === all.length ? '✓ ' : '◦ ') +
+              esc(z.name) +
+              ' · ' +
+              got +
+              ' / ' +
+              all.length +
+              (loupe && got < all.length
+                ? ' · ' +
+                  esc(
+                    'près de ' +
+                      all
+                        .filter(sh => !st.shells.includes(sh.id))
+                        .map(sh => QUEST_NPCS[QUESTS.find(q => q.site === sh.site).npc].name)
+                        .join(', ')
+                  )
+                : '') +
+              '</li>'
+            );
+          })
+          .join('') +
+        '</ul><p class="quest-note">Chaque lieu de quête en cache un, un peu à l’écart. Madame Nacre, au Camp de l’Aurore, récompense les collectionneurs.</p></div>';
     } else {
       const done = QUESTS.filter(q => st.done[q.id]);
       html += done.length
@@ -2047,6 +2743,7 @@
     const tabs = [
       ['main', '📖 Histoire principale'],
       ['side', '🍃 Quêtes secondaires'],
+      ['treasure', '🎁 Trésors'],
       ['done', '✓ Terminées']
     ];
     modernPanel(
@@ -2233,6 +2930,10 @@
       q = site.quest,
       st = stateOf(hero);
     switch (o.kind) {
+      case 'gseal':
+        return drawSeal(c, site, o);
+      case 'shell':
+        return drawShell(c, o);
       case 'stone':
         return standing(
           c,
@@ -3056,7 +3757,7 @@
     c.save();
     c.imageSmoothingEnabled = false;
     for (const site of Object.values(SITES)) {
-      if (!visible(px(site, 0), py(site, 0), (site.r + 4) * T)) continue;
+      if (!visible(px(site, 0), py(site, 0), (site.r + 7) * T)) continue;
       drawSiteExtras(c, site);
       for (const o of site.objs) if (visible(o.x, o.y)) drawObj(c, site, o);
     }
@@ -3093,19 +3794,26 @@
         c.globalAlpha = 1;
       }
       const mode = npcState(game.hero, npc.quest),
+        // Grand troc : l'habitant qui attend l'objet tenu montre un cadeau (de près) ; Madame Nacre, un palier atteint.
+        gift =
+          (Math.hypot(dx, dy) < 6 * T && tradeAt(game.hero, npc.id)) ||
+          (def.collector && shellRewardsDue(stateOf(game.hero)).length),
         mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : mode === 'active' ? '…' : '';
+      if (gift && !mark) rune(c, npc.x, npc.y - 58 * s + Math.sin(time * 0.08) * 3, '🎁', '#ffffff', 22);
       if (mark) {
         c.font = 'bold 26px Georgia, serif';
         c.textAlign = 'center';
         c.lineWidth = 4;
         c.strokeStyle = '#2a1a08';
-        c.fillStyle = mark === '…' ? '#c8c0b0' : npc.quest.main ? '#ffd84a' : '#fff0a0';
+        c.fillStyle = mark === '…' ? '#c8c0b0' : npc.quest?.main ? '#ffd84a' : '#fff0a0';
         const yy = npc.y - 58 * s + Math.sin(time * 0.08) * 3;
         c.strokeText(mark, npc.x, yy);
         c.fillText(mark, npc.x, yy);
       }
       if (Math.hypot(dx, dy) < 4 * T) nameTag(c, npc.x, npc.y - 46 * s, def.name);
     }
+    if (!guest()) drawZones(c);
+    drawRaised(c);
     // Lumi éclaire la nuit autour de chaque héros qu'elle accompagne.
     for (const hero of game.heroes) {
       const l = lumiAt.get(hero);
@@ -3124,7 +3832,7 @@
     if (game.world.instance) return;
     for (const npc of Object.values(NPCS)) {
       const d = Math.hypot(P.x - npc.x, P.y - npc.y);
-      if (d > 4 * T || d < 1.6 * T || npcState(game.hero, npc.quest) !== 'offer') continue;
+      if (!npc.quest || d > 4 * T || d < 1.6 * T || npcState(game.hero, npc.quest) !== 'offer') continue;
       // Traduite avant d'être coupée : un début de phrase seul ne serait pas reconnu.
       const said = translateText(npc.quest.talk.offer[0]),
         text = said.slice(0, 60) + (said.length > 60 ? '…' : '');
@@ -3198,6 +3906,7 @@
       R(ctx, l.x + 5 - Math.sin(time * 0.3) * 2, l.y - 3, 4, 2, '#dff4ff');
     }
     ctx.restore();
+    watchFanfare();
     if (time % 15 === 0) tracker();
   };
   // Cible de la quête suivie : le PNJ s'il faut y retourner, sinon le lieu ou l'objet de l'étape.
@@ -3240,7 +3949,7 @@
   trackerEl.hidden = true;
   document.body.appendChild(trackerEl);
   function tracker() {
-    const tr = started && !game.world.instance ? target(game.hero) : null;
+    const tr = started && !game.world.instance ? target(game.hero) || shellTarget(game.hero) : null;
     trackerEl.hidden = !tr;
     if (!tr) return;
     const d = Math.round(Math.hypot(tr.x - P.x, tr.y - P.y) / T),
@@ -3457,6 +4166,10 @@
     applyRemote,
     questLook,
     done: (hero, id) => !!stateOf(hero).done[id],
+    trade,
+    claimShells,
+    guardianDue,
+    fights: () => FIGHTS,
     drawWorld,
     drawBubbles,
     render: renderJournal,

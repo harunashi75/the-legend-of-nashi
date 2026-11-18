@@ -98,6 +98,8 @@
     questAccept: element => questAccept(actionInteger(element, 'quest')),
     questTurnIn: element => questTurnIn(actionInteger(element, 'quest')),
     questChoice: element => questChoice(actionInteger(element, 'quest'), actionInteger(element, 'choice')),
+    questTrade: element => questTrade(actionText(element, 'npc')),
+    questShells: () => questShells(),
     toggleInventory: () => toggleInventory(),
     toggleCharacter: () => toggleCharacter(),
     toggleMap: () => toggleMap(),

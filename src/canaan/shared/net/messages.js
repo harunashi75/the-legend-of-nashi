@@ -191,6 +191,10 @@ export function sanitizeAction(raw) {
     return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7
       ? { op: r.op, q: r.q, choice: r.choice }
       : null;
+  // Grand troc : l'habitant (identifiant de PNJ) ; coquillages : récompenses de Madame Nacre.
+  if (r.op === 'quest-trade')
+    return typeof r.npc === 'string' && /^[a-z]{2,16}$/.test(r.npc) ? { op: r.op, npc: r.npc } : null;
+  if (r.op === 'quest-shells') return { op: r.op };
   if (r.op === 'quest-act')
     return typeof r.site === 'string' &&
       /^(q\d{1,2}|camp)$/.test(r.site) &&

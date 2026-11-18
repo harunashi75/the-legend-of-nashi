@@ -1035,7 +1035,12 @@
       else if (/^note[1-4]$/.test(name))
         bell(fxBus, midi([60, 64, 67, 72][Number(name[4]) - 1] + 12), ac.currentTime, 0.7, 0.07);
       else if (name === 'puzzle') lootSound();
-      else if (name === 'chest') chestSound();
+      // Fanfare « objet obtenu » : un arpège qui monte puis un accord tenu.
+      else if (name === 'fanfare') {
+        const t0 = ac.currentTime;
+        [67, 71, 74, 79].forEach((n, i) => bell(fxBus, midi(n), t0 + i * 0.09, 0.5, 0.06));
+        for (const n of [79, 83, 86]) bell(fxBus, midi(n), t0 + 0.42, 1.3, 0.045);
+      } else if (name === 'chest') chestSound();
       else if (name === 'wrong') bell(fxBus, midi(43), ac.currentTime, 0.35, 0.05);
     },
     state() {

@@ -1,7 +1,15 @@
 // @ts-check
 // Règles des quêtes : récompenses d'XP, disponibilité, et état d'un héros vérifié (sauvegardes, réseau).
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
-import { QUESTS, SANCTUARIES } from '../data/quests.js';
+import {
+  QUESTS,
+  SANCTUARIES,
+  HEART_FLAGS,
+  HEART_BONUS,
+  SHELLS,
+  SHELL_REWARDS,
+  TRADE_CHAIN
+} from '../data/quests.js';
 import { clampLevel, xpToNext } from './stats.js';
 
 /** @typedef {typeof QUESTS[number]} Quest */
@@ -13,6 +21,9 @@ import { clampLevel, xpToNext } from './stats.js';
  * @property {Record<string, boolean>} flags drapeaux d'histoire
  * @property {Record<number, number>} choices choix narratifs
  * @property {number | null} track quête suivie
+ * @property {number} troc échanges du grand troc déjà faits (0 à TRADE_CHAIN.length)
+ * @property {string[]} shells coquillages chantants trouvés
+ * @property {number} paid paliers de coquillages déjà récompensés
  */
 
 /** @type {(id: number) => Quest | null} */
@@ -30,8 +41,10 @@ export function questXp(quest) {
 // Drapeaux d'histoire connus (récompenses et lieux débloqués).
 const FLAGS = new Set([
   ...QUESTS.flatMap(q => q.reward.flags || []),
-  ...SANCTUARIES.map(s => 'visit_' + s.id)
+  ...SANCTUARIES.map(s => 'visit_' + s.id),
+  ...HEART_FLAGS
 ]);
+const SHELL_IDS = new Set(SHELLS.map(s => s.id));
 // État de quêtes d'un héros, vérifié : quêtes actives (étape et données), terminées, drapeaux,
 // choix narratifs, quête suivie.
 /**
@@ -40,7 +53,16 @@ const FLAGS = new Set([
  */
 export function sanitizeQuests(raw) {
   const r = raw && typeof raw === 'object' ? raw : {},
-    /** @type {QuestState} */ out = { active: {}, done: {}, flags: {}, choices: {}, track: null };
+    /** @type {QuestState} */ out = {
+      active: {},
+      done: {},
+      flags: {},
+      choices: {},
+      track: null,
+      troc: 0,
+      shells: [],
+      paid: 0
+    };
   if (r.done && typeof r.done === 'object')
     for (const [k, v] of Object.entries(r.done))
       if (questById(Number(k))) out.done[Number(k)] = Number.isFinite(v) ? Math.max(0, Math.floor(v)) : 1;
@@ -62,6 +84,12 @@ export function sanitizeQuests(raw) {
     for (const [k, v] of Object.entries(r.choices))
       if (questById(Number(k)) && Number.isInteger(v) && v >= 0 && v < 8) out.choices[Number(k)] = v;
   if (questById(Number(r.track)) && (out.active[Number(r.track)] || false)) out.track = Number(r.track);
+  if (Number.isInteger(r.troc)) out.troc = Math.max(0, Math.min(TRADE_CHAIN.length, r.troc));
+  if (Array.isArray(r.shells))
+    out.shells = [
+      ...new Set(r.shells.filter(/** @param {unknown} x */ x => typeof x === 'string' && SHELL_IDS.has(x)))
+    ];
+  if (Number.isInteger(r.paid)) out.paid = Math.max(0, Math.min(SHELL_REWARDS.length, r.paid));
   return out;
 }
 // Une quête peut commencer : pas déjà active ni terminée, et (principale) la précédente de l'histoire est faite.
@@ -81,3 +109,15 @@ export const questReady = (state, quest) =>
 // Nombre d'étoiles du Cœur retrouvées (drapeaux star1…star6).
 /** @type {(state: QuestState) => number} */
 export const starCount = state => [1, 2, 3, 4, 5, 6].filter(n => state.flags['star' + n]).length;
+// Cœurs d'Aurore réunis (gardiens vaincus, paliers de coquillages) et bonus de PV max qu'ils donnent (fraction).
+/** @type {(state: QuestState) => number} */
+export const heartCount = state => HEART_FLAGS.filter(f => state.flags[f]).length;
+/** @type {(state: QuestState) => number} */
+export const heartBonus = state => heartCount(state) * HEART_BONUS;
+// Paliers de coquillages atteints mais pas encore récompensés.
+/** @type {(state: QuestState) => typeof SHELL_REWARDS[number][]} */
+export const shellRewardsDue = state =>
+  SHELL_REWARDS.slice(state.paid).filter(r => state.shells.length >= r.n);
+// Objet du grand troc tenu par le héros (le dernier reçu), ou null.
+/** @type {(state: QuestState) => typeof TRADE_CHAIN[number]['gives'] | null} */
+export const tradeItem = state => (state.troc > 0 ? TRADE_CHAIN[state.troc - 1].gives : null);

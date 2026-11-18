@@ -281,11 +281,20 @@ export const QUEST_NPCS = deepFreeze({
     site: 'q30',
     at: [-5, 3],
     look: { sex: 'f', race: 'elfe', hair: '#c8e0ff', outfit: 'glace' }
+  },
+  // Collectionneuse des coquillages chantants (sans quête) : au camp, elle récompense chaque palier.
+  nacre: {
+    name: 'Madame Nacre',
+    site: 'q1',
+    camp: [-3, 4],
+    collector: true,
+    look: { sex: 'f', race: 'humain', hair: '#f4d8e8', outfit: 'glace' },
+    tool: 'basket'
   }
 });
 // Objectifs : k = mécanique (trail : suivre des traces ; puzzle : énigme partagée du lieu ; collect : objets cachés ;
 // spot : point précis puis E ; timing : E au bon moment ; reach : atteindre un point ; clues : indices à réunir ;
-// choice : réponse à donner). Les énigmes « puzzle » se résolvent à plusieurs ; chacun garde sa progression.
+// choice : réponse à donner ; guardian : vaincre le gardien du lieu, voir GUARDIANS). Les énigmes « puzzle » se résolvent à plusieurs ; chacun garde sa progression.
 export const QUESTS = deepFreeze([
   {
     id: 1,
@@ -327,7 +336,8 @@ export const QUESTS = deepFreeze([
       'Orven, le vieil érudit des ruines, possède une carte usée où brillent six étoiles. Elle réagit à la présence de Lumi.',
     steps: [
       { k: 'collect', n: 3, text: 'Retrouver les trois symboles cachés dans les ruines' },
-      { k: 'puzzle', text: 'Reconstituer la disposition des symboles sur les socles' }
+      { k: 'puzzle', text: 'Reconstituer la disposition des symboles sur les socles' },
+      { k: 'guardian', text: 'Vaincre Ronce-Moussue, l’écho des ruines (E sur le sceau)' }
     ],
     reward: { gold: 90, flags: ['starmap'], text: 'Carte des sanctuaires dans le journal' },
     talk: {
@@ -462,6 +472,7 @@ export const QUESTS = deepFreeze([
       'L’arbre gardien de la forêt dort depuis des siècles. Aelor pense qu’un rayon de soleil pourrait le réveiller.',
     steps: [
       { k: 'puzzle', text: 'Orienter les miroirs pour diriger la lumière du soleil vers l’arbre gardien' },
+      { k: 'guardian', text: 'Vaincre Sylvenoir, l’écho de la forêt (E sur le sceau)' },
       { k: 'reach', at: [2, -1], text: 'Écouter l’arbre gardien' }
     ],
     reward: {
@@ -599,7 +610,10 @@ export const QUESTS = deepFreeze([
     level: 26,
     summary:
       'Dans la salle des reflets, les miroirs montrent le passé… dans le désordre. Néris pense qu’ils cachent la vérité sur le Cœur.',
-    steps: [{ k: 'puzzle', text: 'Remettre les quatre reflets dans l’ordre de l’histoire' }],
+    steps: [
+      { k: 'puzzle', text: 'Remettre les quatre reflets dans l’ordre de l’histoire' },
+      { k: 'guardian', text: 'Vaincre Miroitombe, l’écho des reflets (E sur le sceau)' }
+    ],
     reward: { gold: 240, flags: ['star2'], text: 'Deuxième étoile et un souvenir dans le journal' },
     talk: {
       offer: [
@@ -742,7 +756,8 @@ export const QUESTS = deepFreeze([
       {
         k: 'puzzle',
         text: 'Régler le mécanisme des saisons (chaque pilier sur la saison que montre son fragment)'
-      }
+      },
+      { k: 'guardian', text: 'Vaincre Fanegrise, l’écho de l’automne (E sur le sceau)' }
     ],
     reward: {
       gold: 320,
@@ -883,7 +898,10 @@ export const QUESTS = deepFreeze([
     requires: 21,
     level: 47,
     summary: 'Une machine des anciens dort sous le désert : trois anneaux qui représentent les sanctuaires.',
-    steps: [{ k: 'puzzle', text: 'Synchroniser les trois anneaux (tourner un anneau entraîne le suivant)' }],
+    steps: [
+      { k: 'puzzle', text: 'Synchroniser les trois anneaux (tourner un anneau entraîne le suivant)' },
+      { k: 'guardian', text: 'Vaincre Sablamort, l’écho des dunes (E sur le sceau)' }
+    ],
     reward: {
       gold: 460,
       flags: ['star5'],
@@ -1038,6 +1056,7 @@ export const QUESTS = deepFreeze([
         k: 'defense',
         text: 'Protéger les six cristaux contre les manifestations (E sur l’autel pour commencer)'
       },
+      { k: 'guardian', text: 'Vaincre l’Ombre, le cœur des échos (E sur le sceau)' },
       { k: 'collect', n: 6, text: 'Réunir la lumière des six cristaux' }
     ],
     reward: {
@@ -1224,3 +1243,209 @@ export const TRAVELERS = deepFreeze([
     what: 'Gaspard : « Moi je l’ai vu sous le pont du ruisseau ! Enfin… je crois. »'
   }
 ]);
+
+// ---------------------------------------------------------------- Au fil de l'aventure (hors des quêtes)
+// Gardiens de l'Ombre : un par chapitre, au bout de sa quête principale. Le sceau du lieu (E) les appelle ; vaincus,
+// ils laissent un Cœur d'Aurore (PV max). Un héros qui a fini la quête sans les avoir vaincus peut les défier.
+// moves : slam (cercle sous un héros), rain (un cercle sur chaque héros proche), nova (onde autour du gardien),
+// blink (disparaît et réapparaît ailleurs dans le lieu) ; adds : renforts à 66 % et 33 % de PV.
+export const GUARDIANS = deepFreeze({
+  2: {
+    name: 'Ronce-Moussue',
+    title: 'l’écho des ruines',
+    look: 'golem',
+    pal: ['#5e7a3a', '#3a4e22', '#8aa85a', '#c8e060', '#e8ff9a'],
+    opts: { leafy: true },
+    color: '#7aa04a',
+    scale: 2.6,
+    moves: ['slam'],
+    adds: 'Slime',
+    intro: 'Les pierres tremblent… Une masse de mousse et de ronces se lève des ruines !',
+    defeat: 'Ronce-Moussue s’effrite en pétales. Une douce chaleur reste dans l’air.'
+  },
+  7: {
+    name: 'Sylvenoir',
+    title: 'l’écho de la forêt',
+    look: 'golem',
+    pal: ['#3a2c1e', '#22180e', '#5e4a34', '#6a4aa0', '#c8a0ff'],
+    opts: { leafy: true },
+    color: '#6a4aa0',
+    scale: 2.9,
+    moves: ['slam', 'nova'],
+    adds: 'Araignée',
+    intro: 'L’ombre de l’arbre gardien se décolle du sol et prend vie !',
+    defeat: 'Sylvenoir se dissout dans les racines d’or. L’arbre gardien soupire de soulagement.'
+  },
+  12: {
+    name: 'Miroitombe',
+    title: 'l’écho des reflets',
+    look: 'spirit',
+    pal: ['#8ab0d8', '#4a6a9a', '#d8ecff', '#ffffff', '#bfe8ff'],
+    opts: {},
+    color: '#8ab0d8',
+    scale: 2.8,
+    moves: ['rain', 'blink'],
+    adds: 'Wisp',
+    intro: 'Un reflet sort du dernier miroir… et il ne te ressemble pas du tout !',
+    defeat: 'Miroitombe éclate en mille éclats de lumière, qui retournent sagement dans les miroirs.'
+  },
+  17: {
+    name: 'Fanegrise',
+    title: 'l’écho de l’automne',
+    look: 'horror',
+    pal: ['#8a5a2a', '#5a3416', '#c8843a', '#ffd36b', '#fff0a0'],
+    opts: {},
+    color: '#c8843a',
+    scale: 3,
+    moves: ['nova', 'rain'],
+    adds: 'Corbeau spectral',
+    intro: 'Les feuilles mortes tourbillonnent et forment une silhouette immense !',
+    defeat: 'Fanegrise retombe en une pluie de feuilles dorées. Le vent sent bon la cannelle.'
+  },
+  22: {
+    name: 'Sablamort',
+    title: 'l’écho des dunes',
+    look: 'scorpion',
+    pal: ['#c8984e', '#8a6430', '#ecc888', '#e05a3a', '#fff09a'],
+    opts: {},
+    color: '#d6a05b',
+    scale: 3.2,
+    moves: ['slam', 'nova', 'blink'],
+    adds: 'Scorpion',
+    intro: 'Le sable s’ouvre sous la machine : une carapace géante en surgit !',
+    defeat: 'Sablamort s’enfonce dans le sable pour toujours. Les anneaux de la machine brillent plus fort.'
+  },
+  27: {
+    name: 'L’Ombre',
+    title: 'le cœur des échos',
+    look: 'horror',
+    pal: ['#2a1a3e', '#140c22', '#4a2e6a', '#c84aff', '#ffb0ff'],
+    opts: {},
+    color: '#6a3aa0',
+    scale: 3.6,
+    moves: ['slam', 'rain', 'nova', 'blink'],
+    adds: 'Spectre',
+    intro: 'Toute la lumière de la chambre vacille. L’Ombre elle-même vient reprendre le Cœur !',
+    defeat: 'L’Ombre se déchire comme un rideau de nuit. Derrière elle, l’aube se lève.'
+  }
+});
+// Coquillages chantants : un caché près de chaque lieu de quête (30). Les voir demande d'être tout près ; la Loupe
+// d'Orven (fin du troc) les fait briller de loin. Madame Nacre récompense chaque palier.
+export const SHELLS = deepFreeze(Object.keys(QUEST_SITES).map(site => ({ id: 'c_' + site, site })));
+export const SHELL_LORE =
+  'Quand le Cœur de l’Aurore s’est brisé, son chant s’est caché dans des coquillages, partout sur l’île. Pose-les contre ton oreille : ils fredonnent encore.';
+export const SHELL_REWARDS = deepFreeze([
+  { n: 5, gold: 150, item: 'Rare', text: 'Équipement Rare de ton niveau' },
+  { n: 10, gold: 300, item: 'Épique', text: 'Équipement Épique de ton niveau' },
+  { n: 15, gold: 400, heart: 'heart_s15', text: 'Un Cœur d’Aurore (+3 % de PV max)' },
+  { n: 20, gold: 600, item: 'Épique', text: 'Équipement Épique de ton niveau' },
+  { n: 25, gold: 800, heart: 'heart_s25', text: 'Un Cœur d’Aurore (+3 % de PV max)' },
+  { n: 30, gold: 1200, item: 'Légendaire', text: 'Équipement Légendaire de ton niveau' }
+]);
+// Cœurs d'Aurore : six gardiens et deux paliers de coquillages ; chacun donne HEART_BONUS de PV max.
+export const HEART_FLAGS = Object.freeze([
+  ...Object.keys(GUARDIANS).map(id => 'heart_q' + id),
+  ...SHELL_REWARDS.filter(r => r.heart).map(r => /** @type {string} */ (r.heart))
+]);
+export const HEART_BONUS = 0.03;
+// Le grand troc : treize échanges d'un bout à l'autre de l'île, avec les habitants. Chacun donne un objet contre
+// celui du précédent ; hint dit à qui porter l'objet reçu. Le dernier (Orven) donne la Loupe d'Orven.
+export const TRADE_CHAIN = deepFreeze([
+  {
+    npc: 'milo',
+    gives: { id: 'laine', name: 'Pelote de laine', icon: '🧶' },
+    line: 'Tu vois cette pelote ? Pompon perd sa laine partout depuis qu’il se prend pour un aventurier. Prends-la, moi j’en ai des sacs entiers !',
+    desc: 'Une pelote toute douce, tricotée par le vent et par Pompon.',
+    hint: 'Un vieux pêcheur, près d’un étang des Plaines verdoyantes, se plaint que ses lignes cassent.'
+  },
+  {
+    npc: 'eloi',
+    gives: { id: 'botte', name: 'Vieille botte', icon: '🥾' },
+    line: 'De la laine de mouton ? Parfaite pour mes mouches de pêche ! En échange… j’ai pêché ça ce matin. Quarante ans de métier, et je sors une botte.',
+    desc: 'Une botte trempée. Un petit poisson y habitait encore.',
+    hint: 'Brin, dans la Forêt ancienne, répète qu’il a froid aux sabots la nuit.'
+  },
+  {
+    npc: 'brin',
+    gives: { id: 'miel', name: 'Pot de miel', icon: '🍯' },
+    line: 'Une botte ! Une seule, mais quelle botte ! Mon sabot gauche te remercie. Prends ce miel : le petit voleur m’en apporte tous les matins, maintenant.',
+    desc: 'Du miel doré de la forêt. Ça colle partout, même aux pensées.',
+    hint: 'Sylva, la gardienne des chants de la Forêt ancienne, a la voix toute cassée.'
+  },
+  {
+    npc: 'sylva',
+    gives: { id: 'flute', name: 'Flûte de roseau', icon: '🎶' },
+    line: 'Du miel de la forêt… Ma voix ! Elle revient ! La-la-laaa. Prends ma vieille flûte : je n’en ai plus besoin, j’ai retrouvé ma voix.',
+    desc: 'Une flûte taillée dans un roseau. Elle joue faux, mais avec cœur.',
+    hint: 'Au Marais brumeux, le petit Pipo rêve de faire de la musique.'
+  },
+  {
+    npc: 'pipo',
+    gives: { id: 'grenouille', name: 'Grenouille porte-bonheur', icon: '🐸' },
+    line: 'Une flûte ! Pour moi ?! Pi-pi-piii ! Tiens, je te donne mon ami Crôa. Il porte bonheur… sauf aux moustiques.',
+    desc: 'Crôa, une grenouille verte qui adore les moustiques. Elle te regarde avec confiance.',
+    hint: 'Goran se fait dévorer par les moustiques sur son pont, au Marais brumeux.'
+  },
+  {
+    npc: 'goran',
+    gives: { id: 'lanterne', name: 'Lanterne de poche', icon: '🏮' },
+    line: 'Une grenouille qui mange les moustiques ? Crôa, tu es engagé ! Prends ma lanterne de poche : avec mon pont, je ne me perds plus dans le noir.',
+    desc: 'Une petite lanterne qui ne s’éteint jamais, même sous la pluie du marais.',
+    hint: 'Odel, le meunier de la Forêt automnale, n’ose plus monter dans son grenier sombre.'
+  },
+  {
+    npc: 'odel',
+    gives: { id: 'farine', name: 'Sac de farine fine', icon: '🌾' },
+    line: 'Une lanterne ! Je vais enfin voir ce qui fait « scrr-scrr » dans mon grenier. Prends ce sac de farine, la plus fine de l’île.',
+    desc: 'Une farine si fine qu’elle s’envole quand on la regarde.',
+    hint: 'Flavio, dans la Forêt automnale, veut cuire un gâteau pour le concours des feuilles.'
+  },
+  {
+    npc: 'flavio',
+    gives: { id: 'girouette', name: 'Girouette en cuivre', icon: '🌬️' },
+    line: 'De la farine fine ! Mon gâteau va gagner, c’est sûr. Tiens, ma girouette de champion : elle tourne même quand il n’y a pas de vent.',
+    desc: 'Une petite girouette en cuivre. Elle tourne toute seule, sans raison.',
+    hint: 'Zafir, le marchand du Désert oublié, achète tout ce qui parle du vent.'
+  },
+  {
+    npc: 'zafir',
+    gives: { id: 'brise', name: 'Bouteille de brise fraîche', icon: '🍶' },
+    line: 'Une girouette qui tourne sans vent ? C’est… du vent pur ! Marché conclu. Prends cette bouteille de brise fraîche, ma meilleure cuvée.',
+    desc: 'Quand on la débouche, une brise de montagne s’en échappe en chantant.',
+    hint: 'Amira, à l’oasis du Désert oublié, étouffe sous la chaleur.'
+  },
+  {
+    npc: 'amira',
+    gives: { id: 'dattes', name: 'Dattes dorées', icon: '🌴' },
+    line: 'Une brise fraîche, en plein désert ! Ahhh… Merci. Prends ces dattes dorées, les plus sucrées de l’oasis.',
+    desc: 'Des dattes qui brillent comme de l’or. Un dragon ferait n’importe quoi pour elles.',
+    hint: 'Pyria, dans la Forêt enchantée, dit que son jeune dragon adore le sucre.'
+  },
+  {
+    npc: 'pyria',
+    gives: { id: 'ecaille', name: 'Écaille de Braise', icon: '🐉' },
+    line: 'Des dattes dorées ?! Braise, regarde ! … Il a tout mangé. Il est si content qu’il a perdu une écaille. Prends-la, c’est un cadeau.',
+    desc: 'Une écaille chaude qui brille comme une braise. Elle ne refroidit jamais.',
+    hint: 'Élya, au lac aux mille étoiles de la Forêt enchantée, taille tout ce qui brille.'
+  },
+  {
+    npc: 'elya',
+    gives: { id: 'lentille', name: 'Lentille d’étoile', icon: '🔮' },
+    line: 'Une écaille de dragon… Elle brille comme une étoile. J’en ferai un bijou. Prends cette lentille d’étoile : elle voit ce qui est caché.',
+    desc: 'Une lentille taillée dans une étoile tombée. À travers elle, la nuit est claire.',
+    hint: 'Orven, aux Ruines de la Couronne, a toujours rêvé de mieux lire sa carte.'
+  },
+  {
+    npc: 'orven',
+    gives: { id: 'loupe', name: 'Loupe d’Orven', icon: '🔎' },
+    line: 'Une lentille d’étoile ! Avec ça, je lirais les plus petits signes de ma carte… Non, prends plutôt ma vieille loupe, montée avec ta lentille. Elle te servira mieux qu’à moi.',
+    desc: 'Avec elle, les coquillages chantants brillent de loin, et ta boussole les trouve.',
+    hint: 'Le grand troc est terminé. La Loupe d’Orven fait briller les coquillages chantants de loin.'
+  }
+]);
+// Dernier échange : en plus de la loupe.
+export const TRADE_FINAL = deepFreeze({
+  gold: 800,
+  item: 'Légendaire',
+  text: 'Équipement Légendaire de ton niveau'
+});

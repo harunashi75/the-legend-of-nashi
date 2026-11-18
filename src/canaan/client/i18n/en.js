@@ -3978,5 +3978,209 @@ export default {
   'VAGUE {n} / {m}': 'WAVE {n} / {m}',
   // ------------------------------------------------------------ Compléments : métiers
   'métier|Enchantement': 'Enchanting',
-  'niv. {n}': 'lv. {n}'
+  'niv. {n}': 'lv. {n}',
+  // ------------------------------------------------------------ Aventure : gardiens de l’Ombre, grand troc, coquillages chantants
+  'Vaincre Ronce-Moussue, l’écho des ruines (E sur le sceau)':
+    'Defeat Mossbramble, the echo of the ruins (E on the seal)',
+  'Vaincre Sylvenoir, l’écho de la forêt (E sur le sceau)':
+    'Defeat Sylvanoir, the echo of the forest (E on the seal)',
+  'Vaincre Miroitombe, l’écho des reflets (E sur le sceau)':
+    'Defeat Mirrortomb, the echo of reflections (E on the seal)',
+  'Vaincre Fanegrise, l’écho de l’automne (E sur le sceau)':
+    'Defeat Greywither, the echo of autumn (E on the seal)',
+  'Vaincre Sablamort, l’écho des dunes (E sur le sceau)':
+    'Defeat Dunebane, the echo of the dunes (E on the seal)',
+  'Vaincre l’Ombre, le cœur des échos (E sur le sceau)':
+    'Defeat the Shadow, heart of the echoes (E on the seal)',
+  'Ronce-Moussue': 'Mossbramble',
+  'Sylvenoir': 'Sylvanoir',
+  'Miroitombe': 'Mirrortomb',
+  'Fanegrise': 'Greywither',
+  'Sablamort': 'Dunebane',
+  'L’Ombre': 'The Shadow',
+  'l’écho des ruines': 'the echo of the ruins',
+  'l’écho de la forêt': 'the echo of the forest',
+  'l’écho des reflets': 'the echo of reflections',
+  'l’écho de l’automne': 'the echo of autumn',
+  'l’écho des dunes': 'the echo of the dunes',
+  'le cœur des échos': 'heart of the echoes',
+  'Ronce-Moussue, l’écho des ruines': 'Mossbramble, the echo of the ruins',
+  'Sylvenoir, l’écho de la forêt': 'Sylvanoir, the echo of the forest',
+  'Miroitombe, l’écho des reflets': 'Mirrortomb, the echo of reflections',
+  'Fanegrise, l’écho de l’automne': 'Greywither, the echo of autumn',
+  'Sablamort, l’écho des dunes': 'Dunebane, the echo of the dunes',
+  'L’Ombre, le cœur des échos': 'The Shadow, heart of the echoes',
+  'Les pierres tremblent… Une masse de mousse et de ronces se lève des ruines !':
+    'The stones tremble… A mass of moss and brambles rises from the ruins!',
+  'Ronce-Moussue s’effrite en pétales. Une douce chaleur reste dans l’air.':
+    'Mossbramble crumbles into petals. A gentle warmth lingers in the air.',
+  'L’ombre de l’arbre gardien se décolle du sol et prend vie !':
+    'The guardian tree’s shadow peels off the ground and comes to life!',
+  'Sylvenoir se dissout dans les racines d’or. L’arbre gardien soupire de soulagement.':
+    'Sylvanoir melts into the golden roots. The guardian tree sighs with relief.',
+  'Un reflet sort du dernier miroir… et il ne te ressemble pas du tout !':
+    'A reflection steps out of the last mirror… and it looks nothing like you!',
+  'Miroitombe éclate en mille éclats de lumière, qui retournent sagement dans les miroirs.':
+    'Mirrortomb shatters into a thousand shards of light, which quietly return to the mirrors.',
+  'Les feuilles mortes tourbillonnent et forment une silhouette immense !':
+    'The dead leaves swirl into a towering silhouette!',
+  'Fanegrise retombe en une pluie de feuilles dorées. Le vent sent bon la cannelle.':
+    'Greywither falls apart in a rain of golden leaves. The wind smells of cinnamon.',
+  'Le sable s’ouvre sous la machine : une carapace géante en surgit !':
+    'The sand splits open beneath the machine: a giant carapace bursts out!',
+  'Sablamort s’enfonce dans le sable pour toujours. Les anneaux de la machine brillent plus fort.':
+    'Dunebane sinks into the sand forever. The machine’s rings shine brighter.',
+  'Toute la lumière de la chambre vacille. L’Ombre elle-même vient reprendre le Cœur !':
+    'All the light in the chamber flickers. The Shadow itself has come to take back the Heart!',
+  'L’Ombre se déchire comme un rideau de nuit. Derrière elle, l’aube se lève.':
+    'The Shadow tears like a curtain of night. Behind it, dawn is breaking.',
+  '{nom} appelle des renforts !': '{nom} calls for reinforcements!',
+  '{nom} disparaît !': '{nom} vanishes!',
+  '{nom} entre en rage !': '{nom} flies into a rage!',
+  'Coup de l’Ombre !': 'Shadow strike!',
+  'Pluie d’éclats !': 'Shard rain!',
+  'Onde de l’Ombre !': 'Shadow wave!',
+  'Cœur d’Aurore : PV max +3 % ({n} / {m})': 'Heart of Dawn: max HP +3% ({n} / {m})',
+  '{nom} retourne dans l’ombre…': '{nom} returns to the shadows…',
+  'Le sceau attend ton retour.': 'The seal awaits your return.',
+  'Briser le sceau de l’Ombre': 'Break the Shadow seal',
+  'Ramasser le coquillage': 'Pick up the shell',
+  'Gardien de l’Ombre': 'Shadow guardian',
+  'Tu as obtenu': 'You got',
+  'Cœur d’Aurore': 'Heart of Dawn',
+  'Cœurs d’Aurore': 'Hearts of Dawn',
+  'PV max +3 % ({n} / {m})': 'Max HP +3% ({n} / {m})',
+  'Étoile du Cœur': 'Star of the Heart',
+  'Une petite lumière tombée du ciel devient ta compagne de voyage.':
+    'A little light fallen from the sky becomes your travel companion.',
+  'Chaque gardien de l’Ombre vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.':
+    'Each Shadow guardian you defeat leaves one behind, and Madam Nacre keeps two for great collectors.',
+  'Un Cœur d’Aurore (+3 % de PV max)': 'A Heart of Dawn (+3% max HP)',
+  'Équipement Légendaire de ton niveau': 'Legendary gear of your level',
+  'Trésors': 'Treasures',
+  'Madame Nacre': 'Madam Nacre',
+  'Coquillage chantant': 'Singing shell',
+  'Coquillages chantants': 'Singing shells',
+  'Coquillage chantant ! ({n} / {m})': 'Singing shell! ({n} / {m})',
+  'Coquillages chantants : {n} / {m}': 'Singing shells: {n} / {m}',
+  'Madame Nacre, au Camp de l’Aurore, aimerait voir ta collection.':
+    'Madam Nacre, at Dawn Camp, would love to see your collection.',
+  'Madame Nacre, au Camp de l’Aurore, les collectionne.': 'Madam Nacre, at Dawn Camp, collects them.',
+  'Palier de {n} coquillages': '{n}-shell milestone',
+  '{n} coquillages': '{n} shells',
+  'La Loupe d’Orven entend un coquillage': 'Orven’s Loupe hears a shell',
+  'près de {noms}': 'near {noms}',
+  'Quand le Cœur de l’Aurore s’est brisé, son chant s’est caché dans des coquillages, partout sur l’île. Pose-les contre ton oreille : ils fredonnent encore.':
+    'When the Heart of Dawn shattered, its song hid inside shells all over the island. Hold one to your ear: they still hum.',
+  'Oh ! Ils chantent si fort, tes coquillages ! Montre-les-moi, j’ai quelque chose pour toi.':
+    'Oh! Your shells are singing so loudly! Show them to me, I have something for you.',
+  'Écoute-les… chacun fredonne un petit bout de la vieille chanson. Il en reste d’autres, j’en suis sûre.':
+    'Listen… each one hums a little piece of the old song. There are more out there, I’m sure of it.',
+  'Bonjour, voyageur ! Tu n’aurais pas entendu un coquillage chanter, par hasard ?':
+    'Hello, traveler! You wouldn’t have heard a shell singing, by any chance?',
+  'Chaque lieu de quête cache un coquillage, un peu à l’écart. De près, ils scintillent.':
+    'Every quest site hides a shell, a little off to the side. Up close, they sparkle.',
+  'Chaque lieu de quête en cache un, un peu à l’écart. Madame Nacre, au Camp de l’Aurore, récompense les collectionneurs.':
+    'Every quest site hides one, a little off to the side. Madam Nacre, at Dawn Camp, rewards collectors.',
+  'Montrer mes coquillages': 'Show my shells',
+  'Tu tiens : {objet}': 'You’re holding: {objet}',
+  'Donner : {objet}': 'Give: {objet}',
+  'Prendre : {objet}': 'Take: {objet}',
+  'Le grand troc': 'The great trade',
+  'Grand troc terminé': 'Great trade complete',
+  'Les habitants de l’île aiment échanger. Milo, le berger des Plaines verdoyantes, a toujours de la laine en trop…':
+    'The islanders love to trade. Milo, the shepherd of the Verdant Plains, always has wool to spare…',
+  'La Loupe d’Orven fait briller les coquillages chantants de loin.':
+    'Orven’s Loupe makes singing shells shine from afar.',
+  'Pelote de laine': 'Ball of wool',
+  'Vieille botte': 'Old boot',
+  'Pot de miel': 'Honey pot',
+  'Flûte de roseau': 'Reed flute',
+  'Grenouille porte-bonheur': 'Lucky frog',
+  'Lanterne de poche': 'Pocket lantern',
+  'Sac de farine fine': 'Bag of fine flour',
+  'Girouette en cuivre': 'Copper weathervane',
+  'Bouteille de brise fraîche': 'Bottle of cool breeze',
+  'Dattes dorées': 'Golden dates',
+  'Écaille de Braise': 'Ember’s scale',
+  'Lentille d’étoile': 'Star lens',
+  'Loupe d’Orven': 'Orven’s Loupe',
+  'Tu vois cette pelote ? Pompon perd sa laine partout depuis qu’il se prend pour un aventurier. Prends-la, moi j’en ai des sacs entiers !':
+    'See this ball of wool? Pompom sheds everywhere since he decided he’s an adventurer. Take it, I have whole sacks of the stuff!',
+  'Une pelote toute douce, tricotée par le vent et par Pompon.':
+    'A soft little ball, knitted by the wind and by Pompom.',
+  'Un vieux pêcheur, près d’un étang des Plaines verdoyantes, se plaint que ses lignes cassent.':
+    'An old fisherman by a pond in the Verdant Plains complains that his lines keep snapping.',
+  'De la laine de mouton ? Parfaite pour mes mouches de pêche ! En échange… j’ai pêché ça ce matin. Quarante ans de métier, et je sors une botte.':
+    'Sheep’s wool? Perfect for my fishing flies! In exchange… I caught this this morning. Forty years on the job, and I reel in a boot.',
+  'Une botte trempée. Un petit poisson y habitait encore.':
+    'A soaking boot. A little fish was still living in it.',
+  'Brin, dans la Forêt ancienne, répète qu’il a froid aux sabots la nuit.':
+    'Brin, in the Ancient Forest, keeps saying his hooves get cold at night.',
+  'Une botte ! Une seule, mais quelle botte ! Mon sabot gauche te remercie. Prends ce miel : le petit voleur m’en apporte tous les matins, maintenant.':
+    'A boot! Just one, but what a boot! My left hoof thanks you. Take this honey: the little thief brings me some every morning now.',
+  'Du miel doré de la forêt. Ça colle partout, même aux pensées.':
+    'Golden forest honey. It sticks to everything, even your thoughts.',
+  'Sylva, la gardienne des chants de la Forêt ancienne, a la voix toute cassée.':
+    'Sylva, keeper of songs in the Ancient Forest, has lost her voice.',
+  'Du miel de la forêt… Ma voix ! Elle revient ! La-la-laaa. Prends ma vieille flûte : je n’en ai plus besoin, j’ai retrouvé ma voix.':
+    'Forest honey… My voice! It’s coming back! La-la-laaa. Take my old flute: I don’t need it anymore, I have my voice again.',
+  'Une flûte taillée dans un roseau. Elle joue faux, mais avec cœur.':
+    'A flute carved from a reed. It plays off-key, but with heart.',
+  'Au Marais brumeux, le petit Pipo rêve de faire de la musique.':
+    'In the Misty Marsh, little Pipo dreams of making music.',
+  'Une flûte ! Pour moi ?! Pi-pi-piii ! Tiens, je te donne mon ami Crôa. Il porte bonheur… sauf aux moustiques.':
+    'A flute! For me?! Pee-pee-peee! Here, you can have my friend Croak. He brings luck… except to mosquitoes.',
+  'Crôa, une grenouille verte qui adore les moustiques. Elle te regarde avec confiance.':
+    'Croak, a green frog who loves mosquitoes. He looks at you trustingly.',
+  'Goran se fait dévorer par les moustiques sur son pont, au Marais brumeux.':
+    'Goran is being eaten alive by mosquitoes on his bridge in the Misty Marsh.',
+  'Une grenouille qui mange les moustiques ? Crôa, tu es engagé ! Prends ma lanterne de poche : avec mon pont, je ne me perds plus dans le noir.':
+    'A frog that eats mosquitoes? Croak, you’re hired! Take my pocket lantern: with my bridge, I don’t get lost in the dark anymore.',
+  'Une petite lanterne qui ne s’éteint jamais, même sous la pluie du marais.':
+    'A little lantern that never goes out, even in the marsh rain.',
+  'Odel, le meunier de la Forêt automnale, n’ose plus monter dans son grenier sombre.':
+    'Odel, the miller of the Autumn Forest, no longer dares climb into his dark attic.',
+  'Une lanterne ! Je vais enfin voir ce qui fait « scrr-scrr » dans mon grenier. Prends ce sac de farine, la plus fine de l’île.':
+    'A lantern! At last I’ll see what goes “scritch-scratch” in my attic. Take this bag of flour, the finest on the island.',
+  'Une farine si fine qu’elle s’envole quand on la regarde.':
+    'Flour so fine it flies away when you look at it.',
+  'Flavio, dans la Forêt automnale, veut cuire un gâteau pour le concours des feuilles.':
+    'Flavio, in the Autumn Forest, wants to bake a cake for the leaf contest.',
+  'De la farine fine ! Mon gâteau va gagner, c’est sûr. Tiens, ma girouette de champion : elle tourne même quand il n’y a pas de vent.':
+    'Fine flour! My cake is going to win for sure. Here, my champion’s weathervane: it spins even when there’s no wind.',
+  'Une petite girouette en cuivre. Elle tourne toute seule, sans raison.':
+    'A little copper weathervane. It spins on its own, for no reason.',
+  'Zafir, le marchand du Désert oublié, achète tout ce qui parle du vent.':
+    'Zafir, the merchant of the Forgotten Desert, buys anything that has to do with wind.',
+  'Une girouette qui tourne sans vent ? C’est… du vent pur ! Marché conclu. Prends cette bouteille de brise fraîche, ma meilleure cuvée.':
+    'A weathervane that spins without wind? That’s… pure wind! Deal. Take this bottle of cool breeze, my finest vintage.',
+  'Quand on la débouche, une brise de montagne s’en échappe en chantant.':
+    'Uncork it, and a mountain breeze escapes, singing.',
+  'Amira, à l’oasis du Désert oublié, étouffe sous la chaleur.':
+    'Amira, at the oasis of the Forgotten Desert, is stifling in the heat.',
+  'Une brise fraîche, en plein désert ! Ahhh… Merci. Prends ces dattes dorées, les plus sucrées de l’oasis.':
+    'A cool breeze, in the middle of the desert! Ahhh… Thank you. Take these golden dates, the sweetest in the oasis.',
+  'Des dattes qui brillent comme de l’or. Un dragon ferait n’importe quoi pour elles.':
+    'Dates that shine like gold. A dragon would do anything for them.',
+  'Pyria, dans la Forêt enchantée, dit que son jeune dragon adore le sucre.':
+    'Pyria, in the Enchanted Forest, says her young dragon loves sweets.',
+  'Des dattes dorées ?! Braise, regarde ! … Il a tout mangé. Il est si content qu’il a perdu une écaille. Prends-la, c’est un cadeau.':
+    'Golden dates?! Ember, look! … He ate them all. He’s so happy he shed a scale. Take it, it’s a gift.',
+  'Une écaille chaude qui brille comme une braise. Elle ne refroidit jamais.':
+    'A warm scale that glows like an ember. It never cools down.',
+  'Élya, au lac aux mille étoiles de la Forêt enchantée, taille tout ce qui brille.':
+    'Élya, at the lake of a thousand stars in the Enchanted Forest, cuts anything that shines.',
+  'Une écaille de dragon… Elle brille comme une étoile. J’en ferai un bijou. Prends cette lentille d’étoile : elle voit ce qui est caché.':
+    'A dragon scale… It shines like a star. I’ll make a jewel of it. Take this star lens: it sees what is hidden.',
+  'Une lentille taillée dans une étoile tombée. À travers elle, la nuit est claire.':
+    'A lens cut from a fallen star. Through it, the night is clear.',
+  'Orven, aux Ruines de la Couronne, a toujours rêvé de mieux lire sa carte.':
+    'Orven, at the Crown Ruins, has always dreamed of reading his map better.',
+  'Une lentille d’étoile ! Avec ça, je lirais les plus petits signes de ma carte… Non, prends plutôt ma vieille loupe, montée avec ta lentille. Elle te servira mieux qu’à moi.':
+    'A star lens! With this I could read the tiniest marks on my map… No, take my old loupe instead, fitted with your lens. It will serve you better than me.',
+  'Avec elle, les coquillages chantants brillent de loin, et ta boussole les trouve.':
+    'With it, singing shells shine from afar, and your compass finds them.',
+  'Le grand troc est terminé. La Loupe d’Orven fait briller les coquillages chantants de loin.':
+    'The great trade is complete. Orven’s Loupe makes singing shells shine from afar.'
 };
