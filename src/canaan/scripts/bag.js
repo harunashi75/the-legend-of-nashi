@@ -1,6 +1,7 @@
 // Sac unifié : chaque chose possédée est un objet du sac (touche I). En plus de l'équipement (hero.inventory), les
 // poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent de la place ; les Rubis
-// non équipés sont aussi des piles (banque, vente, échange), mais rangés à part, dans l'onglet Rubis de la fiche (C) ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
+// non équipés sont aussi des piles, mais rangés à part, dans l'onglet Rubis de la fiche (C), et liés au héros :
+// ils ne se vendent pas, ne se rangent pas à la banque et ne s'échangent pas ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
 // meals) : le sac en est la vue, sans changer les sauvegardes ni l'état envoyé aux invités.
 // Une pile se désigne par un repère texte « genre:id:qualité*nombre » (fish:gardon:2*30, rubis:phenix:0*1), utilisé
 // par la vente au marchand et par l'échange entre joueurs.
@@ -40,8 +41,9 @@
     // Trésor déterré : son prix est dans son catalogue (unitPrice).
     treasure: () => 1
   };
-  // Les clés des secrets ne se vendent pas.
-  const sellable = p => p.kind !== 'key';
+  // Les Rubis sont liés au héros : ni vente, ni banque, ni échange. Les clés des secrets ne se vendent pas.
+  const bound = p => p.kind === 'rubis';
+  const sellable = p => p.kind !== 'key' && !bound(p);
   const profOf = hero => hero.prof || (hero.prof = profFresh());
   // Qualités : les mêmes noms et couleurs que l'équipement (Commun à Mythique).
   const qualityName = q => GEAR_RARITIES[q]?.name || 'Commun';
@@ -199,7 +201,7 @@
         name: r.name,
         icon: r.icon,
         color: f.light,
-        sub: 'Rubis ' + f.short.toLowerCase(),
+        sub: 'Rune · ' + f.short,
         desc: r.desc,
         quality: null
       };
@@ -371,6 +373,7 @@
   window.CANAAN_BAG = Object.freeze({
     STACK,
     stackOf,
+    bound,
     sellable,
     MAT_LIMIT,
     isMat,

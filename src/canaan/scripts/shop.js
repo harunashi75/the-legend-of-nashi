@@ -1,7 +1,7 @@
 // Boutique d'un marchand (touche E) : deux fenêtres côte à côte, comme dans un MMORPG.
 // À gauche, la marchandise, objet par objet (survol : statistiques et comparaison ; un objet acheté est aussitôt
-// remplacé par un autre du même genre). À droite, le sac : un clic vend l'objet ou la pile (poissons, viandes, repas,
-// Rubis en double).
+// remplacé par un autre du même genre). À droite, le sac : un clic vend l'objet ou la pile (poissons, viandes, repas…).
+// Les Rubis, liés au héros, ne se vendent pas.
 // - Marchand du Camp de l'Aurore (et des villages) : un objet Peu commun du niveau du héros pour chaque emplacement et
 //   chaque famille d'arme.
 // - Thalion, l'armurier de Sylvaëlle : équipement elfique de niveau 60, Rare ou Épique, pour chaque emplacement (artefact
@@ -108,7 +108,10 @@
     const p = CANAAN_BAG.parse(text);
     if (!p) return false;
     if (!CANAAN_BAG.sellable(p))
-      return (say(hero, '🗝️ ' + CANAAN_BAG.info(p).name + ' : ne se vend pas.'), false);
+      return (
+        say(hero, (p.kind === 'rubis' ? '💎 ' : '🗝️ ') + CANAAN_BAG.info(p).name + ' : ne se vend pas.'),
+        false
+      );
     if (!nearMerchant(hero)) return (say(hero, '💰 Va voir un marchand pour vendre !'), false);
     if (!CANAAN_BAG.remove(hero, p.kind, p.id, p.q, p.n)) return false;
     const gold = CANAAN_BAG.price(p);
@@ -218,7 +221,6 @@
         '</div>',
       stacks = CANAAN_BAG.tiles(hero, 'main').map(sell),
       mats = CANAAN_BAG.tiles(hero, 'mat').map(sell),
-      rubis = CANAAN_BAG.tiles(hero, 'rubis').map(sell),
       empty = Math.max(0, canaanBagLimit(hero) - gear.length - stacks.length);
     return (
       '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' +
@@ -246,9 +248,6 @@
       (mats.length
         ? '<div class="modern-bag">' + mats.join('') + '</div>'
         : '<p class="muted">Aucun matériau.</p>') +
-      (rubis.length
-        ? '<h3 class="bag-subhead">💎 Rubis</h3><div class="modern-bag">' + rubis.join('') + '</div>'
-        : '') +
       '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div></section>'
     );
   }

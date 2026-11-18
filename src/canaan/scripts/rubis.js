@@ -59,13 +59,8 @@
   function ownedCount(id) {
     return Math.max(0, Math.floor(Number(gems().owned[id]) || 0));
   }
-  // Rubis rangés à la banque du héros : ils restent à lui (découverts), mais ne s'équipent pas depuis la banque.
-  function bankedCount(id) {
-    // Un invité ne connaît sa banque que par le message de l'hôte (près du banquier).
-    const bank = game.mode === 'guest' && me() === game.hero ? CANAAN_BANK.remote() : me().bank;
-    return Math.max(0, Math.floor(Number(bank?.stacks?.['rubis:' + id + ':0']) || 0));
-  }
-  const known = id => ownedCount(id) + bankedCount(id) > 0;
+  // Les Rubis sont liés au héros (ni banque, ni vente, ni échange) : un Rubis connu est un Rubis possédé.
+  const known = id => ownedCount(id) > 0;
   function discovered() {
     return RUBIS.filter(r => known(r.id)).length;
   }
@@ -181,7 +176,6 @@
     slots: SLOTS,
     get: id => BY_ID.get(id) || null,
     owned: ownedCount,
-    banked: bankedCount,
     known,
     equipped: () => [...gems().equipped],
     discovered,
@@ -578,8 +572,8 @@
   // Hors combat et hors Arène : on prépare ses Rubis avant la tentative.
   function canChange() {
     if (game.world.instance?.arena)
-      return { ok: false, why: 'Les Rubis se changent avant d’entrer dans l’Arène.' };
-    if (inCombat()) return { ok: false, why: 'Impossible de changer de Rubis en combat.' };
+      return { ok: false, why: 'Les Runes se changent avant d’entrer dans l’Arène.' };
+    if (inCombat()) return { ok: false, why: 'Impossible de changer de Runes en combat.' };
     return { ok: true, why: '' };
   }
   function gem(r, size = '') {
@@ -618,7 +612,7 @@
           '<em>' +
           esc(r.name) +
           '</em></button>'
-      : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rubis">Libre · ' +
+      : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rune">Libre · ' +
           (k + 1) +
           '</em></div>';
   }
@@ -636,7 +630,7 @@
       for (const r of RUBIS.filter(x => x.family === fi)) {
         const n = ownedCount(r.id),
           worn = gems().equipped.includes(r.id);
-        // Possédé : clic pour équiper ou retirer. Rangé à la banque : visible mais grisé. Jamais trouvé : « ? ».
+        // Possédé : clic pour équiper ou retirer. Jamais trouvé : « ? ».
         html += n
           ? '<button type="button" class="rubis-cell owned' +
             (worn ? ' worn' : '') +
@@ -650,13 +644,7 @@
             gem(r) +
             (n > 1 ? '<sup>×' + n + '</sup>' : '') +
             '</button>'
-          : bankedCount(r.id)
-            ? '<span class="rubis-cell banked" data-tooltip-rubis="' +
-              r.id +
-              '">' +
-              gem(r) +
-              '<sup>🏦</sup></span>'
-            : '<span class="rubis-cell unknown" data-tooltip-rubis="' + r.id + '">?</span>';
+          : '<span class="rubis-cell unknown" data-tooltip-rubis="' + r.id + '">?</span>';
       }
       html += '</div></div>';
     });
@@ -666,7 +654,7 @@
     const worn = gems()
       .equipped.filter(Boolean)
       .map(id => BY_ID.get(id));
-    if (!worn.length) return '<p class="muted">Aucun Rubis équipé : choisis-en dans ta collection.</p>';
+    if (!worn.length) return '<p class="muted">Aucune Rune équipée : choisis-en dans ta collection.</p>';
     return (
       '<ul class="rubis-effects">' +
       worn
@@ -698,14 +686,14 @@
     if (!lock.ok) notes += '<p class="rubis-lock">🔒 ' + esc(lock.why) + '</p>';
     else if (!discovered())
       notes +=
-        '<p class="rubis-lock">⚔️ Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
+        '<p class="rubis-lock">⚔️ Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
     return (
       '<div class="character-layout rubis-layout"><div class="character-left">' +
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>💎 Rubis équipés</h3><span>' +
+      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>💎 Runes équipées</h3><span>' +
       count +
       '/' +
       SLOTS +
-      ' équipés</span></div>' +
+      ' équipées</span></div>' +
       '<div class="rubis-doll"><div class="rubis-doll-col">' +
       left +
       '</div><div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas></div>' +
@@ -719,8 +707,8 @@
       '</div></div>' +
       '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>📖 Collection</h3><span>' +
       discovered() +
-      '/48 découverts</span></div>' +
-      '<p class="rubis-hint">Clique un Rubis de ta collection pour l’équiper ou le retirer ; clique un emplacement pour le libérer.</p>' +
+      '/48 découvertes</span></div>' +
+      '<p class="rubis-hint">Clique une Rune de ta collection pour l’équiper ou la retirer ; clique un emplacement pour le libérer.</p>' +
       collectionHtml() +
       '</div></div>'
     );
@@ -746,12 +734,12 @@
       if (gems().equipped.includes(id)) return false;
       const slot = gems().equipped.indexOf(null);
       if (slot < 0) {
-        notify(hero, '💎 Les 6 emplacements sont occupés : retire d’abord un Rubis.');
+        notify(hero, '💎 Les 6 emplacements sont occupés : retire d’abord une Rune.');
         return false;
       }
       gems().equipped[slot] = id;
       refreshActive();
-      notify(hero, '💎 ' + r.name + ' équipé');
+      notify(hero, '💎 Rune ' + r.name + ' équipée');
       if (hero !== game.hero) recomputeHeroStats(hero);
       return true;
     });
@@ -792,11 +780,10 @@
     if (!r) return '';
     const f = FAMILIES[r.family],
       n = ownedCount(id),
-      banked = bankedCount(id),
       slot = gems().equipped.indexOf(id);
-    if (!n && !banked)
+    if (!n)
       return (
-        '<div class="tooltip-name rubis-unknown">Rubis inconnu · N°' +
+        '<div class="tooltip-name rubis-unknown">Rune inconnue · N°' +
         String(r.n).padStart(2, '0') +
         '</div><div class="tooltip-sub">' +
         esc(f.name) +
@@ -813,8 +800,7 @@
       esc(f.name) +
       ' · N°' +
       String(r.n).padStart(2, '0') +
-      (n > 1 ? ' · possédé ×' + n : '') +
-      (banked ? ' · 🏦 banque ×' + banked : '') +
+      (n > 1 ? ' · possédée ×' + n : '') +
       '</div></div></div><div class="rubis-tip-desc">' +
       esc(r.desc) +
       '</div>' +
@@ -822,11 +808,7 @@
         ? '<div class="rubis-tip-note">👥 Effet de groupe : s’active en coopération.</div>'
         : '') +
       '<div class="rubis-tip-note">' +
-      (slot >= 0
-        ? '✅ Équipé (emplacement ' + (slot + 1) + ') · clic : retirer'
-        : n
-          ? 'Clic : équiper'
-          : '🏦 Rangé à la banque : reprends-le pour l’équiper') +
+      (slot >= 0 ? '✅ Équipée (emplacement ' + (slot + 1) + ') · clic : retirer' : 'Clic : équiper') +
       '</div>'
     );
   }

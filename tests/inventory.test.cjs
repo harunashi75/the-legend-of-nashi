@@ -173,11 +173,13 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  const g1=run('P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);
  assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),130);assert.equal(run('P.gold'),g1+100*run('CANAAN_BAG.unitPrice({kind:"fish",q:1})'));
  assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),false,'pas plus que ce qu’on a (30)');
+ assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"rubis:phenix:0*1")'),false,'les Runes ne se vendent pas');assert.equal(run('game.hero.rubis.owned.phenix'),2);
  // Échange : une pile change de main avec l'équipement ; un sac trop plein annule tout.
  run('game.mode="host";globalThis.ami=canaanCreateHero({name:"Ami",x:P.x,y:P.y});ami.id="g-ami";ami.peer="p1";ami.local=false;game.heroes.push(ami)');
  run('CANAAN_TRADE.handle(game.hero,{op:"trade-request",to:"g-ami"});CANAAN_TRADE.handle(ami,{op:"trade-answer",yes:true})');
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*6"],gold:0})'),false,'pas plus que la pile');
+ assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["rubis:phenix:0*1"],gold:0})'),false,'les Runes ne s’échangent pas');
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
  run('CANAAN_TRADE.handle(game.hero,{op:"trade-ready",yes:true});CANAAN_TRADE.handle(ami,{op:"trade-ready",yes:true})');
  assert.equal(run('CANAAN_BAG.count(ami,"meat","lievre",0)'),5);assert.equal(run('CANAAN_BAG.count(ami,"fish","gardon",1)'),30);
@@ -197,6 +199,10 @@ test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, 
  assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),true);assert.equal(run('game.hero.inventory.length'),0);
  assert.equal(run('CANAAN_BANK.deposit(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),50);
  assert.equal(run('CANAAN_BANK.used(game.hero)'),2);
+ // Les Runes sont liées au héros : pas de dépôt ; celles déjà rangées reviennent dans sa collection au chargement.
+ run('game.hero.rubis.owned.colosse=1');assert.equal(run('CANAAN_BANK.deposit(game.hero,"rubis:colosse:0*1")'),false);assert.equal(run('game.hero.rubis.owned.colosse'),1);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.sanitize({items:[],stacks:{"rubis:phenix:0":2,"fish:gardon:1":5}}).stacks)')),{'fish:gardon:1':5});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.withBankedRubis({stacks:{"rubis:phenix:0":2}},{owned:{phenix:1,colosse:1},equipped:["phenix"]}))')),{owned:{phenix:3,colosse:1},equipped:['phenix']});
  assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*101")'),false);assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*40")'),true);
  assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),90);assert.equal(run('CANAAN_BANK.of(game.hero).stacks["fish:gardon:1"]'),60);
  // Sac plein : on ne reprend pas.

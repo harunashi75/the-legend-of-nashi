@@ -233,10 +233,6 @@
 #window .rubis-cell.unknown {
   border-style: dashed;
 }
-/* Rangé à la banque : connu, mais à reprendre avant de l'équiper. */
-#window .rubis-cell.banked {
-  opacity: 0.5;
-}
 
 /* Effets des Rubis équipés. */
 #window .rubis-effects {

@@ -891,7 +891,7 @@ function openNearbyChest(hero = game.hero) {
     let extra = '';
     if (Math.random() < SECRET_CHEST_RUBIS) {
       const got = CANAAN_RUBIS.grant(null, hero);
-      extra = ' + Rubis ' + got.rubis.name + (got.fresh ? ' (nouveau !)' : '');
+      extra = ' + Rune ' + got.rubis.name + (got.fresh ? ' (nouvelle !)' : '');
     }
     canaanLootNotice(hero, '🗝️ Coffre secret ouvert : équipement Épique + ' + gold + ' or' + extra + ' !');
     CANAAN_WARDROBE.drop('secretChest', hero);

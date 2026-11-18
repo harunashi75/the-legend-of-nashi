@@ -833,7 +833,7 @@
       rec.best = Math.max(rec.best, wave);
       rec.lastBoss = m.t;
       const { rubis, fresh } = CANAAN_RUBIS.grant(null, hero),
-        text = '💎 Rubis obtenu : ' + rubis.name + (fresh ? ' (nouveau !)' : ' (doublon)');
+        text = '💎 Rune obtenue : ' + rubis.name + (fresh ? ' (nouvelle !)' : ' (doublon)');
       if (host) {
         run.banner = { id: rubis.id, fresh, until: run.clock + 5, wave };
         toast(text);
@@ -860,7 +860,7 @@
     }
     if (!run.banner || run.banner.wave !== wave)
       run.banner = { text: m.t + ' vaincu !', until: run.clock + 4, wave };
-    chat('Arène', m.t + ' est vaincu ! Un Rubis pour chaque héros de l’arène.');
+    chat('Arène', m.t + ' est vaincu ! Une Rune pour chaque héros de l’arène.');
     setGate(false);
     if (wave >= WAVES) {
       run.phase = 'victory';
@@ -890,7 +890,7 @@
             const pick =
               CANAAN_RUBIS.missing(hero)[Math.floor(Math.random() * CANAAN_RUBIS.missing(hero).length)];
             CANAAN_RUBIS.grant(pick.id, hero);
-            canaanLootNotice(hero, '🏆 Rubis de la victoire : ' + pick.name);
+            canaanLootNotice(hero, '🏆 Rune de la victoire : ' + pick.name);
           }
         } else {
           hero.player.gold += 2500;
@@ -939,7 +939,7 @@
     if (!run) return;
     // Un boss vaincu = une vague réussie = un Rubis.
     const won = run.rubisWon;
-    chat('Arène', 'Tentative terminée : ' + won + ' vague(s) réussie(s), ' + won + ' Rubis gagné(s).');
+    chat('Arène', 'Tentative terminée : ' + won + ' vague(s) réussie(s), ' + won + ' Rune(s) gagnée(s).');
     clearField();
     run = null;
   }
@@ -1590,7 +1590,7 @@
       else text('Entre sur la piste !', W / 2, H * 0.3 + 52, 24, '#ffd36d');
       if (run.phase === 'rest')
         text(
-          '[E] au portail de l’antichambre pour quitter avec tes Rubis',
+          '[E] au portail de l’antichambre pour quitter avec tes Runes',
           W / 2,
           H * 0.3 + 96,
           14,
@@ -1805,17 +1805,17 @@
       '</h2><p class="arena-motto">« L’Arène est ouverte à tous. La victoire, elle, se mérite. »</p>' +
       '<div class="arena-layout"><div class="arena-board"><h3>🏆 Tableau des records</h3>' +
       row('Meilleure vague', records().best + ' / ' + WAVES) +
-      row('Rubis découverts', rubis.discovered() + ' / 48') +
+      row('Runes découvertes', rubis.discovered() + ' / 48') +
       row('Tentatives effectuées', records().attempts) +
       row('Arène terminée', records().completed ? 'Oui' : 'Non') +
       row('Dernier boss vaincu', records().lastBoss ? esc(records().lastBoss) : '—') +
       '<h3>📜 Règles</h3><ul class="arena-rules">' +
       '<li>12 vagues, un boss par vague, difficulté fixe dès la vague 1.</li>' +
       '<li>Aucun niveau minimum : la difficulté ne s’adapte jamais à ton équipement.</li>' +
-      '<li>1 Rubis garanti par boss vaincu, en priorité un Rubis que tu ne possèdes pas.</li>' +
+      '<li>1 Rune garantie par boss vaincu, en priorité une Rune que tu ne possèdes pas.</li>' +
       '<li>Entre deux vagues : +20 % des PV et du mana, 10 s de répit.</li>' +
-      '<li>Équipement et Rubis se préparent avant d’entrer.</li>' +
-      '<li>Abandon possible entre les vagues ; la mort met fin à la tentative. Les Rubis gagnés sont conservés.</li>' +
+      '<li>Équipement et Runes se préparent avant d’entrer.</li>' +
+      '<li>Abandon possible entre les vagues ; la mort met fin à la tentative. Les Runes gagnées sont conservées.</li>' +
       '<li>Les attaques majeures sont annoncées au sol : <b>Maj</b> ou <b>Espace</b> pour une roulade.</li>' +
       '</ul></div><div class="arena-bosses"><h3>👑 Les douze épreuves</h3>';
     BOSSES.forEach((def, k) => {
@@ -1835,12 +1835,12 @@
     html += '</div></div>';
     if (records().pendingChoice)
       html +=
-        '<p class="arena-choice-note">🎁 Ta récompense finale t’attend : choisis un Rubis.</p>' +
+        '<p class="arena-choice-note">🎁 Ta récompense finale t’attend : choisis une Rune.</p>' +
         choiceList();
     html +=
       '<div class="arena-actions"><button type="button" data-action="enterArena"' +
       (game.world.instance ? ' disabled' : '') +
-      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">💎 Préparer mes Rubis</button></div>';
+      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">💎 Préparer mes Runes</button></div>';
     showPanel(html);
   }
   function choiceList() {
@@ -1867,7 +1867,7 @@
   function openFinalChoice() {
     if (!records().pendingChoice) return;
     showPanel(
-      '<h2>🏆 Le Souverain est tombé</h2><p>Récompense finale : choisis un Rubis que tu ne possèdes pas encore.</p>' +
+      '<h2>🏆 Le Souverain est tombé</h2><p>Récompense finale : choisis une Rune que tu ne possèdes pas encore.</p>' +
         choiceList()
     );
   }

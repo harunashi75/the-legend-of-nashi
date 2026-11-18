@@ -249,13 +249,14 @@
       CANAAN_CLASS.setClasse(hero, d.classe);
       // Compagnon d'avant les classes : il en reçoit une, avec ses talents.
       if (hero.local && !hero.classe.id) giveClass(hero);
-      if (d.rubis?.owned && typeof d.rubis.owned === 'object')
-        for (const [k, n] of Object.entries(d.rubis.owned))
+      const rubis = CANAAN_BANK.withBankedRubis(d.bank, d.rubis);
+      if (rubis?.owned && typeof rubis.owned === 'object')
+        for (const [k, n] of Object.entries(rubis.owned))
           if (CANAAN_RUBIS.get(k) && count(n)) hero.rubis.owned[k] = count(n);
       const worn = new Set();
-      if (Array.isArray(d.rubis?.equipped))
+      if (Array.isArray(rubis?.equipped))
         hero.rubis.equipped = Array.from({ length: 6 }, (_, k) => {
-          const id = d.rubis.equipped[k];
+          const id = rubis.equipped[k];
           if (typeof id !== 'string' || !hero.rubis.owned[id] || worn.has(id)) return null;
           worn.add(id);
           return id;

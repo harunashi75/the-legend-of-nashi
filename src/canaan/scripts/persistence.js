@@ -436,7 +436,7 @@ window.CANAAN_PERSISTENCE = {
     window.CANAAN_CLASS_STATE.import(h.classe);
     if (h.ways && !h.classe)
       chat('Système', 'Les voies sont remplacées par les classes : choisis ta classe et tes talents (T).');
-    window.CANAAN_RUBIS_STATE.import(h.rubis);
+    window.CANAAN_RUBIS_STATE.import(CANAAN_BANK.withBankedRubis(h.bank, h.rubis));
     window.CANAAN_ARENA_STATE.import(h.arena);
     CANAAN_GROUP.importGuests(d.heros.invites);
     P.dead = false;

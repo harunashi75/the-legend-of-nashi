@@ -152,7 +152,7 @@
     { id: 'combat', icon: '⚔️', name: 'Combat & armes' },
     { id: 'explore', icon: '🗺️', name: 'Exploration & aventure' },
     { id: 'eco', icon: '💰', name: 'Économie & métiers' },
-    { id: 'magic', icon: '🔮', name: 'Magie, Rubis & progression' },
+    { id: 'magic', icon: '🔮', name: 'Magie, Runes & progression' },
     { id: 'defi', icon: '🏆', name: 'Défis & Arène' }
   ];
   const A = (cat, id, icon, name, desc, goal, val, reward = {}, pts = 10) => ({
@@ -297,7 +297,7 @@
       'c19',
       '⟦rubis_phenix⟧',
       'Résilience de Phénix',
-      'Survivre à un coup fatal grâce au Rubis Phénix.',
+      'Survivre à un coup fatal grâce à la Rune Phénix.',
       1,
       S('phoenix'),
       { gold: 500 }
@@ -724,8 +724,8 @@
       'magic',
       'm4',
       '💎',
-      'Premier Rubis',
-      'Équiper ton premier Rubis.',
+      'Première Rune',
+      'Équiper ta première Rune.',
       1,
       h => (h.rubis?.equipped || []).filter(Boolean).length,
       { gold: 100 },
@@ -735,8 +735,8 @@
       'magic',
       'm5',
       '💎',
-      'Collection de gemmes',
-      'Posséder 20 Rubis différents.',
+      'Collection de runes',
+      'Posséder 20 Runes différentes.',
       20,
       h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
       { rubis: 1 },
@@ -746,11 +746,11 @@
       'magic',
       'm6',
       '💎',
-      'Joaillier suprême',
-      'Posséder les 48 Rubis.',
+      'Maître des runes',
+      'Posséder les 48 Runes.',
       () => RUBIS_CATALOG.length,
       h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
-      { title: 'Le Joaillier' },
+      { title: 'Le Maître des runes' },
       50
     ),
     A(
@@ -758,7 +758,7 @@
       'm7',
       '⟦fam_offense⟧',
       'Puissance écarlate',
-      'Remplir tes six emplacements avec des Rubis offensifs.',
+      'Remplir tes six emplacements avec des Runes offensives.',
       1,
       familyFull(0),
       { gold: 800 }
@@ -768,7 +768,7 @@
       'm8',
       '⟦fam_defense⟧',
       'Forteresse impénétrable',
-      'Remplir tes six emplacements avec des Rubis défensifs.',
+      'Remplir tes six emplacements avec des Runes défensives.',
       1,
       familyFull(1),
       { gold: 800 }
@@ -778,7 +778,7 @@
       'm9',
       '⟦fam_support⟧',
       'Bénédiction divine',
-      'Remplir tes six emplacements avec des Rubis de soutien.',
+      'Remplir tes six emplacements avec des Runes de soutien.',
       1,
       familyFull(2),
       { gold: 800 }
@@ -788,7 +788,7 @@
       'm10',
       '⟦rubis_phenix⟧',
       'Immortalité du Phénix',
-      'Être sauvé par le Rubis Phénix en plein combat de boss.',
+      'Être sauvé par la Rune Phénix en plein combat de boss.',
       1,
       S('phoenixBoss'),
       { rubis: 1 },
@@ -1141,7 +1141,7 @@
     if (r.title) out.push('Titre « ' + r.title + ' »');
     if (r.aura) out.push('aura dorée');
     if (r.gear) out.push('un objet ' + r.gear + ' de ton niveau');
-    if (r.rubis) out.push('un Rubis qui te manque');
+    if (r.rubis) out.push('une Rune qui te manque');
     if (r.stack)
       out.push(
         r.stack[3] +

@@ -112,7 +112,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  assert.equal(audit.waves,12);assert.deepEqual(audit.missingMoves,[]);assert.equal(audit.ordered,true);assert.equal(audit.phases[11],3);
  // Aucun iLvl minimum : on entre avec iLvl 0, dans le colisée.
  run('started=true;paused=false;P.dead=false;time=1000;game.hero.level=1;recomputeStats();P.hp=P.mhp=1e6;openArenaPortal()');
- assert.match(g.document.getElementById('window').innerHTML,/Meilleure vague[\s\S]*Rubis découverts[\s\S]*Tentatives effectuées[\s\S]*Arène terminée[\s\S]*Dernier boss vaincu/);
+ assert.match(g.document.getElementById('window').innerHTML,/Meilleure vague[\s\S]*Runes découvertes[\s\S]*Tentatives effectuées[\s\S]*Arène terminée[\s\S]*Dernier boss vaincu/);
  assert.equal(run('enterArena()'),true);assert.equal(run('instanceState.arena'),true);assert.equal(run('CANAAN_ARENA.state().attempts'),1);
  assert.equal(run('canWalk(P.x,P.y)'),true);assert.equal(run("CANAAN_ARENA.run().phase"),'enter');
  const tick=n=>{for(let i=0;i<n;i++)run('time++;runUpdatePipeline();P.hp=P.mhp')};
@@ -253,7 +253,7 @@ test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le b
   // Victoire : un Rubis pour l'invité, annoncé chez lui et rangé dans sa collection.
   const owned0=guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)');
   host.run('{const b=CANAAN_ARENA.run().boss;canaanDamageMonster(b,b.hp+1e6,game.hero)}');await step(12);
-  assert.ok(guest.run('__toasts.some(t=>t.startsWith("💎 Rubis obtenu"))'),'Rubis annoncé à l’invité');
+  assert.ok(guest.run('__toasts.some(t=>t.startsWith("💎 Rune obtenue"))'),'Rune annoncée à l’invité');
   assert.equal(guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)'),owned0+1,'collection de l’invité');
   assert.equal(guest.run('game.hero.arena.best'),1,'record de l’invité');
   assert.equal(guest.run('(([x,y])=>game.world.tiles[y][x])('+gate+')'),20,'herse rouverte');

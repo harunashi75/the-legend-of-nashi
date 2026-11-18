@@ -78,7 +78,8 @@
     for (const id of ids) {
       if (CANAAN_BAG.isToken(id)) {
         const p = CANAAN_BAG.parse(id);
-        if (!p) return null;
+        // Les Rubis sont liés au héros : ils ne s'échangent pas.
+        if (!p || CANAAN_BAG.bound(p)) return null;
         const key = p.kind + ':' + p.id + ':' + p.q,
           n = (taken.get(key) || 0) + p.n;
         if (n > CANAAN_BAG.count(hero, p.kind, p.id, p.q)) return null;
@@ -305,7 +306,7 @@
     for (const { stack: p } of offered.filter(x => x.stack))
       minus.set(p.kind + ':' + p.id + ':' + p.q, (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0) + p.n);
     const stacks = [];
-    for (const p of CANAAN_BAG.piles(hero)) {
+    for (const p of CANAAN_BAG.piles(hero).filter(p => !CANAAN_BAG.bound(p))) {
       let n = p.n - (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0);
       for (; n > 0; n -= CANAAN_BAG.STACK) stacks.push({ ...p, n: Math.min(CANAAN_BAG.STACK, n) });
     }

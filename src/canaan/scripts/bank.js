@@ -1,8 +1,8 @@
 // Banque : 500 places par joueur pour ranger ce qu'on veut garder et faire de la place dans le sac. Le banquier
 // (échoppe de Lira, au Camp de l'Aurore) ouvre deux fenêtres côte à côte : la banque à gauche, le sac à droite ;
 // un clic dépose un objet du sac, un clic sur un objet de la banque le reprend.
-// La banque de chaque héros (hero.bank : { items, stacks }) contient des équipements et des piles (Rubis, poissons,
-// viandes, repas ; 100 au plus par case), et elle est sauvegardée avec lui (l'hôte garde celle de ses invités).
+// La banque de chaque héros (hero.bank : { items, stacks }) contient des équipements et des piles (poissons,
+// viandes, repas ; 100 au plus par case ; les Rubis, liés au héros, n'y entrent pas), et elle est sauvegardée avec lui (l'hôte garde celle de ses invités).
 // L'hôte décide : banquier à portée, place à la banque et dans le sac ; un invité reçoit sa banque dans son message
 // privé près du banquier et envoie ses dépôts et retraits (actions bank-deposit et bank-withdraw).
 (() => {
@@ -44,7 +44,7 @@
     const bank = bankOf(hero);
     if (CANAAN_BAG.isToken(ref)) {
       const p = CANAAN_BAG.parse(ref);
-      if (!p || CANAAN_BAG.count(hero, p.kind, p.id, p.q) < p.n) return false;
+      if (!p || CANAAN_BAG.bound(p) || CANAAN_BAG.count(hero, p.kind, p.id, p.q) < p.n) return false;
       const key = p.kind + ':' + p.id + ':' + p.q,
         now = bank.stacks[key] || 0;
       if (used(bank) + tilesFor(now + p.n) - tilesFor(now) > CAPACITY)
@@ -117,13 +117,25 @@
         if (validItem(it) && out.items.length < CAPACITY) out.items.push(window.CANAAN_GEAR.normalize(it));
     if (raw.stacks && typeof raw.stacks === 'object')
       for (const [key, n] of Object.entries(raw.stacks)) {
-        const count = Math.floor(Number(n));
-        if (count > 0 && CANAAN_BAG.parse(key + '*1')) {
+        const count = Math.floor(Number(n)),
+          p = CANAAN_BAG.parse(key + '*1');
+        if (count > 0 && p && !CANAAN_BAG.bound(p)) {
           const room = (CAPACITY - used(out)) * STACK;
           if (room > 0) out.stacks[key] = Math.min(count, room);
         }
       }
     return out;
+  }
+  // Les Rubis rangés à la banque avant qu'ils ne soient liés au héros reviennent dans sa collection, au chargement.
+  function withBankedRubis(rawBank, rawRubis) {
+    const rubis = rawRubis && typeof rawRubis === 'object' ? rawRubis : {},
+      owned = { ...(rubis.owned && typeof rubis.owned === 'object' ? rubis.owned : {}) };
+    for (const [key, n] of Object.entries(rawBank?.stacks || {})) {
+      const [kind, id] = key.split(':'),
+        count = Math.floor(Number(n));
+      if (kind === 'rubis' && count > 0) owned[id] = Math.max(0, Math.floor(Number(owned[id]) || 0)) + count;
+    }
+    return { ...rubis, owned };
   }
   const exportBank = hero => ({ items: bankOf(hero).items, stacks: { ...bankOf(hero).stacks } });
 
@@ -222,8 +234,7 @@
           'data-action="bankDeposit" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Déposer à la banque"'
         ),
       stacks = CANAAN_BAG.tiles(hero, 'main').map(depositTile),
-      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile),
-      rubis = CANAAN_BAG.tiles(hero, 'rubis').map(depositTile);
+      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile);
     showPanel(
       '<div class="rpg-head"><h2>🏦 Banque</h2></div><div class="bank-panel shop-columns">' +
         '<section class="shop-side"><h3>🏦 Ta banque · ' +
@@ -238,7 +249,7 @@
         ' / ' +
         canaanBagLimit(hero) +
         '</h3>' +
-        '<p class="muted">Clique un objet pour le déposer. Les objets portés et les Rubis équipés restent sur toi.</p>' +
+        '<p class="muted">Clique un objet pour le déposer. Les objets portés et les Runes restent sur toi.</p>' +
         '<div class="modern-bag">' +
         gear.join('') +
         stacks.join('') +
@@ -252,10 +263,6 @@
         (mats.length
           ? '<div class="modern-bag">' + mats.join('') + '</div>'
           : '<p class="muted">Aucun matériau.</p>') +
-        // Les Rubis non équipés (onglet Rubis de la fiche C), sans place comptée.
-        (rubis.length
-          ? '<h3 class="bag-subhead">💎 Rubis</h3><div class="modern-bag">' + rubis.join('') + '</div>'
-          : '') +
         '</section></div>'
     );
   }
@@ -306,6 +313,7 @@
     handle,
     view,
     sanitize,
+    withBankedRubis,
     export: exportBank,
     open,
     render,

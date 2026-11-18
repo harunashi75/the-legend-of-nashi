@@ -3,23 +3,23 @@
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 export const RUBIS_FAMILIES = Object.freeze([
   {
-    name: 'Rubis offensifs',
-    short: 'Offensif',
+    name: 'Runes offensives',
+    short: 'Offensive',
     icon: '⟦fam_offense⟧',
     color: '#d8413a',
     light: '#ff9c86',
     dark: '#6a1218'
   },
   {
-    name: 'Rubis défensifs',
-    short: 'Défensif',
+    name: 'Runes défensives',
+    short: 'Défensive',
     icon: '⟦fam_defense⟧',
     color: '#3b78d0',
     light: '#a4caff',
     dark: '#122a5a'
   },
   {
-    name: 'Rubis de soutien',
+    name: 'Runes de soutien',
     short: 'Soutien',
     icon: '⟦fam_support⟧',
     color: '#36b464',
@@ -27,7 +27,7 @@ export const RUBIS_FAMILIES = Object.freeze([
     dark: '#0e4424'
   },
   {
-    name: 'Rubis d’armes',
+    name: 'Runes d’armes',
     short: 'Arme',
     icon: '⟦fam_weapon⟧',
     color: '#e09a2a',
@@ -35,7 +35,7 @@ export const RUBIS_FAMILIES = Object.freeze([
     dark: '#5a3608'
   },
   {
-    name: 'Rubis utilitaires',
+    name: 'Runes utilitaires',
     short: 'Utilitaire',
     icon: '⟦fam_utility⟧',
     color: '#2ab4b0',
@@ -43,8 +43,8 @@ export const RUBIS_FAMILIES = Object.freeze([
     dark: '#0a4442'
   },
   {
-    name: 'Rubis spéciaux',
-    short: 'Spécial',
+    name: 'Runes spéciales',
+    short: 'Spéciale',
     icon: '⟦fam_special⟧',
     color: '#a85ae0',
     light: '#e2b8ff',

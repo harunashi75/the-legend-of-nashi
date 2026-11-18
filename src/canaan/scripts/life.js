@@ -1220,7 +1220,7 @@
         'Ces pierres se souviennent de l’Aube d’avant…',
         'Les squelettes ne dorment jamais vraiment.',
         'Écoute… on entend encore les anciens murmurer.',
-        'Les Rubis de l’Arène renferment une vieille magie.'
+        'Les Runes de l’Arène renferment une vieille magie.'
       ]
     },
     eclaireuse: {
