@@ -11,18 +11,8 @@
     AH = 132,
     CX = 90,
     BASE = 112;
-  const KEYS = [
-    'terriers',
-    'mine',
-    'eclipse',
-    'penitents',
-    'forge',
-    'fosse',
-    'bastion',
-    'continuum',
-    'seraphin',
-    'celestia'
-  ];
+  // Thème de chaque portail, par clé de donjon (fiches de shared/data/dungeons/) : seules les instances de l'île en
+  // ont un ; les Tréfonds s'ouvrent sous terre (underground.js).
   const THEME = {
     terriers: { rune: '#a3c7ff', flame: ['#e5522e', '#f9a640', '#fff1b5'], banner: ['#6b4a2e', '#c9a46e'] },
     mine: { rune: '#67d8ee', flame: ['#e5822e', '#f9c640', '#fff6c5'], banner: ['#3d4652', '#9fe8ff'] },
@@ -1078,7 +1068,11 @@
     return (GLOWS[col] = k.cv);
   }
   function keyOf(i) {
-    return i === 'arena' ? 'arena' : KEYS[i];
+    return i === 'arena' ? 'arena' : DUNGEON_LAYOUTS[i]?.key;
+  }
+  // Un portail sur l'île : l'Arène et chaque instance dont la clé a un thème.
+  function has(i) {
+    return i === 'arena' || (Number.isInteger(i) && !!THEME[keyOf(i)]);
   }
   function get(i, wx, wy) {
     const id = String(i),
@@ -1093,15 +1087,13 @@
   function warm() {
     if (warming || typeof requestIdleCallback !== 'function' || typeof instances === 'undefined') return;
     warming = true;
-    const todo = instances
-      .map((d, i) => [i, d])
-      .filter(([, d]) => !d.under && Number.isFinite(d.x) && KEYS[0] !== undefined);
+    const todo = instances.map((d, i) => [i, d]).filter(([, d]) => !d.under && Number.isFinite(d.x));
     if (typeof CANAAN_ARENA_PORTAL !== 'undefined') todo.push(['arena', CANAAN_ARENA_PORTAL]);
     const step = () => {
       const next = todo.shift();
       if (!next) return void (warming = false);
       const [i, d] = next;
-      if (i === 'arena' || i < KEYS.length) get(i, d.x * TS, d.y * TS);
+      if (has(i)) get(i, d.x * TS, d.y * TS);
       requestIdleCallback(step, { timeout: 2000 });
     };
     requestIdleCallback(step, { timeout: 2000 });
@@ -1279,6 +1271,6 @@
     labelAt,
     occluders,
     blocked,
-    has: i => i === 'arena' || (Number.isInteger(i) && i < KEYS.length)
+    has
   });
 })();

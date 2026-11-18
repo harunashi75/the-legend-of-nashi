@@ -1,8 +1,8 @@
-// Dessin des donjons, des raids et de l'Arène : palette de chaque instance (sols, murs, lumière, flammes, runes,
-// bannières, piliers, particules), textures et cases en pixel art, décor, objets de l'exploration (portes, leviers,
-// braseros, stèles…), portail de sortie, gradins de l'Arène, entrées sur l'île et ambiance. Aucune règle ici : les
-// plans, les énigmes et les boss sont dans scripts/dungeons/dungeons.js, la structure et les créatures de chaque
-// instance dans shared/data/dungeons.js.
+// Dessin des donjons, des raids et de l'Arène : textures et cases en pixel art, décor, objets de l'exploration
+// (portes, leviers, braseros, stèles…), portail de sortie, gradins de l'Arène, entrées sur l'île et ambiance. Aucune
+// règle ici : les plans, les énigmes et les boss sont dans scripts/dungeons/dungeons.js ; la structure, les créatures
+// et la palette de chaque instance (sols, murs, lumière, flammes, runes, bannières…) dans sa fiche de
+// shared/data/dungeons/.
 // dungeons.js appelle CANAAN_DUNGEON_RENDER.create(scène) une fois : la scène lui donne les cases, les plans,
 // l'état de l'exploration et les sorties (lus au moment du dessin, jamais modifiés ici).
 (() => {
@@ -24,211 +24,7 @@
       reachable
     } = scene;
 
-    // Thèmes, dans l'ordre de `instances`. Palettes d'acteurs : [principale, sombre, claire, accent, yeux].
-    // Apparence de chaque instance, dans l’ordre de INSTANCE_DEFS : sol, allées, murs, danger, lumière, flammes,
-    // runes, bannières, piliers, particules. Palettes d’acteurs : [principale, sombre, claire, accent, yeux].
-    const PALETTES = [
-      {
-        key: 'terriers',
-        floor: { style: 'dirt', a: '#5b4733', b: '#3e2f21', c: '#7d6449' },
-        accent: { style: 'gravel', a: '#54412f', b: '#3a2c1f', c: '#7a6450' },
-        wall: { style: 'rock', top: '#17110c', face: '#4d3b2b', dark: '#2e231a', light: '#6d5640' },
-        hazard: { a: '#1d3640', b: '#2c5563', c: '#7fb3c0' },
-        light: { dark: 0.66, tint: '20,12,4' },
-        flame: ['#e5522e', '#f9a640', '#fff1b5'],
-        rune: '#a3c7ff',
-        banner: ['#6b4a2e', '#c9a46e'],
-        pillar: ['#5b4836', '#3b2d21', '#7d6650'],
-        particles: 'dust'
-      },
-      {
-        key: 'mine',
-        floor: { style: 'stone', a: '#4a4a52', b: '#34343b', c: '#686872' },
-        accent: { style: 'rails', a: '#4a4a52', b: '#5e4430', c: '#a7aab4' },
-        wall: { style: 'rock', top: '#101218', face: '#3d434d', dark: '#262a32', light: '#5d6673' },
-        hazard: { a: '#06070a', b: '#12141a', c: '#2a2e38' },
-        light: { dark: 0.62, tint: '6,10,20' },
-        flame: ['#e5822e', '#f9c640', '#fff6c5'],
-        rune: '#67d8ee',
-        banner: ['#3d4652', '#9fe8ff'],
-        pillar: ['#5e4430', '#3b2a1d', '#80614a'],
-        particles: 'dust'
-      },
-      {
-        key: 'eclipse',
-        floor: { style: 'tiles', a: '#2f2a3d', b: '#211d2c', c: '#4a4360' },
-        accent: { style: 'runes', a: '#3a2f22', b: '#271f16', c: '#e0b04a' },
-        wall: { style: 'brick', top: '#0d0b14', face: '#3a3350', dark: '#262036', light: '#5a5078' },
-        hazard: { a: '#0b0614', b: '#1c1030', c: '#7a4ab0' },
-        light: { dark: 0.6, tint: '12,4,24' },
-        flame: ['#7a3ad8', '#b47aff', '#f0e0ff'],
-        rune: '#ff9955',
-        banner: ['#2a1e40', '#e0b04a'],
-        pillar: ['#4a4262', '#2a2438', '#6e6490'],
-        particles: 'motes'
-      },
-      {
-        key: 'penitents',
-        floor: { style: 'flagstone', a: '#56565c', b: '#3c3c42', c: '#77777e' },
-        accent: { style: 'carpet', a: '#6e1c22', b: '#521418', c: '#c9a24a' },
-        wall: { style: 'brick', top: '#111115', face: '#4b4a52', dark: '#303036', light: '#6c6b74' },
-        hazard: { a: '#050506', b: '#101014', c: '#26262c' },
-        light: { dark: 0.54, tint: '10,8,16' },
-        flame: ['#e5522e', '#f9a640', '#fff1b5'],
-        rune: '#b79cff',
-        banner: ['#5a161a', '#d6ccff'],
-        pillar: ['#5c5b63', '#3a3a40', '#807f88'],
-        particles: 'dust'
-      },
-      {
-        key: 'forge',
-        floor: { style: 'basalt', a: '#3a2a26', b: '#261a17', c: '#5a3d33' },
-        accent: { style: 'grate', a: '#2e2e33', b: '#1c1c20', c: '#ff8a3c' },
-        wall: { style: 'rock', top: '#120806', face: '#3d2620', dark: '#25150f', light: '#5e3a2c' },
-        hazard: { a: '#b8360f', b: '#ff6a1f', c: '#ffd36b' },
-        light: { dark: 0.44, tint: '30,6,0' },
-        flame: ['#e5522e', '#f9a640', '#fff1b5'],
-        rune: '#ff7a2a',
-        banner: ['#3a1408', '#ff8a3c'],
-        pillar: ['#4a302a', '#2a1a16', '#6e4a3c'],
-        particles: 'embers'
-      },
-      {
-        key: 'fosse',
-        floor: { style: 'flagstone', a: '#3a2c34', b: '#271d23', c: '#56424c' },
-        accent: { style: 'grate', a: '#2a2228', b: '#18121a', c: '#9a3ad8' },
-        wall: { style: 'rock', top: '#0a0709', face: '#33262c', dark: '#1f171b', light: '#4d3a42' },
-        hazard: { a: '#040206', b: '#120a16', c: '#3a2048' },
-        light: { dark: 0.68, tint: '16,4,20' },
-        flame: ['#8a2ad8', '#c47aff', '#f4d0ff'],
-        rune: '#e88aff',
-        banner: ['#2a1420', '#e88aff'],
-        pillar: ['#4a3a42', '#2a2026', '#6a5560'],
-        particles: 'motes'
-      },
-      {
-        key: 'bastion',
-        floor: { style: 'flagstone', a: '#4a2a2a', b: '#331c1c', c: '#6a3c3a' },
-        accent: { style: 'carpet', a: '#8a1420', b: '#5e0c16', c: '#d4a44a' },
-        wall: { style: 'brick', top: '#120707', face: '#4a2626', dark: '#2e1616', light: '#6e3a36' },
-        hazard: { a: '#4a060c', b: '#7a1018', c: '#c8303a' },
-        light: { dark: 0.52, tint: '30,4,4' },
-        flame: ['#c4221a', '#f46a32', '#ffd3a0'],
-        rune: '#ffd36d',
-        banner: ['#7a0e18', '#d4a44a'],
-        pillar: ['#5a3030', '#341a1a', '#7e4844'],
-        particles: 'embers'
-      },
-      {
-        key: 'continuum',
-        floor: { style: 'arcane', a: '#343954', b: '#22263a', c: '#4c5478', glow: '#7de0ff' },
-        accent: { style: 'runes', a: '#4a4220', b: '#2e2812', c: '#7de0ff' },
-        wall: { style: 'brick', top: '#0b0c18', face: '#40405e', dark: '#2a2a40', light: '#5e5e86' },
-        hazard: { a: '#05040f', b: '#1a1238', c: '#9fd8ff' },
-        light: { dark: 0.46, tint: '10,6,30' },
-        flame: ['#3a8ad8', '#7ad0ff', '#e0f8ff'],
-        rune: '#ff7fa7',
-        banner: ['#262a40', '#7de0ff'],
-        pillar: ['#8a7034', '#54421c', '#c0a050'],
-        particles: 'sparks'
-      },
-      {
-        key: 'seraphin',
-        floor: { style: 'marble', a: '#e4ddd0', b: '#c4bba8', c: '#d4aa3a' },
-        accent: { style: 'carpet', a: '#d4aa3a', b: '#a8822a', c: '#fff4c0' },
-        wall: { style: 'marble', top: '#cfc6b4', face: '#e8e0d0', dark: '#b8ae98', light: '#fffaf0' },
-        hazard: { a: '#9fb8e0', b: '#c8d8f4', c: '#ffffff' },
-        light: { dark: 0.16, tint: '40,24,60' },
-        flame: ['#f0b030', '#ffe070', '#ffffff'],
-        rune: '#c4a0ff',
-        banner: ['#f4f0e4', '#d4aa3a'],
-        pillar: ['#efe8da', '#c8bea8', '#ffffff'],
-        particles: 'feathers'
-      },
-      {
-        key: 'celestia',
-        floor: { style: 'starstone', a: '#1c2148', b: '#121633', c: '#fff0a8' },
-        accent: { style: 'runes', a: '#2a2a5a', b: '#1a1a40', c: '#fff0a8' },
-        wall: { style: 'marble', top: '#06061a', face: '#2a2e60', dark: '#1a1c40', light: '#4a50a0' },
-        hazard: { a: '#020208', b: '#14123a', c: '#fff0a8' },
-        light: { dark: 0.38, tint: '4,6,30' },
-        flame: ['#d4aa3a', '#fff0a8', '#ffffff'],
-        rune: '#fff0a8',
-        banner: ['#1a1c40', '#fff0a8'],
-        pillar: ['#d8d4f0', '#9a96c0', '#ffffff'],
-        particles: 'sparks'
-      },
-      {
-        key: 'durgrim',
-        entrance: 'mine',
-        floor: { style: 'dirt', a: '#5e4632', b: '#3e2e20', c: '#84664a' },
-        accent: { style: 'rails', a: '#5e4632', b: '#5a3e28', c: '#a8a2a0' },
-        wall: { style: 'rock', top: '#140e0a', face: '#4e3a2a', dark: '#2e2218', light: '#70543e' },
-        hazard: { a: '#3a2a1a', b: '#5a4026', c: '#8a6a44' },
-        light: { dark: 0.7, tint: '22,12,4' },
-        flame: ['#e5822e', '#f9c640', '#fff6c5'],
-        rune: '#e0a060',
-        banner: ['#4a3420', '#e0a060'],
-        pillar: ['#5e4430', '#3b2a1d', '#80614a'],
-        particles: 'dust'
-      },
-      {
-        key: 'ombral',
-        entrance: 'penitents',
-        floor: { style: 'flagstone', a: '#4a5058', b: '#33383e', c: '#6a727c' },
-        accent: { style: 'carpet', a: '#2a4a6a', b: '#1a3450', c: '#c9a24a' },
-        wall: { style: 'brick', top: '#0c1016', face: '#454c56', dark: '#2a3038', light: '#68707c' },
-        hazard: { a: '#0e2a3a', b: '#1e4a60', c: '#6ab0d0' },
-        light: { dark: 0.6, tint: '4,12,22' },
-        flame: ['#3a8ad8', '#7ac8ff', '#e0f4ff'],
-        rune: '#8ac8e8',
-        banner: ['#1e3a5a', '#c9a24a'],
-        pillar: ['#5a626c', '#3a4048', '#7e8894'],
-        particles: 'motes'
-      },
-      {
-        key: 'mille_tombes',
-        entrance: 'fosse',
-        floor: { style: 'flagstone', a: '#3c3a36', b: '#282624', c: '#58544e' },
-        accent: { style: 'gravel', a: '#34322e', b: '#22201e', c: '#4e4a44' },
-        wall: { style: 'brick', top: '#08090a', face: '#3a3c3a', dark: '#222422', light: '#5a5c58' },
-        hazard: { a: '#030404', b: '#0c100e', c: '#1e2a24' },
-        light: { dark: 0.72, tint: '4,14,10' },
-        flame: ['#3ad87a', '#8affb0', '#e0fff0'],
-        rune: '#a8f0c0',
-        banner: ['#1a2a22', '#a8f0c0'],
-        pillar: ['#4a4c48', '#2c2e2a', '#6c6e68'],
-        particles: 'motes'
-      },
-      {
-        key: 'fongique',
-        entrance: 'terriers',
-        floor: { style: 'dirt', a: '#3e4a2e', b: '#2a3420', c: '#5e6e40' },
-        accent: { style: 'gravel', a: '#4a3a46', b: '#322630', c: '#6a5664' },
-        wall: { style: 'rock', top: '#0c0a10', face: '#3e3446', dark: '#241e2a', light: '#5e5068' },
-        hazard: { a: '#2e3818', b: '#4a5a24', c: '#a8c060' },
-        light: { dark: 0.66, tint: '16,4,20' },
-        flame: ['#d84ac0', '#ff8ae8', '#ffe0f8'],
-        rune: '#e870c0',
-        banner: ['#3a1a34', '#e870c0'],
-        pillar: ['#4e4258', '#302838', '#6e6080'],
-        particles: 'motes'
-      }
-    ];
-    const ARENA_PALETTE = {
-      key: 'arene',
-      floor: { style: 'dirt', a: '#c2a272', b: '#a5865a', c: '#dcc095' },
-      accent: { style: 'gravel', a: '#9a7c52', b: '#7a6040', c: '#b8986a' },
-      wall: { style: 'brick', top: '#24180e', face: '#9a7a54', dark: '#5a4430', light: '#c8a676' },
-      hazard: { a: '#050506', b: '#101014', c: '#26262c' },
-      light: { dark: 0.16, tint: '34,18,6' },
-      flame: ['#e5522e', '#f9a640', '#fff1b5'],
-      rune: '#ffc65a',
-      banner: ['#7a1424', '#ffd36d'],
-      pillar: ['#d4bc94', '#8e7658', '#f2e4c4'],
-      particles: 'embers'
-    };
-    // Thème complet d'une instance : structure et créatures (shared/data/dungeons.js) avec leur palette.
+    // Thème complet d'une instance : plan, créatures et apparence de sa fiche (shared/data/dungeons/).
     const theme = (layout, actors, palette) => ({
       ...layout,
       ...actors,
@@ -236,8 +32,8 @@
       hazard: { ...layout.hazard, ...palette.hazard },
       accent: { ...layout.accent, ...palette.accent }
     });
-    const THEMES = DUNGEON_LAYOUTS.map((layout, i) => theme(layout, DUNGEON_ACTORS[i], PALETTES[i]));
-    THEMES.arena = theme(DUNGEON_ARENA_LAYOUT, { mobs: [], bosses: [] }, ARENA_PALETTE);
+    const THEMES = DUNGEON_LAYOUTS.map((layout, i) => theme(layout, DUNGEON_ACTORS[i], DUNGEON_PALETTES[i]));
+    THEMES.arena = theme(DUNGEON_ARENA_LAYOUT, { mobs: [], bosses: [] }, DUNGEON_ARENA_PALETTE);
     // Gradins du colisée : rangées de grès et public animé, sur l'anneau de murs autour de la piste.
     const CROWD = ['#7a1424', '#2a4a7a', '#c8a050', '#3a6a3a', '#6a3a7a', '#a85a2a', '#d8d0c0', '#4a4a52'];
     function drawArenaStands(c) {

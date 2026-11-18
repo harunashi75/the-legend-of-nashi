@@ -102,7 +102,8 @@ test('Architecture : shared/ pur (aucun navigateur, aucun autre dossier), charge
  const {g,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  for(const file of files){
   const mod=await import(require('node:url').pathToFileURL(file).href);
-  for(const [name,value] of Object.entries(mod))assert.equal(JSON.stringify(g[name]),JSON.stringify(value),name);
+  // Une fiche de donjon (export par défaut, shared/data/dungeons/) arrive dans le jeu par la liste DUNGEONS.
+  for(const [name,value] of Object.entries(mod))if(name!=='default')assert.equal(JSON.stringify(g[name]),JSON.stringify(value),name);
  }
  // Le build regroupe les modules ES avec esbuild, version épinglée.
  assert.match(JSON.parse(fs.readFileSync(path.join(__dirname,'..','package.json'),'utf8')).devDependencies.esbuild,/^\d+\.\d+\.\d+$/);

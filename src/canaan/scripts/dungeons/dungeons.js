@@ -2,7 +2,8 @@
 // Des explorations : un donjon a trois boss, un raid six ; chaque boss attend derrière une porte scellée par une
 // énigme de son aile (braseros, leviers, dalles gravées ou gardiens du sceau), et des murs fissurés cachent les salles
 // des boss secrets, qui donnent les clés des coffres secrets de l'île.
-// Structure et créatures de chaque instance : shared/data/dungeons.js ; tout le dessin : scripts/dungeons/render.js.
+// Fiche de chaque instance (règles, plan, créatures, apparence) : shared/data/dungeons/<clé>.js ; tout le dessin :
+// scripts/dungeons/render.js.
 (() => {
   'use strict';
   const WALL = 9,
@@ -14,7 +15,7 @@
     SECRET = 23;
 
   const WALKABLE = t => t === FLOOR || t === ACCENT;
-  // Thèmes de la logique : structure et créatures de chaque instance (shared/data/dungeons.js), sans leur apparence.
+  // Thèmes de la logique : structure et créatures de chaque instance (shared/data/dungeons/), sans leur apparence.
   const THEMES = DUNGEON_LAYOUTS.map((layout, i) => ({ ...layout, ...DUNGEON_ACTORS[i] }));
   THEMES.arena = { ...DUNGEON_ARENA_LAYOUT, mobs: [], bosses: [] };
 

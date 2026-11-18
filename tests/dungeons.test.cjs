@@ -189,3 +189,31 @@ test('Données partagées des donjons : une structure et des créatures par inst
  assert.ok(D.DUNGEON_SOLID_PROPS.every(p=>typeof p==='string')&&D.DUNGEON_SOLID_PROPS.includes('pillar'));
  assert.ok(D.DUNGEON_BOSS_DROP_CHANCE>0&&D.DUNGEON_BOSS_DROP_CHANCE<1);
 });
+
+test('Une fiche par donjon : chaque instance a son fichier, l’ordre des sauvegardes est fixe, une fiche fautive est refusée',async()=>{
+ const path=require('node:path'),fs=require('node:fs'),{pathToFileURL}=require('node:url');
+ const dir=path.join(__dirname,'..','src','canaan','shared','data','dungeons');
+ const I=await import(pathToFileURL(path.join(dir,'index.js')).href),W=await import(pathToFileURL(path.join(dir,'..','world.js')).href);
+ const D=await import(pathToFileURL(path.join(dir,'..','dungeons.js')).href);
+ // Ordre des sauvegardes : les donjons terminés sont retenus par leur position, on n'ajoute qu'à la fin.
+ assert.deepEqual(I.DUNGEONS.slice(0,14).map(d=>d.key),['terriers','mine','eclipse','penitents','forge','fosse','bastion','continuum','seraphin','celestia','durgrim','ombral','mille_tombes','fongique']);
+ const files=fs.readdirSync(dir).filter(f=>f.endsWith('.js')&&f!=='index.js'&&f!=='arene.js');
+ assert.equal(files.length,I.DUNGEONS.length,'chaque fiche du dossier est listée dans index.js');
+ I.DUNGEONS.forEach((d,i)=>{
+  assert.equal(W.INSTANCE_DEFS[i].name,d.rules.name);
+  assert.equal(D.DUNGEON_LAYOUTS[i].key,d.key);
+  assert.equal(D.DUNGEON_PALETTES[i].key,d.key);
+  assert.ok(D.DUNGEON_PALETTES[i].floor&&D.DUNGEON_PALETTES[i].wall,d.key+' : palette');
+ });
+ assert.equal(D.DUNGEON_ARENA_PALETTE.key,'arene');
+ // Contrôle au chargement : une fiche sans plan, ou une clé en double, empêche le jeu de démarrer avec un donjon cassé.
+ const tmp=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'fiches-'));
+ const src=fs.readFileSync(path.join(dir,'index.js'),'utf8').replace(/'\.\.\/\.\.\/freeze\.js'/,JSON.stringify(pathToFileURL(path.join(dir,'..','..','freeze.js')).href));
+ for(const f of fs.readdirSync(dir))fs.copyFileSync(path.join(dir,f),path.join(tmp,f));
+ fs.writeFileSync(path.join(tmp,'index.js'),src.replace("import mine from './mine.js';","import mine from './terriers.js';"));
+ await assert.rejects(import(pathToFileURL(path.join(tmp,'index.js')).href),/clé en double/);
+ fs.writeFileSync(path.join(tmp,'mine.js'),fs.readFileSync(path.join(dir,'mine.js'),'utf8').replace("shape: 'hall'","shape: 'cube'"));
+ fs.writeFileSync(path.join(tmp,'index2.js'),src);
+ await assert.rejects(import(pathToFileURL(path.join(tmp,'index2.js')).href),/mine.*layout\.shape/);
+ fs.rmSync(tmp,{recursive:true,force:true});
+});
