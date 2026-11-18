@@ -185,7 +185,6 @@ export const INSTANCE_DEFS = deepFreeze([
   },
   {
     name: 'Le Jugement de Célestia',
-    subtitle: 'Raid 4 · Raid final',
     biome: 5,
     x: 0,
     y: 0,

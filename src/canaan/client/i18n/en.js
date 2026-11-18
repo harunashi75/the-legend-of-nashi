@@ -1266,8 +1266,6 @@ export default {
   'L’Ange Déchu Sans Nom': 'The Nameless Fallen Angel',
   'Le Gardien du Septième Ciel': 'The Guardian of the Seventh Heaven',
   'Le Jugement de Célestia': 'The Judgment of Celestia',
-  'Raid 4': 'Raid 4',
-  'Raid final': 'Final raid',
   'L’Avatar du Jugement': 'The Avatar of Judgment',
   'Le Porte-Étoile': 'The Star-Bearer',
   'Le Héraut de Célestia': 'The Herald of Celestia',
