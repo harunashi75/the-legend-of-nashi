@@ -117,6 +117,8 @@
     for (let k = 1; k < n; k++) occ.push(lv.map(l => (l >= order[k] ? 1 : 0)));
     const c = document.createElement('canvas');
     c.width = c.height = S;
+    // Image perdue par Chromium (mémoire graphique saturée) : tout le cache est repeint.
+    c.addEventListener?.('contextlost', () => (cacheFor = null));
     const g = c.getContext('2d'),
       img = g.createImageData(S, S),
       out = img.data,

@@ -1085,10 +1085,13 @@ function draw() {
   const cols = BIOME_COLORS;
   // Sol : par blocs gardés sur l'île (world-look.js), case par case en donjon.
   if (game.world.instance) {
+    forgetWorldGround();
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) drawDungeonTile(ctx, x, y, game.world.tiles[y][x]);
-  } else if (canaanUnder()) CANAAN_UNDER.drawGround(ctx, x0, x1, y0, y1);
-  else drawWorldGround(ctx, x0, x1, y0, y1);
+  } else if (canaanUnder()) {
+    forgetWorldGround();
+    CANAAN_UNDER.drawGround(ctx, x0, x1, y0, y1);
+  } else drawWorldGround(ctx, x0, x1, y0, y1);
   // Villages, maisons, monuments et portails
   if (game.world.instance) drawDungeonDecor(ctx);
   else if (canaanUnder()) {

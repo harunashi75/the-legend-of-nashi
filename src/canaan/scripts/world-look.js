@@ -711,12 +711,20 @@
     KEEP = 48;
   let chunks = new Map(),
     chunkFor = null,
-    chunkBridges = -1;
+    chunkBridges = -1,
+    chunksStale = false;
+  // Hors de l'île (donjon, Arène, Tréfonds), les blocs gardés ne servent plus : ils sont oubliés et repeints au
+  // retour. Un bloc dont Chromium a perdu l'image (mémoire graphique saturée) reviendrait vide : sol noir.
+  function forgetWorldGround() {
+    chunksStale = true;
+    ahead = null;
+  }
   function chunkAt(cx, cy) {
     // Dans un bâtiment, CANAAN_HOUSE.drawTile peint le dehors en noir : un bloc construit à ce moment-là resterait
     // noir dans le cache (sol noir en ressortant). Aucun bloc n'est donc préparé à l'intérieur.
     if (canaanInHouse(P.x / TS, P.y / TS)) return null;
-    if (chunkFor !== game.world.overworld || chunkBridges !== BRIDGE_TILES.size) {
+    if (chunksStale || chunkFor !== game.world.overworld || chunkBridges !== BRIDGE_TILES.size) {
+      chunksStale = false;
       chunks = new Map();
       chunkFor = game.world.overworld;
       chunkBridges = BRIDGE_TILES.size;
@@ -729,6 +737,7 @@
       return img;
     }
     img = canvas(CH * TS, CH * TS);
+    img.addEventListener?.('contextlost', forgetWorldGround);
     const g = img.getContext('2d');
     if (!g?.translate) return null;
     g.imageSmoothingEnabled = false;
@@ -1081,6 +1090,7 @@
     drawCanaanOcclusion,
     drawWorldTile,
     drawWorldGround,
+    forgetWorldGround,
     worldAmbience,
     drawWaterRipples,
     drawWade,

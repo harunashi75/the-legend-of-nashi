@@ -146,6 +146,7 @@ function modalOpen() {
   return document.getElementById('overlay').style.display === 'flex';
 }
 function closePanels() {
+  currentGearPanel = '';
   document.getElementById('window').classList.remove('rpg-modern');
   document.getElementById('overlay').style.display = 'none';
   hideGearTooltip();
@@ -155,6 +156,9 @@ function showPanel(html) {
   let win = document.getElementById('window'),
     oldScroll = win.scrollTop,
     oldInner = [...win.querySelectorAll('.scroll')].map(x => x.scrollTop);
+  // Toute nouvelle fenêtre remplace le sac ou la fiche : ils se réinscrivent eux-mêmes (prepare) une fois dessinés.
+  currentGearPanel = '';
+  delete win.dataset.canaanPanel;
   document.getElementById('dialog').style.display = 'none';
   document.getElementById('overlay').style.display = 'flex';
   document.getElementById('window').innerHTML =
@@ -178,7 +182,9 @@ function toggleCharacter() {
   }
   renderCharacter();
 }
+// Redessine le sac ou la fiche seulement s'ils sont la fenêtre affichée : jamais par-dessus une autre (T, J, marchand…).
 function refreshGearPanel() {
+  if (!modalOpen() || !currentGearPanel) return;
   if (currentGearPanel === 'character') renderCharacter();
   else renderInventory();
 }

@@ -687,6 +687,9 @@
     game.world.monsters = (Array.isArray(state.monsters) ? state.monsters : []).map(s => {
       const m = old.get(s.k) || { x: s.x, y: s.y };
       const { x, y, ...rest } = s;
+      // Les drapeaux ne sont envoyés que vrais : absents, ils sont retombés (boss de l'arène qui réapparaît après sa téléportation).
+      for (const key of ['boss', 'worldBoss', 'elite', 'arenaBoss', 'hidden', 'bossStage', 'secretBoss'])
+        if (!(key in rest)) delete m[key];
       Object.assign(m, rest);
       target(m, x, y);
       return m;

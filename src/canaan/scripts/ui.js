@@ -4,6 +4,7 @@
   function prepare(panel) {
     const win = document.getElementById('window');
     win.dataset.canaanPanel = panel;
+    currentGearPanel = panel;
     win.querySelectorAll('button').forEach(button => {
       if (!button.hasAttribute('type')) button.type = 'button';
     });
