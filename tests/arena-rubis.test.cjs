@@ -62,30 +62,43 @@ test('Rubis : effets en combat, survie aux coups fatals, soins, mana et utilitai
  run('started=true;paused=false;P.dead=false;time=10000;for(const r of CANAAN_RUBIS.list)CANAAN_RUBIS.grant(r.id)');
  const wear=ids=>run("CANAAN_RUBIS_STATE.import({owned:Object.fromEntries(CANAAN_RUBIS.list.map(r=>[r.id,1])),equipped:"+JSON.stringify([...ids,...Array(6-ids.length).fill(null)])+"});recomputeStats()");
  wear([]);const hp0=run('characterStats().maxHp'),speed0=run('characterStats().speed');
- wear(['colosse']);assert.equal(run('characterStats().maxHp'),Math.round(hp0*1.1));assert.equal(run('characterStats().speed'),speed0-5);
+ const def0=run('characterStats().defense');
+ wear(['colosse']);assert.equal(run('characterStats().maxHp'),Math.round(hp0*1.1));assert.equal(run('characterStats().defense'),Math.round(def0*1.1));assert.equal(run('characterStats().speed'),speed0);
+ // Voyageur : +10 % de vitesse, en combat comme hors combat.
+ wear(['voyageur']);assert.equal(run('characterStats().speed'),speed0+10);run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},1)');assert.equal(run('CANAAN_RUBIS.inCombat()'),true);assert.equal(run('characterStats().speed'),speed0+10);run('time+=600');
  wear(['pacte']);assert.equal(run('characterStats().maxHp'),Math.round(hp0*0.88));
  assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},100)')-118)<1e-9);
  wear(['berserker','chasseur','dernier_souffle']);run('P.hp=P.mhp');
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999,elite:true},100)')-112)<1e-9);
- run('P.hp=P.mhp*0.2');assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:1,mhp:9,x:9999,y:9999},100)')-115*1.15)<1e-9);
+ assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999,elite:true},100)')-115)<1e-9);
+ assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999,boss:true},100)')-115)<1e-9);
+ run('P.hp=P.mhp*0.2');assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:2,mhp:9,x:9999,y:9999},100)')-115*1.2)<1e-9);
  wear(['briseur','precision','tresorier','volonte','arcane','endurance']);
- assert.deepEqual(JSON.parse(run('JSON.stringify([CANAAN_RUBIS.armorFactor(),CANAAN_RUBIS.critFactor(),CANAAN_RUBIS.goldFactor(),CANAAN_RUBIS.incomingCritFactor(),CANAAN_RUBIS.manaCost(100),CANAAN_RUBIS.dodgeCooldownFactor()])')),[0.92,1.12,1.15,0.8,90,0.85]);
+ assert.deepEqual(JSON.parse(run('JSON.stringify([CANAAN_RUBIS.armorFactor(),CANAAN_RUBIS.critFactor(),CANAAN_RUBIS.goldFactor(),CANAAN_RUBIS.manaCost(100),CANAAN_RUBIS.dodgeCooldownFactor()])')),[0.92,1.12,1.15,90,0.85]);
  // Prospecteur : 15 % de chances d'un meilleur objet sur un mob ordinaire.
  wear(['prospecteur']);assert.equal(run('Math.random=()=>0.14;CANAAN_RUBIS.betterDrop()'),true);assert.equal(run('Math.random=()=>0.16;CANAAN_RUBIS.betterDrop()'),false);
  wear([]);assert.equal(run('Math.random=()=>0;CANAAN_RUBIS.betterDrop()'),false);
- // Défense : Peau de pierre seulement contre les coups physiques ; Gardien après un coup, puis recharge.
- wear(['peau_de_pierre']);assert.equal(run('CANAAN_RUBIS.defense({},100,{})'),94);assert.equal(run('CANAAN_RUBIS.defense({},100,{magic:true})'),100);
- wear(['gardien']);assert.equal(run('CANAAN_RUBIS.defense({},100)'),100);assert.equal(run('CANAAN_RUBIS.defense({},100)'),90);
+ // Défense : Peau de pierre plafonne un coup à 25 % des PV max ; Gardien divise un coup par deux toutes les 12 s ;
+ // Volonté de fer sous 50 % de PV.
+ run('P.hp=P.mhp');
+ wear(['peau_de_pierre']);assert.equal(run('CANAAN_RUBIS.defense({},P.mhp*0.2,{})'),run('P.mhp*0.2'));assert.equal(run('CANAAN_RUBIS.defense({},P.mhp,{magic:true})'),run('P.mhp*0.25'));
+ wear(['gardien']);assert.equal(run('CANAAN_RUBIS.defense({},100)'),50);assert.equal(run('CANAAN_RUBIS.defense({},100)'),100);
+ run('time+=12*60');assert.equal(run('CANAAN_RUBIS.defense({},100)'),50);
+ wear(['volonte']);assert.equal(run('CANAAN_RUBIS.defense({},100)'),100);run('P.hp=P.mhp*0.4');assert.equal(run('CANAAN_RUBIS.defense({},100)'),85);run('P.hp=P.mhp');
  // Second souffle puis Phénix : une fois chacun par combat, puis la mort.
  wear(['second_souffle','phenix']);run('P.hp=50');
  assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.1)));
  assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.2)));
  assert.ok(run('canaanHurtPlayer(9999,null)')>0);assert.ok(run('P.hp')<=0);
- // Soins : Guérisseur pour les soins directs, Source vitale pour tous ; Bénédiction après un soin.
+ // Soins : Guérisseur pour les soins directs, Source vitale pour tous ; Bénédiction : le soin en trop devient un bouclier.
  wear(['guerisseur','source_vitale','benediction']);run('P.dead=false;P.mhp=10000;P.hp=1');
- assert.ok(Math.abs(run('canaanApplyHeal(100,true)')-110)<1e-9);run('P.hp=1');
- const direct=run('canaanApplyHeal(100)');assert.ok(direct>=Math.round(100*1.08*1.1)-1,String(direct));
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},100)')-105)<1e-9);
+ assert.ok(Math.abs(run('canaanApplyHeal(100,true)')-120)<1e-9);run('P.hp=1');
+ const direct=run('canaanApplyHeal(100)');assert.ok(direct>=Math.round(100*1.15*1.2)-1,String(direct));
+ run('P.hp=P.mhp-10;canaanApplyHeal(200)');assert.ok(run('CANAAN_RUBIS.auras().some(a=>a.id==="benediction")'),'bouclier de la Bénédiction');
+ run('canaanApplyHeal(5000)');assert.equal(run('CANAAN_RUBIS.defense({},5000)'),5000-run('P.mhp')*0.1,'bouclier plafonné à 10 % des PV max');
+ // Régénération : 1 % des PV max toutes les 3 s, même en combat.
+ wear(['regeneration']);run('P.hp=1;CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},1)');
+ for(let i=0;i<180;i++)run('time++;CanaanStages.rubis.after(new Map())');
+ assert.ok(Math.abs(run('P.hp')-1-run('P.mhp')*0.01)<1e-6,String(run('P.hp')));run('time+=600');
  // Méditation et Symbiose : 3 % du mana toutes les 5 s, et des PV en retour.
  wear(['meditation','symbiose']);run('time+=600;P.mp=0;P.hp=1');const hpBefore=run('P.hp');
  for(let i=0;i<300;i++)run('time++;CanaanStages.rubis.after(new Map())');

@@ -102,7 +102,7 @@
   }
   window.CANAAN_ENEMY_RAW_DAMAGE = enemyRawDamage;
   // Dégâts reçus par un héros (l'hôte par défaut) : Défense (contre le niveau de l'ennemi), Résistance, déviation
-  // et critique ennemi (shared/rules/combat.js), avec ses Rubis (Volonté) ; une déviation ou un critique subi déclenche ses talents.
+  // et critique ennemi (shared/rules/combat.js) ; une déviation ou un critique subi déclenche ses talents.
   // rawOverride : dégâts bruts imposés par une mécanique (Arène), comptés au niveau du héros.
   window.CANAAN_STATS_INCOMING = function (m, rawOverride = null, hero = game.hero) {
     if (!m) return 0;
@@ -114,8 +114,7 @@
         characterStats(hero),
         override ? heroLevel(hero) : canaanMobLevel(m),
         Math.random,
-        enemyCritChance(m),
-        CANAAN_RUBIS.incomingCritFactor(hero)
+        enemyCritChance(m)
       );
     if (blow.deflected) {
       float(p.x, p.y - 50, 'DÉVIATION', '#87f8f4');

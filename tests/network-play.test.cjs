@@ -110,7 +110,9 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.deepEqual(guest.run('JSON.stringify(game.hero.classe)'),JSON.stringify({id:'assassin',talents:[1]}),'l’invité voit sa classe');
   assert.ok(guest.run('!!document.getElementById("specialSkill")'),'sort spécial sur la barre de l’invité');
   assert.equal(guest.run('game.hero.rubis.equipped.includes("colosse")'),true,'l’invité voit son Rubis');
-  assert.ok(Math.abs(guest.run('CANAAN_NET.debug.speed')-speedBefore)<1e-6,'Assassin (+5 %) et Colosse (−5 %) : même vitesse chez l’hôte et chez lui');
+  const hostSpeed=host.run('Math.round(CANAAN_PLAYER_SPEED*(1+(characterStats('+G+').speed||0)/100)*CANAAN_PROF.speedMult('+G+')*1000)/1000');
+  assert.ok(guest.run('CANAAN_NET.debug.speed')>speedBefore,'Assassin : +5 % de vitesse');
+  assert.ok(Math.abs(guest.run('CANAAN_NET.debug.speed')-hostSpeed)<1e-6,'même vitesse chez l’hôte et chez lui');
   assert.equal(host.run('characterStats('+G+').critPower'),60,'passif de l’Assassin : +10 % de dégâts critiques');
   assert.ok(host.run(G+'.player.mhp')>hpBefore*1.05,'Colosse : PV max de l’invité augmentés chez l’hôte');
   assert.equal(host.run('(game.hero.classe.id?1:0)+game.hero.rubis.equipped.filter(Boolean).length'),0,'rien ne change pour l’hôte');

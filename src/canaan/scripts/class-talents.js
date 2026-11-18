@@ -274,11 +274,12 @@
     if (p.hp < p.mhp) {
       gained = Math.max(0, Math.min(p.mhp - p.hp, amount));
       p.hp += gained;
-      if (gained > 0) CANAAN_RUBIS.onHealed(gained, periodic, target);
     }
     if (periodic) return gained;
     // Barde : le soin en trop devient un bouclier (Ritournelle) ; le soin donne de l'élan (Mélodie vivifiante).
     const overflow = Math.max(0, amount - gained);
+    // Rune Bénédiction : le soin en trop devient un bouclier.
+    CANAAN_RUBIS.onOverheal(overflow, target);
     if (overflow > 0 && on('barde', 'refrain', healer)) {
       const r = runtime(target),
         t = now(),

@@ -1424,7 +1424,7 @@ export default {
   '+8 % de dégâts si un seul ennemi se trouve à moins de 5 cases.':
     '+8% damage if only one enemy is within 5 tiles.',
   'Chasseur': 'Hunter',
-  '+12 % de dégâts contre les mobs élites.': '+12% damage against elite mobs.',
+  '+15 % de dégâts contre les élites et les boss.': '+15% damage against elites and bosses.',
   'Briseur': 'Breaker',
   'Les attaques ignorent 8 % de la défense ennemie.': 'Attacks ignore 8% of enemy defense.',
   'Carnage': 'Carnage',
@@ -1434,19 +1434,20 @@ export default {
   'Frapper 4 fois la même cible augmente les dégâts contre elle de 10 % pendant 5 s.':
     'Hitting the same target 4 times increases damage against it by 10% for 5 s.',
   'Dernier souffle': 'Last breath',
-  '+15 % de dégâts contre les ennemis sous 20 % de PV.': '+15% damage against enemies below 20% HP.',
+  '+20 % de dégâts contre les ennemis sous 30 % de PV.': '+20% damage against enemies below 30% HP.',
   'Colosse': 'Colossus',
-  '+10 % de PV maximum, mais −5 % de vitesse de déplacement.': '+10% maximum HP, but −5% movement speed.',
+  '+10 % de PV maximum et +10 % de Défense.': '+10% maximum HP and +10% Defense.',
   'Gardien': 'Guardian',
-  'Après un coup reçu, −10 % de dégâts subis pendant 3 s. Recharge : 20 s.':
-    'After taking a hit, −10% damage taken for 3 s. Cooldown: 20 s.',
+  'Toutes les 12 s, le prochain coup reçu est réduit de 50 %.':
+    'Every 12 s, the next hit taken is reduced by 50%.',
   'Rempart': 'Rampart',
   'Sous 40 % de PV, gagne un bouclier de 15 % des PV max pendant 5 s. Recharge : 45 s.':
     'Below 40% HP, gain a shield worth 15% of max HP for 5 s. Cooldown: 45 s.',
   'Peau de pierre': 'Stoneskin',
-  '−6 % de dégâts physiques reçus.': '−6% physical damage taken.',
+  'Un coup reçu ne peut pas retirer plus de 25 % des PV max.':
+    'A single hit cannot take more than 25% of max HP.',
   'Volonté de fer': 'Iron will',
-  'Les dégâts critiques reçus sont réduits de 20 %.': 'Critical damage taken is reduced by 20%.',
+  'Sous 50 % de PV, −15 % de dégâts reçus.': 'Below 50% HP, −15% damage taken.',
   'Forteresse': 'Fortress',
   'Rester immobile pendant 2 s accorde −12 % de dégâts reçus jusqu’au déplacement.':
     'Standing still for 2 s grants −12% damage taken until you move.',
@@ -1457,9 +1458,9 @@ export default {
   'Une fois par combat, survivre à un coup fatal avec 10 % des PV max.':
     'Once per fight, survive a fatal blow with 10% of max HP.',
   'Guérisseur': 'Healer',
-  '+8 % de soins prodigués.': '+8% healing done.',
+  '+15 % de soins prodigués.': '+15% healing done.',
   'Régénération': 'Regeneration',
-  'Récupère 1 % des PV max toutes les 5 s hors combat.': 'Recover 1% of max HP every 5 s out of combat.',
+  'Récupère 1 % des PV max toutes les 3 s.': 'Recover 1% of max HP every 3 s.',
   'Arcane': 'Arcane',
   'Les compétences consomment 10 % de mana en moins.': 'Skills use 10% less mana.',
   'Faucheur': 'Reaper',
@@ -1467,10 +1468,10 @@ export default {
   'Méditation': 'Meditation',
   'Récupère 3 % du mana maximum toutes les 5 s.': 'Recover 3% of maximum mana every 5 s.',
   'Bénédiction': 'Blessing',
-  'Après avoir reçu un soin, gagne +5 % de dégâts pendant 6 s.':
-    'After receiving a heal, gain +5% damage for 6 s.',
+  'Le soin reçu au-delà des PV max devient un bouclier, jusqu’à 10 % des PV max pendant 6 s.':
+    'Healing received beyond max HP becomes a shield, up to 10% of max HP for 6 s.',
   'Source vitale': 'Vital spring',
-  'Les soins reçus sont augmentés de 10 %.': 'Healing received is increased by 10%.',
+  'Les soins reçus sont augmentés de 20 %.': 'Healing received is increased by 20%.',
   'Communion': 'Communion',
   'Soigner un allié restaure également 3 % de tes PV max. Recharge : 8 s.':
     'Healing an ally also restores 3% of your max HP. Cooldown: 8 s.',
@@ -1498,7 +1499,7 @@ export default {
   'Toutes les 5 compétences offensives, la prochaine inflige +20 % de dégâts.':
     'Every 5 offensive skills, the next one deals +20% damage.',
   'Voyageur': 'Traveler',
-  '+10 % de vitesse de déplacement hors combat.': '+10% movement speed out of combat.',
+  '+10 % de vitesse de déplacement.': '+10% movement speed.',
   'Sprinteur': 'Sprinter',
   'Après une esquive, +20 % de vitesse pendant 2 s.': 'After a dodge, +20% speed for 2 s.',
   'Endurance': 'Endurance',
@@ -2039,9 +2040,7 @@ export default {
   'Choisis ta classe : {liste} ou {nom} (touche T).': 'Choose your class: {liste} or {nom} (T key).',
   'Choisis ta classe (T)': 'Choose your class (T)',
   '+{n} PV ☯': '+{n} HP ☯',
-  'Dégâts reçus −10 %.': 'Damage taken −10%.',
   'Bouclier : absorbe encore {n} dégâts.': 'Shield: absorbs {n} more damage.',
-  'Dégâts +5 %.': 'Damage +5%.',
   'Recharges −10 %.': 'Cooldowns −10%.',
   'TRANSCENDANCE': 'TRANSCENDENCE',
   'ÉCLIPSE': 'ECLIPSE',

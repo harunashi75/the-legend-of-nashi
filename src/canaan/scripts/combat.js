@@ -45,7 +45,7 @@
       return result;
     },
     // raw : dégâts bruts d'une attaque précise (mécaniques de l'Arène) ; sinon calculés par Ratings52.
-    // options.magic : dégâts magiques (la Peau de pierre ne réduit que les dégâts physiques).
+    // options.magic : dégâts magiques (sorts et sols de l'Arène), transmis aux Runes du héros touché.
     // hero : le héros touché (l'hôte par défaut), avec sa roulade, ses postures, ses talents et ses Rubis.
     incoming(source, raw = null, options = {}, hero = game.hero) {
       if (!source || hero.away) return 0;

@@ -113,10 +113,10 @@
       carnage: [],
       target: null,
       targetHits: 0,
-      gardienUntil: 0,
       gardienReady: 0,
       shield: 0,
       shieldUntil: 0,
+      shieldFrom: 'rempart',
       rempartReady: 0,
       still: 0,
       lastX: null,
@@ -126,7 +126,6 @@
       hots: [],
       secondUsed: false,
       phoenixUsed: false,
-      blessUntil: 0,
       regenClock: 0,
       meditationClock: 0,
       hits: 0,
@@ -192,10 +191,8 @@
           const r = BY_ID.get(id);
           if (r && until > t) out.push({ id, icon: r.icon, name: r.name + extra, text, left: until - t });
         };
-      if (has('gardien')) add('gardien', rt.gardienUntil, 'Dégâts reçus −10 %.');
       if (rt.shield > 0)
-        add('rempart', rt.shieldUntil, 'Bouclier : absorbe encore ' + Math.round(rt.shield) + ' dégâts.');
-      if (has('benediction')) add('benediction', rt.blessUntil, 'Dégâts +5 %.');
+        add(rt.shieldFrom, rt.shieldUntil, 'Bouclier : absorbe encore ' + Math.round(rt.shield) + ' dégâts.');
       if (has('acceleration')) add('acceleration', rt.accelUntil, 'Recharges −10 %.');
       if (has('sprinteur')) add('sprinteur', rt.sprintUntil, 'Vitesse +20 %.');
       return out;
@@ -205,10 +202,10 @@
       if (!active.size) return s;
       if (has('colosse')) {
         s.maxHp = Math.round(s.maxHp * 1.1);
-        s.speed = (s.speed || 0) - 5;
+        s.defense = Math.round((s.defense || 0) * 1.1);
       }
       if (has('pacte')) s.maxHp = Math.max(1, Math.round(s.maxHp * 0.88));
-      if (has('voyageur') && !inCombat()) s.speed = (s.speed || 0) + 10;
+      if (has('voyageur')) s.speed = (s.speed || 0) + 10;
       if (has('sprinteur') && now() < rt.sprintUntil) s.speed = (s.speed || 0) + 20;
       if (has('elan') && rt.elan) s.speed = (s.speed || 0) + 15;
       return s;
@@ -225,11 +222,10 @@
         ).length;
         if (near === 1) mult *= 1.08;
       }
-      if (has('chasseur') && m.elite) mult *= 1.12;
+      if (has('chasseur') && (m.elite || m.boss || m.worldBoss || m.arenaBoss)) mult *= 1.15;
       if (has('carnage')) mult *= 1 + 0.03 * rt.carnage.filter(x => x > t).length;
       if (has('acharnement') && m._rubisFocusUntil > t) mult *= 1.1;
-      if (has('dernier_souffle') && m.mhp > 0 && m.hp / m.mhp < 0.2) mult *= 1.15;
-      if (has('benediction') && t < rt.blessUntil) mult *= 1.05;
+      if (has('dernier_souffle') && m.mhp > 0 && m.hp / m.mhp < 0.3) mult *= 1.2;
       if (has('pacte')) mult *= 1.18;
       return damage * mult;
     },
@@ -338,16 +334,24 @@
     armorFactor: () => (has('briseur') ? 0.92 : 1),
     critFactor: () => (has('precision') ? 1.12 : 1),
     goldFactor: () => (has('tresorier') ? 1.15 : 1),
-    incomingCritFactor: () => (has('volonte') ? 0.8 : 1),
     // Prospecteur : 15 % de chances qu'un monstre ordinaire lâche un objet Peu commun au lieu d'un Commun.
     betterDrop() {
       return has('prospecteur') && Math.random() < 0.15;
     },
     healFactor(periodic) {
-      return (!periodic && has('guerisseur') ? 1.08 : 1) * (has('source_vitale') ? 1.1 : 1);
+      return (!periodic && has('guerisseur') ? 1.15 : 1) * (has('source_vitale') ? 1.2 : 1);
     },
-    onHealed(gained, periodic) {
-      if (!periodic && has('benediction')) rt.blessUntil = now() + 6;
+    // Bénédiction : le soin direct reçu au-delà des PV max devient un bouclier (10 % des PV max au plus, 6 s).
+    onOverheal(overflow) {
+      if (!has('benediction') || !(overflow > 0)) return;
+      const t = now(),
+        current = t < rt.shieldUntil ? rt.shield : 0,
+        cap = HP.mhp * 0.1;
+      if (current >= cap) return;
+      rt.shield = Math.min(cap, current + overflow);
+      rt.shieldUntil = Math.max(rt.shieldUntil, t + 6);
+      rt.shieldFrom = 'benediction';
+      if (!current) float(HP.x, HP.y - 58, '🙏 Bouclier', '#a8f2bc');
     },
     // Réductions des dégâts reçus, après la Défense, les armes et les talents de classe.
     defense(source, damage, options = {}) {
@@ -355,9 +359,14 @@
       if (!active.size || damage <= 0) return damage;
       const t = now();
       let d = damage;
-      if (has('gardien') && t < rt.gardienUntil) d *= 0.9;
-      if (has('peau_de_pierre') && !options.magic) d *= 0.94;
+      if (has('volonte') && HP.hp / HP.mhp < 0.5) d *= 0.85;
       if (has('forteresse') && rt.still >= 2) d *= 0.88;
+      if (has('gardien') && t >= rt.gardienReady) {
+        rt.gardienReady = t + 12;
+        d *= 0.5;
+        float(HP.x, HP.y - 56, '🛡️ GARDIEN', '#a4caff');
+      }
+      if (has('peau_de_pierre')) d = Math.min(d, HP.mhp * 0.25);
       if (rt.shield > 0 && t < rt.shieldUntil) {
         const absorbed = Math.min(rt.shield, d);
         rt.shield -= absorbed;
@@ -366,10 +375,6 @@
       }
       if (has('miroir') && source && source.hp > 0 && Number.isFinite(source.mhp) && d > 0)
         secondary(source, Math.min(d * 0.15, source.mhp * 0.05));
-      if (has('gardien') && d > 0 && t >= rt.gardienReady) {
-        rt.gardienUntil = t + 3;
-        rt.gardienReady = t + 20;
-      }
       return Math.max(0, d);
     },
     // Juste avant la perte de PV : Résilience, Rempart et survie aux coups fatals.
@@ -419,6 +424,7 @@
         rt.rempartReady = t + 45;
         rt.shield = HP.mhp * 0.15;
         rt.shieldUntil = t + 5;
+        rt.shieldFrom = 'rempart';
         float(HP.x, HP.y - 70, '🏰 REMPART', '#a4caff');
       }
       return n;
@@ -465,10 +471,9 @@
     armorFactor: 0,
     critFactor: 0,
     goldFactor: 0,
-    incomingCritFactor: 0,
     betterDrop: 0,
     healFactor: 1,
-    onHealed: 2,
+    onOverheal: 1,
     defense: 3,
     beforeHurt: 2,
     revealedChests: 0,
@@ -531,7 +536,7 @@
         rt.moving = 0;
         rt.elan = false;
       }
-      if (has('regeneration') && !fighting && (rt.regenClock += dt) >= 5 - 1e-9) {
+      if (has('regeneration') && (rt.regenClock += dt) >= 3 - 1e-9) {
         rt.regenClock = 0;
         heal(HP.mhp * 0.01);
       }

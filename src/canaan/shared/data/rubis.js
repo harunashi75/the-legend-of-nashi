@@ -61,7 +61,7 @@ const LIST = [
     '⟦rubis_duelliste⟧',
     '+8 % de dégâts si un seul ennemi se trouve à moins de 5 cases.'
   ],
-  ['chasseur', 0, 'Chasseur', '⟦rubis_chasseur⟧', '+12 % de dégâts contre les mobs élites.'],
+  ['chasseur', 0, 'Chasseur', '⟦rubis_chasseur⟧', '+15 % de dégâts contre les élites et les boss.'],
   ['briseur', 0, 'Briseur', '⟦rubis_briseur⟧', 'Les attaques ignorent 8 % de la défense ennemie.'],
   [
     'carnage',
@@ -89,16 +89,10 @@ const LIST = [
     0,
     'Dernier souffle',
     '⟦rubis_dernier_souffle⟧',
-    '+15 % de dégâts contre les ennemis sous 20 % de PV.'
+    '+20 % de dégâts contre les ennemis sous 30 % de PV.'
   ],
-  ['colosse', 1, 'Colosse', '⟦rubis_colosse⟧', '+10 % de PV maximum, mais −5 % de vitesse de déplacement.'],
-  [
-    'gardien',
-    1,
-    'Gardien',
-    '⟦rubis_gardien⟧',
-    'Après un coup reçu, −10 % de dégâts subis pendant 3 s. Recharge : 20 s.'
-  ],
+  ['colosse', 1, 'Colosse', '⟦rubis_colosse⟧', '+10 % de PV maximum et +10 % de Défense.'],
+  ['gardien', 1, 'Gardien', '⟦rubis_gardien⟧', 'Toutes les 12 s, le prochain coup reçu est réduit de 50 %.'],
   [
     'rempart',
     1,
@@ -106,8 +100,14 @@ const LIST = [
     '⟦rubis_rempart⟧',
     'Sous 40 % de PV, gagne un bouclier de 15 % des PV max pendant 5 s. Recharge : 45 s.'
   ],
-  ['peau_de_pierre', 1, 'Peau de pierre', '⟦rubis_peau_de_pierre⟧', '−6 % de dégâts physiques reçus.'],
-  ['volonte', 1, 'Volonté de fer', '⟦rubis_volonte⟧', 'Les dégâts critiques reçus sont réduits de 20 %.'],
+  [
+    'peau_de_pierre',
+    1,
+    'Peau de pierre',
+    '⟦rubis_peau_de_pierre⟧',
+    'Un coup reçu ne peut pas retirer plus de 25 % des PV max.'
+  ],
+  ['volonte', 1, 'Volonté de fer', '⟦rubis_volonte⟧', 'Sous 50 % de PV, −15 % de dégâts reçus.'],
   [
     'forteresse',
     1,
@@ -129,14 +129,8 @@ const LIST = [
     '⟦rubis_second_souffle⟧',
     'Une fois par combat, survivre à un coup fatal avec 10 % des PV max.'
   ],
-  ['guerisseur', 2, 'Guérisseur', '⟦rubis_guerisseur⟧', '+8 % de soins prodigués.'],
-  [
-    'regeneration',
-    2,
-    'Régénération',
-    '⟦rubis_regeneration⟧',
-    'Récupère 1 % des PV max toutes les 5 s hors combat.'
-  ],
+  ['guerisseur', 2, 'Guérisseur', '⟦rubis_guerisseur⟧', '+15 % de soins prodigués.'],
+  ['regeneration', 2, 'Régénération', '⟦rubis_regeneration⟧', 'Récupère 1 % des PV max toutes les 3 s.'],
   ['arcane', 2, 'Arcane', '⟦rubis_arcane⟧', 'Les compétences consomment 10 % de mana en moins.'],
   ['faucheur', 2, 'Faucheur', '⟦rubis_faucheur⟧', 'Chaque élimination restaure 5 % des PV max.'],
   ['meditation', 2, 'Méditation', '⟦rubis_meditation⟧', 'Récupère 3 % du mana maximum toutes les 5 s.'],
@@ -145,9 +139,9 @@ const LIST = [
     2,
     'Bénédiction',
     '⟦rubis_benediction⟧',
-    'Après avoir reçu un soin, gagne +5 % de dégâts pendant 6 s.'
+    'Le soin reçu au-delà des PV max devient un bouclier, jusqu’à 10 % des PV max pendant 6 s.'
   ],
-  ['source_vitale', 2, 'Source vitale', '⟦rubis_source_vitale⟧', 'Les soins reçus sont augmentés de 10 %.'],
+  ['source_vitale', 2, 'Source vitale', '⟦rubis_source_vitale⟧', 'Les soins reçus sont augmentés de 20 %.'],
   [
     'communion',
     2,
@@ -211,7 +205,7 @@ const LIST = [
     '⟦rubis_resonance⟧',
     'Toutes les 5 compétences offensives, la prochaine inflige +20 % de dégâts.'
   ],
-  ['voyageur', 4, 'Voyageur', '⟦rubis_voyageur⟧', '+10 % de vitesse de déplacement hors combat.'],
+  ['voyageur', 4, 'Voyageur', '⟦rubis_voyageur⟧', '+10 % de vitesse de déplacement.'],
   ['sprinteur', 4, 'Sprinteur', '⟦rubis_sprinteur⟧', 'Après une esquive, +20 % de vitesse pendant 2 s.'],
   ['endurance', 4, 'Endurance', '⟦rubis_endurance⟧', 'Réduit le temps de recharge de l’esquive de 15 %.'],
   [

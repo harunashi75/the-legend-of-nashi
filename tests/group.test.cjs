@@ -199,11 +199,11 @@ test('Classes et Rubis pour tous les héros : chaque allié a sa classe, ses tal
  assert.equal(run('CANAAN_RUBIS.equipFor(ally,"phenix")'),false,'Rubis non possédé');
  assert.equal(run('characterStats(ally).maxHp'),Math.round(run('hp0')*1.1));assert.equal(run('ally.player.mhp'),run('characterStats(ally).maxHp'),'PV max recalculés');
  assert.equal(run('characterStats().maxHp'),run('hostHp0'));assert.equal(run('CANAAN_RUBIS.has("colosse")'),false);assert.equal(run('CANAAN_RUBIS.has("colosse",ally)'),true);
- // Coups et dégâts reçus de l'allié : ses Rubis (Pacte +18 %, Peau de pierre −6 %) et ses talents.
+ // Coups et dégâts reçus de l'allié : ses Rubis (Pacte +18 %, Peau de pierre : un coup plafonné à 25 % des PV max) et ses talents.
  run('CANAAN_RUBIS.equipFor(ally,"pacte");CANAAN_RUBIS.equipFor(ally,"peau_de_pierre");CANAAN_RUBIS.equipFor(ally,"second_souffle")');
  run('globalThis.wolf={t:"Loup",x:ally.player.x+50,y:ally.player.y,hp:1e6,mhp:1e6,r:14,cd:1e9,g:0};game.world.monsters.push(wolf)');
  assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore(wolf,100,{},ally)')-118)<1e-9);assert.equal(run('CANAAN_RUBIS.attackBefore(wolf,100,{})'),100);
- assert.ok(Math.abs(run('CANAAN_RUBIS.defense(wolf,100,{},ally)')-94)<1e-9);assert.equal(run('CANAAN_RUBIS.defense(wolf,100,{})'),100);
+ assert.ok(Math.abs(run('CANAAN_RUBIS.defense(wolf,ally.player.mhp,{},ally)')-run('ally.player.mhp')*0.25)<1e-9);assert.equal(run('CANAAN_RUBIS.defense(wolf,100,{},ally)'),100);assert.equal(run('CANAAN_RUBIS.defense(wolf,100,{})'),100);
  // L'allié frappe par le moteur de combat : le Pacte compte dans ses dégâts réels.
  run('Math.random=()=>0.99;ally.player.basicLock=0;ally.intent.aimX=wolf.x;ally.intent.aimY=wolf.y;canaanHeroBasicAttack(ally,false)');
  const withPact=run('1e6-wolf.hp');
