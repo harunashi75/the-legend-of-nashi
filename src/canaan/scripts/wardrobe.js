@@ -85,7 +85,8 @@
     previews.set(key, url);
     return url;
   }
-  let isOpen = false;
+  // Ouverte : la fenêtre affichée est la garde-robe (toute autre fenêtre efface cette marque, voir showPanel).
+  const shown = () => modalOpen() && document.getElementById('window')?.dataset.canaanPanel === 'wardrobe';
   function render() {
     const hero = game.hero,
       owned = ownedOf(hero),
@@ -134,14 +135,9 @@
         '</div></div>'
     );
     document.getElementById('window').dataset.canaanPanel = 'wardrobe';
-    isOpen = true;
   }
   function toggle() {
-    const win = document.getElementById('window');
-    if (isOpen && win?.dataset.canaanPanel === 'wardrobe' && modalOpen()) {
-      isOpen = false;
-      return closePanels();
-    }
+    if (shown()) return closePanels();
     render();
   }
   // Clic sur une apparence : l'hôte la met ; un invité la demande à l'hôte.
@@ -149,7 +145,7 @@
     if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'skin-wear', id: id || '' });
     if (!wear(game.hero, id)) return false;
     saveGame();
-    if (isOpen && modalOpen()) render();
+    if (shown()) render();
     return true;
   }
   function handle(hero, action) {
@@ -159,7 +155,7 @@
   // Invité : la garde-robe gardée chez l'hôte (fenêtre ouverte : rafraîchie).
   function applyRemote(raw) {
     game.hero.skins = sanitize(raw);
-    if (isOpen && modalOpen()) render();
+    if (shown()) render();
   }
   window.CANAAN_WARDROBE = Object.freeze({
     sanitize,
