@@ -147,17 +147,17 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  run('const h=game.hero;h.prof.fish["gardon:1"]=230;h.prof.meat["lievre:0"]=5;h.prof.meals["soupe:1"]=2;h.rubis.owned.phenix=2;h.rubis.equipped=["phenix",null,null,null,null,null]');
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero).map(p=>CANAAN_BAG.token(p)))')),['rubis:phenix:0*1','fish:gardon:1*100','fish:gardon:1*100','fish:gardon:1*30','meat:lievre:0*5','meal:soupe:1*2']);
  // Deux sections : le sac (Rubis, repas…) et les matériaux (poissons, viandes, minerais, herbes), chacun sa place.
- assert.equal(run('canaanBagUsed(game.hero)'),2,'un Rubis équipé n’est plus dans le sac ; les matériaux ont leur section');
+ assert.equal(run('canaanBagUsed(game.hero)'),1,'les Rubis (onglet Rubis de la fiche C) et les matériaux ont leur section');
  assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),4);
  // Section pleine : un poisson qui demande une nouvelle case est refusé ; un de plus dans une pile entamée passe.
- run('game.hero.bagLimit=10;BAG_LIMIT=2');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),true,'le sac plein ne bloque pas les matériaux');
+ run('game.hero.bagLimit=10;BAG_LIMIT=1');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),true,'le sac plein ne bloque pas les matériaux');
  assert.equal(run('CANAAN_BAG.room(game.hero,"meal","grillade",0,1)'),false);
  run('game.hero.prof.ore["fer:0"]=9600');assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),100);
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);run('delete game.hero.prof.ore["fer:0"]');
- // Le sac (I) : onglet Sac (équipement, Rubis, repas) et onglet Matériaux ; un repas se mange d'un clic.
+ // Le sac (I) : onglet Sac (équipement, repas) et onglet Matériaux ; un repas se mange d'un clic. Les Rubis n'y sont plus.
  run('BAG_LIMIT=40;renderInventory()');let inv=run('document.getElementById("window").innerHTML');
- assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,2);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);assert.match(inv,/data-action="bagSection" data-tab="mat"/);
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,1);assert.doesNotMatch(inv,/rubis:phenix/);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);assert.match(inv,/data-action="bagSection" data-tab="mat"/);
  run('canaanBagSection("mat")');inv=run('document.getElementById("window").innerHTML');
  assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,4);assert.match(inv,/Matériaux — 4\/100/);run('canaanBagSection("main")');
  // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.

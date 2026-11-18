@@ -1,6 +1,6 @@
 // Sac unifié : chaque chose possédée est un objet du sac (touche I). En plus de l'équipement (hero.inventory), les
-// Rubis non équipés, les poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent
-// de la place ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
+// poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent de la place ; les Rubis
+// non équipés sont aussi des piles (banque, vente, échange), mais rangés à part, dans l'onglet Rubis de la fiche (C) ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
 // meals) : le sac en est la vue, sans changer les sauvegardes ni l'état envoyé aux invités.
 // Une pile se désigne par un repère texte « genre:id:qualité*nombre » (fish:gardon:2*30, rubis:phenix:0*1), utilisé
 // par la vente au marchand et par l'échange entre joueurs.
@@ -10,11 +10,13 @@
   // Taille d'une pile selon le genre (100 par défaut ; clés des secrets : 20).
   const STACK_OF = { key: 20 };
   const stackOf = kind => STACK_OF[kind] || STACK;
-  // Deux sections : le sac (équipement, Rubis, repas, enchantements) et les matériaux qu'on récolte (minerais,
-  // poissons, herbes, viandes, trésors déterrés), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac.
+  // Trois sections : le sac (équipement, repas, enchantements), les matériaux qu'on récolte (minerais, poissons,
+  // herbes, viandes, trésors déterrés), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
+  // Rubis, une collection sans limite de place (onglet Rubis de la fiche C).
   const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'treasure']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
+  const sectionOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : 'main');
   const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure'];
   const PROF_BAG = {
     fish: 'fish',
@@ -77,11 +79,11 @@
     return out;
   }
   // Cases occupées par les piles (une pile de 230 prend 3 cases : 100, 100, 30). section : 'main' (le sac),
-  // 'mat' (les matériaux), ou rien (toutes).
+  // 'mat' (les matériaux), 'rubis' (les Rubis non équipés), ou rien (toutes).
   function tiles(hero, section) {
     const out = [];
     for (const p of piles(hero)) {
-      if (section && (section === 'mat') !== isMat(p.kind)) continue;
+      if (section && section !== sectionOf(p.kind)) continue;
       for (let left = p.n, size = stackOf(p.kind); left > 0; left -= size)
         out.push({ ...p, n: Math.min(size, left) });
     }
@@ -94,7 +96,9 @@
   }
   const matUsed = hero => tiles(hero, 'mat').length;
   function free(hero, kind) {
-    return isMat(kind) ? MAT_LIMIT - matUsed(hero) : canaanBagLimit(hero) - used(hero);
+    const section = sectionOf(kind);
+    if (section === 'rubis') return Infinity;
+    return section === 'mat' ? MAT_LIMIT - matUsed(hero) : canaanBagLimit(hero) - used(hero);
   }
   // Peut-on ajouter n unités à cette pile ? Seules les cases supplémentaires demandent de la place, dans sa section.
   function room(hero, kind, id, q = 0, n = 1) {

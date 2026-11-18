@@ -599,25 +599,15 @@
       '</b></span>'
     );
   }
-  // Section Rubis de la fiche : le héros affiché est celui de cette application (l'invité chez lui).
+  // Onglet Rubis de la fiche (C) : le héros entouré de ses six emplacements, ses effets actifs, et la collection des 48.
+  // Le héros affiché est celui de cette application (l'invité chez lui).
   function section() {
     return within(game.hero, sectionHtml);
   }
-  function sectionHtml() {
-    const lock = canChange(),
-      count = gems().equipped.filter(Boolean).length;
-    let html =
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>💎 Rubis</h3><span>' +
-      count +
-      '/' +
-      SLOTS +
-      ' équipés · ' +
-      discovered() +
-      '/48 découverts</span></div><div class="rubis-slots">';
-    for (let k = 0; k < SLOTS; k++) {
-      const r = BY_ID.get(gems().equipped[k]);
-      html += r
-        ? '<button type="button" class="rubis-slot filled" data-action="unequipRubis" data-slot="' +
+  function slotHtml(k) {
+    const r = BY_ID.get(gems().equipped[k]);
+    return r
+      ? '<button type="button" class="rubis-slot filled" data-action="unequipRubis" data-slot="' +
           k +
           '" data-tooltip-rubis="' +
           r.id +
@@ -628,24 +618,117 @@
           '<em>' +
           esc(r.name) +
           '</em></button>'
-        : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rubis">Libre · ' +
+      : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rubis">Libre · ' +
           (k + 1) +
           '</em></div>';
-    }
-    html += '</div>';
-    if (!lock.ok) html += '<p class="rubis-lock">🔒 ' + esc(lock.why) + '</p>';
-    else if (!discovered())
-      html += '<p class="rubis-lock">⚔️ Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
-    // Les Rubis possédés sont des objets du sac (I) : un clic sur l'un d'eux l'équipe ici.
-    html +=
-      '<p class="rubis-lock">⟦menu_inventory⟧ Tes Rubis sont dans ton sac (I) : clique sur un Rubis pour l’équiper ; clique sur un emplacement pour le retirer.</p>';
+  }
+  function collectionHtml() {
+    let html = '<div class="rubis-collection">';
+    FAMILIES.forEach((f, fi) => {
+      html +=
+        '<div class="rubis-family"><span class="rubis-family-name" style="color:' +
+        f.light +
+        '">' +
+        f.icon +
+        ' ' +
+        esc(f.short) +
+        '</span><div class="rubis-row">';
+      for (const r of RUBIS.filter(x => x.family === fi)) {
+        const n = ownedCount(r.id),
+          worn = gems().equipped.includes(r.id);
+        // Possédé : clic pour équiper ou retirer. Rangé à la banque : visible mais grisé. Jamais trouvé : « ? ».
+        html += n
+          ? '<button type="button" class="rubis-cell owned' +
+            (worn ? ' worn' : '') +
+            '" data-action="toggleRubis" data-rubis="' +
+            r.id +
+            '" data-tooltip-rubis="' +
+            r.id +
+            '" aria-label="' +
+            esc(r.name) +
+            '">' +
+            gem(r) +
+            (n > 1 ? '<sup>×' + n + '</sup>' : '') +
+            '</button>'
+          : bankedCount(r.id)
+            ? '<span class="rubis-cell banked" data-tooltip-rubis="' +
+              r.id +
+              '">' +
+              gem(r) +
+              '<sup>🏦</sup></span>'
+            : '<span class="rubis-cell unknown" data-tooltip-rubis="' + r.id + '">?</span>';
+      }
+      html += '</div></div>';
+    });
     return html + '</div>';
+  }
+  function effectsHtml() {
+    const worn = gems()
+      .equipped.filter(Boolean)
+      .map(id => BY_ID.get(id));
+    if (!worn.length) return '<p class="muted">Aucun Rubis équipé : choisis-en dans ta collection.</p>';
+    return (
+      '<ul class="rubis-effects">' +
+      worn
+        .map(
+          r =>
+            '<li data-tooltip-rubis="' +
+            r.id +
+            '">' +
+            gem(r) +
+            '<div><b style="color:' +
+            FAMILIES[r.family].light +
+            '">' +
+            esc(r.name) +
+            '</b><span>' +
+            esc(r.desc) +
+            '</span></div></li>'
+        )
+        .join('') +
+      '</ul>'
+    );
+  }
+  function sectionHtml() {
+    const lock = canChange(),
+      count = gems().equipped.filter(Boolean).length,
+      half = SLOTS / 2;
+    const left = Array.from({ length: half }, (_, k) => slotHtml(k)).join(''),
+      right = Array.from({ length: SLOTS - half }, (_, k) => slotHtml(half + k)).join('');
+    let notes = '';
+    if (!lock.ok) notes += '<p class="rubis-lock">🔒 ' + esc(lock.why) + '</p>';
+    else if (!discovered())
+      notes +=
+        '<p class="rubis-lock">⚔️ Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
+    return (
+      '<div class="character-layout rubis-layout"><div class="character-left">' +
+      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>💎 Rubis équipés</h3><span>' +
+      count +
+      '/' +
+      SLOTS +
+      ' équipés</span></div>' +
+      '<div class="rubis-doll"><div class="rubis-doll-col">' +
+      left +
+      '</div><div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas></div>' +
+      '<div class="rubis-doll-col">' +
+      right +
+      '</div></div>' +
+      notes +
+      '</div>' +
+      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>✨ Effets actifs</h3></div>' +
+      effectsHtml() +
+      '</div></div>' +
+      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>📖 Collection</h3><span>' +
+      discovered() +
+      '/48 découverts</span></div>' +
+      '<p class="rubis-hint">Clique un Rubis de ta collection pour l’équiper ou le retirer ; clique un emplacement pour le libérer.</p>' +
+      collectionHtml() +
+      '</div></div>'
+    );
   }
   function refreshPanel() {
     recomputeStats();
     const panel = document.getElementById('window')?.dataset.canaanPanel;
     if (modalOpen() && panel === 'character') renderCharacter();
-    else if (modalOpen() && panel === 'inventory') renderInventory();
     saveGame();
   }
   // Équiper ou retirer un Rubis pour un héros (l'hôte, ou un invité en ligne à sa demande).

@@ -160,6 +160,7 @@
     renderInventory: () => renderInventory(),
     bagSection: element => canaanBagSection(actionText(element, 'tab')),
     renderCharacter: () => renderCharacter(),
+    characterSection: element => canaanCharacterSection(actionText(element, 'tab')),
     chooseClass: element => chooseClass(actionText(element, 'class')),
     equipTalent: element => equipTalent(actionInteger(element, 'talent')),
     unequipTalent: element => unequipTalent(actionInteger(element, 'talent')),

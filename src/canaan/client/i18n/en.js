@@ -312,8 +312,7 @@ export default {
   'Matériaux — {n}/{max} emplacements': 'Materials — {n}/{max} slots',
   'Sac — {n}/{max} emplacements': 'Bag — {n}/{max} slots',
   'Survole un objet pour afficher son comparatif.': 'Hover over an item to compare it.',
-  'Clique pour l’équiper (un Rubis s’équipe, un repas se mange).':
-    'Click to equip it (a Ruby is equipped, a meal is eaten).',
+  'Clique pour l’équiper (un repas se mange).': 'Click to equip it (a meal is eaten).',
   'Marchand proche : vente disponible.': 'Merchant nearby: selling available.',
   'Pour vendre, rends-toi chez un marchand et appuie sur E.': 'To sell, go to a merchant and press E.',
   'Minerais, poissons, herbes et viandes que tu récoltes : rangés ici, ils ne prennent pas la place du sac ({n} cases de 100).':
@@ -2058,8 +2057,11 @@ export default {
   'Libre · {n}': 'Empty · {n}',
   'Les Rubis se gagnent dans l’Arène des Épreuves, à l’est du camp.':
     'Rubies are won in the Arena of Trials, east of the camp.',
-  'Tes Rubis sont dans ton sac (I) : clique sur un Rubis pour l’équiper ; clique sur un emplacement pour le retirer.':
-    'Your Rubies are in your bag (I): click a Ruby to equip it; click a slot to remove it.',
+  'Clique un Rubis de ta collection pour l’équiper ou le retirer ; clique un emplacement pour le libérer.':
+    'Click a Ruby in your collection to equip or remove it; click a slot to free it.',
+  'Rubis équipés': 'Equipped Rubies',
+  'Collection': 'Collection',
+  'Aucun Rubis équipé : choisis-en dans ta collection.': 'No Ruby equipped: pick some from your collection.',
   'Les 6 emplacements sont occupés : retire d’abord un Rubis.': 'All 6 slots are taken: remove a Ruby first.',
   '{nom} équipé': '{nom} equipped',
   'Rubis inconnu': 'Unknown Ruby',

@@ -1,6 +1,6 @@
-/* Rubis (fiche du personnage) et Arène des Épreuves (portail, records, récompense finale). */
+/* Rubis (onglet Rubis de la fiche du personnage) et Arène des Épreuves (portail, records, récompense finale). */
 
-/* Colonne gauche de la fiche : le personnage, puis les Rubis dans l'espace libre en dessous. */
+/* Colonne gauche de la fiche : le personnage (onglet Équipement) ou ses Rubis et leurs effets (onglet Rubis). */
 #window .character-left {
   display: flex;
   flex-direction: column;
@@ -89,11 +89,32 @@
   font-size: calc(18px * var(--font-scale));
 }
 
-/* Six emplacements universels. */
-#window .rubis-slots {
+/* Onglet Rubis : deux colonnes égales, le héros entouré de ses emplacements à gauche, la collection à droite. */
+#window .rubis-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+#window .rubis-hint {
+  margin: 0 0 4px;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--rpg-muted, #b8a483);
+}
+/* Six emplacements universels, trois de chaque côté du héros. */
+#window .rubis-doll {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 150px) minmax(0, 1fr);
   gap: 8px;
+  align-items: center;
+}
+#window .rubis-doll .doll-center {
+  width: auto;
+}
+#window .rubis-doll .doll-center canvas {
+  height: 220px;
+}
+#window .rubis-doll-col {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
 }
 #window .rubis-slot {
   box-sizing: border-box;
@@ -211,6 +232,37 @@
 }
 #window .rubis-cell.unknown {
   border-style: dashed;
+}
+/* Rangé à la banque : connu, mais à reprendre avant de l'équiper. */
+#window .rubis-cell.banked {
+  opacity: 0.5;
+}
+
+/* Effets des Rubis équipés. */
+#window .rubis-effects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+#window .rubis-effects li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+#window .rubis-effects li div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+#window .rubis-effects b {
+  font-size: calc(13px * var(--font-scale));
+}
+#window .rubis-effects span {
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.3;
+  color: var(--rpg-ink, #f3e6c8);
 }
 
 /* Infobulle d'un Rubis. */
@@ -330,8 +382,8 @@
   #window .arena-layout {
     grid-template-columns: 1fr;
   }
-  #window .rubis-slots {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  #window .rubis-layout {
+    grid-template-columns: 1fr;
   }
   #window .rubis-family {
     grid-template-columns: 1fr;

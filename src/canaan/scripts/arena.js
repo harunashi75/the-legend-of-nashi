@@ -1840,7 +1840,7 @@
     html +=
       '<div class="arena-actions"><button type="button" data-action="enterArena"' +
       (game.world.instance ? ' disabled' : '') +
-      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="renderCharacter">💎 Préparer mes Rubis</button></div>';
+      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">💎 Préparer mes Rubis</button></div>';
     showPanel(html);
   }
   function choiceList() {

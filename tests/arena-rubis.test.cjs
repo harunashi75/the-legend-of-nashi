@@ -32,14 +32,23 @@ test('Rubis : 48 effets en six familles, six emplacements, collection, verrous e
  assert.ok(fresh.every(Boolean));assert.equal(run('CANAAN_RUBIS.discovered()'),48);
  // Doublon nommé (non équipé) : un doublon tiré au hasard tombait une fois sur 48 sur le Rubis équipé, qui passait alors dans le sac.
  assert.equal(run('CANAAN_RUBIS.grant("colosse").fresh'),false);
- // Fiche du personnage : six emplacements sous le personnage, puis la collection des 48.
- run('renderCharacter()');const html=g.document.getElementById('window').innerHTML;
- assert.match(html,/class="character-left"[\s\S]*rubis-paper/);
+ // Fiche du personnage : onglet Équipement sans Rubis ; onglet Rubis avec les six emplacements autour du héros,
+ // leurs effets et la collection des 48 (un clic équipe ou retire).
+ run('renderCharacter()');let html=g.document.getElementById('window').innerHTML;
+ assert.match(html,/data-action="characterSection" data-tab="rubis"/);
+ assert.equal((html.match(/class="rubis-slot /g)||[]).length,0,'les Rubis ont leur onglet');
+ run('canaanCharacterSection("rubis")');html=g.document.getElementById('window').innerHTML;
+ assert.match(html,/class="rubis-doll"[\s\S]*heroPreview/);
  assert.equal((html.match(/class="rubis-slot /g)||[]).length,6);
- // Les Rubis possédés sont des objets du sac (piles), plus une grille de collection sur la fiche.
- assert.equal((html.match(/class="rubis-cell /g)||[]).length,0);
- assert.equal(run('CANAAN_BAG.tiles(game.hero).filter(p=>p.kind==="rubis").length'),run('48-game.hero.rubis.equipped.filter(Boolean).length'));
- run('renderInventory()');assert.ok((g.document.getElementById('window').innerHTML.match(/data-tooltip-stack="rubis:/g)||[]).length>=40,'les Rubis dans le sac');
+ assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
+ assert.match(html,/class="rubis-effects"[\s\S]*Berserker/);
+ assert.match(html,/data-action="toggleRubis" data-rubis="colosse"/);
+ // Les Rubis ne sont plus dans le sac (I) et n'y prennent pas de place ; ils restent des piles (banque, échange).
+ assert.equal(run('CANAAN_BAG.tiles(game.hero,"rubis").length'),run('48-game.hero.rubis.equipped.filter(Boolean).length'));
+ assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").filter(p=>p.kind==="rubis").length'),0);
+ assert.equal(run('CANAAN_BAG.room(game.hero,"rubis","colosse",0,500)'),true);
+ run('renderInventory()');assert.equal((g.document.getElementById('window').innerHTML.match(/data-tooltip-stack="rubis:/g)||[]).length,0,'plus de Rubis dans le sac');
+ run('canaanCharacterSection("gear")');
  run("showRubisTooltip('tempete',{clientX:0,clientY:0})");
  assert.match(g.gearTooltip?.innerHTML||run('gearTooltip.innerHTML'),/Tempête[\s\S]*15 %/);
  // Sauvegarde : Rubis et records de l'Arène dans l'instantané.

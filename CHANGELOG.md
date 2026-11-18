@@ -64,6 +64,7 @@ Première version officielle avant la sortie sur Steam : la numérotation repart
 - Onglets des métiers : repères courts toujours visibles et détail repliable, état du poste (forge, cuisinière…) en une ligne.
 
 ### Modifié
+- **Rubis : leur propre onglet dans la fiche du personnage (C)**, comme les enchantements d’un MMORPG : deux onglets, **Équipement** et **Rubis**. L’onglet Rubis montre le héros entouré de ses six emplacements, les effets des Rubis équipés et la collection des 48 par famille (un clic équipe ou retire ; ceux rangés à la banque apparaissent grisés). Les Rubis quittent le sac (I) et n’y prennent plus de place ; ils restent déposables à la banque, vendables et échangeables (rubrique 💎 Rubis). « Préparer mes Rubis » à l’Arène ouvre directement l’onglet.
 - Le bestiaire ne compte que les espèces qui apparaissent vraiment.
 - Les Rubis rangés à la banque restent découverts, sans s’équiper depuis la banque.
 

@@ -84,7 +84,7 @@
       '</div>'
     );
   }
-  // Onglet du sac : 'main' (équipement, Rubis, repas, enchantements) ou 'mat' (minerais, poissons, herbes, viandes).
+  // Onglet du sac : 'main' (équipement, repas, enchantements) ou 'mat' (minerais, poissons, herbes, viandes).
   let bagTab = 'main';
   function bagSection(tab) {
     if (tab === 'main' || tab === 'mat') bagTab = tab;
@@ -136,7 +136,7 @@
       ) +
         '<div class="modern-body">' +
         tabs +
-        '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un Rubis s’équipe, un repas se mange). ' +
+        '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). ' +
         (merchant
           ? '💰 Marchand proche : vente disponible.'
           : '💰 Pour vendre, rends-toi chez un marchand et appuie sur E.') +
@@ -202,42 +202,65 @@
       '</span></div>'
     );
   }
+  // Onglet de la fiche (C), comme le sac : 'gear' (le personnage et son équipement) ou 'rubis' (ses six
+  // emplacements de Rubis et sa collection). L'onglet choisi est gardé d'une ouverture à l'autre.
+  let charTab = 'gear';
+  function characterSection(tab) {
+    if (tab === 'gear' || tab === 'rubis') charTab = tab;
+    renderCharacter();
+  }
   function renderCharacter() {
     Object.values(game.hero.equipment).forEach(item => window.CANAAN_GEAR.normalize(item));
     currentGearPanel = 'character';
     hideGearTooltip();
     const st = characterStats(),
       count = Object.values(game.hero.equipment).filter(Boolean).length,
+      rubis = charTab === 'rubis',
+      worn = window.CANAAN_RUBIS.equipped().filter(Boolean).length,
       need = xpToNext(st.level);
+    const tabs =
+      '<div class="bag-tabs char-tabs">' +
+      '<button type="button" class="' +
+      (rubis ? '' : 'on') +
+      '" data-action="characterSection" data-tab="gear">⚔️ Équipement <small>' +
+      count +
+      ' / 10</small></button>' +
+      '<button type="button" class="' +
+      (rubis ? 'on' : '') +
+      '" data-action="characterSection" data-tab="rubis">💎 Rubis <small>' +
+      worn +
+      ' / ' +
+      window.CANAAN_RUBIS.slots +
+      '</small></button></div>';
+    const gear =
+      '<div class="character-layout"><div class="character-left"><div class="rpg-paper"><div class="character-doll">' +
+      '<div class="doll-column">' +
+      ['helm', 'shoulders', 'armor', 'gloves', 'boots'].map(charSlot).join('') +
+      '</div>' +
+      '<div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas><p class="muted">⚔️ ' +
+      count +
+      '/10 équipés</p><button type="button" class="wardrobe-open" data-action="toggleWardrobe">👗 Garde-robe (V)</button></div>' +
+      '<div class="doll-column">' +
+      ['neck', 'ring', 'artifact', 'weapon', 'weapon2'].map(charSlot).join('') +
+      '</div></div></div></div>' +
+      '<div class="rpg-paper"><div class="char-stats">' +
+      '<div class="char-level"><b>Niveau ' +
+      st.level +
+      '</b><div class="bar exp"><i style="width:' +
+      (need ? Math.min(100, (100 * (game.hero.exp || 0)) / need) : 100) +
+      '%"></i><span>' +
+      (need ? (game.hero.exp || 0) + ' / ' + need + ' XP' : 'Niveau maximum') +
+      '</span></div></div>' +
+      window.CANAAN_STATS_VIEW.panel(st) +
+      '</div></div></div>';
     modernPanel(
       rpgHeader(
         '🧙 Personnage · Niveau ' +
           st.level +
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
-        '<div class="character-layout"><div class="character-left"><div class="rpg-paper"><div class="character-doll">' +
-        '<div class="doll-column">' +
-        ['helm', 'shoulders', 'armor', 'gloves', 'boots'].map(charSlot).join('') +
-        '</div>' +
-        '<div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas><p class="muted">⚔️ ' +
-        count +
-        '/10 équipés</p><button type="button" class="wardrobe-open" data-action="toggleWardrobe">👗 Garde-robe (V)</button></div>' +
-        '<div class="doll-column">' +
-        ['neck', 'ring', 'artifact', 'weapon', 'weapon2'].map(charSlot).join('') +
-        '</div></div></div>' +
-        // Six emplacements de Rubis et collection, sous le personnage.
-        window.CANAAN_RUBIS.section() +
-        '</div>' +
-        '<div class="rpg-paper"><div class="char-stats">' +
-        '<div class="char-level"><b>Niveau ' +
-        st.level +
-        '</b><div class="bar exp"><i style="width:' +
-        (need ? Math.min(100, (100 * (game.hero.exp || 0)) / need) : 100) +
-        '%"></i><span>' +
-        (need ? (game.hero.exp || 0) + ' / ' + need + ' XP' : 'Niveau maximum') +
-        '</span></div></div>' +
-        window.CANAAN_STATS_VIEW.panel(st) +
-        '</div></div></div>'
+        tabs +
+        (rubis ? window.CANAAN_RUBIS.section() : gear)
     );
     drawCharacterPreview();
     prepare('character');
@@ -283,6 +306,7 @@
     renderInventory,
     canaanBagSection: bagSection,
     renderCharacter,
+    canaanCharacterSection: characterSection,
     charSlot,
     showGearTooltip,
     showEquippedTooltip,

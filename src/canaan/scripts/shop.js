@@ -218,6 +218,7 @@
         '</div>',
       stacks = CANAAN_BAG.tiles(hero, 'main').map(sell),
       mats = CANAAN_BAG.tiles(hero, 'mat').map(sell),
+      rubis = CANAAN_BAG.tiles(hero, 'rubis').map(sell),
       empty = Math.max(0, canaanBagLimit(hero) - gear.length - stacks.length);
     return (
       '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' +
@@ -245,6 +246,9 @@
       (mats.length
         ? '<div class="modern-bag">' + mats.join('') + '</div>'
         : '<p class="muted">Aucun matériau.</p>') +
+      (rubis.length
+        ? '<h3 class="bag-subhead">💎 Rubis</h3><div class="modern-bag">' + rubis.join('') + '</div>'
+        : '') +
       '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div></section>'
     );
   }

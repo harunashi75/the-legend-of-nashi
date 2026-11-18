@@ -222,7 +222,8 @@
           'data-action="bankDeposit" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Déposer à la banque"'
         ),
       stacks = CANAAN_BAG.tiles(hero, 'main').map(depositTile),
-      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile);
+      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile),
+      rubis = CANAAN_BAG.tiles(hero, 'rubis').map(depositTile);
     showPanel(
       '<div class="rpg-head"><h2>🏦 Banque</h2></div><div class="bank-panel shop-columns">' +
         '<section class="shop-side"><h3>🏦 Ta banque · ' +
@@ -251,6 +252,10 @@
         (mats.length
           ? '<div class="modern-bag">' + mats.join('') + '</div>'
           : '<p class="muted">Aucun matériau.</p>') +
+        // Les Rubis non équipés (onglet Rubis de la fiche C), sans place comptée.
+        (rubis.length
+          ? '<h3 class="bag-subhead">💎 Rubis</h3><div class="modern-bag">' + rubis.join('') + '</div>'
+          : '') +
         '</section></div>'
     );
   }
