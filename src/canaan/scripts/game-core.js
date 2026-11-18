@@ -892,6 +892,43 @@ function nearestHero(m) {
 function hurtAlly(hero, m) {
   return CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(m, null, {}, hero), m, hero);
 }
+// Coup d'un projectile : celui d'un allié frappe avec ses statistiques ; celui de l'hôte passe par le moteur de combat.
+function projectileStrike(p, m, value) {
+  if (p.owner && p.owner !== game.hero) CANAAN_COMBAT.attack(m, value, p.combatContext || {}, p.owner);
+  else hit(m, value, p.combatContext);
+}
+// Explosion à l'impact (comète du bâton) : la moitié des dégâts aux autres ennemis dans le rayon.
+function projectileBlast(p, first) {
+  CANAAN_SKILLS.fx('ring', p.x, p.y, 0, p.splash, 0, p.c, 0.45);
+  for (const o of game.world.monsters.slice())
+    if (o !== first && o.hp > 0 && Math.hypot(o.x - p.x, o.y - p.y) < p.splash + (o.r || 0))
+      projectileStrike(p, o, Math.max(1, Math.round(p.dmg * 0.5)));
+}
+// Sillage : une poussière fine pour la flèche et l'orbe, une traînée épaisse pour la comète et la peste.
+function projectileTrail(p) {
+  if (p.kind === 'comet')
+    for (let k = 0; k < 3; k++)
+      particles.push({
+        x: p.x - p.vx * k * 0.4 + (Math.random() - 0.5) * 10,
+        y: p.y - p.vy * k * 0.4 + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6 - 0.2,
+        life: 22,
+        c: k ? p.c : '#ffffff',
+        r: 6 - k
+      });
+  else if (p.kind === 'plague')
+    particles.push({
+      x: p.x + (Math.random() - 0.5) * 8,
+      y: p.y + (Math.random() - 0.5) * 8,
+      vx: 0,
+      vy: -0.3,
+      life: 18,
+      c: Math.random() < 0.5 ? p.c : '#3d5a1a',
+      r: 4
+    });
+  else particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 12, c: p.c, r: 3 });
+}
 // Un pas de simulation des héros, des monstres, des projectiles et des butins.
 // Aucun accès à l'écran : les messages passent par game.view, l'affichage se fait dans updateView().
 function update() {
@@ -980,13 +1017,15 @@ function update() {
     p.x += p.vx;
     p.y += p.vy;
     p.life--;
-    if (SOLID.includes(tileAt(Math.floor(p.x / TS), Math.floor(p.y / TS)))) p.life = 0;
-    particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 12, c: p.c, r: 3 });
+    if (SOLID.includes(tileAt(Math.floor(p.x / TS), Math.floor(p.y / TS)))) {
+      p.life = 0;
+      if (p.splash) projectileBlast(p, null);
+    }
+    projectileTrail(p);
     game.world.monsters.slice().forEach(m => {
-      if (p.life > 0 && Math.hypot(m.x - p.x, m.y - p.y) < m.r + 8) {
-        // Le projectile d'un allié frappe avec ses statistiques ; celui de l'hôte passe par le moteur de combat.
-        if (p.owner && p.owner !== game.hero) CANAAN_COMBAT.attack(m, p.dmg, p.combatContext || {}, p.owner);
-        else hit(m, p.dmg, p.combatContext);
+      if (p.life > 0 && Math.hypot(m.x - p.x, m.y - p.y) < m.r + (p.size || 8)) {
+        projectileStrike(p, m, p.dmg);
+        if (p.splash) projectileBlast(p, m);
         p.life = 0;
       }
     });

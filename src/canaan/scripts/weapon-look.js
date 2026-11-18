@@ -769,6 +769,83 @@
         c.lineTo(p.x - ca * 13, p.y - sa * 13);
         c.fill();
       }
+    } else if (p.kind === 'comet') {
+      // Comète (bâton, attaque lourde) : grosse boule ardente et longue traînée qui s'effile derrière elle.
+      c.globalCompositeOperation = 'lighter';
+      const tail = c.createLinearGradient(p.x, p.y, p.x - ca * 90, p.y - sa * 90);
+      tail.addColorStop(0, col);
+      tail.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = tail;
+      c.globalAlpha = 0.75;
+      c.beginPath();
+      c.moveTo(p.x - sa * 18, p.y + ca * 18);
+      c.lineTo(p.x - ca * 90, p.y - sa * 90);
+      c.lineTo(p.x + sa * 18, p.y - ca * 18);
+      c.closePath();
+      c.fill();
+      for (let k = 5; k >= 1; k--) {
+        c.globalAlpha = 0.12 * (6 - k);
+        c.fillStyle = col;
+        c.beginPath();
+        c.arc(p.x - ca * k * 13, p.y - sa * k * 13, 16 - k * 2, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.globalAlpha = 1;
+      const pulse = 1 + 0.08 * Math.sin(performance.now() / 50),
+        g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, 26 * pulse);
+      g.addColorStop(0, '#ffffff');
+      g.addColorStop(0.3, '#ffffff');
+      g.addColorStop(0.55, col);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(p.x, p.y, 26 * pulse, 0, Math.PI * 2);
+      c.fill();
+    } else if (p.kind === 'plague') {
+      // Crachat de peste (grimoire, attaque lourde) : boule toxique bouillonnante, cœur sombre et bulles.
+      const wob = performance.now() / 90 + p.x * 0.05;
+      c.globalAlpha = 0.4;
+      c.fillStyle = '#3d5a1a';
+      for (let k = 1; k <= 3; k++) {
+        c.beginPath();
+        c.arc(p.x - ca * k * 8, p.y - sa * k * 8, 7 - k * 1.5, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.globalAlpha = 0.9;
+      c.fillStyle = col;
+      c.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const a2 = (k / 8) * Math.PI * 2,
+          r = 9 + Math.sin(wob + k * 1.7) * 2;
+        c[k ? 'lineTo' : 'moveTo'](p.x + Math.cos(a2) * r, p.y + Math.sin(a2) * r);
+      }
+      c.closePath();
+      c.fill();
+      c.fillStyle = '#2a3a12';
+      c.beginPath();
+      c.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#e8ffb0';
+      for (let k = 0; k < 2; k++) {
+        c.beginPath();
+        c.arc(p.x + Math.cos(wob + k * 3) * 6, p.y + Math.sin(wob * 1.3 + k * 3) * 6, 1.6, 0, Math.PI * 2);
+        c.fill();
+      }
+    } else if (p.kind === 'note') {
+      // Note (luth, attaque lourde) : une croche lumineuse qui file.
+      c.shadowColor = col;
+      c.shadowBlur = 12;
+      c.fillStyle = col;
+      c.strokeStyle = col;
+      c.lineWidth = 2.5;
+      c.beginPath();
+      c.ellipse(p.x - 3, p.y + 6, 6, 4.5, -0.4, 0, Math.PI * 2);
+      c.fill();
+      c.beginPath();
+      c.moveTo(p.x + 2.5, p.y + 5);
+      c.lineTo(p.x + 2.5, p.y - 12);
+      c.quadraticCurveTo(p.x + 10, p.y - 8, p.x + 9, p.y - 1);
+      c.stroke();
     } else {
       c.globalCompositeOperation = 'lighter';
       for (let k = 3; k >= 1; k--) {

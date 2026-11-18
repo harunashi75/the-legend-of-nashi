@@ -809,29 +809,29 @@
    [
     "💀",
     "Squelette putride",
-    "Invocation · 3 au maximum · 18 s · 60 % par coup",
+    "Invocation · sans limite · 30 s · 60 % par coup",
     4,
     14,
     0.6,
-    "Un squelette sort de terre près de toi et attaque tes ennemis pendant 18 s (60 % de ta Puissance magique toutes les 1,2 s). 3 squelettes au maximum : un nouveau remplace le plus ancien."
+    "Un squelette sort de terre près de toi et attaque tes ennemis pendant 30 s (60 % de ta Puissance magique toutes les 1,2 s). Aucune limite : chaque lancer lève un squelette de plus."
    ],
    [
-    "🐀",
-    "Nuée de rats",
-    "4 rats pestiférés · 6 s · 45 % par morsure, puis éclatent",
+    "🐦‍⬛",
+    "Nuée de corbeaux",
+    "4 corbeaux nécrosés · 8 s · 45 % par coup de bec",
     10,
     20,
     0.45,
-    "4 rats foncent vers la souris et mordent les ennemis (45 % toutes les 0,6 s). Au bout de 6 s, chacun éclate en un nuage toxique (90 % aux ennemis autour de lui)."
+    "4 corbeaux nécrosés fondent sur la souris en volant par-dessus les obstacles, puis harcèlent tes ennemis pendant 8 s (45 % toutes les 0,6 s)."
    ],
    [
     "🪦",
     "Totem de peste",
-    "Totem 10 s sous la souris · 50 %/s en zone",
+    "Totem 10 s sous la souris · 50 %/s en zone · rats pestiférés",
     16,
     22,
     0.5,
-    "Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Tes invocations proches de lui frappent 25 % plus vite."
+    "Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Toutes les 2,5 s, un rat pestiféré sort de terre à ses pieds : il mord les ennemis (35 % toutes les 0,6 s) puis éclate au bout de 6 s en un nuage toxique (90 % autour de lui). Tes invocations proches du totem frappent 25 % plus vite."
    ],
    [
     "🧟",

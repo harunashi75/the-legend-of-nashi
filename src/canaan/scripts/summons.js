@@ -1,6 +1,7 @@
 // Invocations de l'Invocateur et son arme liée (le Grimoire).
 // Les quatre compétences du Grimoire lèvent des créatures temporaires qui combattent pour leur maître : squelettes
-// (3 au maximum), nuée de rats qui éclatent, totem de peste immobile et abomination. Chaque coup passe par le moteur
+// (sans limite), nuée de corbeaux nécrosés qui volent par-dessus les obstacles, totem de peste immobile d'où sortent
+// des rats qui éclatent, et abomination. Chaque coup passe par le moteur
 // de combat comme une compétence offensive de son maître (Peste noire, talents, Rubis, Maîtrise).
 // Simulation chez l'hôte ; un invité reçoit leur position dans l'instantané (view / applyView) et les dessine.
 // Rien n'est sauvegardé : une invocation disparaît au bout de sa durée, à la mort de son maître, quand il change de
@@ -10,17 +11,21 @@
 (() => {
   'use strict';
   // slot : compétence du Grimoire ; life : durée (s) ; every : temps entre deux coups (s) ; reach : portée (px) ;
-  // speed : px par pas ; power : part de la Puissance magique par coup ; r : rayon (dessin, écart).
+  // speed : px par pas ; power : part de la Puissance magique par coup ; r : rayon (dessin, écart) ;
+  // cap : plafond par maître ; fly : vole par-dessus les murs ; litter : temps entre deux rats du totem (s).
   const KINDS = Object.freeze({
-    skeleton: { slot: 0, life: 18, cap: 3, every: 1.2, reach: 30, speed: 2.6, power: 0.6, r: 12 },
-    rat: { slot: 1, life: 6, count: 4, every: 0.6, reach: 20, speed: 4.2, power: 0.45, burst: 0.9, r: 8 },
-    totem: { slot: 2, life: 10, cap: 1, every: 1, area: 3, power: 0.5, r: 12, still: true },
+    skeleton: { slot: 0, life: 30, every: 1.2, reach: 30, speed: 2.6, power: 0.6, r: 12 },
+    crow: { slot: 1, life: 8, count: 4, every: 0.6, reach: 22, speed: 5, power: 0.45, r: 9, fly: true },
+    totem: { slot: 2, life: 10, cap: 1, every: 1, area: 3, power: 0.5, r: 12, still: true, litter: 2.5 },
+    rat: { slot: 2, life: 6, every: 0.6, reach: 20, speed: 4.2, power: 0.35, burst: 0.9, r: 8 },
     abomination: { slot: 3, life: 15, cap: 1, every: 1.6, reach: 34, area: 2, speed: 1.8, power: 1.6, r: 22 }
   });
-  const ORDER = Object.freeze(['skeleton', 'rat', 'totem', 'abomination']);
+  // Ordre de l'instantané réseau (indice de la sorte) : les nouvelles sortes s'ajoutent à la fin.
+  const ORDER = Object.freeze(['skeleton', 'rat', 'totem', 'abomination', 'crow']);
   const POISON = '#a4e83c';
-  // Distances en cases : chasse autour du maître, laisse (retour), disparition (carte changée), totem et rats.
-  const RANGE = Object.freeze({ hunt: 7, leash: 9, lost: 16, totemCast: 8, totemHaste: 3, ratRush: 1.2 });
+  // Distances en cases : chasse autour du maître, laisse (retour), disparition (carte changée), totem ;
+  // durée (s) de la ruée des corbeaux vers le point visé.
+  const RANGE = Object.freeze({ hunt: 7, leash: 9, lost: 16, totemCast: 8, totemHaste: 3, crowRush: 1.2 });
   let list = [],
     serial = 0,
     // Vue d'un invité : invocations reçues de l'hôte (id → état affiché, interpolé).
@@ -32,8 +37,6 @@
   const mine = owner => list.filter(s => s.owner === owner);
   const talent = (owner, key) => CANAAN_CLASS.talent(owner, 'invocateur', key);
   const lifeOf = (owner, kind) => KINDS[kind].life * (talent(owner, 'eternal') ? 1.3 : 1);
-  const capOf = (owner, kind) =>
-    (KINDS[kind].cap || 99) + (kind === 'skeleton' && talent(owner, 'legion') ? 1 : 0);
   const magicPower = owner => CANAAN_SKILLS.power(owner, true);
   // Un coup d'invocation : compétence offensive de poison du maître (l'hôte par hit, un allié par le moteur).
   function strike(s, m, mult) {
@@ -77,9 +80,9 @@
         context,
         ...extra
       };
-    // Plafond par maître (squelettes, totem, abomination) : la plus ancienne cède sa place.
+    // Plafond par maître (totem, abomination) : la plus ancienne cède sa place. Les squelettes n'en ont pas.
     const same = mine(owner).filter(o => o.kind === kind);
-    while (k.cap && same.length >= capOf(owner, kind)) remove(same.shift(), true);
+    while (k.cap && same.length >= k.cap) remove(same.shift(), true);
     list.push(s);
     burst(s.x, s.y + 10, POISON, kind === 'abomination' ? 26 : 10);
     return s;
@@ -116,12 +119,13 @@
       spawn(owner, 'skeleton', at.x, at.y, context);
       float(at.x, at.y - 40, '💀', POISON);
     } else if (i === 1) {
+      // Nuée de corbeaux nécrosés : ils fondent sur le point visé, puis chassent.
       const goal = { x: Number.isFinite(aim?.x) ? aim.x : p.x, y: Number.isFinite(aim?.y) ? aim.y : p.y };
-      for (let n = 0; n < KINDS.rat.count; n++) {
+      for (let n = 0; n < KINDS.crow.count; n++) {
         const angle = a + (n - 1.5) * 0.5;
-        spawn(owner, 'rat', p.x + Math.cos(angle) * 18, p.y + Math.sin(angle) * 18, context, {
-          goal: { x: goal.x + (n - 1.5) * 16, y: goal.y + ((n % 2) - 0.5) * 16 },
-          rushUntil: now() + RANGE.ratRush
+        spawn(owner, 'crow', p.x + Math.cos(angle) * 18, p.y + Math.sin(angle) * 18, context, {
+          goal: { x: goal.x + (n - 1.5) * 18, y: goal.y + ((n % 2) - 0.5) * 18 },
+          rushUntil: now() + RANGE.crowRush
         });
       }
       CANAAN_SKILLS.fx('beam', p.x, p.y, Math.atan2(goal.y - p.y, goal.x - p.x), 70, 10, POISON, 0.3);
@@ -133,6 +137,7 @@
         k = d > tiles(RANGE.totemCast) ? tiles(RANGE.totemCast) / d : 1,
         s = spawn(owner, 'totem', p.x + (tx - p.x) * k, p.y + (ty - p.y) * k, context);
       s.next = now() + 0.2;
+      s.litter = now() + 0.6;
       CANAAN_SKILLS.fx('ring', s.x, s.y, 0, tiles(KINDS.totem.area), 0, POISON, 0.6);
     } else if (i === 3) {
       const at = ahead(48);
@@ -197,18 +202,28 @@
     }
     return best;
   }
-  // Vitesse d'attaque : Contagion (+30 %) et totem de peste proche (+25 %).
+  // Vitesse d'attaque : Contagion (+30 %), totem de peste proche (+25 %) et Légion (squelettes, +20 %).
   function haste(s) {
     const totem = list.some(
       o => o.kind === 'totem' && o.owner === s.owner && o !== s && dist(o, s) < tiles(RANGE.totemHaste)
     );
-    return CANAAN_CLASS.summonHaste(s.owner) * (totem ? 1.25 : 1);
+    return (
+      CANAAN_CLASS.summonHaste(s.owner) *
+      (totem ? 1.25 : 1) *
+      (s.kind === 'skeleton' && talent(s.owner, 'legion') ? 1.2 : 1)
+    );
   }
   function stepSummon(s, t, index) {
     const k = KINDS[s.kind],
       p = s.owner.player;
     s.atk = Math.max(0, s.atk - 1 / 60);
     if (s.kind === 'totem') {
+      // La peste du totem enfante des rats, qui sortent de terre à ses pieds et chassent.
+      if (t >= s.litter) {
+        s.litter = t + k.litter;
+        const a = Math.random() * Math.PI * 2;
+        spawn(s.owner, 'rat', s.x + Math.cos(a) * 20, s.y + Math.sin(a) * 14, s.context);
+      }
       if (t < s.next) return;
       s.next = t + k.every;
       s.atk = 0.4;
@@ -223,9 +238,9 @@
       stepTo(s, p.x, p.y, k.speed * 1.8, true);
       return;
     }
-    // Rats : ruée vers le point visé avant de chasser.
+    // Corbeaux : ruée vers le point visé avant de chasser.
     if (s.rushUntil && t < s.rushUntil && s.goal && dist(s, s.goal) > 12) {
-      stepTo(s, s.goal.x, s.goal.y, k.speed * 1.3);
+      stepTo(s, s.goal.x, s.goal.y, k.speed * 1.3, k.fly);
       return;
     }
     if (t >= s.retarget || !alive(s.target) || dist(s.target, p) > tiles(RANGE.hunt)) {
@@ -238,11 +253,12 @@
       const angle = index * 2.1 + 0.6,
         hx = p.x + Math.cos(angle) * 46,
         hy = p.y + Math.sin(angle) * 30 + 6;
-      if (Math.hypot(hx - s.x, hy - s.y) > 14) stepTo(s, hx, hy, k.speed * (dist(s, p) > 120 ? 1.5 : 1));
+      if (Math.hypot(hx - s.x, hy - s.y) > 14)
+        stepTo(s, hx, hy, k.speed * (dist(s, p) > 120 ? 1.5 : 1), k.fly);
       return;
     }
     const reach = k.reach + (m.r || 0);
-    if (dist(s, m) > reach) stepTo(s, m.x, m.y, k.speed);
+    if (dist(s, m) > reach) stepTo(s, m.x, m.y, k.speed, k.fly);
     else s.face = m.x >= s.x ? 1 : -1;
     if (dist(s, m) > reach + 4 || t < s.next) return;
     s.next = t + k.every / haste(s);
@@ -502,6 +518,41 @@
     c.fillStyle = POISON;
     c.fillRect(Math.round(x + (s.face > 0 ? 8 : -10)), Math.round(y + 5), 2, 2);
   }
+  // Corbeau nécrosé : il vole au-dessus du sol (son ombre en dessous), ailes qui battent, plumes déchirées.
+  function drawCrow(c, s, t, lunge) {
+    const flap = Math.sin(t * 22 + s.id * 1.7),
+      x = s.x + lunge * s.face,
+      y = s.y - 30 + Math.sin(t * 4 + s.id) * 3 + (lunge > 0 ? lunge * 1.5 : 0),
+      wing = flap > 0 ? -3 : 1,
+      FEATHER = '#2a2432',
+      FEATHER_L = '#4a3e58';
+    c.save();
+    c.globalAlpha *= 0.3;
+    c.fillStyle = '#000';
+    c.beginPath();
+    c.ellipse(s.x, s.y + 2, 9, 3, 0, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+    pixels(c, x, y, s.face, [
+      // Corps et queue.
+      [-4, 1, 7, 4, FEATHER],
+      [-7, 2, 3, 2, FEATHER],
+      [-8, 3, 2, 1, FEATHER_L],
+      // Tête et bec.
+      [2, -1, 4, 4, FEATHER],
+      [6, 1, 2, 1, '#8a8070'],
+      // Ailes (deux poses : levées ou baissées), plumes rongées.
+      [-3, wing, 5, 2, FEATHER_L],
+      [-2, wing + (flap > 0 ? -2 : 2), 3, 2, FEATHER],
+      [-1, 5, 1, 1, '#6f8a4a'],
+      // Pattes.
+      [-1, 5, 1, 2, '#8a8070'],
+      [1, 5, 1, 2, '#8a8070']
+    ]);
+    // Œil de peste.
+    c.fillStyle = POISON;
+    c.fillRect(Math.round(x + (s.face > 0 ? 8 : -10)), Math.round(y + 1), 2, 2);
+  }
   function drawTotem(c, s, t) {
     const x = s.x,
       y = s.y - 40,
@@ -581,8 +632,8 @@
     c.save();
     c.globalAlpha = Math.max(0, fade);
     glow(c, s.x, s.y + 2, KINDS[s.kind].r + 6, 0.35);
-    // Sortie de terre : la créature monte depuis le sol.
-    if (rise < 1 && s.kind !== 'totem') {
+    // Sortie de terre : la créature monte depuis le sol (le corbeau, lui, arrive en volant).
+    if (rise < 1 && s.kind !== 'totem' && s.kind !== 'crow') {
       c.beginPath();
       c.rect(s.x - 60, s.y - 120, 120, 120 + 4);
       c.clip();
@@ -590,11 +641,12 @@
     }
     if (s.kind === 'skeleton') drawSkeleton(c, s, moving ? bob : 0, lunge);
     else if (s.kind === 'rat') drawRat(c, s, bob, lunge);
+    else if (s.kind === 'crow') drawCrow(c, s, t, lunge);
     else if (s.kind === 'totem') drawTotem(c, s, t);
     else drawAbomination(c, s, moving ? bob : 0, lunge);
     c.restore();
-    // Durée restante : fine barre verte sous la créature.
-    if (s.kind !== 'rat') {
+    // Durée restante : fine barre verte sous la créature (pas pour les nuées de rats et de corbeaux).
+    if (s.kind !== 'rat' && s.kind !== 'crow') {
       const w = s.kind === 'abomination' ? 40 : 24;
       c.save();
       c.globalAlpha = 0.85 * fade;

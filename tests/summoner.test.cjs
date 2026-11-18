@@ -19,7 +19,7 @@ test('Invocateur : Grimoire lié de qualité Relique, au niveau du héros, qui g
   same(Object.keys(w.sec).sort(), ['haste', 'mastery']);
   // L'épée portée est rangée dans le sac ; la barre montre les quatre invocations.
   same(g.inventory.map(i => i.weaponType), ['sword']);
-  same(g.SKILLS.map(s => s.n), ['Squelette putride', 'Nuée de rats', 'Totem de peste', 'Abomination']);
+  same(g.SKILLS.map(s => s.n), ['Squelette putride', 'Nuée de corbeaux', 'Totem de peste', 'Abomination']);
   // Le Grimoire suit le niveau : nom par palier de 10 niveaux, statistiques qui montent avec lui.
   const stats = lv => {
     g.game.hero.level = lv;
@@ -84,7 +84,7 @@ test('Peste noire : charges cumulables (8, ou 12 avec Virulence), dégâts chaqu
   assert.equal(d.CANAAN_CLASS.plagueStacks(o), 0);
 });
 
-test('Invocations : squelettes (3 au maximum), rats qui éclatent, totem de zone et abomination, qui frappent et empoisonnent', () => {
+test('Invocations : squelettes sans limite, corbeaux nécrosés, totem de zone qui enfante des rats et abomination, qui frappent et empoisonnent', () => {
   const g = game();
   g.setClass('invocateur', []);
   predictable(g, 0.99);
@@ -98,24 +98,26 @@ test('Invocations : squelettes (3 au maximum), rats qui éclatent, totem de zone
   g.advance(60);
   assert.ok(m.hp < hp, 'le squelette frappe');
   assert.ok(g.CANAAN_CLASS.plagueStacks(m) >= 1, 'chaque coup pose une charge de Peste');
-  // Quatre lancers : trois squelettes, le plus ancien cède sa place.
-  for (let i = 0; i < 3; i++) {
+  // Aucune limite : chaque lancer lève un squelette de plus.
+  for (let i = 0; i < 5; i++) {
     ready(g);
     g.useSkill(0);
   }
-  same(kinds(g), ['skeleton', 'skeleton', 'skeleton']);
-  // Ils disparaissent au bout de 18 s.
-  g.advance(18 * 60 + 2);
+  same(kinds(g), Array(6).fill('skeleton'));
+  // Ils disparaissent au bout de 30 s (le premier, levé 1 s plus tôt, s'en va le premier).
+  g.advance(28 * 60);
+  assert.equal(kinds(g).length, 6, 'encore là après 28 s');
+  g.advance(2 * 60 + 2);
   same(kinds(g), []);
-  // Nuée de rats : quatre rats qui éclatent au bout de 6 s (dégâts autour d'eux).
+  // Nuée de corbeaux : quatre corbeaux qui piquent la cible et s'en vont au bout de 8 s.
   ready(g);
   g.useSkill(1);
-  same(kinds(g), ['rat', 'rat', 'rat', 'rat']);
-  g.advance(5 * 60);
-  const beforeBurst = m.hp;
-  g.advance(70);
+  same(kinds(g), ['crow', 'crow', 'crow', 'crow']);
+  const c0 = m.hp;
+  g.advance(3 * 60);
+  assert.ok(m.hp < c0, 'les corbeaux frappent');
+  g.advance(5 * 60 + 2);
   same(kinds(g), []);
-  assert.ok(m.hp < beforeBurst, 'les rats éclatent');
   // Totem : sous la souris (100, 0), il frappe chaque seconde les ennemis à 3 cases.
   ready(g);
   g.useSkill(2);
@@ -124,6 +126,10 @@ test('Invocations : squelettes (3 au maximum), rats qui éclatent, totem de zone
   const t0 = m.hp;
   g.advance(65);
   assert.ok(m.hp < t0, 'le totem empoisonne la zone');
+  // La peste du totem enfante des rats : un premier tout de suite, puis un toutes les 2,5 s.
+  assert.equal(kinds(g).filter(k => k === 'rat').length, 1);
+  g.advance(150);
+  assert.equal(kinds(g).filter(k => k === 'rat').length, 2);
   const far = mob(1e7);
   far.x = 2000;
   g.monsters.push(far);
@@ -142,20 +148,36 @@ test('Invocations : squelettes (3 au maximum), rats qui éclatent, totem de zone
 });
 
 test('Talents de l’Invocateur : Légion, Os éternels, Cadavres explosifs, Carapace d’os, Pandémie, Pacte de sang, Moisson d’âmes, Siphon', () => {
-  // Légion : quatre squelettes ; Os éternels : 30 % plus longtemps.
+  // Os éternels : 30 % plus longtemps (39 s au lieu de 30).
   const g = game();
-  g.setClass('invocateur', [3, 2]);
+  g.setClass('invocateur', [2]);
   predictable(g, 0.99);
   g.monsters = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 2; i++) {
     ready(g);
     g.useSkill(0);
   }
-  assert.equal(kinds(g).length, 4);
-  g.advance(19 * 60);
-  assert.equal(kinds(g).length, 4, 'encore là après 19 s');
-  g.advance(5 * 60);
+  assert.equal(kinds(g).length, 2);
+  g.advance(31 * 60);
+  assert.equal(kinds(g).length, 2, 'encore là après 31 s');
+  g.advance(9 * 60);
   assert.equal(kinds(g).length, 0);
+  // Légion : les squelettes frappent 20 % plus vite.
+  const strikes = talents => {
+    const l = game();
+    l.setClass('invocateur', talents);
+    predictable(l, 0.99);
+    const t = mob(1e7);
+    t.x = 40;
+    l.monsters = [t];
+    ready(l);
+    l.useSkill(0);
+    l.advance(12 * 60);
+    return 1e7 - t.hp;
+  };
+  const plain = strikes([]),
+    legion = strikes([3]);
+  assert.ok(legion / plain > 1.15, 'Légion : ' + legion / plain);
   // Carapace d'os : 10 % de dégâts en moins avec au moins deux invocations.
   const c = game();
   c.setClass('invocateur', [6]);
@@ -166,20 +188,21 @@ test('Talents de l’Invocateur : Légion, Os éternels, Cadavres explosifs, Car
   ready(c);
   c.useSkill(0);
   assert.equal(c.characterStats().guard, guard + 10);
-  // Cadavres explosifs : un squelette remplacé explose et pose 3 charges.
+  // Cadavres explosifs : un squelette qui disparaît explose et pose 3 charges.
   const e = game();
   e.setClass('invocateur', [4]);
   predictable(e, 0.99);
   const target = mob(1e7);
   target.x = 1000;
   e.monsters = [target];
-  for (let i = 0; i < 3; i++) {
-    ready(e);
-    e.useSkill(0);
-  }
-  target.x = 40;
   ready(e);
   e.useSkill(0);
+  e.advance(30 * 60 - 3);
+  const bones = summons(e)[0];
+  target.x = bones.x + 60;
+  target.y = bones.y;
+  e.advance(5);
+  same(kinds(e), []);
   assert.equal(e.CANAAN_CLASS.plagueStacks(target), 3);
   // Pandémie : un ennemi qui meurt sous la Peste en transmet la moitié aux ennemis proches.
   const p = game();

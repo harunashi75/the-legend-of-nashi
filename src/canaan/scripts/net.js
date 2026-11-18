@@ -16,6 +16,8 @@
     RESERVE_TICKS = 2 * 60 * 60,
     HISTORY_TICKS = 180,
     FX_LIMIT = 120;
+  // Formes des projectiles dans l'instantané (k) : l'indice dans cette liste.
+  const PROJECTILE_KINDS = Object.freeze(['orb', 'arrow', 'comet', 'plague', 'note']);
   const net = {
     socket: null,
     relay: DEFAULT_RELAY,
@@ -305,7 +307,7 @@
         y: Math.round(p.y),
         c: p.c,
         a: Math.round(Math.atan2(p.vy || 0, p.vx || 0) * 100),
-        k: p.kind === 'arrow' ? 1 : 0
+        k: Math.max(0, PROJECTILE_KINDS.indexOf(p.kind))
       })),
       fx: net.fx.splice(0),
       // Invocations de l'Invocateur (squelettes, rats, totem, abomination), dessinées chez chacun.
@@ -703,7 +705,7 @@
       c: p.c,
       life: 2,
       a: Number.isFinite(p.a) ? p.a / 100 : 0,
-      kind: p.k ? 'arrow' : 'orb'
+      kind: PROJECTILE_KINDS[p.k] || 'orb'
     }));
     if (Array.isArray(state.fx)) playEffects(state.fx);
     CANAAN_SUMMONS.applyView(state.summons);

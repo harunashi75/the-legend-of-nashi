@@ -300,5 +300,35 @@ test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée 
  run('equipment.weapon={id:"b",slot:"weapon",level:1,weaponType:"bow"};refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+200;mouseWorldY=P.y;game.world.projectiles.length=0;useSkill(0)');
  assert.equal(run('game.world.projectiles.at(-1).kind'),'arrow');
  run('canaanDrawProjectile(ctx,game.world.projectiles.at(-1));canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"orb"})');
+ for(const kind of ['comet','plague','note'])run('canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"'+kind+'"})');
+ assert.equal(errors.length,0,errors.join('\n'));
+});
+
+test('Attaque lourde : une animation propre à chaque arme, et les armes à distance frappent de loin',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
+ const equip=type=>run('equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"'+type+'",rarity:"Commun",sec:{power:1,crit:1}};refreshWeaponBar();game.world.projectiles.length=0;monsters.length=0');
+ const wait=n=>run('for(let i=0;i<'+n+';i++){time++;runUpdatePipeline()}');
+ // Arc : la rapide tire une flèche, la lourde une rafale de cinq flèches coup sur coup.
+ equip('bow');run('mouseWorldX=P.x+300;mouseWorldY=P.y');
+ assert.equal(run('canaanBasicAttack(false)'),true);assert.equal(run('game.world.projectiles.length'),1);
+ wait(80);run('game.world.projectiles.length=0');
+ assert.equal(run('canaanBasicAttack(true)'),true);assert.equal(run('game.world.projectiles.length'),1);
+ wait(20);assert.equal(run('game.world.projectiles.filter(p=>p.kind==="arrow").length'),5);
+ // Portée : une flèche rapide atteint un monstre à 800 px.
+ wait(120);run('game.world.projectiles.length=0;monsters.push({x:P.x+800,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"});mouseWorldX=P.x+800');
+ run('canaanBasicAttack(false)');wait(70);assert.ok(run('monsters[0].hp')<1e6,'flèche à 800 px');
+ // Bâton : la lourde est une grosse comète qui explose à l'impact et touche aussi le voisin.
+ equip('staff');wait(120);
+ run('monsters.push({x:P.x+300,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"},{x:P.x+340,y:P.y+30,hp:1e6,mhp:1e6,r:14,t:"Voisin"});mouseWorldX=P.x+300;mouseWorldY=P.y');
+ run('canaanBasicAttack(true)');assert.equal(run('game.world.projectiles[0].kind'),'comet');
+ wait(60);assert.ok(run('monsters[0].hp')<1e6&&run('monsters[1].hp')<1e6,'explosion de la comète');
+ // Grimoire : rafale de peste en cinq crachats.
+ equip('grimoire');wait(120);run('mouseWorldX=P.x+300;mouseWorldY=P.y;canaanBasicAttack(true)');wait(20);
+ assert.equal(run('game.world.projectiles.filter(p=>p.kind==="plague").length'),5);
+ // Mêlée : chaque arme lourde dessine sa forme (croix, fracas, percée), sans erreur.
+ for(const type of ['sword','mace','spear','dualsword','dualdagger','lute','axe','shield']){equip(type);wait(120);run('canaanBasicAttack(true)');wait(30)}
+ run('CanaanStages.drawWeaponEffects()');
  assert.equal(errors.length,0,errors.join('\n'));
 });

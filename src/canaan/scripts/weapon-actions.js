@@ -77,6 +77,8 @@
     lute: '#ff9ad5',
     grimoire: '#a4e83c'
   };
+  // Portée des attaques de base à distance (px) : on frappe de loin, sans coller l'ennemi.
+  const BASIC_RANGE = Object.freeze({ bow: 900, staff: 760, lute: 700, grimoire: 720 });
   const now = () => performance.now() / 1000,
     // Visée : la souris pour l'hôte, le point de son intention pour un allié.
     aim = () =>
@@ -217,7 +219,10 @@
       );
   }
   // Couleur d'un effet : l'élément de la classe pour une compétence, sinon la couleur de l'arme.
-  const fxColor = () => ELEMENTS[castContext.element]?.color || color[currentWeaponType()] || '#fff';
+  const fxColor = () =>
+    ELEMENTS[castContext.element]?.color ||
+    color[isHost() ? currentWeaponType() : actor.equipment?.weapon?.weaponType] ||
+    '#fff';
   function cone(range, width, mult, cb, a = aim()) {
     arc(range, a, width, fxColor());
     let total = 0;
@@ -282,6 +287,9 @@
     beam(x, y, angle, Math.hypot(AP.x - x, AP.y - y), 16, '#9cecff');
     return { x, y };
   }
+  // Projectile du lanceur. opts : speed (px par pas), range (portée en px) ou life (pas), mag (magique),
+  // kind (forme dessinée : arrow, orb, comet, plague, note), size (rayon de contact), splash (rayon de l'explosion
+  // à l'impact, 50 % des dégâts autour), flash (trait de départ, true par défaut).
   function projectile(a, mult, c, opts = {}) {
     const speed = opts.speed || 12;
     game.world.projectiles.push({
@@ -290,15 +298,17 @@
       vx: Math.cos(a) * speed,
       vy: Math.sin(a) * speed,
       dmg: Math.round((opts.mag ? magPower() : power()) * mult * stanceMult(S, !!castContext.basic)),
-      life: opts.life || 48,
+      life: opts.range ? Math.ceil(opts.range / speed) : opts.life || 48,
       c,
-      kind: opts.mag ? 'orb' : 'arrow',
+      kind: opts.kind || (opts.mag ? 'orb' : 'arrow'),
+      size: opts.size || 8,
+      splash: opts.splash || 0,
       homing: false,
       owner: isHost() ? undefined : actor,
       combatContext: { ...castContext, magic: !!opts.mag || castContext.magic }
     });
     spendStance();
-    beam(AP.x, AP.y, a, 65, 7, c);
+    if (opts.flash !== false) beam(AP.x, AP.y, a, 65, 7, c);
   }
   // Postures du héros touché (l'hôte par défaut) : parade, rage, élan et serment du gardien.
   window.CANAAN_WEAPON_DEFENSE = function (m, damage, hero = game.hero) {
@@ -469,6 +479,89 @@
       c.globalAlpha = t;
       c.fillStyle = '#ffffff';
       c.fillRect(0, -w / 6, e.r * 0.9, w / 3);
+    } else if (e.shape === 'cross') {
+      // Croix (épée, attaque lourde) : deux entailles effilées qui se tracent l'une après l'autre.
+      c.translate(e.x, e.y);
+      c.rotate(e.a);
+      c.shadowColor = e.c;
+      c.shadowBlur = 18;
+      for (const [k, tilt] of [
+        [0, 0.8],
+        [1, -0.8]
+      ]) {
+        const grow = Math.max(0, Math.min(1, (age - k * 0.22) / 0.3));
+        if (grow <= 0) continue;
+        const len = e.r * grow,
+          ca = Math.cos(tilt),
+          sa = Math.sin(tilt);
+        c.globalAlpha = t;
+        c.fillStyle = e.c;
+        c.beginPath();
+        c.moveTo(-ca * e.r, -sa * e.r);
+        c.lineTo(-ca * e.r + ca * 2 * len - sa * 6, -sa * e.r + sa * 2 * len + ca * 6);
+        c.lineTo(-ca * e.r + ca * 2 * len, -sa * e.r + sa * 2 * len);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = '#ffffff';
+        c.lineWidth = 2.5 * t + 0.5;
+        c.beginPath();
+        c.moveTo(-ca * e.r, -sa * e.r);
+        c.lineTo(-ca * e.r + ca * 2 * len, -sa * e.r + sa * 2 * len);
+        c.stroke();
+      }
+    } else if (e.shape === 'slam') {
+      // Fracas (masse, hache, bouclier) : fissures qui courent dans le cône et poussière qui s'élève.
+      const grow = Math.min(1, age / 0.35);
+      c.globalAlpha = 0.9 * t;
+      c.strokeStyle = e.c;
+      c.shadowColor = e.c;
+      c.shadowBlur = 10;
+      c.lineWidth = 3;
+      for (let k = 0; k < 7; k++) {
+        const base = e.a - e.w / 2 + (e.w * (k + 0.5)) / 7,
+          len = e.r * (0.65 + 0.35 * ((k * 37) % 10) * 0.1) * grow;
+        c.beginPath();
+        c.moveTo(e.x + Math.cos(base) * 18, e.y + Math.sin(base) * 18);
+        for (let s = 1; s <= 4; s++) {
+          const d = 18 + ((len - 18) * s) / 4,
+            j = base + (((k + s) % 2 ? 1 : -1) * 0.12) / s;
+          c.lineTo(e.x + Math.cos(j) * d, e.y + Math.sin(j) * d);
+        }
+        c.stroke();
+      }
+      c.globalAlpha = 0.35 * t;
+      c.fillStyle = e.c;
+      for (let k = 0; k < 9; k++) {
+        const b = e.a - e.w / 2 + (e.w * k) / 8,
+          d = e.r * (0.4 + 0.6 * grow) * (0.7 + ((k * 13) % 5) * 0.08);
+        c.beginPath();
+        c.arc(e.x + Math.cos(b) * d, e.y + Math.sin(b) * d - 10 * age, 7 + 8 * age, 0, Math.PI * 2);
+        c.fill();
+      }
+    } else if (e.shape === 'thrust') {
+      // Percée (lance) : une pointe qui file droit devant, et des ondes de choc le long du coup.
+      c.translate(e.x, e.y);
+      c.rotate(e.a);
+      const len = e.r * Math.min(1, age / 0.2);
+      c.globalAlpha = 0.8 * t;
+      c.fillStyle = e.c;
+      c.shadowColor = e.c;
+      c.shadowBlur = 20;
+      c.beginPath();
+      c.moveTo(0, -e.w / 3);
+      c.lineTo(len, 0);
+      c.lineTo(0, e.w / 3);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = '#ffffff';
+      c.lineWidth = 2;
+      for (const at of [0.35, 0.6, 0.85]) {
+        if (len < e.r * at) continue;
+        c.globalAlpha = 0.9 * t;
+        c.beginPath();
+        c.ellipse(e.r * at, 0, 4 + 6 * age, e.w * (0.5 + age), 0, 0, Math.PI * 2);
+        c.stroke();
+      }
     } else if (e.shape === 'spark') {
       // Impact : étoile de traits qui jaillit du point touché.
       c.globalAlpha = t;
@@ -507,14 +600,14 @@
     const type = currentWeaponType(),
       a = aim(),
       c = color[type] || '#b7d8ff';
-    const r =
-      type === 'bow' || type === 'staff' || type === 'lute' || type === 'grimoire'
-        ? 240
-        : type === 'spear'
-          ? 175
-          : type === 'mace' || type === 'shield'
-            ? 135
-            : 125;
+    // À distance : la mire suit le curseur, jusqu'à la portée réelle de l'attaque de base.
+    const r = BASIC_RANGE[type]
+      ? Math.max(120, Math.min(BASIC_RANGE[type], Math.hypot(mouseWorldX - P.x, mouseWorldY - P.y)))
+      : type === 'spear'
+        ? 175
+        : type === 'mace' || type === 'shield'
+          ? 135
+          : 125;
     ctx.globalAlpha = 0.17;
     ctx.fillStyle = c;
     ctx.beginPath();
@@ -638,41 +731,92 @@
     if (!basicReady() || uiBlocked()) return false;
     return performBasic(heavy);
   }
+  // Forme de l'attaque de base du lanceur courant (l'hôte ou un allié, voir withActor) : la rapide frappe une
+  // fois, la lourde a sa propre animation selon l'arme. m : part de la Puissance de la frappe.
+  function basicStrike(type, heavy, m) {
+    const col = color[type],
+      a = aim(),
+      range = BASIC_RANGE[type];
+    // Tirs successifs : le premier part tout de suite, les suivants toutes les gap secondes.
+    const salvo = (n, gap, shoot) => {
+      for (let k = 0; k < n; k++) k ? later(k * gap, () => shoot(k)) : shoot(0);
+    };
+    switch (type) {
+      case 'bow':
+        if (!heavy) return projectile(a, m, col, { speed: 15, range });
+        // Rafale : cinq flèches tirées coup sur coup, en léger éventail.
+        return salvo(5, 0.06, k =>
+          projectile(a + (k - 2) * 0.045, m * 0.26, col, { speed: 18, range: range + 60, flash: !k })
+        );
+      case 'staff':
+        if (!heavy) return projectile(a, m, col, { mag: true, speed: 13, range });
+        // Comète : une grosse boule lente, sa traînée derrière elle, qui explose à l'impact.
+        return projectile(a, m, col, { mag: true, speed: 10, range, kind: 'comet', size: 20, splash: 75 });
+      case 'grimoire':
+        if (!heavy) return projectile(a, m, col, { mag: true, speed: 13, range });
+        // Rafale de peste : cinq crachats toxiques en gerbe.
+        return salvo(5, 0.06, k =>
+          projectile(a + [-0.09, 0.05, -0.02, 0.08, -0.05][k], m * 0.26, col, {
+            mag: true,
+            speed: 11,
+            range,
+            kind: 'plague',
+            size: 11,
+            flash: !k
+          })
+        );
+      case 'lute':
+        if (!heavy) return projectile(a, m, col, { mag: true, speed: 12, range });
+        // Accord : trois notes en éventail.
+        return salvo(3, 0, k =>
+          projectile(a + (k - 1) * 0.2, m * 0.5, col, {
+            mag: true,
+            speed: 12,
+            range,
+            kind: 'note',
+            flash: !k
+          })
+        );
+      case 'spear':
+        linear(heavy ? 185 : 160, heavy ? 30 : 22, m);
+        // Percée : la lance file droit devant, des ondes de choc le long du coup.
+        if (heavy) effect('thrust', AP.x, AP.y, a, 190, 30, col, 0.45);
+        return;
+      case 'mace':
+      case 'shield':
+      case 'axe':
+        cone(heavy ? 140 : 120, heavy ? Math.PI * 0.8 : Math.PI / 2, m);
+        // Fracas : le sol se fend devant le héros.
+        if (heavy) effect('slam', AP.x, AP.y, a, 150, Math.PI * 0.8, col, 0.6);
+        return;
+      case 'dualsword':
+        // Tourbillon : les deux lames tournent autour du héros.
+        return heavy ? circle(125, m) : cone(115, Math.PI / 2, m);
+      case 'dualdagger':
+        if (!heavy) return cone(115, Math.PI / 2, m);
+        // Estocades : trois coups de dague rapides, à gauche, au centre puis à droite.
+        return salvo(3, 0.08, k => linear(140, 16, m * 0.36, null, a + (k - 1) * 0.22));
+      default:
+        cone(heavy ? 130 : 115, heavy ? Math.PI * 0.7 : Math.PI / 2, m);
+        // Croix : deux entailles croisées devant le héros.
+        if (heavy) effect('cross', AP.x + Math.cos(a) * 72, AP.y + Math.sin(a) * 72, a, 58, 0, col, 0.45);
+    }
+  }
   // Attaque de base dans la simulation, sans aucun accès à l'écran.
   function performBasic(heavy) {
     if (!basicReady()) return false;
     const type = currentWeaponType();
     if (!WEAPON_DEFINITIONS[type]) return false;
-    const spec = heavy ? BASIC.heavy : BASIC.quick,
-      col = color[type],
-      m = spec.mult;
+    const spec = heavy ? BASIC.heavy : BASIC.quick;
     // Célérité (et forme féline) : attaques de base plus rapides.
     basicLock =
       spec.lock *
       (1 - Math.min(60, characterStats().haste || 0) / 100) *
       window.CANAAN_CLASS_BASIC_LOCK() *
       (S.flurry > 0 ? 0.7 : 1);
-    castContext = { magic: false, basic: true };
-    switch (type) {
-      case 'bow':
-        projectile(aim(), m, col, { speed: heavy ? 15 : 13 });
-        break;
-      case 'staff':
-      case 'lute':
-      case 'grimoire':
-        projectile(aim(), m, col, { mag: true, speed: heavy ? 10 : 12 });
-        break;
-      case 'spear':
-        linear(heavy ? 185 : 160, heavy ? 30 : 22, m);
-        break;
-      case 'mace':
-      case 'shield':
-      case 'axe':
-        cone(heavy ? 140 : 120, heavy ? Math.PI * 0.8 : Math.PI / 2, m);
-        break;
-      default:
-        cone(heavy ? 130 : 115, heavy ? Math.PI * 0.7 : Math.PI / 2, m);
-    }
+    withActor(game.hero, () =>
+      withCastContext({ magic: false, basic: true }, () => basicStrike(type, heavy, spec.mult))
+    );
     return true;
   }
   // Bouton de souris : 0 = gauche (rapide), 2 = droit (lourd).
@@ -731,68 +875,16 @@
     const type = hero.equipment.weapon?.weaponType || 'sword';
     if (!WEAPON_DEFINITIONS[type]) return false;
     const spec = heavy ? BASIC.heavy : BASIC.quick,
-      a = Math.atan2(hero.intent.aimY - p.y, hero.intent.aimX - p.x),
       st = characterStats(hero),
-      stance = skillStateOf(hero),
-      magic = MAGIC_WEAPONS.includes(type),
-      base = Math.round(
-        (magic ? heroMagicPower(st.attack, st.intellect || 0) : heroPower(st.attack)) *
-          spec.mult *
-          stanceMult(stance, true)
-      ),
-      context = { magic, basic: true };
-    stance.shadow = 0;
+      stance = skillStateOf(hero);
     p.basicLock =
       spec.lock *
       (1 - Math.min(60, st.haste || 0) / 100) *
       window.CANAAN_CLASS_BASIC_LOCK(hero) *
       (stance.flurry > 0 ? 0.7 : 1);
-    p.atk = 0.28;
-    if (type === 'bow' || magic) {
-      const speed = type === 'bow' ? (heavy ? 15 : 13) : heavy ? 10 : 12;
-      game.world.projectiles.push({
-        x: p.x,
-        y: p.y,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed,
-        dmg: base,
-        life: 48,
-        c: color[type],
-        kind: type === 'bow' ? 'arrow' : 'orb',
-        homing: false,
-        owner: hero,
-        combatContext: context
-      });
-      return true;
-    }
-    const spear = type === 'spear',
-      wide = type === 'mace' || type === 'shield' || type === 'axe',
-      range = spear ? (heavy ? 185 : 160) : wide ? (heavy ? 140 : 120) : heavy ? 130 : 115,
-      width = spear
-        ? heavy
-          ? 30
-          : 22
-        : wide
-          ? heavy
-            ? Math.PI * 0.8
-            : Math.PI / 2
-          : heavy
-            ? Math.PI * 0.7
-            : Math.PI / 2;
-    for (const m of game.world.monsters.slice()) {
-      if (m.hp <= 0) continue;
-      const dx = m.x - p.x,
-        dy = m.y - p.y,
-        r = m.r || 0;
-      const inside = spear
-        ? (t => t >= 0 && t <= range + r && Math.abs(dx * Math.sin(a) - dy * Math.cos(a)) <= width + r)(
-            dx * Math.cos(a) + dy * Math.sin(a)
-          )
-        : Math.hypot(dx, dy) <= range + r &&
-          Math.abs(Math.atan2(Math.sin(Math.atan2(dy, dx) - a), Math.cos(Math.atan2(dy, dx) - a))) <=
-            width / 2;
-      if (inside) CANAAN_COMBAT.attack(m, base, context, hero);
-    }
+    withActor(hero, () =>
+      withCastContext({ magic: false, basic: true }, () => basicStrike(type, heavy, spec.mult))
+    );
     return true;
   }
   // Étape du pipeline : attaque voulue par chaque héros (intent.attack), avec sa propre recharge.

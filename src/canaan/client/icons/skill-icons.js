@@ -554,7 +554,7 @@ const ICONS = {
         .join('')
   ]
 };
-// Invocations du Grimoire : rat, totem d'os, tête d'abomination (repère centré, tête en haut).
+// Invocations du Grimoire : corbeau, rat, totem d'os, tête d'abomination (repère centré, tête en haut).
 const SUMMON = {
   ground: c =>
     '<ellipse cx="0" cy="10" rx="11" ry="3" fill="' +
@@ -562,6 +562,12 @@ const SUMMON = {
     '" opacity=".45" stroke="' +
     c +
     '" stroke-width="1"/>',
+  crow: () =>
+    '<path d="M-9 2 C-7 -2 -2 -3 1 -1.5 L5 -5 L9 -4.5 L6 -1.5 C7 3 3 6 -2 6 C-5 6 -8 4.5 -9 2 Z" fill="#2a2432" ' +
+    st +
+    '/><path d="M-5 0 C-3 -5 1 -6 3 -3.5 L0.5 1 L-1 -0.5 L-2.5 1.5 Z" fill="#4a3e58" ' +
+    st +
+    '/><path d="M9 -4.5 L11.5 -4 L9 -3.2 Z" fill="#8a8070"/><circle cx="6.3" cy="-3.4" r="0.9" fill="#a4e83c"/>',
   rat: () =>
     '<path d="M-7 3 C-7 -2 1 -3 5 0 L8 1.5 L5 3 C3 5 -5 5.5 -7 3 Z" fill="#6e5c4c" ' +
     st +
@@ -598,8 +604,9 @@ const SUMMON = {
 };
 ICONS.grimoire = [
   a => SUMMON.ground(a) + at(0, -1, 0, 1.45, E.skull()) + at(-8, 8, 0, 0.35, E.sparkle(a)),
-  () => at(-4, -4, 0, 0.85, SUMMON.rat()) + at(4, 3, 0, 0.95, SUMMON.rat()) + at(-5, 8, 0, 0.8, SUMMON.rat()),
-  a => SUMMON.ground(a) + SUMMON.totem(a),
+  () =>
+    at(-4, -5, 0, 0.85, SUMMON.crow()) + at(5, 1, 0, 0.95, SUMMON.crow()) + at(-4, 7, 0, 0.8, SUMMON.crow()),
+  a => SUMMON.ground(a) + SUMMON.totem(a) + at(7, 7, 0, 0.55, SUMMON.rat()),
   a => SUMMON.ground(a) + at(0, 0, 0, 1, SUMMON.abomination(a))
 ];
 // Luth : note qui file, accord qui repousse, chant qui soigne, symphonie en ondes.

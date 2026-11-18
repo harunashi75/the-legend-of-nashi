@@ -270,7 +270,7 @@ export const CLASSES = deepFreeze([
       ['Os éternels', 'Tes invocations durent 30 % plus longtemps.'],
       [
         'Légion',
-        'Un squelette de plus (4 au maximum) ; tes invocations infligent 10 % de dégâts supplémentaires.'
+        'Tes squelettes frappent 20 % plus vite ; tes invocations infligent 10 % de dégâts supplémentaires.'
       ],
       [
         'Cadavres explosifs',

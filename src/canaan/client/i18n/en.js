@@ -810,18 +810,20 @@ export default {
   'Invocation': 'Summon',
   '{n} au maximum': '{n} at most',
   '{n} % par coup': '{n}% per hit',
-  'Un squelette sort de terre près de toi et attaque tes ennemis pendant 18 s (60 % de ta Puissance magique toutes les 1,2 s). 3 squelettes au maximum : un nouveau remplace le plus ancien.':
-    'A skeleton rises from the ground near you and attacks your enemies for 18 s (60% of your magic Power every 1.2 s). 3 skeletons at most: a new one replaces the oldest.',
-  'Nuée de rats': 'Rat swarm',
-  '4 rats pestiférés': '4 plague rats',
-  '45 % par morsure, puis éclatent': '45% per bite, then they burst',
-  '4 rats foncent vers la souris et mordent les ennemis (45 % toutes les 0,6 s). Au bout de 6 s, chacun éclate en un nuage toxique (90 % aux ennemis autour de lui).':
-    '4 rats rush toward the mouse and bite enemies (45% every 0.6 s). After 6 s, each bursts into a toxic cloud (90% to enemies around it).',
+  'sans limite': 'no limit',
+  'Un squelette sort de terre près de toi et attaque tes ennemis pendant 30 s (60 % de ta Puissance magique toutes les 1,2 s). Aucune limite : chaque lancer lève un squelette de plus.':
+    'A skeleton rises from the ground near you and attacks your enemies for 30 s (60% of your magic Power every 1.2 s). No limit: every cast raises one more skeleton.',
+  'Nuée de corbeaux': 'Crow swarm',
+  '4 corbeaux nécrosés': '4 necrotic crows',
+  '{n} % par coup de bec': '{n}% per peck',
+  '4 corbeaux nécrosés fondent sur la souris en volant par-dessus les obstacles, puis harcèlent tes ennemis pendant 8 s (45 % toutes les 0,6 s).':
+    '4 necrotic crows swoop toward the mouse, flying over obstacles, then harass your enemies for 8 s (45% every 0.6 s).',
   'Totem de peste': 'Plague totem',
   'Totem 10 s sous la souris': 'Totem 10 s under the mouse',
   '50 %/s en zone': '50%/s in an area',
-  'Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Tes invocations proches de lui frappent 25 % plus vite.':
-    'A bone totem rises where you aim for 10 s: each second, it breathes plague on enemies within 3 tiles (50%). Your summons near it strike 25% faster.',
+  'rats pestiférés': 'plague rats',
+  'Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Toutes les 2,5 s, un rat pestiféré sort de terre à ses pieds : il mord les ennemis (35 % toutes les 0,6 s) puis éclate au bout de 6 s en un nuage toxique (90 % autour de lui). Tes invocations proches du totem frappent 25 % plus vite.':
+    'A bone totem rises where you aim for 10 s: each second, it breathes plague on enemies within 3 tiles (50%). Every 2.5 s, a plague rat crawls out of the ground at its feet: it bites enemies (35% every 0.6 s), then bursts after 6 s into a toxic cloud (90% around it). Your summons near the totem strike 25% faster.',
   'Abomination': 'Abomination',
   '{n} % en zone': '{n}% in an area',
   'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).':
@@ -1021,8 +1023,8 @@ export default {
   'Os éternels': 'Eternal bones',
   'Tes invocations durent 30 % plus longtemps.': 'Your summons last 30% longer.',
   'Légion': 'Legion',
-  'Un squelette de plus (4 au maximum) ; tes invocations infligent 10 % de dégâts supplémentaires.':
-    'One more skeleton (4 at most); your summons deal 10% extra damage.',
+  'Tes squelettes frappent 20 % plus vite ; tes invocations infligent 10 % de dégâts supplémentaires.':
+    'Your skeletons strike 20% faster; your summons deal 10% extra damage.',
   'Cadavres explosifs': 'Exploding corpses',
   'Une invocation qui disparaît explose : 60 % de l’Attaque et 3 charges de Peste aux ennemis à moins de 2,5 cases.':
     'A summon that vanishes explodes: 60% of Attack and 3 Plague charges to enemies within 2.5 tiles.',
