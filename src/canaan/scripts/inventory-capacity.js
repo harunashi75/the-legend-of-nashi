@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  // Prix des neuf agrandissements du sac : shared/data/economy.js (BAG_PRICES).
+  // Prix des neuf agrandissements du sac : shared/data/economy.js (BAG_PRICES). Ils s'achètent chez le marchand
+  // (colonne Marchandise de la boutique), plus dans le sac.
   let bagLevelCore = 0;
   // Invité en ligne : la capacité de son sac vient de l'hôte (game.hero.bagLimit), pas des agrandissements locaux.
   window.updateCapacity = function () {
@@ -45,7 +46,8 @@
     bagLevelCore++;
     updateCapacity();
     saveGame();
-    renderInventory();
+    if (CANAAN_SHOP.isOpen()) CANAAN_SHOP.render();
+    else renderInventory();
     toast('🎒 Sac agrandi : ' + BAG_LIMIT + ' emplacements !');
   };
 

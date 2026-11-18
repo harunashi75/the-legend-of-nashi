@@ -259,6 +259,7 @@
       game.hero.inventory.map(i => i.id),
       CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p)),
       Math.floor(P.gold),
+      canaanBagLimit(game.hero),
       CANAAN_DIG.has(game.hero)
     ]);
   // Rayons de la marchandise : un par qualité (chez l'armurier elfe, Rare puis Épique), avec leur prix.

@@ -325,8 +325,8 @@ export default {
   'Trier': 'Sort',
   'Ranger l’équipement : par emplacement, qualité puis niveau':
     'Tidy the equipment: by slot, quality, then level',
-  'Sac plein : vends ou dépose des objets pour faire de la place.':
-    'Bag full: sell or deposit items to make room.',
+  'Sac plein : vends ou dépose des objets, ou agrandis ton sac chez un marchand.':
+    'Bag full: sell or deposit items, or enlarge your bag at a merchant.',
   'Clic sur une arme : Arme 1': 'Click a weapon: Weapon 1',
   'Bouton « Arme 2 » : réserve': '“Weapon 2” button: reserve',
   'Q : changer en combat.': 'Q: switch in combat.',

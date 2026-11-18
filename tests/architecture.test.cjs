@@ -66,7 +66,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   // Les panneaux sont construits directement, y compris les contrôles de réserve et de vente.
   g.CANAAN_UI.openInventory();
   let html=nodes.get('window').innerHTML;
-  assert.ok(html.includes('bag-upgrade'));assert.ok(html.includes('Arme 2'));
+  assert.ok(!html.includes('bag-upgrade'),'l’agrandissement du sac s’achète chez le marchand');assert.ok(html.includes('Arme 2'));
   assert.equal((html.match(/class="bag-sale"/g)||[]).length,2);
   assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,8);
   assert.equal(g.CANAAN_UI.inspect().panel,'inventory');

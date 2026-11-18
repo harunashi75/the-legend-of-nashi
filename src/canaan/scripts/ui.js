@@ -140,7 +140,6 @@
         (game.hero.inventory.length < 2 ? ' disabled' : '') +
         '>⇅ Trier</button></div>' +
         '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
-        bagUpgradeHTML() +
         bagGroup('⚔️', 'Équipement', gear.length, gear) +
         bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
         bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
@@ -150,7 +149,7 @@
             '</small></h3><div class="modern-bag">' +
             Array.from({ length: free }, () => bagCell(null)).join('') +
             '</div>'
-          : '<p class="weapon-hint">🎒 Sac plein : vends ou dépose des objets pour faire de la place.</p>') +
+          : '<p class="weapon-hint">🎒 Sac plein : vends ou dépose des objets, ou agrandis ton sac chez un marchand.</p>') +
         '<div class="bag-section-mat">' +
         bagGroup(
           '⟦prof_mining⟧',
