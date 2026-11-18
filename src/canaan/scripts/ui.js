@@ -213,11 +213,13 @@
       '</span></div>'
     );
   }
-  // Onglet de la fiche (C), comme le sac : 'gear' (le personnage et son équipement) ou 'rubis' (ses six
-  // emplacements de Rubis et sa collection). L'onglet choisi est gardé d'une ouverture à l'autre.
+  // Onglet de la fiche (C), comme le sac : 'gear' (le personnage et son équipement), 'rubis' (ses six
+  // emplacements de Rubis et sa collection) ou 'wardrobe' (la garde-robe, aussi ouverte par la touche V).
+  // L'onglet choisi est gardé d'une ouverture à l'autre.
+  const CHAR_TABS = ['gear', 'rubis', 'wardrobe'];
   let charTab = 'gear';
   function characterSection(tab) {
-    if (tab === 'gear' || tab === 'rubis') charTab = tab;
+    if (CHAR_TABS.includes(tab)) charTab = tab;
     renderCharacter();
   }
   function renderCharacter() {
@@ -227,12 +229,13 @@
     const st = characterStats(),
       count = Object.values(game.hero.equipment).filter(Boolean).length,
       rubis = charTab === 'rubis',
+      wardrobe = charTab === 'wardrobe',
       worn = window.CANAAN_RUBIS.equipped().filter(Boolean).length,
       need = xpToNext(st.level);
     const tabs =
       '<div class="bag-tabs char-tabs">' +
       '<button type="button" class="' +
-      (rubis ? '' : 'on') +
+      (charTab === 'gear' ? 'on' : '') +
       '" data-action="characterSection" data-tab="gear">⚔️ Équipement <small>' +
       count +
       ' / 10</small></button>' +
@@ -242,6 +245,13 @@
       worn +
       ' / ' +
       window.CANAAN_RUBIS.slots +
+      '</small></button>' +
+      '<button type="button" class="' +
+      (wardrobe ? 'on' : '') +
+      '" data-action="characterSection" data-tab="wardrobe">👗 Garde-robe <small>' +
+      window.CANAAN_WARDROBE.count() +
+      ' / ' +
+      SKINS.length +
       '</small></button></div>';
     const gear =
       '<div class="character-layout"><div class="character-left"><div class="rpg-paper"><div class="character-doll">' +
@@ -250,7 +260,7 @@
       '</div>' +
       '<div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas><p class="muted">⚔️ ' +
       count +
-      '/10 équipés</p><button type="button" class="wardrobe-open" data-action="toggleWardrobe">👗 Garde-robe (V)</button></div>' +
+      '/10 équipés</p></div>' +
       '<div class="doll-column">' +
       ['neck', 'ring', 'artifact', 'weapon', 'weapon2'].map(charSlot).join('') +
       '</div></div></div></div>' +
@@ -271,7 +281,7 @@
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
         tabs +
-        (rubis ? window.CANAAN_RUBIS.section() : gear)
+        (rubis ? window.CANAAN_RUBIS.section() : wardrobe ? window.CANAAN_WARDROBE.section() : gear)
     );
     drawCharacterPreview();
     prepare('character');
@@ -318,6 +328,7 @@
     canaanSortBag: sortBag,
     renderCharacter,
     canaanCharacterSection: characterSection,
+    canaanCharacterTab: () => charTab,
     charSlot,
     showGearTooltip,
     showEquippedTooltip,

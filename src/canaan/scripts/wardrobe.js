@@ -1,4 +1,4 @@
-// Garde-robe (touche V) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
+// Garde-robe (touche V, onglet de la fiche C) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
 // Une apparence est une tenue complète, purement visuelle (shared/data/skins.js). Elle tombe des monstres, des élites,
 // des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets, avec une qualité : plus elle
 // est haute, plus la tenue est travaillée. Une apparence déjà possédée est revendue d'office.
@@ -85,9 +85,15 @@
     previews.set(key, url);
     return url;
   }
-  // Ouverte : la fenêtre affichée est la garde-robe (toute autre fenêtre efface cette marque, voir showPanel).
-  const shown = () => modalOpen() && document.getElementById('window')?.dataset.canaanPanel === 'wardrobe';
-  function render() {
+  // Ouverte : la fenêtre affichée est la fiche (C) sur son onglet Garde-robe (toute autre fenêtre efface cette
+  // marque, voir showPanel).
+  const shown = () =>
+    modalOpen() &&
+    document.getElementById('window')?.dataset.canaanPanel === 'character' &&
+    window.canaanCharacterTab?.() === 'wardrobe';
+  const count = () => ownedOf(game.hero).length;
+  // Onglet Garde-robe de la fiche (C) : la tenue portée, puis toutes les apparences du jeu.
+  function section() {
     const hero = game.hero,
       owned = ownedOf(hero),
       worn = hero.look?.wear || '',
@@ -118,23 +124,30 @@
           '</span></button>'
         );
       };
-    modernPanel(
-      rpgHeader('👗 Garde-robe — ' + owned.length + ' / ' + SKINS.length + ' apparences') +
-        '<div class="modern-body"><p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules). Clique pour porter.</p>' +
-        '<div class="skin-current"><img alt="" src="' +
-        preview(hero.look) +
-        '"><div><b>' +
-        esc(worn ? skinById(worn).name : 'Tenue d’origine') +
-        '</b>' +
-        (worn
-          ? '<button type="button" data-action="wearSkin" data-skin="">Retirer l’apparence</button>'
-          : '<span class="muted">Aucune apparence portée.</span>') +
-        '</div></div>' +
-        '<div class="skin-grid">' +
-        SKINS.map(card).join('') +
-        '</div></div>'
+    return (
+      '<div class="rpg-paper rubis-paper wardrobe-tab"><div class="rubis-head"><h3>👗 Garde-robe</h3><span>' +
+      owned.length +
+      ' / ' +
+      SKINS.length +
+      ' apparences</span></div>' +
+      '<p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules). Clique pour porter.</p>' +
+      '<div class="skin-current"><img alt="" src="' +
+      preview(hero.look) +
+      '"><div><b>' +
+      esc(worn ? skinById(worn).name : 'Tenue d’origine') +
+      '</b>' +
+      (worn
+        ? '<button type="button" data-action="wearSkin" data-skin="">Retirer l’apparence</button>'
+        : '<span class="muted">Aucune apparence portée.</span>') +
+      '</div></div>' +
+      '<div class="skin-grid">' +
+      SKINS.map(card).join('') +
+      '</div></div>'
     );
-    document.getElementById('window').dataset.canaanPanel = 'wardrobe';
+  }
+  // Ouvre (ou redessine) la fiche sur son onglet Garde-robe.
+  function render() {
+    window.canaanCharacterSection('wardrobe');
   }
   function toggle() {
     if (shown()) return closePanels();
@@ -169,7 +182,9 @@
     choose,
     handle,
     applyRemote,
-    render
+    render,
+    section,
+    count
   });
   window.toggleWardrobe = toggle;
 })();

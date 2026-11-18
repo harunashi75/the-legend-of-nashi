@@ -1,6 +1,6 @@
 /* Runes (onglet Runes de la fiche du personnage ; « rubis » dans le code) et Arène des Épreuves (portail, records, récompense finale). */
 
-/* Colonne gauche de la fiche : le personnage (onglet Équipement) ou ses Rubis et leurs effets (onglet Rubis). */
+/* Colonne gauche de la fiche (onglet Équipement) : le personnage et son équipement. */
 #window .character-left {
   display: flex;
   flex-direction: column;
@@ -99,9 +99,18 @@
   font-size: calc(18px * var(--font-scale));
 }
 
-/* Onglet Rubis : deux colonnes égales, le héros entouré de ses emplacements à gauche, la collection à droite. */
-#window .rubis-layout {
+/* Onglet Rubis : deux colonnes égales, le héros entouré de ses emplacements en haut à gauche, la collection en haut
+   à droite (même hauteur), les effets actifs sur toute la largeur dessous. */
+#window .character-layout.rubis-layout {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+#window .rubis-layout > .rubis-fx {
+  grid-column: 1 / -1;
+}
+#window .rubis-fx .rubis-effects {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px 18px;
 }
 #window .rubis-hint {
   margin: 0 0 4px;
@@ -388,7 +397,7 @@
   #window .arena-layout {
     grid-template-columns: 1fr;
   }
-  #window .rubis-layout {
+  #window .character-layout.rubis-layout {
     grid-template-columns: 1fr;
   }
   #window .rubis-family {

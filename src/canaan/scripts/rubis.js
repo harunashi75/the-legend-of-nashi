@@ -598,7 +598,8 @@
       '</b></span>'
     );
   }
-  // Onglet Rubis de la fiche (C) : le héros entouré de ses six emplacements, ses effets actifs, et la collection des 48.
+  // Onglet Rubis de la fiche (C) : le héros entouré de ses six emplacements et la collection des 48 en haut, ses effets
+  // actifs dessous.
   // Le héros affiché est celui de cette application (l'invité chez lui).
   function section() {
     return within(game.hero, sectionHtml);
@@ -692,9 +693,10 @@
     else if (!discovered())
       notes +=
         '<p class="rubis-lock">⚔️ Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
+    // Grille alignée : Runes équipées et Collection côte à côte, les effets actifs sur toute la largeur dessous.
     return (
-      '<div class="character-layout rubis-layout"><div class="character-left">' +
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>⟦rune⟧ Runes équipées</h3><span>' +
+      '<div class="character-layout rubis-layout">' +
+      '<div class="rpg-paper rubis-paper rubis-worn"><div class="rubis-head"><h3>⟦rune⟧ Runes équipées</h3><span>' +
       count +
       '/' +
       SLOTS +
@@ -707,14 +709,14 @@
       '</div></div>' +
       notes +
       '</div>' +
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>✨ Effets actifs</h3></div>' +
-      effectsHtml() +
-      '</div></div>' +
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>📖 Collection</h3><span>' +
+      '<div class="rpg-paper rubis-paper rubis-coll"><div class="rubis-head"><h3>📖 Collection</h3><span>' +
       discovered() +
       '/48 découvertes</span></div>' +
       '<p class="rubis-hint">Clique une Rune de ta collection pour l’équiper ou la retirer ; clique un emplacement pour le libérer.</p>' +
       collectionHtml() +
+      '</div>' +
+      '<div class="rpg-paper rubis-paper rubis-fx"><div class="rubis-head"><h3>✨ Effets actifs</h3></div>' +
+      effectsHtml() +
       '</div></div>'
     );
   }

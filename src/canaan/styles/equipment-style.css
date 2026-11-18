@@ -190,10 +190,15 @@
   right: 5px;
 }
 
-/* Garde-robe (V) : apparences en cartes, cadre de la couleur de leur qualité, verrouillées tant qu'elles ne sont pas
-   trouvées ; la tenue portée est mise en avant. */
-#window .wardrobe-open {
-  margin-top: 6px;
+/* Garde-robe (V, onglet de la fiche C) : apparences en cartes, cadre de la couleur de leur qualité, verrouillées tant
+   qu'elles ne sont pas trouvées ; la tenue portée est mise en avant. */
+/* Les trois onglets de la fiche gardent la même largeur de fenêtre. */
+#window:has(.char-tabs) {
+  width: min(1220px, 98vw);
+  max-width: none;
+}
+#window .wardrobe-tab .muted {
+  margin: 0;
 }
 #window .skin-current {
   display: flex;

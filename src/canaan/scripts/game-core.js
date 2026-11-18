@@ -238,7 +238,13 @@ function canaanPanelKey(action) {
   if (!name || typeof window[name] !== 'function') return false;
   canaanTrackPanels();
   if (!modalOpen()) return false;
-  const same = canaanPanelOpen === name;
+  // La garde-robe est un onglet de la fiche : C ferme la fiche quel que soit l'onglet, V ferme l'onglet Garde-robe.
+  const shownPanel = document.getElementById('window')?.dataset.canaanPanel,
+    same =
+      canaanPanelOpen === name ||
+      (shownPanel === 'character' &&
+        (name === 'toggleCharacter' ||
+          (name === 'toggleWardrobe' && window.canaanCharacterTab?.() === 'wardrobe')));
   closePanels();
   canaanPanelOpen = null;
   if (!same) window[name]();

@@ -121,6 +121,15 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),true);assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),false);assert.equal(run('P.gold'),300);
  assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"dragon")'),false,'pas possédée');assert.equal(run('(game.hero.look||{}).wear||""'),'');
  assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"pirate")'),true);assert.equal(run('game.hero.look.wear'),'pirate');
+ // La garde-robe est un onglet de la fiche (C) : V l'ouvre sur cet onglet, sans bouton sous le personnage.
+ run('closePanels();toggleWardrobe()');
+ assert.equal(run('document.getElementById("window").dataset.canaanPanel'),'character');assert.equal(run('canaanCharacterTab()'),'wardrobe');
+ assert.match(run('document.getElementById("window").innerHTML'),/data-tab="wardrobe"[^>]*>[^<]*Garde-robe[^]*skin-grid/);
+ run('toggleWardrobe()');assert.equal(run('modalOpen()'),false,'V referme l’onglet Garde-robe');
+ run('canaanCharacterSection("gear")');assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/wardrobe-open|skin-grid/);
+ // Onglet Runes : Runes équipées et Collection en haut, Effets actifs dessous.
+ run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rubis-coll[^]*rubis-fx/);
+ run('closePanels()');
  // Le sprite d'une tenue a de la place pour les ailes ; sans tenue, rien ne change.
  assert.equal(run('canaanHeroSprite({...game.hero.look,wear:"dragon"},0,0).padX'),12);assert.equal(run('canaanHeroSprite(defaultLook(),0,0).padX'),0);
  // Sauvegarde : collection et tenue portée.

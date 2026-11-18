@@ -546,7 +546,7 @@ export default {
   '{nom} (touche V)': '{nom} (V key)',
   'Apparence {qualite} à découvrir': '{qualite} appearance to discover',
   'portée': 'worn',
-  'Garde-robe — {n} / {max} apparences': 'Wardrobe — {n} / {max} appearances',
+  '{n} / {max} apparences': '{n} / {max} appearances',
   'Des tenues complètes, purement visuelles, portées par-dessus ton équipement.':
     'Complete outfits, purely cosmetic, worn over your gear.',
   'Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules).':
