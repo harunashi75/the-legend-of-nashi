@@ -517,7 +517,7 @@
   font-size: calc(12px * var(--font-scale));
 }
 
-/* Sac (touche I) : deux onglets, le sac et les matériaux récoltés. */
+/* Onglets (fiche C) et rubriques du sac (touche I). */
 #window .bag-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -545,6 +545,36 @@
   margin: 12px 0 6px;
   color: #f6dc98;
   font-size: calc(14px * var(--font-scale));
+}
+#window .bag-subhead small {
+  margin-left: 4px;
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: normal;
+}
+#window .bag-none {
+  margin: 0 0 4px;
+  font-style: italic;
+}
+/* Sac (touche I) : une seule vue rangée par rubriques, le bouton Trier en haut, les matériaux à part en bas. */
+#window .bag-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#window .bag-toolbar p {
+  flex: 1 1 260px;
+  margin: 0;
+}
+#window .bag-sort {
+  flex: none;
+}
+#window .bag-section-mat {
+  margin-top: 14px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(212, 170, 90, 0.35);
 }
 /* Repères courts d'un onglet de métier, et le détail dans un encadré repliable. */
 #window .prof-tips {

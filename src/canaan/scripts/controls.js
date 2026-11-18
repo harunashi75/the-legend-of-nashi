@@ -158,7 +158,7 @@
       unequip(slot);
     },
     renderInventory: () => renderInventory(),
-    bagSection: element => canaanBagSection(actionText(element, 'tab')),
+    sortBag: () => canaanSortBag(),
     renderCharacter: () => renderCharacter(),
     characterSection: element => canaanCharacterSection(actionText(element, 'tab')),
     chooseClass: element => chooseClass(actionText(element, 'class')),

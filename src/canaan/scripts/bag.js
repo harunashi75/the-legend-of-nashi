@@ -11,14 +11,50 @@
   // Taille d'une pile selon le genre (100 par défaut ; clés des secrets : 20).
   const STACK_OF = { key: 20 };
   const stackOf = kind => STACK_OF[kind] || STACK;
-  // Trois sections : le sac (équipement, repas, enchantements), les matériaux qu'on récolte (minerais, poissons,
-  // herbes, viandes, trésors déterrés), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
+  // Trois sections : le sac (équipement, repas, enchantements, clés, trésors déterrés), les matériaux qu'on récolte
+  // (minerais, poissons, herbes, viandes), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
   // Rubis, une collection sans limite de place (onglet Rubis de la fiche C).
-  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'treasure']);
+  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
   const sectionOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : 'main');
   const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure'];
+  // Rubriques du sac (touche I) : l'équipement (hero.inventory), les utilitaires (clés, repas, enchantements) et le
+  // reste (trésors déterrés), dans la place du sac ; puis les matériaux, dans la leur.
+  const CATEGORY = { key: 'util', meal: 'util', ench: 'util', treasure: 'other' };
+  const categoryOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : CATEGORY[kind] || 'other');
+  // Ordre d'affichage des piles : par genre (dans cet ordre), la meilleure qualité d'abord, puis par nom.
+  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'ore', 'herb', 'fish', 'meat', 'rubis'];
+  const byKind = (a, b) =>
+    KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
+    b.q - a.q ||
+    info(a).name.localeCompare(info(b).name, 'fr') ||
+    b.n - a.n;
+  // Trier l'équipement du sac (bouton Trier) : par emplacement (armes d'abord), la meilleure qualité, puis le plus
+  // haut niveau, puis par nom. L'ordre est celui de hero.inventory : il est gardé dans la sauvegarde.
+  const SLOT_ORDER = ['weapon', 'helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'artifact'];
+  const slotRank = item =>
+    SLOT_ORDER.includes(item.slot) ? SLOT_ORDER.indexOf(item.slot) : SLOT_ORDER.length;
+  // Une arme liée (Relique) passe devant les qualités du tirage.
+  const rarityRank = item => {
+    const r = rarityInfo(item),
+      i = GEAR_RARITIES.indexOf(r);
+    return i < 0 ? GEAR_RARITIES.length : i;
+  };
+  function sortGear(hero) {
+    const inv = hero.inventory;
+    if (!Array.isArray(inv) || inv.length < 2) return false;
+    const before = inv.map(it => it.id).join();
+    inv.sort(
+      (a, b) =>
+        slotRank(a) - slotRank(b) ||
+        rarityRank(b) - rarityRank(a) ||
+        itemLevel(b) - itemLevel(a) ||
+        String(gearDisplayName(a)).localeCompare(String(gearDisplayName(b)), 'fr')
+    );
+    hero.netBag = null;
+    return inv.map(it => it.id).join() !== before;
+  }
   const PROF_BAG = {
     fish: 'fish',
     meat: 'meat',
@@ -82,10 +118,14 @@
   }
   // Cases occupées par les piles (une pile de 230 prend 3 cases : 100, 100, 30). section : 'main' (le sac),
   // 'mat' (les matériaux), 'rubis' (les Rubis non équipés), ou rien (toutes).
-  function tiles(hero, section) {
+  // category : une rubrique du sac ('util', 'other', 'mat'), à la place d'une section ; les piles sont alors rangées
+  // dans l'ordre d'affichage (byKind).
+  function tiles(hero, section, category) {
     const out = [];
-    for (const p of piles(hero)) {
+    const list = category ? piles(hero).sort(byKind) : piles(hero);
+    for (const p of list) {
       if (section && section !== sectionOf(p.kind)) continue;
+      if (category && category !== categoryOf(p.kind)) continue;
       for (let left = p.n, size = stackOf(p.kind); left > 0; left -= size)
         out.push({ ...p, n: Math.min(size, left) });
     }
@@ -377,6 +417,8 @@
     sellable,
     MAT_LIMIT,
     isMat,
+    categoryOf,
+    sortGear,
     matUsed,
     count,
     piles,

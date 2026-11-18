@@ -222,6 +222,7 @@ export function sanitizeAction(raw) {
   if (
     r.op === 'sell-common' ||
     r.op === 'bag-upgrade' ||
+    r.op === 'bag-sort' ||
     r.op === 'shovel-buy' ||
     r.op === 'dig' ||
     r.op === 'buy-gear' ||

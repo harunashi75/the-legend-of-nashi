@@ -315,8 +315,18 @@ export default {
   'Clique pour l’équiper (un repas se mange).': 'Click to equip it (a meal is eaten).',
   'Marchand proche : vente disponible.': 'Merchant nearby: selling available.',
   'Pour vendre, rends-toi chez un marchand et appuie sur E.': 'To sell, go to a merchant and press E.',
-  'Minerais, poissons, herbes et viandes que tu récoltes : rangés ici, ils ne prennent pas la place du sac ({n} cases de 100).':
-    'Ores, fish, herbs and meat you gather are stored here and take no bag space ({n} slots of 100).',
+  'Leurs {n} cases de 100 ne prennent pas la place du sac.': 'Their {n} slots of 100 take no bag space.',
+  'Autre': 'Other',
+  'Libres': 'Free',
+  'clés, repas, enchantements': 'keys, meals, enchantments',
+  'trésors déterrés': 'dug-up treasures',
+  'minerais, herbes, poissons, viandes': 'ores, herbs, fish, meat',
+  'Rien pour l’instant.': 'Nothing yet.',
+  'Trier': 'Sort',
+  'Ranger l’équipement : par emplacement, qualité puis niveau':
+    'Tidy the equipment: by slot, quality, then level',
+  'Sac plein : vends ou dépose des objets pour faire de la place.':
+    'Bag full: sell or deposit items to make room.',
   'Clic sur une arme : Arme 1': 'Click a weapon: Weapon 1',
   'Bouton « Arme 2 » : réserve': '“Weapon 2” button: reserve',
   'Q : changer en combat.': 'Q: switch in combat.',
@@ -2238,7 +2248,7 @@ export default {
   'Il te faut une pelle : le marchand en vend une.': 'You need a shovel: the merchant sells one.',
   'Relique trouvée : {nom} !': 'Relic found: {nom}!',
   'Collection des fouilles : {n} / {m} (touche Y).': 'Dig collection: {n} / {m} (Y key).',
-  'Matériaux pleins : tu laisses {nom} au fond du trou.':
+  'Sac plein : tu laisses {nom} au fond du trou.':
     'Materials full: you leave {nom} at the bottom of the hole.',
   'Rien qu’un ver de terre…': 'Just an earthworm…',
   'Pelle de fouilleur': 'Digger’s shovel',

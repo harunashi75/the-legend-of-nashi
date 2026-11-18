@@ -340,12 +340,12 @@ test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au
  // Un endroit libre dans les Plaines, devant le héros.
  const place='{let ok=false;for(let y=8;y<MAPH-8&&!ok;y+=2)for(let x=8;x<MAPW-8;x+=2){P.x=(x+0.5)*TS;P.y=(y+0.5)*TS;const s=CANAAN_DIG.spotOf(game.hero);if(!CANAAN_DIG.blocked(s.x,s.y)&&ZONES.indexOf(regionAt(Math.floor(s.x/TS),Math.floor(s.y/TS)))===0&&canWalk(P.x,P.y)){ok=true;break}}ok}';
  assert.equal(run(place),true);
- // Un trésor (tirage forcé) : rien avant 1,3 s, puis le trou et la pile dans les Matériaux.
+ // Un trésor (tirage forcé) : rien avant 1,3 s, puis le trou et la pile dans le sac (rubrique Autre).
  run('Math.random=()=>0.1');assert.equal(run('CANAAN_DIG.handle(game.hero,{op:"dig"})'),true);assert.equal(run('CANAAN_GATHER.workOf(game.hero).kind'),'dig');
  for(let i=0;i<70;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_DIG.holes().length'),0,'pas avant la fin');
  for(let i=0;i<12;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_DIG.holes().length'),1,'un trou au sol');
- const pile=JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero,"mat").find(p=>p.kind==="treasure"))'));assert.ok(pile&&pile.q===0&&pile.n===1,JSON.stringify(pile));
- assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").length'),0,'les trésors ne prennent pas la place du sac');
+ const pile=JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero,"main").find(p=>p.kind==="treasure"))'));assert.ok(pile&&pile.q===0&&pile.n===1,JSON.stringify(pile));
+ assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").length'),1,'un trésor prend une case du sac');
  // Même endroit : déjà creusé.
  assert.equal(run('{const s=CANAAN_DIG.spotOf(game.hero);CANAAN_DIG.blocked(s.x,s.y)}'),'hole');assert.equal(run('CANAAN_DIG.start(game.hero)'),false);
  // Une relique des Plaines (tirage forcé), ailleurs ; puis de l'or.
@@ -357,7 +357,7 @@ test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au
  // Le trou s'efface au bout de 2 min 30.
  run('time+=151*60');assert.equal(run('CANAAN_DIG.holes().length'),0);
  // Vendre un trésor chez le marchand : son prix du catalogue.
- const tok=run('CANAAN_BAG.token(CANAAN_BAG.tiles(game.hero,"mat").find(p=>p.kind==="treasure"))');
+ const tok=run('CANAAN_BAG.token(CANAAN_BAG.tiles(game.hero,"main").find(p=>p.kind==="treasure"))');
  run('{const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+40};globalThis.g1=P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,'+JSON.stringify(tok)+')'),true);
  assert.equal(run('P.gold-g1'),run('CANAAN_DIG.TREASURES['+JSON.stringify(tok.split(':')[1])+'].value'));
  // Onglet Fouilles de la touche Y.

@@ -84,20 +84,37 @@
       '</div>'
     );
   }
-  // Onglet du sac : 'main' (équipement, repas, enchantements) ou 'mat' (minerais, poissons, herbes, viandes).
-  let bagTab = 'main';
-  function bagSection(tab) {
-    if (tab === 'main' || tab === 'mat') bagTab = tab;
+  // Sac (touche I) : une seule vue, rangée par rubriques. Dans la place du sac (BAG_LIMIT) : l'équipement, les
+  // utilitaires (clés, repas, enchantements) et le reste (trésors déterrés), puis ses cases libres ; ensuite les
+  // matériaux récoltés (minerais, herbes, poissons, viandes), dans leurs propres MAT_LIMIT cases.
+  function bagGroup(icon, title, count, cells, note = '') {
+    return (
+      '<h3 class="bag-subhead">' +
+      icon +
+      ' ' +
+      title +
+      ' <small>' +
+      count +
+      (note ? ' · ' + note : '') +
+      '</small></h3>' +
+      (cells.length
+        ? '<div class="modern-bag">' + cells.join('') + '</div>'
+        : '<p class="muted bag-none">Rien pour l’instant.</p>')
+    );
+  }
+  // Bouton Trier : range l'équipement du sac (l'invité le demande à l'hôte, qui garde son sac).
+  function sortBag() {
+    if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'bag-sort' });
+    CANAAN_BAG.sortGear(game.hero);
     renderInventory();
+    saveGame();
   }
   function renderInventory() {
     updateCapacity();
     game.hero.inventory.forEach(item => window.CANAAN_GEAR.normalize(item));
     currentGearPanel = 'inventory';
     hideGearTooltip();
-    // Sac : équipement d'abord, puis les piles, puis les cases libres. Matériaux : leurs piles, puis leurs cases libres.
     const merchant = nearMerchant(),
-      mat = bagTab === 'mat',
       stackCell = p =>
         '<div class="bag-sale-wrap">' +
         CANAAN_BAG.cell(
@@ -105,51 +122,46 @@
           'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"'
         ) +
         '</div>',
-      gear = mat ? [] : game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
-      stacks = CANAAN_BAG.tiles(game.hero, mat ? 'mat' : 'main').map(stackCell),
-      limit = mat ? CANAAN_BAG.MAT_LIMIT : BAG_LIMIT,
-      empty = Math.max(0, limit - gear.length - stacks.length),
-      cells = gear.join('') + stacks.join('') + Array.from({ length: empty }, () => bagCell(null)).join(''),
+      gear = game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
+      util = CANAAN_BAG.tiles(game.hero, null, 'util').map(stackCell),
+      other = CANAAN_BAG.tiles(game.hero, null, 'other').map(stackCell),
+      mats = CANAAN_BAG.tiles(game.hero, null, 'mat').map(stackCell),
       used = canaanBagUsed(game.hero),
-      matUsed = CANAAN_BAG.matUsed(game.hero),
-      tabs =
-        '<div class="bag-tabs">' +
-        '<button type="button" class="' +
-        (mat ? '' : 'on') +
-        '" data-action="bagSection" data-tab="main">⟦menu_inventory⟧ Sac <small>' +
-        used +
-        ' / ' +
-        BAG_LIMIT +
-        '</small></button>' +
-        '<button type="button" class="' +
-        (mat ? 'on' : '') +
-        '" data-action="bagSection" data-tab="mat">⟦prof_mining⟧ Matériaux <small>' +
-        matUsed +
-        ' / ' +
-        CANAAN_BAG.MAT_LIMIT +
-        '</small></button></div>';
+      free = Math.max(0, BAG_LIMIT - used),
+      matUsed = CANAAN_BAG.matUsed(game.hero);
     modernPanel(
-      rpgHeader(
-        mat
-          ? '⛏️ Matériaux — ' + matUsed + '/' + CANAAN_BAG.MAT_LIMIT + ' emplacements'
-          : '🎒 Sac — ' + used + '/' + BAG_LIMIT + ' emplacements'
-      ) +
+      rpgHeader('🎒 Sac — ' + used + '/' + BAG_LIMIT + ' emplacements') +
         '<div class="modern-body">' +
-        tabs +
-        '<p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). ' +
+        '<div class="bag-toolbar"><p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). ' +
         (merchant
           ? '💰 Marchand proche : vente disponible.'
           : '💰 Pour vendre, rends-toi chez un marchand et appuie sur E.') +
-        '</p>' +
-        (mat
-          ? '<p class="weapon-hint">⛏️ Minerais, poissons, herbes et viandes que tu récoltes : rangés ici, ils ne prennent pas la place du sac (' +
-            CANAAN_BAG.MAT_LIMIT +
-            ' cases de 100).</p>'
-          : '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
-            bagUpgradeHTML()) +
-        '<div class="modern-bag">' +
-        cells +
-        '</div>' +
+        '</p><button type="button" class="bag-sort" data-action="sortBag" title="Ranger l’équipement : par emplacement, qualité puis niveau"' +
+        (game.hero.inventory.length < 2 ? ' disabled' : '') +
+        '>⇅ Trier</button></div>' +
+        '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
+        bagUpgradeHTML() +
+        bagGroup('⚔️', 'Équipement', gear.length, gear) +
+        bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
+        bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
+        (free
+          ? '<h3 class="bag-subhead">＋ Libres <small>' +
+            free +
+            '</small></h3><div class="modern-bag">' +
+            Array.from({ length: free }, () => bagCell(null)).join('') +
+            '</div>'
+          : '<p class="weapon-hint">🎒 Sac plein : vends ou dépose des objets pour faire de la place.</p>') +
+        '<div class="bag-section-mat">' +
+        bagGroup(
+          '⟦prof_mining⟧',
+          'Matériaux',
+          matUsed + ' / ' + CANAAN_BAG.MAT_LIMIT,
+          mats,
+          'minerais, herbes, poissons, viandes'
+        ) +
+        '<p class="muted">Leurs ' +
+        CANAAN_BAG.MAT_LIMIT +
+        ' cases de 100 ne prennent pas la place du sac.</p></div>' +
         (merchant
           ? '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div>'
           : '') +
@@ -304,7 +316,7 @@
   });
   Object.assign(window, {
     renderInventory,
-    canaanBagSection: bagSection,
+    canaanSortBag: sortBag,
     renderCharacter,
     canaanCharacterSection: characterSection,
     charSlot,

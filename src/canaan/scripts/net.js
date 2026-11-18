@@ -448,6 +448,7 @@
     if (action.op === 'sell-common') return sellCommonFor(hero);
     if (action.op === 'buy-gear') return buyGearFor(hero);
     if (action.op === 'bag-upgrade') return buyBagUpgradeFor(hero);
+    if (action.op === 'bag-sort') return CANAAN_BAG.sortGear(hero);
     if (action.op === 'dig' || action.op === 'shovel-buy') return CANAAN_DIG.handle(hero, action);
     return CANAAN_EQUIPMENT.heroAction(hero, action);
   }

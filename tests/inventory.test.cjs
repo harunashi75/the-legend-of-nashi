@@ -155,11 +155,22 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  run('game.hero.prof.ore["fer:0"]=9600');assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),100);
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);run('delete game.hero.prof.ore["fer:0"]');
- // Le sac (I) : onglet Sac (équipement, repas) et onglet Matériaux ; un repas se mange d'un clic. Les Rubis n'y sont plus.
- run('BAG_LIMIT=40;renderInventory()');let inv=run('document.getElementById("window").innerHTML');
- assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,1);assert.doesNotMatch(inv,/rubis:phenix/);assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);assert.match(inv,/data-action="bagSection" data-tab="mat"/);
- run('canaanBagSection("mat")');inv=run('document.getElementById("window").innerHTML');
- assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,4);assert.match(inv,/Matériaux — 4\/100/);run('canaanBagSection("main")');
+ // Le sac (I) : une seule vue par rubriques (Équipement, Utilitaire, Autre, puis Matériaux) ; un repas se mange d'un
+ // clic. Les Rubis n'y sont plus. Un trésor déterré est dans Autre et prend la place du sac.
+ run('game.hero.prof.treasure["perle:0"]=3;game.hero.player.keys=2;BAG_LIMIT=40;renderInventory()');let inv=run('document.getElementById("window").innerHTML');
+ assert.equal(run('canaanBagUsed(game.hero)'),3,'repas, clés et trésor dans la place du sac');
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,7);assert.doesNotMatch(inv,/rubis:phenix/);assert.doesNotMatch(inv,/data-action="bagSection"/);
+ assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);
+ const at=re=>inv.search(re);
+ assert.ok(at(/Équipement/)<at(/Utilitaire/)&&at(/Utilitaire/)<at(/key:secret/)&&at(/key:secret/)<at(/meal:soupe/)&&at(/meal:soupe/)<at(/Autre/)&&at(/Autre/)<at(/treasure:perle/)&&at(/treasure:perle/)<at(/Matériaux/)&&at(/Matériaux/)<at(/fish:gardon/),'rubriques dans l’ordre');
+ assert.match(inv,/Matériaux <small>4 \/ 100/);assert.match(inv,/Libres <small>7</);assert.match(inv,/data-action="sortBag"[^>]*disabled/);
+ run('delete game.hero.prof.treasure["perle:0"];game.hero.player.keys=0');
+ // Trier : l'équipement par emplacement (armes d'abord), puis la meilleure qualité, puis le plus haut niveau.
+ run('game.hero.inventory=[{id:"a",slot:"ring",rarity:"Commun",level:5},{id:"b",slot:"helm",rarity:"Rare",level:3},{id:"c",slot:"helm",rarity:"Épique",level:2},{id:"d",slot:"weapon",weaponType:"sword",rarity:"Commun",level:1},{id:"e",slot:"helm",rarity:"Rare",level:9}];renderInventory()');
+ assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/data-action="sortBag"[^>]*disabled/);
+ run('canaanSortBag()');assert.equal(run('game.hero.inventory.map(i=>i.id).join("")'),'dceba');
+ assert.deepEqual(n.sanitizeAction({op:'bag-sort',x:1}),{op:'bag-sort'});
+ run('game.hero.inventory=[]');
  // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.
  run('const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+30;openShop(m)');
  assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),17);

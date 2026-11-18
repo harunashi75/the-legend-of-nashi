@@ -5,8 +5,8 @@
 //   dans la direction où il regarde. Un coup de pelle dure 1,3 s (travail minuté de gathering.js : bouger
 //   l'interrompt) ; le sol se creuse peu à peu, puis un petit trou reste là un moment. On ne creuse pas deux fois au
 //   même endroit tant que le trou est visible.
-// - Trouvailles : rien (ou un ver de terre), quelques pièces d'or, un trésor à vendre (pile du sac, section
-//   Matériaux), ou une relique du biome qui manque encore à la collection (onglet Fouilles de la touche Y).
+// - Trouvailles : rien (ou un ver de terre), quelques pièces d'or, un trésor à vendre (pile du sac, rubrique
+//   Autre), ou une relique du biome qui manque encore à la collection (onglet Fouilles de la touche Y).
 // L'hôte décide (actions dig et shovel-buy) ; il envoie les trous à tous (état : holes) pour qu'ils se voient chez
 // chacun.
 (() => {
@@ -146,7 +146,7 @@
         ),
         t = TREASURES[id];
       if (!CANAAN_BAG.room(hero, 'treasure', id, 0, 1)) {
-        tell(hero, '🎒 Matériaux pleins : tu laisses ' + t.name + ' au fond du trou.');
+        tell(hero, '🎒 Sac plein : tu laisses ' + t.name + ' au fond du trou.');
       } else {
         CANAAN_BAG.add(hero, 'treasure', id, 0, 1);
         float(at.x, at.y - 40, t.icon + ' ' + t.name, '#e8c070');
