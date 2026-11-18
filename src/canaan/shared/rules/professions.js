@@ -16,7 +16,9 @@ import {
   PROF_QUALITY_LEVEL,
   PROF_QUALITY_MULT,
   PROF_RECIPES,
-  PROF_SKILLS
+  PROF_RELICS,
+  PROF_SKILLS,
+  PROF_TREASURES
 } from '../data/professions.js';
 
 /**
@@ -39,6 +41,9 @@ import {
  * @property {Record<string, number>} ore
  * @property {Record<string, number>} herb
  * @property {Record<string, number>} ench
+ * @property {Record<string, number>} treasure trésors enfouis (à vendre)
+ * @property {Record<string, number>} finds reliques trouvées en creusant (relique → nombre)
+ * @property {number} shovel 1 quand le héros possède la pelle
  * @property {Record<string, { n: number, best: number }>} codex
  * @property {number} qv version des qualités (2 : six qualités, de Commun à Mythique)
  */
@@ -61,6 +66,9 @@ export function profFresh() {
     ore: {},
     herb: {},
     ench: {},
+    treasure: {},
+    finds: {},
+    shovel: 0,
     codex: {},
     // Version des qualités (6 qualités, de Commun à Mythique).
     qv: 2
@@ -239,14 +247,15 @@ export function profSanitize(raw) {
     }
   // Qualités au format actuel (qv 2) ; une ancienne sauvegarde est convertie (l'enchantement garde son métal).
   const convert = raw.qv !== 2;
-  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench', object]>} */
+  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench' | 'treasure', object]>} */
   const bags = [
     ['fish', PROF_FISH],
     ['meat', PROF_MEAT],
     ['meals', PROF_RECIPES],
     ['ore', PROF_ORES],
     ['herb', PROF_HERBS],
-    ['ench', PROF_ENCHANTS]
+    ['ench', PROF_ENCHANTS],
+    ['treasure', PROF_TREASURES]
   ];
   for (const [bag, known] of bags)
     if (raw[bag] && typeof raw[bag] === 'object')
@@ -255,14 +264,23 @@ export function profSanitize(raw) {
           count = Math.floor(Number(n));
         if (!Object.hasOwn(known, id) || !/^[0-7]$/.test(qs) || !(count > 0)) continue;
         const q =
-            bag === 'ench'
-              ? Math.min(5, Number(qs))
-              : convert
-                ? PROF_OLD_QUALITY[Number(qs)]
-                : Math.min(5, Number(qs)),
+            bag === 'treasure'
+              ? 0
+              : bag === 'ench'
+                ? Math.min(5, Number(qs))
+                : convert
+                  ? PROF_OLD_QUALITY[Number(qs)]
+                  : Math.min(5, Number(qs)),
           k = id + ':' + q;
         out[bag][k] = Math.min((out[bag][k] || 0) + count, 9999);
       }
+  // Fouilles : la pelle, et les reliques connues trouvées au moins une fois.
+  out.shovel = raw.shovel ? 1 : 0;
+  if (raw.finds && typeof raw.finds === 'object')
+    for (const [id, n] of Object.entries(raw.finds)) {
+      const count = Math.floor(Number(n));
+      if (Object.hasOwn(PROF_RELICS, id) && count > 0) out.finds[id] = Math.min(count, 9999);
+    }
   for (const e of Object.values(out.codex)) e.best = convert ? PROF_OLD_QUALITY[e.best] : Math.min(5, e.best);
   return out;
 }

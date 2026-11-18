@@ -256,7 +256,7 @@
   // ---------------------------------------------------------------- Travaux minutés (miner, cueillir, forger, cuisiner)
   // Le héros reste sur place le temps du travail, avec son animation ; bouger l'interrompt. À la fin, l'action a lieu
   // (et ses règles sont revérifiées). Un seul travail à la fois.
-  const WORK = { mine: 5, herb: 5, forge: 10, cook: 6 };
+  const WORK = { mine: 5, herb: 5, forge: 10, cook: 6, dig: 1.3 };
   const workTime = (kind, count = 1) =>
     (kind === 'forge'
       ? Math.min(30, WORK.forge + 2 * (count - 1))
@@ -882,6 +882,8 @@
     startGather,
     startCraft,
     startCook,
+    // Coup de pelle (digging.js) : même travail minuté.
+    startWork,
     stepWork,
     cancelWork,
     workOf,

@@ -121,6 +121,7 @@
         element.dataset.difficulty === undefined ? null : actionText(element, 'difficulty')
       ),
     buyBagUpgrade: () => buyBagUpgrade(),
+    buyShovel: () => CANAAN_DIG.buyMine(),
     hideGearTooltip: () => hideGearTooltip(),
     equipBagIndex: element => {
       const index = actionInteger(element, 'index');

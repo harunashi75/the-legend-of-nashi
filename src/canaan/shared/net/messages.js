@@ -161,7 +161,7 @@ export function sanitizeIntent(raw) {
 // Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
-export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 /**
  * @param {any} raw action reçue d'un invité (non fiable : chaque champ est vérifié)
  * @returns {Record<string, any> | null} action mise en forme, ou null si elle est invalide
@@ -222,6 +222,8 @@ export function sanitizeAction(raw) {
   if (
     r.op === 'sell-common' ||
     r.op === 'bag-upgrade' ||
+    r.op === 'shovel-buy' ||
+    r.op === 'dig' ||
     r.op === 'buy-gear' ||
     r.op === 'open-chest' ||
     r.op === 'dungeon-use'

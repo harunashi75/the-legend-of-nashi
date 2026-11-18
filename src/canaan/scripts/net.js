@@ -322,6 +322,8 @@
           }))
         : [],
       opened: openedListDue() ? [...game.world.openedChests] : undefined,
+      // Trous creusés à la pelle (quand ils changent, et toutes les 3 secondes).
+      holes: CANAAN_DIG.netView(),
       // Arène : annonces au sol, projectiles, vague et effets de chaque héros (null hors du colisée).
       arena: CANAAN_ARENA.view(hero => (hero === game.hero ? 'host' : hero.id))
     };
@@ -444,6 +446,7 @@
     if (action.op === 'sell-common') return sellCommonFor(hero);
     if (action.op === 'buy-gear') return buyGearFor(hero);
     if (action.op === 'bag-upgrade') return buyBagUpgradeFor(hero);
+    if (action.op === 'dig' || action.op === 'shovel-buy') return CANAAN_DIG.handle(hero, action);
     return CANAAN_EQUIPMENT.heroAction(hero, action);
   }
   // Effets de combat de l'hôte (chiffres, éclats, compétences) : regroupés dans le prochain instantané.
@@ -635,7 +638,7 @@
         hero.netAim = Number.isFinite(h.aim) ? h.aim / 100 : null;
         hero.netAct =
           Array.isArray(h.act) &&
-          ['mine', 'herb', 'forge', 'cook'].includes(h.act[0]) &&
+          ['mine', 'herb', 'forge', 'cook', 'dig'].includes(h.act[0]) &&
           h.act.slice(1).every(Number.isFinite)
             ? {
                 kind: h.act[0],
@@ -701,6 +704,7 @@
     }));
     if (Array.isArray(state.fx)) playEffects(state.fx);
     CANAAN_SUMMONS.applyView(state.summons);
+    CANAAN_DIG.applyRemote(state.holes);
     if (game.world.instance && Array.isArray(state.chests))
       game.world.chests = state.chests
         .filter(c => c && Number.isFinite(c.x) && Number.isFinite(c.y))

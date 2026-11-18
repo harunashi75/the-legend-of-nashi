@@ -60,7 +60,7 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.prof;
  assert.ok(saved.fishing.level>=20);assert.ok(saved.cooking.level>=15);assert.ok(saved.fish['truite:2']>=1||saved.meals['grillade:2']===undefined);
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fishing:{level:99,exp:-5},cooking:{level:"x"},fish:{"requin:3":2,"thon:9":1,"thon:2":3.7,"__proto__:1":1},meals:{"soupe:1":2}}))')),
-  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},mining:{level:1,exp:0},herbalism:{level:1,exp:0},enchanting:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},ore:{},herb:{},ench:{},codex:{},qv:2});
+  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},mining:{level:1,exp:0},herbalism:{level:1,exp:0},enchanting:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},ore:{},herb:{},ench:{},treasure:{},finds:{},shovel:0,codex:{},qv:2});
  // Ancienne sauvegarde à huit qualités : Héroïque devient Épique, Céleste devient Mythique (une seule fois).
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fish:{"thon:4":1,"carpe:7":2}}).fish)')),{'thon:3':1,'carpe:5':2});
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({qv:2,fish:{"thon:4":1}}).fish)')),{'thon:4':1});
@@ -315,4 +315,58 @@ test('Règles partagées des métiers : courbe d’XP, qualités, repas, tirages
  const clean=R.profSanitize({qv:1,fishing:{level:99,exp:-5},fish:{'gardon:7':3,'inconnu:1':2,'carpe:x':1,'truite:2':0},codex:{gardon:{n:4,best:6},'__proto__':{n:1}}});
  assert.deepEqual(clean.fishing,{level:40,exp:0});assert.deepEqual(clean.fish,{'gardon:5':3});assert.deepEqual(clean.codex,{gardon:{n:4,best:5}});
  assert.deepEqual(R.profSanitize('cassé'),R.profFresh());
+});
+
+test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au sol, or, trésors à vendre et reliques (touche Y)',async()=>{
+ const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
+ assert.deepEqual(n.sanitizeAction({op:'dig',x:5}),{op:'dig'});assert.deepEqual(n.sanitizeAction({op:'shovel-buy'}),{op:'shovel-buy'});
+ assert.ok(n.STACK_TOKEN.test('treasure:perle:0*3'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;toast=()=>{};game.hero.level=30;game.hero.inventory=[];BAG_LIMIT=40;game.hero.bagLimit=40;game.world.monsters=[];globalThis.realRandom=Math.random');
+ // Dix-huit reliques (trois par biome) et dix trésors, chacun avec son icône dessinée.
+ assert.equal(run('Object.keys(CANAAN_DIG.RELICS).length'),18);assert.equal(run('Object.keys(CANAAN_DIG.TREASURES).length'),10);
+ assert.ok(run('[0,1,2,3,4,5].every(z=>Object.values(CANAAN_DIG.RELICS).filter(r=>r.zone===z).length===3)'));
+ assert.ok(run('[...Object.values(CANAAN_DIG.RELICS),...Object.values(CANAAN_DIG.TREASURES)].every(r=>CANAAN_ICONS.art(r.icon.slice(1,-1)))&&CANAAN_ICONS.art("tool_shovel")'));
+ // Sans pelle, E ne creuse pas.
+ assert.equal(run('CANAAN_DIG.interact()'),false);assert.equal(run('CANAAN_DIG.start(game.hero)'),false);
+ // Acheter : chez un marchand seulement, assez d'or, une seule fois.
+ run('P.gold=100000;{const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x+300;P.y=m.y}');assert.equal(run('CANAAN_DIG.buy(game.hero)'),false,'loin du marchand');
+ run('{const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+40};P.gold=CANAAN_DIG.PRICE-1');assert.equal(run('CANAAN_DIG.buy(game.hero)'),false,'pas assez d’or');
+ run('P.gold=CANAAN_DIG.PRICE+50');assert.equal(run('CANAAN_DIG.buy(game.hero)'),true);assert.equal(run('P.gold'),50);
+ assert.equal(run('game.hero.prof.shovel'),1);assert.equal(run('CANAAN_DIG.buy(game.hero)'),false,'déjà une pelle');
+ run('CANAAN_SHOP.open(game.world.npcs.find(n=>n.type==="shop"))');assert.match(run('document.getElementById("window").innerHTML'),/Tu as ta pelle/);run('closePanels()');
+ // Le sol dur (route) ne se creuse pas.
+ assert.equal(run('{let r=null;for(let y=5;y<MAPH-5&&!r;y++)for(let x=5;x<MAPW-5;x++)if(tileAt(x,y)===2&&!BRIDGE_TILES.has(y*MAPW+x)){r=CANAAN_DIG.blocked((x+0.5)*TS,(y+0.5)*TS);break}r}'),'ground');
+ // Un endroit libre dans les Plaines, devant le héros.
+ const place='{let ok=false;for(let y=8;y<MAPH-8&&!ok;y+=2)for(let x=8;x<MAPW-8;x+=2){P.x=(x+0.5)*TS;P.y=(y+0.5)*TS;const s=CANAAN_DIG.spotOf(game.hero);if(!CANAAN_DIG.blocked(s.x,s.y)&&ZONES.indexOf(regionAt(Math.floor(s.x/TS),Math.floor(s.y/TS)))===0&&canWalk(P.x,P.y)){ok=true;break}}ok}';
+ assert.equal(run(place),true);
+ // Un trésor (tirage forcé) : rien avant 1,3 s, puis le trou et la pile dans les Matériaux.
+ run('Math.random=()=>0.1');assert.equal(run('CANAAN_DIG.handle(game.hero,{op:"dig"})'),true);assert.equal(run('CANAAN_GATHER.workOf(game.hero).kind'),'dig');
+ for(let i=0;i<70;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_DIG.holes().length'),0,'pas avant la fin');
+ for(let i=0;i<12;i++)run('time++;simulateStep()');assert.equal(run('CANAAN_DIG.holes().length'),1,'un trou au sol');
+ const pile=JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero,"mat").find(p=>p.kind==="treasure"))'));assert.ok(pile&&pile.q===0&&pile.n===1,JSON.stringify(pile));
+ assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").length'),0,'les trésors ne prennent pas la place du sac');
+ // Même endroit : déjà creusé.
+ assert.equal(run('{const s=CANAAN_DIG.spotOf(game.hero);CANAAN_DIG.blocked(s.x,s.y)}'),'hole');assert.equal(run('CANAAN_DIG.start(game.hero)'),false);
+ // Une relique des Plaines (tirage forcé), ailleurs ; puis de l'or.
+ assert.equal(run(place),true);
+ run('Math.random=()=>0.01');run('CANAAN_DIG.start(game.hero)');for(let i=0;i<82;i++)run('time++;simulateStep()');
+ const finds=JSON.parse(run('JSON.stringify(game.hero.prof.finds)'));assert.equal(Object.keys(finds).length,1);assert.equal(run('CANAAN_DIG.RELICS['+JSON.stringify(Object.keys(finds)[0])+'].zone'),0);
+ assert.equal(run(place),true);run('Math.random=()=>0.45;globalThis.g0=P.gold');run('CANAAN_DIG.start(game.hero)');for(let i=0;i<82;i++)run('time++;simulateStep()');assert.ok(run('P.gold-g0')>0,'quelques pièces');
+ run('Math.random=realRandom');
+ // Le trou s'efface au bout de 2 min 30.
+ run('time+=151*60');assert.equal(run('CANAAN_DIG.holes().length'),0);
+ // Vendre un trésor chez le marchand : son prix du catalogue.
+ const tok=run('CANAAN_BAG.token(CANAAN_BAG.tiles(game.hero,"mat").find(p=>p.kind==="treasure"))');
+ run('{const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+40};globalThis.g1=P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,'+JSON.stringify(tok)+')'),true);
+ assert.equal(run('P.gold-g1'),run('CANAAN_DIG.TREASURES['+JSON.stringify(tok.split(':')[1])+'].value'));
+ // Onglet Fouilles de la touche Y.
+ assert.match(run('CANAAN_DIG.tab(game.hero)'),/Reliques trouvées <b>1 \/ 18<\/b>/);
+ // Sauvegarde et réseau : pelle, reliques et trésors vérifiés.
+ assert.deepEqual(JSON.parse(run('JSON.stringify((({shovel,finds,treasure})=>({shovel,finds,treasure}))(CANAAN_PROF.sanitize({shovel:true,finds:{toupie:1,inconnue:3,oeuf:"x"},treasure:{"perle:0":2,"perle:3":1,"faux:0":4}})))')),{shovel:1,finds:{toupie:1},treasure:{'perle:0':3}});
+ // Les trous partent chez les invités.
+ assert.equal(run(place),true);run('Math.random=()=>0.9');run('CANAAN_DIG.start(game.hero)');for(let i=0;i<82;i++)run('time++;simulateStep()');run('Math.random=realRandom');
+ const view=JSON.parse(run('JSON.stringify(CANAAN_DIG.netView())'));assert.equal(view.length,1);assert.equal(run('CANAAN_DIG.netView()'),undefined,'seulement quand ça change');
+ run('CANAAN_DIG.applyRemote('+JSON.stringify(view)+')');assert.equal(run('CANAAN_DIG.holes().length'),1);
+ assert.equal(errors.length,0,errors.join('\n'));
 });

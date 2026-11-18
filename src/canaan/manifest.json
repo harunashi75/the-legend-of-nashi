@@ -242,6 +242,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-digging",
+      "file": "scripts/digging.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-professions",
       "file": "scripts/professions.js"
     },

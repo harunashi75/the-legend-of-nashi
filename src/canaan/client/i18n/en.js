@@ -2223,6 +2223,107 @@ export default {
   '(portée)': '(worn)',
   'actuel : +{n} {stat}': 'current: +{n} {stat}',
   'deviendra : +{n} {stat}': 'will become: +{n} {stat}',
+  // ------------------------------------------------------------ Fouilles : pelle, trésors et reliques (digging.js)
+  'Le sol est trop dur ici : creuse dans la terre, l’herbe ou le sable.':
+    'The ground is too hard here: dig in soil, grass or sand.',
+  'Tu as déjà creusé ici.': 'You already dug here.',
+  'Tu as déjà ta pelle.': 'You already have your shovel.',
+  'Va voir un marchand pour acheter la pelle.': 'Visit a merchant to buy the shovel.',
+  'Il te manque {n} or pour la pelle.': 'You need {n} more gold for the shovel.',
+  'Pelle achetée ! Appuie sur E sur la terre, l’herbe ou le sable pour creuser.':
+    'Shovel bought! Press E on soil, grass or sand to dig.',
+  'Pelle achetée !': 'Shovel bought!',
+  'Appuie sur E sur la terre, l’herbe ou le sable pour creuser.': 'Press E on soil, grass or sand to dig.',
+  'Il te faut une pelle : le marchand en vend une.': 'You need a shovel: the merchant sells one.',
+  'Relique trouvée : {nom} !': 'Relic found: {nom}!',
+  'Collection des fouilles : {n} / {m} (touche Y).': 'Dig collection: {n} / {m} (Y key).',
+  'Matériaux pleins : tu laisses {nom} au fond du trou.':
+    'Materials full: you leave {nom} at the bottom of the hole.',
+  'Rien qu’un ver de terre…': 'Just an earthworm…',
+  'Pelle de fouilleur': 'Digger’s shovel',
+  'Creuse la terre, l’herbe et le sable de l’île (touche E) : de l’or, des trésors à vendre et des reliques à collectionner (touche Y).':
+    'Dig the island’s soil, grass and sand (E key): gold, treasures to sell and relics to collect (Y key).',
+  'Tu as ta pelle': 'You have your shovel',
+  'Acheter la pelle': 'Buy the shovel',
+  'Fouilles': 'Digging',
+  'Reliques trouvées': 'Relics found',
+  'ta pelle est prête : E sur la terre, l’herbe ou le sable de l’île.':
+    'your shovel is ready: E on the island’s soil, grass or sand.',
+  'achète une pelle chez un marchand ({n} or) pour creuser.':
+    'buy a shovel from a merchant ({n} gold) to dig.',
+  'Pas encore déterrée.': 'Not dug up yet.',
+  'Trésors à vendre': 'Treasures to sell',
+  'Trésor déterré': 'Unearthed treasure',
+  'Trouvé en creusant avec la pelle.': 'Found by digging with the shovel.',
+  'Le marchand le rachète {n} or.': 'The merchant buys it for {n} gold.',
+  'Trouvé en creusant avec la pelle. Le marchand le rachète {n} or.':
+    'Found by digging with the shovel. The merchant buys it for {n} gold.',
+  '{nom} : à vendre chez un marchand.': '{nom}: sell it to a merchant.',
+  'Tesson de poterie': 'Pottery shard',
+  'Fer à cheval rouillé': 'Rusty horseshoe',
+  'Pièce ancienne': 'Ancient coin',
+  'Bouton de nacre': 'Mother-of-pearl button',
+  'Clé rouillée': 'Rusty key',
+  'Anneau terni': 'Tarnished ring',
+  'Éclat d’ambre': 'Amber shard',
+  'Grosse pépite d’or': 'Large gold nugget',
+  'Écu des anciens rois': 'Crown of the old kings',
+  'Perle noire': 'Black pearl',
+  'Toupie de bois peint': 'Painted wooden top',
+  'Un jouet d’enfant aux couleurs presque effacées. Elle tourne encore, en chantonnant un peu.':
+    'A child’s toy with almost faded colours. It still spins, humming a little.',
+  'Sifflet de berger': 'Shepherd’s whistle',
+  'Taillé dans un os de mouton. Les moutons sauvages des Plaines dressent encore l’oreille quand il sonne.':
+    'Carved from a sheep bone. The wild sheep of the Plains still prick up their ears when it sounds.',
+  'Médaille des premiers colons': 'First settlers’ medal',
+  'Frappée pour ceux qui ont allumé le premier feu du Camp de l’Aurore. Le nom gravé au dos est illisible.':
+    'Struck for those who lit the first fire of the Dawn Camp. The name engraved on the back is unreadable.',
+  'Gland de bronze': 'Bronze acorn',
+  'Les druides en enterraient un au pied de chaque arbre planté. Celui-ci n’a jamais germé… pour l’instant.':
+    'Druids buried one at the foot of every tree they planted. This one never sprouted… yet.',
+  'Masque d’écorce': 'Bark mask',
+  'Porté lors des fêtes de la sève. On raconte qu’il laisse entendre le murmure des vieux chênes.':
+    'Worn at the sap festivals. They say it lets you hear the whisper of the old oaks.',
+  'Pipeau de sureau': 'Elder pipe',
+  'Trois trous seulement, mais un son si doux que les oiseaux de la Forêt ancienne lui répondent.':
+    'Only three holes, but a sound so sweet that the birds of the Ancient Forest answer it.',
+  'Grenouille de jade': 'Jade frog',
+  'Une statuette porte-bonheur des pêcheurs du marais. Elle est toujours un peu humide au toucher.':
+    'A lucky charm of the marsh fishermen. It always feels a little damp.',
+  'Fiole de brume': 'Vial of mist',
+  'Bouchée à la cire depuis des siècles : la brume prisonnière tourbillonne encore à l’intérieur.':
+    'Sealed with wax for centuries: the trapped mist still swirls inside.',
+  'Cloche engloutie': 'Sunken bell',
+  'Elle appelait les barques avant que le village ne disparaisse sous les eaux. Elle sent la vase et le vieux bronze.':
+    'It called the boats home before the village vanished under the water. It smells of mud and old bronze.',
+  'Feuille d’or fin': 'Fine gold leaf',
+  'Une feuille d’érable battue dans l’or le plus pur, offerte jadis au plus beau des automnes.':
+    'A maple leaf beaten from the purest gold, once offered to the most beautiful of autumns.',
+  'Sceau du bûcheron': 'Woodcutter’s seal',
+  'La marque de la guilde des bûcherons : une hache et un gland. Chaque tronc vendu en portait l’empreinte.':
+    'The mark of the woodcutters’ guild: an axe and an acorn. Every log sold bore its print.',
+  'Gobelet d’érable': 'Maple cup',
+  'On y buvait le cidre chaud de la fête des récoltes. Une odeur de pomme cuite s’en échappe encore.':
+    'Hot cider was drunk from it at the harvest festival. It still smells of baked apple.',
+  'Scarabée d’émeraude': 'Emerald scarab',
+  'Les caravaniers le cousaient à leur turban pour ne jamais perdre le chemin de l’oasis.':
+    'Caravaneers sewed it to their turbans so they would never lose the way to the oasis.',
+  'Sablier fêlé': 'Cracked hourglass',
+  'Le sable y coule vers le haut. Personne n’a jamais su pourquoi, et personne n’ose le réparer.':
+    'The sand flows upwards. No one has ever known why, and no one dares to fix it.',
+  'Masque solaire': 'Sun mask',
+  'Le masque d’or des prêtres du Désert oublié. Il reste tiède, même au cœur de la nuit.':
+    'The golden mask of the priests of the Forgotten Desert. It stays warm, even in the dead of night.',
+  'Plume d’étoile': 'Star feather',
+  'Tombée d’un oiseau qu’aucun chasseur n’a jamais vu. Elle luit doucement dans le noir.':
+    'Dropped by a bird no hunter has ever seen. It glows softly in the dark.',
+  'Boîte à musique': 'Music box',
+  'Quand on l’ouvre, elle joue une berceuse que tous les habitants de l’île ont l’impression de connaître.':
+    'When opened, it plays a lullaby that everyone on the island feels they know.',
+  'Œuf de cristal': 'Crystal egg',
+  'Quelque chose remue parfois à l’intérieur. Les elfes disent qu’il éclora le jour où l’île n’aura plus peur.':
+    'Something sometimes stirs inside. The elves say it will hatch the day the island is no longer afraid.',
+
   // ------------------------------------------------------------ Groupe, échange, coopératif en ligne et portails
   'Épée de recrue': 'Recruit’s sword',
   'Tunique du voyageur': 'Traveler’s tunic',

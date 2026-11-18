@@ -68,6 +68,21 @@ const person = (body, head = SKIN) =>
   c(12, 7, 3.6, head) + p('M5 21 C5 15 8 12 12 12 C16 12 19 15 19 21 Z', body);
 // ---------------------------------------------------------------- Les icônes
 const I = {
+  // Pelle (fouilles) : poignée, manche de bois et lame de bêche, en biais.
+  shovel: g(
+    'rotate(38 12 12)',
+    r(11, 3, 2, 11, WOOD, 0.8) +
+      r(8.5, 1.5, 7, 2.6, WOODD, 0.8) +
+      r(10.6, 13, 2.8, 2.4, STEELD, 0.4) +
+      p('M7.5 15 L16.5 15 L16.5 19 C16.5 21.5 14 22.8 12 23 C10 22.8 7.5 21.5 7.5 19 Z', STEEL) +
+      hi('M9.3 16.5 L9.3 19.5')
+  ),
+  // Ver de terre (un coup de pelle pour rien).
+  worm:
+    l('M4 17 C6 11 10 20 13 14 C15.5 10 18 13 19 9.5', INK, 4.4) +
+    l('M4 17 C6 11 10 20 13 14 C15.5 10 18 13 19 9.5', '#f08a9a', 2.6) +
+    c(19.5, 9, 2, '#f8a0b0') +
+    c(20.1, 8.5, 0.55, INK),
   swords: sword('rotate(40 12 12)') + sword('rotate(-40 12 12)'),
   sword: sword('rotate(35 12 12)'),
   dagger: g(
@@ -998,6 +1013,9 @@ const MAP = {
   '🏛': 'temple',
   '🏦': 'bank',
   '⛏': 'pickaxe',
+  // Fouilles : la pelle et le ver de terre.
+  '🪏': 'shovel',
+  '🪱': 'worm',
   '🏕': 'tent',
   '🗼': 'tower',
   '🚪': 'door',

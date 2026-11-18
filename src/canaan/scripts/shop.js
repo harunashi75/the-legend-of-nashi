@@ -255,7 +255,8 @@
       myStock()?.items?.map(i => i.id),
       game.hero.inventory.map(i => i.id),
       CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p)),
-      Math.floor(P.gold)
+      Math.floor(P.gold),
+      CANAAN_DIG.has(game.hero)
     ]);
   // Rayons de la marchandise : un par qualité (chez l'armurier elfe, Rare puis Épique), avec leur prix.
   function shelvesHTML(s) {
@@ -305,6 +306,7 @@
         (elfe
           ? ''
           : bagUpgradeHTML() +
+            CANAAN_DIG.shopHTML() +
             '<p class="muted">Pour devenir plus fort, il faut trouver mieux : monstres, boss mondiaux, donjons et raids lâchent des équipements toujours plus puissants.</p>') +
         '</section>' +
         bagSide() +

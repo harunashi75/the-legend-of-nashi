@@ -1042,6 +1042,12 @@
         for (const n of [79, 83, 86]) bell(fxBus, midi(n), t0 + 0.42, 1.3, 0.045);
       } else if (name === 'chest') chestSound();
       else if (name === 'wrong') bell(fxBus, midi(43), ac.currentTime, 0.35, 0.05);
+      // Coup de pelle : la lame qui entre dans la terre, puis la motte qui retombe.
+      else if (name === 'dig') {
+        const t0 = ac.currentTime;
+        thump(fxBus, t0, 180, 60, 0.12, 0.3);
+        whoosh(fxBus, t0 + 0.05, 900, 300, 0.18, 0.12, 0.7);
+      }
     },
     state() {
       let level = 0;

@@ -471,6 +471,8 @@ function interact() {
         Math.hypot(P.x - n.x, P.y - n.y) < 120
     );
     if (npc) openDialog(npc);
+    // Rien d'autre à portée : creuser avec la pelle (l'hôte creuse pour lui).
+    else CANAAN_DIG.interact();
     return;
   }
   if (openNearbyChest()) return;
@@ -511,6 +513,8 @@ function interact() {
     )
     .sort((a, b) => Math.hypot(P.x - a.x, P.y - a.y) - Math.hypot(P.x - b.x, P.y - b.y))[0];
   if (n) openDialog(n);
+  // Rien d'autre à portée : creuser avec la pelle, si le héros en a une.
+  else if (!game.world.instance) CANAAN_DIG.interact();
 }
 function openDialog(npc) {
   if (npc.type === 'portal') return openPortal(npc);
@@ -1100,6 +1104,8 @@ function draw() {
     canaanCampLife.drawGround(ctx);
     // Vie dans l'eau profonde et bancs de poissons où pêcher.
     CANAAN_SEA.draw(ctx);
+    // Trous creusés à la pelle, posés sur le sol.
+    CANAAN_DIG.drawGround(ctx);
     CANAAN_PROF.drawSpots(ctx);
     drawPixelRoads(ctx);
     drawPixelLandmarks(ctx);

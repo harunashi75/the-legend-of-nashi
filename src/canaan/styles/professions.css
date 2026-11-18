@@ -599,3 +599,22 @@
 #window .prof-recipe.ready {
   border-color: #8fe3ae;
 }
+/* Fouilles (touche Y) : reliques et trésors déterrés à la pelle, leur icône en grand. */
+#window .relic-card .relic-ico {
+  height: 56px;
+}
+#window .relic-card .relic-ico svg {
+  width: 48px;
+  height: 48px;
+}
+#window .relic-card small {
+  min-height: 2.4em;
+}
+#window .treasure-grid .relic-card small {
+  min-height: 0;
+}
+#window .shovel-offer strong svg {
+  width: 1.4em;
+  height: 1.4em;
+  vertical-align: -0.35em;
+}

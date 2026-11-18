@@ -1740,7 +1740,8 @@
       stateOf(game.hero).done,
       stateOf(game.hero).title,
       ui,
-      ui.tab === 'succes' ? stateOf(game.hero).s : Object.keys(stateOf(game.hero).best).length
+      ui.tab === 'succes' ? stateOf(game.hero).s : Object.keys(stateOf(game.hero).best).length,
+      ui.tab === 'fouilles' ? CANAAN_DIG.signature(game.hero) : ''
     ]);
   function render() {
     if (!isOpen()) return;
@@ -1751,6 +1752,7 @@
       tabs = [
         ['succes', '⟦menu_achievements⟧ Succès'],
         ['bestiaire', '📖 Bestiaire'],
+        ['fouilles', '⟦tool_shovel⟧ Fouilles'],
         ['titres', '👑 Titres']
       ];
     const scroll = document.querySelector('#window .ach-scroll')?.scrollTop || 0;
@@ -1780,7 +1782,13 @@
           .join('') +
         '</div>' +
         '<div class="ach-scroll">' +
-        (ui.tab === 'bestiaire' ? tabBestiaire(h) : ui.tab === 'titres' ? tabTitres(h) : tabSucces(h)) +
+        (ui.tab === 'bestiaire'
+          ? tabBestiaire(h)
+          : ui.tab === 'fouilles'
+            ? CANAAN_DIG.tab(h)
+            : ui.tab === 'titres'
+              ? tabTitres(h)
+              : tabSucces(h)) +
         '</div></div>'
     );
     const box = document.querySelector('#window .ach-scroll');
@@ -1802,7 +1810,7 @@
   }, 500);
   const actions = {
     tab(id) {
-      if (!['succes', 'bestiaire', 'titres'].includes(id)) return false;
+      if (!['succes', 'bestiaire', 'fouilles', 'titres'].includes(id)) return false;
       ui.tab = id;
       render();
       return true;

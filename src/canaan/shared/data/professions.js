@@ -560,3 +560,134 @@ export const PROF_METALS = deepFreeze(['cuivre', 'etain', 'fer', 'argent', 'or',
 export const PROF_ENCH_MULT = deepFreeze([0.16, 0.2, 0.24, 0.28, 0.33, 0.4]);
 export const PROF_ENCH_LEVEL = deepFreeze([1, 6, 12, 20, 28, 35]);
 export const PROF_ORES_PER_ENCHANT = 3;
+
+// ---------------------------------------------------------------- Fouilles (pelle)
+// La pelle s'achète une fois pour toutes chez le marchand du Camp de l'Aurore. Chaque coup de pelle sur la terre,
+// l'herbe ou le sable de l'île peut faire sortir un peu d'or, un trésor à vendre ou une relique à collectionner.
+export const PROF_SHOVEL_PRICE = 6000;
+// Trésors enfouis : objets du sac (matériaux, piles de 100) qui ne servent qu'à être vendus. value : prix d'une
+// unité chez le marchand ; weight : chance relative d'en trouver un.
+export const PROF_TREASURES = deepFreeze({
+  tesson: { name: 'Tesson de poterie', icon: '⟦treasure_tesson⟧', value: 8, weight: 26 },
+  fer_cheval: { name: 'Fer à cheval rouillé', icon: '⟦treasure_fer_cheval⟧', value: 14, weight: 20 },
+  piece: { name: 'Pièce ancienne', icon: '⟦treasure_piece⟧', value: 22, weight: 18 },
+  bouton: { name: 'Bouton de nacre', icon: '⟦treasure_bouton⟧', value: 30, weight: 12 },
+  cle: { name: 'Clé rouillée', icon: '⟦treasure_cle⟧', value: 40, weight: 9 },
+  anneau: { name: 'Anneau terni', icon: '⟦treasure_anneau⟧', value: 65, weight: 6 },
+  ambre: { name: 'Éclat d’ambre', icon: '⟦treasure_ambre⟧', value: 95, weight: 4 },
+  pepite: { name: 'Grosse pépite d’or', icon: '⟦treasure_pepite⟧', value: 140, weight: 3 },
+  ecu: { name: 'Écu des anciens rois', icon: '⟦treasure_ecu⟧', value: 200, weight: 1.5 },
+  perle: { name: 'Perle noire', icon: '⟦treasure_perle⟧', value: 280, weight: 0.8 }
+});
+// Reliques : trois par biome de l'île (zone : rang dans ZONES), à collectionner (onglet Fouilles de la touche Y).
+// Elles ne vont pas dans le sac et ne se vendent pas.
+export const PROF_RELICS = deepFreeze({
+  toupie: {
+    name: 'Toupie de bois peint',
+    icon: '⟦relic_toupie⟧',
+    zone: 0,
+    bio: 'Un jouet d’enfant aux couleurs presque effacées. Elle tourne encore, en chantonnant un peu.'
+  },
+  sifflet: {
+    name: 'Sifflet de berger',
+    icon: '⟦relic_sifflet⟧',
+    zone: 0,
+    bio: 'Taillé dans un os de mouton. Les moutons sauvages des Plaines dressent encore l’oreille quand il sonne.'
+  },
+  medaille: {
+    name: 'Médaille des premiers colons',
+    icon: '⟦relic_medaille⟧',
+    zone: 0,
+    bio: 'Frappée pour ceux qui ont allumé le premier feu du Camp de l’Aurore. Le nom gravé au dos est illisible.'
+  },
+  gland: {
+    name: 'Gland de bronze',
+    icon: '⟦relic_gland⟧',
+    zone: 1,
+    bio: 'Les druides en enterraient un au pied de chaque arbre planté. Celui-ci n’a jamais germé… pour l’instant.'
+  },
+  masque_ecorce: {
+    name: 'Masque d’écorce',
+    icon: '⟦relic_masque_ecorce⟧',
+    zone: 1,
+    bio: 'Porté lors des fêtes de la sève. On raconte qu’il laisse entendre le murmure des vieux chênes.'
+  },
+  flute: {
+    name: 'Pipeau de sureau',
+    icon: '⟦relic_flute⟧',
+    zone: 1,
+    bio: 'Trois trous seulement, mais un son si doux que les oiseaux de la Forêt ancienne lui répondent.'
+  },
+  grenouille: {
+    name: 'Grenouille de jade',
+    icon: '⟦relic_grenouille⟧',
+    zone: 2,
+    bio: 'Une statuette porte-bonheur des pêcheurs du marais. Elle est toujours un peu humide au toucher.'
+  },
+  fiole: {
+    name: 'Fiole de brume',
+    icon: '⟦relic_fiole⟧',
+    zone: 2,
+    bio: 'Bouchée à la cire depuis des siècles : la brume prisonnière tourbillonne encore à l’intérieur.'
+  },
+  cloche: {
+    name: 'Cloche engloutie',
+    icon: '⟦relic_cloche⟧',
+    zone: 2,
+    bio: 'Elle appelait les barques avant que le village ne disparaisse sous les eaux. Elle sent la vase et le vieux bronze.'
+  },
+  feuille: {
+    name: 'Feuille d’or fin',
+    icon: '⟦relic_feuille⟧',
+    zone: 3,
+    bio: 'Une feuille d’érable battue dans l’or le plus pur, offerte jadis au plus beau des automnes.'
+  },
+  sceau: {
+    name: 'Sceau du bûcheron',
+    icon: '⟦relic_sceau⟧',
+    zone: 3,
+    bio: 'La marque de la guilde des bûcherons : une hache et un gland. Chaque tronc vendu en portait l’empreinte.'
+  },
+  gobelet: {
+    name: 'Gobelet d’érable',
+    icon: '⟦relic_gobelet⟧',
+    zone: 3,
+    bio: 'On y buvait le cidre chaud de la fête des récoltes. Une odeur de pomme cuite s’en échappe encore.'
+  },
+  scarabee: {
+    name: 'Scarabée d’émeraude',
+    icon: '⟦relic_scarabee⟧',
+    zone: 4,
+    bio: 'Les caravaniers le cousaient à leur turban pour ne jamais perdre le chemin de l’oasis.'
+  },
+  sablier: {
+    name: 'Sablier fêlé',
+    icon: '⟦relic_sablier⟧',
+    zone: 4,
+    bio: 'Le sable y coule vers le haut. Personne n’a jamais su pourquoi, et personne n’ose le réparer.'
+  },
+  masque_soleil: {
+    name: 'Masque solaire',
+    icon: '⟦relic_masque_soleil⟧',
+    zone: 4,
+    bio: 'Le masque d’or des prêtres du Désert oublié. Il reste tiède, même au cœur de la nuit.'
+  },
+  plume: {
+    name: 'Plume d’étoile',
+    icon: '⟦relic_plume⟧',
+    zone: 5,
+    bio: 'Tombée d’un oiseau qu’aucun chasseur n’a jamais vu. Elle luit doucement dans le noir.'
+  },
+  boite: {
+    name: 'Boîte à musique',
+    icon: '⟦relic_boite⟧',
+    zone: 5,
+    bio: 'Quand on l’ouvre, elle joue une berceuse que tous les habitants de l’île ont l’impression de connaître.'
+  },
+  oeuf: {
+    name: 'Œuf de cristal',
+    icon: '⟦relic_oeuf⟧',
+    zone: 5,
+    bio: 'Quelque chose remue parfois à l’intérieur. Les elfes disent qu’il éclora le jour où l’île n’aura plus peur.'
+  }
+});

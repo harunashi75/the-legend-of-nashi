@@ -233,6 +233,29 @@
         R(9, 11, 3, 2, STD);
       }
     },
+    // Pelle : long manche à poignée en D, douille de fer et lame en bêche à la pointe arrondie.
+    shovel: {
+      w: 25,
+      h: 9,
+      px: 3,
+      py: 4,
+      draw(R) {
+        R(0, 1, 1, 7, WOD);
+        R(0, 1, 3, 1, WOD);
+        R(0, 7, 3, 1, WOD);
+        R(2, 3, 14, 2, WO);
+        R(2, 4, 14, 1, WOD);
+        R(6, 3, 1, 2, LE);
+        R(15, 2, 3, 5, STD);
+        R(15, 2, 1, 5, ST);
+        R(18, 0, 5, 9, STD);
+        R(18, 1, 5, 7, ST);
+        R(23, 1, 1, 7, ST);
+        R(24, 2, 1, 5, ST);
+        R(18, 1, 5, 1, STL);
+        R(19, 2, 1, 5, STL);
+      }
+    },
     hammer: {
       w: 18,
       h: 12,
@@ -396,11 +419,14 @@
     mine: ['#8a9098', '#c8ccd2'],
     herb: ['#5fcf5a', '#9ae08a'],
     forge: ['#ffd060', '#ff8a2a'],
-    cook: ['#f4f8ff', '#dfe8f0']
+    cook: ['#f4f8ff', '#dfe8f0'],
+    dig: ['#7a5232', '#a87a4a']
   };
   function workParticles(kind, x, y) {
     const [a, b] = chips[kind];
-    for (let k = 0; k < (kind === 'forge' ? 7 : 4); k++)
+    // Coup de pelle : la motte qui part, et son bruit.
+    if (kind === 'dig' && typeof CANAAN_SOUND === 'object') CANAAN_SOUND.cue?.('dig');
+    for (let k = 0; k < (kind === 'forge' || kind === 'dig' ? 7 : 4); k++)
       particles.push({
         x,
         y,
@@ -413,7 +439,7 @@
   }
   // Animation d'un travail : l'outil du métier dans la main, des coups réguliers (un toutes les 0,6 s), une barre
   // d'avancement au-dessus du héros.
-  const TOOL = { mine: 'pickaxe', herb: 'sickle', forge: 'hammer', cook: 'ladle' };
+  const TOOL = { mine: 'pickaxe', herb: 'sickle', forge: 'hammer', cook: 'ladle', dig: 'shovel' };
   function drawWork(c, body, x, y, layer, w) {
     const aim = Math.atan2(w.ty - body.y, w.tx - body.x),
       side = Math.cos(aim) >= 0 ? 1 : -1,
@@ -421,8 +447,19 @@
       hy = y + 4 + Math.sin(aim) * 6,
       beat = ((time / 60) % 0.6) / 0.6;
     if (layer === 'front') {
-      let rot;
+      let rot,
+        px = hx,
+        py = w.kind === 'herb' ? hy + 6 : hy;
       if (w.kind === 'cook') rot = aim + Math.sin(time * 0.25) * 0.5;
+      // Pelle : enfoncer la lame dans la terre (la main descend vers le trou), puis lever la motte et la jeter.
+      else if (w.kind === 'dig') {
+        const push = beat < 0.45 ? beat / 0.45 : 1,
+          lift = beat < 0.45 ? 0 : (beat - 0.45) / 0.55,
+          down = push * (1 - lift);
+        rot = aim + side * 0.9 * (1 - push) - side * 1.3 * Math.sin(lift * Math.PI);
+        px += Math.cos(aim) * 5 * down;
+        py += 3 * down;
+      }
       // Faucille : des coups bas, de côté, au ras des herbes (jamais au-dessus de la tête).
       else if (w.kind === 'herb')
         rot = aim + Math.PI * 0.18 * side + side * Math.sin(beat * Math.PI * 2) * 0.55;
@@ -431,12 +468,13 @@
         const swing = beat < 0.7 ? beat / 0.7 : 1 - (beat - 0.7) / 0.3;
         rot = aim - side * (1.6 - 1.9 * Math.pow(swing, 2.2));
       }
-      piece(c, TOOL[w.kind], hx, w.kind === 'herb' ? hy + 6 : hy, rot, side);
+      piece(c, TOOL[w.kind], px, py, rot, side);
       // Un coup : une poignée de particules sur la cible (une fois par battement).
-      const k = Math.floor(time / 36);
+      // (La motte de la pelle part quand la lame remonte, aux deux tiers du battement.)
+      const k = Math.floor((time + (w.kind === 'dig' ? 13 : 0)) / 36);
       if (body._workBeat !== k && (w.kind === 'cook' ? Math.random() < 0.6 : true)) {
         body._workBeat = k;
-        workParticles(w.kind, w.tx, w.ty - (w.kind === 'herb' ? 6 : 14));
+        workParticles(w.kind, w.tx, w.ty - (w.kind === 'herb' ? 6 : w.kind === 'dig' ? 2 : 14));
       }
       // Barre d'avancement.
       const bw = 44,
@@ -444,7 +482,9 @@
       c.save();
       c.fillStyle = '#120c08cc';
       c.fillRect(x - bw / 2 - 2, by - 2, bw + 4, 9);
-      c.fillStyle = { mine: '#c8ccd2', herb: '#7ee36a', forge: '#ff9a40', cook: '#ffd36d' }[w.kind];
+      c.fillStyle = { mine: '#c8ccd2', herb: '#7ee36a', forge: '#ff9a40', cook: '#ffd36d', dig: '#c8945a' }[
+        w.kind
+      ];
       c.fillRect(x - bw / 2, by, bw * Math.min(1, w.p + 1 / (60 * 10)), 5);
       c.strokeStyle = '#f4d68d';
       c.lineWidth = 1;

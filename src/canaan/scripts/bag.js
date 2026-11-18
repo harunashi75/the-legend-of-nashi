@@ -11,12 +11,20 @@
   const STACK_OF = { key: 20 };
   const stackOf = kind => STACK_OF[kind] || STACK;
   // Deux sections : le sac (équipement, Rubis, repas, enchantements) et les matériaux qu'on récolte (minerais,
-  // poissons, herbes, viandes), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac.
-  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb']);
+  // poissons, herbes, viandes, trésors déterrés), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac.
+  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'treasure']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
-  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key'];
-  const PROF_BAG = { fish: 'fish', meat: 'meat', meal: 'meals', ore: 'ore', herb: 'herb', ench: 'ench' };
+  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure'];
+  const PROF_BAG = {
+    fish: 'fish',
+    meat: 'meat',
+    meal: 'meals',
+    ore: 'ore',
+    herb: 'herb',
+    ench: 'ench',
+    treasure: 'treasure'
+  };
   // Prix de vente d'une unité au marchand, selon le genre et la qualité (0 à 7).
   const UNIT_PRICE = {
     fish: q => 4 + 4 * q,
@@ -26,7 +34,9 @@
     ore: q => 6 + 5 * q,
     herb: q => 4 + 4 * q,
     ench: q => 60 + 40 * q,
-    key: () => 0
+    key: () => 0,
+    // Trésor déterré : son prix est dans son catalogue (unitPrice).
+    treasure: () => 1
   };
   // Les clés des secrets ne se vendent pas.
   const sellable = p => p.kind !== 'key';
@@ -59,7 +69,7 @@
     const keys = count(hero, 'key', 'secret');
     if (keys > 0) out.push({ kind: 'key', id: 'secret', q: 0, n: keys });
     const prof = profOf(hero);
-    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench'])
+    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'treasure'])
       for (const [key, n] of Object.entries(prof[PROF_BAG[kind]] || {}).sort()) {
         const [id, q] = key.split(':');
         if (n > 0) out.push({ kind, id, q: Number(q) || 0, n });
@@ -124,7 +134,7 @@
   }
 
   // ---------------------------------------------------------------- Repères (vente, échange)
-  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
+  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
   const token = (p, n = p.n) => p.kind + ':' + p.id + ':' + p.q + '*' + n;
   function parse(text) {
     const m = TOKEN.exec(String(text || ''));
@@ -145,10 +155,13 @@
       meal: CANAAN_PROF.RECIPES,
       ore: CANAAN_GATHER.ORES,
       herb: CANAAN_GATHER.HERBS,
-      ench: CANAAN_GATHER.ENCHANTS
+      ench: CANAAN_GATHER.ENCHANTS,
+      treasure: PROF_TREASURES
     }[p.kind];
-    // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité.
-    return Object.hasOwn(cat, p.id) && (p.kind !== 'ench' || p.q <= 5);
+    // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité ; un trésor n'a pas de qualité.
+    return (
+      Object.hasOwn(cat, p.id) && (p.kind !== 'ench' || p.q <= 5) && (p.kind !== 'treasure' || p.q === 0)
+    );
   }
   const isToken = text => TOKEN.test(String(text || ''));
 
@@ -163,6 +176,17 @@
         desc: 'Ouvre un coffre secret de l’île ou des Tréfonds (E devant le coffre). Les boss cachés des donjons et des raids en donnent une à chaque héros.',
         quality: null
       };
+    if (p.kind === 'treasure') {
+      const t = PROF_TREASURES[p.id];
+      return {
+        name: t.name,
+        icon: t.icon,
+        color: '#e8c070',
+        sub: 'Trésor déterré',
+        desc: 'Trouvé en creusant avec la pelle. Le marchand le rachète ' + t.value + ' or.',
+        quality: null
+      };
+    }
     const qual = p.kind === 'rubis' ? null : { name: qualityName(p.q), color: qualityColor(p.q) };
     if (p.kind === 'rubis') {
       const r = RUBIS_CATALOG.find(x => x.id === p.id),
@@ -253,7 +277,12 @@
   }
   // Minerais rares des Tréfonds : leur prix est multiplié (value).
   const unitPrice = p =>
-    UNIT_PRICE[p.kind](p.q) * (p.kind === 'ore' ? CANAAN_GATHER.ORES[p.id]?.value || 1 : 1);
+    UNIT_PRICE[p.kind](p.q) *
+    (p.kind === 'ore'
+      ? CANAAN_GATHER.ORES[p.id]?.value || 1
+      : p.kind === 'treasure'
+        ? PROF_TREASURES[p.id]?.value || 1
+        : 1);
   const price = p => unitPrice(p) * p.n;
   const esc = s =>
     String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -330,6 +359,7 @@
     if (p.kind === 'ench') return CANAAN_GATHER.actions.use(text);
     if (p.kind === 'key')
       return (toast('🗝️ Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.'), false);
+    if (p.kind === 'treasure') return (toast(info(p).name + ' : à vendre chez un marchand.'), false);
     toast(info(p).name + ' : à cuisiner près d’une cuisinière (panneau P).');
     return false;
   }
