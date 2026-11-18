@@ -3,26 +3,60 @@
 // instruments, percussions), composée une fois par lieu à partir d'une graine : 32 mesures avec introduction,
 // thème, variation, pont et reprise, jouées en boucle, avec un fondu enchaîné d'un lieu à l'autre.
 // Ambiance : vent (lié au vent visible des arbres), feuillage, eau proche, oiseaux, grillons, grenouilles,
-// gouttes et grondements des donjons. Bruitages : attaques selon l'arme, impacts, coups reçus, pas selon le sol,
-// éclaboussures, roulade, pièces, butin, coffres et sorts. Le moteur observe l'état du jeu à chaque image,
+// gouttes et grondements des donjons, mouettes près de la mer, enclume, poules et chien au village.
+// Bruitages : un son propre à chaque arme (rapide et lourd), impacts, coups reçus, pas selon le sol,
+// éclaboussures, roulade, pièces, butin, coffres, fenêtres et sorts ; voix babillées des personnages.
+// Chaque famille a son curseur de volume (Paramètres → Audio). Le moteur observe l'état du jeu à chaque image,
 // ce qui marche aussi chez un invité en ligne ; quelques points d'accroche signalent les nombres de dégâts,
-// les effets de sorts et la roulade (window.CANAAN_SOUND).
+// les effets de sorts, la roulade et les répliques des personnages (window.CANAAN_SOUND).
 (() => {
   'use strict';
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  const toggle = document.getElementById('soundToggle'),
-    musicSlider = document.getElementById('musicVolume'),
-    fxSlider = document.getElementById('sfxVolume');
-  const settings = Object.assign({ on: false, music: 25, fx: 45 }, CANAAN_PREFERENCES.read('audio', {}));
-  musicSlider.value = settings.music;
-  fxSlider.value = settings.fx;
+  const toggle = document.getElementById('soundToggle');
+  // Un curseur par famille de sons (Paramètres → Audio). fx garde son nom d'origine : c'est le volume du combat.
+  // Les familles ajoutées après coup reprennent l'ancien volume des effets d'une sauvegarde qui ne les connaît pas.
+  const saved = CANAAN_PREFERENCES.read('audio', {}),
+    oldFx = Number.isFinite(saved.fx) ? saved.fx : 45;
+  const settings = Object.assign(
+    {
+      on: false,
+      master: 100,
+      music: 25,
+      fx: 45,
+      ui: oldFx,
+      steps: oldFx,
+      voice: 55,
+      wind: 30,
+      water: 30,
+      nature: oldFx
+    },
+    saved
+  );
+  const SLIDERS = {
+    master: 'masterVolume',
+    music: 'musicVolume',
+    fx: 'sfxVolume',
+    ui: 'uiVolume',
+    steps: 'stepsVolume',
+    voice: 'voiceVolume',
+    wind: 'windVolume',
+    water: 'waterVolume',
+    nature: 'natureVolume'
+  };
   const saveAudio = () => CANAAN_PREFERENCES.write('audio', settings);
 
   // ---------------------------------------------------------------- Graphe audio
+  // Bus : musique ; combat (fxBus), interface et butin, pas, voix ; ambiance : vent, eau, nature (ambBus).
   let ac = null,
     master = null,
+    out = null,
     musicBus = null,
     fxBus = null,
+    uiBus = null,
+    stepBus = null,
+    voiceBus = null,
+    windBus = null,
+    waterBus = null,
     ambBus = null,
     reverb = null,
     noiseBuffer = null,
@@ -50,26 +84,40 @@
         meter = ac.createAnalyser();
         meter.fftSize = 2048;
         master.connect(meter);
+        // Volume général, avant le compresseur.
+        out = ac.createGain();
+        out.connect(master);
         reverb = ac.createConvolver();
         reverb.buffer = impulse(3.2, 2.6);
         const wet = ac.createGain();
         wet.gain.value = 0.32;
         reverb.connect(wet);
-        wet.connect(master);
+        wet.connect(out);
         musicBus = ac.createGain();
         fxBus = ac.createGain();
+        uiBus = ac.createGain();
+        stepBus = ac.createGain();
+        voiceBus = ac.createGain();
+        windBus = ac.createGain();
+        waterBus = ac.createGain();
         ambBus = ac.createGain();
-        for (const bus of [musicBus, fxBus, ambBus]) bus.connect(master);
         // Envois vers la réverbération : beaucoup pour la musique, un peu pour les bruitages.
-        const send = (bus, amount) => {
+        for (const [bus, amount] of [
+          [musicBus, 0.55],
+          [fxBus, 0.18],
+          [uiBus, 0.1],
+          [stepBus, 0.05],
+          [voiceBus, 0.12],
+          [windBus, 0.2],
+          [waterBus, 0.25],
+          [ambBus, 0.25]
+        ]) {
+          bus.connect(out);
           const g = ac.createGain();
           g.gain.value = amount;
           bus.connect(g);
           g.connect(reverb);
-        };
-        send(musicBus, 0.55);
-        send(fxBus, 0.18);
-        send(ambBus, 0.25);
+        }
         noiseBuffer = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
         const d = noiseBuffer.getChannelData(0);
         // Bruit rosé (plus doux que le bruit blanc).
@@ -97,9 +145,19 @@
     const t = ac.currentTime,
       quiet = paused ? 0.35 : 1,
       on = settings.on ? 1 : 0;
-    musicBus.gain.setTargetAtTime(on * quiet * (settings.music / 100) * 0.55, t, 0.2);
-    fxBus.gain.setTargetAtTime(on * (paused ? 0 : 1) * (settings.fx / 100) * 0.9, t, 0.05);
-    ambBus.gain.setTargetAtTime(on * (paused ? 0.3 : 1) * (settings.fx / 100) * 0.7, t, 0.3);
+    const level = key => Math.max(0, Math.min(100, Number(settings[key]) || 0)) / 100,
+      set = (bus, value, tau) => bus.gain.setTargetAtTime(on * value, t, tau),
+      live = paused ? 0 : 1,
+      dim = paused ? 0.3 : 1;
+    out.gain.setTargetAtTime(level('master'), t, 0.05);
+    set(musicBus, quiet * level('music') * 0.55, 0.2);
+    set(fxBus, live * level('fx') * 0.9, 0.05);
+    set(uiBus, level('ui') * 0.9, 0.05);
+    set(stepBus, live * level('steps') * 0.9, 0.05);
+    set(voiceBus, live * level('voice') * 0.9, 0.05);
+    set(windBus, dim * level('wind') * 0.7, 0.3);
+    set(waterBus, dim * level('water') * 0.7, 0.3);
+    set(ambBus, dim * level('nature') * 0.7, 0.3);
   }
   const midi = midiFrequency;
   // Enveloppe : attaque, maintien, relâchement.
@@ -500,9 +558,9 @@
     return { f, g };
   }
   function startAmbience() {
-    amb.wind = loopNoise(ambBus, 'bandpass', 500, 0.8);
-    amb.leaves = loopNoise(ambBus, 'highpass', 4200, 0.5);
-    amb.water = loopNoise(ambBus, 'lowpass', 700, 0.6);
+    amb.wind = loopNoise(windBus, 'bandpass', 500, 0.8);
+    amb.leaves = loopNoise(windBus, 'highpass', 4200, 0.5);
+    amb.water = loopNoise(waterBus, 'lowpass', 700, 0.6);
     amb.rumble = loopNoise(ambBus, 'lowpass', 120, 0.8);
   }
   // Voisinage du héros (recalculé quelques fois par seconde) : eau, arbres et nature du sol.
@@ -593,6 +651,13 @@
       if (a.owl && Math.random() < a.owl * 0.2) owl();
       if (a.crow && Math.random() < a.crow * 0.2) crow();
       if (n.water > 0.2 && Math.random() < 0.08) plop();
+      if (n.sea > 0.3 && Math.random() < n.sea * 0.035) gull();
+      // Village : enclume du forgeron, poules, chien au loin.
+      if (music.current?.key === 'village') {
+        if (Math.random() < 0.035) anvil();
+        if (Math.random() < 0.025) hen();
+        if (Math.random() < 0.008) dog();
+      }
     }
   }
   const spot = () => panner(Math.random() * 1.6 - 0.8);
@@ -681,13 +746,76 @@
     o.start(t);
     o.stop(t + 0.4);
   }
+  // Mouette : deux ou trois cris qui glissent vers le grave, nasillards.
+  function gull() {
+    const t = ac.currentTime,
+      dest = chain(gain(1), spot(), ambBus),
+      cries = 2 + Math.floor(Math.random() * 2),
+      top = 1300 + Math.random() * 400;
+    for (let i = 0; i < cries; i++) {
+      const s = t + i * (0.22 + Math.random() * 0.08),
+        o = ac.createOscillator(),
+        f = filter('bandpass', 1600, 3),
+        g = gain(0);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(top * (i ? 0.92 : 1), s);
+      o.frequency.exponentialRampToValueAtTime(top * 0.55, s + 0.18);
+      chain(o, f, g, dest);
+      envelope(g.gain, s, 0.02, 0.022, 0.06, 0.1);
+      o.start(s);
+      o.stop(s + 0.25);
+    }
+  }
+  // Enclume lointaine : deux ou trois coups de marteau métalliques, assourdis.
+  function anvil() {
+    const t = ac.currentTime,
+      dest = chain(gain(1), filter('lowpass', 3200), spot(), ambBus),
+      hits = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < hits; i++) metal(dest, t + i * 0.42, 1250 + Math.random() * 60, 0.35, 0.03);
+  }
+  function hen() {
+    const t = ac.currentTime,
+      dest = chain(gain(1), spot(), ambBus),
+      clucks = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < clucks; i++) {
+      const s = t + i * 0.13,
+        o = ac.createOscillator(),
+        f = filter('bandpass', 900, 4),
+        g = gain(0);
+      o.type = 'square';
+      o.frequency.setValueAtTime(420 + Math.random() * 40, s);
+      o.frequency.linearRampToValueAtTime(330, s + 0.06);
+      chain(o, f, g, dest);
+      envelope(g.gain, s, 0.005, 0.02, 0.02, 0.04);
+      o.start(s);
+      o.stop(s + 0.1);
+    }
+  }
+  function dog() {
+    const t = ac.currentTime,
+      dest = chain(gain(1), filter('lowpass', 1800), spot(), ambBus);
+    for (const s of [0, 0.32]) {
+      const o = ac.createOscillator(),
+        n = noiseSource(t + s, 0.15),
+        f = filter('bandpass', 700, 2),
+        g = gain(0);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(380, t + s);
+      o.frequency.exponentialRampToValueAtTime(230, t + s + 0.1);
+      o.connect(f);
+      chain(n, f, g, dest);
+      envelope(g.gain, t + s, 0.01, 0.025, 0.03, 0.08);
+      o.start(t + s);
+      o.stop(t + s + 0.16);
+    }
+  }
   function plop() {
     const t = ac.currentTime,
       o = ac.createOscillator(),
       g = gain(0);
     o.frequency.setValueAtTime(900 + Math.random() * 500, t);
     o.frequency.exponentialRampToValueAtTime(300, t + 0.08);
-    chain(o, g, spot(), ambBus);
+    chain(o, g, spot(), waterBus);
     envelope(g.gain, t, 0.003, 0.03, 0.01, 0.07);
     o.start(t);
     o.stop(t + 0.12);
@@ -726,12 +854,11 @@
 
   // ---------------------------------------------------------------- Bruitages
   // Volume et panoramique selon la position dans le monde (le héros entend ce qui est proche).
-  function placed(x, y, vol) {
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return { dest: fxBus, vol };
+  function placed(x, y, vol, bus = fxBus) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return { dest: bus, vol };
     const d = Math.hypot(x - P.x, y - P.y),
       k = Math.max(0, 1 - d / 900);
-    const out = chain(panner((x - P.x) / 600), fxBus);
-    return { dest: out, vol: vol * k * k };
+    return { dest: chain(panner((x - P.x) / 600), bus), vol: vol * k * k };
   }
   function whoosh(dest, t, from, to, dur, vol, q = 1.2) {
     const n = noiseSource(t, dur + 0.1),
@@ -752,47 +879,214 @@
     o.start(t);
     o.stop(t + dur + 0.1);
   }
-  const SWINGS = {
-    sword: [900, 3600, 0.2, 0.5],
-    dualsword: [1200, 4200, 0.14, 0.42],
-    dagger: [1400, 4800, 0.12, 0.38],
-    axe: [400, 1500, 0.3, 0.6],
-    mace: [300, 1200, 0.32, 0.62],
-    hammer: [260, 1000, 0.34, 0.65],
-    shield: [350, 1300, 0.28, 0.55],
-    spear: [700, 2600, 0.18, 0.5]
+  // Note brève dont la hauteur glisse (tension d'une corde, souffle magique, choc).
+  function tone(dest, t, type, from, to, dur, vol, attack = 0.003) {
+    const o = ac.createOscillator(),
+      g = gain(0);
+    o.type = type;
+    o.frequency.setValueAtTime(from, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
+    chain(o, g, dest);
+    envelope(g.gain, t, attack, vol, 0.005, dur);
+    o.start(t);
+    o.stop(t + attack + dur + 0.1);
+    return o;
+  }
+  // Rafale de bruit filtré, sans glissement (claquement, froissement, éclaboussure).
+  function burst(dest, t, type, freq, q, dur, vol, attack = 0.002) {
+    const n = noiseSource(t, dur + 0.05),
+      f = filter(type, freq, q),
+      g = gain(0);
+    chain(n, f, g, dest);
+    envelope(g.gain, t, attack, vol, 0.004, dur);
+    return f;
+  }
+  // Résonance métallique courte : partiels inharmoniques qui s'éteignent vite (lame, enclume, bouclier).
+  function metal(dest, t, freq, dur, vol) {
+    for (const [ratio, amp] of [
+      [1, 1],
+      [1.47, 0.6],
+      [2.09, 0.45],
+      [2.56, 0.3],
+      [3.37, 0.18]
+    ]) {
+      const o = ac.createOscillator(),
+        g = gain(0);
+      o.frequency.value = freq * ratio * (1 + (Math.random() - 0.5) * 0.01);
+      chain(o, g, dest);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol * amp, t + 0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur / ratio + 0.03);
+      o.start(t);
+      o.stop(t + dur + 0.1);
+    }
+    burst(dest, t, 'highpass', 4500, 0.7, 0.03, vol * 2.2);
+  }
+  // Légère variation à chaque coup, pour que deux attaques ne sonnent jamais pareil.
+  const vary = (v, amount = 0.08) => v * (1 + (Math.random() * 2 - 1) * amount);
+  // Sifflement d'une lame ou d'un manche (from → to : le filtre balaie l'air).
+  function swing(dest, t, from, to, dur, vol, q = 1.2) {
+    whoosh(dest, t, vary(from), vary(to), vary(dur, 0.05), vol, q);
+  }
+  // Corde d'arc qui se détend : claquement, vibration grave et brève, puis la flèche qui siffle.
+  function bowShot(dest, t, v) {
+    burst(dest, t, 'bandpass', 2600, 1.2, 0.02, 0.4 * v);
+    const o = ac.createOscillator(),
+      f = filter('lowpass', 1100, 1.5),
+      g = gain(0);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(vary(150), t);
+    o.frequency.exponentialRampToValueAtTime(95, t + 0.1);
+    chain(o, f, g, dest);
+    envelope(g.gain, t, 0.002, 0.22 * v, 0.01, 0.09);
+    o.start(t);
+    o.stop(t + 0.18);
+    whoosh(dest, t + 0.02, vary(3600), 1700, 0.22, 0.13 * v, 6);
+  }
+  // Trait arcanique : un souffle qui monte, une note modulée qui grimpe et un sourd « woum » de départ.
+  function arcaneBolt(dest, t, v, big) {
+    const len = big ? 0.6 : 0.3;
+    whoosh(dest, t, big ? 250 : 450, big ? 1400 : 2600, len, (big ? 0.34 : 0.24) * v, 3);
+    tone(dest, t, 'sine', big ? 85 : 110, big ? 40 : 55, big ? 0.45 : 0.2, 0.3 * v, 0.01);
+    const o = ac.createOscillator(),
+      mod = ac.createOscillator(),
+      depth = gain(big ? 140 : 220),
+      f = filter('lowpass', 2200, 0.8),
+      g = gain(0);
+    o.type = 'triangle';
+    mod.frequency.value = big ? 23 : 37;
+    o.frequency.setValueAtTime(vary(big ? 180 : 300), t);
+    o.frequency.exponentialRampToValueAtTime(big ? 420 : 760, t + len * 0.8);
+    chain(mod, depth);
+    depth.connect(o.frequency);
+    chain(o, f, g, dest);
+    envelope(g.gain, t, 0.03, 0.09 * v, len * 0.3, len * 0.6);
+    for (const n of [o, mod]) {
+      n.start(t);
+      n.stop(t + len + 0.2);
+    }
+    if (big) burst(dest, t, 'lowpass', 600, 0.7, 0.5, 0.25 * v, 0.08);
+  }
+  // Grimoire : pages feuilletées, murmure sombre et grave grondement nécrotique.
+  function grimoireCast(dest, t, v) {
+    for (let i = 0; i < 3; i++) burst(dest, t + i * 0.025, 'highpass', vary(3800, 0.2), 0.8, 0.018, 0.16 * v);
+    const whisper = burst(dest, t + 0.03, 'bandpass', 700, 7, 0.28, 0.4 * v, 0.06);
+    whisper.frequency.setValueAtTime(vary(600), t + 0.03);
+    whisper.frequency.linearRampToValueAtTime(vary(1100), t + 0.18);
+    whisper.frequency.linearRampToValueAtTime(500, t + 0.32);
+    const f = filter('lowpass', 320, 2),
+      g = gain(0);
+    chain(f, g, dest);
+    for (const fr of [vary(62), 66.5]) {
+      const o = ac.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(fr, t);
+      o.frequency.linearRampToValueAtTime(fr * 0.85, t + 0.35);
+      o.connect(f);
+      o.start(t);
+      o.stop(t + 0.5);
+    }
+    envelope(g.gain, t, 0.04, 0.2 * v, 0.1, 0.25);
+  }
+  // Crachat de peste : giclée humide et bulle qui éclate.
+  function plagueSpit(dest, t, v) {
+    const f = burst(dest, t, 'lowpass', 1400, 2, 0.12, 0.3 * v);
+    f.frequency.setValueAtTime(vary(1500), t);
+    f.frequency.exponentialRampToValueAtTime(260, t + 0.12);
+    tone(dest, t + 0.01, 'sine', vary(340), 110, 0.07, 0.18 * v);
+  }
+  // Luth : une corde pincée sur la gamme pentatonique (l'arme est un instrument : la note est voulue).
+  const LUTE_NOTES = [57, 60, 62, 64, 67, 69, 72];
+  // Bruitage de chaque famille d'arme, rapide ou lourd. Les salves (arc, dagues, grimoire, luth) jouent
+  // chaque coup de la rafale.
+  const WEAPON_SOUNDS = {
+    sword(d, t, v, heavy) {
+      if (heavy) {
+        swing(d, t, 600, 2800, 0.3, 0.55 * v);
+        tone(d, t, 'sine', 150, 70, 0.25, 0.14 * v, 0.03);
+        metal(d, t + 0.05, vary(2400, 0.04), 0.18, 0.018 * v);
+        swing(d, t + 0.16, 900, 3400, 0.22, 0.45 * v);
+      } else {
+        swing(d, t, 900, 3600, 0.2, 0.5 * v);
+        metal(d, t + 0.03, vary(2600, 0.05), 0.14, 0.014 * v);
+      }
+    },
+    dualsword(d, t, v, heavy) {
+      if (heavy)
+        for (let i = 0; i < 4; i++) swing(d, t + i * 0.09, 700 + i * 150, 3000 + i * 300, 0.16, 0.4 * v);
+      else {
+        swing(d, t, 1200, 4200, 0.14, 0.4 * v);
+        swing(d, t + 0.07, 1400, 4600, 0.13, 0.34 * v);
+        metal(d, t + 0.05, vary(2900, 0.05), 0.1, 0.01 * v);
+      }
+    },
+    dualdagger(d, t, v, heavy) {
+      const stab = s => {
+        swing(d, s, 1700, 5200, 0.09, 0.46 * v, 1.6);
+        burst(d, s + 0.02, 'highpass', 6000, 0.8, 0.025, 0.16 * v);
+      };
+      if (heavy) for (let i = 0; i < 3; i++) stab(t + i * 0.08);
+      else {
+        stab(t);
+        stab(t + 0.06);
+      }
+    },
+    axe(d, t, v, heavy) {
+      swing(d, t, 300, 1300, heavy ? 0.42 : 0.32, (heavy ? 0.7 : 0.6) * v, 1);
+      burst(d, t, 'bandpass', 520, 5, 0.08, 0.12 * v, 0.02);
+      tone(d, t, 'sine', 120, 60, 0.3, 0.12 * v, 0.05);
+      if (heavy) slam(d, t + 0.24, v);
+    },
+    mace(d, t, v, heavy) {
+      swing(d, t, 260, 1100, heavy ? 0.42 : 0.34, (heavy ? 0.7 : 0.62) * v, 0.9);
+      tone(d, t, 'sine', 100, 55, 0.3, 0.14 * v, 0.06);
+      if (heavy) slam(d, t + 0.26, v);
+    },
+    shield(d, t, v, heavy) {
+      swing(d, t, 350, 1300, 0.28, 0.5 * v, 1);
+      metal(d, t + 0.04, vary(520, 0.04), 0.35, 0.02 * v);
+      if (heavy) {
+        slam(d, t + 0.24, v);
+        metal(d, t + 0.24, 780, 0.6, 0.016 * v);
+      }
+    },
+    spear(d, t, v, heavy) {
+      tone(d, t, 'triangle', 420, 200, 0.04, 0.12 * v);
+      swing(d, t, 500, heavy ? 3400 : 3000, heavy ? 0.22 : 0.14, (heavy ? 0.6 : 0.5) * v, 2);
+      if (heavy) burst(d, t + 0.12, 'lowpass', 900, 0.8, 0.3, 0.2 * v, 0.02);
+    },
+    bow(d, t, v, heavy) {
+      if (heavy) for (let i = 0; i < 5; i++) bowShot(d, t + i * 0.06, v * (i ? 0.7 : 1));
+      else bowShot(d, t, v);
+    },
+    staff(d, t, v, heavy) {
+      arcaneBolt(d, t, v * 0.8, heavy);
+    },
+    grimoire(d, t, v, heavy) {
+      grimoireCast(d, t, (heavy ? 0.6 : 0.8) * v);
+      if (heavy) for (let i = 0; i < 5; i++) plagueSpit(d, t + 0.05 + i * 0.06, v);
+    },
+    lute(d, t, v, heavy) {
+      const pick = () => LUTE_NOTES[Math.floor(Math.random() * LUTE_NOTES.length)];
+      burst(d, t, 'bandpass', 3000, 1, 0.012, 0.1 * v);
+      if (heavy) {
+        const root = pick();
+        [0, 4, 7].forEach((k, i) => pluck(d, midi(root + k), t + i * 0.025, 0.5, 0.2 * v, 0.7));
+      } else pluck(d, midi(pick()), t, 0.4, 0.24 * v, 0.7);
+    }
   };
+  // Fracas au sol : choc sourd, gravats.
+  function slam(dest, t, v) {
+    thump(dest, t, 110, 38, 0.4, 0.5 * v);
+    burst(dest, t, 'lowpass', 1200, 0.7, 0.25, 0.3 * v);
+    for (let i = 0; i < 4; i++)
+      burst(dest, t + 0.05 + Math.random() * 0.2, 'bandpass', vary(2200, 0.3), 3, 0.02, 0.08 * v);
+  }
   function attackSound(type, heavy, x, y, vol = 1) {
     const t = ac.currentTime,
       { dest, vol: v } = placed(x, y, vol);
     if (v < 0.01) return;
-    if (type === 'bow') {
-      pluck(dest, 196, t, 0.25, 0.35 * v, 0.9);
-      whoosh(dest, t + 0.02, 2500, 5000, 0.18, 0.25 * v, 2);
-      return;
-    }
-    if (type === 'staff') {
-      whoosh(dest, t, 600, 2400, 0.3, 0.3 * v, 3);
-      const o = ac.createOscillator(),
-        g = gain(0);
-      o.type = 'sine';
-      o.frequency.setValueAtTime(520, t);
-      o.frequency.exponentialRampToValueAtTime(1300, t + 0.25);
-      chain(o, g, dest);
-      envelope(g.gain, t, 0.02, 0.07 * v, 0.08, 0.2);
-      o.start(t);
-      o.stop(t + 0.4);
-      return;
-    }
-    const [from, to, dur, loud] = SWINGS[type] || SWINGS.sword;
-    whoosh(
-      dest,
-      t,
-      heavy ? from * 0.7 : from,
-      heavy ? to * 0.8 : to,
-      heavy ? dur * 1.4 : dur,
-      loud * v * (heavy ? 1.15 : 1)
-    );
+    (WEAPON_SOUNDS[type] || WEAPON_SOUNDS.sword)(dest, t, v, heavy);
   }
   let hitBudget = 0,
     hitClock = 0;
@@ -805,13 +1099,13 @@
     if (++hitBudget > 3) return;
     const { dest, vol } = placed(x, y, 1);
     if (vol < 0.01) return;
-    thump(dest, t, 150, 55, 0.12, 0.45 * vol);
-    const n = noiseSource(t, 0.08),
-      f = filter('bandpass', 1800, 1),
-      g = gain(0);
-    chain(n, f, g, dest);
-    envelope(g.gain, t, 0.002, 0.3 * vol, 0.01, 0.05);
-    if (crit) bell(dest, 1760, t, 0.05, 0.05 * vol);
+    thump(dest, t, vary(150, 0.15), 55, 0.12, 0.45 * vol);
+    burst(dest, t, 'bandpass', vary(1800, 0.2), 1, 0.05, 0.3 * vol);
+    // Coup critique : claquement sec et choc plus lourd, sans note.
+    if (crit) {
+      burst(dest, t, 'highpass', 3200, 0.8, 0.04, 0.35 * vol);
+      thump(dest, t + 0.01, 90, 40, 0.22, 0.4 * vol);
+    }
   }
   function hurtSound() {
     const t = ac.currentTime;
@@ -832,17 +1126,17 @@
   // Montée de niveau : petite fanfare ascendante.
   function levelUpSound() {
     const t = ac.currentTime;
-    [67, 72, 76, 79, 84].forEach((n, i) => bell(fxBus, midi(n + 12), t + i * 0.09, 0.4, 0.06));
-    bell(fxBus, midi(91), t + 0.5, 0.9, 0.05);
+    [67, 72, 76, 79, 84].forEach((n, i) => bell(uiBus, midi(n + 12), t + i * 0.09, 0.4, 0.06));
+    bell(uiBus, midi(91), t + 0.5, 0.9, 0.05);
   }
   function coinSound() {
     const t = ac.currentTime;
-    bell(fxBus, 1568, t, 0.05, 0.05);
-    bell(fxBus, 2093, t + 0.07, 0.08, 0.05);
+    bell(uiBus, 1568, t, 0.05, 0.05);
+    bell(uiBus, 2093, t + 0.07, 0.08, 0.05);
   }
   function lootSound() {
     const t = ac.currentTime;
-    [72, 76, 79, 84].forEach((n, i) => bell(fxBus, midi(n + 12), t + i * 0.07, 0.25, 0.045));
+    [72, 76, 79, 84].forEach((n, i) => bell(uiBus, midi(n + 12), t + i * 0.07, 0.25, 0.045));
   }
   function chestSound() {
     const t = ac.currentTime,
@@ -852,11 +1146,11 @@
     o.type = 'sawtooth';
     o.frequency.setValueAtTime(70, t);
     o.frequency.linearRampToValueAtTime(130, t + 0.35);
-    chain(o, f, g, fxBus);
+    chain(o, f, g, uiBus);
     envelope(g.gain, t, 0.05, 0.25, 0.2, 0.15);
     o.start(t);
     o.stop(t + 0.5);
-    [79, 83, 86, 91].forEach((n, i) => bell(fxBus, midi(n + 12), t + 0.35 + i * 0.06, 0.4, 0.04));
+    [79, 83, 86, 91].forEach((n, i) => bell(uiBus, midi(n + 12), t + 0.35 + i * 0.06, 0.4, 0.04));
   }
   function healSound(x, y) {
     const { dest, vol } = placed(x, y, 1);
@@ -878,7 +1172,9 @@
     return (h * 60 + 360) % 360;
   }
   let lastSpell = 0;
-  function spellSound(shape, x, y, c) {
+  function spellSound(shape, x, y, c, r, w) {
+    // Trait de départ d'un projectile (65 px de long) : l'attaque de l'arme a déjà son propre son.
+    if (shape === 'beam' && r === 65 && w === 7) return;
     const t = ac.currentTime;
     if (t - lastSpell < 0.06) return;
     lastSpell = t;
@@ -924,7 +1220,7 @@
             })();
     const vol = 0.16;
     if (tile === 'water') {
-      whoosh(fxBus, t, 1600, 500, 0.22, vol * 1.4, 1.5);
+      whoosh(stepBus, t, 1600, 500, 0.22, vol * 1.4, 1.5);
       return;
     }
     const n = noiseSource(t, 0.12),
@@ -934,9 +1230,81 @@
         tile === 'stone' ? 2 : 0.8
       ),
       g = gain(0);
-    chain(n, f, g, fxBus);
+    chain(n, f, g, stepBus);
     envelope(g.gain, t, 0.004, vol * (tile === 'grass' ? 1.1 : 1), 0.01, tile === 'sand' ? 0.09 : 0.06);
-    if (tile === 'stone' || tile === 'dirt') thump(fxBus, t, 130, 70, 0.05, vol * 0.6);
+    if (tile === 'stone' || tile === 'dirt') thump(stepBus, t, 130, 70, 0.05, vol * 0.6);
+  }
+
+  // ---------------------------------------------------------------- Voix des personnages
+  // Un babillage sans paroles : des syllabes chantées à travers les formants d'une voyelle. Le nom du personnage
+  // fixe sa hauteur et son timbre, si bien qu'un même habitant garde toujours la même voix.
+  const VOWELS = [
+    [730, 1090],
+    [530, 1840],
+    [390, 1990],
+    [570, 840],
+    [440, 1020],
+    [300, 870]
+  ];
+  function hashOf(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+    return h >>> 0;
+  }
+  let voiceUntil = 0;
+  function speak(seed, text, x, y, kind) {
+    const t0 = ac.currentTime;
+    // Une seule réplique à la fois : la suivante attend que la précédente soit dite.
+    if (t0 < voiceUntil) return;
+    const { dest, vol } = placed(x, y, 1, voiceBus);
+    if (vol < 0.02) return;
+    const h = hashOf(seed),
+      sex = kind || (h & 1 ? 'f' : 'm'),
+      base = sex === 'dwarf' ? 95 + (h % 30) : sex === 'f' ? 210 + (h % 70) : 120 + (h % 50),
+      speed = 0.085 + ((h >> 3) % 5) * 0.01,
+      bright = sex === 'f' ? 1.15 : sex === 'dwarf' ? 0.85 : 1,
+      words = text.replace(/[^\p{L}\s]/gu, '').trim(),
+      count = Math.max(2, Math.min(9, Math.round(words.length / 7))),
+      ask = /\?\s*»?\s*$/.test(text);
+    let rnd = h;
+    const next = () => ((rnd = Math.imul(rnd ^ (rnd >>> 15), 2246822507) >>> 0) % 1000) / 1000;
+    let t = t0;
+    for (let i = 0; i < count; i++) {
+      const len = speed * (0.7 + next() * 0.6),
+        last = i === count - 1,
+        // Intonation : la phrase descend, ou remonte à la fin d'une question.
+        pitch = base * (1 + (next() - 0.5) * 0.25) * (last ? (ask ? 1.25 : 0.85) : 1),
+        [f1, f2] = VOWELS[Math.floor(next() * VOWELS.length)],
+        o = ac.createOscillator(),
+        g = gain(0),
+        mix = gain(1);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(pitch, t);
+      o.frequency.linearRampToValueAtTime(pitch * (last && ask ? 1.15 : 0.94), t + len);
+      for (const [fr, amp, q] of [
+        [f1 * bright, 1, 6],
+        [f2 * bright, 0.5, 8]
+      ]) {
+        const f = filter('bandpass', fr, q),
+          fg = gain(amp * 2.4);
+        o.connect(f);
+        chain(f, fg, mix);
+      }
+      chain(mix, g, dest);
+      envelope(g.gain, t, 0.012, 0.09 * vol, len * 0.5, len * 0.5);
+      o.start(t);
+      o.stop(t + len + 0.1);
+      t += len + 0.02 + next() * 0.05 + (next() < 0.15 ? 0.1 : 0);
+    }
+    voiceUntil = t + 0.15;
+  }
+  // Fenêtres : froissement de parchemin à l'ouverture, son plus bref à la fermeture.
+  function panelSound(open) {
+    const t = ac.currentTime,
+      f = burst(uiBus, t, 'bandpass', open ? 1800 : 2600, 1.4, open ? 0.12 : 0.07, open ? 0.12 : 0.08, 0.02);
+    f.frequency.setValueAtTime(open ? 1200 : 3000, t);
+    f.frequency.exponentialRampToValueAtTime(open ? 3200 : 1400, t + (open ? 0.12 : 0.07));
+    thump(uiBus, t, open ? 260 : 200, 120, 0.05, 0.07);
   }
 
   // ---------------------------------------------------------------- Observation de l'état du jeu
@@ -957,6 +1325,10 @@
     if (!music.current || music.current.key !== key) startTheme(key);
     schedule();
     updateAmbience();
+    // Fenêtres du jeu (sac, carte, quêtes, marchand…) : ouverture et fermeture.
+    const panel = typeof modalOpen === 'function' && modalOpen();
+    if (watch.panel !== undefined && panel !== watch.panel) panelSound(panel);
+    watch.panel = panel;
     // Coups reçus, or et butin du héros.
     if (watch.hp !== null && P.hp < watch.hp - 1 && !P.dead) hurtSound();
     watch.hp = P.hp;
@@ -995,13 +1367,13 @@
     // Pêche : plouf du bouchon au lancer, éclaboussure quand ça mord, carillon pour une prise.
     const line = CANAAN_PROF.myLive().fishing,
       caught = Object.values(game.hero.prof?.fish || {}).reduce((a, b) => a + b, 0);
-    if (line && !watch.line) whoosh(fxBus, ac.currentTime, 1800, 500, 0.25, 0.25, 1.5);
+    if (line && !watch.line) whoosh(waterBus, ac.currentTime, 1800, 500, 0.25, 0.35, 1.5);
     if (line?.bite && !watch.line?.bite) {
-      whoosh(fxBus, ac.currentTime, 2400, 700, 0.3, 0.45, 1.2);
-      bell(fxBus, 1318, ac.currentTime, 0.1, 0.05);
+      whoosh(waterBus, ac.currentTime, 2400, 700, 0.3, 0.6, 1.2);
+      bell(uiBus, 1318, ac.currentTime, 0.1, 0.05);
     }
     if (watch.caught !== undefined && caught > watch.caught)
-      [84, 88, 91].forEach((n, i) => bell(fxBus, midi(n), ac.currentTime + i * 0.06, 0.2, 0.04));
+      [84, 88, 91].forEach((n, i) => bell(uiBus, midi(n), ac.currentTime + i * 0.06, 0.2, 0.04));
     watch.line = line;
     watch.caught = caught;
     // Monstres disparus après avoir été bien entamés : chute.
@@ -1022,10 +1394,15 @@
       if (/^-?\d[\d\s]*!?$/.test(s) || /^\d+\s?(💥|!)/.test(s))
         hitSound(x, y, /!|💥/.test(s) || c === '#ffd54a');
     },
-    effect(shape, x, y, c) {
+    effect(shape, x, y, c, r, w) {
       if (!ac || !settings.on || !started || paused) return;
       if (shape === 'arc' || shape === 'spark') return;
-      spellSound(shape, x, y, c);
+      spellSound(shape, x, y, c, r, w);
+    },
+    // Un personnage parle : seed (son nom) fixe sa voix ; kind : 'f', 'm' ou 'dwarf' (sinon tiré du nom).
+    voice(seed, text, x, y, kind) {
+      if (!ac || !settings.on || !started || paused) return;
+      speak(String(seed || ''), String(text || ''), x, y, kind);
     },
     cue(name) {
       if (!ac || !settings.on || !started || paused) return;
@@ -1033,20 +1410,20 @@
       else if (name === 'levelup') levelUpSound();
       // Quêtes : notes des pierres musicales (note1 à note4), énigme résolue, erreur, coffre.
       else if (/^note[1-4]$/.test(name))
-        bell(fxBus, midi([60, 64, 67, 72][Number(name[4]) - 1] + 12), ac.currentTime, 0.7, 0.07);
+        bell(uiBus, midi([60, 64, 67, 72][Number(name[4]) - 1] + 12), ac.currentTime, 0.7, 0.07);
       else if (name === 'puzzle') lootSound();
       // Fanfare « objet obtenu » : un arpège qui monte puis un accord tenu.
       else if (name === 'fanfare') {
         const t0 = ac.currentTime;
-        [67, 71, 74, 79].forEach((n, i) => bell(fxBus, midi(n), t0 + i * 0.09, 0.5, 0.06));
-        for (const n of [79, 83, 86]) bell(fxBus, midi(n), t0 + 0.42, 1.3, 0.045);
+        [67, 71, 74, 79].forEach((n, i) => bell(uiBus, midi(n), t0 + i * 0.09, 0.5, 0.06));
+        for (const n of [79, 83, 86]) bell(uiBus, midi(n), t0 + 0.42, 1.3, 0.045);
       } else if (name === 'chest') chestSound();
-      else if (name === 'wrong') bell(fxBus, midi(43), ac.currentTime, 0.35, 0.05);
+      else if (name === 'wrong') bell(uiBus, midi(43), ac.currentTime, 0.35, 0.05);
       // Coup de pelle : la lame qui entre dans la terre, puis la motte qui retombe.
       else if (name === 'dig') {
         const t0 = ac.currentTime;
-        thump(fxBus, t0, 180, 60, 0.12, 0.3);
-        whoosh(fxBus, t0 + 0.05, 900, 300, 0.18, 0.12, 0.7);
+        thump(uiBus, t0, 180, 60, 0.12, 0.3);
+        whoosh(uiBus, t0 + 0.05, 900, 300, 0.18, 0.12, 0.7);
       }
     },
     state() {
@@ -1087,23 +1464,28 @@
     toggle.textContent = settings.on ? '🔊 Son' : '🔇 Son';
     if (settings.on) {
       initAudio();
-      if (ac) bell(fxBus, 1047, ac.currentTime, 0.2, 0.06);
+      if (ac) bell(uiBus, 1047, ac.currentTime, 0.2, 0.06);
     } else {
       applyVolumes();
       stopMusic();
     }
   });
   toggle.textContent = settings.on ? '🔊 Son' : '🔇 Son';
-  musicSlider.addEventListener('input', () => {
-    settings.music = +musicSlider.value;
-    saveAudio();
-    applyVolumes();
-  });
-  fxSlider.addEventListener('input', () => {
-    settings.fx = +fxSlider.value;
-    saveAudio();
-    applyVolumes();
-  });
+  // Curseurs de volume : la valeur s'affiche à côté (« 45 % ») et s'applique aussitôt.
+  for (const [key, id] of Object.entries(SLIDERS)) {
+    const slider = document.getElementById(id);
+    if (!slider) continue;
+    const label = slider.parentElement?.querySelector('.volume-value');
+    const show = () => label && (label.textContent = slider.value + ' %');
+    slider.value = settings[key];
+    show();
+    slider.addEventListener('input', () => {
+      settings[key] = +slider.value;
+      show();
+      saveAudio();
+      applyVolumes();
+    });
+  }
   // La pause baisse la musique et coupe les bruitages.
   let wasPaused = false;
   setInterval(() => {

@@ -1328,6 +1328,7 @@
     const v = npc.dwarf;
     if (!v || !v.lines.length) return false;
     v.bubble = { text: v.lines[v.line % v.lines.length], until: time + 300 };
+    CANAAN_SOUND.voice(npc.name || 'nain', v.bubble.text, v.x, v.y, 'dwarf');
     v.line++;
     v.face = P.x < v.x ? -1 : 1;
     return true;

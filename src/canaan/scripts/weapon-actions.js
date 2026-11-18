@@ -97,7 +97,7 @@
   function effect(shape, x, y, a, r, w, c, d = 0.3) {
     vfx.push({ shape, x, y, a, r, w, c, life: d, max: d });
     if (vfx.length > 180) vfx.shift();
-    CANAAN_SOUND.effect(shape, x, y, c);
+    CANAAN_SOUND.effect(shape, x, y, c, r, w);
     game.view.fx?.('v', [
       shape,
       Math.round(x),
@@ -115,7 +115,7 @@
       return;
     vfx.push({ shape, x, y, a, r, w, c, life: Math.min(d, 2), max: Math.min(d, 2) });
     if (vfx.length > 180) vfx.shift();
-    CANAAN_SOUND.effect(shape, x, y, c);
+    CANAAN_SOUND.effect(shape, x, y, c, r, w);
   }
   function ageEffects(dt) {
     for (let i = vfx.length - 1; i >= 0; i--) {

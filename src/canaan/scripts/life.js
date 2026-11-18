@@ -1431,6 +1431,7 @@
   function say(v, nearby) {
     v.line = (v.line + 1) % v.lines.length;
     v.bubble = { text: v.lines[v.line], at: time, near: nearby };
+    CANAAN_SOUND.voice(v.name, v.bubble.text, v.x, v.y, v.look?.sex === 'f' ? 'f' : 'm');
   }
   // De temps en temps, un habitant visible parle tout seul (un peu de vie même de loin).
   let chatter = 0;

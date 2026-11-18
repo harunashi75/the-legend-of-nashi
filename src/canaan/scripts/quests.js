@@ -2372,6 +2372,7 @@
           '</li>'
       ).join('') +
       '</ul><p class="quest-note">Chaque lieu de quête cache un coquillage, un peu à l’écart. De près, ils scintillent.</p></div>';
+    CANAAN_SOUND.voice(npc.def.name, body.replace(/<[^>]*>/g, ' '));
     modernPanel(
       '<div class="quest-dialog"><h2>' +
         esc(npc.def.name) +
@@ -2456,6 +2457,7 @@
     const swap = tradeHtml(hero, npc);
     body += swap.body;
     buttons += swap.button;
+    CANAAN_SOUND.voice(npc.def.name, body.replace(/<[^>]*>/g, ' '));
     modernPanel(
       '<div class="quest-dialog"><h2>' +
         esc(npc.def.name) +

@@ -519,6 +519,9 @@ function interact() {
 function openDialog(npc) {
   if (npc.type === 'portal') return openPortal(npc);
   if (npc.type === 'arena') return openArenaPortal();
+  // Marchand et banquier saluent le héros (un babillage, voir audio.js).
+  if (npc.type === 'shop' || npc.type === 'bank')
+    CANAAN_SOUND.voice(npc.name || npc.type, 'Bienvenue, voyageur !', npc.x, npc.y);
   if (npc.type === 'shop') return openShop(npc);
   if (npc.type === 'bank') return CANAAN_BANK.open(npc);
   // Tréfonds : parler à un nain, descendre ou remonter par une entrée.

@@ -1534,3 +1534,22 @@ svg.ico.solo {
     height: 22px;
   }
 }
+/* Paramètres → Audio : un curseur par famille de sons, sa valeur à côté, rangés sous « Effets sonores » et « Ambiance ». */
+#settingsCard .settings-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#settingsCard .volume-value {
+  min-width: 48px;
+  text-align: right;
+  font-size: calc(13px * var(--font-scale));
+  font-variant-numeric: tabular-nums;
+}
+#settingsCard .settings-sub {
+  margin: 12px 0 2px;
+  font-size: calc(13px * var(--font-scale));
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
