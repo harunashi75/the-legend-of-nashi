@@ -11,14 +11,18 @@ const load = f => import(pathToFileURL(path.join(ROOT, f)).href);
 function memoryCanvas() {
   const cv = { width: 0, height: 0 };
   let data = null;
-  const pixels = () => (data && data.length === cv.width * cv.height * 4 ? data : (data = new Uint8ClampedArray(cv.width * cv.height * 4)));
+  const pixels = () =>
+    data && data.length === cv.width * cv.height * 4
+      ? data
+      : (data = new Uint8ClampedArray(cv.width * cv.height * 4));
   const g = {
     fillStyle: '#000000',
     fillRect(x, y, w, h) {
       const d = pixels(),
         c = [1, 3, 5].map(i => parseInt(this.fillStyle.slice(i, i + 2), 16));
       for (let yy = Math.max(0, y); yy < Math.min(cv.height, y + h); yy++)
-        for (let xx = Math.max(0, x); xx < Math.min(cv.width, x + w); xx++) d.set([...c, 255], (yy * cv.width + xx) * 4);
+        for (let xx = Math.max(0, x); xx < Math.min(cv.width, x + w); xx++)
+          d.set([...c, 255], (yy * cv.width + xx) * 4);
     },
     getImageData: (x, y, w, h) => ({ data: new Uint8ClampedArray(pixels()), width: w, height: h }),
     putImageData: img => pixels().set(img.data)
@@ -41,7 +45,8 @@ const withDocument = async fn => {
 test('Kit de pixel art : couleurs, bruits à graine, trame, polygones et courbes', async () => {
   const K = await load('client/art/pixel-kit.js');
   assert.ok(Object.isFrozen(K.CANAAN_PIXEL_KIT));
-  for (const [name, fn] of Object.entries(K)) if (name !== 'CANAAN_PIXEL_KIT') assert.equal(K.CANAAN_PIXEL_KIT[name], fn, name);
+  for (const [name, fn] of Object.entries(K))
+    if (name !== 'CANAAN_PIXEL_KIT') assert.equal(K.CANAAN_PIXEL_KIT[name], fn, name);
   // Couleurs.
   assert.deepEqual(K.rgb('#ff8010'), [255, 128, 16]);
   assert.equal(K.hex([300, -5, 16.4]), '#ff0010');
@@ -65,7 +70,18 @@ test('Kit de pixel art : couleurs, bruits à graine, trame, polygones et courbes
   assert.equal(seuils.size, 16);
   assert.equal(K.bayer(5, 6), K.bayer(1, 2), 'trame répétée tous les 4 pixels');
   // Formes : rangées d'un carré, extrémités d'une courbe.
-  assert.deepEqual(K.spans([[0, 0], [3, 0], [3, 2], [0, 2]]), [[0, 0, 3], [1, 0, 3]]);
+  assert.deepEqual(
+    K.spans([
+      [0, 0],
+      [3, 0],
+      [3, 2],
+      [0, 2]
+    ]),
+    [
+      [0, 0, 3],
+      [1, 0, 3]
+    ]
+  );
   const courbe = K.bez([0, 0], [5, 10], [10, 0], 4);
   assert.deepEqual([courbe[0], courbe.at(-1), courbe.length], [[0, 0], [10, 0], 5]);
 });
@@ -96,12 +112,18 @@ test('Kit de pixel art : contour sombre, modelé (reflet en haut, ombre en bas) 
       assert.equal(kit, K.CANAAN_PIXEL_KIT);
       b.px(2, 2, '#ffffff');
     });
-    assert.equal(paint('x', 5, 5, () => n++), a);
+    assert.equal(
+      paint('x', 5, 5, () => n++),
+      a
+    );
     assert.equal(n, 1);
     assert.deepEqual(a.pixel(2, 1), [...K.rgb(K.PIXEL_INK), 255]);
   });
   // Sans document (tests sans rendu), le peintre ne dessine rien.
-  assert.equal(K.painter()('y', 4, 4, () => assert.fail('pas de dessin')), null);
+  assert.equal(
+    K.painter()('y', 4, 4, () => assert.fail('pas de dessin')),
+    null
+  );
 });
 
 test('Plume SVG des icônes : contour d’encre, reflets et étoiles réglés par jeu d’icônes', async () => {
@@ -113,7 +135,11 @@ test('Plume SVG des icônes : contour d’encre, reflets et étoiles réglés pa
   assert.equal(pen.s('M0 0', '#000'), '<path d="M0 0" fill="#000"/>', 'aplat sans contour');
   assert.match(pen.r(1, 2, 3, 4, '#f00'), /rx="1.5"/);
   assert.match(pen.hi('M0 0'), /stroke="#ffffff".*opacity=".7"\/>$/);
-  assert.equal(pen.L('M0 0', '#f00'), pen.l('M0 0', '#123456', 4.4) + pen.l('M0 0', '#f00', 2.4), 'trait cerné');
+  assert.equal(
+    pen.L('M0 0', '#f00'),
+    pen.l('M0 0', '#123456', 4.4) + pen.l('M0 0', '#f00', 2.4),
+    'trait cerné'
+  );
   assert.match(pen.star(5, 10, 4), /^M16\.0 6\.0 L/, 'étoile centrée sur la grille');
 });
 
@@ -135,7 +161,72 @@ test('Pixel art : un seul kit, aucun art ne redéfinit ses outils', () => {
   for (const file of arts) {
     const src = fs.readFileSync(path.join(ROOT, file), 'utf8');
     for (const [owner, patterns] of Object.entries(signs))
-      if (file !== owner) for (const re of patterns) assert.doesNotMatch(src, re, file + ' : outil du kit (' + owner + ') recopié');
+      if (file !== owner)
+        for (const re of patterns)
+          assert.doesNotMatch(src, re, file + ' : outil du kit (' + owner + ') recopié');
     assert.doesNotMatch(src, /CANAAN_BUILDING_ART\.kit/, file);
   }
+});
+
+// Créatures : une silhouette propre à chaque espèce, et chaque monstre ou boss du jeu en porte une qui existe.
+test('Créatures : espèces dessinées, élites marquées, chaque monstre et boss a une espèce connue', async () => {
+  const art = await load('client/art/creature-art.js');
+  const world = await load('shared/data/world.js');
+  const arena = await load('shared/data/arena.js');
+  const { DUNGEONS } = await load('shared/data/dungeons/index.js');
+  const { GUARDIANS } = await load('shared/data/quests.js');
+  const known = new Set(art.CREATURE_SPECIES());
+  assert.ok(known.size >= 45, 'au moins 45 espèces : ' + known.size);
+  for (const s of [
+    'wolf',
+    'boar',
+    'bear',
+    'rat',
+    'spider',
+    'bat',
+    'troll',
+    'minotaur',
+    'ghost',
+    'treant',
+    'mushroom'
+  ])
+    assert.ok(known.has(s), s);
+  const all = [
+    ...world.MOB_TYPES.map(t => ['monstre ' + t.name, t.look, t.pal]),
+    ...world.WORLD_BOSS_DEFS.map(b => ['boss mondial ' + b.name, b.look, b.pal]),
+    ...arena.ARENA_BOSSES.map(b => ['Arène ' + b.name, b.look, b.pal]),
+    ...DUNGEONS.filter(d => d.actors).flatMap(d =>
+      ['mobs', 'bosses', 'secrets'].flatMap(p =>
+        (d.actors[p] || []).map((a, i) => [d.key + ' ' + p + ' ' + i, a.look, a.pal])
+      )
+    ),
+    ...Object.values(GUARDIANS).map(g => ['gardien ' + g.name, g.look, g.pal])
+  ];
+  for (const [who, look, pal] of all) {
+    assert.ok(known.has(look), who + ' : espèce inconnue ' + look);
+    assert.equal(pal.length, 5, who + ' : palette');
+  }
+  // Chaque monstre du monde a une version d'élite nommée, et aucun nom de créature d'instance n'est en double.
+  for (const t of world.MOB_TYPES) assert.ok(t.elite && t.elite !== t.name, t.name);
+  const names = DUNGEONS.filter(d => d.actors).flatMap(d => d.actors.mobs.map(m => m.name));
+  assert.equal(new Set(names).size, names.length, 'créatures d’instance en double');
+  // Rendu : chaque espèce se peint (34 × 42, contour et ombre), et son élite diffère de la version normale.
+  await withDocument(async () => {
+    const pal = ['#8c7a68', '#5a4a3c', '#b8a690', '#e8dcc8', '#ffcf40'];
+    for (const s of known) {
+      const spr = art.creatureSprite(s, pal, {});
+      assert.deepEqual([spr.width, spr.height], [34, 42], s);
+      assert.equal(art.creatureSprite(s, pal, {}), spr, s + ' : gardé en cache');
+      const elite = art.creatureSprite(s, pal, { elite: true }),
+        a = spr.getContext('2d').getImageData(0, 0, 34, 42).data,
+        b = elite.getContext('2d').getImageData(0, 0, 34, 42).data;
+      assert.ok(
+        a.some((v, i) => v !== b[i]),
+        s + ' : élite identique'
+      );
+    }
+  });
+  // Les anciens noms de silhouettes restent valables.
+  for (const old of ['quad', 'beast', 'flyer', 'robed', 'rogue', 'brute', 'spirit'])
+    assert.ok(art.creatureFloats(old) !== undefined);
 });

@@ -46,22 +46,25 @@ export default {
     mobs: [
       {
         name: 'Porte-spores',
-        look: 'golem',
+        look: 'mushroom',
         pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'],
-        leafy: true
+        sacs: true
       },
-      {
-        name: 'Larve des fanges',
-        look: 'slime',
-        pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010']
-      }
+      { name: 'Larve des fanges', look: 'grub', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] }
     ],
     bosses: [
-      { look: 'golem', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], leafy: true },
-      { look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'] },
-      { look: 'horror', pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'] }
+      { look: 'mushroom', pal: ['#c8604a', '#8a3a2a', '#f0a080', '#f8e8c8', '#fff0a0'], howl: true },
+      { look: 'slime', pal: ['#8a9a4a', '#4e5a26', '#b8c870', '#e870c0', '#1a2010'], shrooms: true },
+      {
+        look: 'mushroom',
+        pal: ['#b0407a', '#6a2048', '#e080b0', '#f8e8c8', '#ffe0f8'],
+        crown: true,
+        elite: true
+      }
     ],
-    secrets: [{ look: 'horror', pal: ['#4a5a26', '#2a3414', '#7a8a40', '#e870c0', '#ffe0f8'], leafy: true }]
+    secrets: [
+      { look: 'horror', pal: ['#4a5a26', '#2a3414', '#7a8a40', '#e870c0', '#ffe0f8'], style: 'heart' }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules,
   // entrance (entrée sur l'île dessinée comme celle de cette instance).

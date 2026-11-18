@@ -46,17 +46,45 @@ export default {
     mobs: [
       {
         name: 'Goule des cryptes',
-        look: 'brute',
-        pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0']
+        look: 'ghoul',
+        pal: ['#9aa890', '#5e6e54', '#c4d0b8', '#4a3a2a', '#7affb0'],
+        kilt: '#3a3428'
       },
-      { name: 'Âme sans repos', look: 'spirit', pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff'] }
+      { name: 'Âme sans repos', look: 'ghost', pal: ['#8ad8b0', '#3a8a68', '#d8fff0', '#ffffff', '#ffffff'] }
     ],
     bosses: [
-      { look: 'rogue', pal: ['#4a4a40', '#2a2a22', '#6e6e60', '#a8f0c0', '#d8fff0'] },
-      { look: 'spirit', pal: ['#2a2e2a', '#141614', '#4a524a', '#a8f0c0', '#ffffff'] },
-      { look: 'robed', pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'], hood: true }
+      {
+        look: 'humanoid',
+        pal: ['#4a4a40', '#2a2a22', '#6e6e60', '#a8f0c0', '#d8fff0'],
+        head: 'hood',
+        face: 'mask',
+        hold: 'pickaxe',
+        off: 'lantern',
+        cape: '#2a2430'
+      },
+      { look: 'ghost', pal: ['#2a2e2a', '#141614', '#4a524a', '#a8f0c0', '#ffffff'], veil: '#2a2230' },
+      {
+        look: 'humanoid',
+        pal: ['#3a3e3a', '#1e221e', '#5e665e', '#7affb0', '#d8fff0'],
+        robe: true,
+        tatters: true,
+        head: 'hood',
+        face: 'skull',
+        hold: 'scythe',
+        off: 'lantern'
+      }
     ],
-    secrets: [{ look: 'skeleton', pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'], crown: true }]
+    secrets: [
+      {
+        look: 'skeleton',
+        pal: ['#b8c0b0', '#6e7868', '#e0e8d8', '#7affb0', '#d8fff0'],
+        crown: true,
+        hold: 'scythe',
+        off: null,
+        rags: '#2a2230',
+        elite: true
+      }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules,
   // entrance (entrée sur l'île dessinée comme celle de cette instance).

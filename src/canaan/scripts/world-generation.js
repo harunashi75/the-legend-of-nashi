@@ -23,7 +23,7 @@
       name: 'Forêt ancienne',
       angle: 225,
       t: 5,
-      mobs: ['Araignée', 'Ours', 'Gobelin'],
+      mobs: ['Araignée', 'Ours', 'Gobelin', 'Chauve-souris'],
       description: 'Grands arbres, sous-bois, champignons et clairières.'
     },
     {

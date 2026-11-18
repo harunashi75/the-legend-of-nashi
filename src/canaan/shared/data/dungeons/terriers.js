@@ -39,24 +39,43 @@ export default {
   // l'ordre de rules.bosses et rules.secrets. Palettes : [principale, sombre, claire, accent, yeux].
   actors: {
     mobs: [
-      { name: 'Osselet', look: 'skeleton', pal: ['#ddd6be', '#8f8670', '#fff8e0', '#6a5a40', '#7fd0ff'] },
       {
-        name: 'Rat des terriers',
-        look: 'beast',
-        pal: ['#7a5d44', '#4b3828', '#a3846a', '#e6a7a7', '#ff5040']
-      }
+        name: 'Osselet',
+        look: 'skeleton',
+        pal: ['#ddd6be', '#8f8670', '#fff8e0', '#6a5a40', '#7fd0ff'],
+        small: true,
+        hold: 'club',
+        off: null
+      },
+      { name: 'Rat des terriers', look: 'rat', pal: ['#7a5d44', '#4b3828', '#a3846a', '#e6a7a7', '#ff5040'] }
     ],
     bosses: [
-      { look: 'beast', pal: ['#8a6a50', '#4e3a2a', '#b89878', '#e6a7a7', '#ff5040'], crown: true },
-      { look: 'robed', pal: ['#5a4a3a', '#2e241a', '#80705a', '#c9a46e', '#a3c7ff'], hood: true },
-      { look: 'skeleton', pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'], crown: true }
+      { look: 'rat', pal: ['#8a6a50', '#4e3a2a', '#b89878', '#e6a7a7', '#ff5040'], elite: true, crown: true },
+      {
+        look: 'humanoid',
+        pal: ['#5a4a3a', '#2e241a', '#80705a', '#c9a46e', '#a3c7ff'],
+        build: 'stocky',
+        head: 'hood',
+        hold: 'shovel',
+        off: 'lantern',
+        hoodColor: '#3a2e22'
+      },
+      {
+        look: 'skeleton',
+        pal: ['#ece5cc', '#9a917a', '#fffbe8', '#5a6a8a', '#8fd8ff'],
+        crown: true,
+        hold: 'greatsword',
+        off: 'shield',
+        elite: true
+      }
     ],
     secrets: [
       {
-        look: 'beast',
+        look: 'rat',
         pal: ['#4a3a30', '#2a1e16', '#7a6050', '#d0a040', '#ffd040'],
-        horns: true,
-        crown: true
+        elite: true,
+        crown: true,
+        tails: true
       }
     ]
   },

@@ -50,25 +50,54 @@ export default {
       {
         name: 'Séraphin corrompu',
         look: 'angel',
-        pal: ['#c4a0ff', '#7a5ab0', '#efe0ff', '#ffd36d', '#ffffff']
+        pal: ['#c4a0ff', '#7a5ab0', '#efe0ff', '#ffd36d', '#ffffff'],
+        dark: true
       },
       {
         name: 'Sentinelle solaire',
         look: 'golem',
-        pal: ['#e8c860', '#a8862a', '#fff0a8', '#ffffff', '#ffffff']
+        pal: ['#e8c860', '#a8862a', '#fff0a8', '#ffffff', '#ffffff'],
+        style: 'sun'
       }
     ],
     bosses: [
-      { look: 'angel', pal: ['#ffe8d0', '#c8a888', '#ffffff', '#ffd36d', '#fff6c0'] },
-      { look: 'angel', pal: ['#f0e6c8', '#b8a878', '#ffffff', '#ffd36d', '#fff6c0'] },
-      { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#ffffff', '#fff6c0'], halo: true },
-      { look: 'golem', pal: ['#f4f0e4', '#c4baa0', '#ffffff', '#ffd36d', '#ffe680'], halo: true },
-      { look: 'robed', pal: ['#f8f4ec', '#c8c0b0', '#ffffff', '#c4a0ff', '#fff6c0'], halo: true },
-      { look: 'angel', pal: ['#ffffff', '#d8cfa8', '#ffffff', '#ffcf40', '#fff0a0'], wings6: true }
+      { look: 'angel', pal: ['#ffe8d0', '#c8a888', '#ffffff', '#ffd36d', '#fff6c0'], child: true },
+      { look: 'angel', pal: ['#f0e6c8', '#b8a878', '#ffffff', '#ffd36d', '#fff6c0'], armor: true },
+      { look: 'horror', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#ffffff', '#fff6c0'], style: 'eye' },
+      {
+        look: 'golem',
+        pal: ['#f4f0e4', '#c4baa0', '#ffffff', '#ffd36d', '#ffe680'],
+        style: 'statue',
+        halo: true
+      },
+      {
+        look: 'caster',
+        pal: ['#f8f4ec', '#c8c0b0', '#ffffff', '#c4a0ff', '#fff6c0'],
+        head: 'halo',
+        face: 'human',
+        hold: 'book'
+      },
+      {
+        look: 'angel',
+        pal: ['#ffffff', '#d8cfa8', '#ffffff', '#ffcf40', '#fff0a0'],
+        wings6: true,
+        crown: true
+      }
     ],
     secrets: [
-      { look: 'angel', pal: ['#3a3040', '#1a141e', '#6a5a72', '#c4a0ff', '#ff5070'] },
-      { look: 'angel', pal: ['#c8e0ff', '#7a90c0', '#ffffff', '#c4a0ff', '#ffffff'], wings6: true }
+      {
+        look: 'angel',
+        pal: ['#3a3040', '#1a141e', '#6a5a72', '#c4a0ff', '#ff5070'],
+        dark: true,
+        hold: 'greatsword'
+      },
+      {
+        look: 'angel',
+        pal: ['#c8e0ff', '#7a90c0', '#ffffff', '#c4a0ff', '#ffffff'],
+        wings6: true,
+        armor: true,
+        hold: 'spear'
+      }
     ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.

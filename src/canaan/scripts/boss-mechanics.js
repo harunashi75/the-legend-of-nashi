@@ -53,6 +53,7 @@
         mobColor: type.pal[0],
         look: type.look,
         pal: type.pal,
+        lookOpts: type,
         r: 13,
         cd: 1,
         g: 0,

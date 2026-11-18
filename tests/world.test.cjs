@@ -119,8 +119,10 @@ test('Monde au niveau des donjons : créatures détaillées, textures des biomes
  // Chaque créature des biomes reçoit une silhouette dédiée, plus variée que l'ancien jeu de sprites.
  const looks=JSON.parse(run("JSON.stringify(ZONES.flatMap(z=>z.mobs).map(t=>{const m={t,x:0,y:0,hp:1,mhp:1};drawCanaanActor(ctx,m);return [t,m.look]}))"));
  assert.ok(looks.every(([,l])=>l),JSON.stringify(looks));
- assert.ok(new Set(looks.map(([,l])=>l)).size>=10,JSON.stringify(looks));
- assert.deepEqual(Object.fromEntries(looks.filter(([t])=>['Slime','Loup','Ours','Scorpion','Minotaure','Bandit'].includes(t))),{Slime:'slime',Loup:'quad',Ours:'quad',Scorpion:'scorpion',Minotaure:'brute',Bandit:'rogue'});
+ assert.ok(new Set(looks.map(([,l])=>l)).size>=19,JSON.stringify(looks));
+ assert.deepEqual(Object.fromEntries(looks.filter(([t])=>['Slime','Loup','Sanglier','Ours','Scorpion','Minotaure','Bandit'].includes(t))),{Slime:'slime',Loup:'wolf',Sanglier:'boar',Ours:'bear',Scorpion:'scorpion',Minotaure:'minotaur',Bandit:'bandit'});
+ // Une élite porte le nom de sa version d'élite.
+ assert.equal(run("mobTitle({t:'Loup',elite:true})"),'Loup alpha');assert.equal(run("mobTitle({t:'Loup'})"),'Loup');
  // Boss mondiaux : apparence propre à chacun.
  run('monsters=[];worldBossTimers={};instanceState=null;spawnWorldBosses();monsters.forEach(m=>drawCanaanActor(ctx,m))');
  assert.equal(run("monsters.filter(m=>m.worldBoss).every(m=>m.look&&m.pal)"),true);

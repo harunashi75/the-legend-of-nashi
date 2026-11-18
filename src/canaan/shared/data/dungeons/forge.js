@@ -47,15 +47,27 @@ export default {
       {
         name: 'Dragonnet ardent',
         look: 'dragon',
-        pal: ['#c4462a', '#7c2412', '#f08050', '#ffcf5a', '#fff09a']
+        pal: ['#c4462a', '#7c2412', '#f08050', '#ffcf5a', '#fff09a'],
+        young: true
       }
     ],
     bosses: [
-      { look: 'brute', pal: ['#7a4a30', '#4a2a18', '#a87050', '#ff8a3c', '#ffd36b'], heavy: true },
-      { look: 'golem', pal: ['#3a2a26', '#1e1412', '#5a3d33', '#ff6a1f', '#ffd36b'] },
-      { look: 'dragon', pal: ['#d0401c', '#7a1e0c', '#ff8a4a', '#ffd36b', '#fff6b0'] }
+      {
+        look: 'humanoid',
+        pal: ['#7a4a30', '#4a2a18', '#a87050', '#ff8a3c', '#ffd36b'],
+        build: 'big',
+        bare: true,
+        skin: '#a87a5a',
+        beard: '#3a2418',
+        head: 'bandana',
+        hold: 'hammer',
+        kilt: '#4a3020',
+        barefoot: false
+      },
+      { look: 'elemental', pal: ['#3a2a26', '#1e1412', '#5a3d33', '#ff6a1f', '#ffd36b'], rock: true },
+      { look: 'dragon', pal: ['#d0401c', '#7a1e0c', '#ff8a4a', '#ffd36b', '#fff6b0'], elite: true }
     ],
-    secrets: [{ look: 'scorpion', pal: ['#1e1a22', '#0c0a10', '#3e3446', '#ff6a1f', '#ffd36b'] }]
+    secrets: [{ look: 'basilisk', pal: ['#1e1a22', '#0c0a10', '#3e3446', '#ff6a1f', '#ffd36b'], elite: true }]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
   palette: {

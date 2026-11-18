@@ -730,7 +730,7 @@
           arenaClone: true,
           shotClock: 1 + k * 0.4,
           expires: run.clock + 12,
-          look: 'horror',
+          look: 'soul',
           pal: ['#2a1840', '#120a20', '#6a3a9a', '#c050ff', '#ffffff'],
           lookOpts: {}
         });

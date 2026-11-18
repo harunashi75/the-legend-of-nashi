@@ -47,20 +47,41 @@ export default {
       {
         name: 'Garde de pierre',
         look: 'golem',
-        pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff']
+        pal: ['#7a8088', '#4e545c', '#a8b0b8', '#8ac8e8', '#e0f8ff'],
+        style: 'statue'
       },
       {
         name: 'Esprit d’Ombral',
-        look: 'spirit',
-        pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff']
+        look: 'ghost',
+        pal: ['#6aa8d8', '#3a6a98', '#c8e8ff', '#ffd36d', '#ffffff'],
+        weed: true
       }
     ],
     bosses: [
-      { look: 'robed', pal: ['#3a4a5a', '#1e2834', '#5a6e84', '#8ac8e8', '#d8f0ff'], hood: true },
-      { look: 'golem', pal: ['#2a3038', '#14181e', '#4a5260', '#8ac8e8', '#d8f0ff'], heavy: true },
-      { look: 'knight', pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'], crown: true }
+      {
+        look: 'caster',
+        pal: ['#3a4a5a', '#1e2834', '#5a6e84', '#8ac8e8', '#d8f0ff'],
+        hold: 'spear',
+        weed: true
+      },
+      {
+        look: 'golem',
+        pal: ['#2a3038', '#14181e', '#4a5260', '#8ac8e8', '#d8f0ff'],
+        style: 'statue',
+        elite: true
+      },
+      {
+        look: 'dwarf',
+        pal: ['#4a5a6e', '#2a3444', '#7a8ca4', '#c9a24a', '#8ad8ff'],
+        head: 'crown',
+        beard: '#d8d8e0',
+        hold: 'greataxe',
+        cape: '#1a2a4a'
+      }
     ],
-    secrets: [{ look: 'spirit', pal: ['#4a7a8a', '#2a4a54', '#7ab0c0', '#8ac8e8', '#ffffff'], crown: true }]
+    secrets: [
+      { look: 'ghost', pal: ['#4a7a8a', '#2a4a54', '#7ab0c0', '#8ac8e8', '#ffffff'], crown: true, weed: true }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules,
   // entrance (entrée sur l'île dessinée comme celle de cette instance).

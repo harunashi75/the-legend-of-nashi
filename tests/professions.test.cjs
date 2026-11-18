@@ -247,7 +247,7 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  fire(g,'keydown',{key:'Y'});assert.equal(run('modalOpen()'),false,'Y referme le carnet');
  click('toggleAchievements');assert.equal(carnet(),true,'le bouton ouvre le carnet');run('closePanels()');
  // Bestiaire : monstres du monde, créatures des instances, boss mondiaux, boss d'instance et de l'Arène.
- assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[22,16,27,12,72,12]');
+ assert.equal(run('JSON.stringify(["mob","under","dungeon","world","boss","arena"].map(k=>CANAAN_ACHIEVEMENTS.catalog().filter(b=>b.group===k).length))'),'[23,16,28,12,72,12]');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Loup"})'),'m:Loup');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"x",worldBoss:true,worldBossId:"fenrir"})'),'w:fenrir');
  assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Le Roi Sanglant",boss:true})'),'b:Le Roi Sanglant');assert.equal(run('CANAAN_ACHIEVEMENTS.beastKey({t:"Clone",arenaClone:true})'),null);
  run('started=true;paused=false;game.hero.level=5;game.hero.kills=0;P.gold=0;game.hero.inventory=[];game.hero.equipment.weapon={id:"w",slot:"weapon",level:5,rarity:"Commun",weaponType:"bow"};toast=()=>{}');

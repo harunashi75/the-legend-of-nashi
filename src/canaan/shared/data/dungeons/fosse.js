@@ -39,19 +39,49 @@ export default {
   // l'ordre de rules.bosses et rules.secrets. Palettes : [principale, sombre, claire, accent, yeux].
   actors: {
     mobs: [
-      { name: 'Âme damnée', look: 'spirit', pal: ['#8a6ab0', '#4a3a68', '#c4a8ec', '#e88aff', '#f4d0ff'] },
+      {
+        name: 'Âme damnée',
+        look: 'soul',
+        pal: ['#8a6ab0', '#4a3a68', '#c4a8ec', '#e88aff', '#f4d0ff'],
+        chains: true,
+        wail: true
+      },
       {
         name: 'Geôlier de la Fosse',
-        look: 'brute',
-        pal: ['#5a4a4a', '#352a2a', '#7c6a6a', '#8a2a2a', '#ff4a4a']
+        look: 'humanoid',
+        pal: ['#5a4a4a', '#352a2a', '#7c6a6a', '#8a2a2a', '#ff4a4a'],
+        build: 'stocky',
+        head: 'hood',
+        face: 'mask',
+        hold: 'flail',
+        off: 'chain'
       }
     ],
     bosses: [
-      { look: 'knight', pal: ['#3a3a40', '#1e1e22', '#5e5e66', '#e88aff', '#f4d0ff'], heavy: true },
-      { look: 'spirit', pal: ['#6a5070', '#3a2840', '#a080b0', '#e88aff', '#ffffff'] },
-      { look: 'brute', pal: ['#4a3438', '#2a1c20', '#6e5056', '#c03040', '#ff5050'] }
+      {
+        look: 'knight',
+        pal: ['#3a3a40', '#1e1e22', '#5e5e66', '#e88aff', '#f4d0ff'],
+        chains: true,
+        hold: 'flail',
+        off: 'chain'
+      },
+      { look: 'ghost', pal: ['#6a5070', '#3a2840', '#a080b0', '#e88aff', '#ffffff'], hands: true },
+      {
+        look: 'humanoid',
+        pal: ['#4a3438', '#2a1c20', '#6e5056', '#c03040', '#ff5050'],
+        build: 'big',
+        head: 'cowl',
+        face: 'shadow',
+        bare: true,
+        skin: '#b8907a',
+        hold: 'greataxe',
+        kilt: '#2a1a1a',
+        barefoot: true
+      }
     ],
-    secrets: [{ look: 'horror', pal: ['#1e1420', '#0c080e', '#3e2a42', '#e88aff', '#ffd0ff'] }]
+    secrets: [
+      { look: 'horror', pal: ['#1e1420', '#0c080e', '#3e2a42', '#e88aff', '#ffd0ff'], style: 'tentacle' }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
   palette: {

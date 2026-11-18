@@ -70,24 +70,52 @@ export default {
   // l'ordre de rules.bosses et rules.secrets. Palettes : [principale, sombre, claire, accent, yeux].
   actors: {
     mobs: [
-      { name: 'Juge céleste', look: 'angel', pal: ['#fff0a8', '#c4aa50', '#ffffff', '#9fd8ff', '#ffffff'] },
+      {
+        name: 'Juge céleste',
+        look: 'angel',
+        pal: ['#fff0a8', '#c4aa50', '#ffffff', '#9fd8ff', '#ffffff'],
+        blind: true
+      },
       {
         name: 'Héraut stellaire',
-        look: 'spirit',
-        pal: ['#9fd8ff', '#4a7ab0', '#e0f4ff', '#fff0a8', '#ffffff']
+        look: 'wisp',
+        pal: ['#9fd8ff', '#4a7ab0', '#e0f4ff', '#fff0a8', '#ffffff'],
+        star: true
       }
     ],
     bosses: [
-      { look: 'spirit', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'] },
-      { look: 'angel', pal: ['#c8d8ff', '#7a8ac0', '#ffffff', '#9fd8ff', '#e0f4ff'] },
-      { look: 'golem', pal: ['#2a2e60', '#1a1c40', '#4a50a0', '#fff0a8', '#ffffff'], halo: true },
-      { look: 'golem', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'], halo: true },
-      { look: 'robed', pal: ['#1a1c40', '#0c0e24', '#3a3e80', '#fff0a8', '#ffffff'], crown: true },
-      { look: 'angel', pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'], wings6: true }
+      {
+        look: 'caster',
+        pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'],
+        head: 'halo',
+        face: 'human',
+        hold: 'staff',
+        off: 'orb'
+      },
+      { look: 'angel', pal: ['#c8d8ff', '#7a8ac0', '#ffffff', '#9fd8ff', '#e0f4ff'], armor: true },
+      { look: 'astrolabe', pal: ['#2a2e60', '#1a1c40', '#4a50a0', '#fff0a8', '#ffffff'] },
+      { look: 'scales', pal: ['#d4aa3a', '#8a6a1a', '#fff0a8', '#9fd8ff', '#ffffff'] },
+      {
+        look: 'humanoid',
+        pal: ['#1a1c40', '#0c0e24', '#3a3e80', '#fff0a8', '#ffffff'],
+        robe: true,
+        face: 'blind',
+        head: 'mitre',
+        hold: 'scales',
+        cape: '#1a1a4a'
+      },
+      {
+        look: 'angel',
+        pal: ['#fff8d8', '#c8b070', '#ffffff', '#fff0a8', '#ffffff'],
+        wings6: true,
+        crown: true,
+        armor: true,
+        hold: 'greatsword'
+      }
     ],
     secrets: [
-      { look: 'dragon', pal: ['#c8303a', '#7a1018', '#ff7060', '#fff0a8', '#ffffff'] },
-      { look: 'spirit', pal: ['#ffffff', '#d8d4f0', '#ffffff', '#fff0a8', '#9fd8ff'] }
+      { look: 'dragon', pal: ['#c8303a', '#7a1018', '#ff7060', '#fff0a8', '#ffffff'], stars: true },
+      { look: 'wisp', pal: ['#ffffff', '#d8d4f0', '#ffffff', '#fff0a8', '#9fd8ff'], elite: true }
     ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.

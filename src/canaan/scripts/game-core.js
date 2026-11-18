@@ -1226,7 +1226,7 @@ function draw() {
     // Les boss ont leur barre en haut de l'écran ; les autres, au-dessus de leur sprite.
     if (m.boss || m.worldBoss) return;
     const top = m.y - (m.elite ? 88 : 64);
-    if (m.elite) ctx.fillText(m.t, m.x, top - 6);
+    if (m.elite) ctx.fillText(mobTitle(m), m.x, top - 6);
     ctx.fillStyle = '#261d2b';
     ctx.fillRect(m.x - 22, top, 44, 5);
     ctx.fillStyle = '#f36b74';

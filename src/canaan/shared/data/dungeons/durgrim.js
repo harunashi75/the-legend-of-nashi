@@ -45,22 +45,48 @@ export default {
   actors: {
     mobs: [
       {
-        name: 'Mineur maudit',
+        name: 'Mineur nain maudit',
         look: 'skeleton',
-        pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040']
+        pal: ['#c8b898', '#7a6a50', '#ece0c0', '#8a5a2a', '#ffb040'],
+        head: 'miner',
+        beard: '#b8ac90',
+        hold: 'pickaxe',
+        off: 'lantern'
       },
       {
         name: 'Taupe des galeries',
-        look: 'beast',
+        look: 'mole',
         pal: ['#5a4434', '#3a2a20', '#7e6450', '#f0b0a0', '#ff8a3a']
       }
     ],
     bosses: [
-      { look: 'brute', pal: ['#7a6048', '#4a3a2a', '#a0866a', '#e0a060', '#ffd080'], tusks: true },
-      { look: 'golem', pal: ['#5e5a5a', '#3a3636', '#86807a', '#e0a060', '#ffd080'] },
-      { look: 'brute', pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'], horns: true }
+      {
+        look: 'dwarf',
+        pal: ['#7a6048', '#4a3a2a', '#a0866a', '#e0a060', '#ffd080'],
+        hold: 'pickaxe',
+        face: 'shadow'
+      },
+      { look: 'drill', pal: ['#5e5a5a', '#3a3636', '#86807a', '#e0a060', '#ffd080'] },
+      {
+        look: 'dwarf',
+        pal: ['#6a5040', '#40302a', '#927060', '#e0a060', '#ffd080'],
+        head: 'horned',
+        hold: 'greataxe',
+        cape: '#3a2a20',
+        elite: true
+      }
     ],
-    secrets: [{ look: 'skeleton', pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'], crown: true }]
+    secrets: [
+      {
+        look: 'skeleton',
+        pal: ['#c8b8a0', '#806e58', '#ece0c8', '#e0a060', '#ffd080'],
+        head: 'helm',
+        beard: '#c8bca0',
+        hold: 'hammer',
+        off: null,
+        rags: '#4a4038'
+      }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules,
   // entrance (entrée sur l'île dessinée comme celle de cette instance).

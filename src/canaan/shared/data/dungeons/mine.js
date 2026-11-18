@@ -39,24 +39,49 @@ export default {
   // l'ordre de rules.bosses et rules.secrets. Palettes : [principale, sombre, claire, accent, yeux].
   actors: {
     mobs: [
-      { name: 'Mineur maudit', look: 'brute', pal: ['#6b7a8c', '#3d4652', '#93a3b5', '#c9a24a', '#9fe8ff'] },
+      {
+        name: 'Mineur maudit',
+        look: 'humanoid',
+        pal: ['#6b7a8c', '#3d4652', '#93a3b5', '#c9a24a', '#9fe8ff'],
+        build: 'stocky',
+        head: 'miner',
+        skin: '#9aa48c',
+        hold: 'pickaxe',
+        armsBare: true
+      },
       {
         name: 'Kobold des galeries',
-        look: 'imp',
+        look: 'kobold',
         pal: ['#a67c4f', '#6e5033', '#c9a074', '#e0d060', '#ffd23f']
       }
     ],
     bosses: [
       {
-        look: 'imp',
+        look: 'kobold',
         pal: ['#8a7a5a', '#4e4430', '#b0a07a', '#c9a24a', '#9fe8ff'],
-        nowings: true,
-        crown: true
+        head: 'crown',
+        hold: 'whip',
+        elite: true
       },
-      { look: 'spider', pal: ['#3d4652', '#22282e', '#6a7a8c', '#9fe8ff', '#c8f7ff'] },
-      { look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'] }
+      {
+        look: 'spider',
+        pal: ['#3d4652', '#22282e', '#6a7a8c', '#9fe8ff', '#c8f7ff'],
+        hairy: true,
+        elite: true
+      },
+      { look: 'golem', pal: ['#9fb6c9', '#5c6f80', '#e3f2ff', '#7de0ff', '#c8f7ff'], style: 'metal' }
     ],
-    secrets: [{ look: 'robed', pal: ['#2a2e36', '#14161a', '#4a5260', '#ffcf6a', '#ffffff'], hood: true }]
+    secrets: [
+      {
+        look: 'humanoid',
+        pal: ['#2a2e36', '#14161a', '#4a5260', '#ffcf6a', '#ffffff'],
+        head: 'miner',
+        face: 'shadow',
+        hold: 'pickaxe',
+        off: 'lantern',
+        cape: '#14161a'
+      }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
   palette: {

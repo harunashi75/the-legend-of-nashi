@@ -41,21 +41,52 @@ export default {
     mobs: [
       {
         name: 'Pénitent flagellant',
-        look: 'robed',
+        look: 'penitent',
         pal: ['#6b5a48', '#463a2e', '#8f7b64', '#a03030', '#ff6040']
       },
       {
         name: 'Chevalier spectral',
         look: 'knight',
-        pal: ['#8d9ac4', '#56608a', '#c9d3f0', '#ab94ee', '#d6ccff']
+        pal: ['#8d9ac4', '#56608a', '#c9d3f0', '#ab94ee', '#d6ccff'],
+        spectral: true
       }
     ],
     bosses: [
-      { look: 'brute', pal: ['#5a5560', '#33303a', '#807a8a', '#b79cff', '#e2d4ff'], hood: true },
-      { look: 'robed', pal: ['#e8e4f0', '#a8a0b8', '#ffffff', '#5a161a', '#b79cff'], hood: true },
-      { look: 'knight', pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'], hood: true }
+      {
+        look: 'ogre',
+        pal: ['#5a5560', '#33303a', '#807a8a', '#b79cff', '#e2d4ff'],
+        hold: 'whip',
+        off: 'chain'
+      },
+      {
+        look: 'caster',
+        pal: ['#e8e4f0', '#a8a0b8', '#ffffff', '#5a161a', '#b79cff'],
+        head: 'veil',
+        face: 'human',
+        hold: 'censer',
+        off: 'book'
+      },
+      {
+        look: 'humanoid',
+        pal: ['#4a4458', '#2a2636', '#7c7490', '#b79cff', '#e2d4ff'],
+        robe: true,
+        head: 'mitre',
+        hatColor: '#a82a2a',
+        hold: 'flail',
+        off: 'book',
+        cape: '#6a1a1a'
+      }
     ],
-    secrets: [{ look: 'skeleton', pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'], hood: true }]
+    secrets: [
+      {
+        look: 'skeleton',
+        pal: ['#8a8494', '#4a4652', '#b8b2c4', '#b79cff', '#e2d4ff'],
+        head: 'hood',
+        hold: 'whip',
+        off: null,
+        rags: '#5a4a3a'
+      }
+    ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
   palette: {

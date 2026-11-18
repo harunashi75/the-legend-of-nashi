@@ -815,6 +815,7 @@
           mobColor: type.pal[0],
           look: type.look,
           pal: type.pal,
+          lookOpts: type,
           r: 13,
           cd: 0,
           g: 12 + i * 5
@@ -832,6 +833,7 @@
           mobColor: type.pal[0],
           look: type.look,
           pal: type.pal,
+          lookOpts: type,
           r: 16,
           cd: 0,
           g: 30 + i * 8,

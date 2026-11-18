@@ -37,6 +37,8 @@ import * as icons from './client/icons/icons.js';
 import * as skillIcons from './client/icons/skill-icons.js';
 import * as buildingArt from './client/art/building-art.js';
 import * as dwarfArt from './client/art/dwarf-art.js';
+// Art des créatures : un seul nom global, comme le kit.
+import { CANAAN_CREATURE_ART } from './client/art/creature-art.js';
 import * as preferences from './client/preferences.js';
 import * as music from './client/audio/music.js';
 import * as gamepad from './client/input/gamepad.js';
@@ -76,6 +78,7 @@ Object.assign(
   skillIcons,
   buildingArt,
   dwarfArt,
+  { CANAAN_CREATURE_ART },
   preferences,
   music,
   gamepad,

@@ -47,20 +47,52 @@ export default {
   // l'ordre de rules.bosses et rules.secrets. Palettes : [principale, sombre, claire, accent, yeux].
   actors: {
     mobs: [
-      { name: 'Rouage animé', look: 'golem', pal: ['#b08a3a', '#6e5420', '#e0c070', '#7de0ff', '#c8f7ff'] },
-      { name: 'Ombre astrale', look: 'spirit', pal: ['#ed8bc1', '#8a4a7a', '#ffc0e4', '#9fd8ff', '#ffffff'] }
+      { name: 'Rouage animé', look: 'gear', pal: ['#b08a3a', '#6e5420', '#e0c070', '#7de0ff', '#c8f7ff'] },
+      {
+        name: 'Ombre astrale',
+        look: 'ghost',
+        pal: ['#ed8bc1', '#8a4a7a', '#ffc0e4', '#9fd8ff', '#ffffff'],
+        eclipse: true
+      }
     ],
     bosses: [
-      { look: 'imp', pal: ['#a07a3a', '#5a4220', '#d0aa60', '#7de0ff', '#d0faff'], nowings: true },
-      { look: 'golem', pal: ['#c09a40', '#705a22', '#f0d080', '#7de0ff', '#d0faff'] },
-      { look: 'golem', pal: ['#e8d0a0', '#a08a60', '#fff4d8', '#ff7fa7', '#ffd0e0'], halo: true },
-      { look: 'robed', pal: ['#3a4a9a', '#1e2860', '#6a7ad8', '#ffd36d', '#9fe8ff'], halo: true },
-      { look: 'spirit', pal: ['#5a6ac8', '#2a3470', '#9aa8ff', '#7de0ff', '#ffffff'] },
-      { look: 'horror', pal: ['#2a1a4a', '#140a2a', '#5a3a8a', '#ff7fa7', '#ffd0e0'] }
+      {
+        look: 'humanoid',
+        pal: ['#a07a3a', '#5a4220', '#d0aa60', '#7de0ff', '#d0faff'],
+        build: 'small',
+        head: 'goggles',
+        hold: 'wrench',
+        hair: '#e8e8e8'
+      },
+      {
+        look: 'golem',
+        pal: ['#c09a40', '#705a22', '#f0d080', '#7de0ff', '#d0faff'],
+        style: 'metal',
+        gear: true
+      },
+      { look: 'hourglass', pal: ['#e8d0a0', '#a08a60', '#fff4d8', '#ff7fa7', '#ffd0e0'] },
+      {
+        look: 'spider',
+        pal: ['#3a4a9a', '#1e2860', '#6a7ad8', '#ffd36d', '#9fe8ff'],
+        clock: true,
+        elite: true
+      },
+      { look: 'ghost', pal: ['#5a6ac8', '#2a3470', '#9aa8ff', '#7de0ff', '#ffffff'], hands: true },
+      {
+        look: 'horror',
+        pal: ['#2a1a4a', '#140a2a', '#5a3a8a', '#ff7fa7', '#ffd0e0'],
+        style: 'maw',
+        stars: true
+      }
     ],
     secrets: [
-      { look: 'flyer', pal: ['#7a5ad8', '#3a2a70', '#b8a0ff', '#7de0ff', '#ffffff'] },
-      { look: 'spirit', pal: ['#fff0d8', '#c8b090', '#ffffff', '#ff7fa7', '#7de0ff'] }
+      { look: 'soul', pal: ['#7a5ad8', '#3a2a70', '#b8a0ff', '#7de0ff', '#ffffff'] },
+      {
+        look: 'angel',
+        pal: ['#fff0d8', '#c8b090', '#ffffff', '#ff7fa7', '#7de0ff'],
+        child: true,
+        hold: 'orb'
+      }
     ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.

@@ -60,7 +60,8 @@
         name: t.name,
         where:
           (t.under === undefined ? 'Monde ouvert' : 'Tréfonds · ' + CANAAN_UNDER.BIOMES[t.under].name) +
-          ' · peut être une élite',
+          ' · élite : ' +
+          t.elite,
         look: { t: t.name, mobColor: t.color }
       });
     instances.forEach((d, i) =>
@@ -70,7 +71,7 @@
           group: 'dungeon',
           name: m.name,
           where: d.name,
-          look: { t: m.name, look: m.look, pal: m.pal, lookOpts: {} }
+          look: { t: m.name, look: m.look, pal: m.pal, lookOpts: m }
         })
       )
     );

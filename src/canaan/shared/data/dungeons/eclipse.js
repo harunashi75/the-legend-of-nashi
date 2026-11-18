@@ -42,17 +42,38 @@ export default {
     mobs: [
       {
         name: 'Acolyte de l’Éclipse',
-        look: 'robed',
-        pal: ['#3b2d55', '#22193a', '#5d4a80', '#e0b04a', '#ffb347']
+        look: 'caster',
+        pal: ['#3b2d55', '#22193a', '#5d4a80', '#e0b04a', '#ffb347'],
+        hold: 'censer',
+        off: 'book'
       },
-      { name: 'Ombre éclipsée', look: 'spirit', pal: ['#6a4f9a', '#3a2a5a', '#a58ad8', '#ffd36d', '#ffe9a0'] }
+      {
+        name: 'Ombre éclipsée',
+        look: 'ghost',
+        pal: ['#6a4f9a', '#3a2a5a', '#a58ad8', '#ffd36d', '#ffe9a0'],
+        eclipse: true
+      }
     ],
     bosses: [
-      { look: 'robed', pal: ['#3a2a5a', '#1e1530', '#6a5090', '#ff9955', '#ffcc88'], hood: true },
-      { look: 'golem', pal: ['#c89a40', '#7a5a22', '#f0d080', '#ffcc55', '#fff0b0'], halo: true },
-      { look: 'robed', pal: ['#1e1530', '#0f0a1c', '#4a3670', '#ffcc55', '#ffdd88'], halo: true }
+      {
+        look: 'caster',
+        pal: ['#3a2a5a', '#1e1530', '#6a5090', '#ff9955', '#ffcc88'],
+        hold: 'staff',
+        off: 'book',
+        cape: '#1a1424'
+      },
+      { look: 'golem', pal: ['#c89a40', '#7a5a22', '#f0d080', '#ffcc55', '#fff0b0'], style: 'sun' },
+      {
+        look: 'humanoid',
+        pal: ['#1e1530', '#0f0a1c', '#4a3670', '#ffcc55', '#ffdd88'],
+        robe: true,
+        face: 'blind',
+        hair: '#e8e0f0',
+        hold: 'orb',
+        head: 'halo'
+      }
     ],
-    secrets: [{ look: 'spirit', pal: ['#120a1c', '#06040c', '#3a2a5a', '#ff7a3a', '#ffb080'] }]
+    secrets: [{ look: 'horror', pal: ['#120a1c', '#06040c', '#3a2a5a', '#ff7a3a', '#ffb080'], style: 'void' }]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
   palette: {

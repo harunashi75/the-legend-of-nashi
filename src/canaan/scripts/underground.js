@@ -247,9 +247,9 @@
       id: 'u_gorgrath',
       name: 'Gorgrath, le Ver-Roi des Boues',
       biome: 0,
-      look: 'horror',
+      look: 'worm',
       pal: ['#9a6a3a', '#5a3a1e', '#c8965a', '#ffd36d', '#ffef60'],
-      opts: { heavy: true },
+      opts: { elite: true, crown: true },
       color: '#c8904a'
     },
     {
@@ -258,25 +258,25 @@
       biome: 1,
       look: 'golem',
       pal: ['#b8c0cc', '#6a7480', '#e8eef4', '#8ac8e8', '#ffffff'],
-      opts: { crown: true },
+      opts: { style: 'metal', crown: true },
       color: '#8ac8e8'
     },
     {
       id: 'u_morvane',
       name: 'Morvane, la Reine-Liche',
       biome: 2,
-      look: 'robed',
+      look: 'humanoid',
       pal: ['#3a3e4a', '#1e2028', '#6a7088', '#7affb0', '#d8fff0'],
-      opts: { crown: true },
+      opts: { robe: true, face: 'skull', head: 'crown', hold: 'staff', off: 'orb', cape: '#1e2028' },
       color: '#7affb0'
     },
     {
       id: 'u_sporemere',
       name: 'Sporemère, la Myconide Ancestrale',
       biome: 3,
-      look: 'golem',
+      look: 'mushroom',
       pal: ['#d04a7a', '#7a2048', '#f08ab0', '#f8e8c8', '#fff0a0'],
-      opts: { leafy: true, crown: true },
+      opts: { crown: true, sacs: true, elite: true },
       color: '#e870c0'
     }
   ];

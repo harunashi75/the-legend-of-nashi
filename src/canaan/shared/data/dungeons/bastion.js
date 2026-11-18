@@ -50,25 +50,81 @@ export default {
       {
         name: 'Garde sanglant',
         look: 'knight',
-        pal: ['#7a2a2a', '#4a1616', '#a84a44', '#d4a44a', '#ffcc66']
+        pal: ['#7a2a2a', '#4a1616', '#a84a44', '#d4a44a', '#ffcc66'],
+        hold: 'halberd',
+        off: null
       },
       {
         name: 'Vampire écarlate',
-        look: 'robed',
+        look: 'vampire',
         pal: ['#5a1420', '#330a12', '#8a2a36', '#e0c060', '#ff3040']
       }
     ],
     bosses: [
-      { look: 'quad', pal: ['#5a2020', '#300e0e', '#8a3a34', '#d4a44a', '#ff6040'] },
-      { look: 'knight', pal: ['#6a1c1c', '#3a0e0e', '#9a3a34', '#c0c0c8', '#ff6040'] },
-      { look: 'robed', pal: ['#4a0a16', '#24040a', '#7a1a2a', '#d4a44a', '#ff3050'], hood: true },
-      { look: 'robed', pal: ['#8a1428', '#4a0a16', '#c03a50', '#ffd36d', '#ff3050'], crown: true },
-      { look: 'brute', pal: ['#7a1a1a', '#420a0a', '#b03a34', '#ffd36d', '#ff8060'], heavy: true },
-      { look: 'knight', pal: ['#9a1a1a', '#550c0c', '#d04040', '#ffd36d', '#ffee88'], crown: true }
+      { look: 'hound', pal: ['#5a2020', '#300e0e', '#8a3a34', '#d4a44a', '#ff6040'], elite: true },
+      {
+        look: 'humanoid',
+        pal: ['#6a1c1c', '#3a0e0e', '#9a3a34', '#c0c0c8', '#ff6040'],
+        build: 'stocky',
+        head: 'hood',
+        face: 'mask',
+        hold: 'cleaver',
+        off: 'dagger',
+        armor: true
+      },
+      {
+        look: 'caster',
+        pal: ['#4a0a16', '#24040a', '#7a1a2a', '#d4a44a', '#ff3050'],
+        head: 'mitre',
+        hatColor: '#8a1428',
+        face: 'pale',
+        hold: 'censer',
+        off: 'book'
+      },
+      {
+        look: 'vampire',
+        pal: ['#8a1428', '#4a0a16', '#c03a50', '#ffd36d', '#ff3050'],
+        head: 'crown',
+        hair: '#a01828',
+        wings: 'demon',
+        hold: 'orb'
+      },
+      {
+        look: 'humanoid',
+        pal: ['#7a1a1a', '#420a0a', '#b03a34', '#ffd36d', '#ff8060'],
+        build: 'big',
+        armsBare: true,
+        skin: '#c89070',
+        head: 'horned',
+        face: 'helm',
+        armor: true,
+        hold: 'greatsword',
+        off: 'shield'
+      },
+      {
+        look: 'knight',
+        pal: ['#9a1a1a', '#550c0c', '#d04040', '#ffd36d', '#ffee88'],
+        build: 'big',
+        crown: true,
+        cape: '#8a1428',
+        hold: 'greatsword',
+        off: null
+      }
     ],
     secrets: [
-      { look: 'rogue', pal: ['#2a1a1a', '#140a0a', '#4a2a2a', '#c8303a', '#ff5050'] },
-      { look: 'spirit', pal: ['#f4f0f0', '#c8b8b8', '#ffffff', '#c8303a', '#ffd0d0'] }
+      {
+        look: 'humanoid',
+        pal: ['#2a1a1a', '#140a0a', '#4a2a2a', '#c8303a', '#ff5050'],
+        build: 'big',
+        head: 'hood',
+        hoodColor: '#5a0a12',
+        face: 'mask',
+        bare: true,
+        skin: '#c8a088',
+        hold: 'greatsword',
+        kilt: '#1a0a0a'
+      },
+      { look: 'ghost', pal: ['#f4f0f0', '#c8b8b8', '#ffffff', '#c8303a', '#ffd0d0'], veil: true }
     ]
   },
   // Apparence : sol, allées, murs, couleurs du danger, lumière, flammes, runes, bannières, piliers, particules.
