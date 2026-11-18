@@ -1,4 +1,4 @@
-/* Rubis (onglet Rubis de la fiche du personnage) et Arène des Épreuves (portail, records, récompense finale). */
+/* Runes (onglet Runes de la fiche du personnage ; « rubis » dans le code) et Arène des Épreuves (portail, records, récompense finale). */
 
 /* Colonne gauche de la fiche : le personnage (onglet Équipement) ou ses Rubis et leurs effets (onglet Rubis). */
 #window .character-left {
@@ -29,7 +29,8 @@
   font-size: calc(12px * var(--font-scale));
 }
 
-/* Gemme : facette taillée selon la famille, dégradé lumineux et reflet. */
+/* Pierre runique : une pierre grise taillée selon la famille (menhir, stèle, galet, éclat, tablette, obélisque),
+   cerclée d'un liseré qui luit de la couleur de la famille ; l'illustration de la Rune est gravée par-dessus. */
 .rubis-gem {
   position: relative;
   display: inline-grid;
@@ -37,47 +38,56 @@
   width: 30px;
   height: 30px;
   flex: none;
+  --shape: polygon(12% 4%, 86% 0, 100% 14%, 96% 88%, 84% 100%, 10% 96%, 0 84%, 4% 16%);
 }
 .rubis-gem.big {
   width: 44px;
   height: 44px;
 }
+/* Le liseré et la pierre sont découpés ; la lueur, posée sur leur parent, suit leur silhouette. */
 .rubis-gem i {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at 32% 26%,
-    #ffffff 0 7%,
-    var(--gem-l) 18%,
-    var(--gem) 55%,
-    var(--gem-d) 100%
-  );
-  filter: drop-shadow(0 0 1px #000) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 0 2px var(--gem)) drop-shadow(0 2px 1px rgba(0, 0, 0, 0.7));
 }
+.rubis-gem i::before,
 .rubis-gem i::after {
   content: '';
   position: absolute;
-  inset: 18% 46% 52% 20%;
-  background: rgba(255, 255, 255, 0.55);
-  transform: skewX(-18deg);
+  clip-path: var(--shape);
 }
-.rubis-gem.fam0 i {
-  clip-path: polygon(50% 0, 95% 40%, 50% 100%, 5% 40%);
+.rubis-gem i::before {
+  inset: 0;
+  background: linear-gradient(160deg, var(--gem-l), var(--gem) 55%, var(--gem-d));
 }
-.rubis-gem.fam1 i {
-  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%);
+.rubis-gem i::after {
+  inset: 2px;
+  background:
+    radial-gradient(circle at 72% 68%, rgba(0, 0, 0, 0.28) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 26% 74%, rgba(0, 0, 0, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 64% 22%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 32% 26%, #a9afb9 0, #767c88 48%, #40444d 100%);
 }
-.rubis-gem.fam2 i {
-  border-radius: 50%;
+.rubis-gem.big i::after {
+  inset: 3px;
 }
-.rubis-gem.fam3 i {
-  clip-path: polygon(50% 0, 100% 32%, 85% 100%, 15% 100%, 0 32%);
+.rubis-gem.fam0 {
+  --shape: polygon(50% 0, 78% 14%, 90% 55%, 82% 100%, 18% 100%, 10% 55%, 22% 14%);
 }
-.rubis-gem.fam4 i {
-  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+.rubis-gem.fam1 {
+  --shape: polygon(24% 3%, 50% 0, 76% 3%, 94% 16%, 99% 40%, 95% 100%, 5% 100%, 1% 40%, 6% 16%);
 }
-.rubis-gem.fam5 i {
-  clip-path: polygon(50% 0, 63% 33%, 100% 38%, 72% 62%, 80% 100%, 50% 80%, 20% 100%, 28% 62%, 0 38%, 37% 33%);
+.rubis-gem.fam2 {
+  --shape: ellipse(49% 45% at 50% 53%);
+}
+.rubis-gem.fam3 {
+  --shape: polygon(30% 0, 76% 5%, 100% 38%, 90% 90%, 42% 100%, 4% 80%, 0 30%);
+}
+.rubis-gem.fam4 {
+  --shape: polygon(12% 4%, 86% 0, 100% 14%, 96% 88%, 84% 100%, 10% 96%, 0 84%, 4% 16%);
+}
+.rubis-gem.fam5 {
+  --shape: polygon(50% 0, 80% 12%, 94% 100%, 6% 100%, 20% 12%);
 }
 .rubis-gem b {
   position: relative;

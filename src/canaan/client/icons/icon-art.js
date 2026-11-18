@@ -1,5 +1,5 @@
 // Icônes illustrées du jeu (32 × 32), dessinées en code pour ce qu'elles représentent : emplacements d'équipement,
-// familles d'armes, statistiques, les 48 Rubis et leurs familles, classes et éléments, passifs d'artéfact,
+// familles d'armes, statistiques, les 48 Runes et leurs familles, classes et éléments, passifs d'artéfact,
 // difficultés, poissons, viandes, métiers et boutons des menus. Les données y renvoient par un repère ⟦nom⟧
 // (par exemple ⟦rubis_phenix⟧), que canaan-icons remplace par l'icône à l'affichage (interface et canevas).
 // Style commun : formes pleines en deux ou trois tons, contour sombre, reflets clairs.
@@ -124,7 +124,27 @@ const gemCut = (col, dark, x = 16, y = 16, k = 1) =>
       hi('M10 9 L13 9')
   );
 
+// Pierre runique dressée : pierre grise, mousse au pied, glyphe gravé qui luit (couleur du glyphe et de sa lueur).
+const RUNE_STONE = 'M8.5 29 L6.5 13 C6.5 6.5 10.5 2.5 16 2.5 C21.5 2.5 25.5 6.5 25.5 13 L23.5 29 Z';
+const glyph = (d, col, glow, w = 1.7) =>
+  l(d, glow, w + 2.6).replace('/>', ' opacity=".45"/>') + l(d, INK, w + 1.2) + l(d, col, w);
+const runeStone = (d, col, glow, stone = '#8e95a2', shade = '#666d7a') =>
+  p(RUNE_STONE, stone) +
+  s('M16 2.5 C21.5 2.5 25.5 6.5 25.5 13 L23.5 29 L16 29 Z', shade) +
+  l('M9 18 L11 19.5 M21.5 8 L23 9.5 M20.5 24 L22.5 23', '#4e5460', 1) +
+  hi('M8.6 12 C8.8 8.5 10.6 5.8 13.2 4.7') +
+  s(
+    'M7.8 27 C10 25.6 12 26.4 13.5 27.4 C15.5 26 18.5 26 20 27.2 C21.5 26.2 23 26.4 24 27.2 L23.5 29 L8.5 29 Z',
+    '#5f9a4a'
+  ) +
+  glyph(d, col, glow);
+// Glyphes gravés (inspirés des runes anciennes, simplifiés pour 32 × 32).
+const GLYPH_R = 'M13 8 L13 23 M13 8 L19 11 L13 14.5 L19.5 23';
+const GLYPH_ALGIZ = 'M16 9 L16 23 M16 14 L11.5 9.5 M16 14 L20.5 9.5';
+
 const A = {
+  // ---------------------------------------------------------------- Pierre runique (les Runes du héros)
+  rune: runeStone(GLYPH_R, '#e8fbff', '#5ad0ff'),
   // ---------------------------------------------------------------- Emplacements d'équipement
   slot_weapon: g('translate(16 16) scale(1.22) translate(-16 -16)', blade('rotate(40 16 16)')),
   slot_armor:
@@ -358,7 +378,7 @@ const A = {
       '#e8fffb',
       1.8
     ),
-  // ---------------------------------------------------------------- Familles de Rubis
+  // ---------------------------------------------------------------- Familles de Runes
   fam_offense:
     g(
       'translate(16 16) scale(1.08) translate(-16 -16)',
@@ -367,7 +387,7 @@ const A = {
   fam_defense:
     p(shieldShape, BL) +
     s('M16 3 C20 5 24 5 27 5.5 C27 17 23 24.5 16 29 Z', BLD) +
-    gemCut(RE, RED, 16, 14, 0.42) +
+    glyph(GLYPH_ALGIZ, '#e8f4ff', '#8ac8ff') +
     hi('M8 7.5 C10 7.2 12 6.6 14 5.8'),
   fam_support:
     p(heartShape, GR) +
@@ -394,7 +414,9 @@ const A = {
     c(16, 16, 1.8, GO) +
     l('M16 2.5 L16 4.5 M29.5 16 L27.5 16 M16 29.5 L16 27.5 M2.5 16 L4.5 16', INK, 1.6),
   fam_special:
-    gemCut('#c890ff', '#7040b8') + p(star(4, 4, 1, 26, 6), '#fff6d0') + p(star(4, 3, 0.8, 6, 25), '#fff6d0'),
+    runeStone(GLYPH_R, '#f4e8ff', '#c890ff', '#9a8ab0', '#6e6088') +
+    p(star(4, 4, 1, 27, 5), '#fff6d0') +
+    p(star(4, 3, 0.8, 4.5, 21), '#fff6d0'),
   // ---------------------------------------------------------------- Rubis offensifs
   rubis_berserker:
     p('M6 18 C6 10 10.5 6 16 6 C21.5 6 26 10 26 18 L26 22 L21 26 L11 26 L6 22 Z', STM) +

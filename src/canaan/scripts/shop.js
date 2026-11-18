@@ -109,7 +109,7 @@
     if (!p) return false;
     if (!CANAAN_BAG.sellable(p))
       return (
-        say(hero, (p.kind === 'rubis' ? '💎 ' : '🗝️ ') + CANAAN_BAG.info(p).name + ' : ne se vend pas.'),
+        say(hero, (p.kind === 'rubis' ? '⟦rune⟧ ' : '🗝️ ') + CANAAN_BAG.info(p).name + ' : ne se vend pas.'),
         false
       );
     if (!nearMerchant(hero)) return (say(hero, '💰 Va voir un marchand pour vendre !'), false);

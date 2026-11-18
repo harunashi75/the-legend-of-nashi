@@ -723,7 +723,7 @@
     A(
       'magic',
       'm4',
-      '💎',
+      '⟦rune⟧',
       'Première Rune',
       'Équiper ta première Rune.',
       1,
@@ -734,7 +734,7 @@
     A(
       'magic',
       'm5',
-      '💎',
+      '⟦rune⟧',
       'Collection de runes',
       'Posséder 20 Runes différentes.',
       20,
@@ -745,7 +745,7 @@
     A(
       'magic',
       'm6',
-      '💎',
+      '⟦rune⟧',
       'Maître des runes',
       'Posséder les 48 Runes.',
       () => RUBIS_CATALOG.length,

@@ -253,7 +253,7 @@ test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le b
   // Victoire : un Rubis pour l'invité, annoncé chez lui et rangé dans sa collection.
   const owned0=guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)');
   host.run('{const b=CANAAN_ARENA.run().boss;canaanDamageMonster(b,b.hp+1e6,game.hero)}');await step(12);
-  assert.ok(guest.run('__toasts.some(t=>t.startsWith("💎 Rune obtenue"))'),'Rune annoncée à l’invité');
+  assert.ok(guest.run('__toasts.some(t=>t.startsWith("⟦rune⟧ Rune obtenue"))'),'Rune annoncée à l’invité');
   assert.equal(guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)'),owned0+1,'collection de l’invité');
   assert.equal(guest.run('game.hero.arena.best'),1,'record de l’invité');
   assert.equal(guest.run('(([x,y])=>game.world.tiles[y][x])('+gate+')'),20,'herse rouverte');

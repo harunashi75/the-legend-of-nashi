@@ -227,7 +227,7 @@
       ' / 10</small></button>' +
       '<button type="button" class="' +
       (rubis ? 'on' : '') +
-      '" data-action="characterSection" data-tab="rubis">💎 Runes <small>' +
+      '" data-action="characterSection" data-tab="rubis">⟦rune⟧ Runes <small>' +
       worn +
       ' / ' +
       window.CANAAN_RUBIS.slots +

@@ -833,7 +833,7 @@
       rec.best = Math.max(rec.best, wave);
       rec.lastBoss = m.t;
       const { rubis, fresh } = CANAAN_RUBIS.grant(null, hero),
-        text = '💎 Rune obtenue : ' + rubis.name + (fresh ? ' (nouvelle !)' : ' (doublon)');
+        text = '⟦rune⟧ Rune obtenue : ' + rubis.name + (fresh ? ' (nouvelle !)' : ' (doublon)');
       if (host) {
         run.banner = { id: rubis.id, fresh, until: run.clock + 5, wave };
         toast(text);
@@ -1602,7 +1602,7 @@
       text('🏆 L’ARÈNE EST VAINCUE', W / 2, H * 0.26, 34, '#ffd36d', 7);
       text('Retourne au portail de l’antichambre [E]', W / 2, H * 0.26 + 40, 16, '#fff2cb', 4);
     }
-    // Bandeau : Rubis obtenu ou nouvelle phase.
+    // Bandeau : Rune obtenue ou nouvelle phase.
     if (run.banner && run.clock < run.banner.until) {
       const k = Math.min(1, (run.banner.until - run.clock) / 0.5),
         y = H * 0.66;
@@ -1618,7 +1618,7 @@
         drawRubisGem(c, W / 2 - 180, y + 2, 56, r.id);
         c.textAlign = 'left';
         text(
-          '💎 RUBIS OBTENU' + (run.banner.fresh ? ' · NOUVEAU !' : ' · DOUBLON'),
+          '⟦rune⟧ RUNE OBTENUE' + (run.banner.fresh ? ' · NOUVELLE !' : ' · DOUBLON'),
           W / 2 - 140,
           y - 16,
           13,
@@ -1840,7 +1840,7 @@
     html +=
       '<div class="arena-actions"><button type="button" data-action="enterArena"' +
       (game.world.instance ? ' disabled' : '') +
-      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">💎 Préparer mes Runes</button></div>';
+      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">⟦rune⟧ Préparer mes Runes</button></div>';
     showPanel(html);
   }
   function choiceList() {
@@ -1878,7 +1878,7 @@
     records().pendingChoice = false;
     hideGearTooltip();
     closePanels();
-    toast('💎 Récompense finale : ' + r.name);
+    toast('⟦rune⟧ Récompense finale : ' + r.name);
     if (run) run.banner = { id, fresh: true, until: run.clock + 5 };
     saveGame();
     return true;

@@ -2544,8 +2544,9 @@ export default {
     '[E] at the antechamber portal to leave with your Runes',
   'L’ARÈNE EST VAINCUE': 'THE ARENA IS CONQUERED',
   'Retourne au portail de l’antichambre [E]': 'Return to the antechamber portal [E]',
-  'RUBIS OBTENU': 'RUBY OBTAINED',
+  'RUNE OBTENUE': 'RUNE OBTAINED',
   'NOUVEAU !': 'NEW!',
+  'NOUVELLE !': 'NEW!',
   'DOUBLON': 'DUPLICATE',
   'Soins −60 %': 'Healing −60%',
   '« L’Arène est ouverte à tous. La victoire, elle, se mérite. »':

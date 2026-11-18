@@ -689,7 +689,7 @@
         '<p class="rubis-lock">⚔️ Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
     return (
       '<div class="character-layout rubis-layout"><div class="character-left">' +
-      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>💎 Runes équipées</h3><span>' +
+      '<div class="rpg-paper rubis-paper"><div class="rubis-head"><h3>⟦rune⟧ Runes équipées</h3><span>' +
       count +
       '/' +
       SLOTS +
@@ -734,12 +734,12 @@
       if (gems().equipped.includes(id)) return false;
       const slot = gems().equipped.indexOf(null);
       if (slot < 0) {
-        notify(hero, '💎 Les 6 emplacements sont occupés : retire d’abord une Rune.');
+        notify(hero, '⟦rune⟧ Les 6 emplacements sont occupés : retire d’abord une Rune.');
         return false;
       }
       gems().equipped[slot] = id;
       refreshActive();
-      notify(hero, '💎 Rune ' + r.name + ' équipée');
+      notify(hero, '⟦rune⟧ Rune ' + r.name + ' équipée');
       if (hero !== game.hero) recomputeHeroStats(hero);
       return true;
     });
@@ -817,83 +817,98 @@
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }
-  // Gemme dessinée sur le canevas (annonces de l'Arène), même taille de facette que dans l'interface.
+  // Pierre runique dessinée sur le canevas (bandeau de l'Arène) : mêmes silhouettes que dans l'interface
+  // (styles/rubis-arena.css), liseré lumineux de la famille, pierre grise, puis l'illustration de la Rune.
+  const STONE_SHAPES = [
+    [
+      [50, 0],
+      [78, 14],
+      [90, 55],
+      [82, 100],
+      [18, 100],
+      [10, 55],
+      [22, 14]
+    ],
+    [
+      [24, 3],
+      [50, 0],
+      [76, 3],
+      [94, 16],
+      [99, 40],
+      [95, 100],
+      [5, 100],
+      [1, 40],
+      [6, 16]
+    ],
+    null,
+    [
+      [30, 0],
+      [76, 5],
+      [100, 38],
+      [90, 90],
+      [42, 100],
+      [4, 80],
+      [0, 30]
+    ],
+    [
+      [12, 4],
+      [86, 0],
+      [100, 14],
+      [96, 88],
+      [84, 100],
+      [10, 96],
+      [0, 84],
+      [4, 16]
+    ],
+    [
+      [50, 0],
+      [80, 12],
+      [94, 100],
+      [6, 100],
+      [20, 12]
+    ]
+  ];
   function drawRubisGem(c, x, y, size, id) {
     const r = BY_ID.get(id);
     if (!r) return;
     const f = FAMILIES[r.family],
-      s = size / 2;
-    const shapes = [
-      [
-        [0, -1],
-        [0.9, -0.2],
-        [0, 1],
-        [-0.9, -0.2]
-      ],
-      [
-        [-0.5, -0.9],
-        [0.5, -0.9],
-        [1, 0],
-        [0.5, 0.9],
-        [-0.5, 0.9],
-        [-1, 0]
-      ],
-      null,
-      [
-        [0, -1],
-        [1, -0.35],
-        [0.7, 1],
-        [-0.7, 1],
-        [-1, -0.35]
-      ],
-      [
-        [-0.4, -1],
-        [0.4, -1],
-        [1, -0.4],
-        [1, 0.4],
-        [0.4, 1],
-        [-0.4, 1],
-        [-1, 0.4],
-        [-1, -0.4]
-      ],
-      [
-        [0, -1],
-        [0.3, -0.3],
-        [1, -0.2],
-        [0.45, 0.25],
-        [0.6, 1],
-        [0, 0.55],
-        [-0.6, 1],
-        [-0.45, 0.25],
-        [-1, -0.2],
-        [-0.3, -0.3]
-      ]
-    ];
-    const path = () => {
+      pts = STONE_SHAPES[r.family];
+    // Silhouette réduite de k (k = 1 : liseré ; un peu moins : la pierre).
+    const path = k => {
+      const s = (size / 2) * k;
       c.beginPath();
-      const pts = shapes[r.family];
-      if (!pts) c.arc(x, y, s, 0, Math.PI * 2);
+      if (!pts) c.ellipse(x, y + s * 0.06, s * 0.98, s * 0.9, 0, 0, Math.PI * 2);
       else
-        pts.forEach(([px, py], k) =>
-          k ? c.lineTo(x + px * s, y + py * s) : c.moveTo(x + px * s, y + py * s)
-        );
+        pts.forEach(([px, py], i) => {
+          const X = x + (px / 50 - 1) * s,
+            Y = y + (py / 50 - 1) * s;
+          i ? c.lineTo(X, Y) : c.moveTo(X, Y);
+        });
       c.closePath();
     };
     c.save();
-    const g = c.createRadialGradient(x - s * 0.3, y - s * 0.4, 1, x, y, s * 1.1);
-    g.addColorStop(0, '#ffffff');
-    g.addColorStop(0.25, f.light);
-    g.addColorStop(0.65, f.color);
-    g.addColorStop(1, f.dark);
-    path();
-    c.fillStyle = g;
+    const rim = c.createLinearGradient(x - size / 2, y - size / 2, x + size / 2, y + size / 2);
+    rim.addColorStop(0, f.light);
+    rim.addColorStop(0.55, f.color);
+    rim.addColorStop(1, f.dark);
+    path(1);
+    c.shadowColor = f.color;
+    c.shadowBlur = size / 5;
+    c.fillStyle = rim;
     c.fill();
-    c.lineWidth = Math.max(2, size / 14);
-    c.strokeStyle = '#1a0e08';
-    c.stroke();
-    c.globalAlpha = 0.6;
-    c.fillStyle = '#ffffff';
-    c.fillRect(x - s * 0.45, y - s * 0.5, s * 0.22, s * 0.22);
+    c.shadowBlur = 0;
+    const s = size / 2,
+      stone = c.createRadialGradient(x - s * 0.36, y - s * 0.48, 1, x, y, s * 1.1);
+    stone.addColorStop(0, '#a9afb9');
+    stone.addColorStop(0.48, '#767c88');
+    stone.addColorStop(1, '#40444d');
+    path(1 - 6 / size);
+    c.fillStyle = stone;
+    c.fill();
+    c.font = Math.round(size * 0.55) + 'px sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(r.icon, x, y + size * 0.03);
     c.restore();
   }
   api.equipFor = equipFor;
