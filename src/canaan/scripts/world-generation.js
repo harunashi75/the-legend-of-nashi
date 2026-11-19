@@ -503,6 +503,15 @@
             game.world.decor[y][x] = null;
           }
         }
+    // Décor sur la roche : seulement loin du bord inférieur (jamais posé sur la face de la falaise).
+    for (let y = y0; y <= y1; y++)
+      for (let x = x0; x <= x1; x++)
+        if (
+          game.world.tiles[y][x] === 4 &&
+          canaanExtLandMask[y * MAPW + x] &&
+          (game.world.tiles[y + 1][x] !== 4 || game.world.tiles[y + 2][x] !== 4)
+        )
+          game.world.decor[y][x] = null;
     // Plage de la vallée et bords de l'isthme : ni cactus ni bois mort du désert, quelques galets.
     for (let y = y0 - 8; y <= y1 + 8; y++)
       for (let x = x0 - 8; x <= x1 + 8; x++) {

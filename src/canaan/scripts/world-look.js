@@ -547,9 +547,8 @@
     let road = null,
       blend = null;
     if (t === 4) {
-      const rock =
-        inChunk && CANAAN_BLEND.active() && CANAAN_BLEND.rock(x, y, v, g => drawRock(g, x, y, 0, 0, v));
-      if (rock) c.drawImage(rock, X, Y);
+      // Paroi calculée (world-blend.js), comme celles des Tréfonds ; sans canevas, l'ancienne falaise par case.
+      if (smooth && (blend = CANAAN_BLEND.tile(x, y, v))) c.drawImage(blend, X, Y);
       else drawRock(c, x, y, X, Y, v);
     } else if (water) drawScrolled(c, tex, v * 48, X, Y, time * (t === 0 ? 0.12 : 0.08) + y * 11);
     else if (t === 2 && (road = CANAAN_ROADS.tile(x, y, v))) c.drawImage(road, X, Y);
@@ -565,8 +564,8 @@
       const over = CANAAN_ROADS.overlay(x, y, v);
       if (over) c.drawImage(over, X, Y);
     }
-    // Ombre portée au pied d'une falaise.
-    if (t !== 4 && tileAt(x, y - 1) === 4) {
+    // Ombre portée au pied d'une falaise (les parois calculées portent la leur).
+    if (!smooth && t !== 4 && tileAt(x, y - 1) === 4) {
       c.globalAlpha = 0.3;
       c.fillStyle = '#10161a';
       c.fillRect(X, Y, TS, 10);
