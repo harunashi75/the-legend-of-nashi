@@ -2,7 +2,7 @@
 node_modules/
 
 # Fichiers compilés et distributions
-# HTML autonome généré par tools/build_canaan.py (publié avec chaque release GitHub)
+# HTML autonome généré par tools/build.cjs (publié avec chaque release GitHub)
 CANAAN_ONLINE_V*.html
 dist/
 release/
