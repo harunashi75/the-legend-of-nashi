@@ -1,4 +1,6 @@
-// Carte de l'île (touche M) : les six biomes, leur plage de niveaux, leurs donjons et raids.
+// Carte (touche M) : la grande carte à gauche, et à droite la légende puis la liste des lieux.
+// Sur l'île : les six biomes, leur plage de niveaux, leurs donjons et raids ; en donjon : l'instance et ses ennemis.
+// Un lieu cliqué dans la liste centre la carte dessus ; survolé, il est entouré sur la carte.
 (() => {
   'use strict';
   // Plage de niveaux des monstres d'un biome (ZONE_LEVELS).
@@ -6,52 +8,131 @@
     const [lo, hi] = ZONE_LEVELS[biome];
     return lo + '–' + hi;
   }
+  const focusAttrs = (x, y) =>
+    ' data-action="mapFocus" data-x="' + Math.round(x) + '" data-y="' + Math.round(y) + '"';
   function instanceLine(d, j) {
     return (
-      '<div class="entry" data-map-instance="' +
+      '<button class="entry map-place" data-map-instance="' +
       j +
-      '"><span class="' +
+      '"' +
+      focusAttrs(d.x, d.y) +
+      '><span class="' +
       (d.raid ? 'map-raid' : 'map-dungeon') +
       '">' +
-      (d.raid ? '🟣 Raid' : '🔴 Donjon') +
-      '</span> · ' +
+      (d.raid ? 'Raid' : 'Donjon') +
+      '</span> <span class="map-place-name">' +
       safeGearText(d.name) +
-      ' <b class="map-ilvl">Niv. ' +
+      '</span> <b class="map-ilvl">Niv. ' +
       (d.difficulties
         ? Object.values(d.difficulties)
             .map(mode => mode.level)
             .join(' / ')
         : d.level) +
-      '</b></div>'
+      '</b></button>'
     );
   }
-  // Barre d'outils : zoom, centrer sur soi, vue d'ensemble ; la molette zoome, la souris fait glisser la carte.
-  const TOOLS =
-    '<div class="map-tools"><button data-action="mapZoom" data-step="-1" title="Dézoomer">➖</button>' +
-    '<button data-action="mapZoom" data-step="1" title="Zoomer">➕</button>' +
-    '<button data-action="mapCenter">🎯 Me centrer</button><button data-action="mapFit">🗺️ Vue d’ensemble</button>' +
-    '<span id="mapZoomLevel" class="muted"></span><span class="muted map-hint">Molette : zoom · glisser : déplacer · double-clic : zoomer ici</span></div>';
+  // En-tête : titre, et où se trouve le héros.
+  function head(title) {
+    return (
+      '<div class="map-head"><h2>🗺️ ' +
+      title +
+      '</h2><div class="map-here">📍 <span>Vous êtes ici</span> · <b>' +
+      safeGearText(currentZoneName()) +
+      '</b></div></div>'
+    );
+  }
+  function layout(side) {
+    return (
+      '<div class="map-instance-layout"><div class="map-main">' +
+      CANAAN_MAP.frame() +
+      '</div><div class="map-instance-list">' +
+      side +
+      '</div></div>'
+    );
+  }
   // En donjon ou en raid : le plan de l'instance, ses monstres et son boss.
   function instancePanel() {
     const d = instances[game.world.instance.index],
       foes = game.world.monsters.filter(m => m.hp > 0),
       boss = foes.find(m => m.boss);
     return (
-      '<h2>🗺️ ' +
-      safeGearText(d.name) +
-      '</h2><p class="muted">⚪ Vous · 🔵 Alliés · 🔴 Monstres · 🟠 Élites · 👑 Boss</p><div class="map-instance-layout"><div>' +
-      TOOLS +
-      '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>' +
-      (d.raid ? '🟣 Raid' : '🔴 Donjon') +
-      '</h3><section class="island-section"><div class="entry">Ennemis restants : <b>' +
-      foes.length +
-      '</b></div><div class="entry">' +
-      (boss
-        ? '👑 ' + safeGearText(boss.t) + ' vous attend.'
-        : game.world.instance.cleared
-          ? '✅ Instance terminée : ouvre le coffre puis ressors.'
-          : '👑 Le boss apparaîtra quand la salle sera vide.') +
-      '</div></section></div></div>'
+      head(safeGearText(d.name)) +
+      layout(
+        CANAAN_MAP.legend([
+          ['me', 'Vous'],
+          ['ally', 'Alliés'],
+          ['mob', 'Monstres'],
+          ['mob', 'Élites', { elite: true }],
+          ['bossmob', 'Boss']
+        ]) +
+          '<section class="island-section"><h4>' +
+          (d.raid ? 'Raid' : 'Donjon') +
+          '</h4><div class="entry">Ennemis restants : <b>' +
+          foes.length +
+          '</b></div><div class="entry">' +
+          (boss
+            ? '👑 ' + safeGearText(boss.t) + ' vous attend.'
+            : game.world.instance.cleared
+              ? '✅ Instance terminée : ouvre le coffre puis ressors.'
+              : '👑 Le boss apparaîtra quand la salle sera vide.') +
+          '</div></section>'
+      )
+    );
+  }
+  function islandPanel() {
+    const here = regionAt(P.x / TS, P.y / TS);
+    const regions = ZONES.map((z, i) => {
+      const lines = instances
+        .map((d, j) => ({ d, j }))
+        .filter(v => v.d.biome === i && !v.d.under)
+        .map(({ d, j }) => instanceLine(d, j))
+        .join('');
+      return (
+        '<section class="island-section' +
+        (z === here ? ' here' : '') +
+        '" style="--biome:' +
+        CANAAN_MAP.groundColor(z.t) +
+        '"><button class="map-region"' +
+        focusAttrs(z.x, z.y) +
+        '><span class="map-swatch"></span><span class="map-region-name">' +
+        safeGearText(z.name) +
+        '</span><span class="map-levels">Niveaux ' +
+        biomeLevelRange(i) +
+        '</span></button>' +
+        (z === here ? '<div class="map-here-tag">📍 Vous êtes ici</div>' : '') +
+        (i === 0
+          ? '<button class="entry map-place"' +
+            focusAttrs(CANAAN_CAMP.x, CANAAN_CAMP.y) +
+            '><span class="map-camp">Camp</span> <span class="map-place-name">' +
+            safeGearText(CANAAN_CAMP.name) +
+            '</span> <b class="map-safe">zone sûre</b></button>'
+          : '') +
+        lines +
+        '</section>'
+      );
+    }).join('');
+    return (
+      head('Canaan — L’île et ses six biomes') +
+      layout(
+        CANAAN_MAP.legend([
+          ['me', 'Vous'],
+          ['camp', 'Camp'],
+          ['refuge', 'Refuges'],
+          ['portal', 'Donjons'],
+          ['portal', 'Raids', { raid: true }],
+          ['arena', 'Arène'],
+          ['boss', 'Boss mondiaux'],
+          ['quest', 'Quête à prendre', { mark: '!' }],
+          ['quest', 'Quête à rendre', { mark: '?' }],
+          ['target', 'Objectif suivi'],
+          ['shop', 'Marchands'],
+          ['stairs', 'Entrées des Tréfonds'],
+          ['chest', 'Coffres révélés'],
+          ['ally', 'Alliés']
+        ]) +
+          '<h3 class="map-list-title">🧭 Biomes, donjons et raids</h3><p class="muted">Clique un lieu pour le voir sur la carte.</p>' +
+          regions
+      )
     );
   }
   function toggleMap() {
@@ -59,43 +140,10 @@
       closePanels();
       return;
     }
-    if (game.world.instance && !game.world.instance.arena) {
-      showPanel(instancePanel());
-      CANAAN_MAP.open();
-      return;
-    }
+    if (game.world.instance && !game.world.instance.arena) showPanel(instancePanel());
     // Les Tréfonds : leurs quatre biomes, donjons et boss.
-    if (canaanUnder()) {
-      showPanel(CANAAN_UNDER.mapPanel());
-      CANAAN_MAP.open();
-      return;
-    }
-    const regions = ZONES.map((z, i) => {
-      const lines = instances
-        .map((d, j) => ({ d, j }))
-        .filter(v => v.d.biome === i)
-        .map(({ d, j }) => instanceLine(d, j))
-        .join('');
-      return (
-        '<section class="island-section"><h4>' +
-        (i + 1) +
-        '. ' +
-        safeGearText(z.name) +
-        '</h4><div class="muted">Niveaux ' +
-        biomeLevelRange(i) +
-        '</div>' +
-        (i === 0 ? '<div class="muted">🏕️ ' + safeGearText(CANAAN_CAMP.name) + ' · zone sûre</div>' : '') +
-        lines +
-        '</section>'
-      );
-    }).join('');
-    showPanel(
-      '<h2>🗺️ Canaan — L’île et ses six biomes</h2><p class="muted">🏕️ Camp · 🔴 Donjons · 🟣 Raids · 🔶 Arène · ⭐ Boss mondiaux · 🛖 Refuges · ❗ Quête à prendre · ❓ Quête à rendre · 🎯 Objectif suivi · ⚪ Vous</p><div class="map-instance-layout"><div>' +
-        TOOLS +
-        '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>🧭 Biomes, donjons et raids</h3><p class="muted">Survole une instance pour la voir sur la carte.</p>' +
-        regions +
-        '</div></div>'
-    );
+    else if (canaanUnder()) showPanel(CANAAN_UNDER.mapPanel());
+    else showPanel(islandPanel());
     CANAAN_MAP.open();
   }
   Object.assign(window, { toggleMap });

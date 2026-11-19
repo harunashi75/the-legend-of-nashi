@@ -2932,9 +2932,15 @@
           safeGearText(b.desc) +
           '</div>' +
           (d
-            ? '<div class="entry"><span class="map-dungeon">🔴 Donjon</span> · ' +
+            ? '<button class="entry map-place" data-map-instance="' +
+              instances.indexOf(d) +
+              '" data-action="mapFocus" data-x="' +
+              Math.round(d.x) +
+              '" data-y="' +
+              Math.round(d.y) +
+              '"><span class="map-dungeon">Donjon</span> <span class="map-place-name">' +
               safeGearText(d.name) +
-              ' <b class="map-ilvl">à ton niveau</b></div>'
+              '</span> <b class="map-ilvl">à ton niveau</b></button>'
             : '') +
           '<div class="entry">⭐ Boss : ' +
           safeGearText(boss.name) +
@@ -2942,11 +2948,24 @@
         );
       }).join('');
     return (
-      '<h2>🗺️ Les Tréfonds de Canaan</h2><p class="muted">🏰 Forteresse de Durgrim (zone sûre) · 🔴 Donjons · ⭐ Boss · ⛏️ Entrées vers la surface · ⚪ Vous — créatures et boss à ton niveau (' +
+      '<div class="map-head"><h2>🗺️ Les Tréfonds de Canaan</h2><div class="map-here">📍 <span>Vous êtes ici</span> · <b>' +
+      safeGearText(currentZoneName()) +
+      '</b></div></div><div class="map-instance-layout"><div class="map-main">' +
+      CANAAN_MAP.frame() +
+      '</div><div class="map-instance-list">' +
+      CANAAN_MAP.legend([
+        ['me', 'Vous'],
+        ['camp', 'Forteresse de Durgrim (zone sûre)'],
+        ['portal', 'Donjons'],
+        ['boss', 'Boss'],
+        ['stairs', 'Entrées vers la surface'],
+        ['shop', 'Marchand'],
+        ['chest', 'Coffres révélés'],
+        ['ally', 'Alliés']
+      ]) +
+      '<h3 class="map-list-title">🧭 Quatre biomes sous l’île</h3><p class="muted">Créatures et boss à ton niveau (' +
       lv +
-      ')</p><div class="map-instance-layout"><div>' +
-      '<div class="map-tools"><button data-action="mapZoom" data-step="-1" title="Dézoomer">➖</button><button data-action="mapZoom" data-step="1" title="Zoomer">➕</button><button data-action="mapCenter">🎯 Me centrer</button><button data-action="mapFit">🗺️ Vue d’ensemble</button><span id="mapZoomLevel" class="muted"></span></div>' +
-      '<canvas id="bigMap" width="800" height="800"></canvas></div><div class="map-instance-list"><h3>🧭 Quatre biomes sous l’île</h3>' +
+      ')</p>' +
       list +
       '</div></div>'
     );

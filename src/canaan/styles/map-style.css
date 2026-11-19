@@ -1,56 +1,249 @@
+/* Carte (M) : la carte à gauche, à la hauteur de l'écran ; légende et lieux à droite. */
 #window:has(#bigMap) {
-  width: min(1050px, 97vw);
-  max-height: 92vh;
+  --map-size: min(680px, calc(92vh - 190px));
+  width: min(calc(var(--map-size) + 400px), 97vw);
+  max-height: 94vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#window .map-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  border-bottom: 1px solid var(--rpg-gold-dark, #7a5a2a);
+  margin-bottom: 12px;
+}
+#window .map-head h2 {
+  border-bottom: 0;
+  margin-bottom: 0;
+  background: none;
+}
+#window .map-here {
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(13px * var(--font-scale));
+  padding-bottom: 8px;
+}
+#window .map-here b {
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif, serif);
 }
 #window .map-instance-layout {
   display: grid;
-  grid-template-columns: minmax(0, 680px) minmax(230px, 1fr);
-  gap: 16px;
+  grid-template-columns: var(--map-size) minmax(250px, 1fr);
+  gap: 18px;
   align-items: start;
+  min-height: 0;
+}
+#window .map-frame {
+  position: relative;
+  width: var(--map-size);
+  aspect-ratio: 1;
+  border: 3px solid #7a5a2a;
+  border-radius: 6px;
+  background: #0e3462;
+  box-shadow:
+    0 0 0 1px #0c0805,
+    0 0 0 4px #2a1f16,
+    0 0 0 5px #d4aa5a,
+    0 8px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+/* Ombre intérieure du cadre, par-dessus la carte. */
+#window .map-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 160, 0.25),
+    inset 0 0 22px rgba(0, 0, 0, 0.55);
 }
 #window #bigMap {
   width: 100%;
-  max-width: 680px;
-  cursor: var(--cursor-pointer);
+  height: 100%;
+  cursor: grab;
   touch-action: none;
-  aspect-ratio: 1;
   image-rendering: pixelated;
   display: block;
-  background: #145c9a;
-  border: 3px solid #927b53;
-  border-radius: 9px;
+}
+#window #bigMap.dragging {
+  cursor: grabbing;
+}
+/* Boutons posés sur la carte : recentrer et vue d'ensemble en haut à gauche, zoom à droite. */
+#window .map-tools {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+}
+#window .map-tools-top {
+  top: 10px;
+  left: 10px;
+}
+#window .map-tools-zoom {
+  top: 10px;
+  right: 10px;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(23, 16, 11, 0.82);
+  border: 1px solid var(--rpg-gold-dark, #7a5a2a);
+}
+#window .map-tools button {
+  padding: 4px 10px;
+  font-size: calc(13px * var(--font-scale));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.7);
+}
+#window .map-tools-zoom button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: calc(18px * var(--font-scale));
+  line-height: 1;
+}
+#window #mapZoomLevel {
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif, serif);
+  font-size: calc(11px * var(--font-scale));
+  padding: 3px 0;
+  text-align: center;
+  max-width: 32px;
+  line-height: 1.1;
+}
+#window .map-hint {
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+  text-align: center;
+  margin-top: 8px;
 }
 #window .map-instance-list {
-  max-height: 65vh;
+  max-height: calc(var(--map-size) + 30px);
   overflow: auto;
+  padding-right: 4px;
 }
-@media (max-width: 800px) {
-  #window .map-instance-layout {
-    grid-template-columns: 1fr;
-  }
+/* Légende : les repères dessinés comme sur la carte, sur deux colonnes. */
+#window .map-legend {
+  padding: 8px 10px 10px;
+  margin-bottom: 12px;
+  background: rgba(10, 7, 4, 0.45);
+  border: 1px solid var(--rpg-gold-dark, #7a5a2a);
+  border-radius: 6px;
 }
+#window .map-legend h3,
+#window .map-list-title {
+  margin: 0 0 6px;
+  font-size: calc(14px * var(--font-scale));
+}
+#window .map-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 2px 8px;
+}
+#window .map-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: calc(11.5px * var(--font-scale));
+  color: var(--rpg-ink, #f3e6c8);
+  line-height: 1.15;
+}
+#window .map-key canvas {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+/* Lieux : une carte par région, liseré de la couleur de son sol ; la région du héros est mise en avant. */
 #window .island-section {
-  margin: 9px 0 15px;
-  padding: 10px 12px;
-  background: #14283a;
-  border: 1px solid #536d8d;
-  border-radius: 10px;
+  margin: 8px 0 12px;
+  padding: 8px 10px 6px 12px;
+  background: linear-gradient(90deg, rgba(255, 226, 160, 0.05), transparent 60%), rgba(10, 7, 4, 0.45);
+  border: 1px solid #4a3820;
+  border-left: 4px solid var(--biome, #7a5a2a);
+  border-radius: 6px;
+}
+#window .island-section.here {
+  border-color: var(--rpg-gold, #d4aa5a);
+  border-left-color: var(--biome, #d4aa5a);
+  box-shadow: 0 0 12px rgba(212, 170, 90, 0.25);
 }
 #window .island-section h4 {
-  color: #f3dca8;
+  color: var(--rpg-gold-light, #f6dc98);
   margin-bottom: 5px;
   font-size: calc(13px * var(--font-scale));
-}
-#window .island-section .entry {
-  padding: 5px 0;
-  border: 0;
-  font-size: calc(12px * var(--font-scale));
 }
 #window .island-section .muted {
   font-size: calc(11px * var(--font-scale));
 }
-#window .map-instance-list {
-  max-height: 70vh;
+#window .island-section .entry {
+  padding: 4px 0;
+  border: 0;
+  font-size: calc(12px * var(--font-scale));
+}
+/* Boutons-lignes de la liste : texte simple, sans l'habillage des boutons de laiton. */
+#window .map-region,
+#window .map-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  border-radius: 4px;
+  padding: 4px 4px;
+  color: var(--rpg-ink, #f3e6c8);
+  font-family: inherit;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-shadow: none;
+  cursor: var(--cursor-pointer);
+}
+#window .map-region:hover:not(:disabled),
+#window .map-place:hover:not(:disabled) {
+  background: rgba(212, 170, 90, 0.14);
+  box-shadow: none;
+  filter: none;
+}
+#window .map-region {
+  align-items: center;
+  padding: 2px 4px 4px;
+}
+#window .map-region-name {
+  font-family: var(--rpg-serif, serif);
+  font-weight: 700;
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: calc(14px * var(--font-scale));
+}
+#window .map-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--biome, #7a5a2a);
+  box-shadow:
+    0 0 0 1px #0c0805,
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  align-self: center;
+}
+#window .map-levels {
+  margin-left: auto;
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+}
+#window .map-here-tag {
+  color: var(--rpg-gold, #d4aa5a);
+  font-size: calc(11px * var(--font-scale));
+  padding: 0 4px 2px;
+}
+#window .map-place-name {
+  flex: 1 1 auto;
 }
 #window .entry .map-raid {
   color: #d6a6ff;
@@ -58,8 +251,34 @@
 #window .entry .map-dungeon {
   color: #ff8d93;
 }
-#window .entry .map-ilvl {
+#window .entry .map-camp {
+  color: #ffc07a;
+}
+#window .entry .map-raid,
+#window .entry .map-dungeon,
+#window .entry .map-camp {
+  font-size: calc(10.5px * var(--font-scale));
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+}
+#window .entry .map-ilvl,
+#window .entry .map-safe {
   color: #f5dc9a;
+  font-size: calc(11px * var(--font-scale));
+}
+#window .entry .map-safe {
+  color: #9fdc8a;
+}
+@media (max-width: 860px) {
+  #window:has(#bigMap) {
+    --map-size: min(94vw - 60px, 60vh);
+    overflow: auto;
+    display: block;
+  }
+  #window .map-instance-layout {
+    grid-template-columns: 1fr;
+  }
 }
 /* Portail à difficultés : une carte par mode, côte à côte, empilées sur écran étroit. */
 #window .raid-modes {
@@ -83,23 +302,4 @@
 }
 #window .raid-mode.locked {
   border-color: #52476d;
-}
-#window #bigMap.dragging {
-  cursor: var(--cursor-pointer);
-}
-/* Outils de la carte : zoom, centrer, vue d'ensemble. */
-#window .map-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-#window .map-tools button {
-  padding: 4px 10px;
-  font-size: calc(13px * var(--font-scale));
-}
-#window .map-tools .map-hint {
-  font-size: calc(11px * var(--font-scale));
-  margin-left: auto;
 }

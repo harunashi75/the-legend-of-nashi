@@ -115,6 +115,7 @@
     mapZoom: element => CANAAN_MAP.zoom(actionInteger(element, 'step')),
     mapCenter: () => CANAAN_MAP.center(),
     mapFit: () => CANAAN_MAP.fit(),
+    mapFocus: element => CANAAN_MAP.focus(actionInteger(element, 'x'), actionInteger(element, 'y')),
     enterInstance: element =>
       enterInstance(
         actionInteger(element, 'instance'),

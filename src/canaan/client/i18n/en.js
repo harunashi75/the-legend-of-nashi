@@ -636,6 +636,13 @@ export default {
   'Objectif suivi': 'Tracked objective',
   'Biomes, donjons et raids': 'Biomes, dungeons and raids',
   'Survole une instance pour la voir sur la carte.': 'Hover over an instance to see it on the map.',
+  'Vous êtes ici': 'You are here',
+  'Légende': 'Legend',
+  'Marchands': 'Merchants',
+  'Entrées des Tréfonds': 'Entrances to the Depths',
+  'Coffres révélés': 'Revealed chests',
+  'Clique un lieu pour le voir sur la carte.': 'Click a place to see it on the map.',
+  'Créatures et boss à ton niveau ({n})': 'Creatures and bosses at your level ({n})',
   // ------------------------------------------------------------ Statistiques (shared/data/stats.js)
   'Attaque': 'Attack',
   'Augmente les dégâts des attaques et compétences offensives.':

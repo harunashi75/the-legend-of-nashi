@@ -20,7 +20,7 @@ Ouvrir une aventure recharge la page : le slot choisi est retenu dans le stockag
 ```json
 {
   "schema": 10,
-  "version": "0.10.0",
+  "version": "0.11.0",
   "nom": "Aventure de Haruna",
   "created": 1794083453133,
   "updated": 1794104975791,
