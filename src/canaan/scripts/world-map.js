@@ -188,13 +188,14 @@
     return out;
   }
   // Peint l'image : paint(px) reçoit les pixels (Uint32Array) et la largeur.
-  function pixels(cv, paint) {
+  // area : seulement ce rectangle du canevas (coordonnées des pixels de paint relatives à son coin).
+  function pixels(cv, paint, area = { x: 0, y: 0, w: cv.width, h: cv.height }) {
     const g = cv.getContext('2d'),
-      img = g.createImageData?.(cv.width, cv.height);
+      img = g.createImageData?.(area.w, area.h);
     // Sans pixels (canevas factice des tests sans écran) : rien à peindre.
     if (!img?.data?.buffer) return g;
-    paint(new Uint32Array(img.data.buffer), cv.width);
-    g.putImageData(img, 0, 0);
+    paint(new Uint32Array(img.data.buffer), area.w);
+    g.putImageData(img, area.x, area.y);
     return g;
   }
   // Une case : ses PX × PX pixels dans les nuances données.
@@ -329,33 +330,44 @@
     return cv;
   }
   // Donjon ou raid : sols du thème, murs sombres soulignés le long des salles, herses et dangers.
+  // Seul le cadre des salles connues (box, avec sa marge) est peint : au-delà, tout est mur, de la couleur unie du fond
+  // des cartes (#08080e), qui reste donc transparent. Peindre toute l'île figeait l'entrée et chaque salle découverte.
   function paintInstance() {
     const cv = newCanvas(),
       tiles = game.world.tiles,
       known = CANAAN_DUNGEON_EXPLORE.known,
+      bx0 = Math.max(0, box.x0),
+      by0 = Math.max(0, box.y0),
+      bx1 = Math.min(MAPW, box.x1),
+      by1 = Math.min(MAPH, box.y1),
       // Brouillard : seules les salles visitées (et les couloirs qui en partent) sont dessinées.
       open = (t, x, y) => t !== undefined && (!SOLID.includes(t) || t === 19) && known(x, y);
-    pixels(cv, (px, w) => {
-      const wall = shades('#08080e', 1, 1),
-        edge = shades('#5a5468', 0.85, 1.15),
-        floors = new Map();
-      for (let y = 0; y < MAPH; y++)
-        for (let x = 0; x < MAPW; x++) {
-          const t = tiles[y][x],
-            X = x * PX,
-            Y = y * PX;
-          if (!open(t, x, y)) {
-            let rim = false;
-            for (let i = 0; i < 4 && !rim; i++)
-              rim = open(tiles[y + DY4[i]]?.[x + DX4[i]], x + DX4[i], y + DY4[i]);
-            fillTile(px, w, X, Y, rim ? edge : wall);
-            continue;
+    if (bx1 <= bx0 || by1 <= by0) return cv;
+    pixels(
+      cv,
+      (px, w) => {
+        const wall = shades('#08080e', 1, 1),
+          edge = shades('#5a5468', 0.85, 1.15),
+          floors = new Map();
+        for (let y = by0; y < by1; y++)
+          for (let x = bx0; x < bx1; x++) {
+            const t = tiles[y][x],
+              X = (x - bx0) * PX,
+              Y = (y - by0) * PX;
+            if (!open(t, x, y)) {
+              let rim = false;
+              for (let i = 0; i < 4 && !rim; i++)
+                rim = open(tiles[y + DY4[i]]?.[x + DX4[i]], x + DX4[i], y + DY4[i]);
+              fillTile(px, w, X, Y, rim ? edge : wall);
+              continue;
+            }
+            let sh = floors.get(t);
+            if (!sh) floors.set(t, (sh = shades(dungeonMinimapColor(t), 0.9, 1.08)));
+            fillTile(px, w, X, Y, sh);
           }
-          let sh = floors.get(t);
-          if (!sh) floors.set(t, (sh = shades(dungeonMinimapColor(t), 0.9, 1.08)));
-          fillTile(px, w, X, Y, sh);
-        }
-    });
+      },
+      { x: bx0 * PX, y: by0 * PX, w: (bx1 - bx0) * PX, h: (by1 - by0) * PX }
+    );
     return cv;
   }
   // Tréfonds : sols et chemins de chaque biome, eau et boue, roche soulignée le long des galeries.

@@ -199,21 +199,41 @@
       standCache.tiles.set(key, cv);
       return cv;
     }
-    function drawArenaStands(c) {
+    // Rang de gradin d'une case (0 en bas, 6 pour la promenade), ou -1 hors des tribunes.
+    function standBand(grid, x, y) {
       const { cx, cy, r } = DUNGEON_ARENA,
+        d = Math.hypot(x - cx, y - cy);
+      if (d < r + 0.6 || d > r + 7 || grid[y]?.[x] !== WALL || grid[y + 1]?.[x] !== WALL) return -1;
+      return Math.min(6, Math.floor(d - r));
+    }
+    // Tribunes peintes à l'avance (panneau de l'Arène ouvert) : marches, public assis, et chaque spectateur debout
+    // bras levés pour les acclamations. Un générateur : une case par étape.
+    function* warmStands() {
+      const { cx, cy } = DUNGEON_ARENA,
+        th = THEMES.arena,
+        grid = planFor('arena').grid;
+      for (let y = cy - 20; y <= cy + 15; y++)
+        for (let x = cx - 20; x <= cx + 20; x++) {
+          const band = standBand(grid, x, y);
+          if (band < 0) continue;
+          standTile(th, x, y, band);
+          if (band < 6) for (const f of fansAt(x, y)) fanSprite(f.look, true);
+          yield;
+        }
+    }
+    function drawArenaStands(c) {
+      const { cx, cy } = DUNGEON_ARENA,
         th = THEMES.arena,
         cheer = CANAAN_ARENA.cheer();
       c.save();
       c.imageSmoothingEnabled = false;
       for (let y = cy - 20; y <= cy + 15; y++)
         for (let x = cx - 20; x <= cx + 20; x++) {
-          const d = Math.hypot(x - cx, y - cy);
-          if (d < r + 0.6 || d > r + 7 || game.world.tiles[y]?.[x] !== WALL) continue;
-          if (game.world.tiles[y + 1]?.[x] !== WALL) continue;
+          const band = standBand(game.world.tiles, x, y);
+          if (band < 0) continue;
           const X = x * TS,
             Y = y * TS;
           if (X < camX - TS || X > camX + W || Y < camY - TS || Y > camY + H) continue;
-          const band = Math.min(6, Math.floor(d - r));
           if (cheer <= 0 || band >= 6) {
             c.drawImage(standTile(th, x, y, band), X, Y, TS, TS);
             continue;
@@ -959,9 +979,10 @@
       RIVER: -5
     };
     const DEEP = new Set(['chasm', 'void', 'stars']);
+    // Un rendu par instance ; seuls les blocs de la dernière instance visitée sont gardés : y revenir (nouvel essai,
+    // farm) réaffiche son sol tout de suite au lieu de le repeindre.
     const LOOKS = new Map();
-    let lookTiles = null,
-      lookGen = 0;
+    let lastLook = null;
     function lookFor(i) {
       if (LOOKS.has(i)) return LOOKS.get(i);
       if (!window.CANAAN_UNDER_LOOK) return null;
@@ -984,7 +1005,8 @@
         const plan = planFor(i),
           k = y * MAPW + x;
         if (plan.solid.has(k)) return V.FLOOR;
-        let t = game.world.tiles[y]?.[x];
+        // Dans l'instance : ses cases du moment ; ailleurs (sol préparé avant d'entrer) : le plan neuf, tout fermé.
+        let t = (game.world.instance?.index === i ? game.world.tiles : plan.grid)[y]?.[x];
         if (t === GATE) t = gateUnder(plan, k) ?? FLOOR;
         if (t === ACCENT) return V.PATH;
         if (t === HAZARD) return hzTile;
@@ -1058,27 +1080,22 @@
         pathBorder: th.accent.style === 'carpet' ? () => toRgb(th.accent.c) : null,
         deep: w => deep && w === hzTile,
         liquidLook,
-        key: () => {
-          if (game.world.tiles !== lookTiles) {
-            lookTiles = game.world.tiles;
-            lookGen++;
-          }
-          return game.world.instance?.index === i ? lookGen : -1;
-        },
+        // Le plan est le même à chaque entrée : les blocs restent valables d'une entrée à l'autre. Seuls les passages
+        // secrets changent le sol (les herses sont lues comme ce qu'elles ferment) : syncSecrets repeint leurs blocs.
+        key: () => 0,
         live: () => game.world.instance?.index === i,
         afterChunk: (g, x0, y0, x1, y1) => {
           if (th.accent.style === 'rails')
-            for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) rails(g, x, y, at);
+            for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) rails(g, x, y, at, th.accent);
         }
       });
       LOOKS.set(i, look.active() ? look : null);
       return LOOKS.get(i);
     }
     // Voie de mine : traverses de bois et deux rails d'acier, dans le sens de l'allée.
-    function rails(g, x, y, at) {
+    function rails(g, x, y, at, ac) {
       if (at(x, y) !== V.PATH) return;
-      const ac = THEMES[game.world.instance.index].accent,
-        X = x * TS,
+      const X = x * TS,
         Y = y * TS,
         same = (xx, yy) => at(xx, yy) === V.PATH,
         horizontal = same(x - 1, y) || same(x + 1, y),
@@ -1114,22 +1131,17 @@
           g.fillRect(X, Y + vy, 48, 2);
         }
     }
-    // Passages secrets déjà vus ouverts, par instance : à l'ouverture, seuls les blocs touchés sont repeints.
-    let seenSecrets = -1,
-      seenFor = null;
-    // Repère d'entrée : les cases de l'instance (game.world.tiles), neuves à chaque entrée ; le cache du sol (lookTiles)
-    // ne les voit qu'après ce contrôle. L'Arène n'a aucun passage secret.
-    function syncSecrets(i, look) {
-      const bits = dunState()?.secrets ?? 0;
-      if (seenFor !== game.world.tiles) {
-        seenFor = game.world.tiles;
-        seenSecrets = bits;
-        return;
-      }
-      if (bits === seenSecrets) return;
+    // Passages secrets ouverts quand les blocs gardés de chaque instance ont été peints. Dès qu'ils diffèrent de l'état
+    // de l'exploration (ouverture en jeu, ou nouvelle entrée où tout est refermé), seuls les blocs touchés sont repeints ;
+    // un passage qui se referme est repeint sans réafficher l'ancienne image (la salle cachée ne doit pas se montrer).
+    // L'Arène n'a aucun passage secret.
+    const paintedSecrets = new Map();
+    function syncSecrets(i, look, bits = dunState()?.secrets ?? 0) {
+      const was = paintedSecrets.get(i) ?? 0;
+      if (bits === was) return;
       const plan = planFor(i);
       (plan.secretWalls || []).forEach((w, k) => {
-        if (!(bits & (1 << k)) || seenSecrets & (1 << k)) return;
+        if (!((bits ^ was) & (1 << k))) return;
         const cells = [...w.cells, ...(plan.masks[k] || [])];
         let x0 = 1e9,
           y0 = 1e9,
@@ -1141,18 +1153,61 @@
           x1 = Math.max(x1, x);
           y1 = Math.max(y1, y);
         }
-        look.forget(x0, y0, x1, y1);
+        look.forget(x0, y0, x1, y1, !(bits & (1 << k)));
       });
-      seenSecrets = bits;
+      paintedSecrets.set(i, bits);
+    }
+    // Nouvelle instance : les blocs de la précédente sont libérés (mémoire graphique).
+    function keepOnly(i) {
+      if (lastLook === i) return;
+      if (lastLook !== null) {
+        LOOKS.get(lastLook)?.release();
+        paintedSecrets.delete(lastLook);
+      }
+      lastLook = i;
+    }
+    // Sol préparé avant d'entrer (panneau du portail ouvert) : les blocs visibles à l'arrivée sont peints quand le
+    // navigateur a du temps libre, un morceau à la fois. S'arrête une fois prêts, à l'entrée, ou si une autre instance
+    // est préparée ou visitée entre-temps.
+    let warming = null;
+    function prewarm(i) {
+      if (game.world.instance || typeof requestIdleCallback !== 'function') return;
+      const look = planFor(i) && lookFor(i);
+      if (!look?.warm) return;
+      keepOnly(i);
+      // Blocs peints sur le plan neuf : tous les passages secrets fermés, comme à l'entrée.
+      syncSecrets(i, look, 0);
+      themeArt(i);
+      // Cadre de l'écran centré sur le héros à l'arrivée (même calcul que la boucle de rendu).
+      const ex = DUNGEON_ENTRY.x * TS,
+        ey = DUNGEON_ENTRY.y * TS,
+        x0 = Math.max(0, Math.floor((ex - W / 2) / TS) - 1),
+        x1 = Math.min(MAPW, Math.ceil((ex + W / 2) / TS) + 1),
+        y0 = Math.max(0, Math.floor((ey - H / 2) / TS) - 1),
+        y1 = Math.min(MAPH, Math.ceil((ey + H / 2) / TS) + 1),
+        job = (warming = {}),
+        // Arène : ses tribunes ensuite, une fois le sol prêt.
+        stands = i === 'arena' ? warmStands() : null;
+      let groundReady = false;
+      const step = deadline => {
+        if (warming !== job || lastLook !== i || game.world.instance) return;
+        const end = performance.now() + Math.max(2, Math.min(8, (deadline?.timeRemaining?.() ?? 6) - 1));
+        groundReady ||= look.warm(x0, x1, y0, y1, end);
+        let done = groundReady && !stands;
+        if (groundReady && stands) {
+          while (performance.now() < end && !(done = !!stands.next().done));
+        }
+        if (done) warming = null;
+        else requestIdleCallback(step, { timeout: 400 });
+      };
+      requestIdleCallback(step, { timeout: 400 });
     }
     // Sol de l'instance à l'écran : peint par blocs ; sans canevas (tests), case par case.
     function drawDungeonGround(c, x0, x1, y0, y1) {
       const i = game.world.instance.index,
         look = lookFor(i);
-      if (look) {
-        look.key?.();
-        syncSecrets(i, look);
-      }
+      keepOnly(i);
+      if (look) syncSecrets(i, look);
       if (!look || !look.drawGround(c, x0, x1, y0, y1)) {
         for (let y = y0; y < y1; y++)
           for (let x = x0; x < x1; x++) drawDungeonTile(c, x, y, game.world.tiles[y][x]);
@@ -3085,6 +3140,7 @@
     }
     return Object.freeze({
       THEMES,
+      prewarm,
       drawDungeonTile,
       drawDungeonGround,
       drawDungeonDecor,

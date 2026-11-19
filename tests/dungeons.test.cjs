@@ -364,3 +364,10 @@ test('Une fiche par donjon : chaque instance a son fichier, l’ordre des sauveg
  await assert.rejects(import(pathToFileURL(path.join(tmp,'index2.js')).href),/mine.*layout\.shape/);
  fs.rmSync(tmp,{recursive:true,force:true});
 });
+
+test('Tentatives notées : chaque plan est celui que donnerait la recherche depuis la première graine', () => {
+ const noted = /const PLAN_TRIES = \[[^\]]*\]/;
+ assert.match(source, noted);
+ const plans = src => require('./helpers/canaan-runtime.cjs')(src).run('JSON.stringify(instances.map((d,i)=>CANAAN_DUNGEON_EXPLORE.plan(i)))');
+ assert.equal(plans(source), plans(source.replace(noted, 'const PLAN_TRIES = []')));
+});

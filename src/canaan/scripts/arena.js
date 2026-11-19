@@ -1796,6 +1796,8 @@
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
     );
   function openArenaPortal() {
+    // Le sol du colisée se peint pendant que le joueur lit le panneau (canaan-dungeons).
+    if (!game.world.instance) window.prewarmInstance?.('arena');
     const rubis = window.CANAAN_RUBIS,
       row = (label, value) =>
         '<div class="arena-record"><span>' + label + '</span><b>' + value + '</b></div>';

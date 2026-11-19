@@ -276,6 +276,12 @@ function placeGroup(x, y) {
     if (hero === game.hero) {
       p.x = x;
       p.y = y;
+      // Grand saut (entrée ou sortie d'instance, retour au camp) : la caméra suit tout de suite. Sinon l'image dessinée
+      // avant le prochain pas de jeu peindrait le sol autour de l'ancienne position, pour rien.
+      if (Math.abs(x - W / 2 - camX) > W || Math.abs(y - H / 2 - camY) > H) {
+        camX = x - W / 2;
+        camY = y - H / 2;
+      }
       return;
     }
     const [ox, oy] = fan[(k - 1) % fan.length],

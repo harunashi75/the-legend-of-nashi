@@ -37,6 +37,10 @@
     };
   }
   const PLANS = [];
+  // Tentative qui donne le plan de chaque instance (les graines sont fixes, c'est toujours la même) : on commence par
+  // elle au lieu de rejouer les échecs (12 essais pour le Bastion). Si le générateur change, la recherche reprend
+  // depuis le début ; le test « tentatives notées » signale alors le tableau à mettre à jour.
+  const PLAN_TRIES = [0, 1, 0, 1, 0, 1, 11, 0, 0, 4, 0, 0, 1, 0];
   const bounds = r => ({
     x0: r.cx - (r.w - 1) / 2,
     x1: r.cx + (r.w - 1) / 2,
@@ -257,7 +261,10 @@
   function planDungeon(i) {
     if (PLANS[i]) return PLANS[i];
     const d = instances[i];
-    for (let attempt = 0; attempt < 600; attempt++) {
+    const first = PLAN_TRIES[i] ?? 0;
+    for (let k = -1; k < 600; k++) {
+      const attempt = k < 0 ? first : k;
+      if (k === first) continue;
       const rnd = seeded(i * 1000 + attempt),
         net = layout(d, rnd);
       if (!net) continue;
@@ -2161,6 +2168,8 @@
     dungeonChestSpot,
     drawDungeonTile: ART.drawDungeonTile,
     drawDungeonGround: ART.drawDungeonGround,
+    // Sol d'une instance peint à l'avance, pendant que le panneau de son portail est ouvert.
+    prewarmInstance: ART.prewarm,
     drawDungeonDecor: ART.drawDungeonDecor,
     dungeonAmbience: ART.dungeonAmbience,
     drawDungeonEntrance: ART.drawDungeonEntrance,

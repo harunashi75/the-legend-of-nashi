@@ -9,6 +9,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ### Modifié
 - **Arène au rendu de l’île** ⚔️ : gradins en gros pixels (marches de grès ombrées et jointoyées, promenade dallée et balustrade en haut) et vrai public de petits personnages cernés d’encre, chacun sa tenue, son teint, ses cheveux, chapeau, capuche ou casque, qui se lèvent bras en l’air quand la foule acclame. Statues, braseros, râteliers et caisses au même rendu que les donjons ; margelle du portail de sortie et cercle runique de la piste repeints en pixels (aussi à l’entrée des donjons).
+- **Entrées et sorties d’instance plus rapides** ⚡ : le sol de l’instance se prépare pendant que le panneau du portail est ouvert. Il est complet en 15 à 40 ms à l’entrée, contre 180 à 470 ms auparavant. Revenir dans une instance déjà visitée ne repeint plus son sol (15 à 40 ms au lieu de 135 à 420 ms). En sortant, l’île ne fige plus le jeu (près de 200 ms) : elle se peint en fondu en quelques images. Les à-coups au chargement disparaissent presque : la mini-carte ne repeint plus toute la carte à l’entrée et à chaque salle découverte, les motifs de sol se créent un par un, et la caméra suit le héros dès l’entrée. Le plan du Bastion du Roi Sanglant se construit en 8 ms au lieu de 45.
 
 ## [0.10.0] — 2026-11-18
 

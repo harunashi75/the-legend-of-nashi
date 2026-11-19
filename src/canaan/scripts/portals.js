@@ -86,6 +86,8 @@ function openPortal(n) {
     toast('Termine ton instance actuelle');
     return;
   }
+  // Le joueur lit le panneau : le sol de l'instance se peint pendant ce temps (canaan-dungeons).
+  window.prewarmInstance?.(n.instance);
   const lv = heroLevel(),
     title = '<h2>🌀 ' + safeGearText(d.name) + '</h2>';
   if (d.difficulties) {

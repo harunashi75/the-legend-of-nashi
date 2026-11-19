@@ -727,7 +727,11 @@
   // fixes des biomes) est peint une fois dans un bloc gardé ; chaque image ne dessine que les blocs visibles, puis
   // l'eau, les détails animés et le décor. Une trentaine de blocs restent en mémoire (les plus anciens sont oubliés).
   const CH = 16,
-    KEEP = 48;
+    KEEP = 48,
+    // Temps de peinture des blocs manquants par image (ms) et durée du fondu d'un bloc qui apparaît (images).
+    GROUND_BUDGET = 8,
+    GROUND_FADE = 9,
+    born = new Map();
   let chunks = new Map(),
     chunkFor = null,
     chunkBridges = -1,
@@ -738,16 +742,22 @@
     chunksStale = true;
     ahead = null;
   }
-  function chunkAt(cx, cy) {
-    // Dans un bâtiment, CANAAN_HOUSE.drawTile peint le dehors en noir : un bloc construit à ce moment-là resterait
-    // noir dans le cache (sol noir en ressortant). Aucun bloc n'est donc préparé à l'intérieur.
-    if (canaanInHouse(P.x / TS, P.y / TS)) return null;
+  function freshChunks() {
     if (chunksStale || chunkFor !== game.world.overworld || chunkBridges !== BRIDGE_TILES.size) {
       chunksStale = false;
       chunks = new Map();
       chunkFor = game.world.overworld;
       chunkBridges = BRIDGE_TILES.size;
+      born.clear();
     }
+  }
+  // Bloc (cx, cy) : gardé, ou peint maintenant ; avec paint = false, un bloc pas encore peint renvoie undefined (il le
+  // sera à une image suivante). null : aucun bloc possible (dans un bâtiment, ou sans canevas).
+  function chunkAt(cx, cy, paint = true) {
+    // Dans un bâtiment, CANAAN_HOUSE.drawTile peint le dehors en noir : un bloc construit à ce moment-là resterait
+    // noir dans le cache (sol noir en ressortant). Aucun bloc n'est donc préparé à l'intérieur.
+    if (canaanInHouse(P.x / TS, P.y / TS)) return null;
+    freshChunks();
     const id = cy * 64 + cx;
     let img = chunks.get(id);
     if (img) {
@@ -755,6 +765,7 @@
       chunks.set(id, img);
       return img;
     }
+    if (!paint) return undefined;
     img = canvas(CH * TS, CH * TS);
     img.addEventListener?.('contextlost', forgetWorldGround);
     const g = img.getContext('2d');
@@ -835,9 +846,53 @@
         for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
       return;
     }
+    // Blocs visibles, du plus proche du centre au plus loin. Ceux qui manquent (retour sur l'île : les blocs ont été
+    // oubliés en partant) sont peints dans un budget de temps par image, au moins un par image : le sol apparaît en
+    // fondu en quelques images au lieu de figer le jeu.
+    freshChunks();
+    const cx0 = Math.floor(x0 / CH),
+      cx1 = Math.floor((x1 - 1) / CH),
+      cy0 = Math.floor(y0 / CH),
+      cy1 = Math.floor((y1 - 1) / CH),
+      mx = (x0 + x1) / 2 / CH - 0.5,
+      my = (y0 + y1) / 2 / CH - 0.5,
+      list = [],
+      ready = new Map(),
+      start = performance.now();
+    for (let cy = cy0; cy <= cy1; cy++)
+      for (let cx = cx0; cx <= cx1; cx++) list.push([Math.hypot(cx - mx, cy - my), cx, cy]);
+    list.sort((a, b) => a[0] - b[0]);
+    let ok = true,
+      waiting = 0;
+    const painted = [];
+    for (const [, cx, cy] of list) {
+      const id = cy * 64 + cx,
+        had = chunks.has(id),
+        img = chunkAt(cx, cy, !painted.length || performance.now() - start < GROUND_BUDGET);
+      if (img === null) {
+        ok = false;
+        break;
+      }
+      if (!img) {
+        waiting++;
+        continue;
+      }
+      if (!had) painted.push(id);
+      ready.set(id, img);
+    }
+    // Fondu seulement pendant un remplissage (des blocs attendent encore) ; en marchant, un bloc paraît d'un coup.
+    if (waiting || born.size) for (const id of painted) born.set(id, time);
+    ahead = { cx0, cx1, cy0, cy1 };
+    // Sans canevas (tests sans écran) : dessin case par case.
+    if (!ok) {
+      for (let y = y0; y < y1; y++)
+        for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
+      return;
+    }
+    queueAhead();
+    const under = CANAAN_BLEND.active();
     // Transitions organiques : l'eau animée (et ses reflets) est peinte d'abord, sous les blocs de sol, sur les cases
     // d'eau et sur les cases de terre qui la bordent ; les blocs laissent voir l'eau là où elle déborde.
-    const under = CANAAN_BLEND.active() && !!chunkAt(Math.floor(x0 / CH), Math.floor(y0 / CH));
     if (under) {
       // Suites de cases d'une même eau sur chaque rangée : un seul remplissage par suite.
       for (let y = y0; y < y1; y++)
@@ -868,31 +923,32 @@
     const m = c.getTransform?.(),
       snapX = m ? m.e : 0,
       snapY = m ? m.f : 0;
-    let ok = true;
-    for (let cy = Math.floor(y0 / CH); cy <= Math.floor((y1 - 1) / CH) && ok; cy++)
-      for (let cx = Math.floor(x0 / CH); cx <= Math.floor((x1 - 1) / CH); cx++) {
-        const img = chunkAt(cx, cy);
+    for (let cy = cy0; cy <= cy1; cy++)
+      for (let cx = cx0; cx <= cx1; cx++) {
+        const id = cy * 64 + cx,
+          img = ready.get(id),
+          // Calé sur un pixel entier de l'écran : la caméra glisse au sous-pixel, et un bloc posé entre deux pixels
+          // laissait un liseré sombre à la jonction avec son voisin.
+          X = Math.round(cx * CH * TS + snapX) - snapX,
+          Y = Math.round(cy * CH * TS + snapY) - snapY;
+        // Bloc pas encore peint : dans le noir (l'eau ne déborde pas sur la terre).
         if (!img) {
-          ok = false;
-          break;
+          c.fillStyle = '#050407';
+          c.fillRect(X, Y, CH * TS, CH * TS);
+          continue;
         }
-        // Calé sur un pixel entier de l'écran : la caméra glisse au sous-pixel, et un bloc posé entre deux pixels
-        // laissait un liseré sombre à la jonction avec son voisin.
-        c.drawImage(img, Math.round(cx * CH * TS + snapX) - snapX, Math.round(cy * CH * TS + snapY) - snapY);
+        const age = born.has(id) ? time - born.get(id) : GROUND_FADE;
+        if (age >= GROUND_FADE) {
+          born.delete(id);
+          c.drawImage(img, X, Y);
+          continue;
+        }
+        c.fillStyle = '#050407';
+        c.fillRect(X, Y, CH * TS, CH * TS);
+        c.globalAlpha = Math.max(0.15, age / GROUND_FADE);
+        c.drawImage(img, X, Y);
+        c.globalAlpha = 1;
       }
-    ahead = {
-      cx0: Math.floor(x0 / CH),
-      cx1: Math.floor((x1 - 1) / CH),
-      cy0: Math.floor(y0 / CH),
-      cy1: Math.floor((y1 - 1) / CH)
-    };
-    if (ok) queueAhead();
-    // Sans canevas (tests sans écran) : dessin case par case.
-    if (!ok) {
-      for (let y = y0; y < y1; y++)
-        for (let x = x0; x < x1; x++) drawWorldTile(c, x, y, tiles[y][x], deco[y][x]);
-      return;
-    }
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
         const t = tiles[y][x],

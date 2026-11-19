@@ -576,6 +576,20 @@
           TT[k] = x < 0 || y < 0 || x >= MAPW || y >= MAPH ? T.WALL : at(x, y);
           BI[k] = biomeAt(Math.max(0, Math.min(MAPW - 1, x)), Math.max(0, Math.min(MAPH - 1, y)));
         }
+      yield null;
+      // Motifs des sols et de la roche du bloc : chacun coûte plusieurs millisecondes à sa création (une fois par
+      // rendu). Créés ici un par étape, pour que le budget de temps de l'image tienne.
+      const wanted = new Map();
+      for (let k = 0; k < TT.length; k++) {
+        const b = BI[k];
+        wanted.set(b * 4096 + 4095, [b, 'rock']);
+        if (FLOORS.has(TT[k]) || TT[k] === T.PATH) wanted.set(b * 4096 + TT[k], [b, TT[k]]);
+      }
+      for (const [id, [b, t]] of wanted)
+        if (!FLOOR_PAT.has(id)) {
+          floorPattern(b, t);
+          yield null;
+        }
       const lv = (x, y) => LV[(y - Y0 + M0) * MW + x - X0 + M0];
       const tt = (x, y) => TT[(y - Y0 + M0) * MW + x - X0 + M0];
       const bi = (x, y) => BI[(y - Y0 + M0) * MW + x - X0 + M0];
@@ -1211,6 +1225,11 @@
       fresh();
       const id = cy * 64 + cx;
       let img = chunks.get(id);
+      // Bloc gardé dont Chromium a perdu l'image (mémoire graphique saturée) : repeint plutôt qu'affiché noir.
+      if (img?.getContext?.('2d')?.isContextLost?.()) {
+        chunks.delete(id);
+        img = null;
+      }
       if (img) {
         chunks.delete(id);
         chunks.set(id, img);
@@ -1250,6 +1269,27 @@
       chunkAt(todo[0][1], todo[0][2], end);
       queue();
     }
+    // Blocs des cases (x0, y0)-(x1, y1) peints à l'avance, du plus proche du centre au plus loin, jusqu'à l'heure dite
+    // (deadline) : vrai quand ils sont tous prêts. Sert à préparer le sol d'une instance avant d'y entrer.
+    function warm(x0, x1, y0, y1, deadline) {
+      fresh();
+      const cx0 = Math.max(0, Math.floor(x0 / CH)),
+        cx1 = Math.min(Math.floor((MAPW - 1) / CH), Math.floor((x1 - 1) / CH)),
+        cy0 = Math.max(0, Math.floor(y0 / CH)),
+        cy1 = Math.min(Math.floor((MAPH - 1) / CH), Math.floor((y1 - 1) / CH)),
+        mx = (cx0 + cx1) / 2,
+        my = (cy0 + cy1) / 2,
+        todo = [];
+      for (let cy = cy0; cy <= cy1; cy++)
+        for (let cx = cx0; cx <= cx1; cx++)
+          if (!chunks.has(cy * 64 + cx)) todo.push([Math.hypot(cx - mx, cy - my), cx, cy]);
+      todo.sort((a, b) => a[0] - b[0]);
+      for (const [, cx, cy] of todo) {
+        if (performance.now() > deadline) return false;
+        if (!chunkAt(cx, cy, deadline)) return false;
+      }
+      return true;
+    }
     function queue() {
       if (queued) return;
       queued = true;
@@ -1257,16 +1297,17 @@
       else setTimeout(prepare, 30);
     }
     // Cases (x0, y0)-(x1, y1) changées (passage secret ouvert) : les blocs qui les touchent (avec la marge des bords
-    // et des faces de falaise) seront repeints ; l'ancienne image reste affichée jusque-là.
+    // et des faces de falaise) seront repeints ; l'ancienne image reste affichée jusque-là, sauf avec drop.
     const stale = new Map();
-    function forget(x0, y0, x1, y1) {
+    function forget(x0, y0, x1, y1, drop = false) {
       fresh();
       underFor = null;
       axesFor = null;
       for (let cy = Math.floor((y0 - 9) / CH); cy <= Math.floor((y1 + 3) / CH); cy++)
         for (let cx = Math.floor((x0 - 3) / CH); cx <= Math.floor((x1 + 3) / CH); cx++) {
           const id = cy * 64 + cx;
-          if (chunks.has(id)) stale.set(id, chunks.get(id));
+          if (drop) stale.delete(id);
+          else if (chunks.has(id)) stale.set(id, chunks.get(id));
           chunks.delete(id);
           work.delete(id);
         }
@@ -1370,7 +1411,7 @@
         }
       return true;
     }
-    return { drawGround, forget, release, active };
+    return { drawGround, forget, release, active, warm };
   }
   window.CANAAN_UNDER_LOOK = Object.freeze({ create });
 })();
