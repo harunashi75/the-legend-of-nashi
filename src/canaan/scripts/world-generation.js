@@ -85,6 +85,17 @@
       sea = Math.hypot(x - CENTER.x, y - CENTER.y) - coastRadius(x, y) - VALLEY.channel;
     return Math.min(edge, sea) + (field(x, y, 7, 561) - 0.5) * 3;
   }
+  // Chenal entre l'île et cette terre : somme des distances (en cases, sans bruit) d'une case de mer aux deux
+  // rivages ; environ VALLEY.channel dans le chenal, beaucoup plus au large. Les hauts-fonds s'en servent pour
+  // garder le chenal guéable d'un bout à l'autre (world-shallows.js).
+  function valleyStrait(x, y) {
+    const se =
+        Math.pow(Math.abs(x - VALLEY.x) / VALLEY.half, VALLEY.p) +
+        Math.pow(Math.abs(y - VALLEY.y) / VALLEY.half, VALLEY.p),
+      outside = Math.max(0, (Math.pow(se, 1 / VALLEY.p) - 1) * VALLEY.half),
+      off = Math.max(0, Math.hypot(x - CENTER.x, y - CENTER.y) - coastRadius(x, y));
+    return outside + off;
+  }
   // Isthme : de la Forêt enchantée (A, au bord de la terre ferme) au premier point bien à l'intérieur de la terre
   // (B), tout droit vers le large ; l'angle retenu est celui du plus court passage qui part de la Forêt enchantée.
   let isthmus = null;
@@ -475,6 +486,23 @@
         })
       })
     );
+    // Collines rocheuses : les rochers trop petits (moins de deux voisins de roche) redeviennent de l'herbe dorée ; le
+    // lissage des bords (world-blend.js) les effacerait presque, et ils bloqueraient sans se voir.
+    for (let pass = 0; pass < 2; pass++)
+      for (let y = y0; y <= y1; y++)
+        for (let x = x0; x <= x1; x++) {
+          if (game.world.tiles[y][x] !== 4 || !canaanExtLandMask[y * MAPW + x]) continue;
+          const n = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ].filter(([dx, dy]) => game.world.tiles[y + dy][x + dx] === 4).length;
+          if (n < 2) {
+            game.world.tiles[y][x] = 50;
+            game.world.decor[y][x] = null;
+          }
+        }
     // Plage de la vallée et bords de l'isthme : ni cactus ni bois mort du désert, quelques galets.
     for (let y = y0 - 8; y <= y1 + 8; y++)
       for (let x = x0 - 8; x <= x1 + 8; x++) {
@@ -1170,6 +1198,7 @@
     canaanInCity: (x, y) => inCity(Math.floor(x), Math.floor(y)),
     canaanZoneKin: zoneKin,
     canaanSurfaceZoneAt: surfaceZoneAt,
+    canaanValleyStrait: valleyStrait,
     // Outils de placement pour les lieux posés après la génération (quêtes) : mêmes règles que les portails.
     CANAAN_WORLD_TOOLS: Object.freeze({
       polar,

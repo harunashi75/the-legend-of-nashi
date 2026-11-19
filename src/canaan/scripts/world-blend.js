@@ -14,8 +14,9 @@
     B = 24;
   const LX = -0.6,
     LY = -0.8;
-  // Niveau de chaque terrain qui se fond dans ses voisins ; toutes les eaux sont au même niveau (0).
-  const LEVEL = { 0: 0, 15: 0, 18: 0, 3: 1, 11: 2, 16: 3, 51: 3, 1: 4, 10: 4, 50: 4, 5: 5, 17: 5 };
+  // Niveau de chaque terrain qui se fond dans ses voisins ; toutes les eaux sont au même niveau (0). La roche (4,
+  // collines de la terre du sud-ouest) est la plus haute : bord organique, talus éclairé et ombre portée.
+  const LEVEL = { 0: 0, 15: 0, 18: 0, 3: 1, 11: 2, 16: 3, 51: 3, 1: 4, 10: 4, 50: 4, 5: 5, 17: 5, 4: 6 };
   const WATER = new Set([0, 15, 18]);
   const OTHER = 99;
   // Teinte de chaque eau quand elle déborde sur une case de l'autre eau.

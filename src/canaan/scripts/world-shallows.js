@@ -4,6 +4,7 @@
 // - Profondeur : distance (chanfrein 8 voisins, en cases) entre chaque case de mer et la terre ferme la plus proche.
 //   Seule la mer reliée au bord de la carte compte (les lacs gardent leur rendu et restent infranchissables) ; les
 //   pilotis du quai sont de l'eau.
+// - Chenal : entre l'île et la terre du sud-ouest, le fond reste guéable d'un rivage à l'autre.
 // - Palissade : là où la palissade entre la région de départ et la Forêt enchantée plonge dans la mer, une fosse
 //   profonde la prolonge ; on ne la contourne pas à gué.
 // - Rendu : une image d'un pixel par case (teinte et opacité selon la profondeur), agrandie avec lissage par-dessus
@@ -14,6 +15,8 @@
   const WADE = 3.2;
   // Fosse au pied de la palissade : profondeur ajoutée près d'un tronc, décroissante sur PIT cases.
   const PIT = 7;
+  // Fond du chenal qui sépare l'île de la terre du sud-ouest : toujours guéable.
+  const STRAIT = 2.6;
   const SQ2 = Math.SQRT2;
   let depthFor = null,
     depthBridges = -1,
@@ -114,6 +117,14 @@
     coast = new Uint8Array(N);
     for (let i = 0; i < N; i++) coast[i] = !sea[i] && touches(sea, i) ? 1 : 0;
     for (let i = 0; i < N; i++) depth[i] = sea[i] ? toLand[i] + Math.max(0, PIT - toWood[i]) * 1.2 : 0;
+    // Chenal de la terre du sud-ouest : guéable d'un rivage à l'autre (au plus STRAIT cases de fond), le fond
+    // redescend peu à peu vers le large pour garder un dégradé continu.
+    for (let i = 0; i < N; i++) {
+      if (!sea[i] || depth[i] <= STRAIT) continue;
+      const x = i % MAPW,
+        s = canaanValleyStrait(x, (i - x) / MAPW);
+      depth[i] = Math.min(depth[i], STRAIT + Math.max(0, s - 10) * 0.45);
+    }
     return depth;
   }
 
