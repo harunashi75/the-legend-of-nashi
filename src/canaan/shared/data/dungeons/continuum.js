@@ -23,6 +23,21 @@ export default {
       'Le Dévoreur Stellaire'
     ],
     secrets: ['Le Paradoxe Errant', 'L’Enfant d’Avant le Temps'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['memory', 'toggles', 'mirrors', 'runes', 'guardian', 'ambush'],
+    mechanics: [
+      ['cross', 'adds'],
+      ['beam', 'slam', 'totems'],
+      ['pools', 'safe', 'rain'],
+      ['spread', 'blink', 'pull'],
+      ['donut', 'nova', 'cross'],
+      ['pull', 'beam', 'safe', 'rain', 'berserk']
+    ],
+    secretMechanics: [
+      ['blink', 'cross', 'spread'],
+      ['donut', 'soak', 'beam']
+    ],
     color: '#ff7fa7',
     raid: true,
     level: 49,
@@ -41,6 +56,12 @@ export default {
     wallProps: [],
     floorProps: ['gear', 'hourglass', 'crystal', 'pillar', 'crystal', 'gear'],
     centerpiece: 'orrery',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'pulse',
+    secret: 'statue',
+    dark: 1,
     gate: 'barrier'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

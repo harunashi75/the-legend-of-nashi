@@ -16,6 +16,15 @@ export default {
     boss: 'Gardien des Os',
     bosses: ['Grignotte, Reine des Rats', 'Le Fossoyeur Bossu', 'Gardien des Os'],
     secrets: ['Le Rat-Roi aux Mille Queues'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['braziers', 'search', 'levers'],
+    mechanics: [
+      ['charge', 'adds'],
+      ['slam', 'pools'],
+      ['nova', 'rain', 'adds']
+    ],
+    secretMechanics: [['charge', 'spread', 'adds']],
     color: '#a3c7ff',
     level: 7,
     mobLevel: 9,
@@ -33,6 +42,12 @@ export default {
     wallProps: ['torch', 'roots', 'beam', 'roots'],
     floorProps: ['bones', 'mushroom', 'burrow', 'crate', 'rubble', 'bones', 'mushroom'],
     centerpiece: 'bonethrone',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: null,
+    secret: 'wall',
+    dark: 1,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

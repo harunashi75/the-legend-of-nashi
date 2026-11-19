@@ -107,6 +107,7 @@
     island = null,
     houses = [],
     gates = -1,
+    knownAt = '',
     box = null,
     checkAt = 0;
   function gateCount() {
@@ -121,9 +122,10 @@
     let stale = !base || baseFor !== key || force;
     if (!stale && !inst && baseAt !== BRIDGE_TILES.size) stale = true;
     // En donjon, une herse ouverte change le plan : vérifié deux fois par seconde, sur le cadre de l'instance seulement.
+    // Le brouillard aussi : une salle visitée, un passage ouvert agrandissent le plan connu.
     if (!stale && inst && time - checkAt > 30) {
       checkAt = time;
-      stale = gateCount() !== gates;
+      stale = gateCount() !== gates || CANAAN_DUNGEON_EXPLORE.knownKey() !== knownAt;
     }
     if (!stale) return base;
     // Les Tréfonds : leur image est peinte une fois et gardée.
@@ -144,6 +146,7 @@
       box = instanceBox();
       base = paintInstance();
       gates = gateCount();
+      knownAt = CANAAN_DUNGEON_EXPLORE.knownKey();
     } else {
       houses = CANAAN_HOUSE.buildings();
       base = paintIsland();
@@ -329,7 +332,9 @@
   function paintInstance() {
     const cv = newCanvas(),
       tiles = game.world.tiles,
-      open = t => t !== undefined && (!SOLID.includes(t) || t === 19);
+      known = CANAAN_DUNGEON_EXPLORE.known,
+      // Brouillard : seules les salles visitées (et les couloirs qui en partent) sont dessinées.
+      open = (t, x, y) => t !== undefined && (!SOLID.includes(t) || t === 19) && known(x, y);
     pixels(cv, (px, w) => {
       const wall = shades('#08080e', 1, 1),
         edge = shades('#5a5468', 0.85, 1.15),
@@ -339,9 +344,10 @@
           const t = tiles[y][x],
             X = x * PX,
             Y = y * PX;
-          if (!open(t)) {
+          if (!open(t, x, y)) {
             let rim = false;
-            for (let i = 0; i < 4 && !rim; i++) rim = open(tiles[y + DY4[i]]?.[x + DX4[i]]);
+            for (let i = 0; i < 4 && !rim; i++)
+              rim = open(tiles[y + DY4[i]]?.[x + DX4[i]], x + DX4[i], y + DY4[i]);
             fillTile(px, w, X, Y, rim ? edge : wall);
             continue;
           }
@@ -368,9 +374,10 @@
           const t = tiles[y][x],
             X = x * PX,
             Y = y * PX;
-          if (!open(t)) {
+          if (!open(t, x, y)) {
             let rim = false;
-            for (let i = 0; i < 4 && !rim; i++) rim = open(tiles[y + DY4[i]]?.[x + DX4[i]]);
+            for (let i = 0; i < 4 && !rim; i++)
+              rim = open(tiles[y + DY4[i]]?.[x + DX4[i]], x + DX4[i], y + DY4[i]);
             fillTile(px, w, X, Y, rim ? edge : rock);
             continue;
           }
@@ -382,7 +389,7 @@
     });
     return cv;
   }
-  // Cadre d'une instance : les cases praticables et leurs abords.
+  // Cadre d'une instance : les cases praticables déjà connues et leurs abords.
   function instanceBox() {
     let x0 = MAPW,
       y0 = MAPH,
@@ -391,7 +398,7 @@
     const tiles = game.world.tiles;
     for (let y = 0; y < MAPH; y++)
       for (let x = 0; x < MAPW; x++)
-        if (!SOLID.includes(tiles[y][x]) || tiles[y][x] === 19) {
+        if ((!SOLID.includes(tiles[y][x]) || tiles[y][x] === 19) && CANAAN_DUNGEON_EXPLORE.known(x, y)) {
           x0 = Math.min(x0, x);
           y0 = Math.min(y0, y);
           x1 = Math.max(x1, x);
@@ -667,7 +674,7 @@
     };
     if (game.world.instance) {
       for (const m of game.world.monsters) {
-        if (m.hp <= 0 || m.hidden) continue;
+        if (m.hp <= 0 || m.hidden || !CANAAN_DUNGEON_EXPLORE.known(m.x / TS, m.y / TS)) continue;
         put(m.boss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, m.boss && names ? m.t : null);
       }
     } else if (game.world.layer === 'under') {

@@ -16,6 +16,15 @@ export default {
     boss: 'Ombral, le Roi sous la Pierre',
     bosses: ['Le Héraut des Profondeurs', 'La Garde de Pierre Noire', 'Ombral, le Roi sous la Pierre'],
     secrets: ['Le Prince Noyé'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['levers', 'mirrors', 'guardian'],
+    mechanics: [
+      ['spread', 'pools'],
+      ['totems', 'slam', 'cross'],
+      ['safe', 'pull', 'nova', 'adds']
+    ],
+    secretMechanics: [['donut', 'pools', 'blink']],
     color: '#8ac8e8',
     // Tréfonds (underground.js) : aucun niveau requis ; ennemis au niveau du groupe et butin du niveau de chaque
     // héros : Peu commun, 31 % de chances de Rare (PRESTIGE_DROPS.underground).
@@ -38,6 +47,12 @@ export default {
     wallProps: ['sconce', 'banner', 'chains', 'banner'],
     floorProps: ['pillar', 'statue', 'rubble', 'candles', 'brazier', 'statue'],
     centerpiece: 'throne',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spikes',
+    secret: 'statue',
+    dark: 1.3,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

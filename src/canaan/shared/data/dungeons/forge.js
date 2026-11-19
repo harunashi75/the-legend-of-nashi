@@ -16,6 +16,15 @@ export default {
     boss: 'Pyrrhax, Wyrm d’Écaille-Ardente',
     bosses: ['Maître-Forgeron Kraag', 'L’Élémentaire de Scories', 'Pyrrhax, Wyrm d’Écaille-Ardente'],
     secrets: ['La Salamandre d’Obsidienne'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['braziers', 'toggles', 'guardian'],
+    mechanics: [
+      ['slam', 'charge', 'soak'],
+      ['pools', 'nova', 'adds'],
+      ['beam', 'rain', 'safe', 'totems']
+    ],
+    secretMechanics: [['charge', 'pools', 'donut']],
     color: '#6bdfa2',
     level: 32,
     mobLevel: 34,
@@ -33,6 +42,12 @@ export default {
     wallProps: ['furnace', 'chains', 'torch', 'chains'],
     floorProps: ['anvil', 'rack', 'brazier', 'ingots', 'dragonskull', 'ingots'],
     centerpiece: 'greatforge',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'jets',
+    secret: 'torch',
+    dark: 1,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

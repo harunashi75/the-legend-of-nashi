@@ -16,6 +16,15 @@ export default {
     boss: 'Le Fossoyeur Éternel',
     bosses: ['Le Pilleur de Tombes', 'La Veuve des Cryptes', 'Le Fossoyeur Éternel'],
     secrets: ['Le Mille-et-Unième Mort'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['memory', 'search', 'runes'],
+    mechanics: [
+      ['charge', 'spread'],
+      ['pools', 'pull', 'adds'],
+      ['safe', 'nova', 'rain', 'adds']
+    ],
+    secretMechanics: [['spread', 'soak', 'donut']],
     color: '#a8f0c0',
     // Tréfonds (underground.js) : aucun niveau requis ; ennemis au niveau du groupe et butin du niveau de chaque
     // héros : Peu commun, 31 % de chances de Rare (PRESTIGE_DROPS.underground).
@@ -38,6 +47,12 @@ export default {
     wallProps: ['skulls', 'sconce', 'chains', 'skulls'],
     floorProps: ['bonepile', 'candles', 'bones', 'cage', 'statue', 'candles'],
     centerpiece: 'altar',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spikes',
+    secret: 'torch',
+    dark: 1.4,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

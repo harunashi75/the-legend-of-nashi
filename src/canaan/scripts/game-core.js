@@ -949,6 +949,11 @@ function update() {
   game.world.monsters.forEach(m => {
     // Les boss de l'Arène et leurs clones sont pilotés par canaan-arena.
     if (m.arenaBoss || m.arenaClone) return;
+    // Cristaux de garde immobiles ; un boss qui incante reste sur place sans frapper (boss-mechanics.js).
+    if (m.still || m.castUntil > time) {
+      m.cd -= 1 / 60;
+      return;
+    }
     // Cible : le héros vivant le plus proche (gardée pour l'orientation du monstre).
     const target = nearestHero(m);
     m.targetHero = target;

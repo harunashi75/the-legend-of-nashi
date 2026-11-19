@@ -57,6 +57,11 @@
     if (!m || m.hp <= 0) return 0;
     // Boss de l'Arène : bouclier de cristal, parade et contre-attaque.
     if (m.arenaBoss || m.arenaClone) value = CANAAN_ARENA.onBossHurt(m, value);
+    // Boss de donjon protégé par ses cristaux de garde (boss-mechanics.js).
+    if (m.bossShield) {
+      if (Math.random() < 0.2) float(m.x, m.y - 60, 'IMMUNISÉ', '#d8d0c0');
+      return 0;
+    }
     if (value <= 0) return 0;
     const before = m.hp;
     m.hp -= value;
@@ -98,7 +103,14 @@
           : mobDamage(level);
     // Donjons et raids : monstres 50 % plus forts que dehors ; un boss enragé (boss-mechanics.js) frappe 25 % plus fort.
     const inst = game.world?.instance && !game.world.instance.arena ? INSTANCE_DAMAGE : 1;
-    return raw * inst * (m.enraged ? 1.25 : 1) * (instanceDifficulty()?.damage || 1) * canaanGroupScale().dmg;
+    return (
+      raw *
+      inst *
+      (m.enraged ? 1.25 : 1) *
+      (m.berserk ? 1.8 : 1) *
+      (instanceDifficulty()?.damage || 1) *
+      canaanGroupScale().dmg
+    );
   }
   window.CANAAN_ENEMY_RAW_DAMAGE = enemyRawDamage;
   // Dégâts reçus par un héros (l'hôte par défaut) : Défense (contre le niveau de l'ennemi), Résistance, déviation

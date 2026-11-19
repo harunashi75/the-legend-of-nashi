@@ -21,7 +21,12 @@
       exitNear,
       planFor,
       dunState,
-      reachable
+      reachable,
+      beamPath,
+      trapPhase,
+      trapZones,
+      secretOpen,
+      hostTime
     } = scene;
 
     // Thème complet d'une instance : plan, créatures et apparence de sa fiche (shared/data/dungeons/).
@@ -773,22 +778,28 @@
     // Dessin d'une case d'instance, appelé par la boucle de rendu à la place des tuiles du monde.
     function drawDungeonTile(c, x, y, t) {
       if (t === SECRET) {
-        // Mur fissuré : comme un mur, avec des lézardes et un filet de poussière.
+        // Passage secret fermé : un mur comme les autres. Celui qu'on ouvre en l'examinant porte une fine lézarde et
+        // un filet de poussière, qu'on ne voit qu'en s'en approchant ; les autres s'ouvrent par une torche ou une statue.
         drawDungeonTile(c, x, y, WALL);
+        const plan = planFor(game.world.instance.index),
+          wall = plan.secretWalls.find(w => w.cells.some(([cx, cy]) => cx === x && cy === y));
+        if (!wall || wall.kind !== 'wall') return;
+        const d = Math.hypot(P.x / TS - (x + 0.5), P.y / TS - (y + 0.5));
+        if (d > 3.2) return;
         const X = x * TS,
           Y = y * TS;
-        c.fillStyle = 'rgba(10,8,6,.75)';
+        c.globalAlpha = Math.min(1, (3.2 - d) / 1.6) * 0.75;
+        c.fillStyle = 'rgba(10,8,6,1)';
         for (const [px, py, w, h] of [
-          [20, 14, 2, 8],
-          [18, 21, 2, 6],
-          [22, 26, 2, 7],
-          [14, 30, 6, 2],
-          [24, 32, 6, 2],
-          [26, 18, 5, 2]
+          [22, 16, 2, 7],
+          [20, 23, 2, 6],
+          [23, 29, 2, 5],
+          [16, 33, 5, 2]
         ])
           c.fillRect(X + px, Y + py, w, h);
-        if (Math.floor(time / 9 + x * 3) % 7 === 0) {
-          c.fillStyle = 'rgba(220,200,170,.6)';
+        c.globalAlpha = 1;
+        if (Math.floor(time / 9 + x * 3) % 9 === 0) {
+          c.fillStyle = 'rgba(220,200,170,.5)';
           c.fillRect(X + 21, Y + 36 + ((time * 0.5) % 10), 2, 2);
         }
         return;
@@ -1587,7 +1598,7 @@
       px3(c, X - 3, Y + 39, 10, 2, th.pillar[1]);
       for (let k = 0; k < 4; k++) px3(c, X + 3, Y + 15 + k * 6, 6, 1, th.pillar[1]);
       // Symboles de la séquence (leviers, dalles) ou flamme gravée (braseros) au fronton.
-      if (lock.type === 'levers' || lock.type === 'runes') {
+      if (lock.type !== 'braziers') {
         c.fillStyle = th.rune;
         c.globalAlpha = 0.5 + 0.3 * Math.sin(time * 0.06 + p.x);
         c.fillRect(X + 9, Y + 9, 6, 3);
@@ -1656,9 +1667,314 @@
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = INK;
-      c.fillText({ braziers: '🔥', levers: '⚙', runes: '✦', guardian: '⚔' }[lock.type], cx, cy + 1);
+      c.fillText(
+        {
+          braziers: '🔥',
+          levers: '⚙',
+          runes: '✦',
+          guardian: '⚔',
+          mirrors: '◈',
+          memory: '♪',
+          toggles: '⭐',
+          search: '💠',
+          ambush: '☠'
+        }[lock.type],
+        cx,
+        cy + 1
+      );
       c.textBaseline = 'alphabetic';
       canaanLight(cx, cy, 120, th.rune);
+    }
+    // Miroir sur pivot : une plaque d'argent inclinée en « / » ou en « \ ».
+    function drawMirror(c, p, th, slash) {
+      const X = p.x * TS,
+        Y = p.y * TS;
+      c.fillStyle = 'rgba(0,0,0,.3)';
+      c.beginPath();
+      c.ellipse(X + 24, Y + 40, 15, 5, 0, 0, Math.PI * 2);
+      c.fill();
+      block(c, X + 15, Y + 33, 6, 3, th.pillar[1]);
+      px3(c, X + 15, Y + 33, 6, 1, th.pillar[2]);
+      c.save();
+      c.translate(X + 24, Y + 20);
+      c.rotate(slash ? Math.PI / 4 : -Math.PI / 4);
+      c.fillStyle = INK;
+      c.fillRect(-19, -6, 38, 12);
+      c.fillStyle = '#b8c8d8';
+      c.fillRect(-16, -3, 32, 6);
+      c.fillStyle = '#ffffff';
+      c.fillRect(-16, -3, 32, 2);
+      c.restore();
+    }
+    function drawEmitter(c, p, th) {
+      const X = p.x * TS,
+        Y = p.y * TS,
+        [dx, dy] = p.dir;
+      block(c, X + 9, Y + 18, 10, 8, th.pillar[1]);
+      px3(c, X + 9, Y + 18, 10, 1, th.pillar[2]);
+      c.fillStyle = '#fff6c8';
+      c.beginPath();
+      c.arc(X + 24 + dx * 10, Y + 24 + dy * 10, 7 + Math.sin(time * 0.15), 0, Math.PI * 2);
+      c.fill();
+      canaanLight(X + 24, Y + 24, 140, '#fff0b0');
+    }
+    function drawMirrorTarget(c, p, th, lit) {
+      const X = p.x * TS,
+        Y = p.y * TS;
+      block(c, X + 12, Y + 33, 8, 3, th.pillar[1]);
+      c.fillStyle = INK;
+      c.beginPath();
+      c.moveTo(X + 24, Y - 4);
+      c.lineTo(X + 38, Y + 18);
+      c.lineTo(X + 24, Y + 38);
+      c.lineTo(X + 10, Y + 18);
+      c.fill();
+      c.fillStyle = lit ? '#fff6c8' : th.rune;
+      c.globalAlpha = lit ? 1 : 0.55;
+      c.beginPath();
+      c.moveTo(X + 24, Y + 1);
+      c.lineTo(X + 34, Y + 18);
+      c.lineTo(X + 24, Y + 33);
+      c.lineTo(X + 14, Y + 18);
+      c.fill();
+      c.globalAlpha = 1;
+      canaanLight(X + 24, Y + 18, lit ? 220 : 80, lit ? '#fff6c8' : th.rune);
+    }
+    // Rayon de lumière : de l'émetteur, rebondissant sur les miroirs, jusqu'au mur ou au cristal.
+    function drawBeam(c, pts, lit) {
+      c.save();
+      c.lineCap = 'round';
+      c.lineJoin = 'round';
+      for (const [w, col, a] of [
+        [14, lit ? '#fff2a0' : '#ffe08a', 0.25],
+        [6, '#fff6c8', 0.8],
+        [2, '#ffffff', 1]
+      ]) {
+        c.globalAlpha = a * (0.85 + 0.15 * Math.sin(time * 0.2));
+        c.strokeStyle = col;
+        c.lineWidth = w;
+        c.beginPath();
+        pts.forEach(([x, y], k) => (k ? c.lineTo : c.moveTo).call(c, x * TS + 24, y * TS + 20));
+        c.stroke();
+      }
+      c.restore();
+    }
+    // Pierre d'écho : une cloche de pierre qui vibre quand elle chante.
+    function drawEchoStone(c, p, th, singing) {
+      const X = p.x * TS + 12,
+        Y = p.y * TS - 4;
+      block(c, X, Y + 18, 8, 8, th.pillar[0]);
+      px3(c, X, Y + 18, 8, 1, th.pillar[2]);
+      block(c, X + 6, Y + 6, 4, 4, th.pillar[1]);
+      px3(c, X - 3, Y + 42, 10, 2, th.pillar[1]);
+      if (singing)
+        for (let k = 0; k < 3; k++) {
+          c.globalAlpha = 0.6 - k * 0.18;
+          c.strokeStyle = th.rune;
+          c.lineWidth = 2;
+          c.beginPath();
+          c.arc(X + 12, Y + 14, 12 + k * 9 + ((time * 0.6) % 9), 0, Math.PI * 2);
+          c.stroke();
+        }
+      c.globalAlpha = 1;
+      canaanLight(X + 12, Y + 18, singing ? 140 : 60, th.rune);
+    }
+    function drawEchoCrystal(c, p, th, lit) {
+      const X = p.x * TS,
+        Y = p.y * TS,
+        col = SIGILS[p.id].col;
+      c.fillStyle = 'rgba(0,0,0,.3)';
+      c.beginPath();
+      c.ellipse(X + 24, Y + 40, 13, 4, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = INK;
+      c.beginPath();
+      c.moveTo(X + 24, Y - 6);
+      c.lineTo(X + 35, Y + 22);
+      c.lineTo(X + 24, Y + 40);
+      c.lineTo(X + 13, Y + 22);
+      c.fill();
+      c.fillStyle = col;
+      c.globalAlpha = lit ? 1 : 0.42;
+      c.beginPath();
+      c.moveTo(X + 24, Y - 1);
+      c.lineTo(X + 31, Y + 22);
+      c.lineTo(X + 24, Y + 35);
+      c.lineTo(X + 17, Y + 22);
+      c.fill();
+      c.globalAlpha = 1;
+      sigil(c, p.id, X + 24, Y + 18, lit, 13);
+      if (lit) canaanLight(X + 24, Y + 18, 200, col);
+    }
+    function drawTogglePillar(c, p, th, lit) {
+      const X = p.x * TS + 12,
+        Y = p.y * TS - 18;
+      block(c, X, Y + 6, 8, 18, lit ? th.pillar[2] : th.pillar[1]);
+      px3(c, X, Y + 6, 8, 1, th.pillar[2]);
+      px3(c, X + 21, Y + 6, 1, 18, th.pillar[1]);
+      px3(c, X - 3, Y + 57, 10, 2, INK);
+      c.fillStyle = lit ? th.rune : '#3a3640';
+      c.fillRect(X + 6, Y + 18, 12, 12);
+      if (lit) {
+        c.fillStyle = '#ffffff';
+        c.fillRect(X + 9, Y + 21, 6, 6);
+        canaanLight(X + 12, Y + 24, 150, th.rune);
+      }
+    }
+    // Urne de terre : intacte (un éclat luit à peine quand elle cache un fragment) ou brisée.
+    function drawUrn(c, p, th, broken, shard) {
+      const X = p.x * TS + 9,
+        Y = p.y * TS + 6;
+      if (broken) {
+        for (const [dx, dy] of [
+          [0, 30],
+          [12, 33],
+          [21, 27],
+          [6, 24]
+        ])
+          block(c, X + dx, Y + dy, 3, 2, '#8a5a3a');
+        return;
+      }
+      block(c, X + 6, Y + 12, 6, 2, '#6a4028');
+      block(c, X + 3, Y + 18, 12, 12, '#9a6440');
+      px3(c, X + 3, Y + 18, 3, 12, '#b8805a');
+      px3(c, X + 3, Y + 24, 12, 1, '#6a4028');
+      if (shard && Math.floor(time / 7 + p.id * 5) % 23 === 0) {
+        px3(c, X + 15, Y + 21, 1, 1, '#ffffff');
+        canaanLight(X + 18, Y + 24, 50, th.rune);
+      }
+    }
+    // Torche secrète : comme les autres, mais sa flamme n'a pas la couleur du thème.
+    function drawSecretTorch(c, p, th, done) {
+      const cx = p.x * TS + 24,
+        Y = p.y * TS,
+        cols = done ? th.flame : ['#2a8a6a', '#5ae0b0', '#d8fff0'];
+      R(c, cx - 2, Y + (done ? 30 : 24), 4, 14, '#4a3324');
+      R(c, cx - 6, Y + (done ? 26 : 20), 12, 5, '#6f5137');
+      flame(c, cx, Y + (done ? 26 : 20), 1, cols, p.x * 3 + p.y);
+      canaanLight(cx, Y + 30, 170, cols[1]);
+    }
+    // Statue de travers : elle regarde ailleurs que ses sœurs (et se redresse une fois tournée).
+    function drawSecretStatue(c, p, th, done) {
+      const ax = p.x * TS + 24,
+        ay = p.y * TS + 42;
+      c.save();
+      if (!done) {
+        c.translate(ax, ay);
+        c.rotate(0.14);
+        c.translate(-ax, -ay);
+      }
+      drawFloorProp(c, { ...p, kind: 'statue' }, th);
+      c.restore();
+    }
+    function drawPuffball(c, p) {
+      const X = p.x * TS + 24,
+        Y = p.y * TS + 30,
+        swell = 1 + 0.12 * Math.sin(((hostTime() + p.phase) % 300) * 0.02);
+      c.fillStyle = '#4a6a2a';
+      c.fillRect(X - 3, Y, 6, 10);
+      c.fillStyle = INK;
+      c.beginPath();
+      c.ellipse(X, Y - 2, 15 * swell, 12 * swell, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#9ac050';
+      c.beginPath();
+      c.ellipse(X, Y - 3, 12 * swell, 9 * swell, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#d8f0a0';
+      c.fillRect(X - 6, Y - 9, 4, 3);
+      canaanLight(X, Y, 70, '#a8e060');
+    }
+    // Pièges en bandes : plaques au repos, qui tremblent quand elles s'arment, puis pointes, flammes ou runes.
+    function drawTraps(c, plan, th, view) {
+      const kind = th.trap;
+      if (plan.traps.length)
+        for (const trap of plan.traps) {
+          const ph = trapPhase(trap);
+          for (const [x, y] of trap.cells) {
+            if (!view(x, y)) continue;
+            const X = x * TS,
+              Y = y * TS,
+              jit = ph === 1 ? Math.round(Math.sin(time * 1.3 + x) * 1.5) : 0;
+            c.fillStyle = 'rgba(0,0,0,.35)';
+            c.fillRect(X + 4, Y + 4, 40, 40);
+            c.fillStyle = kind === 'pulse' ? th.floor.b : '#3a3638';
+            c.fillRect(X + 6 + jit, Y + 6, 36, 36);
+            if (kind === 'pulse') {
+              c.globalAlpha = ph === 2 ? 0.95 : ph === 1 ? 0.35 + 0.3 * Math.sin(time * 0.6) : 0.18;
+              c.strokeStyle = th.rune;
+              c.lineWidth = 3;
+              c.strokeRect(X + 12, Y + 12, 24, 24);
+              c.beginPath();
+              c.moveTo(X + 24, Y + 8);
+              c.lineTo(X + 24, Y + 40);
+              c.moveTo(X + 8, Y + 24);
+              c.lineTo(X + 40, Y + 24);
+              c.stroke();
+              c.globalAlpha = 1;
+              if (ph === 2) canaanLight(X + 24, Y + 24, 90, th.rune);
+              continue;
+            }
+            // Trous des pointes ou buses des jets.
+            c.fillStyle = INK;
+            for (const [hx, hy] of [
+              [12, 12],
+              [30, 12],
+              [21, 21],
+              [12, 30],
+              [30, 30]
+            ])
+              c.fillRect(X + hx + jit, Y + hy, 6, 6);
+            if (ph !== 2) continue;
+            if (kind === 'jets') {
+              flame(c, X + 24, Y + 34, 1.5, th.flame, x + y);
+              canaanLight(X + 24, Y + 20, 120, th.flame[1]);
+            } else
+              for (const [hx, hy] of [
+                [12, 12],
+                [30, 12],
+                [21, 21],
+                [12, 30],
+                [30, 30]
+              ]) {
+                c.fillStyle = '#c8c8d0';
+                c.beginPath();
+                c.moveTo(X + hx, Y + hy + 6);
+                c.lineTo(X + hx + 3, Y + hy - 10);
+                c.lineTo(X + hx + 6, Y + hy + 6);
+                c.fill();
+              }
+          }
+        }
+      for (const p of plan.puffs) if (view(p.x, p.y)) drawPuffball(c, p);
+      // Éboulements et spores annoncés.
+      for (const z of trapZones()) {
+        const k = Math.min(1, Math.max(0, (time - z.start) / Math.max(1, z.at - z.start)));
+        c.globalAlpha = 0.18 + 0.3 * k;
+        c.fillStyle = z.kind === 'spore' ? '#8ad040' : '#a0603a';
+        c.beginPath();
+        c.arc(z.x, z.y, z.r * k, 0, Math.PI * 2);
+        c.fill();
+        c.globalAlpha = 0.8;
+        c.strokeStyle = z.kind === 'spore' ? '#c8f080' : '#ffb070';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
+        c.stroke();
+        c.globalAlpha = 1;
+        if (z.kind === 'rock') {
+          // La pierre tombe du plafond.
+          const h = (1 - k) * 160;
+          block(c, z.x - 9, z.y - 12 - h, 6, 5, '#7a6a5a');
+        }
+      }
+    }
+    // Écho joué par la pierre : quel cristal brille à cet instant (ou -1).
+    function echoLit(lock, ls) {
+      if (ls.a > 0 && time - ls.t < 26) return ls.a - 1;
+      if (ls.a !== 0 || !ls.t || time < ls.t) return -1;
+      const k = Math.floor((time - ls.t) / 42);
+      return k < lock.order.length && (time - ls.t) % 42 < 30 ? lock.order[k] : -1;
     }
     function drawExplore(c, plan, th, view) {
       const st = dunState();
@@ -1666,11 +1982,40 @@
       for (const p of plan.plates)
         if (view(p.x, p.y))
           drawPlate(c, p, th, !!(st.locks[p.lock].prog & (1 << p.id)) || !!st.locks[p.lock].done);
+      // Rayons des miroirs.
+      plan.locks.forEach((lock, s) => {
+        if (lock.type !== 'mirrors' || !view(lock.emitter.x, lock.emitter.y, 12)) return;
+        const ls = st.locks[s],
+          beam = ls.done ? { pts: [], lit: true } : beamPath(plan, s, ls.prog);
+        if (!ls.done) drawBeam(c, beam.pts, beam.lit);
+      });
+      // Piliers liés : un fil de runes relie chaque pilier à ses voisins.
+      plan.locks.forEach((lock, s) => {
+        if (lock.type !== 'toggles' || !view(lock.items[0].x, lock.items[0].y, 12)) return;
+        c.save();
+        c.globalAlpha = 0.28;
+        c.strokeStyle = th.rune;
+        c.lineWidth = 2;
+        c.setLineDash?.([6, 6]);
+        c.beginPath();
+        lock.items.forEach((it, k) => (k ? c.lineTo : c.moveTo).call(c, it.x * TS + 24, it.y * TS + 30));
+        c.closePath();
+        c.stroke();
+        c.restore();
+      });
       for (const p of plan.props) {
         if (!view(p.x, p.y, 4)) continue;
+        if (p.hidden !== undefined && !secretOpen(p.hidden)) continue;
         if (p.kind === 'treasure') drawTreasure(c, p);
+        if (p.secretTrigger !== undefined) {
+          const done = secretOpen(p.secretTrigger);
+          if (p.kind === 'secrettorch') drawSecretTorch(c, p, th, done);
+          else drawSecretStatue(c, p, th, done);
+          continue;
+        }
         if (p.lock === undefined) continue;
-        const ls = st.locks[p.lock],
+        const lock = plan.locks[p.lock],
+          ls = st.locks[p.lock],
           on = !!ls.done || !!(ls.prog & (1 << p.id));
         // Agrandis d'un tiers autour du pied (pixels de 4 px) : bien lisibles à côté du héros.
         const ax = p.x * TS + 24,
@@ -1681,42 +2026,87 @@
         c.translate(-ax, -ay);
         if (p.kind === 'lever') drawLever(c, p, th, on);
         else if (p.kind === 'brazier_off') drawBrazierOff(c, p, th, on);
-        else if (p.kind === 'stele') drawStele(c, p, th, plan.locks[p.lock]);
+        else if (p.kind === 'stele') drawStele(c, p, th, lock);
+        else if (p.kind === 'mirror') drawMirror(c, p, th, (ls.prog >> p.id) & 1);
+        else if (p.kind === 'emitter') drawEmitter(c, { ...p, dir: lock.emitter.dir }, th);
+        else if (p.kind === 'mtarget') drawMirrorTarget(c, p, th, !!ls.done);
+        else if (p.kind === 'echostone') drawEchoStone(c, p, th, echoLit(lock, ls) >= 0 && ls.a === 0);
+        else if (p.kind === 'echocrystal') drawEchoCrystal(c, p, th, !!ls.done || echoLit(lock, ls) === p.id);
+        else if (p.kind === 'togglepillar') drawTogglePillar(c, p, th, on);
+        else if (p.kind === 'urn') drawUrn(c, p, th, !!(ls.prog & (1 << p.id)), lock.shards.includes(p.id));
         c.restore();
       }
       plan.doors.forEach(
         (g, s) =>
           g && game.world.tiles[g.cells[0][1]]?.[g.cells[0][0]] === GATE && drawDoor(c, g, th, plan.locks[s])
       );
+      // Embuscade : les issues de la salle se ferment comme des herses.
+      plan.locks.forEach(lock => {
+        if (lock.seals)
+          for (const sl of lock.seals)
+            if (sl.cells.length && game.world.tiles[sl.cells[0][1]]?.[sl.cells[0][0]] === GATE)
+              drawGate(c, sl, th);
+      });
+      // Braseros minutés : les secondes qui restent, au-dessus de la porte.
+      plan.locks.forEach((lock, s) => {
+        const ls = st.locks[s];
+        if (lock.type !== 'braziers' || ls.done || !ls.prog || !ls.t) return;
+        const left = Math.max(0, Math.ceil((ls.t - time) / 60)),
+          g = plan.doors[s],
+          [x, y] = g.cells[Math.floor(g.cells.length / 2)];
+        c.save();
+        c.font = 'bold 18px monospace';
+        c.textAlign = 'center';
+        c.lineWidth = 4;
+        c.strokeStyle = '#1a1008';
+        c.fillStyle = left <= 5 ? '#ff6a4a' : '#ffd36d';
+        c.strokeText('⏳ ' + left, x * TS + 24, y * TS - 22);
+        c.fillText('⏳ ' + left, x * TS + 24, y * TS - 22);
+        c.restore();
+      });
       // Invitation à agir sur ce qui est à portée de main.
       const what = reachable(P);
       if (!what) return;
       let at = null,
         text = '';
       if (what.kind === 'secret') {
-        const [x, y] = plan.secretWalls[what.k].cells[1] || plan.secretWalls[what.k].cells[0];
-        at = [x, y];
-        text = '[E] Examiner le mur fissuré';
+        const w = plan.secretWalls[what.k];
+        if (w.kind === 'wall') {
+          at = w.cells[1] || w.cells[0];
+          text = '[E] Examiner la lézarde';
+        } else {
+          at = [w.trigger.x, w.trigger.y + (w.trigger.wall ? 1 : 0)];
+          text = w.kind === 'torch' ? '[E] Tirer la torche' : '[E] Tourner la statue';
+        }
       } else if (what.kind === 'door') {
         const g = plan.doors[what.s];
         at = g.cells[Math.floor(g.cells.length / 2)];
         text = '🔒 [E] Porte scellée';
       } else if (what.kind === 'stele') {
-        at = [plan.locks[what.s].stele.x, plan.locks[what.s].stele.y];
-        text = '[E] Lire la stèle';
+        const lock = plan.locks[what.s];
+        at = [lock.stele.x, lock.stele.y];
+        text = lock.type === 'memory' ? '[E] Écouter la pierre d’écho' : '[E] Lire la stèle';
       } else {
         const it = plan.locks[what.s].items[what.id];
         at = [it.x, it.y];
-        text = what.kind === 'braziers' ? '[E] Allumer le brasero' : '[E] Actionner le levier';
+        text = {
+          braziers: '[E] Allumer le brasero',
+          levers: '[E] Actionner le levier',
+          mirrors: '[E] Tourner le miroir',
+          memory: '[E] Frapper le cristal',
+          toggles: '[E] Toucher le pilier',
+          search: '[E] Fouiller l’urne'
+        }[what.kind];
       }
       c.save();
       c.font = 'bold 13px Palatino Linotype, Georgia, serif';
       c.textAlign = 'center';
       c.lineWidth = 3;
       c.strokeStyle = '#1a1008';
-      c.strokeText(text, at[0] * TS + 24, at[1] * TS - 18);
+      const label = translateText(text);
+      c.strokeText(label, at[0] * TS + 24, at[1] * TS - 18);
       c.fillStyle = '#f6dc98';
-      c.fillText(text, at[0] * TS + 24, at[1] * TS - 18);
+      c.fillText(label, at[0] * TS + 24, at[1] * TS - 18);
       c.restore();
     }
     // Objets au sol en gros pixels cernés d'encre, comme le décor de l'île : peints une fois (leurs lumières notées),
@@ -1773,14 +2163,23 @@
           x * TS < camX + W + m * TS &&
           y * TS > camY - m * TS &&
           y * TS < camY + H + m * TS;
+      const hid = o => o.hidden !== undefined && !secretOpen(o.hidden);
       for (const l of plan.lights)
-        if (view(l.x, l.y))
+        if (view(l.x, l.y) && !hid(l))
           canaanLight(l.x * TS, l.y * TS, l.r * (0.9 + Math.sin(time * 0.06 + l.x) * 0.1), l.col);
       c.save();
       if (plan.arena) drawArenaStands(c);
-      for (const dcl of plan.decals) if (view(dcl.x, dcl.y, 4)) drawDecal(c, dcl, th);
+      if (!plan.arena) drawTraps(c, plan, th, view);
+      for (const dcl of plan.decals) if (view(dcl.x, dcl.y, 4) && !hid(dcl)) drawDecal(c, dcl, th);
       for (const p of plan.props)
-        if (view(p.x, p.y, 4) && p.lock === undefined && p.kind !== 'treasure') {
+        if (
+          view(p.x, p.y, 4) &&
+          p.lock === undefined &&
+          p.kind !== 'treasure' &&
+          p.secretTrigger === undefined &&
+          p.kind !== 'puffball' &&
+          !hid(p)
+        ) {
           if (p.wall) drawWallProp(c, p, th);
           else if (p.center) drawCenterpiece(c, p, th);
           else if (plan.arena) drawFloorProp(c, p, th);
@@ -2211,7 +2610,7 @@
       // Pénombre adoucie : on voit le pixel art des salles, les torches gardent leur halo.
       const arena = game.world.instance.arena;
       return {
-        dark: arena ? th.light.dark : th.light.dark * 0.62,
+        dark: arena ? th.light.dark : Math.min(0.92, th.light.dark * 0.62 * (th.dark || 1)),
         tint: th.light.tint,
         particles: th.particles,
         color: col

@@ -12,8 +12,8 @@ export default {
     'Tip: dodge rolling (Shift or Space) makes you invulnerable for a moment.',
   'Astuce : la garde-robe (V) range les apparences trouvées en jouant.':
     'Tip: the wardrobe (V) stores the appearances you find while playing.',
-  'Astuce : une stèle de donjon donne l’ordre des leviers et des dalles gravées.':
-    'Tip: a dungeon stele tells you the order of the levers and engraved tiles.',
+  'Astuce : la stèle d’un donjon ne donne que des indices ; recoupe-les pour trouver l’ordre des leviers.':
+    'Tip: a dungeon stele only gives clues; cross-check them to find the order of the levers.',
   'Ouverture de l’aventure…': 'Opening the adventure…',
   'Préparation du monde…': 'Preparing the world…',
   'Erreur de chargement :': 'Loading error:',
@@ -3290,15 +3290,88 @@ export default {
     'Wrong order: the levers go back up. Read the stele again.',
   'Mauvais ordre : les dalles s’éteignent. Relis la stèle.':
     'Wrong order: the tiles go dark. Read the stele again.',
-  'allume les {n} braseros éteints de cette aile': 'light the {n} unlit braziers in this wing',
-  'abaisse les {n} leviers de cette aile dans l’ordre gravé sur la stèle':
-    'pull the {n} levers in this wing in the order carved on the stele',
-  'foule les 4 dalles gravées dans l’ordre donné par la stèle':
-    'step on the 4 engraved tiles in the order given by the stele',
-  'vaincs les gardiens du sceau dans les salles voisines':
-    'defeat the seal guardians in the neighboring rooms',
-  'La porte de {nom} est scellée : {indice}.': '{nom}’s door is sealed: {indice}.',
+  'allume les braseros de cette aile avant qu’ils ne s’éteignent':
+    'light this wing’s braziers before they go out',
+  'abaisse les leviers dans l’ordre que la stèle laisse deviner':
+    'pull the levers in the order the stele hints at',
+  'foule les dalles gravées dans l’ordre que la stèle laisse deviner':
+    'step on the engraved tiles in the order the stele hints at',
+  'abats les gardiens liés presque en même temps': 'slay the bound guardians at almost the same time',
+  'guide le rayon de lumière jusqu’au cristal avec les miroirs':
+    'guide the beam of light to the crystal with the mirrors',
+  'écoute la pierre d’écho et frappe les cristaux dans le même ordre':
+    'listen to the echo stone and strike the crystals in the same order',
+  'allume tous les piliers liés': 'light all the bound pillars',
+  'retrouve les trois fragments du sceau cachés dans les urnes':
+    'find the three seal fragments hidden in the urns',
+  'survis à l’embuscade de la salle voisine': 'survive the ambush in the neighboring room',
+  'La porte de {nom} est scellée : {quoi}': '{nom}’s door is sealed: {quoi}',
   'Brasero allumé ({n}/{m}).': 'Brazier lit ({n}/{m}).',
+  'Le cristal répond ({n}/{m}).': 'The crystal answers ({n}/{m}).',
+  'Un fragment du sceau ! ({n}/{m})': 'A seal fragment! ({n}/{m})',
+  'Un grondement sourd : quelque part dans cette aile, un mur a coulissé…':
+    'A dull rumble: somewhere in this wing, a wall has slid open…',
+  'Fausse note : les cristaux se taisent. Écoute de nouveau la pierre d’écho.':
+    'Wrong note: the crystals fall silent. Listen to the echo stone again.',
+  '{a} passe avant {b}': '{a} comes before {b}',
+  '{b} vient juste après {a}': '{b} comes right after {a}',
+  '{a} ouvre la marche': '{a} leads the way',
+  '{a} ferme la marche': '{a} brings up the rear',
+  '{a} n’ouvre pas la marche': '{a} does not lead the way',
+  '{a} ne ferme pas la marche': '{a} does not bring up the rear',
+  '{a} n’est pas {n}e': '{a} is not number {n}',
+  '« {texte}. » — {verbe} dans le bon ordre.': '“{texte}.” — {verbe} in the right order.',
+  '« Les flammes s’éteignent vite : allume les {n} braseros en moins de {s} secondes. »':
+    '“The flames die quickly: light the {n} braziers in under {s} seconds.”',
+  '« Les gardiens sont liés : abattez-les à moins de {s} secondes d’intervalle, ou ils se relèvent. »':
+    '“The guardians are bound: slay them within {s} seconds of each other, or they rise again.”',
+  '« Guide la lumière jusqu’au cristal : tourne les miroirs (E). L’un d’eux ment. »':
+    '“Guide the light to the crystal: turn the mirrors (E). One of them lies.”',
+  '« Chaque pilier réveille aussi ses deux voisins. Allume-les tous. »':
+    '“Each pillar also wakes its two neighbors. Light them all.”',
+  '« Trois fragments du sceau dorment dans les urnes de cette aile. Elles luisent à peine. »':
+    '“Three seal fragments sleep in this wing’s urns. They barely glimmer.”',
+  'La pierre d’écho chante une suite de {n} notes. Frappe les cristaux dans le même ordre.':
+    'The echo stone sings a sequence of {n} notes. Strike the crystals in the same order.',
+  'Le sceau de cette aile est déjà brisé.': 'This wing’s seal is already broken.',
+  'Le premier brasero brûle : {s} secondes pour allumer les autres !':
+    'The first brazier burns: {s} seconds to light the others!',
+  'L’urne se brise… rien dedans.': 'The urn shatters… nothing inside.',
+  'Une salle oubliée… Un boss caché s’y réveille !': 'A forgotten room… A hidden boss awakens!',
+  'Trop lent : les braseros s’éteignent. Recommence, plus vite.':
+    'Too slow: the braziers go out. Try again, faster.',
+  'Un gardien tombe : abattez les autres en moins de {s} secondes !':
+    'A guardian falls: slay the others within {s} seconds!',
+  'Trop tard : le gardien se relève ! Ils doivent tomber ensemble.':
+    'Too late: the guardian rises again! They must fall together.',
+  'Embuscade ! Les issues se referment…': 'Ambush! The exits slam shut…',
+  'Vague {n} sur {m} !': 'Wave {n} of {m}!',
+  '[E] Examiner la lézarde': '[E] Examine the crack',
+  '[E] Tirer la torche': '[E] Pull the torch',
+  '[E] Tourner la statue': '[E] Turn the statue',
+  '[E] Écouter la pierre d’écho': '[E] Listen to the echo stone',
+  '[E] Tourner le miroir': '[E] Turn the mirror',
+  '[E] Frapper le cristal': '[E] Strike the crystal',
+  '[E] Toucher le pilier': '[E] Touch the pillar',
+  '[E] Fouiller l’urne': '[E] Search the urn',
+  // Mécaniques des boss d'instance (boss-mechanics.js).
+  'Onde de choc !': 'Shockwave!',
+  'Nova : éloignez-vous !': 'Nova: get away!',
+  'Anneau : collez-vous à lui !': 'Ring: stick close to it!',
+  'Charge !': 'Charge!',
+  'Croix : sortez des lignes !': 'Cross: get out of the lines!',
+  'Impact partagé : regroupez-vous sur {nom} !': 'Shared impact: stack on {nom}!',
+  'Marques : dispersez-vous !': 'Marks: spread out!',
+  'Le sol se corrompt !': 'The ground is corrupted!',
+  'Rayon tournant !': 'Sweeping beam!',
+  'Attraction : résistez !': 'Pull: resist it!',
+  'Il disparaît… et retombe !': 'It vanishes… and crashes down!',
+  'Zone sûre : tous dans le cercle vert !': 'Safe zone: everyone into the green circle!',
+  'Cristal de garde': 'Guardian crystal',
+  '{nom} s’entoure de cristaux : brisez-les !': '{nom} surrounds itself with crystals: break them!',
+  'Le bouclier se brise !': 'The shield shatters!',
+  '{nom} entre en frénésie !': '{nom} goes berserk!',
+  'Frénésie': 'Berserk',
   '[E] Sortir de l’instance': '[E] Leave the instance',
   'Portail de retour': 'Return portal',
   '[E] Examiner le mur fissuré': '[E] Examine the cracked wall',

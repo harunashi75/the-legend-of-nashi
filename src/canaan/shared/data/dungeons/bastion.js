@@ -23,6 +23,21 @@ export default {
       'Le Roi Sanglant'
     ],
     secrets: ['Le Bourreau Masqué', 'La Dame Blanche du Bastion'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['ambush', 'levers', 'guardian', 'braziers', 'runes', 'toggles'],
+    mechanics: [
+      ['charge', 'adds'],
+      ['spread', 'slam', 'pools'],
+      ['soak', 'rain', 'totems'],
+      ['blink', 'donut', 'adds'],
+      ['charge', 'cross', 'nova'],
+      ['safe', 'beam', 'pull', 'adds', 'berserk']
+    ],
+    secretMechanics: [
+      ['charge', 'soak', 'slam'],
+      ['blink', 'spread', 'donut']
+    ],
     color: '#ffd36d',
     raid: true,
     level: 44,
@@ -41,6 +56,12 @@ export default {
     wallProps: ['banner', 'torch', 'skulls', 'torch'],
     floorProps: ['pillar', 'brazier', 'pike', 'statue', 'candles'],
     centerpiece: 'throne',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spikes',
+    secret: 'torch',
+    dark: 1,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

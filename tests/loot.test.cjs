@@ -192,7 +192,8 @@ test('Qualité Unique et types d’armure absents du jeu et du butin',()=>{
 test('Catalogues uniques : valeurs, butins et prix identiques à la référence 13e',()=>{
  const reference=require('./fixtures/catalogs-13e.json');
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
- const data=JSON.parse(run('JSON.stringify({instances,rarities:GEAR_RARITIES,weapons:WEAPON_TYPES,craft:CRAFT_WEAPONS,spells:WEAPON_SPELLS})'));
+ // Les énigmes des ailes et les mécaniques des boss (refonte des donjons) ne sont pas des catalogues : hors référence.
+ const data=JSON.parse(run('JSON.stringify({instances:instances.map(({wings,mechanics,secretMechanics,...d})=>d),rarities:GEAR_RARITIES,weapons:WEAPON_TYPES,craft:CRAFT_WEAPONS,spells:WEAPON_SPELLS})'));
  for(const key of Object.keys(data))assert.deepEqual(data[key],reference[key],key);
  for(const [rarity,level,price] of reference.sales)assert.equal(run('gearSellValue('+JSON.stringify({id:'sale',slot:'armor',rarity,level})+')'),price);
  for(const [level,kind,rarity,price] of reference.fullBag){

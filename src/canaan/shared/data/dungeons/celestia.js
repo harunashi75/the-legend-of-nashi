@@ -23,6 +23,21 @@ export default {
       'L’Avatar du Jugement'
     ],
     secrets: ['La Comète Écarlate', 'Le Témoin du Premier Jour'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['runes', 'mirrors', 'memory', 'toggles', 'guardian', 'ambush'],
+    mechanics: [
+      ['rain', 'spread', 'adds'],
+      ['charge', 'cross', 'soak'],
+      ['beam', 'totems', 'donut'],
+      ['safe', 'soak', 'spread'],
+      ['cross', 'pull', 'pools', 'nova'],
+      ['beam', 'safe', 'donut', 'rain', 'adds', 'berserk']
+    ],
+    secretMechanics: [
+      ['charge', 'rain', 'pools'],
+      ['safe', 'beam', 'blink']
+    ],
     color: '#fff0a8',
     raid: true,
     level: 58,
@@ -64,6 +79,12 @@ export default {
     wallProps: [],
     floorProps: ['pillarlight', 'orb', 'pillar', 'crystal', 'statue'],
     centerpiece: 'scales',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'falling',
+    secret: 'statue',
+    dark: 1.1,
     gate: 'barrier'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

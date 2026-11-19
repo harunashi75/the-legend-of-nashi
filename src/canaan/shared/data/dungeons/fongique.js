@@ -16,6 +16,15 @@ export default {
     boss: 'La Reine des Spores',
     bosses: ['Le Champignon Hurleur', 'Le Mycélium Vivant', 'La Reine des Spores'],
     secrets: ['Le Cœur de Moisissure'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['toggles', 'ambush', 'braziers'],
+    mechanics: [
+      ['nova', 'spread'],
+      ['totems', 'pools'],
+      ['pools', 'safe', 'adds', 'donut']
+    ],
+    secretMechanics: [['pull', 'pools', 'nova']],
     color: '#e870c0',
     // Tréfonds (underground.js) : aucun niveau requis ; ennemis au niveau du groupe et butin du niveau de chaque
     // héros : Peu commun, 31 % de chances de Rare (PRESTIGE_DROPS.underground).
@@ -38,6 +47,12 @@ export default {
     wallProps: ['roots', 'lantern', 'roots', 'roots'],
     floorProps: ['mushroom', 'crystal', 'mushroom', 'bones', 'rubble', 'mushroom'],
     centerpiece: 'mithrilcluster',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spores',
+    secret: 'wall',
+    dark: 1.1,
     gate: 'barrier'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

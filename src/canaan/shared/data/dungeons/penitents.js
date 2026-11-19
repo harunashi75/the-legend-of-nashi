@@ -16,6 +16,15 @@ export default {
     boss: 'Le Grand Inquisiteur',
     bosses: ['Le Geôlier Flagellant', 'La Mère Supérieure', 'Le Grand Inquisiteur'],
     secrets: ['Le Pénitent Oublié'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['guardian', 'levers', 'ambush'],
+    mechanics: [
+      ['charge', 'pull', 'slam'],
+      ['soak', 'rain', 'adds'],
+      ['cross', 'safe', 'pools']
+    ],
+    secretMechanics: [['pull', 'nova', 'spread']],
     color: '#b79cff',
     level: 25,
     mobLevel: 27,
@@ -33,6 +42,12 @@ export default {
     wallProps: ['torch', 'banner', 'chains', 'banner'],
     floorProps: ['pillar', 'candles', 'cage', 'statue', 'brazier', 'candles'],
     centerpiece: 'altar',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spikes',
+    secret: 'wall',
+    dark: 1.15,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

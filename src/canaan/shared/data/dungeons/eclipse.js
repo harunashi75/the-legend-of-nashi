@@ -16,6 +16,15 @@ export default {
     boss: 'Oracle de l’Éclipse',
     bosses: ['L’Acolyte du Crépuscule', 'Le Gardien Solaire', 'Oracle de l’Éclipse'],
     secrets: ['L’Ombre de l’Astre Mort'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['memory', 'mirrors', 'toggles'],
+    mechanics: [
+      ['spread', 'blink', 'rain'],
+      ['beam', 'nova'],
+      ['safe', 'cross', 'adds']
+    ],
+    secretMechanics: [['donut', 'beam', 'blink']],
     color: '#ff9955',
     level: 18,
     mobLevel: 20,
@@ -34,6 +43,12 @@ export default {
     floorProps: ['pillar', 'brazier', 'statue', 'candles', 'candles'],
     centerpiece: 'altar',
     decal: 'eclipse',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'pulse',
+    secret: 'statue',
+    dark: 1.45,
     gate: 'barrier'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

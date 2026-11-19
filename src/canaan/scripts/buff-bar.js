@@ -364,6 +364,7 @@
     mark: ['🎯', 'Marqué', 'debuff'],
     focus: ['💢', 'Acharnement', 'debuff'],
     enraged: ['😡', 'Rage', 'buff'],
+    berserk: ['🔥', 'Frénésie', 'buff'],
     shield: ['🛡', 'Bouclier', 'buff'],
     parry: ['🤺', 'Parade', 'buff'],
     immune: ['✨', 'Invulnérable', 'buff']
@@ -395,6 +396,8 @@
     }
     if (m.shieldHp > 0) add('shield', Infinity);
     if (m.enraged) add('enraged', Infinity);
+    if (m.berserk) add('berserk', Infinity);
+    if (m.bossShield) add('immune', Infinity);
     return [...left]
       .map(([code, l]) => [code, Number.isFinite(l) ? Math.round(l * 10) / 10 : -1])
       .sort((a, b) => MON_CODES.indexOf(a[0]) - MON_CODES.indexOf(b[0]));

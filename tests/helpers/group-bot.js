@@ -2,8 +2,8 @@
 // Chaque héros suit un chemin case par case (recherche en largeur), attaque le monstre le plus proche
 // à portée de son arme ; une fois le dernier boss vaincu, l'hôte ouvre le coffre et ramène le groupe dehors par le
 // portail de retour.
-// Exploration : quand plus aucun monstre n'est accessible, l'hôte examine les murs fissurés et résout les énigmes
-// des portes scellées (braseros, leviers dans l'ordre de la stèle, dalles gravées), comme un joueur.
+// Exploration : quand plus aucun monstre n'est accessible, l'hôte ouvre les passages secrets et résout les énigmes
+// des portes scellées (braseros, leviers et dalles, miroirs, cristaux, piliers, urnes, embuscade), comme un joueur.
 // Exécuté dans le contexte du jeu (script classique), comme le ferait un invité qui envoie ses intentions.
 globalThis.canaanGroupBot = (() => {
   const plans = new Map();
@@ -99,7 +99,21 @@ globalThis.canaanGroupBot = (() => {
     return reachSet;
   }
   const near = (set, x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => set.has((y + dy) * MAPW + x + dx));
-  // Prochaine chose à faire pour ouvrir la suite : mur fissuré, brasero, levier ou dalle accessibles.
+  // Prochaine chose à faire pour ouvrir la suite : passage secret, puis l'objet utile de chaque énigme accessible
+  // (brasero, levier, dalle, miroir, cristal, pilier, urne, salle de l'embuscade), comme un joueur qui a compris.
+  function bestToggle(lock, prog) {
+    const n = lock.items.length,
+      full = (1 << n) - 1;
+    let best = null;
+    for (let set = 0; set < 1 << n; set++) {
+      let st = prog;
+      for (let j = 0; j < n; j++) if (set & (1 << j)) st ^= CANAAN_DUNGEON_EXPLORE.toggleMask(j, n);
+      if (st !== full) continue;
+      const count = [...Array(n).keys()].filter(j => set & (1 << j)).length;
+      if (!best || count < best.count) best = { set, count };
+    }
+    return best ? [...Array(n).keys()].find(j => best.set & (1 << j)) : 0;
+  }
   function objective() {
     const E = CANAAN_DUNGEON_EXPLORE,
       plan = E.plan(game.world.instance.index),
@@ -107,8 +121,15 @@ globalThis.canaanGroupBot = (() => {
       set = reachable();
     if (!st) return null;
     for (let k = 0; k < plan.secretWalls.length; k++) {
-      const [x, y] = plan.secretWalls[k].cells[1] || plan.secretWalls[k].cells[0];
-      if (!(st.secrets & (1 << k)) && near(set, x, y)) return { x, y, act: 'use' };
+      if (st.secrets & (1 << k)) continue;
+      const w = plan.secretWalls[k];
+      if (w.trigger) {
+        const ty = w.trigger.y + (w.trigger.wall ? 1 : 0);
+        if (near(set, w.trigger.x, ty)) return { x: w.trigger.x, y: ty, act: 'use', r: w.trigger.wall ? 0.6 : 1.4 };
+        continue;
+      }
+      const [x, y] = w.cells[1] || w.cells[0];
+      if (near(set, x, y)) return { x, y, act: 'use', r: 1.1 };
     }
     for (let s = 0; s < plan.locks.length; s++) {
       const lock = plan.locks[s],
@@ -116,13 +137,18 @@ globalThis.canaanGroupBot = (() => {
       if (ls.done) continue;
       let it = null;
       if (lock.type === 'braziers') it = lock.items.find(i => !(ls.prog & (1 << i.id)));
-      if (lock.type === 'levers' || lock.type === 'runes') it = lock.items[lock.order[ls.step]];
+      if (lock.type === 'levers' || lock.type === 'runes' || lock.type === 'memory') it = lock.items[lock.order[ls.step]];
+      if (lock.type === 'mirrors')
+        it = lock.items.find(i => i.id < lock.pathMirrors && ((ls.prog >> i.id) & 1) !== ((lock.solution >> i.id) & 1));
+      if (lock.type === 'toggles') it = lock.items[bestToggle(lock, ls.prog)];
+      if (lock.type === 'search') it = lock.items.find(i => lock.shards.includes(i.id) && !(ls.prog & (1 << i.id)));
+      if (lock.type === 'ambush' && !ls.step) it = lock.items[0];
       if (it && near(set, it.x, it.y)) {
         // Dalles : ne marcher que sur la bonne, comme un joueur attentif.
         const next = new Set(lock.type === 'runes' ? lock.items.filter(i => i !== it).map(i => i.y * MAPW + i.x) : []);
         if ([...next].join() !== [...avoid].join()) plans.clear();
         avoid = next;
-        return { x: it.x, y: it.y, act: lock.type === 'runes' ? 'stand' : 'use' };
+        return { x: it.x, y: it.y, act: lock.type === 'runes' || lock.type === 'ambush' ? 'stand' : 'use', r: 1.4 };
       }
     }
     if (avoid.size) plans.clear();
@@ -134,20 +160,25 @@ globalThis.canaanGroupBot = (() => {
     if (state.done) return state;
     const host = game.hero;
     const set = game.world.instance && !game.world.instance.arena ? reachable() : null,
-      alive = game.world.monsters.filter(m => m.hp > 0 && (!set || near(set, tileOf(m.x), tileOf(m.y))));
+      inReach = game.world.monsters.filter(m => m.hp > 0 && (!set || near(set, tileOf(m.x), tileOf(m.y)))),
+      // Un boss protégé par ses cristaux de garde : on brise d'abord les cristaux.
+      alive = inReach.some(m => !m.bossShield) ? inReach.filter(m => !m.bossShield) : inReach;
     for (const hero of game.heroes) {
       const p = hero.player;
       if (p.dead) continue;
       hero.intent.attack = null;
-      // Comme un joueur : sortir d'un cercle annoncé par un boss (roulade dans la direction opposée au centre).
-      const zone = CANAAN_BOSS_MECHANICS.zones().find(z => Math.hypot(p.x - z.x, p.y - z.y) < z.r + 14);
-      if (zone) {
-        const a = Math.atan2(p.y - zone.y, p.x - zone.x) || Math.random() * 6.28;
+      // Comme un joueur : sortir des zones annoncées par un boss (ou entrer dans la zone sûre, l'impact partagé), en
+      // roulant quand il le faut.
+      const go = CANAAN_BOSS_MECHANICS.escape(hero);
+      if (go) {
+        const a = Math.atan2(go.y - p.y, go.x - p.x) || Math.random() * 6.28;
         hero.intent.dx = Math.round(Math.cos(a));
         hero.intent.dy = Math.round(Math.sin(a));
         if (!hero.intent.dx && !hero.intent.dy) hero.intent.dx = 1;
-        if (hero === host) CANAAN_COMBAT.dodge(hero.intent.dx, hero.intent.dy);
-        else CANAAN_COMBAT.heroDodge(hero, hero.intent.dx, hero.intent.dy);
+        if (go.roll) {
+          if (hero === host) CANAAN_COMBAT.dodge(hero.intent.dx, hero.intent.dy);
+          else CANAAN_COMBAT.heroDodge(hero, hero.intent.dx, hero.intent.dy);
+        }
         continue;
       }
       if (alive.length) {
@@ -180,11 +211,11 @@ globalThis.canaanGroupBot = (() => {
       state.phase = 'exploration';
       const p = host.player,
         d = Math.hypot(p.x / TS - (goal.x + 0.5), p.y / TS - (goal.y + 0.5));
-      if (goal.act === 'use' && d < 1.4) {
+      if (goal.act === 'use' && d < goal.r) {
         stop(host);
         CANAAN_DUNGEON_EXPLORE.interact(host);
         reachAge = 99;
-      } else if (goal.act === 'stand' && tileOf(p.x) === goal.x && tileOf(p.y + 10) === goal.y) {
+      } else if (goal.act === 'stand' && Math.abs(p.x / TS - (goal.x + 0.5)) < 0.45 && tileOf(p.y + 10) === goal.y) {
         stop(host);
         reachAge = 99;
       } else steer(host, (goal.x + 0.5) * TS, (goal.y + 0.5) * TS);

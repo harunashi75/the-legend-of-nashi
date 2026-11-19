@@ -25,6 +25,27 @@ import arene from './arene.js';
 
 const SHAPES = ['cave', 'hall', 'pit', 'void'];
 const GATES = ['portcullis', 'barrier'];
+const LOCKS = ['braziers', 'levers', 'runes', 'guardian', 'mirrors', 'memory', 'toggles', 'search', 'ambush'];
+const MECHANICS = [
+  'slam',
+  'rain',
+  'adds',
+  'nova',
+  'donut',
+  'charge',
+  'cross',
+  'soak',
+  'spread',
+  'pools',
+  'totems',
+  'blink',
+  'pull',
+  'safe',
+  'beam',
+  'berserk'
+];
+const TRAPS = [null, 'spikes', 'jets', 'pulse', 'falling', 'spores'];
+const TRIGGERS = ['wall', 'torch', 'statue'];
 
 /**
  * Vérifie une fiche au chargement : une erreur nomme la fiche et le champ fautif.
@@ -43,7 +64,25 @@ function check(d) {
   const bosses = rules.bosses || [rules.boss];
   if (bosses.length !== (rules.raid ? 6 : 3)) fail(`rules.bosses : ${rules.raid ? 6 : 3} boss attendus`);
   if (bosses[bosses.length - 1] !== rules.boss) fail('rules.boss doit être le dernier de rules.bosses');
+  if (
+    !Array.isArray(rules.wings) ||
+    rules.wings.length !== bosses.length ||
+    !rules.wings.every((/** @type {string} */ w) => LOCKS.includes(w))
+  )
+    fail('rules.wings : une énigme par boss parmi ' + LOCKS.join(', '));
+  const mechs = (/** @type {any} */ list, /** @type {number} */ n, /** @type {string} */ what) => {
+    if (!Array.isArray(list) || list.length !== n) fail(what + ' : une liste par boss');
+    for (const m of list)
+      if (!Array.isArray(m) || !m.length || !m.every(k => MECHANICS.includes(k)))
+        fail(what + ' : mécaniques parmi ' + MECHANICS.join(', '));
+  };
+  mechs(rules.mechanics, bosses.length, 'rules.mechanics');
+  mechs(rules.secretMechanics, (rules.secrets || []).length, 'rules.secretMechanics');
   if (!SHAPES.includes(layout.shape)) fail('layout.shape : ' + SHAPES.join(', '));
+  if (!TRAPS.includes(layout.trap ?? null)) fail('layout.trap : ' + TRAPS.join(', '));
+  if (!TRIGGERS.includes(layout.secret)) fail('layout.secret : ' + TRIGGERS.join(', '));
+  if (!(typeof layout.dark === 'number' && layout.dark >= 1 && layout.dark <= 2))
+    fail('layout.dark : de 1 à 2');
   if (!GATES.includes(layout.gate)) fail('layout.gate : ' + GATES.join(', '));
   if (!Number.isInteger(layout.hazard?.pools) || typeof layout.hazard?.style !== 'string')
     fail('layout.hazard');

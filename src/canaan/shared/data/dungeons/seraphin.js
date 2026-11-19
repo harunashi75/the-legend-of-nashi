@@ -23,6 +23,21 @@ export default {
       'Le Séraphin Divin'
     ],
     secrets: ['L’Ange Déchu Sans Nom', 'Le Gardien du Septième Ciel'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['mirrors', 'braziers', 'guardian', 'memory', 'toggles', 'levers'],
+    mechanics: [
+      ['spread', 'rain'],
+      ['beam', 'soak', 'nova'],
+      ['charge', 'cross', 'totems'],
+      ['donut', 'slam', 'adds'],
+      ['safe', 'spread', 'pools'],
+      ['beam', 'cross', 'safe', 'pull', 'berserk']
+    ],
+    secretMechanics: [
+      ['blink', 'donut', 'beam'],
+      ['soak', 'cross', 'totems']
+    ],
     color: '#c4a0ff',
     raid: true,
     level: 54,
@@ -41,6 +56,12 @@ export default {
     wallProps: [],
     floorProps: ['pillar', 'angelstatue', 'brazier', 'feathers', 'pillar'],
     centerpiece: 'throne',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'pulse',
+    secret: 'statue',
+    dark: 1,
     gate: 'barrier'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

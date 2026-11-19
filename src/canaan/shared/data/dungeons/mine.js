@@ -16,6 +16,15 @@ export default {
     boss: 'Golem de Mithril',
     bosses: ['Le Contremaître Kobold Grisch', 'L’Araignée des Galeries', 'Golem de Mithril'],
     secrets: ['Le Mineur Sans Visage'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['mirrors', 'ambush', 'toggles'],
+    mechanics: [
+      ['slam', 'charge', 'adds'],
+      ['pools', 'spread', 'blink'],
+      ['cross', 'nova', 'totems']
+    ],
+    secretMechanics: [['blink', 'safe', 'slam']],
     color: '#67d8ee',
     level: 13,
     mobLevel: 15,
@@ -33,6 +42,12 @@ export default {
     wallProps: ['lantern', 'mithril', 'beam', 'mithril'],
     floorProps: ['minecart', 'crate', 'ore', 'pickaxe', 'rubble', 'ore'],
     centerpiece: 'mithrilcluster',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'falling',
+    secret: 'torch',
+    dark: 1.1,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans

@@ -16,6 +16,15 @@ export default {
     boss: 'Le Bourreau de l’Expiation',
     bosses: ['Le Gardien des Chaînes', 'La Pleureuse des Abysses', 'Le Bourreau de l’Expiation'],
     secrets: ['Celui-qui-Rampe-au-Fond'],
+    // Énigme de la porte de chaque boss, aile par aile (braziers, levers, runes, guardian, mirrors, memory,
+    // toggles, search, ambush), et mécaniques de chaque boss puis de chaque boss caché (scripts/boss-mechanics.js).
+    wings: ['memory', 'guardian', 'runes'],
+    mechanics: [
+      ['pull', 'slam', 'cross'],
+      ['donut', 'spread', 'adds'],
+      ['charge', 'safe', 'soak', 'berserk']
+    ],
+    secretMechanics: [['pools', 'pull', 'nova']],
     color: '#e88aff',
     level: 37,
     mobLevel: 39,
@@ -33,6 +42,12 @@ export default {
     wallProps: ['chains', 'sconce', 'chains', 'skulls'],
     floorProps: ['bonepile', 'cage', 'spikes', 'rack', 'brazier', 'bones'],
     centerpiece: 'block',
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
+    // statue : statue de travers) et obscurité (1 : celle du thème).
+    trap: 'spikes',
+    secret: 'statue',
+    dark: 1.35,
     gate: 'portcullis'
   },
   // Créatures : monstres (nom, silhouette, palette), puis l'apparence de chaque boss et de chaque boss secret, dans
