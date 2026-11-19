@@ -58,8 +58,8 @@
   const FIRST_SECTOR = ZONES[0].angle - 30;
 
   // Terre de l'Extension 1 (zone de niveau 60) : au sud-ouest, entre la côte et le coin de la carte, un
-  // carré aux angles très arrondis séparé de l'île par un chenal, ceint de collines rocheuses, relié à la Forêt
-  // enchantée par un isthme rocheux. Ses cases sont les mêmes dans tous les builds ; sans l'extension, elle
+  // carré aux angles très arrondis séparé de l'île par un chenal peu profond, bordé d'une plage de sable, relié à la
+  // Forêt enchantée par un isthme sablonneux. Ses cases sont les mêmes dans tous les builds ; sans l'extension, elle
   // est fermée et couverte de brume (extensions.js), et son nom reste caché.
   const VALLEY = Object.freeze({ x: 66, y: 334, half: 52, p: 3.2, channel: 7, rim: 3.4 });
   const VALLEY_ZONE = Object.freeze({
@@ -125,13 +125,14 @@
       neck = isthmusAt(x, y),
       half = 3.2 + (field(x, y, 5, 562) - 0.5) * 1.4;
     if (neck && neck.d < half && (depth > -VALLEY.channel - 4 || neck.t < 0.6)) {
-      // Isthme : herbe au milieu (la route y passe), épaulements de roche ; côté île, la Forêt enchantée.
+      // Isthme : herbe au milieu (la route y passe), bords de sable ; côté île, la Forêt enchantée.
       const valley = depth > -2 || neck.t > 0.55;
       if (!valley && Math.hypot(x - CENTER.x, y - CENTER.y) < coastRadius(x, y) - 2.6) return null;
-      return { t: neck.d < half - 1.3 ? (valley ? 50 : 17) : 4, biome: valley ? 6 : 5, valley };
+      return { t: neck.d < half - 1.3 ? (valley ? 50 : 17) : 3, biome: valley ? 6 : 5, valley };
     }
     if (depth <= 0) return null;
-    if (depth < VALLEY.rim + (field(x, y, 6, 563) - 0.5) * 2) return { t: 4, biome: 6, valley: true };
+    // Plage de sable tout autour : la terre s'ouvre sur l'eau (pas de mur), le chenal reste trop profond au milieu.
+    if (depth < VALLEY.rim + (field(x, y, 6, 563) - 0.5) * 2) return { t: 3, biome: 6, valley: true };
     // Collines rocheuses éparses et champs de blé ; herbe dorée ailleurs.
     if (depth > 8 && field(x, y, 6, 572) > 0.86) return { t: 4, biome: 6, valley: true };
     if (depth > 6 && field(x, y, 9, 571) > 0.7) return { t: 51, biome: 6, valley: true };
@@ -474,6 +475,13 @@
         })
       })
     );
+    // Plage de la vallée et bords de l'isthme : ni cactus ni bois mort du désert, quelques galets.
+    for (let y = y0 - 8; y <= y1 + 8; y++)
+      for (let x = x0 - 8; x <= x1 + 8; x++) {
+        if (!valid(x, y) || game.world.tiles[y][x] !== 3) continue;
+        if (!canaanExtLandMask[y * MAPW + x] && !(isthmusAt(x, y)?.d < 5)) continue;
+        game.world.decor[y][x] = hash(x, y, 64) < 0.03 ? 'rock' : null;
+      }
     // Arbres aux feuilles d'or : jamais collés l'un à l'autre, jamais sur l'isthme.
     for (let y = y0; y <= y1; y++)
       for (let x = x0; x <= x1; x++) {

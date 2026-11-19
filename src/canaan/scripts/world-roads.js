@@ -17,7 +17,8 @@
   // Lumière venue d'en haut à gauche, comme sur les décors et les personnages.
   const LX = -0.6,
     LY = -0.8;
-  const SOFT = new Set([1, 3, 5, 10, 11, 15, 16, 17]);
+  // Sols meubles (la route s'y fond en bord organique) ; 50 et 51 : herbe dorée et blé de la terre du sud-ouest (Extension 1).
+  const SOFT = new Set([1, 3, 5, 10, 11, 15, 16, 17, 50, 51]);
   const isRoad = (x, y) => tileAt(x, y) === 2 && !BRIDGE_TILES.has(y * MAPW + x);
   // Eau (mer, marais, lacs) hors des ponts : la route s'y arrête en bord organique, l'eau animée passe dessous.
   const WET = new Set([0, 15, 18]);
