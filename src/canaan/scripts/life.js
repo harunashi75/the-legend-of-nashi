@@ -1373,7 +1373,7 @@
           skin: '#c98e62',
           hairStyle: 'queue',
           hair: '#2a1f1a',
-          eyes: '#c8a020',
+          eyes: '#202938',
           outfit: 'cramoisi',
           wear: 'pirate'
         });
