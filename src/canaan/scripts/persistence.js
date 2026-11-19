@@ -360,7 +360,7 @@ window.CANAAN_PERSISTENCE = {
     // Partie sauvegardée dans les Tréfonds : on y reprend (à la forteresse si la place n'est plus praticable).
     if (monde.couche === 'under') CANAAN_UNDER.setLayer('under');
     const home = canaanUnder() ? CANAAN_UNDER.spawnPoint() : CANAAN_SPAWN;
-    if (P.x < 0 || P.y < 0 || P.x / TS >= MAPW || P.y / TS >= MAPH || !canWalk(P.x, P.y)) {
+    if (P.x < 0 || P.y < 0 || P.x / TS >= MAPW || P.y / TS >= MAPH || !canWalk(P.x, P.y, true)) {
       P.x = home.x;
       P.y = home.y;
     }

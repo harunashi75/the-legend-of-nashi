@@ -1377,14 +1377,19 @@
     const sk = !feral && look?.wear && typeof skinById === 'function' ? skinById(look.wear) : null;
     if (sk) drawSkinFx(c, sk, x, y + bob, 'under');
     const px = spr.padX || 0,
-      py = spr.padY || 0;
-    c.drawImage(
-      spr,
-      Math.round(x - (26 + px) * scale),
-      Math.round(y + 18 - (60 + py) * scale + bob),
-      Math.round(spr.width * scale),
-      Math.round(spr.height * scale)
-    );
+      py = spr.padY || 0,
+      drawSprite = () =>
+        c.drawImage(
+          spr,
+          Math.round(x - (26 + px) * scale),
+          Math.round(y + 18 - (60 + py) * scale + bob),
+          Math.round(spr.width * scale),
+          Math.round(spr.height * scale)
+        );
+    // Dans la mer peu profonde : le bas du corps sous l'eau (world-shallows.js).
+    const sink = CANAAN_SHALLOWS.sink(x, y);
+    if (sink) CANAAN_SHALLOWS.drawWading(c, x, y, sink, drawSprite);
+    else drawSprite();
     if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'front');
     if (sk) drawSkinFx(c, sk, x, y + bob, 'over');
     c.restore();

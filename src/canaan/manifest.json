@@ -57,6 +57,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-world-shallows",
+      "file": "scripts/world-shallows.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-sprite-kit",
       "file": "scripts/sprite-kit.js"
     },

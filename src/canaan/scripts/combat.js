@@ -200,8 +200,8 @@
     for (let k = 0; k < 2; k++) {
       const nx = p.x + (r.dx * step) / 2,
         ny = p.y + (r.dy * step) / 2;
-      if (canWalk(nx, p.y)) p.x = nx;
-      if (canWalk(p.x, ny)) p.y = ny;
+      if (canWalk(nx, p.y, true)) p.x = nx;
+      if (canWalk(p.x, ny, true)) p.y = ny;
     }
     r.left -= 1 / 60;
     return r.left > 1e-9;
@@ -221,8 +221,8 @@
       for (let k = 0; k < 2; k++) {
         const nx = P.x + (roll.dx * step) / 2,
           ny = P.y + (roll.dy * step) / 2;
-        if (canWalk(nx, P.y)) P.x = nx;
-        if (canWalk(P.x, ny)) P.y = ny;
+        if (canWalk(nx, P.y, true)) P.x = nx;
+        if (canWalk(P.x, ny, true)) P.y = ny;
       }
       particles.push({ x: P.x, y: P.y + 10, vx: -roll.dx, vy: -roll.dy * 0.5, life: 16, c: '#bfe8ff', r: 4 });
       roll.left -= 1 / 60;

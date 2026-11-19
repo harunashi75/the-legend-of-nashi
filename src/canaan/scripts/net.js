@@ -864,12 +864,13 @@
       p.anim = (p.anim || 0) + 0.25;
       if (dx) p.face = dx > 0 ? 1 : -1;
     }
-    p.vx = dx * net.speed;
-    p.vy = dy * net.speed;
-    const nx = p.x + dx * net.speed,
-      ny = p.y + dy * net.speed;
-    if (canWalk(nx, p.y)) p.x = nx;
-    if (canWalk(p.x, ny)) p.y = ny;
+    const sp = net.speed * CANAAN_SHALLOWS.speedAt(p.x, p.y);
+    p.vx = dx * sp;
+    p.vy = dy * sp;
+    const nx = p.x + dx * sp,
+      ny = p.y + dy * sp;
+    if (canWalk(nx, p.y, true)) p.x = nx;
+    if (canWalk(p.x, ny, true)) p.y = ny;
     CanaanStages.dodge.after();
   }
   // Pas d'un invité : lissage des positions et envoi de l'intention (20 fois par seconde).

@@ -562,7 +562,7 @@ addEventListener('pagehide', () => {
 });
 function startGame() {
   if (!window.CANAAN_READY) throw new Error(window.CANAAN_BOOT_ERROR || 'Initialisation du jeu incomplète');
-  if (!canWalk(P.x, P.y)) {
+  if (!canWalk(P.x, P.y, true)) {
     P.x = CANAAN_SPAWN.x;
     P.y = CANAAN_SPAWN.y;
   }
@@ -755,7 +755,8 @@ function loop(timestamp) {
 addEventListener('visibilitychange', () => {
   if (document.hidden) window.CANAAN_CLOCK.reset();
 });
-function canWalk(x, y) {
+// wade : la mer peu profonde autour de l'île porte (héros, monstres qui les poursuivent) ; world-shallows.js.
+function canWalk(x, y, wade = false) {
   let r = 12;
   return [
     [-r, -r],
@@ -772,8 +773,10 @@ function canWalk(x, y) {
     // Lieux des quêtes : socles et haies bloquent, nénuphars et pont restauré portent (quests.js).
     const quest = canaanQuestWalk(x + a, y + b);
     if (quest !== null) return quest;
+    const tx = Math.floor((x + a) / TS),
+      ty = Math.floor((y + b) / TS);
     return (
-      !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) &&
+      (!SOLID.includes(tileAt(tx, ty)) || (wade && CANAAN_SHALLOWS.wadeable(tx, ty))) &&
       !canaanHouseBlocked(x + a, y + b) &&
       !canaanTreeBlocked(x + a, y + b) &&
       !canaanPortalBlocked(x + a, y + b) &&
@@ -852,7 +855,11 @@ function stepHero(hero) {
   if (p.dead || hero.away) return;
   // Les durées d'animation avancent une seule fois par tick de simulation.
   if (p.atk > 0) p.atk = Math.max(0, p.atk - 1 / 60);
-  let sp = CANAAN_PLAYER_SPEED * (1 + characterStats(hero).speed / 100) * CANAAN_PROF.speedMult(hero),
+  let sp =
+      CANAAN_PLAYER_SPEED *
+      (1 + characterStats(hero).speed / 100) *
+      CANAAN_PROF.speedMult(hero) *
+      CANAAN_SHALLOWS.speedAt(p.x, p.y),
     dx = Math.sign(hero.intent.dx),
     dy = Math.sign(hero.intent.dy);
   if (host && playerStun > 0) {
@@ -871,8 +878,8 @@ function stepHero(hero) {
   p.vy = dy * sp;
   let nx = p.x + dx * sp,
     ny = p.y + dy * sp;
-  if (canWalk(nx, p.y)) p.x = nx;
-  if (canWalk(p.x, ny)) p.y = ny;
+  if (canWalk(nx, p.y, true)) p.x = nx;
+  if (canWalk(p.x, ny, true)) p.y = ny;
   // Régénération : un héros est en combat 5 s après son dernier coup donné ou reçu (Rubis compris).
   const fighting = CANAAN_RUBIS.inCombat(hero),
     regen = canaanRegenRates(fighting, p);
@@ -971,7 +978,7 @@ function update() {
         uy = (T.y - m.y) / d;
       let tx = m.x + ux * speed,
         ty = m.y + uy * speed;
-      if (canWalk(tx, ty)) {
+      if (canWalk(tx, ty, true)) {
         m.x = tx;
         m.y = ty;
         m.stuck = 0;
@@ -980,7 +987,7 @@ function update() {
         let side = m.stuck % 120 < 60 ? 1 : -1;
         let ax = m.x - uy * speed * side,
           ay = m.y + ux * speed * side;
-        if (canWalk(ax, ay)) {
+        if (canWalk(ax, ay, true)) {
           m.x = ax;
           m.y = ay;
         }
@@ -1031,7 +1038,10 @@ function update() {
     p.x += p.vx;
     p.y += p.vy;
     p.life--;
-    if (SOLID.includes(tileAt(Math.floor(p.x / TS), Math.floor(p.y / TS)))) {
+    const ptx = Math.floor(p.x / TS),
+      pty = Math.floor(p.y / TS);
+    // Les tirs filent au-dessus de la mer peu profonde (un héros peut tirer depuis l'eau).
+    if (SOLID.includes(tileAt(ptx, pty)) && !CANAAN_SHALLOWS.wadeable(ptx, pty)) {
       p.life = 0;
       if (p.splash) projectileBlast(p, null);
     }

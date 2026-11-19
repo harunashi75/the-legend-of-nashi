@@ -397,6 +397,8 @@
         y: (py0 - 5) * T,
         base: py0 * T - 2
       });
+      // Coque à flot : la mer peu profonde porte les héros (world-shallows.js), mais on ne traverse pas le navire.
+      for (let y = py0 - 2; y < py0; y++) for (let x = px0; x < px0 + w - 1; x++) solid.add(key(x, y));
       for (const p of PIER_PROPS) {
         const tx = cx + p.x,
           ty = cy + p.y;

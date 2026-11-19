@@ -916,6 +916,8 @@
               );
           x = end;
         }
+      // Hauts-fonds : dégradé turquoise près des côtes, bleu nuit au large.
+      CANAAN_SHALLOWS.draw(c, x0, x1, y0, y1);
       for (let y = y0; y < y1; y++)
         for (let x = x0; x < x1; x++)
           if (WATER.has(tiles[y][x]) && !BRIDGE_TILES.has(y * MAPW + x)) drawCoastLive(c, x, y, 1);
