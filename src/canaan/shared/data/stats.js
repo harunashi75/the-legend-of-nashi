@@ -59,7 +59,8 @@ export const SLOT_PROFILE = deepFreeze({
   neck: [0.75, 0.5, 0.8],
   ring: [0.8, 0.55, 0.65]
 });
-// Niveaux des monstres de chaque zone, dans l'ordre des biomes (Plaines verdoyantes → Forêt enchantée).
+// Niveaux des monstres de chaque zone, dans l'ordre des biomes (Plaines verdoyantes → Forêt enchantée), puis la
+// terre de l'Extension 1 au sud-ouest (zone de niveau 60).
 /** @type {ReadonlyArray<readonly [number, number]>} */
 export const ZONE_LEVELS = deepFreeze([
   [1, 10],
@@ -67,7 +68,8 @@ export const ZONE_LEVELS = deepFreeze([
   [20, 30],
   [30, 40],
   [40, 50],
-  [50, 60]
+  [50, 60],
+  [60, 60]
 ]);
 // Courbe d'XP : multiplicateur par tranche de 10 niveaux (1–10 très rapide … 51–60 plus exigeant).
 export const XP_BRACKETS = Object.freeze([1, 1.15, 1.35, 1.6, 1.9, 2.3]);

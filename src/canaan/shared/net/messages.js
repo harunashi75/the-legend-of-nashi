@@ -237,6 +237,11 @@ export function sanitizeAction(raw) {
   if (r.op === 'skin-wear') return r.id === '' || word(r.id) ? { op: r.op, id: r.id } : null;
   // Cité elfique : porte, bénédiction du Grand Arbre, atelier (apparence) ; l'hôte vérifie. L'armurerie passe par shop-buy.
   if (r.op === 'city-gate' || r.op === 'city-bless') return { op: r.op };
+  // Extensions : l'extension, son action et un identifiant court facultatif (vérifiés ensuite par l'extension).
+  if (r.op === 'ext')
+    return word(r.ext) && word(r.act) && (r.id === undefined || r.id === null || word(r.id))
+      ? { op: 'ext', ext: r.ext, act: r.act, id: r.id ?? null }
+      : null;
   if (r.op === 'city-skin') return word(r.id) ? { op: r.op, id: r.id } : null;
   if (r.op === 'rubis-unequip')
     return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;

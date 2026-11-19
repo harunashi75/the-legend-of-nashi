@@ -62,6 +62,8 @@
       if (Math.random() < 0.2) float(m.x, m.y - 60, 'IMMUNISÉ', '#d8d0c0');
       return 0;
     }
+    // Monstre d'une extension (son boss) : il voit chaque coup (participants, invulnérabilités).
+    if (typeof m.onHurt === 'function') value = m.onHurt(value, hero);
     if (value <= 0) return 0;
     const before = m.hp;
     m.hp -= value;

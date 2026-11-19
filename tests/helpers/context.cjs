@@ -58,7 +58,7 @@ function game() {
     // Tréfonds (underground.js, testé à part) : l'île seulement.
     canaanUnder: () => false, canaanHere: o => o?.layer !== 'under',
     CANAAN_PROF: {damageMult: () => 1, armorMult: () => 1, speedMult: () => 1, sanitize: p => p || {fishing: {level: 1, exp: 0}, cooking: {level: 1, exp: 0}, hunting: {level: 1, exp: 0}, fish: {}, meat: {}, meals: {}, codex: {}}},
-    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, elvenCity: {}, bossMechanics: {}, achievements: {}},
+    CanaanStages: {mobScaling: {}, bossScaling: {}, companions: {}, professions: {}, quests: {}, dungeonPuzzles: {}, elvenCity: {}, bossMechanics: {}, extensions: {}, achievements: {}},
     // Cité elfique (elven-city.js, testée à part) : pas de bénédiction.
     CANAAN_CITY: {blessMult: () => 1, blocked: () => false},
     // Touches du clavier (keybinds.js, testé à part) : étiquettes par défaut.
@@ -144,6 +144,8 @@ function storageGame() {
   // Tréfonds : l'île seulement (le vrai module est testé à part).
   g.canaanUnder=()=>false;g.canaanHere=o=>o?.layer!=='under';g.CANAAN_UNDER={setLayer(){},spawnPoint:()=>g.CANAAN_SPAWN};
   vm.runInContext(section('function recomputeStats() {','\nfunction recordKill'),g);
+  // Extensions : le vrai registre (données des extensions gardées telles quelles dans la sauvegarde).
+  vm.runInContext(section('const CANAAN_EXTENSIONS = Object.create(null);','\n// ---------------------------------------------------------------- Terres des extensions'),g);
   vm.runInContext(script('canaan-persistence'),g);
   g.db=db;g.scheduled=scheduled;
   return g;

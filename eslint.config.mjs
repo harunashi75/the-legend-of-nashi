@@ -25,7 +25,8 @@ export default [
   // globaux inconnus (no-undef) et les déclarations globales jamais lues ici (no-unused-vars) ne sont pas vérifiés.
   {
     // group-bot.js pilote des héros dans le contexte du jeu chargé par les tests : mêmes noms globaux.
-    files: ['src/canaan/scripts/**/*.js', 'tests/helpers/group-bot.js'],
+    // Les extensions (src/canaan/extensions/) sont des scripts classiques du même espace global.
+    files: ['src/canaan/scripts/**/*.js', 'src/canaan/extensions/**/*.js', 'tests/helpers/group-bot.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',

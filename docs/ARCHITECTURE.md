@@ -1,6 +1,6 @@
 # Architecture et code
 
-Notes techniques : organisation des sources, modules ES, application de bureau, rendu et fluidité. Le contenu du jeu est décrit dans [GAMEPLAY.md](GAMEPLAY.md), le format des sauvegardes dans [SAVES.md](SAVES.md) et l’ordre de démarrage dans [INITIALIZATION.md](INITIALIZATION.md).
+Notes techniques : organisation des sources, modules ES, application de bureau, rendu et fluidité. Le contenu du jeu est décrit dans [GAMEPLAY.md](GAMEPLAY.md), le format des sauvegardes dans [SAVES.md](SAVES.md) et l’ordre de démarrage dans [INITIALIZATION.md](INITIALIZATION.md), les extensions préparées à l’avance (build de test et build de sortie) dans [EXTENSIONS.md](EXTENSIONS.md).
 
 ## Sources et assemblage
 

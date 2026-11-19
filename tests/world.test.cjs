@@ -9,7 +9,10 @@ const {
 test('Île unique : six biomes, un seul camp sûr, route continue et lieux accessibles',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.equal(run('ZONES.map(z=>z.name).join()'),'Plaines verdoyantes,Forêt ancienne,Marais brumeux,Forêt automnale,Désert oublié,Forêt enchantée');
+ assert.equal(run('ZONES.slice(0,6).map(z=>z.name).join()'),'Plaines verdoyantes,Forêt ancienne,Marais brumeux,Forêt automnale,Désert oublié,Forêt enchantée');
+ // Septième zone : la terre de l'Extension 1 au sud-ouest, fermée et sans nom dans le build de sortie.
+ assert.equal(run('ZONES.length'),7);assert.equal(run('ZONES[6].ext'),'vallee');
+ assert.equal(run('ZONES[6].locked'),run('!canaanExtension("vallee")'));
  // Un seul camp, une seule zone sûre, un seul marchand ; le héros y apparaît.
  assert.equal(run('villages.length'),1);assert.equal(run('villages[0].name'),'Camp de l’Aurore');
  assert.equal(run("npcs.filter(n=>n.type==='shop'&&!n.layer).length"),1);
@@ -162,6 +165,12 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
  const styles=[...source.matchAll(/<style id="([^"]+)"/g)].map(m=>m[1]);
  assert.equal(styles[styles.length-1],'canaan-rpg-theme');
  assert.match(source,/--rpg-serif:/);
+ // Chaque région ne fait apparaître que ses créatures (plus de Slime de secours ailleurs que dans les Plaines).
+ for(let i=1;i<6;i++){
+  run('game.world.monsters=[];P.x=(ZONES['+i+'].x+0.5)*TS;P.y=(ZONES['+i+'].y+0.5)*TS;spawnMonsters(40)');
+  assert.equal(run('game.world.monsters.filter(m=>!m.worldBoss&&!regionAt(m.x/TS,m.y/TS).mobs.includes(m.t)).length'),0,'région '+i);
+ }
+ run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;game.world.monsters=[]');
  // Coffres cachés et coffre de boss : sprites dédiés, dessinés sans erreur.
  run('drawCanaanChest(ctx,100,100,false,1);drawCanaanChest(ctx,200,100,true,2);drawChests()');
 });
@@ -173,7 +182,9 @@ test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habita
  const zoneOf=`(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS)))`;
  const kinds=JSON.parse(run('JSON.stringify(ZONES.map((z,i)=>[...new Set(CANAAN_LIFE.animals().filter(a=>a.kind!=="poule"&&!a.sp.coast&&!a.farm&&!a.pet&&!a.layer&&'+zoneOf+'(a)===i).map(a=>a.kind))].sort()))'));
  // Chaque biome a ses espèces, et seulement les siennes (les bêtes de la ferme du camp sont à part).
- assert.deepEqual(kinds,[['cerf','lapin','mouton','renard'],['cerf','ecureuil','faisan','lapin','renard'],['canard','grenouille','heron','tortue'],['cerf','ecureuil','faisan','herisson','renard'],['chameau','chevre','fennec','lezard'],['cerf','ecureuil','lapin']]);
+ assert.deepEqual(kinds.slice(0,6),[['cerf','lapin','mouton','renard'],['cerf','ecureuil','faisan','lapin','renard'],['canard','grenouille','heron','tortue'],['cerf','ecureuil','faisan','herisson','renard'],['chameau','chevre','fennec','lezard'],['cerf','ecureuil','lapin']]);
+ // Vallée des Héros : ses bêtes seulement si l'extension est là (terre fermée sinon).
+ assert.deepEqual(kinds[6],run('!!canaanExtension("vallee")')?['cerf','faisan','lapin','mouton']:[]);
  // Crabes : sur les plages tout autour de l'île, sur la terre ferme au bord de la mer, dans plusieurs biomes.
  assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.kind==="crabe").length')>=30);
  assert.ok(run('CANAAN_LIFE.animals().filter(a=>a.kind==="crabe").every(a=>{const x=Math.floor(a.hx/TS),y=Math.floor(a.hy/TS);return canWalk(a.hx,a.hy)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([u,v])=>game.world.overworld[y+v][x+u]===0)})'),'crabes au bord de la mer');

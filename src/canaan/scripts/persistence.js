@@ -167,7 +167,9 @@ window.CANAAN_PERSISTENCE = {
       // Succès et bestiaire.
       succes: CANAAN_ACHIEVEMENTS.export(hero),
       // Quêtes : actives, terminées, secrets débloqués, décorations et choix narratifs.
-      quetes: sanitizeQuests(hero.quetes)
+      quetes: sanitizeQuests(hero.quetes),
+      // Données des extensions, gardées même par un build qui ne les connaît pas.
+      ...(Object.keys(hero.ext || {}).length ? { ext: canaanSanitizeExt(hero.ext) } : {})
     };
   },
   snapshot() {
@@ -384,6 +386,7 @@ window.CANAAN_PERSISTENCE = {
     game.hero.prof = CANAAN_PROF.sanitize(h.prof);
     game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);
     game.hero.quetes = sanitizeQuests(h.quetes);
+    game.hero.ext = canaanSanitizeExt(h.ext);
     const validItem = it =>
       it &&
       typeof it === 'object' &&

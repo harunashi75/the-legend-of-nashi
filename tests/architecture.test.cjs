@@ -321,7 +321,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  assert.doesNotMatch(source,/const\s+\w+\s*=\s*(?:window\.)?CanaanStages\.\w+\s*;/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','summons','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','elvenCity','bossMechanics','achievements']);
+ assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','summons','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','elvenCity','bossMechanics','extensions','achievements']);
  // Les vraies étapes tournent sur une partie chargée.
  run('started=true;paused=false;P.dead=false');
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline();updateWorld()');
@@ -335,7 +335,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  run('runUpdatePipeline();runDrawPipeline()');
  assert.deepEqual(calls,['before:rubis','before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
   'after:weaponEffects=weaponEffects','after:mobScaling','after:weaponVfx=weaponVfx','after:facing','after:classes=classes','after:summons',
-  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:elvenCity','after:bossMechanics','after:achievements','draw','drawWeaponEffects']);
+  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:elvenCity','after:bossMechanics','after:extensions','after:achievements','draw','drawWeaponEffects']);
  for(const state of ['paused=true','paused=false;P.dead=true','P.dead=false;started=false']){
   calls.length=0;run(state+';runUpdatePipeline()');assert.deepEqual(calls,[],state);
  }
@@ -400,7 +400,7 @@ test('Application de bureau : Electron épinglé, version unique, fenêtre isol�
  const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
  assert.equal(pkg.version,version);assert.equal(pkg.main,'app/main.js');
  assert.match(pkg.devDependencies.electron,/^\d+\.\d+\.\d+$/,'version exacte');
- assert.match(pkg.scripts.start,/tools\/build\.cjs && node tools\/run_app\.cjs/);
+ assert.match(pkg.scripts.start,/tools\/build\.cjs --extensions && node tools\/run_app\.cjs/);
  const main=fs.readFileSync(path.join(root,'app','main.js'),'utf8'),preload=fs.readFileSync(path.join(root,'app','preload.js'),'utf8');
  for(const flag of ['contextIsolation: true','sandbox: true','nodeIntegration: false'])assert.ok(main.includes(flag),flag);
  assert.match(main,/will-navigate/);assert.ok(main.includes("if (url.split('#')[0] !== page) event.preventDefault();"),'seul le rechargement du jeu est permis');assert.match(main,/setWindowOpenHandler/);assert.match(main,/setPermissionRequestHandler/);

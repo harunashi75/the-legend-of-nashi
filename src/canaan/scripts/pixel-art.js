@@ -1367,31 +1367,38 @@
     const spr = feral
       ? canaanFeralSprite(face, frame)
       : canaanHeroSprite(look, face, frame, hero ? { tool: 'none' } : {});
-    const bob = moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
+    // Extensions : un héros peut être porté (heroBody) : il est soulevé, ce qui le porte passe dessous et ce qui doit
+    // le recouvrir est dessiné devant ; il ne marche plus.
+    const mount = !feral && hero ? CANAAN_EXT.heroBody(hero, body, face, moving, phase) : null;
+    const lift = mount ? mount.lift : 0;
+    const bob = mount ? mount.bob : moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
+    const shown = mount ? canaanHeroSprite(look, face, 0, hero ? { tool: 'none' } : {}) : spr;
     // Le minotaure est un peu plus grand.
     const scale = !feral && look?.race === 'minotaure' ? 1.1 : 1.0;
     c.save();
     if (body.veiled) c.globalAlpha *= 0.3;
-    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'back');
+    if (mount) mount.under(c, x, y);
+    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob - lift, 'back');
     // Apparence portée : aura au sol sous le héros, particules par-dessus.
     const sk = !feral && look?.wear && typeof skinById === 'function' ? skinById(look.wear) : null;
     if (sk) drawSkinFx(c, sk, x, y + bob, 'under');
-    const px = spr.padX || 0,
-      py = spr.padY || 0,
+    const px = shown.padX || 0,
+      py = shown.padY || 0,
       drawSprite = () =>
         c.drawImage(
-          spr,
+          shown,
           Math.round(x - (26 + px) * scale),
-          Math.round(y + 18 - (60 + py) * scale + bob),
-          Math.round(spr.width * scale),
-          Math.round(spr.height * scale)
+          Math.round(y + 18 - (60 + py) * scale + bob - lift),
+          Math.round(shown.width * scale),
+          Math.round(shown.height * scale)
         );
     // Dans la mer peu profonde : le bas du corps sous l'eau (world-shallows.js).
-    const sink = CANAAN_SHALLOWS.sink(x, y);
+    const sink = mount ? 0 : CANAAN_SHALLOWS.sink(x, y);
     if (sink) CANAAN_SHALLOWS.drawWading(c, x, y, sink, drawSprite);
     else drawSprite();
-    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob, 'front');
-    if (sk) drawSkinFx(c, sk, x, y + bob, 'over');
+    if (mount) mount.over(c, x, y);
+    if (hero) CANAAN_WEAPON_LOOK.draw(c, hero, body, x, y + bob - lift, 'front');
+    if (sk) drawSkinFx(c, sk, x, y + bob - lift, 'over');
     c.restore();
   }
   // Ponts en planches hors des instances (les routes sont des tuiles texturées de canaan-world-look), dans le style

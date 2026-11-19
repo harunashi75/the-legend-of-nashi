@@ -346,7 +346,8 @@ test('Paramètres en onglets ; touches du clavier réglables, échangées en cas
  // Défauts : ceux d'avant les réglages.
  assert.equal(run('CANAAN_KEYS.actionOf("e")'),'interact');assert.equal(run('CANAAN_KEYS.actionOf("Z")'),'moveUp');
  assert.equal(run('CANAAN_KEYS.actionOf(" ")'),'dodge');assert.equal(run('CANAAN_KEYS.actionOf("r")'),null);
- assert.equal(run('CANAAN_KEYS.actionOf("h")'),null,'plus de touche Maison');
+ // Plus de touche Maison : H est libre, ou prise par la monture de l'Extension 1 dans un build de test.
+ assert.equal(run('CANAAN_KEYS.actionOf("h")'),run('canaanExtension("vallee")?"mount":null'),'plus de touche Maison');
  // Attendre une touche, puis la prendre : R devient Interagir ; E se libère.
  run('keybindCapture("interact",0)');assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.listening())')),{id:'interact',slot:0});
  fire(g,'keydown',{key:'R',stopImmediatePropagation(){}});

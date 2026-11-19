@@ -208,7 +208,7 @@
   const CHAR_TABS = ['gear', 'rubis', 'wardrobe'];
   let charTab = 'gear';
   function characterSection(tab) {
-    if (CHAR_TABS.includes(tab)) charTab = tab;
+    if (CHAR_TABS.includes(tab) || CANAAN_EXT.charTabs().some(t => t.id === tab)) charTab = tab;
     renderCharacter();
   }
   function renderCharacter() {
@@ -220,7 +220,11 @@
       rubis = charTab === 'rubis',
       wardrobe = charTab === 'wardrobe',
       worn = window.CANAAN_RUBIS.equipped().filter(Boolean).length,
-      need = xpToNext(st.level);
+      need = xpToNext(st.level),
+      // Onglets des extensions présentes ; un onglet d'une extension absente revient à l'équipement.
+      extTabs = CANAAN_EXT.charTabs(),
+      extTab = extTabs.find(t => t.id === charTab) || null;
+    if (!CHAR_TABS.includes(charTab) && !extTab) charTab = 'gear';
     const tabs =
       '<div class="bag-tabs char-tabs">' +
       '<button type="button" class="' +
@@ -241,7 +245,22 @@
       window.CANAAN_WARDROBE.count() +
       ' / ' +
       SKINS.length +
-      '</small></button></div>';
+      '</small></button>' +
+      extTabs
+        .map(
+          t =>
+            '<button type="button" class="' +
+            (charTab === t.id ? 'on' : '') +
+            '" data-action="characterSection" data-tab="' +
+            t.id +
+            '">' +
+            t.label +
+            ' <small>' +
+            t.count +
+            '</small></button>'
+        )
+        .join('') +
+      '</div>';
     const gear =
       '<div class="character-layout"><div class="character-left"><div class="rpg-paper"><div class="character-doll">' +
       '<div class="doll-column">' +
@@ -270,7 +289,13 @@
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
         tabs +
-        (rubis ? window.CANAAN_RUBIS.section() : wardrobe ? window.CANAAN_WARDROBE.section() : gear)
+        (extTab
+          ? extTab.section()
+          : rubis
+            ? window.CANAAN_RUBIS.section()
+            : wardrobe
+              ? window.CANAAN_WARDROBE.section()
+              : gear)
     );
     drawCharacterPreview();
     prepare('character');

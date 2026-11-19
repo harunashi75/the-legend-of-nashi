@@ -25,11 +25,14 @@
     15: ['#3f8a86', '#2f6e6c', '#5fa8a0', '#a8e0d0'],
     16: ['#9a5a2a', '#7a4220', '#c07a34', '#e8b040'],
     17: ['#2e6e72', '#22545a', '#40908a', '#9ff0e0'],
-    18: ['#3a3e9a', '#2a2c78', '#5a60c8', '#c8d0ff']
+    18: ['#3a3e9a', '#2a2c78', '#5a60c8', '#c8d0ff'],
+    // Terre du sud-ouest (Extension 1) : herbe dorée, champ de blé mûr.
+    50: ['#8a9a3e', '#6e7e2e', '#b0b450', '#f2d466'],
+    51: ['#c8a040', '#a07c2a', '#e2c060', '#f8e490']
   };
   const WATER = new Set([0, 15, 18]);
   // Ordre de recouvrement des bords : un terrain plus haut déborde sur son voisin.
-  const PRIORITY = { 0: 0, 15: 1, 18: 1, 3: 2, 2: 3, 11: 4, 16: 5, 1: 6, 10: 6, 5: 7, 17: 7 };
+  const PRIORITY = { 0: 0, 15: 1, 18: 1, 3: 2, 2: 3, 11: 4, 16: 5, 51: 5, 1: 6, 10: 6, 50: 6, 5: 7, 17: 7 };
   const h = (x, y, k = 0) => {
     const n = Math.sin(x * 127.1 + y * 311.7 + k * 74.7) * 43758.5453;
     return n - Math.floor(n);
@@ -57,7 +60,7 @@
       WATER.has(t)
     );
     g.globalAlpha = 1;
-    if (t === 1 || t === 10 || t === 5 || t === 17) {
+    if (t === 1 || t === 10 || t === 5 || t === 17 || t === 50) {
       // Herbes : touffes de brins sombres et clairs.
       scatter(g, t === 5 ? 18 : 30, s + 2, (x, y, k) => {
         rect(g, x, y, 1, 3, p[1]);
@@ -71,6 +74,29 @@
         });
       if (t === 5) scatter(g, 10, s + 4, (x, y, k) => rect(g, x, y, 3, 2, k % 2 ? p[3] : '#8a6a3a'));
       if (t === 17) scatter(g, 6, s + 5, (x, y, k) => rect(g, x, y, 2, 2, k % 2 ? p[3] : '#d4b4ff'));
+      // Herbe dorée : brins couleur de miel et petites fleurs blanches et jaunes.
+      if (t === 50)
+        scatter(g, v === 2 ? 5 : 2, s + 6, (x, y, k) => {
+          rect(g, x, y, 2, 2, ['#fff4c8', '#ffd84a', '#f6f0e0', '#f0a83a', '#ffffff'][k % 5]);
+          rect(g, x + 1, y + 2, 1, 1, '#6e7e2e');
+        });
+    } else if (t === 51) {
+      // Blé mûr : rangées d'épis en quatre tons, sillons sombres entre les rangées, quelques coquelicots.
+      for (let row = 0; row < 48; row += 6) {
+        rect(g, 0, row + 5, 48, 1, p[1]);
+        for (let x = (row / 6) % 2 ? 1 : 3; x < 48; x += 4) {
+          const k = Math.floor(h(x, row, s) * 4);
+          rect(g, x, row + 1, 1, 4, p[1]);
+          rect(g, x + 1, row, 1, 4, k % 2 ? p[2] : p[3]);
+          rect(g, x + 1, row, 1, 1, '#fff6c8');
+          rect(g, x + 2, row + 2, 1, 3, p[0]);
+        }
+      }
+      if (v === 3)
+        scatter(g, 2, s + 4, (x, y) => {
+          rect(g, x, y, 2, 2, '#d8343a');
+          rect(g, x, y, 1, 1, '#ff6a5a');
+        });
     } else if (t === 2) {
       scatter(g, 40, s + 2, (x, y, k) => rect(g, x, y, 1, 1, k % 2 ? p[1] : p[2]));
       scatter(g, 8, s + 3, (x, y) => {
@@ -418,6 +444,8 @@
   // Souplesse de chaque décor dans le vent (les rochers, cristaux et champignons ne bougent pas).
   const SWAY = {
     tree: 1,
+    goldtree: 1,
+    wheat: 1.4,
     bigtree: 0.65,
     pine: 0.6,
     snowpine: 0.6,
@@ -441,7 +469,8 @@
     ['#6a7a3a', '#8a9a52', '#4f6b4a'],
     ['#d9542f', '#e98a2c', '#efc145'],
     ['#e0c890', '#c9a673', '#f0dca8'],
-    ['#9ff4e4', '#c99bff', '#4fc0b0']
+    ['#9ff4e4', '#c99bff', '#4fc0b0'],
+    ['#f2cf5a', '#e8a83a', '#fff0a0']
   ];
   function drawWindLayer(c) {
     if (game.world.instance || !canaanDisplay.particles || canaanInHouse(P.x / TS, P.y / TS)) return;
@@ -978,7 +1007,9 @@
     { dark: 0.32, tint: [18, 30, 28], particles: 'mist', color: '#d6e4e0' },
     { dark: 0.1, tint: [44, 16, 0], particles: 'leaves', color: '#e98a2c' },
     { dark: 0.06, tint: [70, 34, 0], particles: 'dust', color: '#f0d8a0' },
-    { dark: 0.55, tint: [8, 10, 42], particles: 'sparks', color: '#b2ffec', heroLight: 260 }
+    { dark: 0.55, tint: [8, 10, 42], particles: 'sparks', color: '#b2ffec', heroLight: 260 },
+    // Terre du sud-ouest : lumière dorée de fin d'après-midi, poussière d'or dans l'air.
+    { dark: 0.07, tint: [96, 60, 4], particles: 'motes', color: '#ffe08a', heroLight: 420 }
   ];
   const current = { dark: 0, tint: [0, 0, 0], particles: 'dust', color: '#fff6c0' };
   // Intérieur de la maison : lumière chaude et douce, quelques grains de poussière.
@@ -1130,7 +1161,8 @@
       ...CANAAN_HOUSE.occluders(),
       ...canaanCampLife.occluders(),
       ...CANAAN_PORTAL_ART.occluders(),
-      ...CANAAN_CITY.occluders()
+      ...CANAAN_CITY.occluders(),
+      ...CANAAN_EXT.occluders()
     );
     // Les objets redessinés n'allument pas une seconde fois leurs lumières.
     const light = window.canaanLight;

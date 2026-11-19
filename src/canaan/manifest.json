@@ -27,6 +27,23 @@
     },
     {
       "kind": "script",
+      "id": "canaan-extensions",
+      "file": "scripts/extensions.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-data",
+      "file": "extensions/vallee/data.js",
+      "extension": "vallee"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-i18n",
+      "file": "extensions/vallee/i18n.js",
+      "extension": "vallee"
+    },
+    {
+      "kind": "script",
       "id": "canaan-game-state",
       "file": "scripts/game-state.js"
     },
@@ -464,6 +481,30 @@
       "kind": "script",
       "id": "canaan-ui-overlay",
       "file": "scripts/ui-overlay.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-art",
+      "file": "extensions/vallee/art.js",
+      "extension": "vallee"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-mounts",
+      "file": "extensions/vallee/mounts.js",
+      "extension": "vallee"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-boss",
+      "file": "extensions/vallee/valerion.js",
+      "extension": "vallee"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee",
+      "file": "extensions/vallee/vallee.js",
+      "extension": "vallee"
     },
     {
       "kind": "script",

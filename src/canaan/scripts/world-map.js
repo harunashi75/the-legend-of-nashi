@@ -37,6 +37,9 @@
     16: '#9a5a2a',
     17: '#2e6e72',
     18: '#3a3e9a',
+    // Terre du sud-ouest (Extension 1) : herbe dorée et blé.
+    50: '#8a9a3e',
+    51: '#c8a040',
     // Palissade de troncs et emprises de la cité elfique.
     37: '#6a4a2e'
   };
@@ -63,6 +66,8 @@
     autumn_red: ['#a8341e', '#e05a32', 3],
     autumn_orange: ['#c0601a', '#f0902a', 3],
     autumn_gold: ['#c09a20', '#f0d050', 3],
+    goldtree: ['#c8a028', '#fae070', 3],
+    wheat: ['#b88a30', '#f0d070', 1],
     leafpile: ['#b0501e', '#e0802a', 2],
     palm: ['#3a8a3a', '#7ac05a', 3],
     cactus: ['#3a7a3a', '#6aa85a', 2],
@@ -510,7 +515,108 @@
         g.fillRect(X + 3, Y + 1, 1, 1);
       }
     }
+    // Extensions : leurs lieux vus d'en haut (bâtiments, statues, arène), puis le nuage des terres fermées.
+    for (const id of CANAAN_EXT.list()) CANAAN_EXT.mapPaint(id, g, PX);
+    paintClouds(g);
     return cv;
+  }
+  // ---------------------------------------------------------------- Nuage des terres fermées
+  // Terre d'une extension absente de ce build : un grand nuage blanc la recouvre. Il est fait de grosses volutes
+  // rondes posées sur toute la terre (et un peu au-delà, sur la mer) ; chaque pixel prend la volute la plus haute et
+  // s'éclaire selon sa pente (lumière en haut à gauche, ombre bleutée en bas à droite), en gros pixels de 2, avec un
+  // liseré gris-bleu sur le pourtour : un nuage de dessin animé, bosselé, qui déborde du rivage.
+  function paintClouds(g) {
+    const lands = CANAAN_EXT_LANDS.filter(l => !canaanExtension(l.ext));
+    if (!lands.length || !g.getImageData) return;
+    const L = [-0.48, -0.62, 0.62],
+      M = 8,
+      COLORS = [
+        [255, 255, 255],
+        [240, 244, 250],
+        [214, 223, 236],
+        [184, 197, 218]
+      ],
+      RIM = [112, 128, 160];
+    for (const land of lands) {
+      const tx0 = Math.max(0, land.box.x0 - M),
+        ty0 = Math.max(0, land.box.y0 - M),
+        tx1 = Math.min(MAPW - 1, land.box.x1 + M),
+        ty1 = Math.min(MAPH - 1, land.box.y1 + M),
+        cw = tx1 - tx0 + 1,
+        ch = ty1 - ty0 + 1;
+      // Volutes : une grille décalée au hasard, gardée seulement près de la terre fermée.
+      const near = (x, y, r) => {
+        for (let j = -r; j <= r; j += 2)
+          for (let i = -r; i <= r; i += 2)
+            if (canaanExtLand(Math.round(x + i), Math.round(y + j)) === land) return true;
+        return false;
+      };
+      const puffs = [];
+      for (let gy = ty0; gy <= ty1; gy += 5)
+        for (let gx = tx0 + ((gy / 5) % 2 ? 2.5 : 0); gx <= tx1; gx += 5) {
+          const x = gx + (hashOf(gx, gy, 81) - 0.5) * 3,
+            y = gy + (hashOf(gx, gy, 82) - 0.5) * 3;
+          if (!near(x, y, 2)) continue;
+          puffs.push({ x, y, r: 4.2 + hashOf(gx, gy, 83) * 3.6, z: hashOf(gx, gy, 84) * 2 });
+        }
+      // Volute la plus haute en un point : sa hauteur et sa normale (null hors du nuage).
+      const top = (fx, fy) => {
+        let best = null;
+        for (const p of puffs) {
+          const dx = fx - p.x,
+            dy = fy - p.y,
+            q = p.r * p.r - dx * dx - dy * dy;
+          if (q <= 0) continue;
+          const z = Math.sqrt(q) + p.z;
+          if (!best || z > best.z) best = { z, nx: dx / p.r, ny: dy / p.r, nz: Math.sqrt(q) / p.r, p };
+        }
+        return best;
+      };
+      const X0 = tx0 * PX,
+        Y0 = ty0 * PX,
+        W2 = cw * PX,
+        H2 = ch * PX,
+        img = g.getImageData(X0, Y0, W2, H2),
+        data = img.data,
+        put = (bx, by, col) => {
+          for (let j = 0; j < 2; j++)
+            for (let i = 0; i < 2; i++) {
+              const o = ((by + j) * W2 + bx + i) * 4;
+              if (o < 0 || o + 3 >= data.length) continue;
+              data[o] = col[0];
+              data[o + 1] = col[1];
+              data[o + 2] = col[2];
+              data[o + 3] = 255;
+            }
+        };
+      const cols = W2 >> 1,
+        rows = H2 >> 1,
+        cover = new Array(cols * rows);
+      for (let by = 0; by < rows; by++)
+        for (let bx = 0; bx < cols; bx++)
+          cover[by * cols + bx] = top(tx0 + (bx * 2 + 1) / PX, ty0 + (by * 2 + 1) / PX);
+      for (let by = 0; by < rows; by++)
+        for (let bx = 0; bx < cols; bx++) {
+          const t = cover[by * cols + bx];
+          if (!t) continue;
+          const out = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ].some(([i, j]) => !cover[(by + j) * cols + bx + i] || bx + i < 0 || bx + i >= cols);
+          if (out) {
+            put(bx * 2, by * 2, RIM);
+            continue;
+          }
+          // Lumière de la volute ; un trait d'ombre là où une volute passe devant une autre plus basse.
+          const lum = t.nx * L[0] + t.ny * L[1] + t.nz * L[2],
+            below = cover[(by + 1) * cols + bx],
+            seam = below && below.p !== t.p && below.z < t.z - 0.8;
+          put(bx * 2, by * 2, COLORS[seam ? 3 : lum > 0.78 ? 0 : lum > 0.5 ? 1 : lum > 0.22 ? 2 : 3]);
+        }
+      g.putImageData(img, X0, Y0);
+    }
   }
   // Donjon ou raid : sols du thème, murs sombres soulignés le long des salles, herses et dangers.
   // Seul le cadre des salles connues (box, avec sa marge) est peint : au-delà, tout est mur, de la couleur unie du fond
@@ -955,6 +1061,8 @@
         }
       });
       for (const camp of villages) put('camp', camp.x, camp.y, {}, camp.name);
+      // Lieux des extensions présentes (écurie, arène…).
+      for (const mk of CANAAN_EXT.markers()) put(mk.kind, mk.x, mk.y, mk.extra || {}, mk.name);
       if (window.CANAAN_CITY_PLAN)
         put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
       for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
@@ -1031,7 +1139,8 @@
         span = Math.max(b.x1 - b.x0, b.y1 - b.y0);
       return { cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2, scale: BIG / span };
     }
-    return { cx: 200, cy: 200, scale: BIG / (game.world.layer === 'under' ? 330 : 360) };
+    // Île : un peu plus large que l'île elle-même, pour voir aussi la terre du sud-ouest (Extension 1).
+    return { cx: 200, cy: 200, scale: BIG / (game.world.layer === 'under' ? 330 : 384) };
   }
   function currentView() {
     const fit = fitView();

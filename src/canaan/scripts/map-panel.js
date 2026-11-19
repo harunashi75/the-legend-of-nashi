@@ -6,7 +6,7 @@
   // Plage de niveaux des monstres d'un biome (ZONE_LEVELS).
   function biomeLevelRange(biome) {
     const [lo, hi] = ZONE_LEVELS[biome];
-    return lo + '–' + hi;
+    return lo === hi ? 'Niveau ' + lo : 'Niveaux ' + lo + '–' + hi;
   }
   const focusAttrs = (x, y) =>
     ' data-action="mapFocus" data-x="' + Math.round(x) + '" data-y="' + Math.round(y) + '"';
@@ -81,7 +81,9 @@
   }
   function islandPanel() {
     const here = regionAt(P.x / TS, P.y / TS);
+    // Une terre d'extension fermée (absente de ce build) n'est pas listée : seul le nuage de la carte la montre.
     const regions = ZONES.map((z, i) => {
+      if (z.locked) return '';
       const lines = instances
         .map((d, j) => ({ d, j }))
         .filter(v => v.d.biome === i && !v.d.under)
@@ -96,7 +98,7 @@
         focusAttrs(z.x, z.y) +
         '><span class="map-swatch"></span><span class="map-region-name">' +
         safeGearText(z.name) +
-        '</span><span class="map-levels">Niveaux ' +
+        '</span><span class="map-levels">' +
         biomeLevelRange(i) +
         '</span></button>' +
         (z === here ? '<div class="map-here-tag">📍 Vous êtes ici</div>' : '') +

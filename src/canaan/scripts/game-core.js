@@ -307,6 +307,8 @@ addEventListener('keydown', e => {
     return chatInput.focus();
   }
   if (/^skill[1-4]$/.test(action)) return useSkill(+action.slice(5) - 1);
+  // Actions des extensions (leurs touches, Paramètres → Clavier).
+  if (CANAAN_EXT.key(action)) return e.preventDefault();
   if (Object.hasOwn(CANAAN_PANEL_KEYS, action)) {
     e.preventDefault();
     window[CANAAN_PANEL_KEYS[action]]();
@@ -430,7 +432,7 @@ function canaanHostRespawn(message) {
       // héros de niveau 60 tombé dans la Forêt enchantée ou dans la cité.
       const home = canaanUnder()
         ? CANAAN_UNDER.spawnPoint()
-        : CANAAN_CITY.respawnFor(game.hero) || CANAAN_SPAWN;
+        : CANAAN_EXT.respawnFor(game.hero) || CANAAN_CITY.respawnFor(game.hero) || CANAAN_SPAWN;
       P.x = home.x;
       P.y = home.y;
       P.hp = P.mhp;
@@ -455,6 +457,8 @@ function interact() {
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
     // Cité elfique : porte (l'hôte la fait passer), Grand Arbre et marchands (fenêtres chez l'invité).
     if (!game.world.instance && !canaanUnder() && CANAAN_CITY.guestUse()) return;
+    // Extensions : leurs lieux et personnages (fenêtres chez l'invité, le reste demandé à l'hôte).
+    if (!canaanUnder() && CANAAN_EXT.guestUse()) return;
     // Donjon : mur fissuré, brasero, levier, stèle ou porte scellée (l'hôte agit pour lui).
     if (game.world.instance && CANAAN_DUNGEON_EXPLORE.near(P))
       return CANAAN_NET.requestAction({ op: 'dungeon-use' });
@@ -483,6 +487,7 @@ function interact() {
   }
   if (openNearbyChest()) return;
   if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_CITY.interact()) return;
+  if (!canaanUnder() && !modalOpen() && CANAAN_EXT.interact(game.hero)) return;
   if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_QUESTS.interact()) return;
   if (!game.world.instance && !modalOpen() && CANAAN_HOUSE.interact()) return;
   if (!game.world.instance && !modalOpen() && CANAAN_PROF.interact()) return;
@@ -780,7 +785,8 @@ function canWalk(x, y, wade = false) {
       !canaanHouseBlocked(x + a, y + b) &&
       !canaanTreeBlocked(x + a, y + b) &&
       !canaanPortalBlocked(x + a, y + b) &&
-      !CANAAN_CITY.blocked(x + a, y + b)
+      !CANAAN_CITY.blocked(x + a, y + b) &&
+      !CANAAN_EXT.blocked(x + a, y + b)
     );
   });
 }
@@ -797,6 +803,7 @@ const CANAAN_BIG_TREES = new Set([
   'autumn_red',
   'autumn_orange',
   'autumn_gold',
+  'goldtree',
   'glowtree',
   'elftree',
   'blossom',
@@ -859,6 +866,7 @@ function stepHero(hero) {
       CANAAN_PLAYER_SPEED *
       (1 + characterStats(hero).speed / 100) *
       CANAAN_PROF.speedMult(hero) *
+      CANAAN_EXT.speed(hero) *
       CANAAN_SHALLOWS.speedAt(p.x, p.y),
     dx = Math.sign(hero.intent.dx),
     dy = Math.sign(hero.intent.dy);
@@ -1174,12 +1182,16 @@ function draw() {
     CANAAN_PROF.drawSpots(ctx);
     drawPixelRoads(ctx);
     drawPixelLandmarks(ctx);
+    // Extensions : ce qui est posé sur le sol (champs, dalles, enclos).
+    CANAAN_EXT.draw(ctx, 'ground');
     // Bâtiments (maison, échoppe, cuisine, demeures, refuges) et intérieur meublé de la pièce où l'on est.
     CANAAN_HOUSE.draw(ctx);
     // Ferme, enclos, verger, jardin et fontaine du Camp de l'Aurore.
     canaanCampLife.draw(ctx);
     // Sylvaëlle, la cité elfique : porte, bâtiments, Grand Arbre, fontaine, lanternes, elfes et animaux.
     CANAAN_CITY.draw(ctx);
+    // Extensions : bâtiments, statues et habitants de leurs terres.
+    CANAAN_EXT.draw(ctx, 'world');
     // Animaux de chaque biome et habitants (camp, refuges, ruines, tours).
     CANAAN_LIFE.update();
     CANAAN_LIFE.drawAnimals(ctx);
@@ -1270,6 +1282,8 @@ function draw() {
   drawWade(ctx, P, P.x, P.y + 16, 40, Math.hypot(P.vx || 0, P.vy || 0) > 0.1, 1);
   // Devant / derrière : arbres, bâtiments et grands objets redessinés devant les personnages qui sont derrière eux.
   drawCanaanOcclusion(ctx);
+  // Extensions : ce qui passe au-dessus des personnages (rayons, oiseaux, pétales).
+  CANAAN_EXT.draw(ctx, 'air');
   // Invitations « [E] Entrer » des bâtiments, au-dessus des façades et des personnages.
   CANAAN_HOUSE.drawPrompts(ctx);
   // Titres et aura des succès, au-dessus de chaque héros.
@@ -1286,6 +1300,8 @@ function draw() {
     ctx,
     game.world.instance ? dungeonAmbience() : canaanUnder() ? CANAAN_UNDER.ambience() : worldAmbience()
   );
+  // Terres des extensions absentes de ce build : un banc de brume blanche, lumineux même la nuit.
+  CANAAN_LOCKED_FOG.draw(ctx);
   // Bulles de dialogue des habitants, lisibles même dans l'obscurité.
   CANAAN_LIFE.drawBubbles(ctx);
   CANAAN_QUESTS.drawBubbles(ctx);

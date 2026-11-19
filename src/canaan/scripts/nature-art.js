@@ -305,6 +305,23 @@
       }
     }
   };
+  // Arbre aux feuilles d'or (terre du sud-ouest) : tronc clair d'écorce argentée marquée de sombre (comme un
+  // bouleau), couronne haute et ronde en quatre tons de miel, petites feuilles qui scintillent (P[4]).
+  TREES.golden = (k, v) => {
+    const BIRCH = ramp('#efe6d2', '#cfc2a6', '#9a8a70', '#4a3e30');
+    shadow(k, 32, 67, 21, 4);
+    trunk(k, 32, 34, 66, 6, BIRCH, 41 + v, v - 1);
+    // Marques sombres de l'écorce, en travers.
+    for (let y = 38; y < 62; y += 5 + (y % 3)) k.rect(30 + ((y * 7) % 3), y, 3, 1, BIRCH[3]);
+    branch(k, bez([32, 42], [25, 36], [19, 28], 8), 2, BIRCH);
+    branch(k, bez([33, 40], [40, 34], [45, 27], 8), 2, BIRCH);
+    const P = [
+      ['#7a5410', '#b8861c', '#e6b832', '#ffe878', '#fffbe0'],
+      ['#7e4a12', '#c07a1e', '#eaa834', '#ffd870', '#fff4c8'],
+      ['#6e5a14', '#a8921e', '#dcc236', '#fff08a', '#ffffff']
+    ][v];
+    crown(k, 32 + (v - 1) * 2, 25, 23 - v, 21, P, 151 + v * 9, 17, 9);
+  };
   const AUTUMN = {
     autumn_red: [['#5a1a16', '#8d2a22', '#c4402e', '#ee7a50'], 61],
     autumn_orange: [['#6a3412', '#a8561e', '#d8802c', '#f8b45a'], 71],
@@ -317,7 +334,8 @@
       const P = {
         3: ['#5a2a12', '#a8561e', '#d8802c', '#f8b45a', '#c4402e'],
         5: ['#12504c', '#1e7a70', '#3aa898', '#8ae8d8', '#f6d8ff'],
-        2: ['#2a3a24', '#40583a', '#5e7a4e', '#8aa070', '#c8a060']
+        2: ['#2a3a24', '#40583a', '#5e7a4e', '#8aa070', '#c8a060'],
+        6: ['#4a4a14', '#7a7a24', '#a8a238', '#dcd060', '#ffe070']
       }[z] || ['#1c4a2a', '#2e6a3a', '#4a8c48', '#86c062', ['#e8483a', '#fff4d0', '#f6c5e2'][v]];
       shadow(k, 16, 34, 12, 2);
       crown(k, 16, 27, 12 - v, 7, P, 91 + v * 3 + z * 11, 9, v === 1 ? 0 : 5);
@@ -336,6 +354,17 @@
                 ['#9ab0ff', '#d3b4ee', '#ffffff']
               ][v],
         G = z === 5 ? ['#1e6a5a', '#2e8a70', '#4fc0a0'] : ['#2e5a2a', '#467b46', '#6aa552'];
+      // Terre du sud-ouest : boutons d'or, marguerites et soucis.
+      if (z === 6)
+        cols.splice(
+          0,
+          3,
+          ...[
+            ['#ffd84a', '#fff4c8', '#f0a83a'],
+            ['#ffffff', '#ffd84a', '#fff4c8'],
+            ['#f0a83a', '#ffd84a', '#e8483a']
+          ][v]
+        );
       shadow(k, 16, 34, 11, 2);
       for (let i = 0; i < 9; i++) {
         const x = 6 + Math.floor(hash(i, v + z) * 20),
@@ -409,6 +438,29 @@
       }
       k.g.fillStyle = 'rgba(40,70,80,.35)';
       k.g.fillRect(4, 33, 24, 2);
+    },
+    // Touffe de blé mûr (terre du sud-ouest) : tiges dorées, épis barbus qui penchent, une tige verte au pied.
+    wheat: (k, v) => {
+      shadow(k, 16, 34, 11, 2);
+      const T = ['#a07c2a', '#c8a040', '#e8c860', '#fff0a0'];
+      for (let i = 0; i < 9; i++) {
+        const x = 5 + i * 2.6 + Math.floor(hash(i, v + 3) * 2),
+          h = 17 + Math.floor(hash(v + 5, i) * 9),
+          lean = hash(i, v + 11) > 0.5 ? 1 : -1;
+        for (let y = 0; y < h; y++)
+          k.px(Math.round(x + (y > h * 0.6 ? lean : 0)), 33 - y, i % 3 ? T[1] : T[0]);
+        // Épi : grains en quinconce, barbes claires au-dessus.
+        const ex = Math.round(x + lean),
+          ey = 33 - h;
+        for (let j = 0; j < 6; j++) {
+          k.px(ex - (j & 1), ey - j, T[2]);
+          k.px(ex + 1 - (j & 1), ey - j, j % 2 ? T[1] : T[3]);
+        }
+        k.px(ex - 1, ey - 7, T[3]);
+        k.px(ex + 1, ey - 8, T[3]);
+      }
+      k.rect(9, 30, 1, 4, '#6e7e2e');
+      k.rect(21, 29, 1, 5, '#7a8a34');
     },
     lilypad: (k, v) => {
       for (const [x, y, r] of [
@@ -654,12 +706,13 @@
   tree('twisted', TREES.twisted);
   tree('palm', TREES.palm);
   tree('deadwood', TREES.deadwood);
+  tree('goldtree', TREES.golden);
   for (const [name, [pal, seed]] of Object.entries(AUTUMN))
     tree(name, (k, v) => TREES.autumn(k, v, pal, seed));
   for (const [name, fn] of Object.entries(SMALL)) {
     VARIANTS[name] = [0, 1, 2].map(v => bake(32, 38, k => fn(k, v, 0), name.length * 5 + v));
     // Versions par région (indice des ZONES) pour les décors qui changent de couleur.
-    const zones = { bush: [2, 3, 5], flower: [5], mushroom: [1, 2, 5] }[name] || [];
+    const zones = { bush: [2, 3, 5, 6], flower: [5, 6], mushroom: [1, 2, 5] }[name] || [];
     for (const z of zones)
       VARIANTS[name + '@' + z] = [0, 1, 2].map(v => bake(32, 38, k => fn(k, v, z), z * 13 + v));
   }

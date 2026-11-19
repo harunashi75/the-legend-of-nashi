@@ -184,7 +184,8 @@
         arena: { ...hero.arena },
         prof: CANAAN_PROF.sanitize(hero.prof),
         succes: CANAAN_ACHIEVEMENTS.export(hero),
-        quetes: sanitizeQuests(hero.quetes)
+        quetes: sanitizeQuests(hero.quetes),
+        ...(Object.keys(hero.ext || {}).length ? { ext: canaanSanitizeExt(hero.ext) } : {})
       };
     }
     return out;
@@ -221,6 +222,7 @@
       hero.prof = CANAAN_PROF.sanitize(d.prof);
       hero.succes = CANAAN_ACHIEVEMENTS.sanitize(d.succes);
       hero.quetes = sanitizeQuests(d.quetes);
+      hero.ext = canaanSanitizeExt(d.ext);
       hero.inventory = Array.isArray(d.inventory) ? d.inventory.filter(validItem) : [];
       hero.bank = CANAAN_BANK.sanitize(d.bank);
       hero.satchel = CANAAN_SALVAGE.sanitize(d.sacoche);

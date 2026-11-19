@@ -756,6 +756,16 @@
         ['luciole', 52],
         ['papillon', 24, true]
       ]
+    },
+    // Terre du sud-ouest (Extension 1) : lapins et faisans dans les blés, cerfs et moutons dans l'herbe dorée.
+    {
+      ground: [
+        ['lapin', 18, 0],
+        ['faisan', 12, 0],
+        ['cerf', 10, 0],
+        ['mouton', 8, 0]
+      ],
+      fliers: [['papillon', 30]]
     }
   ];
   // Animaux de compagnie du camp (chats, chien) : ils se promènent dans le camp, hors de l'enclos.
@@ -1380,7 +1390,7 @@
       }
     }
     // Habitants des bâtiments (échoppe, cuisine, demeures, refuges) ; devant chaque refuge, un pêcheur ou un voyageur.
-    const zoneOf = p => Math.max(0, ZONES.indexOf(regionAt(p.x, p.y)));
+    const zoneOf = p => canaanSurfaceZoneAt(p.x, p.y);
     for (const r of CANAAN_HOUSE.residents()) {
       const extra = r.place ? [BIOME_LINES[zoneOf(r.place)]] : [];
       if (r.role) {

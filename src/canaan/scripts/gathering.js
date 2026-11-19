@@ -79,7 +79,7 @@
           continue;
         if (canaanQuestWalk(tx, ty) !== null || BRIDGE_TILES.has(ty * MAPW + tx)) continue;
         if (game.world.npcs.some(n => Math.hypot(n.x - x, n.y - y) < 4 * TS)) continue;
-        const zone = Math.max(0, ZONES.indexOf(regionAt(tx, ty))),
+        const zone = canaanSurfaceZoneAt(tx, ty),
           roll = hash(tx, ty, 1);
         // Filons près des rochers (plus rares), herbes un peu partout.
         const rocky = [

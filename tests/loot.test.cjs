@@ -91,8 +91,9 @@ test('Raid 4 : Jugement de Célestia, choix Normal ou Héroïque, puissance et b
  assert.match(portal(60),/data-difficulty="heroic" >/);
  // Carte M : la plage de niveaux de chaque biome (1–10, 10–20 … 50–60).
  run('closePanels();toggleMap()');
- const ranges=[...g.document.getElementById('window').innerHTML.matchAll(/Niveaux ([^<]+)</g)].map(m=>m[1]);
- assert.deepEqual(ranges,['1–10','10–20','20–30','30–40','40–50','50–60']);
+ const ranges=[...g.document.getElementById('window').innerHTML.matchAll(/Niveaux? ([^<]+)</g)].map(m=>m[1]);
+ // La terre de l'Extension 1 (niveau 60) n'est listée que si l'extension est là.
+ assert.deepEqual(ranges,['1–10','10–20','20–30','30–40','40–50','50–60',...(run('!!canaanExtension("vallee")')?['60']:[])]);
  // Entrée : la difficulté est obligatoire et son niveau contrôlé.
  run('closePanels();game.hero.level=58;enterInstance(9)');assert.equal(run('instanceState'),null);
  run("enterInstance(9,'heroic')");assert.equal(run('instanceState'),null);

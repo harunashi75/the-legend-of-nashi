@@ -24,8 +24,8 @@
   function resolveLook(m) {
     if (m.look) return;
     const def = m.worldBoss
-      ? WORLD_BOSS_DEFS.find(b => b.id === m.worldBossId)
-      : MOB_TYPES.find(t => t.name === m.t && t.look);
+      ? WORLD_BOSSES.find(b => b.id === m.worldBossId)
+      : canaanMobTypes().find(t => t.name === m.t && t.look);
     if (def?.look) {
       Object.assign(m, { look: def.look, pal: def.pal, lookOpts: def.opts || {} });
       return;

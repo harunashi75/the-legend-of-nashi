@@ -21,6 +21,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'dungeonPuzzles',
     'elvenCity',
     'bossMechanics',
+    'extensions',
     'achievements'
   ]),
   draw: Object.freeze([

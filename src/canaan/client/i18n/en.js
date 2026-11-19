@@ -4489,5 +4489,11 @@ export default {
   'Avec elle, les coquillages chantants brillent de loin, et ta boussole les trouve.':
     'With it, singing shells shine from afar, and your compass finds them.',
   'Le grand troc est terminé. La Loupe d’Orven fait briller les coquillages chantants de loin.':
-    'The great trade is complete. Orven’s Loupe makes singing shells shine from afar.'
+    'The great trade is complete. Orven’s Loupe makes singing shells shine from afar.',
+  // Terres des extensions absentes de ce build (fermées, sous la brume) et coopératif entre builds différents.
+  'Brumes impénétrables': 'Impenetrable Mists',
+  'Une brume épaisse recouvre ces terres. Nul ne sait ce qu’elle cache.':
+    'A thick mist covers these lands. No one knows what it hides.',
+  'Contenu différent : l’hôte et l’invité doivent avoir les mêmes extensions du jeu.':
+    'Different content: the host and the guest must have the same game extensions.'
 };

@@ -86,6 +86,9 @@
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),
     cityBless: () => CANAAN_CITY.actions.bless(),
     cityBuySkin: element => CANAAN_CITY.actions.buySkin(actionText(element, 'skin')),
+    // Extensions : un bouton de leurs fenêtres (data-ext, data-act, data-id).
+    extAction: element =>
+      CANAAN_EXT.ui(actionText(element, 'ext'), actionText(element, 'act'), element.dataset.id || null),
     wearSkin: element =>
       CANAAN_WARDROBE.choose(
         element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''

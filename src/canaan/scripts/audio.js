@@ -541,8 +541,7 @@
     const x = P.x / TS,
       y = P.y / TS;
     if (villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 3)) return 'village';
-    const zone = ZONES.indexOf(regionAt(x, y));
-    return BIOME_THEMES[Math.max(0, zone)];
+    return BIOME_THEMES[canaanSurfaceZoneAt(x, y)];
   }
 
   // ---------------------------------------------------------------- Ambiance
@@ -630,7 +629,7 @@
       }
       return;
     }
-    const zone = Math.max(0, ZONES.indexOf(regionAt(P.x / TS, P.y / TS))),
+    const zone = canaanSurfaceZoneAt(P.x / TS, P.y / TS),
       a = BIOME_AMB[zone],
       w = typeof windAt === 'function' ? windAt(P.x, P.y) : 0.6,
       n = survey();

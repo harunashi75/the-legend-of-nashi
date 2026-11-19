@@ -219,6 +219,9 @@
       return refuse(
         'Versions différentes : hôte ' + window.CANAAN_VERSION + ', invité ' + String(message.version)
       );
+    // Même contenu des deux côtés : un build de test (avec les extensions) ne reçoit qu'un build de test.
+    if (String(message.extensions || '') !== canaanExtensionIds().join(','))
+      return refuse('Contenu différent : l’hôte et l’invité doivent avoir les mêmes extensions du jeu.');
     if (!isGuestId(message.id)) return refuse('Identifiant d’invité invalide.');
     // Le même invité se reconnecte alors que l'ancienne connexion n'est pas encore fermée : la nouvelle la remplace.
     for (const [peer, other] of net.peers)
@@ -327,7 +330,9 @@
       // Trous creusés à la pelle (quand ils changent, et toutes les 3 secondes).
       holes: CANAAN_DIG.netView(),
       // Arène : annonces au sol, projectiles, vague et effets de chaque héros (null hors du colisée).
-      arena: CANAAN_ARENA.view(hero => (hero === game.hero ? 'host' : hero.id))
+      arena: CANAAN_ARENA.view(hero => (hero === game.hero ? 'host' : hero.id)),
+      // Extensions présentes : leur état partagé (ce qu'elles dessinent sur les héros, leurs boss…).
+      ext: CANAAN_EXT.view(hero => (hero === game.hero ? 'host' : hero.id))
     };
   }
   let openedSent = -1;
@@ -351,8 +356,13 @@
         seq: hero.intentSeq,
         age: hero.intentSeq === null ? 0 : time - hero.intentTick,
         speed:
-          Math.round(CANAAN_PLAYER_SPEED * (1 + (st.speed || 0) / 100) * CANAAN_PROF.speedMult(hero) * 1000) /
-          1000,
+          Math.round(
+            CANAAN_PLAYER_SPEED *
+              (1 + (st.speed || 0) / 100) *
+              CANAAN_PROF.speedMult(hero) *
+              CANAAN_EXT.speed(hero) *
+              1000
+          ) / 1000,
         // Pêche et repas en cours (métiers).
         live: CANAAN_PROF.liveOf(hero),
         // Niveau et expérience (l'hôte les fait gagner).
@@ -450,6 +460,7 @@
     if (action.op === 'dungeon-use') return CANAAN_DUNGEON_EXPLORE.interact(hero);
     if (action.op === 'skin-wear') return CANAAN_WARDROBE.handle(hero, action);
     if (action.op.startsWith('city-')) return CANAAN_CITY.handle(hero, action);
+    if (action.op === 'ext') return CANAAN_EXT.handle(hero, action);
     if (action.op === 'sell') return sellItemFor(hero, action.id);
     if (action.op === 'sell-common') return sellCommonFor(hero);
     if (action.op === 'buy-gear') return buyGearFor(hero);
@@ -499,6 +510,7 @@
           pseudo: name,
           look: me.look,
           version: window.CANAAN_VERSION,
+          extensions: canaanExtensionIds().join(','),
           schema: SAVE_SCHEMA
         });
       },
@@ -691,6 +703,8 @@
     }
     for (const id of [...net.remote.keys()]) if (!seen.has(id)) net.remote.delete(id);
     game.heroes.splice(1, game.heroes.length, ...net.remote.values());
+    // Extensions : leur état, une fois les héros reçus (ce qu'elles posent sur eux).
+    CANAAN_EXT.apply(state.ext, id => (id === net.heroId ? game.hero : net.remote.get(id) || null));
     // Monstres : même objet d'un instantané à l'autre (animations), créé ou retiré selon l'hôte.
     const old = new Map(game.world.monsters.map(m => [m.k, m]));
     game.world.monsters = (Array.isArray(state.monsters) ? state.monsters : []).map(s => {

@@ -385,6 +385,9 @@ const BIOME_COLORS = [
 ];
 // 37 : palissade de troncs et emprises de la cité elfique.
 BIOME_COLORS[37] = '#6a4a2e';
+// 50 et 51 : herbe dorée et blé de la terre du sud-ouest (Extension 1).
+BIOME_COLORS[50] = '#8a9a3e';
+BIOME_COLORS[51] = '#c8a040';
 let instanceEntrance = { x: 120 * TS, y: 133 * TS };
 const hash = (x, y, s = 0) => {
   let n = Math.sin(x * 127.1 + y * 311.7 + s * 71.3) * 43758.5453;
@@ -773,7 +776,11 @@ function drawWorldFeatures(c) {
 }
 
 // Huit boss mondiaux persistants répartis dans les six biomes ; position fixée par la génération de l'île.
-const WORLD_BOSSES = WORLD_BOSS_DEFS.map(b => ({ ...b, x: 0, y: 0 }));
+// Les boss mondiaux des extensions présentes (ext : leur extension) s'y ajoutent ; leur extension les place.
+const WORLD_BOSSES = [
+  ...WORLD_BOSS_DEFS,
+  ...canaanExtensionIds().flatMap(id => canaanExtension(id).worldBosses || [])
+].map(b => ({ ...b, x: 0, y: 0 }));
 function findBossSpot(b) {
   let cx = b.x,
     cy = b.y;
@@ -794,6 +801,8 @@ function spawnWorldBosses() {
   if (canaanUnder()) return CANAAN_UNDER.spawnBosses();
   if (!game.world.instance)
     for (const b of WORLD_BOSSES) {
+      // Boss d'une extension : elle le fait apparaître elle-même (arène, statues, PV selon les participants).
+      if (b.ext) continue;
       if (
         (game.world.worldBossTimers[b.id] || 0) > Date.now() ||
         game.world.monsters.some(m => m.worldBossId === b.id)
@@ -816,6 +825,8 @@ function spawnWorldBosses() {
         worldBossId: b.id
       });
     }
+  // Boss des extensions présentes : chacune fait apparaître les siens, au même rythme.
+  if (!game.world.instance) CANAAN_EXT.spawnBosses();
   game.world.monsters.forEach(scaleBossHp);
 }
 function updateWorldBosses() {

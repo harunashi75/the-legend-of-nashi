@@ -107,7 +107,7 @@
             !DEEP.has(tile(tx + dx, ty + dy))
         );
         if (!shore || spots.some(s => Math.hypot(s.tx - tx, s.ty - ty) < (sea ? 9 : 5))) continue;
-        const zone = Math.max(0, ZONES.indexOf(regionAt(tx, ty))),
+        const zone = canaanSurfaceZoneAt(tx, ty),
           kind = t === 18 ? 'glow' : sea ? 'sea' : 'lake';
         spots.push({
           tx,
@@ -238,7 +238,7 @@
     // Zone de chasse : 0 à 5 sur l'île, 6 à 9 dans les Tréfonds.
     const zone = canaanUnder()
       ? CANAAN_UNDER.zoneId(p.x / TS, p.y / TS)
-      : ZONES.indexOf(regionAt(p.x / TS, p.y / TS));
+      : canaanZoneKin(ZONES.indexOf(regionAt(p.x / TS, p.y / TS)));
     if (!g.zones.includes(zone)) return false;
     hero.huntCd = time + 40;
     const prof = profOf(hero),

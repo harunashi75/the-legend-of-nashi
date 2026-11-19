@@ -89,6 +89,8 @@ game.world.npcs.push({
 });
 // Boss mondiaux : or et objet Rare garanti.
 function onWorldBossKilled(m, hero = game.hero) {
+  // Boss d'une extension : sa propre récompense (chaque participant) et son propre délai de réapparition.
+  if (CANAAN_EXT.bossKilled(m, hero)) return;
   game.world.worldBossTimers[m.worldBossId] = Date.now() + BOSS_RESPAWN_MS;
   const gold = worldBossGold(Math.random);
   hero.player.gold += gold;

@@ -108,7 +108,7 @@ test('Chaumière des Glycines : maison de PNJ meublée dans les Plaines, habitan
   const inside=JSON.parse(run('JSON.stringify(CANAAN_LIFE.villagers().filter(v=>canaanRoomAt(v.x/TS,v.y/TS)?.id==="maison").map(v=>v.name))'));
   assert.equal(inside.length,2,inside.join(', '));
   // Plus de mode décoration ni de meubles à sauvegarder.
-  assert.equal(run('typeof toggleHousing'),'undefined');assert.equal(run('CANAAN_KEYS.actionOf("h")'),null);
+  assert.equal(run('typeof toggleHousing'),'undefined');assert.equal(run('CANAAN_KEYS.actionOf("h")'),run('canaanExtension("vallee")?"mount":null'));
   assert.equal(/toggleHousing|housingBar/.test(source),false,'ni bouton Maison ni barre de décoration');
   assert.equal(run('saveGame()'),true);
   assert.equal(JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).monde.maison,undefined);

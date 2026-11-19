@@ -41,7 +41,8 @@
   }
   function scaleBossHp(m) {
     // Les boss de l'Arène ont des PV fixes.
-    if (!m || m.hp <= 0 || !(m.boss || m.worldBoss) || m.arenaBoss) return;
+    // Ni ceux d'une extension qui règle elle-même leurs PV (customHp : selon le nombre de participants).
+    if (!m || m.hp <= 0 || !(m.boss || m.worldBoss) || m.arenaBoss || m.customHp) return;
     const desired = bossMaxHealth(m);
     if (m._scaledMaxHp === desired) return;
     const ratio = m.mhp > 0 ? Math.min(1, Math.max(0, m.hp / m.mhp)) : 1;
@@ -54,7 +55,7 @@
   // et la taille du groupe. Un monstre déjà blessé garde sa part de PV.
   function setupMob(m) {
     if (!m || m.boss || m.worldBoss || m.arenaBoss || m.arenaClone || m.hp <= 0 || m._levelHp) return;
-    const type = MOB_TYPES.find(t => t.name === m.t),
+    const type = canaanMobTypes().find(t => t.name === m.t),
       inst = game.world.instance && !game.world.instance.arena,
       // En donjon et en raid, les monstres sont 25 % plus résistants que dehors (boss : voir bossHealth).
       scale = inst ? INSTANCE_TOUGHNESS * (instanceDifficulty()?.hp || 1) * canaanGroupScale().hp : 1,

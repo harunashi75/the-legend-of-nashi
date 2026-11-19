@@ -57,6 +57,87 @@
   ].map(z => Object.freeze({ ...z, ...polar(z.angle, 112) }));
   const FIRST_SECTOR = ZONES[0].angle - 30;
 
+  // Terre de l'Extension 1 (zone de niveau 60) : au sud-ouest, entre la côte et le coin de la carte, un
+  // carré aux angles très arrondis séparé de l'île par un chenal, ceint de collines rocheuses, relié à la Forêt
+  // enchantée par un isthme rocheux. Ses cases sont les mêmes dans tous les builds ; sans l'extension, elle
+  // est fermée et couverte de brume (extensions.js), et son nom reste caché.
+  const VALLEY = Object.freeze({ x: 66, y: 334, half: 52, p: 3.2, channel: 7, rim: 3.4 });
+  const VALLEY_ZONE = Object.freeze({
+    name: 'Brumes impénétrables',
+    angle: 135,
+    t: 50,
+    mobs: [],
+    description: 'Une brume épaisse recouvre ces terres. Nul ne sait ce qu’elle cache.',
+    ...(canaanExtension('vallee')?.zone || {}),
+    locked: !canaanExtension('vallee'),
+    ext: 'vallee',
+    x: VALLEY.x,
+    y: VALLEY.y
+  });
+  ZONES.push(VALLEY_ZONE);
+  Object.freeze(ZONES);
+  // Profondeur approchée (en cases) d'une case dans cette terre : positive dedans, avec un bord organique.
+  function valleyDepth(x, y) {
+    const se =
+        Math.pow(Math.abs(x - VALLEY.x) / VALLEY.half, VALLEY.p) +
+        Math.pow(Math.abs(y - VALLEY.y) / VALLEY.half, VALLEY.p),
+      edge = (1 - Math.pow(se, 1 / VALLEY.p)) * VALLEY.half,
+      sea = Math.hypot(x - CENTER.x, y - CENTER.y) - coastRadius(x, y) - VALLEY.channel;
+    return Math.min(edge, sea) + (field(x, y, 7, 561) - 0.5) * 3;
+  }
+  // Isthme : de la Forêt enchantée (A, au bord de la terre ferme) au premier point bien à l'intérieur de la terre
+  // (B), tout droit vers le large ; l'angle retenu est celui du plus court passage qui part de la Forêt enchantée.
+  let isthmus = null;
+  function valleyIsthmus() {
+    if (isthmus) return isthmus;
+    for (let angle = 100; angle <= 134; angle++) {
+      const ux = Math.cos(angle * RAD),
+        uy = Math.sin(angle * RAD);
+      let A = null,
+        B = null;
+      for (let r = 140; r < 260 && !B; r += 0.5) {
+        const x = CENTER.x + ux * r,
+          y = CENTER.y + uy * r;
+        if (!A && r > coastRadius(x, y) - 4) {
+          if (sectorOf(x, y).index !== 5) break;
+          A = { x, y };
+        }
+        if (A && valleyDepth(Math.round(x), Math.round(y)) > VALLEY.rim + 4) B = { x, y };
+      }
+      if (!A || !B) continue;
+      const len = Math.hypot(B.x - A.x, B.y - A.y);
+      if (!isthmus || len < isthmus.len) isthmus = { A, B, len, angle };
+    }
+    return isthmus;
+  }
+  // Distance d'une case à l'axe de l'isthme, et position le long de l'axe (0 en A, 1 en B).
+  function isthmusAt(x, y) {
+    const { A, B, len } = valleyIsthmus(),
+      ux = (B.x - A.x) / len,
+      uy = (B.y - A.y) / len,
+      t = ((x - A.x) * ux + (y - A.y) * uy) / len;
+    if (t < -0.05 || t > 1.05) return null;
+    return { d: Math.abs(-(x - A.x) * uy + (y - A.y) * ux), t };
+  }
+  // Terrain de la terre du sud-ouest et de son isthme, ou null hors d'eux.
+  function valleyTerrain(x, y) {
+    const depth = valleyDepth(x, y),
+      neck = isthmusAt(x, y),
+      half = 3.2 + (field(x, y, 5, 562) - 0.5) * 1.4;
+    if (neck && neck.d < half && (depth > -VALLEY.channel - 4 || neck.t < 0.6)) {
+      // Isthme : herbe au milieu (la route y passe), épaulements de roche ; côté île, la Forêt enchantée.
+      const valley = depth > -2 || neck.t > 0.55;
+      if (!valley && Math.hypot(x - CENTER.x, y - CENTER.y) < coastRadius(x, y) - 2.6) return null;
+      return { t: neck.d < half - 1.3 ? (valley ? 50 : 17) : 4, biome: valley ? 6 : 5, valley };
+    }
+    if (depth <= 0) return null;
+    if (depth < VALLEY.rim + (field(x, y, 6, 563) - 0.5) * 2) return { t: 4, biome: 6, valley: true };
+    // Collines rocheuses éparses et champs de blé ; herbe dorée ailleurs.
+    if (depth > 8 && field(x, y, 6, 572) > 0.86) return { t: 4, biome: 6, valley: true };
+    if (depth > 6 && field(x, y, 9, 571) > 0.7) return { t: 51, biome: 6, valley: true };
+    return { t: 50, biome: 6, valley: true };
+  }
+
   // Géométrie de l'île : angle déformé, rayon de côte et massif central.
   function warpedAngle(x, y) {
     const a = Math.atan2(y - CENTER.y, x - CENTER.x) / RAD;
@@ -113,9 +194,21 @@
     }
     regionBanner.textContent = previousZone;
   }
+  // Créature d'une case : une espèce tirée parmi celles de sa région. (L'ancien tirage recommençait à chaque espèce du
+  // catalogue et retombait souvent sur le Slime, qui apparaissait alors dans toutes les régions.)
   function worldMobAt(x, y) {
-    const list = regionAt(x, y).mobs;
-    return MOB_TYPES.find(m => m.name === list[Math.floor(rnd() * list.length)]) || MOB_TYPES[0];
+    const list = regionAt(x, y).mobs,
+      name = list[Math.floor(rnd() * list.length)];
+    return canaanMobTypes().find(m => m.name === name) || MOB_TYPES[0];
+  }
+
+  // Région « parente » d'une zone, pour les systèmes qui ne connaissent que les six biomes de l'île (poissons,
+  // herbes, minerais, trésors, gibier, musique, chaussée) : la terre du sud-ouest prend ceux de la Forêt enchantée.
+  function zoneKin(index) {
+    return index === 6 ? 5 : index;
+  }
+  function surfaceZoneAt(x, y) {
+    return zoneKin(Math.max(0, ZONES.indexOf(regionAt(x, y))));
   }
 
   // Lieux fixes, en coordonnées polaires autour du centre de l'île.
@@ -180,7 +273,10 @@
     3: [0.08, ['cactus', 'dune', 'rock', 'dune', 'cactus', 'deadwood']],
     10: [0.3, ['palm', 'bush', 'flower', 'palm']],
     17: [0.42, ['glowtree', 'glowtree', 'crystal', 'magicplant', 'magicplant', 'mushroom']],
-    4: [0.12, ['peak', 'rock']]
+    4: [0.12, ['peak', 'rock']],
+    // Terre du sud-ouest : herbe dorée (arbres aux feuilles d'or, fleurs, buissons) et champs de blé.
+    50: [0.15, ['goldtree', 'flower', 'bush', 'goldtree', 'flower', 'goldtree']],
+    51: [0.06, ['wheat', 'wheat', 'flower']]
   };
   function decorate(x, y, t) {
     const d = DECOR[t];
@@ -192,6 +288,14 @@
       coast = coastRadius(x, y),
       { index, rel } = sectorOf(x, y);
     BIOME_MAP[y * MAPW + x] = index;
+    // Terre du sud-ouest et son isthme (Extension 1).
+    if (dist > 150) {
+      const v = valleyTerrain(x, y);
+      if (v) {
+        BIOME_MAP[y * MAPW + x] = v.biome;
+        return v;
+      }
+    }
     if (dist >= coast) return { t: 0, biome: index };
     // Cité elfique de Sylvaëlle, au cœur de l'île (à la place de l'ancien massif) : herbe, ceinte d'une palissade de
     // troncs ; la Forêt enchantée la borde (niveau 60).
@@ -338,6 +442,73 @@
     return seen;
   }
 
+  // Terre du sud-ouest : masque des cases fermées sans l'extension (extensions.js), arbres dorés espacés.
+  function valleyLand() {
+    canaanExtLandMask = new Uint8Array(MAPW * MAPH);
+    CANAAN_EXT_LANDS.length = 0;
+    let x0 = MAPW,
+      y0 = MAPH,
+      x1 = 0,
+      y1 = 0;
+    for (let y = 0; y < MAPH; y++)
+      for (let x = 0; x < MAPW; x++)
+        if (BIOME_MAP[y * MAPW + x] === 6) {
+          canaanExtLandMask[y * MAPW + x] = 1;
+          x0 = Math.min(x0, x);
+          y0 = Math.min(y0, y);
+          x1 = Math.max(x1, x);
+          y1 = Math.max(y1, y);
+        }
+    const { A, B } = valleyIsthmus();
+    CANAAN_EXT_LANDS.push(
+      Object.freeze({
+        ext: 'vallee',
+        zone: VALLEY_ZONE,
+        x: VALLEY.x,
+        y: VALLEY.y,
+        box: Object.freeze({ x0, y0, x1, y1 }),
+        // Isthme : du bord de la Forêt enchantée (from) à l'entrée de la terre (to), en cases.
+        pass: Object.freeze({
+          from: Object.freeze({ x: Math.round(A.x), y: Math.round(A.y) }),
+          to: Object.freeze({ x: Math.round(B.x), y: Math.round(B.y) })
+        })
+      })
+    );
+    // Arbres aux feuilles d'or : jamais collés l'un à l'autre, jamais sur l'isthme.
+    for (let y = y0; y <= y1; y++)
+      for (let x = x0; x <= x1; x++) {
+        if (game.world.decor[y][x] !== 'goldtree') continue;
+        const crowded = [
+          [-1, -1],
+          [0, -1],
+          [1, -1],
+          [-1, 0],
+          [-2, 0],
+          [0, -2]
+        ].some(([dx, dy]) => CANAAN_BIG_TREES.has(game.world.decor[y + dy][x + dx]));
+        if (crowded || isthmusAt(x, y)?.d < 5)
+          game.world.decor[y][x] = hash(x, y, 63) < 0.4 ? 'flower' : null;
+      }
+  }
+  // Route de la Forêt enchantée jusqu'à l'isthme : de la route principale au bout de l'isthme.
+  function valleyRoad(main) {
+    const { A, B } = valleyIsthmus(),
+      near = main.reduce(
+        (best, p) => {
+          const dist = Math.hypot(p[0] - A.x, p[1] - A.y);
+          return dist < best.dist ? { p, dist } : best;
+        },
+        { p: main[0], dist: Infinity }
+      ).p,
+      mx = (near[0] + A.x) / 2 + (hash(Math.round(A.x), Math.round(A.y), 33) - 0.5) * 8,
+      my = (near[1] + A.y) / 2 + (hash(Math.round(A.y), Math.round(A.x), 34) - 0.5) * 8;
+    paveLine(
+      catmull(
+        [near, [mx, my], [A.x, A.y], [(A.x + B.x) / 2, (A.y + B.y) / 2], [B.x, B.y]].map(([x, y]) => [x, y]),
+        []
+      )
+    );
+  }
   function newRegionWorld() {
     worldSeed = CANAAN_WORLD_SEED;
     game.world.tiles = Array.from({ length: MAPH }, () => Array(MAPW).fill(0));
@@ -442,6 +613,7 @@
         if (crowded || hash(x, y, 61) > 0.42)
           game.world.decor[y][x] = hash(x, y, 62) < 0.25 && d !== 'palm' ? 'bush' : null;
       }
+    valleyLand();
     // Camp de l'Aurore : clairière d'herbe, terre battue autour du feu.
     const camp = villages[0];
     clearArea(camp.x, camp.y, camp.r + 2, 1);
@@ -493,6 +665,7 @@
     }
     const main = catmull([[camp.x + 3, camp.y], [camp.x + 9, camp.y - 1], ...ring], []);
     paveLine(main);
+    valleyRoad(main);
     // Embranchements vers chaque portail, depuis le point le plus proche de la route.
     for (const d of instances) {
       if (d.under) continue;
@@ -511,6 +684,8 @@
     const reach = reachableFrom(camp.x, camp.y);
     const reachable = (x, y) => walkableLand(x, y) && reach[y * MAPW + x] === 1 && !isSafe(x, y);
     for (const b of WORLD_BOSSES) {
+      // Boss d'une extension : placé par son extension (CANAAN_EXT.afterWorld).
+      if (!BOSS_SPOTS[b.id]) continue;
       const target = polar(...BOSS_SPOTS[b.id]),
         spot = nearestSpot(target.x, target.y, b.biome, reachable);
       b.x = spot.x;
@@ -565,6 +740,8 @@
     // Ferme, verger, jardin et ruisseau du Camp de l'Aurore, autour des bâtiments et des lieux de quête.
     canaanCampLife.place();
     cityLayout();
+    // Extensions présentes : leurs lieux, dans leurs terres déjà générées.
+    CANAAN_EXT.afterWorld();
   }
   // ---------------------------------------------------------------- Cité elfique de Sylvaëlle
   // Plan de la cité, dans la palissade : porte cachée au sud-ouest (derrière le lac), place et fontaine de lune au
@@ -916,6 +1093,7 @@
           y >= MAPH - 5 ||
           SOLID.includes(tileAt(x, y)) ||
           isSafe(x, y) ||
+          canaanLockedTile(x, y) ||
           canaanCampLife.farm(x, y) ||
           game.world.monsters.some(m => Math.hypot(m.x / TS - x, m.y / TS - y) < 3.5)) &&
         tries < 80
@@ -982,6 +1160,8 @@
     newRegionWorld,
     // Cité elfique : intérieur de la palissade (rien d'autre ne s'y pose).
     canaanInCity: (x, y) => inCity(Math.floor(x), Math.floor(y)),
+    canaanZoneKin: zoneKin,
+    canaanSurfaceZoneAt: surfaceZoneAt,
     // Outils de placement pour les lieux posés après la génération (quêtes) : mêmes règles que les portails.
     CANAAN_WORLD_TOOLS: Object.freeze({
       polar,

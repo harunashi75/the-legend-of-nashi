@@ -53,7 +53,7 @@
       };
     // Seules les espèces qui apparaissent vraiment : celles d'une région de l'île, et toutes celles des Tréfonds.
     const roaming = new Set(ZONES.flatMap(z => z.mobs || []));
-    for (const t of MOB_TYPES.filter(t => t.under !== undefined || roaming.has(t.name)))
+    for (const t of canaanMobTypes().filter(t => t.under !== undefined || roaming.has(t.name)))
       push({
         key: 'm:' + t.name,
         group: t.under === undefined ? 'mob' : 'under',
@@ -75,7 +75,8 @@
         })
       )
     );
-    for (const b of WORLD_BOSS_DEFS)
+    // Boss mondiaux de l'île, extensions présentes comprises.
+    for (const b of WORLD_BOSSES)
       push({
         key: 'w:' + b.id,
         group: 'world',

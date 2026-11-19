@@ -28,8 +28,14 @@
     ['journal', 'Journal de quêtes', ['l'], 'Menus'],
     ['achievements', 'Succès et collections', ['y'], 'Menus'],
     ['wardrobe', 'Garde-robe', ['v'], 'Menus'],
-    ['chat', 'Écrire dans la discussion', ['enter'], 'Menus']
-  ].map(([id, name, defaults, group, context = 'game']) => ({ id, name, defaults, group, context }));
+    ['chat', 'Écrire dans la discussion', ['enter'], 'Menus'],
+    // Actions des extensions présentes (déclarées avec leurs données : extensions.js).
+    ...canaanExtensionIds().flatMap(id => canaanExtension(id).keys || [])
+  ]
+    .map(([id, name, defaults, group, context = 'game']) => ({ id, name, defaults, group, context }))
+    // Une même situation regroupée à l'écran des Paramètres : l'ordre des groupes est celui de leur première action.
+    .map((a, i, all) => ({ ...a, order: all.findIndex(b => b.group === a.group) * 100 + i }))
+    .sort((a, b) => a.order - b.order);
   const BY_ID = Object.fromEntries(ACTIONS.map(a => [a.id, a]));
   const SLOTS = 2;
   // Touches qu'on ne peut pas attribuer : Échap (pause, retour) et les flèches (toujours le déplacement).

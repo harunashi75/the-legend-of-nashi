@@ -122,7 +122,7 @@ test('Catalogues partagés gelés : donjons copiés pour chaque partie, monstres
  assert.equal(Object.isFrozen(a[0]),false);assert.equal(a.length,14);assert.equal(world.WORLD_BOSS_DEFS.length,8);assert.equal(world.MOB_TYPES.length,47);
  assert.equal(world.BOSS_RESPAWN_MS,180000);assert.equal(economy.BAG_PRICES.length,9);assert.equal(classes.CLASSES.length,6);assert.deepEqual(classes.TALENT_SLOT_LEVELS,[1,10,20,30,40]);
  assert.equal(stats.PRIMARY_KEYS.length,3);assert.equal(stats.SECONDARY_KEYS.length,6);assert.equal(stats.MAX_LEVEL,60);
- assert.deepEqual(stats.ZONE_LEVELS.map(z=>z.join('-')),['1-10','10-20','20-30','30-40','40-50','50-60']);assert.equal(rules.xpToNext(60),0);
+ assert.deepEqual(stats.ZONE_LEVELS.map(z=>z.join('-')),['1-10','10-20','20-30','30-40','40-50','50-60','60-60']);assert.equal(rules.xpToNext(60),0);
  // Dans le jeu, les portails sont placés sur la copie, jamais sur le catalogue.
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  assert.ok(run('instances.every(d=>d.x>0&&d.y>0)'));assert.ok(run('INSTANCE_DEFS.every(d=>d.x===0&&d.y===0)'));

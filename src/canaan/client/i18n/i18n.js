@@ -246,6 +246,14 @@ export const CANAAN_I18N = Object.freeze({
   },
   translate: translateText,
   tt,
+  // Traductions apportées par une extension (src/canaan/extensions/) : ajoutées au dictionnaire de la langue, pour
+  // que le build de sortie, sans l'extension, n'en contienne aucune.
+  extend(code, table) {
+    if (!Object.hasOwn(LANGUAGES, code) || code === 'fr' || !table || typeof table !== 'object') return false;
+    DICTIONARIES[code] = { ...DICTIONARIES[code], ...table };
+    if (lang === code) setDictionary(code);
+    return true;
+  },
   // Textes vus à l'écran sans traduction depuis le démarrage (aide à compléter le dictionnaire).
   missing: () => [...missing].filter(Boolean).sort()
 });

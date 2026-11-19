@@ -15,7 +15,7 @@
   const TREASURES = PROF_TREASURES;
   const RELICS = PROF_RELICS;
   // Sol meuble où la pelle s'enfonce (herbe, sable, terre, sous-bois, feuilles…) : ni route, ni eau, ni roche.
-  const DIGGABLE = new Set([1, 3, 5, 10, 11, 16, 17]);
+  const DIGGABLE = new Set([1, 3, 5, 10, 11, 16, 17, 50, 51]);
   // Un trou reste 2 min 30 (il s'efface les 10 dernières secondes) ; au plus 80 à la fois.
   const HOLE_LIFE = 150 * 60;
   const HOLE_FADE = 10 * 60;
@@ -118,7 +118,7 @@
     if (holes.length > HOLE_MAX) holes.shift();
     holesChanged++;
     const prof = profOf(hero),
-      zone = ZONES.indexOf(regionAt(tx, ty)),
+      zone = canaanZoneKin(ZONES.indexOf(regionAt(tx, ty))),
       relic = zone >= 0 && zone < 6 && Math.random() < RELIC_CHANCE ? missingRelic(hero, zone) : null,
       roll = Math.random(),
       mine = hero === game.hero;

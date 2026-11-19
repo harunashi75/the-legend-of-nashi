@@ -416,16 +416,22 @@
     }
     if (d > 3 && ih(wx >> 1, wy >> 1, 133) > 0.996) set([255, 246, 210]);
   }
+  // Chaussée d'une région : celle de son biome ; les chemins de la terre du sud-ouest (Extension 1) sont de terre battue, comme ceux
+  // des Plaines (ornières, bande d'herbe, cailloux).
+  const roadZone = zone => {
+    const i = ZONES.indexOf(zone);
+    return i === 6 ? 0 : Math.max(0, i);
+  };
   // Couleur de la chaussée en un point (avant éclairage).
   function surface(wx, wy, d, F, gF, lit) {
     const camp = CAMP(),
       jitter = (fbm(wx / 40, wy / 40, 121) - 0.5) * 70 + (ih(wx >> 2, wy >> 2, 122) - 0.5) * 18,
-      zone = Math.max(0, ZONES.indexOf(regionAt((wx + jitter) / S, (wy - jitter) / S)));
+      zone = roadZone(regionAt((wx + jitter) / S, (wy - jitter) / S));
     // Esplanade : bord rond et net (léger bruit doux), bordure de pierres taillées.
     for (const p of places()) {
       const r = Math.hypot(wx - p.x, wy - p.y),
         edge = p.r + (fbm(wx / 60, wy / 60, 123) - 0.5) * 14;
-      const pz = p.zone ?? (p.zone = Math.max(0, ZONES.indexOf(regionAt(p.x / S, p.y / S))));
+      const pz = p.zone ?? (p.zone = roadZone(regionAt(p.x / S, p.y / S)));
       if (r < edge - 7) return (shadePlaza(wx, wy, p, pz), 0.4);
       if (r < edge) {
         const seg = Math.floor((Math.atan2(wy - p.y, wx - p.x) / (2 * Math.PI) + 1) * Math.round(p.r / 7)),
