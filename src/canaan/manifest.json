@@ -327,6 +327,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-salvage",
+      "file": "scripts/salvage.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-shop",
       "file": "scripts/shop.js"
     },

@@ -176,6 +176,12 @@ const I = {
     r(7.5, 12, 9, 6, '#c8925a', 1.5) +
     p('M9 6 C9 2.5 15 2.5 15 6', 'none') +
     r(11, 13.5, 2, 2, GOLD, 0.4),
+  // Sacoche de butin : besace de cuir à rabat, fermoir doré.
+  satchel:
+    p('M7 8 C7 4 17 4 17 8', 'none') +
+    r(4, 8, 16, 13, '#8a5a34', 3) +
+    p('M4 11 C4 8.5 5.5 8 7 8 L17 8 C18.5 8 20 8.5 20 11 L20 14 C16 16 8 16 4 14 Z', '#a8743f') +
+    r(10.5, 13, 3, 3, GOLD, 0.5),
   house: house('#e8d4a8', '#c8503a'),
   ruin:
     p('M3 11 L9 6 L11 8 L14 5 L21 11 Z', '#8a5a40') +
@@ -1013,6 +1019,7 @@ const MAP = {
   '💰': 'moneybag',
   '🪙': 'coin',
   '🎒': 'backpack',
+  '👜': 'satchel',
   '🏠': 'house',
   '🏚': 'ruin',
   '🛖': 'hut',

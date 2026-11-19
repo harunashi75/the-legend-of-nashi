@@ -561,6 +561,46 @@ export const PROF_ENCH_MULT = deepFreeze([0.16, 0.2, 0.24, 0.28, 0.33, 0.4]);
 export const PROF_ENCH_LEVEL = deepFreeze([1, 6, 12, 20, 28, 35]);
 export const PROF_ORES_PER_ENCHANT = 3;
 
+// ---------------------------------------------------------------- Démantèlement et poudres d'enchantement
+// Démanteler une pièce d'équipement (bouton ⚒ du sac, partout, même en donjon) la réduit en poudre. Les poudres sont
+// des matériaux (piles de 100, rangées avec les minerais) ; value : prix d'une unité chez le marchand.
+export const PROF_DUSTS = deepFreeze({
+  poussiere: { name: 'Poussière d’enchantement', icon: '⟦dust_poussiere⟧', color: '#c8b8f0', value: 6 },
+  essence: { name: 'Essence d’enchantement', icon: '⟦dust_essence⟧', color: '#7aa8ff', value: 40 },
+  eclat: { name: 'Éclat d’enchantement', icon: '⟦dust_eclat⟧', color: '#ffb84a', value: 180 }
+});
+// Ce que donne une pièce selon sa qualité (rang dans GEAR_RARITIES : Commun 0 … Mythique 5) : [poudre, min, max].
+// Le niveau d'enchanteur donne une chance (1 % par niveau) d'une poudre principale de plus.
+export const PROF_SALVAGE = deepFreeze([
+  [['poussiere', 1, 2]],
+  [['poussiere', 2, 3]],
+  [
+    ['essence', 1, 1],
+    ['poussiere', 1, 2]
+  ],
+  [['essence', 2, 2]],
+  [
+    ['eclat', 1, 1],
+    ['essence', 1, 1]
+  ],
+  [['eclat', 2, 2]]
+]);
+// Poudre demandée, en plus des minerais, pour forger un enchantement de chaque métal (rang 0 à 5) : [poudre, nombre].
+export const PROF_ENCH_DUST = deepFreeze([
+  null,
+  ['poussiere', 1],
+  ['poussiere', 2],
+  ['essence', 1],
+  ['essence', 2],
+  ['eclat', 1]
+]);
+// Changer la statistique d'un enchantement déjà posé (sans perdre son métal) : [poudre, nombre].
+export const PROF_REROLL_COST = deepFreeze(['essence', 2]);
+// Sacoche de butin : quand le sac est plein, un objet Rare ou mieux y est rangé (10 places) ; un objet moins bon,
+// ou un objet qui ne trouve plus de place dans la sacoche, est démantelé. Rien n'est jamais perdu.
+export const SATCHEL_SIZE = 10;
+export const SATCHEL_MIN_RARITY = 2;
+
 // ---------------------------------------------------------------- Fouilles (pelle)
 // La pelle s'achète une fois pour toutes chez le marchand du Camp de l'Aurore. Chaque coup de pelle sur la terre,
 // l'herbe ou le sable de l'île peut faire sortir un peu d'or, un trésor à vendre ou une relique à collectionner.

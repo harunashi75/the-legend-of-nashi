@@ -2,7 +2,8 @@
 // - Minage : des filons de minerai sur toute l'île, un minerai par biome (du cuivre des Plaines au mithril de la
 //   Forêt enchantée). Touche E près d'un filon.
 // - Cueillette : des herbes sauvages dans chaque biome (cuisinées en infusions, voir professions.js).
-// - Enchanteur : 3 minerais d'un même métal donnent un enchantement ; chaque enchantement porte une statistique
+// - Enchanteur : 3 minerais d'un même métal (et, de l'étain au mithril, un peu de poudre d'enchantement : PROF_ENCH_DUST,
+//   obtenue en démantelant l'équipement, voir salvage.js) donnent un enchantement ; chaque enchantement porte une statistique
 //   secondaire (Puissance, Critique, Célérité, Maîtrise, Soin, Résistance). Posé sur un équipement, il lui ajoute
 //   cette statistique en troisième secondaire ; sa force dépend du métal et du niveau de l'objet.
 // Minerais, herbes et enchantements sont des objets du sac (piles de 100), rangés dans hero.prof.ore / herb / ench.
@@ -33,6 +34,15 @@
     ').';
   const levelBonus = hero => 1 + 0.01 * (CANAAN_PROF.profOf(hero).enchanting.level || 1);
   const ORES_PER_ENCHANT = PROF_ORES_PER_ENCHANT;
+  // Poudre demandée par enchantement de ce métal ([poudre, nombre] ou null), et ce qu'en a le héros.
+  const dustNeed = tier => PROF_ENCH_DUST[tier] || null;
+  const dustHave = (hero, id) => CANAAN_BAG.count(hero, 'dust', id, 0);
+  // Nombre d'enchantements de ce métal que le héros peut payer en poudre (Infinity sans poudre demandée).
+  const dustBatches = (hero, tier) => {
+    const need = dustNeed(tier);
+    return need ? Math.floor(dustHave(hero, need[0]) / need[1]) : Infinity;
+  };
+  const dustText = (id, n) => n + ' × ' + PROF_DUSTS[id].name;
   const RESPAWN = 90 * 60;
   const REACH = TS * 1.7;
   const esc = s =>
@@ -171,6 +181,14 @@
     for (let k = 0; k < Math.max(1, Math.min(20, count | 0)); k++) {
       const have = () => Array.from({ length: 8 }, (_, q) => CANAAN_BAG.count(hero, 'ore', metal, q));
       if (have().reduce((a, b) => a + b, 0) < ORES_PER_ENCHANT) break;
+      if (dustBatches(hero, tier) < 1) {
+        if (made) break;
+        const need = dustNeed(tier);
+        return (
+          tell(hero, '✨ Il faut aussi ' + dustText(need[0], need[1]) + ' pour cet enchantement.'),
+          false
+        );
+      }
       // Le minerai part avant que l'enchantement prenne sa place dans le sac.
       const spent = [];
       let left = ORES_PER_ENCHANT;
@@ -187,6 +205,8 @@
         tell(hero, '🎒 Sac plein : impossible de ranger l’enchantement.');
         break;
       }
+      const need = dustNeed(tier);
+      if (need) CANAAN_BAG.remove(hero, 'dust', need[0], 0, need[1]);
       CANAAN_BAG.add(hero, 'ench', stat, tier, 1);
       CANAAN_PROF.gainXp(hero, 'enchanting', 30 + 15 * tier);
       made++;
@@ -247,6 +267,39 @@
         item.ench.value +
         ' ' +
         SECONDARY_STATS[p.id].name +
+        '.'
+    );
+    hero.netBag = null;
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Changer la statistique d'un enchantement déjà posé (pièce du sac ou portée) : il garde son métal, sa force est
+  // recalculée avec le niveau d'enchanteur de celui qui le change. Coûte PROF_REROLL_COST en poudre.
+  function reroll(hero, ref, stat) {
+    if (!ENCHANTS[stat]) return false;
+    const worn = Object.hasOwn(hero.equipment, ref),
+      item = worn ? hero.equipment[ref] : hero.inventory.find(it => it && String(it.id) === String(ref));
+    if (!item?.ench) return (tell(hero, '✨ Choisis une pièce déjà enchantée.'), false);
+    if (item.ench.stat === stat)
+      return (tell(hero, '✨ Cet enchantement donne déjà ' + SECONDARY_STATS[stat].name + '.'), false);
+    const [dust, n] = PROF_REROLL_COST;
+    if (dustHave(hero, dust) < n)
+      return (tell(hero, '✨ Il faut ' + dustText(dust, n) + ' pour changer un enchantement.'), false);
+    CANAAN_BAG.remove(hero, 'dust', dust, 0, n);
+    item.ench = { stat, value: value(item, item.ench.tier, hero), tier: item.ench.tier };
+    if (worn) {
+      if (hero === game.hero) recomputeStats();
+      else recomputeHeroStats(hero);
+    }
+    CANAAN_PROF.gainXp(hero, 'enchanting', 10 + 5 * item.ench.tier);
+    tell(
+      hero,
+      '✨ ' +
+        gearDisplayName(item) +
+        ' : enchantement changé, +' +
+        item.ench.value +
+        ' ' +
+        SECONDARY_STATS[stat].name +
         '.'
     );
     hero.netBag = null;
@@ -325,7 +378,7 @@
         (a, b) => a + b,
         0
       ),
-      n = Math.max(1, Math.min(20, count | 0, Math.floor(have / ORES_PER_ENCHANT)));
+      n = Math.max(1, Math.min(20, count | 0, Math.floor(have / ORES_PER_ENCHANT), dustBatches(hero, tier)));
     if (have < ORES_PER_ENCHANT)
       return (
         tell(
@@ -334,6 +387,13 @@
         ),
         false
       );
+    if (dustBatches(hero, tier) < 1) {
+      const need = dustNeed(tier);
+      return (
+        tell(hero, '✨ Il faut aussi ' + dustText(need[0], need[1]) + ' pour cet enchantement.'),
+        false
+      );
+    }
     if (!CANAAN_BAG.room(hero, 'ench', stat, tier, n) && canaanBagUsed(hero) >= canaanBagLimit(hero))
       return (tell(hero, '🎒 Sac plein : libère une case pour ranger l’enchantement.'), false);
     return startWork(
@@ -396,6 +456,7 @@
     if (action.op === 'gather') return startGather(hero, action.node);
     if (action.op === 'enchant-craft') return startCraft(hero, action.stat, action.tier, action.count);
     if (action.op === 'enchant-apply') return apply(hero, action.token, action.ref);
+    if (action.op === 'enchant-reroll') return reroll(hero, action.ref, action.stat);
     return false;
   }
   // Enchantement enregistré valide (statistique secondaire connue, valeur entière, rang 0 à 5) ; sinon retiré.
@@ -714,12 +775,14 @@
       h.tips(
         [
           ORES_PER_ENCHANT + ' minerais du même métal = 1 enchantement',
+          '⚒ Poudre en plus dès l’étain',
           'Toutes les qualités comptent',
           'Ton niveau : +' + level + ' % de force'
         ],
         'Choisis la statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort, mais il demande un niveau d’enchanteur plus haut (' +
           METALS.map((m, t) => esc(ORES[m].metal) + ' ' + ENCH_LEVEL[t]).join(', ') +
-          '). Les minerais les moins bons partent en premier. Fabriquer prend 10 s (2 s de plus par enchantement en série) : reste immobile. Posé sur une pièce d’équipement (n’importe où), l’enchantement lui ajoute sa statistique en troisième secondaire ; un nouveau remplace l’ancien. Ton niveau d’enchanteur renforce de ' +
+          '). Dès l’étain, il faut aussi de la poudre d’enchantement : démantèle les pièces dont tu n’as plus besoin (bouton ⚒ du sac). ' +
+          'Les minerais les moins bons partent en premier. Fabriquer prend 10 s (2 s de plus par enchantement en série) : reste immobile. Posé sur une pièce d’équipement (n’importe où), l’enchantement lui ajoute sa statistique en troisième secondaire ; un nouveau remplace l’ancien. Ton niveau d’enchanteur renforce de ' +
           level +
           ' % ceux que tu poses.'
       ) +
@@ -747,10 +810,13 @@
             0
           ),
           locked = levelTooLow(game.hero, tier),
+          need = dustNeed(tier),
+          dust = need ? dustHave(game.hero, need[0]) : 0,
+          dustOk = !need || dust >= need[1],
           enough = have >= ORES_PER_ENCHANT,
-          ok = forge && enough && !locked,
+          ok = forge && enough && dustOk && !locked,
           pct = Math.round(ENCH_MULT[tier] * levelBonus(game.hero) * 100),
-          batch = Math.min(20, Math.floor(have / ORES_PER_ENCHANT)),
+          batch = Math.min(20, Math.floor(have / ORES_PER_ENCHANT), dustBatches(game.hero, tier)),
           // La raison du blocage est écrite sur le bouton lui-même.
           label = locked
             ? '🔒 Enchanteur niv. ' + ENCH_LEVEL[tier]
@@ -759,9 +825,11 @@
                 (ORES_PER_ENCHANT - have) +
                 ' minerai' +
                 (ORES_PER_ENCHANT - have > 1 ? 's' : '')
-              : !forge
-                ? 'Va à la forge'
-                : 'Créer';
+              : !dustOk
+                ? 'Il manque de la poudre'
+                : !forge
+                  ? 'Va à la forge'
+                  : 'Créer';
         return (
           '<article class="prof-recipe' +
           (locked ? ' locked' : ok ? ' ready' : '') +
@@ -782,6 +850,19 @@
           '">tu en as ' +
           have +
           '</b></p>' +
+          (need
+            ? '<p>' +
+              need[1] +
+              ' × ' +
+              PROF_DUSTS[need[0]].icon +
+              ' ' +
+              esc(PROF_DUSTS[need[0]].name) +
+              ' · <b class="' +
+              (dustOk ? 'ok' : 'ko') +
+              '">tu en as ' +
+              dust +
+              '</b></p>'
+            : '') +
           '<div class="prof-actions"><button type="button" data-action="enchantCraft" data-stat="' +
           ui.stat +
           '" data-tier="' +
@@ -809,7 +890,8 @@
     // Poser un enchantement : choisir l'enchantement, puis la pièce.
     const owned = stockOf('ench');
     html += '<h3>Poser un enchantement</h3>';
-    if (!owned.length) return html + '<p class="prof-empty">Aucun enchantement dans ton sac.</p>';
+    if (!owned.length)
+      return html + '<p class="prof-empty">Aucun enchantement dans ton sac.</p>' + rerollSection();
     if (!owned.some(p => CANAAN_BAG.token({ ...p, n: 1 }) === ui.apply))
       ui.apply = CANAAN_BAG.token({ ...owned[0], n: 1 });
     html +=
@@ -874,7 +956,82 @@
         })
         .join('') +
       '</div>';
-    return html;
+    return html + rerollSection();
+  }
+  // Changer la statistique d'un enchantement posé : la statistique choisie en haut, puis la pièce enchantée.
+  function rerollSection() {
+    const [dust, n] = PROF_REROLL_COST,
+      have = dustHave(game.hero, dust),
+      gear = [
+        ...Object.entries(game.hero.equipment)
+          .filter(([, it]) => it?.ench)
+          .map(([slot, it]) => [it, slot, true]),
+        ...game.hero.inventory.filter(it => it?.ench).map(it => [it, it.id, false])
+      ];
+    let html =
+      '<h3>Changer la statistique d’un enchantement</h3><p class="muted">Choisis la statistique en haut (' +
+      esc(SECONDARY_STATS[ui.stat].name) +
+      '), puis clique une pièce enchantée : l’enchantement garde son métal. Coût : ' +
+      n +
+      ' × ' +
+      PROF_DUSTS[dust].icon +
+      ' ' +
+      esc(PROF_DUSTS[dust].name) +
+      ' · <b class="' +
+      (have >= n ? 'ok' : 'ko') +
+      '">tu en as ' +
+      have +
+      '</b></p>';
+    if (!gear.length) return html + '<p class="prof-empty">Aucune pièce enchantée.</p>';
+    return (
+      html +
+      '<div class="modern-bag ench-targets">' +
+      gear
+        .map(([it, ref, worn]) => {
+          const rarity = rarityInfo(it),
+            same = it.ench.stat === ui.stat;
+          return (
+            '<div class="bag-sale-wrap"><button type="button" class="bag-cell' +
+            (worn ? ' worn' : '') +
+            '"' +
+            canaanPrestige(it) +
+            ' style="border-color:' +
+            rarity.color +
+            ';--rarity:' +
+            rarity.color +
+            '" data-action="enchantReroll" data-ref="' +
+            esc(ref) +
+            '" title="' +
+            esc(
+              gearDisplayName(it) +
+                (worn ? ' (portée)' : '') +
+                ' · actuel : +' +
+                it.ench.value +
+                ' ' +
+                SECONDARY_STATS[it.ench.stat].name +
+                (same
+                  ? ''
+                  : ' · deviendra : +' +
+                    value(it, it.ench.tier, game.hero) +
+                    ' ' +
+                    SECONDARY_STATS[ui.stat].name)
+            ) +
+            '"' +
+            (same || have < n ? ' disabled' : '') +
+            '><span class="bag-icon">' +
+            (weaponIcon(it) || itemIcon[it.slot]) +
+            '</span><span class="bag-name">' +
+            esc(gearDisplayName(it)) +
+            '</span><span class="ench-mark">' +
+            ENCHANTS[it.ench.stat].icon +
+            '</span><span class="bag-ilvl">' +
+            itemLevel(it) +
+            '</span></button></div>'
+          );
+        })
+        .join('') +
+      '</div>'
+    );
   }
   const act = action => {
     const done = guest() ? CANAAN_NET.requestAction(action) : handle(game.hero, action);
@@ -896,6 +1053,7 @@
       return act({ op: 'enchant-craft', stat, tier, count });
     },
     apply: ref => (ui.apply ? act({ op: 'enchant-apply', token: ui.apply, ref }) : false),
+    reroll: ref => act({ op: 'enchant-reroll', ref: String(ref), stat: ui.stat }),
     // Depuis le sac (I) : ouvrir l'onglet Enchantement avec cet enchantement choisi.
     use(token) {
       ui.apply = token.replace(/\*\d+$/, '*1');
@@ -916,6 +1074,7 @@
     gather,
     craft,
     apply,
+    reroll,
     value,
     handle,
     startGather,

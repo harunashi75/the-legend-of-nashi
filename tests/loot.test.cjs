@@ -27,9 +27,10 @@ test('Objets : normalisation unique, butin de chaque instance à son niveau, anc
     if(item.slot!=='artifact')assert.equal(Object.keys(item.sec).length,2);
     assert.equal(item.origin,index<6?'donjon':'raid');assert.doesNotMatch(item.name,/ — (Relique du donjon|Héritage du raid)/);
   }
-  // Sac plein : la récompense garantie est perdue.
-  run('inventory=Array.from({length:BAG_LIMIT},(_,i)=>({id:"full"+i,slot:"armor",level:1}))');g.Math.random=()=>.01;
-  assert.equal(g.CANAAN_LOOT.instance(0),false);
+  // Sac plein : la récompense garantie n'est plus perdue, elle attend dans la sacoche de butin.
+  run('inventory=Array.from({length:BAG_LIMIT},(_,i)=>({id:"full"+i,slot:"armor",level:1}));game.hero.satchel=[]');g.Math.random=()=>.01;
+  assert.equal(g.CANAAN_LOOT.instance(0),true);assert.equal(run('inventory.length'),run('BAG_LIMIT'));
+  assert.equal(run('game.hero.satchel.length'),1);assert.equal(run('game.hero.satchel[0].origin'),'donjon');
   // Ancienne sauvegarde : l'iLvl devient un niveau (190 → 60) et les points Ratings52 disparaissent.
   const old=run('CANAAN_GEAR.normalize({id:"vieux-85",name:"Armure",slot:"armor",rarity:"Épique",ilvl:85,ratings52:{defense:99},_stats52:1,_stats52Ilvl:85})');
   assert.equal(old.level,Math.round(85*60/190));for(const k of ['ilvl','ratings52','_stats52','_stats52Ilvl'])assert.equal(k in old,false,k);
@@ -196,9 +197,14 @@ test('Catalogues uniques : valeurs, butins et prix identiques à la référence 
  const data=JSON.parse(run('JSON.stringify({instances:instances.map(({wings,mechanics,secretMechanics,...d})=>d),rarities:GEAR_RARITIES,weapons:WEAPON_TYPES,craft:CRAFT_WEAPONS,spells:WEAPON_SPELLS})'));
  for(const key of Object.keys(data))assert.deepEqual(data[key],reference[key],key);
  for(const [rarity,level,price] of reference.sales)assert.equal(run('gearSellValue('+JSON.stringify({id:'sale',slot:'armor',rarity,level})+')'),price);
- for(const [level,kind,rarity,price] of reference.fullBag){
-  assert.equal(run('inventory=Array(BAG_LIMIT).fill(null);P.gold=0;Math.random=()=>.5;giveGear(...'+JSON.stringify([level,kind,rarity])+');P.gold'),price,JSON.stringify([level,kind,rarity]));
+ // Sac plein : plus d'or à la place du butin. Rare ou mieux : la sacoche de butin ; moins bon : des poudres.
+ for(const [level,kind,rarity] of reference.fullBag){
+  const r=JSON.parse(run('inventory=Array(BAG_LIMIT).fill(null);game.hero.satchel=[];game.hero.prof.dust={};P.gold=0;Math.random=()=>.5;giveGear(...'+JSON.stringify([level,kind,rarity])+');JSON.stringify({gold:P.gold,satchel:game.hero.satchel.length,dust:game.hero.prof.dust})'));
+  assert.equal(r.gold,0,JSON.stringify([level,kind,rarity]));
+  if(rarity==='Commun'){assert.equal(r.satchel,0);assert.ok(r.dust['poussiere:0']>=1)}
+  else{assert.equal(r.satchel,1);assert.deepEqual(r.dust,{})}
  }
+ run('inventory=[];game.hero.satchel=[];game.hero.prof.dust={}');
  for(const [level,kind,rarity,expected] of reference.loot){
   const item=JSON.parse(run('inventory=[];Math.random=()=>.5;JSON.stringify(giveGear(...'+JSON.stringify([level,kind,rarity])+'))'));
   assert.deepEqual({level:item.level,rarity:item.rarity},expected);
@@ -228,9 +234,11 @@ test('Butin individuel : objets et or de chaque victime vont au héros qui l’a
  run('globalThis.boss={t:"Fenrir",worldBoss:true,worldBossId:"fenrir",x:ally.player.x,y:ally.player.y,hp:1,mhp:1,r:30,g:0};game.world.monsters.push(boss);canaanDamageMonster(boss,5,ally)');
  assert.ok(run('ally.player.gold')>=1000);assert.equal(run('ally.inventory.some(i=>i.rarity==="Rare")'),true);
  assert.equal(run('P.gold'),host.gold);assert.ok(run('game.world.worldBossTimers.fenrir')>0,'le minuteur du boss reste celui du monde');
- // Sac plein (40 places pour un allié) : l'objet est converti en or pour lui.
+ // Sac plein (40 places pour un allié) : un Commun est démantelé en poudre pour lui (plus d'or), un Rare va dans sa sacoche.
  run('ally.inventory=Array.from({length:40},(_,i)=>({id:"f"+i,slot:"ring",level:1,rarity:"Commun"}));globalThis.goldBefore=ally.player.gold;giveGear(1,"normal","Commun",ally)');
- assert.equal(run('ally.inventory.length'),40);assert.ok(run('ally.player.gold')>run('goldBefore'));
+ assert.equal(run('ally.inventory.length'),40);assert.equal(run('ally.player.gold'),run('goldBefore'));
+ assert.ok(run('CANAAN_BAG.count(ally,"dust","poussiere",0)')>=1);
+ run('giveGear(1,"world","Rare",ally)');assert.equal(run('ally.satchel.length'),1);assert.equal(run('ally.inventory.length'),40);
  // Sans héros précisé, rien ne change pour l'hôte.
  run('giveGear(1,"normal","Commun")');assert.equal(run('game.hero.inventory.length'),host.inv+1);
  assert.equal(errors.length,0,errors.join('\n'));

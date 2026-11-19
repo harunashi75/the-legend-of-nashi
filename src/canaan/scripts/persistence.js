@@ -157,6 +157,8 @@ window.CANAAN_PERSISTENCE = {
       inventory: hero.inventory,
       equipment: hero.equipment,
       bank: CANAAN_BANK.export(hero),
+      // Sacoche de butin : gardée seulement quand elle contient quelque chose.
+      ...(CANAAN_SALVAGE.of(hero).length ? { sacoche: CANAAN_SALVAGE.export(hero) } : {}),
       bagLevel: window.CANAAN_BAG_STATE.export(),
       classe: window.CANAAN_CLASS_STATE.export(),
       rubis: window.CANAAN_RUBIS_STATE.export(),
@@ -392,6 +394,7 @@ window.CANAAN_PERSISTENCE = {
       Number(it.level ?? it.ilvl ?? 1) > 0;
     game.hero.inventory = Array.isArray(h.inventory) ? h.inventory.filter(validItem) : [];
     game.hero.bank = CANAAN_BANK.sanitize(h.bank);
+    game.hero.satchel = CANAAN_SALVAGE.sanitize(h.sacoche);
     game.hero.equipment = Object.fromEntries(
       Object.keys(gearSlots).map(slot => {
         const it = h.equipment?.[slot];

@@ -27,7 +27,9 @@
       '</section>'
     );
   }
-  function bagCell(item, index, merchant) {
+  // Case d'une pièce du sac : clic pour l'équiper, ⚒ pour la démanteler, « 2 » pour une arme de réserve. La vente se
+  // fait dans la fenêtre du marchand (shop.js), plus depuis le sac.
+  function bagCell(item, index) {
     if (!item)
       return '<div class="bag-sale-wrap"><div class="bag-cell empty" title="Emplacement vide"><span class="bag-icon">＋</span><span class="bag-name">Vide</span></div></div>';
     const rarity = rarityInfo(item),
@@ -60,22 +62,7 @@
       '">' +
       itemLevel(item) +
       '</span></button>' +
-      '<button type="button" class="bag-sale" data-item-id="' +
-      safeGearText(item.id) +
-      '" data-action="sellInventoryCell" data-index="' +
-      index +
-      '" title="' +
-      safeGearText(
-        'Vendre ' +
-          gearDisplayName(item) +
-          ' pour ' +
-          gearSellValue(item) +
-          ' or' +
-          (!merchant ? ' (marchand requis)' : '')
-      ) +
-      '" ' +
-      (!merchant ? 'disabled' : '') +
-      '>🪙</button>' +
+      CANAAN_SALVAGE.salvageButton(item) +
       (item.slot === 'weapon'
         ? '<button type="button" class="weapon-reserve" data-action="equipReserve" data-index="' +
           index +
@@ -122,7 +109,7 @@
           'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"'
         ) +
         '</div>',
-      gear = game.hero.inventory.map((item, i) => bagCell(item, i, merchant)),
+      gear = game.hero.inventory.map((item, i) => bagCell(item, i)),
       util = CANAAN_BAG.tiles(game.hero, null, 'util').map(stackCell),
       other = CANAAN_BAG.tiles(game.hero, null, 'other').map(stackCell),
       mats = CANAAN_BAG.tiles(game.hero, null, 'mat').map(stackCell),
@@ -140,6 +127,7 @@
         (game.hero.inventory.length < 2 ? ' disabled' : '') +
         '>⇅ Trier</button></div>' +
         '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
+        '<p class="weapon-hint">⚒ Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.</p>' +
         bagGroup('⚔️', 'Équipement', gear.length, gear) +
         bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
         bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
@@ -149,14 +137,15 @@
             '</small></h3><div class="modern-bag">' +
             Array.from({ length: free }, () => bagCell(null)).join('') +
             '</div>'
-          : '<p class="weapon-hint">🎒 Sac plein : vends ou dépose des objets, ou agrandis ton sac chez un marchand.</p>') +
+          : '<p class="weapon-hint">🎒 Sac plein : démantèle (⚒), vends ou dépose des objets, ou agrandis ton sac chez un marchand. Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.</p>') +
+        CANAAN_SALVAGE.section() +
         '<div class="bag-section-mat">' +
         bagGroup(
           '⟦prof_mining⟧',
           'Matériaux',
           matUsed + ' / ' + CANAAN_BAG.MAT_LIMIT,
           mats,
-          'minerais, herbes, poissons, viandes'
+          'minerais, herbes, poissons, viandes, poudres'
         ) +
         '<p class="muted">Leurs ' +
         CANAAN_BAG.MAT_LIMIT +

@@ -51,7 +51,8 @@
     CANAAN_GATHER.cleanItem(item);
     return item;
   }
-  // Crée un objet du niveau donné et le dépose dans le sac du héros (l'hôte par défaut) ; sac plein : converti en or.
+  // Crée un objet du niveau donné et le dépose dans le sac du héros (l'hôte par défaut). Sac plein : rangé dans la
+  // sacoche de butin (Rare ou mieux) ou démantelé en poudres (salvage.js) ; renvoie null s'il a été démantelé.
   // guaranteed : qualité imposée ; sinon selon la source (monstre : Commun ou Peu commun).
   function giveGear(level, source = 'normal', guaranteed = null, hero = game.hero, slot = null) {
     // createRawGear fournit l'objet brut ; ce moteur le normalise puis le dépose (slot : pièce choisie).
@@ -61,21 +62,16 @@
     // Sans qualité imposée : monstres et coffres donnent du Commun.
     if (!guaranteed)
       item.rarity = ['normal', 'chest', 'hidden_common'].includes(source) ? 'Commun' : rarityInfo(item).name;
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
-      const price = gearSellValue(item);
-      hero.player.gold += price;
-      canaanLootNotice(hero, '🎒 Sac plein ! Butin converti en ' + price + ' or.');
-      window.CANAAN_PERSISTENCE.requestSave();
-      return null;
-    }
     if (item.slot === 'weapon') {
       const types = [...WEAPONS];
       item.weaponType = types[Math.floor(rnd() * types.length)];
     }
     if (item.slot === 'artifact') item.artifactVariant = Math.floor(rnd() * 3);
     normalizeItem(item);
-    hero.inventory.push(item);
-    canaanLootNotice(hero, '🎁 ' + item.rarity + ' niv. ' + item.level + ' : ' + item.name);
+    const where = CANAAN_SALVAGE.deliver(hero, item);
+    if (where === 'dust') return null;
+    if (where === 'bag')
+      canaanLootNotice(hero, '🎁 ' + item.rarity + ' niv. ' + item.level + ' : ' + item.name);
     // Sauvegarde différée : une seule écriture pour tout un butin, après les ajustements des appelants.
     window.CANAAN_PERSISTENCE.requestSave();
     return item;

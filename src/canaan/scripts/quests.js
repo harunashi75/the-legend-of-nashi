@@ -1733,12 +1733,8 @@
         level: clampLevel(hero.level),
         rarity: 'Légendaire'
       });
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
-      hero.player.gold += gearSellValue(item);
-      return tell(hero, '🎒 Sac plein ! Le bijou est échangé contre de l’or.');
-    }
-    hero.inventory.push(item);
-    tell(hero, '💍 ' + item.name + ' (Légendaire) !');
+    // Sac plein : il attend dans la sacoche de butin (ou part en poudres si elle est pleine).
+    if (CANAAN_SALVAGE.deliver(hero, item) === 'bag') tell(hero, '💍 ' + item.name + ' (Légendaire) !');
   }
   // Une énigme partagée est résolue : chaque héros proche qui l'a en cours avance.
   function solve(site, at0) {

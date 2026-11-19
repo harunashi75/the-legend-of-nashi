@@ -321,7 +321,8 @@ test('Icônes illustrées, taille des textes et cases carrées : chaque objet a 
  run('settingsStep("textscale",1)');assert.equal(run('canaanTextScale()'),1.4);assert.equal(run('CANAAN_PREFERENCES.read("settings",{}).textScale'),1.4);
  for(let i=0;i<6;i++)run('settingsStep("textscale",-1)');assert.equal(run('canaanTextScale()'),1);
  // Sac et personnage : objets en cases carrées, nom dans l'info-bulle.
- run('renderInventory()');assert.match(run('document.getElementById("window").innerHTML'),/class="bag-sale"[^>]*>🪙<\/button>/);
+ run('renderInventory()');assert.match(run('document.getElementById("window").innerHTML'),/class="bag-salvage"[^>]*>⚒<\/button>/);
+ assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/class="bag-sale"/,'la vente se fait chez le marchand');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 

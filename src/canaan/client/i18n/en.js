@@ -314,7 +314,6 @@ export default {
   'cliquer pour équiper': 'click to equip',
   'Vendre': 'Sell',
   'Vendre {objet} pour {n} or': 'Sell {objet} for {n} gold',
-  'Vendre {objet} pour {n} or (marchand requis)': 'Sell {objet} for {n} gold (merchant required)',
   'Équiper cette arme dans le deuxième emplacement (Arme 2)':
     'Equip this weapon in the second slot (Weapon 2)',
   'Sac': 'Bag',
@@ -330,13 +329,38 @@ export default {
   'Libres': 'Free',
   'clés, repas, enchantements': 'keys, meals, enchantments',
   'trésors déterrés': 'dug-up treasures',
-  'minerais, herbes, poissons, viandes': 'ores, herbs, fish, meat',
+  'minerais, herbes, poissons, viandes, poudres': 'ores, herbs, fish, meat, dusts',
   'Rien pour l’instant.': 'Nothing yet.',
   'Trier': 'Sort',
   'Ranger l’équipement : par emplacement, qualité puis niveau':
     'Tidy the equipment: by slot, quality, then level',
-  'Sac plein : vends ou dépose des objets, ou agrandis ton sac chez un marchand.':
-    'Bag full: sell or deposit items, or enlarge your bag at a merchant.',
+  'Sac plein : démantèle (⚒), vends ou dépose des objets, ou agrandis ton sac chez un marchand.':
+    'Bag full: salvage (⚒), sell or deposit items, or enlarge your bag at a merchant.',
+  'Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.':
+    'Rare or better loot waits in the satchel; the rest is salvaged automatically.',
+  'Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.':
+    'Salvage: the piece turns into enchanting dust, even in a dungeon.',
+  // Démantèlement et sacoche de butin (salvage.js)
+  'Une arme liée ne se démantèle pas.': 'A bound weapon cannot be salvaged.',
+  '{nom} démantelé': '{nom} salvaged',
+  '+{n} Poussière d’enchantement': '+{n} Enchanting Dust',
+  '+{n} Essence d’enchantement': '+{n} Enchanting Essence',
+  '+{n} Éclat d’enchantement': '+{n} Enchanting Shard',
+  'Sac plein : {nom} rangé dans ta sacoche de butin.': 'Bag full: {nom} stored in your loot satchel.',
+  'Sac plein : {nom} démantelé automatiquement': 'Bag full: {nom} salvaged automatically',
+  'Sac plein : démantèle, vends ou dépose un objet pour reprendre ce butin.':
+    'Bag full: salvage, sell or deposit an item to take this loot back.',
+  'Démanteler {nom} ({qualite}, niveau {n}) en poudres d’enchantement ?':
+    'Salvage {nom} ({qualite}, level {n}) into enchanting dust?',
+  'Son enchantement sera perdu.': 'Its enchantment will be lost.',
+  'Démanteler un objet précieux': 'Salvage a precious item',
+  'Démanteler': 'Salvage',
+  'cliquer pour le reprendre dans le sac': 'click to take it back into the bag',
+  'Démanteler {nom} en poudres d’enchantement': 'Salvage {nom} into enchanting dust',
+  'Sacoche de butin': 'Loot satchel',
+  'butin Rare ou mieux gardé quand le sac était plein': 'Rare or better loot kept while the bag was full',
+  'Clique une pièce pour la reprendre dans le sac (il faut une case libre).':
+    'Click a piece to take it back into the bag (a free slot is needed).',
   'Clic sur une arme : Arme 1': 'Click a weapon: Weapon 1',
   'Bouton « Arme 2 » : réserve': '“Weapon 2” button: reserve',
   'Q : changer en combat.': 'Q: switch in combat.',
@@ -2241,6 +2265,20 @@ export default {
   '{n} × {nom} ({metal}) créés.': '{n} × {nom} ({metal}) created.',
   'Choisis une pièce d’équipement (pas un artefact).': 'Choose a piece of gear (not an artifact).',
   '{objet} : enchantement remplacé, +{n} {stat}.': '{objet}: enchantment replaced, +{n} {stat}.',
+  '{objet} : enchantement changé, +{n} {stat}.': '{objet}: enchantment changed, +{n} {stat}.',
+  'Il faut aussi {n} × {nom} pour cet enchantement.': 'You also need {n} × {nom} for this enchantment.',
+  'Il faut {n} × {nom} pour changer un enchantement.': 'You need {n} × {nom} to change an enchantment.',
+  'Choisis une pièce déjà enchantée.': 'Choose an already enchanted piece.',
+  'Cet enchantement donne déjà {stat}.': 'This enchantment already gives {stat}.',
+  'Poudre en plus dès l’étain': 'Dust needed from tin upward',
+  'Dès l’étain, il faut aussi de la poudre d’enchantement : démantèle les pièces dont tu n’as plus besoin (bouton ⚒ du sac).':
+    'From tin upward, you also need enchanting dust: salvage the pieces you no longer need (⚒ button in the bag).',
+  'Il manque de la poudre': 'Dust missing',
+  'Changer la statistique d’un enchantement': 'Change an enchantment’s stat',
+  'Choisis la statistique en haut ({stat}), puis clique une pièce enchantée : l’enchantement garde son métal.':
+    'Choose the stat at the top ({stat}), then click an enchanted piece: the enchantment keeps its metal.',
+  'Coût : {n} × {nom}': 'Cost: {n} × {nom}',
+  'Aucune pièce enchantée.': 'No enchanted pieces.',
   '{objet} : +{n} {stat}.': '{objet}: +{n} {stat}.',
   'Termine d’abord ce que tu fais.': 'Finish what you are doing first.',
   'Va à la forge du Camp de l’Aurore pour fabriquer un enchantement.':
@@ -2324,6 +2362,14 @@ export default {
   'Pas encore déterrée.': 'Not dug up yet.',
   'Trésors à vendre': 'Treasures to sell',
   'Trésor déterré': 'Unearthed treasure',
+  'Poussière d’enchantement': 'Enchanting Dust',
+  'Essence d’enchantement': 'Enchanting Essence',
+  'Éclat d’enchantement': 'Enchanting Shard',
+  'Poudre d’enchantement': 'Enchanting dust',
+  'Obtenue en démantelant un équipement (bouton ⚒ du sac).':
+    'Obtained by salvaging gear (⚒ button in the bag).',
+  'L’enchanteur s’en sert, avec les minerais, pour forger les enchantements des métaux rares et pour changer la statistique d’un enchantement posé.':
+    'The enchanter uses it, along with ores, to forge enchantments of the rare metals and to change the stat of an applied enchantment.',
   'Trouvé en creusant avec la pelle.': 'Found by digging with the shovel.',
   'Le marchand le rachète {n} or.': 'The merchant buys it for {n} gold.',
   'Trouvé en creusant avec la pelle. Le marchand le rachète {n} or.':
@@ -2971,7 +3017,6 @@ export default {
   '+{n} or dans le coffre': '+{n} gold in the chest',
   'Coffre secret verrouillé : il faut une clé des secrets. Les boss cachés des donjons et des raids en donnent une.':
     'Secret chest locked: you need a key of secrets. Hidden dungeon and raid bosses give one.',
-  'Sac plein : équipement non récupéré': 'Bag full: gear not collected',
   '(nouveau !)': '(new!)',
   'Clé des secrets requise': 'Key of secrets required',
   'Coffre secret ouvert : équipement Épique + {n} or !': 'Secret chest opened: Epic gear + {n} gold!',
@@ -3272,7 +3317,6 @@ export default {
   '« {texte}. » — {verbe} dans cet ordre.': '“{texte}.” — {verbe} in this order.',
   'réservée': 'reserved',
   'Gardien du sceau': 'Seal guardian',
-  'Sac plein : clé des secrets non récupérée.': 'Bag full: key of secrets not collected.',
   '{nom} vaincu : clé des secrets dans ton sac ! Elle ouvre un coffre secret de l’île ({n}).':
     '{nom} defeated: key of secrets in your bag! It opens a secret chest on the island ({n}).',
   '{nom} : pas d’équipement cette fois.': '{nom}: no gear this time.',
@@ -4060,7 +4104,6 @@ export default {
   'Une étoile du Cœur de l’Aurore te rejoint ({n} / 6).': 'A star of the Heart of Dawn joins you ({n} / 6).',
   'Anneau des mille étoiles': 'Ring of a thousand stars',
   'Collier des mille étoiles': 'Necklace of a thousand stars',
-  'Sac plein ! Le bijou est échangé contre de l’or.': 'Bag full! The jewel is exchanged for gold.',
   '{objet} (Légendaire) !': '{objet} (Legendary)!',
   'Le mécanisme est déjà réglé.': 'The mechanism is already set.',
   'Stèle ancienne': 'Ancient stele',

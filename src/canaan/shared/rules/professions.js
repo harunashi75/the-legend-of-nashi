@@ -5,6 +5,7 @@
 // tirages reçoivent leur générateur aléatoire en paramètre.
 import {
   PROF_BUFF_PCT,
+  PROF_DUSTS,
   PROF_ENCHANTS,
   PROF_FISH,
   PROF_GAME,
@@ -17,6 +18,7 @@ import {
   PROF_QUALITY_MULT,
   PROF_RECIPES,
   PROF_RELICS,
+  PROF_SALVAGE,
   PROF_SKILLS,
   PROF_TREASURES
 } from '../data/professions.js';
@@ -42,6 +44,7 @@ import {
  * @property {Record<string, number>} herb
  * @property {Record<string, number>} ench
  * @property {Record<string, number>} treasure trésors enfouis (à vendre)
+ * @property {Record<string, number>} dust poudres d'enchantement (pièces démantelées)
  * @property {Record<string, number>} finds reliques trouvées en creusant (relique → nombre)
  * @property {number} shovel 1 quand le héros possède la pelle
  * @property {Record<string, { n: number, best: number }>} codex
@@ -67,6 +70,7 @@ export function profFresh() {
     herb: {},
     ench: {},
     treasure: {},
+    dust: {},
     finds: {},
     shovel: 0,
     codex: {},
@@ -223,6 +227,28 @@ export function profMealEffect(recipe, q, player = { mhp: 100, mmp: 300 }) {
 }
 
 /**
+ * Poudres obtenues en démantelant une pièce de cette qualité (rang dans GEAR_RARITIES ; une qualité inconnue compte
+ * comme Commun, une qualité au-delà de Mythique comme Mythique). Le niveau d'enchanteur donne 1 % de chance par niveau
+ * d'une poudre principale de plus.
+ * @param {number} rank qualité de la pièce (0 : Commun … 5 : Mythique)
+ * @param {number} enchLevel niveau d'enchanteur du héros
+ * @param {() => number} rng
+ * @returns {Record<string, number>} poudre → nombre
+ */
+export function salvageYield(rank, enchLevel, rng) {
+  const table = PROF_SALVAGE[Math.max(0, Math.min(PROF_SALVAGE.length - 1, Math.floor(rank) || 0))];
+  /** @type {Record<string, number>} */
+  const out = {};
+  table.forEach((entry, i) => {
+    const [dust, min, max] = /** @type {[string, number, number]} */ (/** @type {unknown} */ (entry));
+    let n = min + Math.floor(rng() * (max - min + 1));
+    if (i === 0 && rng() < Math.max(0, Math.min(40, Number(enchLevel) || 0)) / 100) n++;
+    out[dust] = (out[dust] || 0) + n;
+  });
+  return out;
+}
+
+/**
  * Métiers lus d'une sauvegarde ou du réseau : niveaux bornés, collection et sacs filtrés (espèces connues,
  * quantités positives et plafonnées). Une sauvegarde aux huit anciennes qualités est convertie une fois.
  * @param {any} raw état lu (non fiable : chaque champ est vérifié)
@@ -247,7 +273,7 @@ export function profSanitize(raw) {
     }
   // Qualités au format actuel (qv 2) ; une ancienne sauvegarde est convertie (l'enchantement garde son métal).
   const convert = raw.qv !== 2;
-  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench' | 'treasure', object]>} */
+  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench' | 'treasure' | 'dust', object]>} */
   const bags = [
     ['fish', PROF_FISH],
     ['meat', PROF_MEAT],
@@ -255,7 +281,8 @@ export function profSanitize(raw) {
     ['ore', PROF_ORES],
     ['herb', PROF_HERBS],
     ['ench', PROF_ENCHANTS],
-    ['treasure', PROF_TREASURES]
+    ['treasure', PROF_TREASURES],
+    ['dust', PROF_DUSTS]
   ];
   for (const [bag, known] of bags)
     if (raw[bag] && typeof raw[bag] === 'object')
@@ -264,7 +291,7 @@ export function profSanitize(raw) {
           count = Math.floor(Number(n));
         if (!Object.hasOwn(known, id) || !/^[0-7]$/.test(qs) || !(count > 0)) continue;
         const q =
-            bag === 'treasure'
+            bag === 'treasure' || bag === 'dust'
               ? 0
               : bag === 'ench'
                 ? Math.min(5, Number(qs))

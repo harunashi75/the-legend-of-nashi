@@ -175,6 +175,7 @@
         inventory: hero.inventory,
         equipment: hero.equipment,
         bank: CANAAN_BANK.export(hero),
+        ...(CANAAN_SALVAGE.of(hero).length ? { sacoche: CANAAN_SALVAGE.export(hero) } : {}),
         bagLevel: canaanBagLevel(hero),
         // Version du niveau de sac : sans elle, un niveau 3 venait du départ à 40 places (ancienne règle).
         bagVersion: 2,
@@ -222,6 +223,7 @@
       hero.quetes = sanitizeQuests(d.quetes);
       hero.inventory = Array.isArray(d.inventory) ? d.inventory.filter(validItem) : [];
       hero.bank = CANAAN_BANK.sanitize(d.bank);
+      hero.satchel = CANAAN_SALVAGE.sanitize(d.sacoche);
       for (const slot of Object.keys(hero.equipment)) {
         const it = d.equipment?.[slot];
         hero.equipment[slot] =

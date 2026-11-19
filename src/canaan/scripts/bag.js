@@ -12,19 +12,19 @@
   const STACK_OF = { key: 20 };
   const stackOf = kind => STACK_OF[kind] || STACK;
   // Trois sections : le sac (équipement, repas, enchantements, clés, trésors déterrés), les matériaux qu'on récolte
-  // (minerais, poissons, herbes, viandes), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
+  // (minerais, poissons, herbes, viandes, poudres d'enchantement), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
   // Rubis, une collection sans limite de place (onglet Rubis de la fiche C).
-  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb']);
+  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'dust']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
   const sectionOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : 'main');
-  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure'];
+  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure', 'dust'];
   // Rubriques du sac (touche I) : l'équipement (hero.inventory), les utilitaires (clés, repas, enchantements) et le
   // reste (trésors déterrés), dans la place du sac ; puis les matériaux, dans la leur.
   const CATEGORY = { key: 'util', meal: 'util', ench: 'util', treasure: 'other' };
   const categoryOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : CATEGORY[kind] || 'other');
   // Ordre d'affichage des piles : par genre (dans cet ordre), la meilleure qualité d'abord, puis par nom.
-  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'ore', 'herb', 'fish', 'meat', 'rubis'];
+  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'dust', 'ore', 'herb', 'fish', 'meat', 'rubis'];
   const byKind = (a, b) =>
     KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
     b.q - a.q ||
@@ -62,7 +62,8 @@
     ore: 'ore',
     herb: 'herb',
     ench: 'ench',
-    treasure: 'treasure'
+    treasure: 'treasure',
+    dust: 'dust'
   };
   // Prix de vente d'une unité au marchand, selon le genre et la qualité (0 à 7).
   const UNIT_PRICE = {
@@ -74,8 +75,9 @@
     herb: q => 4 + 4 * q,
     ench: q => 60 + 40 * q,
     key: () => 0,
-    // Trésor déterré : son prix est dans son catalogue (unitPrice).
-    treasure: () => 1
+    // Trésor déterré et poudre : leur prix est dans leur catalogue (unitPrice).
+    treasure: () => 1,
+    dust: () => 1
   };
   // Les Rubis sont liés au héros : ni vente, ni banque, ni échange. Les clés des secrets ne se vendent pas.
   const bound = p => p.kind === 'rubis';
@@ -109,7 +111,7 @@
     const keys = count(hero, 'key', 'secret');
     if (keys > 0) out.push({ kind: 'key', id: 'secret', q: 0, n: keys });
     const prof = profOf(hero);
-    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'treasure'])
+    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'treasure', 'dust'])
       for (const [key, n] of Object.entries(prof[PROF_BAG[kind]] || {}).sort()) {
         const [id, q] = key.split(':');
         if (n > 0) out.push({ kind, id, q: Number(q) || 0, n });
@@ -180,7 +182,7 @@
   }
 
   // ---------------------------------------------------------------- Repères (vente, échange)
-  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
+  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure|dust):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
   const token = (p, n = p.n) => p.kind + ':' + p.id + ':' + p.q + '*' + n;
   function parse(text) {
     const m = TOKEN.exec(String(text || ''));
@@ -202,11 +204,14 @@
       ore: CANAAN_GATHER.ORES,
       herb: CANAAN_GATHER.HERBS,
       ench: CANAAN_GATHER.ENCHANTS,
-      treasure: PROF_TREASURES
+      treasure: PROF_TREASURES,
+      dust: PROF_DUSTS
     }[p.kind];
-    // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité ; un trésor n'a pas de qualité.
+    // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité ; un trésor ou une poudre n'a pas de qualité.
     return (
-      Object.hasOwn(cat, p.id) && (p.kind !== 'ench' || p.q <= 5) && (p.kind !== 'treasure' || p.q === 0)
+      Object.hasOwn(cat, p.id) &&
+      (p.kind !== 'ench' || p.q <= 5) &&
+      ((p.kind !== 'treasure' && p.kind !== 'dust') || p.q === 0)
     );
   }
   const isToken = text => TOKEN.test(String(text || ''));
@@ -230,6 +235,17 @@
         color: '#e8c070',
         sub: 'Trésor déterré',
         desc: 'Trouvé en creusant avec la pelle. Le marchand le rachète ' + t.value + ' or.',
+        quality: null
+      };
+    }
+    if (p.kind === 'dust') {
+      const d = PROF_DUSTS[p.id];
+      return {
+        name: d.name,
+        icon: d.icon,
+        color: d.color,
+        sub: 'Poudre d’enchantement',
+        desc: 'Obtenue en démantelant un équipement (bouton ⚒ du sac). L’enchanteur s’en sert, avec les minerais, pour forger les enchantements des métaux rares et pour changer la statistique d’un enchantement posé.',
         quality: null
       };
     }
@@ -328,7 +344,9 @@
       ? CANAAN_GATHER.ORES[p.id]?.value || 1
       : p.kind === 'treasure'
         ? PROF_TREASURES[p.id]?.value || 1
-        : 1);
+        : p.kind === 'dust'
+          ? PROF_DUSTS[p.id]?.value || 1
+          : 1);
   const price = p => unitPrice(p) * p.n;
   const esc = s =>
     String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -406,6 +424,7 @@
     if (p.kind === 'key')
       return (toast('🗝️ Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.'), false);
     if (p.kind === 'treasure') return (toast(info(p).name + ' : à vendre chez un marchand.'), false);
+    if (p.kind === 'dust') return (CANAAN_PROF.open('enchant'), false);
     toast(info(p).name + ' : à cuisiner près d’une cuisinière (panneau P).');
     return false;
   }

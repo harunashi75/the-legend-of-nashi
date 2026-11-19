@@ -7,7 +7,7 @@
   'use strict';
   // Les cases qui ont déjà leur info-bulle détaillée (objets, Rubis, compétences…) n'affichent pas la bulle simple.
   const RICH =
-    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]';
+    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel]';
   const DELAY = 280;
 
   // ---------------------------------------------------------------- title → data-tip

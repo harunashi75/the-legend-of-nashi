@@ -371,7 +371,12 @@
     if (action.op === 'cook') return startCook(hero, action.recipe, action.quality, action.count);
     if (action.op === 'eat') return eat(hero, action.recipe, action.quality);
     if (action.op === 'hunt') return hunt(hero, action.game);
-    if (action.op === 'gather' || action.op === 'enchant-craft' || action.op === 'enchant-apply')
+    if (
+      action.op === 'gather' ||
+      action.op === 'enchant-craft' ||
+      action.op === 'enchant-apply' ||
+      action.op === 'enchant-reroll'
+    )
       return CANAAN_GATHER.handle(hero, action);
     return false;
   }

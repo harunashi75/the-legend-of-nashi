@@ -1316,12 +1316,8 @@
       total = plan ? plan.bossCount : 1;
     if (m.secretBoss !== undefined) {
       dunState().hidden |= 1 << m.secretBoss;
-      // La clé va dans le sac (piles de 20) ; sac plein : elle est perdue, comme un équipement.
+      // La clé va dans le sac (piles de 20), même plein : elle n'est jamais perdue.
       for (const h of members()) {
-        if (!CANAAN_BAG.room(h, 'key', 'secret', 0, 1)) {
-          canaanLootNotice(h, '🎒 Sac plein : clé des secrets non récupérée.');
-          continue;
-        }
         CANAAN_BAG.add(h, 'key', 'secret', 0, 1);
         CANAAN_WARDROBE.drop('secretBoss', h);
         canaanLootNotice(

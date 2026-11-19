@@ -1706,4 +1706,36 @@ Object.assign(A, {
     '<ellipse cx="16" cy="20" rx="3.5" ry="4.5" fill="#ffffff" opacity=".45"/>' +
     hi('M10 9.5 C11 7.5 12.5 6 14 5.3')
 });
+// ---------------------------------------------------------------- Poudres d'enchantement (pièces démantelées)
+Object.assign(A, {
+  // Poussière : petit tas de poudre mauve qui scintille.
+  dust_poussiere:
+    p('M4 26 C7 19 11 15 16 14 C21 15 25 19 28 26 Z', '#a890d8') +
+    s('M16 14 C21 15 25 19 28 26 L17 26 Z', '#7a62b0') +
+    dot(11, 22, 1, '#e8dcff') +
+    dot(19, 20, 0.9, '#e8dcff') +
+    dot(22, 24, 0.8, '#e8dcff') +
+    s(star(4, 3.4, 1, 21, 8), '#f4ecff') +
+    s(star(4, 2.4, 0.8, 9, 11), '#f4ecff') +
+    hi('M9 22 C11 19 13 17 15.5 16'),
+  // Essence : fiole bleue, liquide lumineux.
+  dust_essence:
+    r(13, 3, 6, 4, WOD, 1) +
+    p(
+      'M13.5 7 L18.5 7 L18.5 11 C23.5 13 26 17 26 21 C26 26.5 21.5 29.5 16 29.5 C10.5 29.5 6 26.5 6 21 C6 17 8.5 13 13.5 11 Z',
+      '#cfe4ff'
+    ) +
+    p('M7.2 20 C10 18.5 22 18.5 24.8 20 C25 25.5 21 28.2 16 28.2 C11 28.2 7 25.5 7.2 20 Z', BL) +
+    s('M16 18.6 C20 18.7 23.3 19.2 24.8 20 C25 25.5 21 28.2 16 28.2 Z', BLD) +
+    dot(12, 23, 1.2, '#e0f0ff') +
+    dot(18.5, 24.5, 0.9, '#e0f0ff') +
+    hi('M10 15 C9 16.5 8.5 18 8.5 19'),
+  // Éclat : cristal doré à facettes.
+  dust_eclat:
+    p('M16 2 L24 12 L20 29 L12 29 L8 12 Z', '#ffc860') +
+    s('M16 2 L24 12 L20 29 L16 29 Z', '#d8902a') +
+    l('M8 12 L24 12 M16 2 L16 29', '#fff0c0', 1).replace('/>', ' opacity=".55"/>') +
+    s(star(4, 3.6, 1.1, 26, 6), '#fff6d8') +
+    hi('M11 12 L14.5 5.5')
+});
 export const CANAAN_ICON_ART = Object.freeze(A);

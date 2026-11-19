@@ -13,10 +13,7 @@
     // Donjon des Tréfonds : un objet du niveau du héros. Règle : instanceLoot (shared/rules/economy.js).
     const difficulty = d.difficulties ? game.world.instance?.index === index && instanceDifficulty() : null,
       { level, rarity, origin } = instanceLoot(d, difficulty, hero.level, Math.random);
-    if (canaanBagUsed(hero) >= canaanBagLimit(hero)) {
-      canaanLootNotice(hero, '🎒 Sac plein : équipement non récupéré');
-      return false;
-    }
+    // Sac plein : la récompense va dans la sacoche de butin (ou en poudres), jamais perdue.
     const item = window.CANAAN_GEAR.grant(level, 'tier', rarity, hero);
     if (!item) return false;
     // Provenance gardée sur l'objet (sans suffixe dans le nom de l'arme).

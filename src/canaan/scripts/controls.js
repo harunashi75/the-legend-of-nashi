@@ -150,6 +150,13 @@
       ),
     enchantPick: element => CANAAN_GATHER.actions.pick(element.dataset.token),
     enchantApply: element => CANAAN_GATHER.actions.apply(element.dataset.ref),
+    enchantReroll: element => CANAAN_GATHER.actions.reroll(element.dataset.ref),
+    // Démantèlement et sacoche de butin (salvage.js).
+    salvageItem: (element, event) => {
+      event?.stopPropagation();
+      CANAAN_SALVAGE.salvageMine(element.dataset.id);
+    },
+    satchelTake: element => CANAAN_SALVAGE.takeMine(element.dataset.id),
     bankDeposit: element => CANAAN_BANK.depositRef(element.dataset.ref),
     bankWithdraw: element => CANAAN_BANK.withdrawRef(element.dataset.ref),
     unequip: element => {
@@ -287,7 +294,7 @@
 
   // Survol délégué : les événements pointerover/out remontent depuis les panneaux dynamiques.
   const CANAAN_HOVER_SELECTOR =
-    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-map-instance]';
+    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel],[data-map-instance]';
   function canaanHover(event, enter) {
     const element = eventClosest(event, CANAAN_HOVER_SELECTOR);
     if (!element || (event.relatedTarget && element.contains(event.relatedTarget))) return;
@@ -304,6 +311,8 @@
       CANAAN_TRADE.showTooltip(element.dataset.tooltipTrade, event);
     else if (element.dataset.tooltipBank !== undefined)
       CANAAN_BANK.showTooltip(element.dataset.tooltipBank, event);
+    else if (element.dataset.tooltipSatchel !== undefined)
+      CANAAN_SALVAGE.showTooltip(element.dataset.tooltipSatchel, event);
     else if (element.dataset.tooltipRubis !== undefined)
       showRubisTooltip(element.dataset.tooltipRubis, event);
     else if (element.dataset.tooltipIndex !== undefined)
@@ -316,7 +325,7 @@
     if (
       eventClosest(
         event,
-        '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank]'
+        '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel]'
       )
     )
       moveGearTooltip(event);

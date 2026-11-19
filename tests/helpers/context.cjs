@@ -137,6 +137,8 @@ function storageGame() {
   g.CANAAN_QUESTS={exportWorld:()=>g.savedQuests||{flags:{},solved:{}},importWorld:d=>{g.savedQuests=d}};
   // Banque : conservée telle quelle (le vrai module est testé à part).
   g.CANAAN_BANK={export:h=>h.bank||{items:[],stacks:{}},withBankedRubis:(b,r)=>r,sanitize:b=>b&&Array.isArray(b.items)?b:{items:[],stacks:{}}};
+  // Sacoche de butin : conservée telle quelle (le vrai module est testé à part).
+  g.CANAAN_SALVAGE={of:h=>h.satchel||[],export:h=>(h.satchel||[]).slice(),sanitize:v=>Array.isArray(v)?v:[]};
   // Succès : carnet conservé tel quel (le vrai module est testé à part).
   g.CANAAN_ACHIEVEMENTS={export:h=>h.succes||{},sanitize:v=>v&&typeof v==='object'?v:{}};
   // Tréfonds : l'île seulement (le vrai module est testé à part).

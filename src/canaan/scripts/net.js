@@ -385,6 +385,7 @@
     const bag = JSON.stringify({
       inventory: hero.inventory,
       equipment: hero.equipment,
+      satchel: CANAAN_SALVAGE.of(hero),
       limit: canaanBagLimit(hero),
       bagLevel: canaanBagLevel(hero),
       classe: { id: hero.classe.id, talents: hero.classe.talents },
@@ -429,8 +430,13 @@
     if (action.op === 'shop-buy' || action.op === 'sell-stack') return CANAAN_SHOP.handle(hero, action);
     if (action.op === 'bank-deposit' || action.op === 'bank-withdraw')
       return CANAAN_BANK.handle(hero, action);
+    if (action.op === 'salvage' || action.op === 'satchel-take') return CANAAN_SALVAGE.handle(hero, action);
     if (action.op.startsWith('house-')) return CANAAN_HOUSE.handle(hero, action);
-    if (['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply'].includes(action.op))
+    if (
+      ['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply', 'enchant-reroll'].includes(
+        action.op
+      )
+    )
       return CANAAN_PROF.handle(hero, action);
     if (action.op.startsWith('quest-')) return CANAAN_QUESTS.handle(hero, action);
     if (action.op === 'ach-title') return CANAAN_ACHIEVEMENTS.handle(hero, action);
@@ -763,6 +769,7 @@
     if (bag && Array.isArray(bag.inventory) && bag.equipment && typeof bag.equipment === 'object') {
       game.hero.inventory = bag.inventory;
       game.hero.equipment = bag.equipment;
+      game.hero.satchel = CANAAN_SALVAGE.sanitize(bag.satchel);
       if (Number.isInteger(bag.limit)) game.hero.bagLimit = Math.max(10, Math.min(100, bag.limit));
       if (Number.isInteger(bag.bagLevel)) game.hero.bagLevel = canaanBagLevel({ bagLevel: bag.bagLevel });
       applyClassAndRubis(bag);

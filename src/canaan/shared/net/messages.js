@@ -161,7 +161,8 @@ export function sanitizeIntent(raw) {
 // Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
-export const STACK_TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+export const STACK_TOKEN =
+  /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure|dust):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 /**
  * @param {any} raw action reçue d'un invité (non fiable : chaque champ est vérifié)
  * @returns {Record<string, any> | null} action mise en forme, ou null si elle est invalide
@@ -205,6 +206,8 @@ export function sanitizeAction(raw) {
   if (r.op === 'rubis-equip') return word(r.rubis) ? { op: r.op, rubis: r.rubis } : null;
   // Marchand : l'hôte vérifie la présence d'un marchand, l'or et l'objet.
   if (r.op === 'sell') return id ? { op: r.op, id } : null;
+  // Démanteler une pièce du sac ou de la sacoche, reprendre une pièce de la sacoche (l'hôte vérifie qu'elle y est).
+  if (r.op === 'salvage' || r.op === 'satchel-take') return id ? { op: r.op, id } : null;
   // Banque : un équipement (identifiant) ou une pile (repère) à déposer ou reprendre.
   // Succès : titre choisi (identifiant d'un succès débloqué, ou none).
   if (r.op === 'ach-title')
@@ -261,6 +264,11 @@ export function sanitizeAction(raw) {
       r.ref.length > 0 &&
       r.ref.length <= 96
       ? { op: r.op, token: r.token, ref: r.ref }
+      : null;
+  // Changer la statistique d'un enchantement posé : pièce (identifiant ou emplacement) et nouvelle statistique.
+  if (r.op === 'enchant-reroll')
+    return word(r.stat) && typeof r.ref === 'string' && r.ref.length > 0 && r.ref.length <= 96
+      ? { op: r.op, stat: r.stat, ref: r.ref }
       : null;
   if (r.op === 'hunt')
     return typeof r.game === 'string' && /^[a-z]{2,16}$/.test(r.game) ? { op: 'hunt', game: r.game } : null;

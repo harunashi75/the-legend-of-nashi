@@ -243,3 +243,55 @@ test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, 
  assert.equal(run('game.world.monsters[0].x'),x0,'le loup ne bouge pas vers le héros invisible');assert.equal(run('game.world.monsters[0].targetHero'),null);
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Démantèlement, poudres et sacoche de butin : rien n’est perdu ni changé en or quand le sac est plein',async()=>{
+ const url=f=>require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared',f)).href;
+ const {salvageYield}=await import(url('rules/professions.js')),n=await import(url('net/messages.js'));
+ // Rendement : la qualité choisit la poudre ; le niveau d'enchanteur peut en donner une de plus.
+ assert.deepEqual(salvageYield(0,1,()=>0.99),{poussiere:2});assert.deepEqual(salvageYield(2,1,()=>0.5),{essence:1,poussiere:2});
+ assert.deepEqual(salvageYield(5,40,()=>0),{eclat:3});assert.deepEqual(salvageYield(9,1,()=>0.99),{eclat:2});
+ // Actions d'un invité : identifiants courts, statistique connue.
+ assert.deepEqual(n.sanitizeAction({op:'salvage',id:'abc'}),{op:'salvage',id:'abc'});assert.equal(n.sanitizeAction({op:'salvage'}),null);
+ assert.deepEqual(n.sanitizeAction({op:'satchel-take',id:'abc'}),{op:'satchel-take',id:'abc'});
+ assert.deepEqual(n.sanitizeAction({op:'enchant-reroll',ref:'helm',stat:'crit'}),{op:'enchant-reroll',ref:'helm',stat:'crit'});assert.equal(n.sanitizeAction({op:'enchant-reroll',ref:'helm',stat:'<b>'}),null);
+ assert.ok(n.STACK_TOKEN.test('dust:essence:0*12'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;toast=()=>{};game.hero.level=30;game.hero.inventory=[];game.hero.satchel=[];game.hero.prof.dust={};BAG_LIMIT=10;game.hero.bagLimit=10;P.gold=0');
+ // Démanteler une pièce Rare du sac : une essence et de la poussière, rangées avec les matériaux.
+ run('giveGear(30,"world","Rare");globalThis.rare=game.hero.inventory[0]');
+ assert.equal(run('CANAAN_SALVAGE.salvage(game.hero,rare.id)'),true);assert.equal(run('game.hero.inventory.length'),0);
+ assert.ok(run('CANAAN_BAG.count(game.hero,"dust","essence",0)')>=1);assert.ok(run('CANAAN_BAG.tiles(game.hero,"mat").some(p=>p.kind==="dust")'));
+ assert.equal(run('CANAAN_BAG.parse("dust:essence:0*1").kind'),'dust');assert.ok(run('CANAAN_BAG.unitPrice({kind:"dust",id:"eclat",q:0,n:1})')>run('CANAAN_BAG.unitPrice({kind:"dust",id:"essence",q:0,n:1})'));
+ // Une arme liée ne se démantèle pas.
+ run('game.hero.inventory.push({id:"lie",slot:"weapon",weaponType:"sword",rarity:"Relique",level:30})');
+ assert.equal(run('CANAAN_SALVAGE.salvage(game.hero,"lie")'),false);assert.equal(run('game.hero.inventory.length'),1);
+ // Sac plein : un Commun part en poudre, un Rare ou mieux attend dans la sacoche ; jamais d'or à la place.
+ run('game.hero.inventory=Array.from({length:10},(_,i)=>({id:"f"+i,slot:"ring",level:1,rarity:"Commun"}));game.hero.prof.dust={}');
+ assert.equal(run('giveGear(30,"normal","Commun")'),null);assert.ok(run('CANAAN_BAG.count(game.hero,"dust","poussiere",0)')>=1);
+ run('globalThis.myth=giveGear(30,"tier","Mythique")');assert.equal(run('game.hero.satchel.length'),1);assert.equal(run('game.hero.satchel[0]===myth'),true);
+ assert.equal(run('P.gold'),0);assert.equal(run('game.hero.inventory.length'),10);
+ // Sacoche pleine (10 places) : le butin suivant est démantelé, même Rare.
+ for(let i=0;i<9;i++)run('giveGear(30,"world","Rare")');assert.equal(run('game.hero.satchel.length'),10);
+ run('globalThis.ess=CANAAN_BAG.count(game.hero,"dust","essence",0)');assert.equal(run('giveGear(30,"world","Rare")'),null);
+ assert.ok(run('CANAAN_BAG.count(game.hero,"dust","essence",0)')>run('ess'));assert.equal(run('game.hero.satchel.length'),10);
+ // Reprendre : il faut une case libre ; on en libère une en démantelant.
+ assert.equal(run('CANAAN_SALVAGE.take(game.hero,myth.id)'),false);
+ assert.equal(run('CANAAN_SALVAGE.salvage(game.hero,"f0")'),true);assert.equal(run('CANAAN_SALVAGE.take(game.hero,myth.id)'),true);
+ assert.equal(run('game.hero.inventory.at(-1)===myth&&game.hero.satchel.length===9'),true);
+ // Le sac (I) affiche le bouton ⚒ de chaque pièce et la sacoche quand elle n'est pas vide.
+ run('renderInventory()');const html=run('document.getElementById("window").innerHTML');
+ assert.match(html,/data-action="salvageItem"/);assert.match(html,/Sacoche de butin <small>9 \/ 10/);assert.match(html,/data-action="satchelTake"/);
+ // Clé des secrets : même sac plein, elle est gardée.
+ run('game.hero.player.keys=0;CANAAN_BAG.add(game.hero,"key","secret",0,1)');assert.equal(run('game.hero.player.keys'),1);
+ // Changer la statistique d'un enchantement posé : 2 essences, le métal est gardé.
+ run('myth.ench={stat:"crit",value:5,tier:3};game.hero.prof.dust={"essence:0":3}');
+ assert.equal(run('CANAAN_GATHER.reroll(game.hero,myth.id,"crit")'),false,'même statistique');
+ assert.equal(run('CANAAN_GATHER.reroll(game.hero,myth.id,"haste")'),true);
+ assert.equal(run('myth.ench.stat'),'haste');assert.equal(run('myth.ench.tier'),3);assert.equal(run('game.hero.prof.dust["essence:0"]'),1);
+ assert.equal(run('CANAAN_GATHER.reroll(game.hero,myth.id,"power")'),false,'plus assez d’essence');
+ // Sauvegarde : la sacoche et les poudres reviennent au chargement.
+ run('game.hero.prof.dust={"eclat:0":2}');assert.equal(run('saveGame()'),true);
+ run('game.hero.satchel=[];game.hero.prof.dust={}');assert.equal(run('loadGame()'),true);
+ assert.equal(run('game.hero.satchel.length'),9);assert.equal(run('CANAAN_BAG.count(game.hero,"dust","eclat",0)'),2);
+ assert.equal(errors.length,0,errors.join('\n'));
+});

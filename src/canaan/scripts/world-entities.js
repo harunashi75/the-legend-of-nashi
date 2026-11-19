@@ -892,8 +892,8 @@ function openNearbyChest(hero = game.hero) {
     // Objet Épique au niveau de la zone du coffre (le milieu de sa plage) ; dans les Tréfonds, au niveau du héros.
     const [lo, hi] = ZONE_LEVELS[canaanZoneIndexAt(c.x, c.y)],
       level = c.layer === 'under' ? clampLevel(hero.level) : Math.round((lo + hi) / 2);
-    if (canaanBagUsed(hero) < canaanBagLimit(hero)) grantSourceReward('secretChest', hero, level);
-    else canaanLootNotice(hero, '🎒 Sac plein : équipement non récupéré');
+    // Sac plein : sacoche de butin (ou poudres), jamais perdu.
+    grantSourceReward('secretChest', hero, level);
     let extra = '';
     if (Math.random() < SECRET_CHEST_RUBIS) {
       const got = CANAAN_RUBIS.grant(null, hero);
