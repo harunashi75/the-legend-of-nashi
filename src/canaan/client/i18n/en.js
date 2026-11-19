@@ -1983,7 +1983,17 @@ export default {
   // ------------------------------------------------------------ Lieux, régions, classes (panneau T) et Runes (panneau)
   'Camp de l’Aurore': 'Dawn Camp',
   'Ferme de l’Aurore': 'Dawn Farm',
-  'L’Aile d’Éclipse': 'The Eclipse Wing',
+  'Le Souffle du Dragon': 'The Dragon’s Breath',
+  'Capitaine Kaelor': 'Captain Kaelor',
+  'Je suis Kaelor, capitaine du Souffle du Dragon.': 'I am Kaelor, captain of the Dragon’s Breath.',
+  'Le Souffle du Dragon n’attend que le bon vent pour lever l’ancre.':
+    'The Dragon’s Breath is only waiting for the right wind to weigh anchor.',
+  'Cette figure de proue n’est pas qu’une sculpture. Certains soirs, ses yeux brûlent pour de vrai.':
+    'That figurehead is more than a carving. Some nights, its eyes truly burn.',
+  'Au-delà des brumes de l’ouest, le ciel s’assombrit. Les anciens parlent d’une éclipse…':
+    'Beyond the western mists, the sky is darkening. The elders speak of an eclipse…',
+  'Quand le moment viendra, j’aurai besoin d’un équipage courageux. Tiens-toi prêt.':
+    'When the time comes, I will need a brave crew. Be ready.',
   'Chaumière des Glycines': 'Wisteria Cottage',
   'Échoppe de Lira': 'Lira’s Stall',
   'La Marmite dorée': 'The Golden Pot',

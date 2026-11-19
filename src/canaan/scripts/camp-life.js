@@ -2582,7 +2582,7 @@
     }
     c.globalAlpha = 1;
   }
-  // Navire draconique (pixels de 2, proue à gauche) : coque d'écailles d'obsidienne cerclée d'or et de pourpre,
+  // Le Souffle du Dragon, navire du capitaine Kaelor (pixels de 2, proue à gauche) : coque d'écailles d'obsidienne cerclée d'or et de pourpre,
   // boucliers le long du plat-bord, figure de proue en tête de dragon cornue (œil de braise, gueule ouverte), queue
   // relevée en poupe, château arrière éclairé, mât et voile pourpre frappée d'une éclipse aux ailes de dragon.
   const SHIP_W = 236,
@@ -2973,7 +2973,7 @@
       c.textAlign = 'center';
       c.lineWidth = 3;
       c.strokeStyle = '#101b20';
-      const name = '🐉 ' + tt('L’Aile d’Éclipse');
+      const name = '🐉 ' + tt('Le Souffle du Dragon');
       c.strokeText(name, cx, top - 14);
       c.fillStyle = '#ffc890';
       c.fillText(name, cx, top - 14);

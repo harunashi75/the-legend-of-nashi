@@ -1223,6 +1223,20 @@
         'Les Runes de l’Arène renferment une vieille magie.'
       ]
     },
+    // Kaelor, capitaine du Souffle du Dragon, sur le quai de l'Aurore (un seul, posé à part dans settle).
+    capitaine: {
+      tool: 'none',
+      outfits: ['cramoisi'],
+      speed: 0.25,
+      roam: 1.2,
+      lines: [
+        'Je suis Kaelor, capitaine du Souffle du Dragon.',
+        'Le Souffle du Dragon n’attend que le bon vent pour lever l’ancre.',
+        'Cette figure de proue n’est pas qu’une sculpture. Certains soirs, ses yeux brûlent pour de vrai.',
+        'Au-delà des brumes de l’ouest, le ciel s’assombrit. Les anciens parlent d’une éclipse…',
+        'Quand le moment viendra, j’aurai besoin d’un équipage courageux. Tiens-toi prêt.'
+      ]
+    },
     eclaireuse: {
       tool: 'spear',
       outfits: ['foret', 'glace', 'nuit'],
@@ -1344,6 +1358,27 @@
     add('villageois', cx + 3, cy + 2);
     add('enfant', cx, cy + 3);
     add('voyageur', cx + 4, cy - 2);
+    // Kaelor, capitaine du Souffle du Dragon : sur le quai, devant son navire (camp-life.js), en manteau de capitaine.
+    const ship = CANAAN_CAMP_LIFE.ship();
+    if (ship) {
+      const n = villagers.length;
+      add('capitaine', Math.floor(ship.x / TS) - 2, Math.floor(ship.y / TS) + 1, [], true);
+      const v = villagers[n];
+      if (v) {
+        v.name = 'Capitaine Kaelor';
+        v.line = v.lines.length - 1; // sa première réplique : il se présente.
+        v.look = sanitizeLook({
+          sex: 'm',
+          race: 'humain',
+          skin: '#c98e62',
+          hairStyle: 'queue',
+          hair: '#2a1f1a',
+          eyes: '#c8a020',
+          outfit: 'cramoisi',
+          wear: 'pirate'
+        });
+      }
+    }
     // Habitants des bâtiments (échoppe, cuisine, demeures, refuges) ; devant chaque refuge, un pêcheur ou un voyageur.
     const zoneOf = p => Math.max(0, ZONES.indexOf(regionAt(p.x, p.y)));
     for (const r of CANAAN_HOUSE.residents()) {
@@ -1467,8 +1502,9 @@
         c.lineWidth = 3;
         c.strokeStyle = '#120c07';
         c.fillStyle = '#f6e2b1';
-        c.strokeText(v.name, v.x, v.y - 48 * s);
-        c.fillText(v.name, v.x, v.y - 48 * s);
+        const name = translateText(v.name);
+        c.strokeText(name, v.x, v.y - 48 * s);
+        c.fillText(name, v.x, v.y - 48 * s);
       }
     }
     c.restore();
