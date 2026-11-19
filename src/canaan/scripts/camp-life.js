@@ -167,12 +167,13 @@
     }
   ];
   // Quai : planches sur pilotis, de la plage droit vers le large (cases depuis le camp) ; le navire draconique est
-  // amarré le long de son bord nord. Lanternes et caisses posées sur le bord sud.
-  const PIER = { x0: -44, x1: -33, y: 5, h: 2 };
+  // amarré le long de son bord nord. Il commence sur la plage (sa dernière case pose sur le sable) ; lanternes et
+  // caisses sur le bord sud. On passe derrière les lanternes comme derrière un arbre (elles ne bloquent pas).
+  const PIER = { x0: -44, x1: -32, y: 5, h: 2 };
   const PIER_PROPS = [
     { kind: 'crates', x: -34, y: 6, w: 1, h: 1, block: true },
-    { kind: 'lantern', x: -37, y: 6, w: 1, h: 1, block: true },
-    { kind: 'lantern', x: -43, y: 6, w: 1, h: 1, block: true }
+    { kind: 'lantern', x: -38, y: 6, w: 1, h: 1 },
+    { kind: 'lantern', x: -43, y: 6, w: 1, h: 1 }
   ];
   // Zones de la ferme où aucun monstre n'apparaît (cases depuis le camp).
   const CALM = [
@@ -372,23 +373,25 @@
       for (let x = PIER.x0; x <= PIER.x1; x++) pierCells.push([cx + x, cy + y]);
     if (
       pierCells.every(
-        ([x, y]) => tools.valid(x, y) && ([0, 15].includes(tiles[y][x]) || BRIDGE_TILES.has(key(x, y)))
+        ([x, y]) => tools.valid(x, y) && ([0, 15, 2, 3].includes(tiles[y][x]) || BRIDGE_TILES.has(key(x, y)))
       )
     ) {
+      // Sur l'eau, des pilotis (un pont) ; sur le sable, le chemin.
       for (const [x, y] of pierCells) {
+        if ([0, 15].includes(tiles[y][x])) BRIDGE_TILES.add(key(x, y));
         tiles[y][x] = 2;
-        BRIDGE_TILES.add(key(x, y));
         clear(x, y);
       }
       const px0 = cx + PIER.x0,
         py0 = cy + PIER.y,
         w = PIER.x1 - PIER.x0 + 1;
       items.push({ kind: 'pier', tx: px0, ty: py0, w, h: PIER.h, x: px0 * T, y: py0 * T, base: py0 * T });
+      // Le navire est centré sur la partie du quai au-dessus de l'eau (sans la case posée sur le sable).
       items.push({
         kind: 'ship',
         tx: px0,
         ty: py0 - 5,
-        w,
+        w: w - 1,
         h: 5,
         x: px0 * T,
         y: (py0 - 5) * T,
@@ -397,7 +400,7 @@
       for (const p of PIER_PROPS) {
         const tx = cx + p.x,
           ty = cy + p.y;
-        solid.add(key(tx, ty));
+        if (p.block) solid.add(key(tx, ty));
         items.push({ ...p, tx, ty, x: tx * T, y: ty * T, base: (ty + p.h) * T });
       }
     } else missing.push('pier@' + PIER.x0 + ',' + PIER.y);
@@ -2546,14 +2549,30 @@
       for (let a = 0; a < Math.PI * 2; a += 0.35)
         px(18 + Math.cos(a) * r, top + 34 + Math.sin(a) * r * 0.6, r % 4 === 1 ? '#c8a86a' : '#8a6a3a', 2, 1);
     }
-    // Filet de pêche replié vers la plage.
-    for (let i = 0; i < 40; i++) {
-      const x = fw - 40 + hash(i, 1, 95) * 18,
-        y = top + 8 + hash(1, i, 95) * 10;
-      px(x, y, i % 2 ? '#6a7a6a' : '#9aa48a');
+    // Filet de pêche replié vers la plage : ballot cerné d'encre, mailles en croisillons, flotteurs orange.
+    {
+      const nx = fw - 46,
+        ny = top + 7;
+      px(nx + 1, ny - 1, OUT, 18, 12);
+      px(nx, ny, OUT, 20, 10);
+      px(nx + 1, ny, '#4e5e50', 18, 9);
+      px(nx + 2, ny + 1, '#5e705e', 16, 4);
+      for (let k = 0; k < 18; k += 3) {
+        for (let d = 0; d < 8; d++) {
+          if (k + d < 18) px(nx + 1 + k + d, ny + 1 + d, '#8a9a7a');
+          if (k - d >= 0) px(nx + 1 + k - d, ny + 1 + d, '#7a8a6c');
+        }
+      }
+      for (const [fx, fy] of [
+        [nx + 3, ny + 2],
+        [nx + 11, ny + 5],
+        [nx + 16, ny + 1]
+      ]) {
+        px(fx - 1, fy - 1, OUT, 4, 4);
+        px(fx, fy, '#e0703a', 2, 2);
+        px(fx, fy, '#ffb080');
+      }
     }
-    px(fw - 40, top + 13, '#d0603a', 2, 2);
-    px(fw - 26, top + 10, '#d0603a', 2, 2);
     // Poteaux d'amarrage du bord nord, cerclés de cordage.
     for (let x = 16; x < fw - 8; x += 48) {
       px(x - 1, top - 12, OUT, 8, 17);

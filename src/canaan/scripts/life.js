@@ -1488,12 +1488,15 @@
       c.ellipse(v.x, v.y + 17 * s, 15 * s, 5 * s, 0, 0, Math.PI * 2);
       c.fill();
       c.globalAlpha = 1;
+      // Une apparence portée (Kaelor et son manteau de capitaine) a de la place autour : même taille que le héros.
+      const px = spr.padX || 0,
+        py = spr.padY || 0;
       c.drawImage(
         spr,
-        Math.round(v.x - 26 * s),
-        Math.round(v.y + 18 - 60 * s),
-        Math.round(52 * s),
-        Math.round(64 * s)
+        Math.round(v.x - (26 + px) * s),
+        Math.round(v.y + 18 - (60 + py) * s),
+        Math.round(spr.width * s),
+        Math.round(spr.height * s)
       );
       // Nom au-dessus, quand le héros est proche.
       if (Math.hypot(P.x - v.x, P.y - v.y) < TALK * 1.6) {
