@@ -1,7 +1,7 @@
 // Vie du Camp de l'Aurore : une ferme au sud (grange, silo, poulailler, enclos avec moutons, vaches et cochons, bottes
 // de foin, charrette, champs de blé, de légumes et de fruits), un verger de pommiers à l'ouest, un jardin fleuri au
 // nord, une fontaine sur une petite place pavée, des bûches, des fleurs et un ruisseau qui descend d'une source jusqu'à
-// une mare, sous un pont de la route.
+// une mare, sous un pont de la route ; à l'ouest du verger, un quai sur pilotis où mouille un navire draconique.
 // Même style que les donjons : volumes en trois tons (reflet en haut à gauche, ombre en bas à droite), contour sombre,
 // grain des décors (canaanPolish, canaanOutline), ombre au sol, lueurs (canaanLight).
 // Le plan est fixe (cases comptées depuis le feu) et posé après les bâtiments et les lieux de quête : un élément qui
@@ -30,7 +30,8 @@
   // Chemins de terre : allée de la ferme, allée du verger, sentier du jardin et cour de la ferme.
   const PATHS = [
     [0, 4, 1, 19],
-    [-26, 5, -12, 6],
+    // L'allée du verger descend jusqu'à la plage, où commence le quai.
+    [-32, 5, -12, 6],
     [-6, -13, -5, -8],
     [2, 10, 8, 11],
     // Allée de la forge jusqu'au centre du camp.
@@ -65,7 +66,7 @@
     { kind: 'apple', x: -27, y: 9, w: 1, h: 1, block: true },
     { kind: 'apple', x: -24, y: 9, w: 1, h: 1, block: true },
     { kind: 'apple', x: -21, y: 9, w: 1, h: 1, block: true },
-    { kind: 'crates', x: -27, y: 5, w: 1, h: 2, block: true },
+    { kind: 'crates', x: -29, y: 7, w: 1, h: 2, block: true },
     { kind: 'basket', x: -23, y: 7, w: 1, h: 1, block: true },
     { kind: 'logs', x: -26, y: 12, w: 2, h: 1, block: true },
     { kind: 'woodpile', x: -6, y: 2, w: 3, h: 1, block: true },
@@ -165,8 +166,17 @@
       ]
     }
   ];
+  // Quai : planches sur pilotis, de la plage droit vers le large (cases depuis le camp) ; le navire draconique est
+  // amarré le long de son bord nord. Lanternes et caisses posées sur le bord sud.
+  const PIER = { x0: -44, x1: -33, y: 5, h: 2 };
+  const PIER_PROPS = [
+    { kind: 'crates', x: -34, y: 6, w: 1, h: 1, block: true },
+    { kind: 'lantern', x: -37, y: 6, w: 1, h: 1, block: true },
+    { kind: 'lantern', x: -43, y: 6, w: 1, h: 1, block: true }
+  ];
   // Zones de la ferme où aucun monstre n'apparaît (cases depuis le camp).
   const CALM = [
+    [-46, 0, -28, 8],
     [-15, 3, 9, 20],
     [-28, 0, -19, 13],
     [-9, -20, 3, -13],
@@ -355,6 +365,42 @@
         }
     }
     bridgeAcross();
+
+    // Quai : des planches sur l'eau profonde (praticables comme un pont), puis le navire amarré à son bord nord.
+    const pierCells = [];
+    for (let y = PIER.y; y < PIER.y + PIER.h; y++)
+      for (let x = PIER.x0; x <= PIER.x1; x++) pierCells.push([cx + x, cy + y]);
+    if (
+      pierCells.every(
+        ([x, y]) => tools.valid(x, y) && ([0, 15].includes(tiles[y][x]) || BRIDGE_TILES.has(key(x, y)))
+      )
+    ) {
+      for (const [x, y] of pierCells) {
+        tiles[y][x] = 2;
+        BRIDGE_TILES.add(key(x, y));
+        clear(x, y);
+      }
+      const px0 = cx + PIER.x0,
+        py0 = cy + PIER.y,
+        w = PIER.x1 - PIER.x0 + 1;
+      items.push({ kind: 'pier', tx: px0, ty: py0, w, h: PIER.h, x: px0 * T, y: py0 * T, base: py0 * T });
+      items.push({
+        kind: 'ship',
+        tx: px0,
+        ty: py0 - 5,
+        w,
+        h: 5,
+        x: px0 * T,
+        y: (py0 - 5) * T,
+        base: py0 * T - 2
+      });
+      for (const p of PIER_PROPS) {
+        const tx = cx + p.x,
+          ty = cy + p.y;
+        solid.add(key(tx, ty));
+        items.push({ ...p, tx, ty, x: tx * T, y: ty * T, base: (ty + p.h) * T });
+      }
+    } else missing.push('pier@' + PIER.x0 + ',' + PIER.y);
 
     // Objets : toute l'emprise doit être libre (et hors des chemins pour ce qui bloque).
     for (const p of PROPS) {
@@ -1453,55 +1499,34 @@
   function drawFieldTile(c, x, y, g, R, sway) {
     const X = x * T,
       Y = y * T;
-    if (g.crop === 'wheat') {
-      R(X, Y, T, T, '#b08a3a');
-      for (let r = 0; r < 4; r++) R(X, Y + 6 + r * 12, T, 3, '#8a6a2a');
-      for (let r = 0; r < 3; r++)
-        for (let k = 0; k < 5; k++) {
-          const sx = X + 3 + k * 9 + (r % 2) * 4,
-            base = Y + 16 + r * 15,
-            sw = sway + (hash(x + k, y + r, 1) < 0.3 ? 1 : 0);
-          R(sx, base - 13, 2, 13, '#c8a040');
-          R(sx - 1 + sw, base - 20, 4, 8, '#8a6a2a');
-          R(sx + sw, base - 19, 3, 6, '#ecc860');
-          R(sx + sw, base - 19, 1, 6, '#fbe49a');
-          R(sx + 1 + sw, base - 22, 1, 3, '#d8b050');
-        }
-      return;
-    }
-    // Terre labourée : une butte par rang, sillon sombre entre deux, mottes.
-    R(X, Y, T, T, '#5e4128');
-    R(X, Y + 20, T, 20, '#7a5634');
-    R(X, Y + 20, T, 3, '#946a42');
-    R(X, Y + 38, T, 3, '#4a3220');
-    for (let k = 0; k < 4; k++)
-      R(
-        X + 4 + hash(x, y, k + 50) * 38,
-        Y + 24 + hash(x, y, k + 60) * 12,
-        3,
-        2,
-        k % 2 ? '#8a6440' : '#5a3e28'
-      );
-    // Bordure de planches autour du champ.
+    // La terre, la bordure et l'herbe autour sont peintes d'une pièce (fieldArt) ; la case ne pose que ses plantes.
     const same = (dx, dy) => {
       const n = ground.get(key(x + dx, y + dy));
       return n && n.type === 'field' && n.crop === g.crop;
     };
-    if (!same(0, -1)) {
-      R(X, Y, T, 5, '#5e4430');
-      R(X, Y, T, 2, '#9a7048');
-    }
-    if (!same(0, 1)) {
-      R(X, Y + T - 5, T, 5, '#5e4430');
-      R(X, Y + T - 5, T, 2, '#9a7048');
-    }
-    if (!same(-1, 0)) {
-      R(X, Y, 5, T, '#5e4430');
-      R(X, Y, 2, T, '#9a7048');
-    }
-    if (!same(1, 0)) {
-      R(X + T - 5, Y, 5, T, '#4e3627');
-      R(X + T - 5, Y, 1, T, '#7a5634');
+    if (g.crop === 'wheat') {
+      // Épis en quatre rangs décalés : pied des tiges plus sombre (le volume du champ), épis en trois tons et barbes ;
+      // au bord du champ, les épis sont plus clairsemés et plus bas.
+      const edge = !same(0, -1) || !same(0, 1) || !same(-1, 0) || !same(1, 0);
+      for (let r = 0; r < 4; r++)
+        for (let k = 0; k < 6; k++) {
+          const n = hash(x * 7 + k, y * 5 + r, 2);
+          if (edge && n < 0.3) continue;
+          const sx = X + 2 + k * 8 + (r % 2) * 4 + Math.floor(n * 3),
+            base = Y + 16 + r * 10,
+            hgt = 15 + Math.floor(hash(x + k, y + r, 3) * 9) - (edge ? 4 : 0),
+            sw = sway + (n < 0.3 ? 1 : 0),
+            top = base - hgt;
+          R(sx, top + 2, 2, hgt - 2, r % 2 ? '#b8963c' : '#c8a446');
+          R(sx + 1, top + hgt * 0.5, 1, hgt * 0.5, '#7a5e26');
+          R(sx - 1 + sw, top - 7, 4, 9, '#7a5a22');
+          R(sx + sw, top - 6, 3, 7, n < 0.5 ? '#e6c058' : '#f0cc66');
+          R(sx + sw, top - 6, 1, 6, '#fde8a2');
+          R(sx + 2 + sw, top - 3, 1, 4, '#b88e36');
+          R(sx + 1 + sw, top - 10, 1, 4, '#d8b456');
+          if (n > 0.6) R(sx - 1 + sw, top - 9, 1, 3, '#d8b456');
+        }
+      return;
     }
     // Plantes sur la butte ; chaque rang a son espèce.
     const kinds =
@@ -1513,11 +1538,13 @@
     const small = ['carotte', 'salade', 'fraise'].includes(kind),
       spots = small ? [13, 35] : [(x + g.row) % 2 ? 18 : 30];
     for (let k = 0; k < spots.length; k++) {
+      // Pas de plante collée à la bordure tressée.
+      if ((!same(-1, 0) && spots[k] < 16) || (!same(1, 0) && spots[k] > 32)) continue;
       const s = plantSprite(kind, Math.floor(hash(x, y, k) * 2)),
         px = X + spots[k],
         py = Y + 40,
         tall = kind === 'tomate' || kind === 'framboisier' || kind === 'carotte';
-      c.globalAlpha = 0.25;
+      c.globalAlpha = 0.3;
       c.fillStyle = '#1a0e06';
       c.beginPath();
       c.ellipse(px, py - 2, s.width * 0.36, 4, 0, 0, Math.PI * 2);
@@ -1530,6 +1557,186 @@
         c.drawImage(s, -Math.round(s.width / 2), -s.height);
         c.restore();
       } else c.drawImage(s, Math.round(px - s.width / 2), py - s.height);
+    }
+  }
+  // ---------------------------------------------------------------- Champs (sol peint d'une pièce)
+  // Pixels de 2, comme le jardin : terre aux coins arrondis, buttes en trois tons (reflet en haut, ombre en bas)
+  // séparées par des sillons humides, mottes, cailloux et paille ; bordure tressée (plessis) tenue par des piquets,
+  // touffes d'herbe qui débordent, panneau planté au coin et arrosoir. Le blé pousse sur un chaume doré, sans plessis.
+  const FIELD_PAD = { x: 8, top: 18, bottom: 10 };
+  const FIELD_ART = new Map();
+  function fieldArt(it) {
+    const id = it.tx + ',' + it.ty + ',' + it.crop;
+    if (FIELD_ART.has(id)) return FIELD_ART.get(id);
+    FIELD_ART.set(id, null);
+    if (typeof document === 'undefined') return null;
+    const fw = it.w * 24,
+      fh = it.h * 24,
+      ox = FIELD_PAD.x,
+      oy = FIELD_PAD.top,
+      cv = document.createElement('canvas');
+    cv.width = fw + ox * 2;
+    cv.height = fh + oy + FIELD_PAD.bottom;
+    const g = cv.getContext('2d');
+    if (!g || !g.fillRect) return null;
+    const wheat = it.crop === 'wheat',
+      seed = it.tx * 3 + it.ty,
+      px = (x, y, col, w = 1, h = 1) => {
+        g.fillStyle = col;
+        g.fillRect(Math.round(x), Math.round(y), w, h);
+      },
+      // Rectangle aux coins arrondis (rayon r), agrandi de grow pixels ; le bord ondule un peu.
+      inside = (x, y, grow = 0) => {
+        const r = 7 + grow,
+          lx = x - ox,
+          ly = y - oy,
+          wob = (hash(Math.floor(lx / 3), Math.floor(ly / 3), seed + 80) - 0.5) * 1.2;
+        if (lx < -grow - wob || ly < -grow - wob || lx >= fw + grow + wob || ly >= fh + grow + wob)
+          return false;
+        const dx = Math.max(0, r - grow - lx, lx - (fw - 1 - r + grow)),
+          dy = Math.max(0, r - grow - ly, ly - (fh - 1 - r + grow));
+        return dx * dx + dy * dy <= r * r + wob * 4;
+      },
+      pick = (x, y, k, tones) => {
+        const n = hash(x, y, seed + k);
+        return n < 0.62 ? tones[0] : n < 0.82 ? tones[1] : tones[2];
+      };
+    // Ombre portée et lèvre de terre sombre tout autour.
+    for (let y = 0; y < cv.height; y++)
+      for (let x = 0; x < cv.width; x++) {
+        if (inside(x, y)) continue;
+        if (inside(x - 2, y - 3, 3)) px(x, y, 'rgba(10,8,6,.22)');
+        if (inside(x, y, 2)) px(x, y, wheat ? '#5e4a22' : '#3e2a1a');
+      }
+    // Terre : sillon, reflet du haut de la butte, butte, ombre du bas ; chaque ton tramé de deux voisins.
+    const SOIL = wheat
+      ? {
+          furrow: ['#7a5e2a', '#6a5024', '#86682e'],
+          top: ['#b8984e', '#c8a85a', '#a88a44'],
+          body: ['#9a7c3a', '#a88a44', '#8a6e32'],
+          low: ['#7e6230', '#8a6e36', '#6e5428']
+        }
+      : {
+          furrow: ['#4a3220', '#3e2a1a', '#56402a'],
+          top: ['#a07448', '#b08456', '#946a42'],
+          body: ['#7a5634', '#86603a', '#6e4c2e'],
+          low: ['#5e4128', '#664830', '#523822']
+        };
+    for (let y = oy - 3; y < oy + fh + 3; y++)
+      for (let x = ox - 3; x < ox + fw + 3; x++) {
+        if (!inside(x, y)) continue;
+        const yy = (((y - oy) % 24) + 24) % 24,
+          part = yy <= 6 || yy === 23 ? 'furrow' : yy <= 8 ? 'top' : yy <= 18 ? 'body' : 'low';
+        px(x, y, pick(x, y, 1, SOIL[part]));
+      }
+    // Mottes et cailloux sur les buttes, paille, flaques et cailloux dans les sillons.
+    for (let i = 0; i < it.w * it.h * 14; i++) {
+      const x = ox + hash(i, seed, 81) * fw,
+        y = oy + hash(seed, i, 82) * fh,
+        yy = Math.floor(y - oy) % 24;
+      if (!inside(x, y) || !inside(x + 3, y + 2)) continue;
+      const furrow = yy <= 5;
+      if (wheat) {
+        px(x, y, i % 2 ? '#d8b866' : '#6a5024', 2, 1);
+        continue;
+      }
+      if (!furrow) {
+        px(x, y, i % 3 ? '#8e6840' : '#5a3e26', 2, 2);
+        px(x, y, i % 3 ? '#b88c5c' : '#7a5634');
+      } else if (i % 5 === 0) {
+        px(x, y + 1, '#3a4a50', 4, 2);
+        px(x + 1, y + 1, '#7a98a4', 2, 1);
+      } else if (i % 3 === 0) {
+        px(x, y + 2, '#5e5a52', 2, 2);
+        px(x, y + 2, '#b0a898');
+      } else px(x, y + 2, '#c8a860', 3, 1);
+    }
+    // Plessis : osier tressé tout autour (trois tons qui se croisent, contour sombre), piquets en haut et en bas.
+    if (!wheat) {
+      for (let y = 0; y < cv.height; y++)
+        for (let x = 0; x < cv.width; x++) {
+          if (inside(x, y)) continue;
+          if (inside(x, y, 2)) {
+            const w = Math.floor((x + y * 2) / 2) % 3;
+            px(x, y, ['#a8824c', '#80603a', '#5e4428'][w]);
+          } else if (inside(x, y, 3)) px(x, y, OUT);
+        }
+      const stake = (x, y) => {
+        px(x - 1, y - 6, OUT, 4, 9);
+        px(x, y - 5, '#7a5634', 2, 8);
+        px(x, y - 5, '#a8824c', 1, 7);
+        px(x, y - 6, '#c8a06a', 2, 1);
+      };
+      for (let x = ox + 10; x < ox + fw - 8; x += 18) {
+        stake(x, oy - 1);
+        stake(x, oy + fh + 1);
+      }
+    }
+    // Touffes d'herbe qui débordent sur la bordure.
+    for (let i = 0; i < (fw + fh) * 0.9; i++) {
+      const side = i % 4,
+        t = hash(i, seed, 83),
+        x =
+          side < 2
+            ? ox + t * fw
+            : side === 2
+              ? ox - 2 - hash(seed, i, 84) * 3
+              : ox + fw + 1 + hash(seed, i, 84) * 3,
+        y =
+          side === 0
+            ? oy - 2 - hash(seed, i, 84) * 3
+            : side === 1
+              ? oy + fh + 3 + hash(seed, i, 84) * 3
+              : oy + t * fh;
+      if (hash(i, seed, 85) < 0.45) continue;
+      px(x, y - 2, '#5aa848', 1, 3);
+      px(x + 1, y - 3, '#7ac85a', 1, 3);
+      px(x - 1, y - 1, '#3e8a36', 1, 2);
+    }
+    if (!wheat) {
+      // Panneau planté au coin haut-gauche : planche, piquet et la plante du champ peinte dessus.
+      const sx = ox + 2,
+        sy = oy - 4;
+      px(sx + 4, sy - 6, OUT, 4, 12);
+      px(sx + 5, sy - 6, '#6e4c2e', 2, 11);
+      px(sx - 1, sy - 16, OUT, 14, 11);
+      px(sx, sy - 15, '#b08456', 12, 9);
+      px(sx, sy - 15, '#d0a676', 12, 1);
+      px(sx, sy - 7, '#7a5634', 12, 1);
+      if (it.crop === 'veg') {
+        px(sx + 4, sy - 13, '#4a9a36', 1, 2);
+        px(sx + 6, sy - 13, '#78c050', 1, 2);
+        px(sx + 4, sy - 11, '#e8822a', 3, 2);
+        px(sx + 5, sy - 9, '#c8601a', 1, 1);
+      } else {
+        px(sx + 5, sy - 13, '#4a9a36', 2, 1);
+        px(sx + 4, sy - 12, '#d8303a', 4, 2);
+        px(sx + 5, sy - 10, '#b81e2a', 2, 1);
+        px(sx + 4, sy - 12, '#ff8a8a');
+      }
+      // Arrosoir posé au coin bas-droit.
+      const ax = ox + fw + 1,
+        ay = oy + fh + 6;
+      px(ax - 1, ay - 7, OUT, 9, 8);
+      px(ax, ay - 6, '#6a8a9a', 7, 6);
+      px(ax, ay - 6, '#a8c8d4', 7, 1);
+      px(ax + 5, ay - 6, '#4a6a7a', 2, 6);
+      px(ax - 4, ay - 8, OUT, 4, 2);
+      px(ax - 3, ay - 8, '#6a8a9a', 3, 1);
+      px(ax + 1, ay - 10, OUT, 5, 4);
+      px(ax + 2, ay - 9, '#6a8a9a', 3, 1);
+    }
+    FIELD_ART.set(id, cv);
+    return cv;
+  }
+  function drawFields(c) {
+    for (const it of items) {
+      if (it.kind !== 'field') continue;
+      const X = it.tx * T - FIELD_PAD.x * 2,
+        Y = it.ty * T - FIELD_PAD.top * 2;
+      if (X > camX + W || Y > camY + H || X + it.w * T + 40 < camX || Y + it.h * T + 70 < camY) continue;
+      const art = fieldArt(it);
+      if (art) c.drawImage(art, X, Y, art.width * 2, art.height * 2);
     }
   }
   // Légumes et fruits : sprites en trois tons, grain et contour (deux variantes par espèce).
@@ -2133,6 +2340,7 @@
     const R = rectOf(c);
     c.save();
     c.imageSmoothingEnabled = false;
+    drawFields(c);
     for (let y = y0; y <= y1; y++)
       for (let x = x0; x <= x1; x++) {
         const g = ground.get(key(x, y));
@@ -2257,6 +2465,520 @@
     }
     c.globalAlpha = 1;
   }
+  // ---------------------------------------------------------------- Quai et navire draconique
+  // Quai peint d'une pièce en pixels de 2 : planches en travers en trois tons (reflet à gauche, joint sombre,
+  // nœuds, clous, planches blanchies par le sel), longerons sur les deux bords, poteaux d'amarrage cerclés de
+  // cordage au nord, pilotis couverts d'algues au sud, échelle et rouleau de corde au bout.
+  const PIER_TOP = 14,
+    PIER_BELOW = 16;
+  let pierCanvas = null,
+    pierKey = '';
+  function pierArt(it) {
+    const id = it.tx + ',' + it.ty;
+    if (pierKey === id) return pierCanvas;
+    pierKey = id;
+    pierCanvas = null;
+    if (typeof document === 'undefined') return null;
+    const fw = it.w * 24,
+      fh = it.h * 24,
+      cv = document.createElement('canvas');
+    cv.width = fw;
+    cv.height = PIER_TOP + fh + PIER_BELOW;
+    const g = cv.getContext('2d');
+    if (!g || !g.fillRect) return null;
+    const px = (x, y, col, w = 1, h = 1) => {
+        g.fillStyle = col;
+        g.fillRect(Math.round(x), Math.round(y), w, h);
+      },
+      top = PIER_TOP,
+      bot = PIER_TOP + fh;
+    // Ombre du tablier sur l'eau.
+    px(0, bot, 'rgba(6,14,24,.45)', fw, 6);
+    px(0, bot + 6, 'rgba(6,14,24,.2)', fw, 3);
+    // Pilotis du bord sud : bois mouillé, bande d'algues à la ligne d'eau.
+    for (let x = 4; x < fw; x += 24) {
+      px(x - 1, bot - 1, OUT, 7, 13);
+      px(x, bot, '#4a3020', 5, 11);
+      px(x, bot, '#6e4c2e', 1, 11);
+      px(x, bot + 7, '#2e5a44', 5, 2);
+      px(x + 1, bot + 7, '#4a8a5a', 2, 1);
+      px(x, bot + 9, '#22303a', 5, 2);
+    }
+    // Planches en travers.
+    px(0, top, '#2a1a10', fw, fh);
+    for (let x = 0, k = 0; x < fw; x += 6, k++) {
+      const n = hash(it.tx * 31 + k, it.ty, 90),
+        base = n < 0.12 ? '#b8a07e' : n < 0.45 ? '#8a5e38' : n < 0.78 ? '#9a6c42' : '#a87a4c',
+        cut = hash(k, it.ty, 91) < 0.25 ? Math.floor(hash(k, it.ty, 92) * (fh - 8)) + top + 4 : -1;
+      px(x, top + 3, base, 5, fh - 6);
+      px(x, top + 3, n < 0.12 ? '#d8c4a0' : '#c39463', 1, fh - 6);
+      px(x + 4, top + 3, '#6a4628', 1, fh - 6);
+      // Joint d'about (deux planches bout à bout), nœuds et veinage.
+      if (cut > 0) px(x, cut, '#2a1a10', 5, 1);
+      if (hash(k, 3, 93) < 0.4) {
+        const ky = top + 6 + hash(k, 4, 93) * (fh - 14);
+        px(x + 2, ky, '#5a3a22', 2, 2);
+        px(x + 2, ky, '#7a5232');
+      }
+      for (let v = 0; v < 2; v++) px(x + 1 + v * 2, top + 6 + hash(k, v, 94) * (fh - 16), '#b08458', 1, 4);
+      // Clous au-dessus des longerons et des traverses.
+      for (const ny of [top + 4, top + fh / 2, bot - 5]) {
+        px(x + 2, ny, '#2e2a30');
+        px(x + 2, ny - 1, '#9a9aa4');
+      }
+    }
+    // Longerons nord et sud.
+    px(0, top, '#5a3a24', fw, 3);
+    px(0, top, '#8a6440', fw, 1);
+    px(0, bot - 3, '#4a3020', fw, 3);
+    px(0, bot - 3, '#7a5434', fw, 1);
+    px(0, bot - 1, '#2a1a10', fw, 1);
+    // Bout du quai : poutre de rive et échelle qui descend dans l'eau.
+    px(0, top, '#4a3020', 3, fh);
+    px(0, top, '#7a5434', 1, fh);
+    for (let r = 0; r < 4; r++) {
+      px(6, bot + r * 3, '#4a3020', 1, 3);
+      px(12, bot + r * 3, '#4a3020', 1, 3);
+      px(6, bot + r * 3 + 1, '#8a6440', 7, 1);
+    }
+    // Rouleau de corde près du bout.
+    for (let r = 5; r >= 1; r -= 2) {
+      for (let a = 0; a < Math.PI * 2; a += 0.35)
+        px(18 + Math.cos(a) * r, top + 34 + Math.sin(a) * r * 0.6, r % 4 === 1 ? '#c8a86a' : '#8a6a3a', 2, 1);
+    }
+    // Filet de pêche replié vers la plage.
+    for (let i = 0; i < 40; i++) {
+      const x = fw - 40 + hash(i, 1, 95) * 18,
+        y = top + 8 + hash(1, i, 95) * 10;
+      px(x, y, i % 2 ? '#6a7a6a' : '#9aa48a');
+    }
+    px(fw - 40, top + 13, '#d0603a', 2, 2);
+    px(fw - 26, top + 10, '#d0603a', 2, 2);
+    // Poteaux d'amarrage du bord nord, cerclés de cordage.
+    for (let x = 16; x < fw - 8; x += 48) {
+      px(x - 1, top - 12, OUT, 8, 17);
+      px(x, top - 11, '#5a3a24', 6, 15);
+      px(x, top - 11, '#8a6440', 2, 15);
+      px(x + 5, top - 11, '#3a2618', 1, 15);
+      px(x, top - 12, '#a87a4c', 6, 2);
+      px(x - 1, top - 7, '#c8a86a', 8, 2);
+      px(x - 1, top - 4, '#a88a52', 8, 2);
+      px(x - 1, top - 6, '#8a6a3a', 8, 1);
+    }
+    pierCanvas = cv;
+    return cv;
+  }
+  function drawPier(c, it) {
+    const art = pierArt(it),
+      R = rectOf(c);
+    if (art) c.drawImage(art, it.x, it.y - PIER_TOP * 2, art.width * 2, art.height * 2);
+    // Ronds dans l'eau autour des pilotis du bord sud.
+    const by = it.y + it.h * T;
+    for (let x = it.x + 8; x < it.x + it.w * T; x += 48) {
+      const t = (time * 0.02 + x * 0.013) % 1;
+      c.globalAlpha = (1 - t) * 0.55;
+      R(x - 6 - t * 8, by + 18, 8, 2, '#cfefff');
+      R(x + 12 + t * 8, by + 18, 8, 2, '#cfefff');
+    }
+    c.globalAlpha = 1;
+  }
+  // Navire draconique (pixels de 2, proue à gauche) : coque d'écailles d'obsidienne cerclée d'or et de pourpre,
+  // boucliers le long du plat-bord, figure de proue en tête de dragon cornue (œil de braise, gueule ouverte), queue
+  // relevée en poupe, château arrière éclairé, mât et voile pourpre frappée d'une éclipse aux ailes de dragon.
+  const SHIP_W = 236,
+    SHIP_H = 160,
+    SHIP_WL = 156;
+  const shipTop = x => 122 - 22 * Math.pow(Math.min(1, Math.abs(x - 120) / 80), 2.4),
+    shipBottom = x => SHIP_WL - Math.max(0, Math.abs(x - 120) - 48) * 0.85;
+  function shipSprite() {
+    return sprite('navire-draconique', SHIP_W, SHIP_H, (R, D, E, L) => {
+      // Polygone plein (règle pair-impair), case par case.
+      const poly = (pts, col) => {
+        const ys = pts.map(p => p[1]);
+        for (let y = Math.floor(Math.min(...ys)); y <= Math.max(...ys); y++)
+          for (
+            let x = Math.floor(Math.min(...pts.map(p => p[0])));
+            x <= Math.max(...pts.map(p => p[0]));
+            x++
+          ) {
+            let inside = false;
+            for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+              const [ax, ay] = pts[i],
+                [bx, by] = pts[j];
+              if (ay > y + 0.5 !== by > y + 0.5 && x + 0.5 < ((bx - ax) * (y + 0.5 - ay)) / (by - ay) + ax)
+                inside = !inside;
+            }
+            if (inside) R(x, y, 1, 1, col);
+          }
+      };
+      const bez = (a, b, d, n) => {
+        const out = [];
+        for (let i = 0; i <= n; i++) {
+          const t = i / n,
+            u = 1 - t;
+          out.push([
+            u * u * a[0] + 2 * u * t * b[0] + t * t * d[0],
+            u * u * a[1] + 2 * u * t * b[1] + t * t * d[1]
+          ]);
+        }
+        return out;
+      };
+      // Mât et vergue (derrière la voile et la coque).
+      R(117, 4, 5, 120, '#4a3020');
+      R(117, 4, 2, 120, '#7a5434');
+      R(115, 2, 9, 4, '#c8902a');
+      R(70, 16, 98, 4, '#4a3020');
+      R(70, 16, 98, 1, '#7a5434');
+      R(68, 15, 4, 6, '#c8902a');
+      R(166, 15, 4, 6, '#c8902a');
+      // Voile gonflée : lés pourpres, reflet à gauche, ombre en bas à droite, ourlet d'or.
+      for (let y = 20; y <= 100; y++) {
+        const b = Math.sin((Math.PI * (y - 20)) / 80) * 4,
+          x0 = Math.round(76 - b),
+          x1 = Math.round(162 + b);
+        for (let x = x0; x <= x1; x++) {
+          const bottom = 96 + Math.sin((Math.PI * (x - 76)) / 86) * 5;
+          if (y > bottom) continue;
+          const seam = (x - 76) % 14 === 0,
+            edge = x <= x0 + 1 || x >= x1 - 1 || y >= bottom - 2,
+            shade = (x - 76) / 86 + (y - 20) / 160;
+          R(
+            x,
+            y,
+            1,
+            1,
+            edge
+              ? y >= bottom - 1
+                ? '#8a5a1a'
+                : '#e0a83a'
+              : seam
+                ? '#6a1018'
+                : shade < 0.35
+                  ? '#c03038'
+                  : shade < 0.85
+                    ? '#9a1e28'
+                    : '#7a1620'
+          );
+        }
+      }
+      // Éclipse : couronne de feu, disque noir, liseré de lumière, et le dragon qui l'enlace de ses ailes.
+      D(119, 54, 19, '#e06a20');
+      D(119, 54, 17, '#ffc040');
+      D(119, 54, 15, '#ffe8a0');
+      D(119, 54, 14, '#140c16');
+      for (let a = -1.2; a < 0.2; a += 0.08)
+        R(119 + Math.cos(a) * 14, 54 + Math.sin(a) * 14, 1, 1, '#fff4c8');
+      const wing = side => {
+        const m = p => [119 + (p[0] - 119) * side, p[1]];
+        poly(
+          [
+            [117, 56],
+            [100, 36],
+            [84, 28],
+            [88, 40],
+            [79, 42],
+            [89, 50],
+            [80, 56],
+            [93, 60],
+            [86, 68],
+            [104, 66],
+            [116, 64]
+          ].map(m),
+          '#140c16'
+        );
+        for (const [a, b] of [
+          [
+            [117, 56],
+            [84, 28]
+          ],
+          [
+            [116, 58],
+            [79, 42]
+          ],
+          [
+            [116, 61],
+            [80, 56]
+          ]
+        ])
+          L(...m(a), ...m(b), '#5a1018');
+      };
+      wing(1);
+      wing(-1);
+      E(119, 62, 3, 9, '#140c16');
+      D(119, 49, 3, '#140c16');
+      L(117, 47, 114, 42, '#140c16');
+      L(121, 47, 124, 42, '#140c16');
+      L(119, 70, 122, 80, '#140c16', 2);
+      L(122, 80, 117, 88, '#140c16', 2);
+      R(118, 49, 1, 1, '#ff6a20');
+      R(120, 49, 1, 1, '#ff6a20');
+      // Château arrière (au-dessus du plat-bord) : planches sombres, fenêtre éclairée.
+      R(166, 92, 32, 20, '#3a2632');
+      R(166, 92, 32, 3, '#c8902a');
+      R(166, 92, 32, 1, '#ffd86a');
+      R(166, 95, 2, 17, '#56405a');
+      R(178, 99, 7, 7, '#1a1016');
+      R(179, 100, 5, 5, '#ffb030');
+      R(179, 100, 2, 2, '#fff0a0');
+      // Coque : plat-bord d'or, bande pourpre, écailles d'obsidienne en quinconce, préceinte, ligne d'eau mouillée.
+      for (let x = 40; x <= 200; x++) {
+        const t = Math.round(shipTop(x)),
+          b = Math.round(shipBottom(x));
+        for (let y = t; y <= b; y++) {
+          const r = y - t,
+            end = Math.abs(x - 120) / 80;
+          let col;
+          if (r === 0) col = '#ffd86a';
+          else if (r <= 2) col = '#c8902a';
+          else if (r === 3) col = '#7a4a14';
+          else if (r <= 5) col = '#8a1a24';
+          else if (r === 17) col = '#d8343a';
+          else if (r === 18) col = '#a01e2a';
+          else if (r === 19) col = '#5a0e16';
+          else if (y >= b - 3) col = (x * 7 + y) % 5 === 0 ? '#2e5a44' : '#1c2628';
+          else {
+            const row = Math.floor((r - 6) / 5),
+              cy0 = (r - 6) % 5,
+              cx0 = (x + (row % 2) * 3) % 6;
+            col =
+              cx0 === 0 || cy0 === 4
+                ? '#150e18'
+                : cy0 === 0
+                  ? end > 0.75
+                    ? '#3a2c40'
+                    : '#55405c'
+                  : end > 0.8 || cy0 === 3
+                    ? '#221828'
+                    : '#2e2236';
+          }
+          R(x, y, 1, 1, col);
+        }
+      }
+      // Boucliers le long du plat-bord, pourpre et noir, umbo d'or.
+      for (let x = 56, k = 0; x <= 160; x += 13, k++) {
+        if (x > 108 && x < 130) continue;
+        const y = Math.round(shipTop(x)) + 8;
+        D(x, y, 5, '#e0a83a');
+        D(x, y, 4, k % 2 ? '#a01e2a' : '#2a1d2e');
+        R(x - 4, y, 9, 1, k % 2 ? '#7a1620' : '#140c16');
+        D(x, y, 1.5, '#ffd86a');
+        R(x - 2, y - 3, 2, 1, k % 2 ? '#e05058' : '#56405a');
+      }
+      // Queue relevée en poupe, enroulée, pointe en fer de lance.
+      const tail = bez([196, 104], [222, 92], [212, 52], 26);
+      tail.forEach(([x, y], i) => {
+        const r = 6 - (i / tail.length) * 3.5;
+        D(x, y, r, '#2e2236');
+        D(x - r * 0.4, y - r * 0.3, r * 0.5, '#4a3a52');
+      });
+      tail.forEach(([x, y], i) => {
+        if (i % 4 === 1 && i < 24)
+          poly(
+            [
+              [x + 2, y - 2],
+              [x + 9, y - 4],
+              [x + 3, y + 3]
+            ],
+            '#a01e2a'
+          );
+      });
+      poly(
+        [
+          [212, 52],
+          [202, 44],
+          [210, 30],
+          [218, 44]
+        ],
+        '#a01e2a'
+      );
+      L(210, 32, 210, 48, '#d8343a');
+      // Figure de proue : cou en S aux écailles de ventre dorées, tête cornue, gueule ouverte, crocs, œil de braise.
+      const neck = bez([46, 112], [14, 92], [30, 54], 30);
+      neck.forEach(([x, y], i) => {
+        const r = 8 - (i / neck.length) * 3;
+        D(x, y, r, '#2e2236');
+      });
+      neck.forEach(([x, y], i) => {
+        const r = 8 - (i / neck.length) * 3;
+        D(x - r * 0.45, y - r * 0.2, r * 0.45, '#4e3a56');
+        if (i % 2 === 0) R(x + r * 0.5, y - 1, 3, 2, i % 4 ? '#c8902a' : '#8a5a1a');
+        if (i % 5 === 2 && i > 3)
+          poly(
+            [
+              [x - r + 1, y - 2],
+              [x - r - 6, y - 4],
+              [x - r + 1, y + 3]
+            ],
+            '#a01e2a'
+          );
+      });
+      E(30, 49, 11, 8, '#2e2236');
+      E(27, 46, 7, 4, '#4e3a56');
+      poly(
+        [
+          [24, 42],
+          [4, 46],
+          [2, 50],
+          [22, 52]
+        ],
+        '#2e2236'
+      );
+      R(4, 46, 16, 1, '#4e3a56');
+      // Mâchoire basse ouverte : gueule pourpre, crocs.
+      poly(
+        [
+          [26, 55],
+          [8, 58],
+          [6, 61],
+          [28, 60]
+        ],
+        '#2e2236'
+      );
+      poly(
+        [
+          [22, 52],
+          [3, 51],
+          [7, 57],
+          [26, 56]
+        ],
+        '#8a1a24'
+      );
+      for (const fx of [6, 11, 16]) {
+        R(fx, 51, 1, 3, '#f0e8d8');
+        R(fx + 2, 55, 1, 2, '#f0e8d8');
+      }
+      R(3, 47, 2, 1, '#140c16');
+      // Cornes recourbées vers l'arrière, en os clair.
+      L(30, 42, 40, 32, '#d8ccb0', 2);
+      L(40, 32, 50, 28, '#b8a888', 1);
+      L(34, 45, 46, 38, '#b8a888', 2);
+      L(46, 38, 54, 37, '#8a7a60', 1);
+      R(30, 42, 2, 1, '#f4ecd8');
+      // Œil.
+      R(20, 44, 5, 3, '#140c16');
+      R(21, 44, 3, 2, '#ffb030');
+      R(22, 44, 1, 1, '#fff0a0');
+      // Crête de piquants le long de la tête.
+      for (const [x, y] of [
+        [36, 42],
+        [40, 46],
+        [42, 50]
+      ])
+        poly(
+          [
+            [x, y],
+            [x + 6, y - 3],
+            [x + 2, y + 3]
+          ],
+          '#a01e2a'
+        );
+      // Défenses de bois (pare-battages) pendues contre la coque, côté quai.
+      for (const x of [76, 138, 172]) {
+        const y = Math.round(shipTop(x)) + 20;
+        L(x, Math.round(shipTop(x)) + 2, x, y, '#c8a86a');
+        E(x, y + 4, 2.5, 4, '#8a6440');
+        R(x - 1, y + 1, 1, 5, '#b08458');
+      }
+    });
+  }
+  function drawShip(c, it) {
+    const s = shipSprite(),
+      bob = Math.round(Math.sin(time * 0.035) * 2),
+      cx = it.x + (it.w * T) / 2,
+      wl = it.y + it.h * T - 4,
+      // Le sprite (contour de 2 pixels compris) : sa ligne d'eau tombe sur wl.
+      left = Math.round(cx - s.width / 2),
+      top = wl - SHIP_WL * 2 - 2 + bob,
+      at = (ax, ay) => [left + 2 + ax * 2, top + 2 + ay * 2],
+      R = rectOf(c);
+    // Reflet sombre de la coque sur l'eau.
+    if (!redrawing) {
+      c.globalAlpha = 0.28;
+      c.fillStyle = '#060a14';
+      c.beginPath();
+      c.ellipse(cx, wl + 2, 172, 12, 0, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 1;
+    }
+    // Haubans et étai : du haut du mât à la proue et à la poupe (derrière la voile, donc dessinés avant).
+    const [mx, my] = at(119, 5),
+      [bx, by] = at(46, 108),
+      [sx, sy] = at(196, 100);
+    c.strokeStyle = 'rgba(26,18,16,.85)';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(mx, my);
+    c.lineTo(bx, by);
+    c.moveTo(mx, my);
+    c.lineTo(sx, sy);
+    c.moveTo(mx, my + 20);
+    c.lineTo(...at(60, 104));
+    c.moveTo(mx, my + 20);
+    c.lineTo(...at(180, 96));
+    c.stroke();
+    c.drawImage(s, left, top);
+    // Flamme au sommet du mât, qui claque au vent.
+    const wind = typeof windAt === 'function' ? windAt(mx, my) : 0;
+    c.fillStyle = OUT;
+    c.beginPath();
+    c.moveTo(mx, my - 6);
+    for (let k = 0; k <= 6; k++)
+      c.lineTo(mx + 6 + k * 7, my - 4 + k * 0.9 + Math.sin(time * 0.15 + k) * (2 + wind));
+    for (let k = 6; k >= 0; k--)
+      c.lineTo(mx + 6 + k * 7, my + 6 - k * 0.9 + Math.sin(time * 0.15 + k) * (2 + wind));
+    c.closePath();
+    c.fill();
+    c.fillStyle = '#a01e2a';
+    c.beginPath();
+    c.moveTo(mx + 2, my - 4);
+    for (let k = 0; k <= 6; k++)
+      c.lineTo(mx + 6 + k * 7, my - 2 + k * 0.8 + Math.sin(time * 0.15 + k) * (2 + wind));
+    for (let k = 6; k >= 0; k--)
+      c.lineTo(mx + 6 + k * 7, my + 4 - k * 0.8 + Math.sin(time * 0.15 + k) * (2 + wind));
+    c.closePath();
+    c.fill();
+    // Écume le long de la ligne d'eau.
+    const x0 = left + 2 + 52 * 2,
+      len = 136 * 2;
+    for (let k = 0; k < 12; k++) {
+      const u = (time * 0.35 + k * 23) % len;
+      c.globalAlpha = 0.6 * Math.sin((Math.PI * u) / len);
+      R(x0 + u, wl - 1 + (k % 2) * 3, 8, 2, '#dff4ff');
+    }
+    c.globalAlpha = 1;
+    // Amarres : du plat-bord aux poteaux du quai.
+    if (!redrawing) {
+      c.strokeStyle = '#c8a86a';
+      c.lineWidth = 2;
+      for (const [ax, px] of [
+        [62, it.x + 16 * 2 + 6],
+        [184, it.x + (16 + 48 * 4) * 2 + 6]
+      ]) {
+        const [hx, hy] = at(ax, shipTop(ax) + 1),
+          py = it.y + it.h * T - 4 * 2 - 6;
+        c.beginPath();
+        c.moveTo(hx, hy);
+        c.quadraticCurveTo((hx + px) / 2, Math.max(hy, py) + 16, px, py);
+        c.stroke();
+      }
+    }
+    // Lueurs : œil du dragon, fenêtre du château arrière, braise de l'éclipse.
+    const [ex, ey] = at(22, 45),
+      [wx, wy] = at(181, 102);
+    canaanLight(ex, ey, 60, '#ff9a30');
+    canaanLight(wx, wy, 70, '#ffb040');
+    canaanLight(...at(119, 54), 90, '#ff7a30');
+    if (!redrawing && Math.hypot(P.x - cx, P.y - wl) < 420) {
+      c.font = 'bold 12px system-ui';
+      c.textAlign = 'center';
+      c.lineWidth = 3;
+      c.strokeStyle = '#101b20';
+      const name = '🐉 ' + tt('L’Aile d’Éclipse');
+      c.strokeText(name, cx, top - 14);
+      c.fillStyle = '#ffc890';
+      c.fillText(name, cx, top - 14);
+    }
+  }
   const BIG = { barn: barnSprite, silo: siloSprite, coop: coopSprite, hay: haySprite, cart: cartSprite };
   function drawItem(c, it) {
     const X = it.x,
@@ -2294,9 +3016,10 @@
             c.textAlign = 'center';
             c.lineWidth = 3;
             c.strokeStyle = '#101b20';
-            c.strokeText('🌾 Ferme de l’Aurore', cx, Y - 74);
+            const name = '🌾 ' + tt('Ferme de l’Aurore');
+            c.strokeText(name, cx, Y - 74);
             c.fillStyle = '#f6e2b1';
-            c.fillText('🌾 Ferme de l’Aurore', cx, Y - 74);
+            c.fillText(name, cx, Y - 74);
           }
         }
         if (it.kind === 'coop') {
@@ -2308,6 +3031,12 @@
       case 'pen':
       case 'garden':
         drawFence(c, it);
+        break;
+      case 'pier':
+        drawPier(c, it);
+        break;
+      case 'ship':
+        drawShip(c, it);
         break;
       case 'trough':
         shadow(c, cx, bottom - 8, 26, 6);
@@ -2575,6 +3304,12 @@
       const f = items.find(it => it.kind === 'forge');
       return f ? { x: (f.tx + f.w / 2) * TS, y: (f.ty + f.h) * TS } : null;
     },
-    groundAt: (tx, ty) => ground.get(key(tx, ty))?.type || null
+    groundAt: (tx, ty) => ground.get(key(tx, ty))?.type || null,
+    // Navire draconique amarré au quai (centre de sa ligne d'eau, en pixels), ou null s'il n'a pas trouvé sa place :
+    // le point d'appui de l'extension « L'Éclipse des Dragons ».
+    ship() {
+      const s = items.find(it => it.kind === 'ship');
+      return s ? { x: s.x + (s.w * T) / 2, y: s.y + s.h * T - 4 } : null;
+    }
   });
 })();

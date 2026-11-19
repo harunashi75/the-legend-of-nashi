@@ -1982,6 +1982,8 @@ export default {
   '{n} % de dégâts subis pendant {s} min': '{n}% damage taken for {s} min',
   // ------------------------------------------------------------ Lieux, régions, classes (panneau T) et Runes (panneau)
   'Camp de l’Aurore': 'Dawn Camp',
+  'Ferme de l’Aurore': 'Dawn Farm',
+  'L’Aile d’Éclipse': 'The Eclipse Wing',
   'Chaumière des Glycines': 'Wisteria Cottage',
   'Échoppe de Lira': 'Lira’s Stall',
   'La Marmite dorée': 'The Golden Pot',
