@@ -10,8 +10,14 @@
 // - Phase 3 (40 à 0 %) — La dernière lumière : plus rapide, ondes de choc successives (anneaux qui s'éloignent de
 //   lui), explosions de lumière, et l'incantation de la Dernière Lumière (6 s) : l'activation de deux sceaux de
 //   statues différentes (E) l'interrompt ; il reste alors étourdi et vulnérable 4 s. Sinon, la lumière submerge tout.
-// - PV selon le nombre de participants : ceux d'un boss de raid de niveau 60 seul, +75 % par héros en plus (jamais
-//   réduits pendant un combat). Plus personne dans l'arène pendant 4 s : il se relève et retourne à sa garde.
+// - Riposte (toutes les phases) : un cercle autour de lui ; on ne reste pas collé à lui. En phase 2 et 3, la charge
+//   s'enchaîne trois fois ; en phase 3, la frappe au sol poursuit sa cible trois fois.
+// - Dégâts en part des PV max du héros touché (la Défense et la Résistance n'en retirent qu'un quart au plus) :
+//   environ un tiers par coup, la Dernière Lumière et le Jugement solaire sont mortels. Seules la roulade et le bon
+//   placement protègent. Colère du Champion après 7 minutes de combat : attaques plus rapides, +40 % de dégâts.
+// - PV selon le nombre de participants : cinq fois ceux d'un boss de raid de niveau 60 seul (environ 4 minutes pour
+//   un héros bien équipé), +75 % par héros en plus (jamais réduits pendant un combat). Plus personne dans l'arène
+//   pendant 4 s : il se relève et retourne à sa garde.
 // - Butin : chaque participant éligible (il a frappé Valérion et se trouve à moins de 20 cases à sa chute) reçoit sa
 //   bourse d'or, une pièce Épique de niveau 60 et tire seul sa chance de 11 % d'une pièce Mythique (pièce au hasard
 //   parmi les neuf emplacements d'équipement). Réapparition 15 minutes après sa chute.
@@ -22,6 +28,9 @@
   const RESPAWN_MS = 15 * 60 * 1000;
   const MYTHIC = 0.11;
   const R = 9; // rayon de l'arène, en cases
+  const HP_MULT = 5; // PV : cinq boss de raid de niveau 60
+  const ENRAGE = 7 * 60 * 60; // Colère du Champion : après 7 minutes de combat (ticks)
+  const baseHp = () => Math.round(bossHealth(60, 'raid') * HP_MULT);
   const KINDS = ['cone', 'line', 'circle', 'beam', 'ring', 'shelter'];
   const now = () => time;
   let arena = null;
@@ -48,15 +57,23 @@
     float(m.x, m.y - 96, text, col);
     for (const h of game.heroes) if (inArena(h.player, 8)) canaanLootNotice(h, text);
   }
-  function hurt(m, hero, mult) {
-    const raw = CANAAN_ENEMY_RAW_DAMAGE(m) * mult;
-    CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(m, raw, {}, hero), m, hero);
+  // Coup d'une mécanique : une part (pct) des PV max du héros. La Défense et la Résistance n'en retirent qu'un quart
+  // au plus : l'équipement ne suffit pas, il faut esquiver. La roulade (invulnérable) évite tout.
+  function hurt(m, hero, pct) {
+    const p = hero.player;
+    if (CANAAN_COMBAT.invulnerable(hero)) {
+      float(p.x, p.y - 35, 'ESQUIVE !', '#87f8f4');
+      return;
+    }
+    const soften = 0.75 + 0.25 * canaanDamageTaken(hero, 60),
+      rage = m.fight?.enraged ? 1.4 : 1;
+    CANAAN_COMBAT.hurt(p.mhp * pct * soften * rage, m, hero);
   }
 
   // ---------------------------------------------------------------- Apparition et garde
   function spawn() {
     const c = center(),
-      base = bossHealth(60, 'raid');
+      base = baseHp();
     const m = {
       x: c.x,
       y: c.y,
@@ -143,32 +160,38 @@
     sweep(m, tg) {
       const h = pick(tg);
       root(m, 60);
-      add({ kind: 'cone', x: m.x, y: m.y, a: aimAt(m, h), r: 3.6 * T, w: 1.1, at: now() + 54, mult: 1.6 });
+      add({ kind: 'cone', x: m.x, y: m.y, a: aimAt(m, h), r: 3.8 * T, w: 1.15, at: now() + 54, pct: 0.38 });
       say(m, '⚠️ ' + tt('Balayage de hallebarde !'), '#ffb070');
     },
-    // Charge : une ligne vers un héros, puis il fonce jusqu'au bout (ou jusqu'au bord de l'arène).
+    // Charge : une ligne vers un héros, puis il fonce jusqu'au bout (ou jusqu'au bord de l'arène). En phase 2 et 3,
+    // il recharge aussitôt deux fois vers un héros (strike).
     charge(m, tg) {
       const h = pick(tg);
       root(m, 64);
-      add({
-        kind: 'line',
-        x: m.x,
-        y: m.y,
-        a: aimAt(m, h),
-        len: 8 * T,
-        w: 0.7 * T,
-        at: now() + 60,
-        mult: 1.8,
-        charge: true
-      });
+      add(chargeZone(m, h, 60, m.fight?.phase >= 2 ? 3 : 1));
       say(m, '⚠️ ' + tt('Charge du champion !'), '#ffb070');
     },
-    // Frappe au sol : un cercle sous un héros.
+    // Frappe au sol : un cercle sous un héros ; en phase 3, elle le poursuit trois fois (strike).
     slam(m, tg) {
       const h = pick(tg);
       root(m, 50);
-      add({ kind: 'circle', x: h.player.x, y: h.player.y, r: 2.1 * T, at: now() + 66, mult: 1.7 });
+      add({
+        kind: 'circle',
+        x: h.player.x,
+        y: h.player.y,
+        r: 2.1 * T,
+        at: now() + 66,
+        pct: 0.4,
+        follow: m.fight?.phase >= 3 ? h : null,
+        repeat: m.fight?.phase >= 3 ? 3 : 1
+      });
       say(m, '⚠️ ' + tt('Frappe au sol !'), '#ffb070');
+    },
+    // Riposte : un cercle autour de lui ; personne ne reste collé au champion.
+    riposte(m) {
+      root(m, 56);
+      add({ kind: 'circle', x: m.x, y: m.y, r: 2.6 * T, at: now() + 50, pct: 0.35 });
+      say(m, '⚠️ ' + tt('Riposte du champion !'), '#ffb070');
     },
     // Rayons des statues éveillées : chacune traverse l'arène, un peu de biais ; on se place entre eux.
     beams(m) {
@@ -185,7 +208,7 @@
           w: 0.55 * T,
           at: now() + 72,
           until: now() + 72 + 130,
-          mult: 0.9,
+          pct: 0.12,
           tick: 0
         });
       });
@@ -206,7 +229,7 @@
           y: s.y + ((s.y - c.y) / d) * 1.15 * T,
           r: 1.15 * T,
           at: now() + 210,
-          mult: 6,
+          pct: 1.2,
           vol
         });
       });
@@ -218,7 +241,7 @@
       root(m, 140);
       for (let i = 0; i < 3; i++) {
         const r0 = (1.2 + 2.4 * i) * T;
-        add({ kind: 'ring', x: m.x, y: m.y, r0, r: r0 + 1.5 * T, at: now() + 66 + 32 * i, mult: 1.5 });
+        add({ kind: 'ring', x: m.x, y: m.y, r0, r: r0 + 1.5 * T, at: now() + 66 + 32 * i, pct: 0.35 });
       }
       say(m, '⚠️ ' + tt('Ondes de choc !'), '#ffb070');
     },
@@ -227,8 +250,8 @@
       const c = center(),
         vol = ++volley;
       for (const h of tg)
-        add({ kind: 'circle', x: h.player.x, y: h.player.y, r: 1.6 * T, at: now() + 76, mult: 1.3, vol });
-      for (let i = 0; i < 3; i++) {
+        add({ kind: 'circle', x: h.player.x, y: h.player.y, r: 1.6 * T, at: now() + 76, pct: 0.3, vol });
+      for (let i = 0; i < 5; i++) {
         const a = Math.random() * Math.PI * 2,
           d = Math.random() * (R - 2) * T;
         add({
@@ -237,7 +260,7 @@
           y: c.y + Math.sin(a) * d,
           r: 1.6 * T,
           at: now() + 76,
-          mult: 1.3,
+          pct: 0.3,
           vol
         });
       }
@@ -253,11 +276,26 @@
     }
   };
   const ROTATION = {
-    1: ['sweep', 'charge', 'slam', 'sweep', 'slam', 'charge'],
-    2: ['beams', 'sweep', 'charge', 'judgement', 'slam', 'beams', 'sweep', 'charge'],
-    3: ['shockwave', 'burst', 'sweep', 'incant', 'charge', 'shockwave', 'burst', 'slam']
+    1: ['sweep', 'riposte', 'charge', 'slam', 'sweep', 'riposte', 'slam', 'charge'],
+    2: ['beams', 'sweep', 'riposte', 'charge', 'judgement', 'slam', 'beams', 'riposte', 'sweep', 'charge'],
+    3: ['riposte', 'shockwave', 'burst', 'charge', 'incant', 'slam', 'beams', 'riposte', 'burst', 'judgement']
   };
-  const PERIOD = { 1: 150, 2: 140, 3: 108 };
+  const PERIOD = { 1: 120, 2: 110, 3: 90 };
+  // Ligne de charge depuis Valérion vers un héros ; chain : charges restantes, celle-ci comprise.
+  function chargeZone(m, h, delay, chain) {
+    return {
+      kind: 'line',
+      x: m.x,
+      y: m.y,
+      a: aimAt(m, h),
+      len: 8 * T,
+      w: 0.7 * T,
+      at: now() + delay,
+      pct: 0.45,
+      charge: true,
+      chain
+    };
+  }
   // Sceau d'une statue (E près d'elle) pendant la Dernière Lumière.
   function canSeal(i) {
     return !!cast?.seals && statues[i] === 1;
@@ -315,7 +353,7 @@
       if (volleyHits.has(z.vol)) return;
       volleyHits.set(z.vol, true);
       const safe = zones.filter(o => o.vol === z.vol).concat(z);
-      for (const h of heroes) if (!safe.some(o => inside(o, h.player.x, h.player.y))) hurt(m, h, z.mult);
+      for (const h of heroes) if (!safe.some(o => inside(o, h.player.x, h.player.y))) hurt(m, h, z.pct);
       cast = null;
       burst(m.x, m.y, '#fff4b0', 40);
       shake = Math.max(shake, 10);
@@ -325,7 +363,7 @@
     for (const h of heroes) {
       if (!inside(z, h.player.x, h.player.y) || seen?.has(h)) continue;
       seen?.add(h);
-      hurt(m, h, z.mult);
+      hurt(m, h, z.pct);
     }
     if (seen) volleyHits.set(z.vol, seen);
     if (volleyHits.size > 30) volleyHits.delete(volleyHits.keys().next().value);
@@ -341,6 +379,17 @@
         m.y = ny;
       }
       shake = Math.max(shake, 6);
+      // Charge enchaînée : il se retourne aussitôt vers un héros.
+      const tg = fighters(1);
+      if (z.chain > 1 && tg.length) {
+        root(m, 54);
+        add(chargeZone(m, pick(tg), 48, z.chain - 1));
+      }
+    }
+    // Frappe poursuivante : la suivante tombe là où se trouve sa cible.
+    if (z.follow && z.repeat > 1 && fighters(1).includes(z.follow)) {
+      root(m, 54);
+      add({ ...z, x: z.follow.player.x, y: z.follow.player.y, at: now() + 48, repeat: z.repeat - 1 });
     }
   }
   function tickZones(m) {
@@ -351,7 +400,7 @@
         if (now() >= z.until) zones.splice(i, 1);
         else if (now() >= z.tick) {
           z.tick = now() + 20;
-          for (const h of fighters(1.5)) if (inside(z, h.player.x, h.player.y)) hurt(m, h, z.mult);
+          for (const h of fighters(1.5)) if (inside(z, h.player.x, h.player.y)) hurt(m, h, z.pct);
         }
         continue;
       }
@@ -361,7 +410,7 @@
     // Dernière Lumière non interrompue : elle submerge l'arène.
     if (cast?.seals && now() >= cast.at) {
       cast = null;
-      for (const h of fighters(1.5)) hurt(m, h, 5);
+      for (const h of fighters(1.5)) hurt(m, h, 1.6);
       statues = statues.map(v => (v ? 1 : 0));
       say(m, '🌟 ' + tt('La Dernière Lumière submerge l’arène !'), '#ffffff');
       burst(m.x, m.y, '#ffffff', 50);
@@ -381,7 +430,7 @@
       statues = [0, 0, 0, 0];
       return;
     }
-    m.fight ||= fresh(bossHealth(60, 'raid'));
+    m.fight ||= fresh(baseHp());
     m.onHurt ||= onHurt;
     // Valérion ne frappe qu'avec ses mécaniques annoncées (pas d'attaque surprise au contact).
     m.cd = 9;
@@ -417,8 +466,13 @@
       f.k = 0;
       say(m, '🌟 ' + tt('Phase 3 — La dernière lumière !'), '#ffe88a');
     }
+    // Colère du Champion : combat trop long, il frappe plus vite et plus fort.
+    if (!f.enraged && now() - f.started > ENRAGE) {
+      f.enraged = true;
+      say(m, '🔥 ' + tt('La colère du Champion : Valérion s’embrase !'), '#ff7a3a');
+    }
     if (tg.length && now() >= f.next && !(m.castUntil > now()) && !cast) {
-      f.next = now() + PERIOD[f.phase];
+      f.next = now() + Math.round(PERIOD[f.phase] * (f.enraged ? 0.75 : 1));
       const list = ROTATION[f.phase];
       CAST[list[f.k++ % list.length]](m, tg);
     }
@@ -681,6 +735,7 @@
     cast: (kind, m = boss()) =>
       m && CAST[kind] && CAST[kind](m, fighters(1).length ? fighters(1) : game.heroes),
     spawn,
+    baseHp,
     RESPAWN_MS,
     MYTHIC
   });

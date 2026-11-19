@@ -103,7 +103,7 @@
         name: 'Valérion, le Dernier Champion',
         biome: 6,
         level: 60,
-        hp: 36134,
+        hp: 180670,
         color: '#ffd86a',
         look: 'knight',
         pal: ['#e8c050', '#9a7020', '#fff2a8', '#c8202a', '#fff6d0'],

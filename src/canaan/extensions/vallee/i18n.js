@@ -118,6 +118,8 @@ CANAAN_I18N.extend('en', {
   'Balayage de hallebarde !': 'Halberd sweep!',
   'Charge du champion !': 'Champion’s charge!',
   'Frappe au sol !': 'Ground strike!',
+  'Riposte du champion !': 'Champion’s riposte!',
+  'La colère du Champion : Valérion s’embrase !': 'The Champion’s wrath: Valerion blazes up!',
   'Les statues projettent leurs rayons !': 'The statues cast their beams!',
   'Jugement solaire': 'Solar Judgement',
   'Jugement solaire : abritez-vous derrière les statues !': 'Solar Judgement: take cover behind the statues!',

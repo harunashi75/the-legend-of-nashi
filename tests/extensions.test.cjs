@@ -233,7 +233,8 @@ test('Valérion : PV selon les participants, attaques annoncées, abris du Jugem
   const ar = JSON.parse(run('JSON.stringify(CANAAN_VALLEY.plan().arena)'));
   run('spawnWorldBosses()');
   assert.equal(run('game.world.monsters.filter(m=>m.worldBossId==="valerion").length'), 1);
-  const base = run('bossHealth(60,"raid")');
+  const base = run("CANAAN_VALLEY_BOSS.baseHp()");
+  assert.equal(base, run('bossHealth(60,"raid")*5'));
   assert.equal(run('game.world.monsters.find(m=>m.worldBossId==="valerion").mhp'), base);
   // Un héros entre dans l'arène : le combat commence ; un deuxième : +75 % de PV, part de PV gardée.
   run(`P.mhp=P.hp=1e7;P.x=(${ar.x}+0.5)*TS;P.y=(${ar.y}+4.5)*TS;CANAAN_EXT.step()`);
@@ -248,6 +249,12 @@ test('Valérion : PV selon les participants, attaques annoncées, abris du Jugem
     run(
       `CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;CANAAN_VALLEY_BOSS.cast("${kind}");if(CANAAN_VALLEY_BOSS.zones().some(z=>z.at-time<48))throw new Error("${kind} trop rapide")`
     );
+  // Dégâts en part des PV max (la Défense n'en retire qu'un quart au plus) : la Riposte, collé à lui, ≈ un tiers.
+  run('CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;P.roll=0;P.x=__m.x+30;P.y=__m.y;globalThis.__h0=P.hp');
+  run('CANAAN_VALLEY_BOSS.cast("riposte");for(let i=0;i<60;i++){time++;CANAAN_EXT.step()}');
+  const share = run('(__h0-P.hp)/P.mhp');
+  assert.ok(share >= 0.26 && share <= 0.35, 'Riposte : ' + share);
+  run('P.hp=P.mhp');
   // Jugement solaire : abrité derrière une statue, rien ; à découvert, un coup très lourd.
   run('CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;CANAAN_VALLEY_BOSS.cast("judgement")');
   const shelter = JSON.parse(run('JSON.stringify(CANAAN_VALLEY_BOSS.zones().find(z=>z.kind==="shelter"))'));
