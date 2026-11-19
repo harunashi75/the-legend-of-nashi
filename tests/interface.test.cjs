@@ -388,3 +388,23 @@ test('Paramètres en onglets ; touches du clavier réglables, échangées en cas
  assert.equal(run('CANAAN_KEYS.actionOf("w")'),'moveUp');
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Caméra : sur l’île, elle reste dans la carte près des bords ; dans un intérieur, centrée sur la pièce',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ run('startGame();W=1920;H=1080');
+ // Coin sud-ouest : aucun vide au-delà de la grille, ni à gauche ni en bas.
+ run('P.x=3*TS;P.y=(MAPH-2)*TS;camX=-5000;camY=0;for(let i=0;i<120;i++)updateView()');
+ assert.equal(run('Math.round(camX)'),0);assert.equal(run('Math.round(camY)'),run('MAPH*TS-H'));
+ // Coin nord-est.
+ run('P.x=(MAPW-1)*TS;P.y=TS;for(let i=0;i<120;i++)updateView()');
+ assert.equal(run('Math.round(camX)'),run('MAPW*TS-W'));assert.equal(run('Math.round(camY)'),0);
+ // Au large des bords, la caméra suit le héros au centre de l'écran.
+ run('P.x=200*TS;P.y=200*TS;for(let i=0;i<120;i++)updateView()');
+ assert.equal(run('Math.round(camX)'),run('200*TS-W/2'));
+ // La maison du joueur est rangée dans le coin nord-ouest : la caméra reste centrée sur la pièce.
+ run('{const r=CANAAN_ROOMS[0];P.x=(r.x+r.w/2)*TS;P.y=(r.y+r.h/2)*TS;for(let i=0;i<120;i++)updateView();globalThis.room=r}');
+ assert.equal(run('Math.round(camX)'),run('Math.round((room.x+room.w/2)*TS-W/2)'));assert.ok(run('camX')<0);
+ // Vue plus grande que la carte : centrée.
+ assert.equal(run('canaanClampCam(-10,500,300)===-100&&canaanClampCam(-10,100,300)===0&&canaanClampCam(999,100,300)===200'),true);
+});

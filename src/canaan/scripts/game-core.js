@@ -339,6 +339,11 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 // camera
 let camX = 0,
   camY = 0;
+// Borne une coordonnée de caméra pour que la vue (view px) reste dans la carte (size px) ; centrée si la vue est
+// plus grande que la carte.
+function canaanClampCam(cam, view, size) {
+  return view >= size ? (size - view) / 2 : Math.min(Math.max(cam, 0), size - view);
+}
 // chat
 const chatLog = document.getElementById('chatlog'),
   chatInput = document.getElementById('chatinput');
@@ -1104,14 +1109,23 @@ function updateView() {
   const room = game.world.instance ? null : canaanRoomAt(P.x / TS, P.y / TS),
     focusX = room ? (room.x + room.w / 2) * TS : P.x,
     focusY = room ? (room.y + room.h / 2 + 0.6) * TS : P.y;
+  let goalX = focusX - W / 2,
+    goalY = focusY - H / 2;
+  // Sur l'île, la caméra reste dans la carte : près d'un bord, le héros
+  // s'écarte du centre de l'écran au lieu de laisser voir le vide au-delà de la grille. Les intérieurs, eux, restent
+  // centrés sur leur pièce.
+  if (!room && !game.world.instance && !canaanUnder()) {
+    goalX = canaanClampCam(goalX, W, MAPW * TS);
+    goalY = canaanClampCam(goalY, H, MAPH * TS);
+  }
   // Grand saut (début de partie, entrée ou sortie d'instance, retour au camp) : la caméra se pose d'un coup sur le
   // héros au lieu de traverser la carte (elle partait de l'angle de la carte, où sont rangés les intérieurs).
-  if (Math.abs(focusX - W / 2 - camX) > W || Math.abs(focusY - H / 2 - camY) > H) {
-    camX = focusX - W / 2;
-    camY = focusY - H / 2;
+  if (Math.abs(goalX - camX) > W || Math.abs(goalY - camY) > H) {
+    camX = goalX;
+    camY = goalY;
   }
-  camX += (focusX - W / 2 - camX) * (room ? 0.2 : 0.1);
-  camY += (focusY - H / 2 - camY) * (room ? 0.2 : 0.1);
+  camX += (goalX - camX) * (room ? 0.2 : 0.1);
+  camY += (goalY - camY) * (room ? 0.2 : 0.1);
   if (shake > 0) shake *= 0.85;
   // HUD
   document.getElementById('hpb').style.width = (P.hp / P.mhp) * 100 + '%';
