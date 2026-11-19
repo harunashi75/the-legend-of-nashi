@@ -2,7 +2,15 @@
 
 Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ; la version unique est `CANAAN_VERSION` dans `src/canaan/scripts/runtime-config.js`. Le détail du contenu est dans [docs/GAMEPLAY.md](docs/GAMEPLAY.md).
 
-## [0.9.8] — en préparation
+## [0.10.0] — 2026-11-18
+
+Première version publique.
+
+### Modifié
+- **Donjons, raids et Arène au rendu de l’île et des Tréfonds** 🏰 : plus de cases visibles. Sols continus peints en motifs sans couture selon la fiche de chaque instance (terre, gravier, dalles, carreaux, marbre veiné aux joints d’or, basalte aux joints de braise, dalles arcaniques, pierre d’étoiles), allées aux bords nets (tapis tissés à liseré d’or, grilles de fer, voies de mine avec traverses et rails, dalles runiques), vraies faces de murs en maçonnerie ou en roche avec leur ombre portée, dessus des murs sombre pour bien voir où l’on marche, dangers animés (eau, lave, sang, mer de nuées) et gouffres, vide et ciel étoilé qui plongent dans le noir. Une salle secrète qui s’ouvre se repeint sur place.
+- **Arrivée dans les Tréfonds plus rapide** : le sol n’est plus peint d’un seul coup à l’arrivée (le jeu se figeait près d’une demi-seconde, plus sur une machine modeste) ; il apparaît en fondu en quelques images, le bloc du héros d’abord, et chaque bloc se peint environ deux fois plus vite.
+
+## [0.9.8]
 
 Première version officielle avant la sortie sur Steam : la numérotation repart de 0.9.8 (les versions 1.9.x étaient des versions de développement). Les sauvegardes des versions 1.9.x restent lisibles : seul le format des sauvegardes compte, et il ne change pas. Prochaine étape : tests en jeu, puis 0.10.0, première version publique.
 

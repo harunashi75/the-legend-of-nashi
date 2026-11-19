@@ -2160,6 +2160,7 @@
     onInstanceBossDown,
     dungeonChestSpot,
     drawDungeonTile: ART.drawDungeonTile,
+    drawDungeonGround: ART.drawDungeonGround,
     drawDungeonDecor: ART.drawDungeonDecor,
     dungeonAmbience: ART.dungeonAmbience,
     drawDungeonEntrance: ART.drawDungeonEntrance,

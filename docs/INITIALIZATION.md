@@ -30,7 +30,7 @@ En cas d’échec, le démarrage est bloqué et l’écran d’accueil affiche l
 | `canaan-portals` | `openPortal` |
 | `canaan-map-panel` | `toggleMap` |
 | `canaan-sprite-kit` | `canaanOutline`, `canaanPolish`, `canaanActorSprite`, `drawCanaanActor`, `canaanLight`, `resetCanaanLights`, `drawCanaanLighting`, `drawCanaanBossFrame` |
-| `canaan-dungeons` | `makeDungeon`, `spawnInstanceBoss`, `onInstanceBossDown`, `dungeonChestSpot`, `drawDungeonTile`, `drawDungeonDecor`, `drawDungeonEntrance`, `dungeonAmbience`, `dungeonMinimapColor`, `arenaLayout` |
+| `canaan-dungeons` | `makeDungeon`, `spawnInstanceBoss`, `onInstanceBossDown`, `dungeonChestSpot`, `drawDungeonTile`, `drawDungeonGround`, `drawDungeonDecor`, `drawDungeonEntrance`, `dungeonAmbience`, `dungeonMinimapColor`, `arenaLayout` |
 | `canaan-world-look` | `drawWorldTile`, `worldAmbience` |
 | `canaan-item-rules` | `rarityRoll` |
 | `canaan-gear-engine` | `giveGear` |

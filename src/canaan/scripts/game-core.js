@@ -1136,11 +1136,10 @@ function draw() {
   let y0 = Math.max(0, Math.floor(camY / TS) - 1),
     y1 = Math.min(MAPH, Math.ceil((camY + H) / TS) + 1);
   const cols = BIOME_COLORS;
-  // Sol : par blocs gardés sur l'île (world-look.js), case par case en donjon.
+  // Sol : par blocs gardés sur l'île (world-look.js), dans les Tréfonds et en donjon (under-look.js).
   if (game.world.instance) {
     forgetWorldGround();
-    for (let y = y0; y < y1; y++)
-      for (let x = x0; x < x1; x++) drawDungeonTile(ctx, x, y, game.world.tiles[y][x]);
+    drawDungeonGround(ctx, x0, x1, y0, y1);
   } else if (canaanUnder()) {
     forgetWorldGround();
     CANAAN_UNDER.drawGround(ctx, x0, x1, y0, y1);

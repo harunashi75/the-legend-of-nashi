@@ -51,6 +51,7 @@
         onInstanceBossDown: 'function',
         dungeonChestSpot: 'function',
         drawDungeonTile: 'function',
+        drawDungeonGround: 'function',
         drawDungeonDecor: 'function',
         drawDungeonEntrance: 'function',
         dungeonAmbience: 'function',

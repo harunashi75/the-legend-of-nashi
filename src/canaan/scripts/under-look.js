@@ -24,7 +24,13 @@
   const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
   function create(api) {
-    const { T, at, biomeAt, bridges, themeOf, BIOMES, WET, houseTile } = api;
+    const { T, at, biomeAt, bridges, themeOf, BIOMES, WET } = api;
+    // Crochets facultatifs (donjons, raids) ; par défaut, les Tréfonds.
+    const key = api.key || (() => game.world.underworld),
+      live = api.live || (() => !game.world.instance && game.world.layer === 'under'),
+      deepOf = w => (api.deep ? api.deep(w) : w === T.CHASM),
+      isRoom = api.isRoom || (() => false),
+      houseTile = api.houseTile || (() => {});
     const kit = () => window.CANAAN_GROUND_KIT;
     const FLOORS = new Set([T.FLOOR, T.STONE, T.GRAVE, T.MOSS]);
     let probe;
@@ -230,6 +236,120 @@
         mul(0.82 + 0.18 * Math.min(1, v.e / 4));
         if (o.moss && pfbm(x, y, 16, 85) > 0.6) mix(o.moss, 0.5);
       },
+      // Marbre : grandes dalles polies, veines sinueuses, joints fins dorés ou sombres.
+      marble(x, y, p, o) {
+        const lx = x & 63,
+          ly = y & 63,
+          id = ih(((x >> 6) & 3) + 1, ((y >> 6) & 3) + 1, 121 + o.seed);
+        if (lx < 2 || ly < 2) {
+          set(o.joint || p.b);
+          if (!o.joint) mul(0.8);
+          return;
+        }
+        set(lerp(p.a, p.b, 0.15 + id * 0.25));
+        const vein = Math.abs(pfbm(x, y, 4, 123 + o.seed) - 0.5 + 0.12 * Math.sin((x + y) / 23 + id * 6));
+        if (vein < 0.02) mix(p.b, 0.75);
+        else if (vein < 0.05) mix(p.b, 0.3);
+        mul(1 + 0.08 * Math.max(-1, Math.min(1, ((lx - 32) / 30) * LX + ((ly - 32) / 30) * LY)));
+        if (lx > 61 || ly > 61) mul(0.9);
+      },
+      // Basalte : colonnes hexagonales vues de dessus (cellules), arêtes vives, braises dans les joints.
+      basalt(x, y, p, o) {
+        const v = pvor(x, y, 16, 131 + o.seed);
+        if (v.e < 1) {
+          set(p.b);
+          mul(0.55);
+          if (o.glow && pv(x, y, 8, 133) > 0.8) mix(o.glow, 0.7);
+          return;
+        }
+        set(lerp(p.a, v.id > 0.5 ? p.c : p.b, Math.abs(v.id - 0.5) * 0.9));
+        mul(1 + 0.22 * lit(x - v.cx, y - v.cy, 8));
+        mul(0.84 + 0.16 * Math.min(1, v.e / 3));
+        if (ih(x >> 1, y >> 1, 134) > 0.97) mul(0.8);
+      },
+      // Dalles arcaniques : carreaux sombres traversés de lignes de lumière, glyphe au centre de quelques-uns.
+      arcane(x, y, p, o) {
+        const lx = x & 31,
+          ly = y & 31,
+          id = ih((x >> 5) & 7, (y >> 5) & 7, 141 + o.seed);
+        if (lx < 2 || ly < 2) {
+          set(p.b);
+          mul(0.7);
+          if (o.glow && pv(x, y, 4, 142) > 0.55) mix(o.glow, 0.6);
+          return;
+        }
+        set(lerp(p.a, id > 0.5 ? p.c : p.b, Math.abs(id - 0.5) * 0.8));
+        mul(1 + 0.1 * Math.max(-1, Math.min(1, ((lx - 16) / 14) * LX + ((ly - 16) / 14) * LY)));
+        if (o.glow && id > 0.82) {
+          const ax = Math.abs(lx - 16),
+            ay = Math.abs(ly - 16);
+          if (Math.abs(ax + ay - 7) < 1 || (ax < 1 && ay < 4)) mix(o.glow, 0.75);
+        }
+      },
+      // Pierre d'étoiles : nuit pavée, constellations de points lumineux, nébuleuse douce.
+      starstone(x, y, p, o) {
+        const v = pvor(x, y, 32, 151 + o.seed);
+        set(p.a);
+        const n = pfbm(x, y, 4, 152 + o.seed);
+        mix(lerp(p.a, [120, 90, 200], 0.4), Math.max(0, n - 0.5) * 0.9);
+        if (v.e < 1.2) {
+          set(p.b);
+          mul(0.75);
+          return;
+        }
+        mul(1 + 0.1 * lit(x - v.cx, y - v.cy, 14));
+        const st = ih(x >> 1, y >> 1, 153);
+        if (st > 0.992) set(p.c);
+        else if (st > 0.982) mix(p.c, 0.45);
+      },
+      // Tapis : trame tissée, motif de losanges, usure au centre.
+      carpet(x, y, p, o) {
+        set(p.a);
+        if ((x >> 1) % 2 === (y >> 1) % 2) mul(0.94);
+        const ax = Math.abs((x & 31) - 16),
+          ay = Math.abs((y & 31) - 16);
+        if (Math.abs(ax + ay - 10) < 1.5) mix(p.c, 0.45);
+        else if (ax + ay < 4) mix(p.b, 0.6);
+        mul(0.92 + 0.12 * pv(x, y, 16, 161 + o.seed));
+      },
+      // Grille de fer : barreaux croisés, fond sombre qui luit par en dessous.
+      grate(x, y, p, o) {
+        const lx = x & 15,
+          ly = y & 15;
+        if (lx < 4 || ly < 4) {
+          set(p.a);
+          mul(lx < 2 || ly < 2 ? 1.18 : 0.9);
+          if (pv(x, y, 16, 171) > 0.7) mix([110, 70, 40], 0.3);
+          return;
+        }
+        set(p.b);
+        mul(0.5);
+        if (o.glow) mix(o.glow, 0.25 + 0.25 * pv(x, y, 8, 172 + o.seed));
+      },
+      // Voie de mine : gravier tassé (les rails et traverses sont posés par-dessus).
+      rails(x, y, p, o) {
+        SHADERS.gravel(x, y, { a: p.a, b: lerp(p.a, [0, 0, 0], 0.35), c: lerp(p.a, p.c, 0.4) }, o);
+      },
+      // Allée runique : dalles carrées, une rune lumineuse sur deux.
+      runes(x, y, p, o) {
+        const lx = x & 47,
+          ly = y & 47,
+          id = ih(Math.floor(x / 48) & 7, Math.floor(y / 48) & 7, 181 + o.seed);
+        if (lx < 2 || ly < 2) {
+          set(p.b);
+          mul(0.7);
+          return;
+        }
+        set(lerp(p.a, p.b, id * 0.4));
+        mul(1 + 0.1 * Math.max(-1, Math.min(1, ((lx - 24) / 22) * LX + ((ly - 24) / 22) * LY)));
+        if (id > 0.45) {
+          const ax = Math.abs(lx - 24),
+            ay = Math.abs(ly - 24),
+            r = Math.hypot(ax, ay);
+          if (Math.abs(r - 11) < 1 || (ax < 1 && ay < 8) || (ay < 1 && ax < 8 && id > 0.7)) mix(p.c, 0.8);
+        }
+        mul(0.94 + 0.1 * pv(x, y, 32, 183 + o.seed));
+      },
       // Boue : flaques luisantes et traînées.
       mud(x, y, p, o) {
         const n = pfbm(x, y, 8, 91 + o.seed);
@@ -296,15 +416,23 @@
       return out;
     }
     // Motif d'un sol (b : biome, t : case), du dessus de la roche ('rock') ou de la boue.
+    // Mémo par (biome, case) : appelé pour chaque bloc de 2 px des cases de bord.
+    const FLOOR_PAT = new Map();
     function floorPattern(b, t) {
+      const id = b * 4096 + (t === 'rock' ? 4095 : t);
+      let pat = FLOOR_PAT.get(id);
+      if (!pat) FLOOR_PAT.set(id, (pat = makeFloorPattern(b, t)));
+      return pat;
+    }
+    function makeFloorPattern(b, t) {
       const th = themeOf(b),
-        o = { ...DRESS[b], seed: b * 3 };
+        o = { ...(api.dress ? api.dress(b) : DRESS[b]), seed: b * 3 };
       if (t === 'rock') {
         const w = th.wall;
         return pattern(
           b + ':rock',
           'rock',
-          { a: mixHex(w.dark, w.top, 0.45), b: w.top, c: mixHex(w.dark, w.face, 0.5) },
+          api.rockPal?.(b) || { a: mixHex(w.dark, w.top, 0.45), b: w.top, c: mixHex(w.dark, w.face, 0.5) },
           o
         );
       }
@@ -341,9 +469,9 @@
     let underMap = null,
       underFor = null;
     function liquidUnder(x, y) {
-      if (underFor !== game.world.underworld) {
+      if (underFor !== key()) {
         underMap = new Int8Array(MAPW * MAPH).fill(-2);
-        underFor = game.world.underworld;
+        underFor = key();
       }
       const k = y * MAPW + x;
       if (underMap[k] !== -2) return underMap[k];
@@ -457,11 +585,15 @@
         RH = RB + RT + 42,
         rockMemo = new Int8Array(RB * RH).fill(-1);
       const rk = { f: 0, gx: 0, gy: 0, thr: 0 };
+      // Parois bâties (api.rockSharp > 1) : la transition est resserrée vers le bord de la case, coins plus vifs.
+      const SH = api.rockSharp || 1,
+        sharp = v =>
+          SH === 1 ? v : Math.max(0, Math.min(B - 1, Math.round(B / 2 - 0.5 + (v - B / 2 + 0.5) * SH)));
       function rockField(gx, gy) {
         const tx = Math.floor(gx / B),
           ty = Math.floor(gy / B),
-          bx = gx - tx * B,
-          by = gy - ty * B,
+          bx = sharp(gx - tx * B),
+          by = sharp(gy - ty * B),
           wx = gx * 2 + 1,
           wy = gy * 2 + 1;
         let f = 0,
@@ -478,10 +610,15 @@
             fy += qx * dqy;
           }
         }
-        const amp = bi(tx, ty) === 4 ? 0.35 : 1;
         rk.f = f;
-        rk.gx = fx / S;
-        rk.gy = fy / S;
+        rk.gx = (fx / S) * SH;
+        rk.gy = (fy / S) * SH;
+        // Loin de toute roche : pas de bruit à calculer (le seuil ne descend jamais sous 0,2).
+        if (f < 0.01) {
+          rk.thr = 0.5;
+          return false;
+        }
+        const amp = api.rockAmp ? api.rockAmp(bi(tx, ty)) : bi(tx, ty) === 4 ? 0.35 : 1;
         rk.thr =
           0.5 +
           (fbm(wx / 34, wy / 34, 231) - 0.5) * 0.46 * amp +
@@ -685,7 +822,8 @@
                   }
                 }
                 // La chaussée a son propre seuil (bords plus nets, comme les routes).
-                const th = L === 3 ? 0.5 + (fbm(wx / 40, wy / 40, 3) - 0.5) * 0.3 : thr;
+                const th =
+                  L === 3 ? (api.pathSharp ? 0.5 : 0.5 + (fbm(wx / 40, wy / 40, 3) - 0.5) * 0.3) : thr;
                 f[L] = a - th;
                 fgx[L] = ax / S;
                 fgy[L] = ay / S;
@@ -714,7 +852,7 @@
                 gg = 0,
                 bb = 0,
                 a = 0;
-              if (w === T.CHASM) {
+              if (deepOf(w)) {
                 // Paroi du gouffre : la terre plonge dans le noir sous le bord d'en haut.
                 let k = 1;
                 while (k <= 12 && !landAbove(gx, gy - k)) k++;
@@ -759,6 +897,13 @@
               if (wet < 6) shade *= 0.66 + 0.34 * smooth(0, 6, wet);
               else if (d < 6) shade *= 1 + 0.3 * litOf(win) * (1 - d / 6) * (win === 3 ? 1 : 0.7);
               if (win === 3) shade *= 1 - 0.18 * (1 - smooth(0, 8, d));
+              // Liseré d'une allée (tapis) : bande d'or le long de son bord.
+              const rim = win === 3 && api.pathBorder?.(bi(tx, ty));
+              if (rim && d < 5) {
+                const k = (d < 1.2 ? 0.6 : 1) * shade;
+                fill(ox + bx * 2, oy + by * 2, rim[0] * k, rim[1] * k, rim[2] * k, 255);
+                continue;
+              }
             }
             if (win < hi && win > 0) {
               const d = dist(win + 1),
@@ -805,7 +950,7 @@
         for (let x = X0; x < Math.min(MAPW, X0 + CH); x++) {
           const ox = (x - X0) * S,
             oy = (y - Y0) * S;
-          if (api.isRoom(x, y)) {
+          if (isRoom(x, y)) {
             rooms.push([x, y]);
             continue;
           }
@@ -828,6 +973,7 @@
       for (let y = Y0; y < Math.min(MAPH, Y0 + CH); y++)
         for (let x = X0; x < Math.min(MAPW, X0 + CH); x++) if (bridges.has(y * MAPW + x)) bridge(g, x, y);
       for (const [x, y] of rooms) houseTile(g, x, y);
+      api.afterChunk?.(g, X0, Y0, Math.min(MAPW, X0 + CH), Math.min(MAPH, Y0 + CH));
       return cv;
     }
     let MACRO;
@@ -866,9 +1012,9 @@
     let axes = null,
       axesFor = null;
     function bridgeAxis(x, y) {
-      if (axesFor !== game.world.underworld) {
+      if (axesFor !== key()) {
         axes = new Map();
-        axesFor = game.world.underworld;
+        axesFor = key();
         for (const k0 of bridges.keys()) {
           if (axes.has(k0)) continue;
           const part = [k0];
@@ -964,7 +1110,9 @@
         img = bg.createImageData(Pw, Pw),
         d = img.data;
       let tones, glints, speed, streak;
-      if (w === T.CHASM) {
+      const own = api.liquidLook?.(w, b);
+      if (own) ({ tones, glints, speed, streak } = own);
+      else if (w === T.CHASM) {
         tones = [
           [3, 3, 6],
           [6, 6, 12],
@@ -1004,11 +1152,11 @@
       bg.putImageData(img, 0, 0);
       for (let j = 0; j < 16; j++)
         for (let i = 0; i < 16; i++) {
-          if (ih(i, j, 274 + w) > (w === T.CHASM ? 0.25 : 0.5)) continue;
+          if (ih(i, j, 274 + w) > (deepOf(w) ? 0.25 : 0.5)) continue;
           const x = (i * 16 + Math.floor(ih(j, i, 275) * 12)) % Pw,
             y = (j * 16 + Math.floor(ih(i, j, 276) * 12)) % Pw,
-            len = (w === T.CHASM ? 2 : 4) + Math.floor(ih(i, j, 277) * 4) * 2 * streak;
-          gg.fillStyle = w === T.CHASM ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,.35)';
+            len = (deepOf(w) ? 2 : 4) + Math.floor(ih(i, j, 277) * 4) * 2 * streak;
+          gg.fillStyle = deepOf(w) ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,.35)';
           gg.fillRect(x + 2, y + 2, len - 2, 2);
           gg.fillStyle = glints[ih(i, j, 278) > 0.7 ? 1 : 0];
           gg.fillRect(x, y, len, 2);
@@ -1036,7 +1184,7 @@
       MAT.e = Math.round(time * 0.16 * k);
       MAT.f = Math.round(time * 0.03 * k);
       pat.glint.setTransform(MAT);
-      c.globalAlpha = w === T.CHASM ? 0.35 + 0.2 * Math.sin(time * 0.01) : 0.5 + 0.25 * Math.sin(time * 0.02);
+      c.globalAlpha = deepOf(w) ? 0.35 + 0.2 * Math.sin(time * 0.01) : 0.5 + 0.25 * Math.sin(time * 0.02);
       c.fillStyle = pat.glint;
       c.fillRect(X, Y, wd, hg);
       c.globalAlpha = 1;
@@ -1048,15 +1196,17 @@
       ahead = null,
       queued = false;
     function fresh() {
-      if (chunkFor !== game.world.underworld) {
+      if (chunkFor !== key()) {
         chunks = new Map();
-        chunkFor = game.world.underworld;
+        chunkFor = key();
         underFor = null;
+        work = new Map();
+        stale.clear();
       }
     }
     // Bloc (cx, cy) : gardé, ou peint maintenant (deadline : s'arrête à l'heure dite et renvoie null, la peinture
-    // reprendra où elle en était).
-    let work = null;
+    // reprendra où elle en était ; quelques blocs entamés sont gardés en cours).
+    let work = new Map();
     function chunkAt(cx, cy, deadline) {
       fresh();
       const id = cy * 64 + cx;
@@ -1066,12 +1216,17 @@
         chunks.set(id, img);
         return img;
       }
-      if (work?.id !== id || work.of !== chunkFor) work = { id, of: chunkFor, it: paintChunk(cx, cy) };
+      let job = work.get(id);
+      if (!job || job.of !== chunkFor) {
+        job = { of: chunkFor, it: paintChunk(cx, cy) };
+        work.set(id, job);
+        if (work.size > 4) work.delete(work.keys().next().value);
+      }
       let step;
-      do step = work.it.next();
+      do step = job.it.next();
       while (!step.done && step.value === null && !(deadline && performance.now() > deadline));
       if (!step.done) return null;
-      work = null;
+      work.delete(id);
       img = step.value;
       if (!img) return null;
       img.addEventListener?.('contextlost', release);
@@ -1081,7 +1236,7 @@
     }
     function prepare(deadline) {
       queued = false;
-      if (!ahead || game.world.instance || game.world.layer !== 'under') return;
+      if (!ahead || !live()) return;
       const { cx0, cx1, cy0, cy1 } = ahead,
         mx = (cx0 + cx1) / 2,
         my = (cy0 + cy1) / 2,
@@ -1101,15 +1256,60 @@
       if (typeof requestIdleCallback === 'function') requestIdleCallback(prepare, { timeout: 400 });
       else setTimeout(prepare, 30);
     }
+    // Cases (x0, y0)-(x1, y1) changées (passage secret ouvert) : les blocs qui les touchent (avec la marge des bords
+    // et des faces de falaise) seront repeints ; l'ancienne image reste affichée jusque-là.
+    const stale = new Map();
+    function forget(x0, y0, x1, y1) {
+      fresh();
+      underFor = null;
+      axesFor = null;
+      for (let cy = Math.floor((y0 - 9) / CH); cy <= Math.floor((y1 + 3) / CH); cy++)
+        for (let cx = Math.floor((x0 - 3) / CH); cx <= Math.floor((x1 + 3) / CH); cx++) {
+          const id = cy * 64 + cx;
+          if (chunks.has(id)) stale.set(id, chunks.get(id));
+          chunks.delete(id);
+          work.delete(id);
+        }
+    }
     function release() {
+      stale.clear();
       if (chunks.size) chunks = new Map();
       ahead = null;
-      work = null;
+      work = new Map();
+      born.clear();
     }
     // Sol des Tréfonds : eaux animées dessous, blocs de sol, bulles de boue. Faux si le rendu est indisponible.
+    // Les blocs visibles pas encore peints le sont dans un budget de temps par image (le plus proche du centre
+    // d'abord) : à l'arrivée, le sol apparaît en fondu en quelques images au lieu de figer le jeu. Un bloc absent
+    // reste dans le noir, sous ses eaux.
+    const BUDGET = 10,
+      FADE = 9,
+      born = new Map();
     function drawGround(c, x0, x1, y0, y1) {
       if (!active()) return false;
-      if (!chunkAt(Math.floor(x0 / CH), Math.floor(y0 / CH))) return false;
+      fresh();
+      const start = performance.now(),
+        cx0 = Math.floor(x0 / CH),
+        cx1 = Math.floor((x1 - 1) / CH),
+        cy0 = Math.floor(y0 / CH),
+        cy1 = Math.floor((y1 - 1) / CH),
+        mx = (x0 + x1) / 2 / CH - 0.5,
+        my = (y0 + y1) / 2 / CH - 0.5,
+        list = [];
+      for (let cy = cy0; cy <= cy1; cy++)
+        for (let cx = cx0; cx <= cx1; cx++) list.push([Math.hypot(cx - mx, cy - my), cx, cy]);
+      list.sort((a, b) => a[0] - b[0]);
+      const ready = new Map();
+      for (const [, cx, cy] of list) {
+        const id = cy * 64 + cx;
+        let img = chunks.has(id) ? chunkAt(cx, cy) : null;
+        if (!img && performance.now() - start < BUDGET) {
+          img = chunkAt(cx, cy, start + BUDGET);
+          if (img && !stale.delete(id)) born.set(id, time);
+        }
+        if (!img && stale.has(id)) img = stale.get(id);
+        if (img) ready.set(id, img);
+      }
       for (let y = y0; y < y1; y++)
         for (let x = x0; x < x1;) {
           const w = liquidUnder(x, y);
@@ -1126,17 +1326,30 @@
       const m = c.getTransform?.(),
         sx = m ? m.e : 0,
         sy = m ? m.f : 0;
-      for (let cy = Math.floor(y0 / CH); cy <= Math.floor((y1 - 1) / CH); cy++)
-        for (let cx = Math.floor(x0 / CH); cx <= Math.floor((x1 - 1) / CH); cx++) {
-          const img = chunkAt(cx, cy);
-          if (img) c.drawImage(img, Math.round(cx * CH * S + sx) - sx, Math.round(cy * CH * S + sy) - sy);
+      for (let cy = cy0; cy <= cy1; cy++)
+        for (let cx = cx0; cx <= cx1; cx++) {
+          const id = cy * 64 + cx,
+            img = ready.get(id),
+            X = Math.round(cx * CH * S + sx) - sx,
+            Y = Math.round(cy * CH * S + sy) - sy;
+          if (!img) {
+            c.fillStyle = '#050407';
+            c.fillRect(X, Y, CH * S, CH * S);
+            continue;
+          }
+          const age = born.has(id) ? time - born.get(id) : FADE;
+          if (age >= FADE) {
+            born.delete(id);
+            c.drawImage(img, X, Y);
+            continue;
+          }
+          c.fillStyle = '#050407';
+          c.fillRect(X, Y, CH * S, CH * S);
+          c.globalAlpha = Math.max(0.15, age / FADE);
+          c.drawImage(img, X, Y);
+          c.globalAlpha = 1;
         }
-      ahead = {
-        cx0: Math.floor(x0 / CH),
-        cx1: Math.floor((x1 - 1) / CH),
-        cy0: Math.floor(y0 / CH),
-        cy1: Math.floor((y1 - 1) / CH)
-      };
+      ahead = { cx0, cx1, cy0, cy1 };
       queue();
       // Bulles qui crèvent à la surface de la boue.
       for (let y = y0; y < y1; y++)
@@ -1157,7 +1370,7 @@
         }
       return true;
     }
-    return { drawGround, release, active };
+    return { drawGround, forget, release, active };
   }
   window.CANAAN_UNDER_LOOK = Object.freeze({ create });
 })();

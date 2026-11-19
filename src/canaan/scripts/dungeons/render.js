@@ -775,6 +775,239 @@
       c.drawImage(img, off, 0, 48 - off, 48, x, y, 48 - off, 48);
       c.drawImage(img, 0, 0, off, 48, x + 48 - off, y, off, 48);
     }
+    // ---------------------------------------------------------------- Sol peint comme l'île et les Tréfonds
+    // Même moteur que les Tréfonds (under-look.js) : sols continus en motifs sans couture, bords organiques, vraies
+    // faces de falaise ou de maçonnerie avec leur ombre portée, dangers animés (eaux, lave, sang, nuées) et gouffres
+    // qui plongent dans le noir. Les cases de l'instance y sont traduites : sol, allée (chaussée), danger (eaux ou
+    // gouffre), tout le reste en roche ; les objets posés au sol comptent comme du sol, une herse comme ce qu'elle
+    // ferme. Un rendu par instance, ses blocs peints à l'entrée puis gardés.
+    const V = {
+      FLOOR: 1,
+      PATH: 2,
+      WALL: 3,
+      LAKE: 4,
+      CHASM: 5,
+      STONE: -1,
+      GRAVE: -2,
+      MOSS: -3,
+      MUD: -4,
+      RIVER: -5
+    };
+    const DEEP = new Set(['chasm', 'void', 'stars']);
+    const LOOKS = new Map();
+    let lookTiles = null,
+      lookGen = 0;
+    function lookFor(i) {
+      if (LOOKS.has(i)) return LOOKS.get(i);
+      if (!window.CANAAN_UNDER_LOOK) return null;
+      const th = THEMES[i],
+        hz = th.hazard,
+        deep = DEEP.has(hz.style),
+        hzTile = deep ? V.CHASM : V.LAKE,
+        under = new Map();
+      let underFor = null;
+      // Ce que ferme chaque herse (sol ou allée), relu à chaque entrée (le plan est le même, les cases non).
+      const gateUnder = (plan, k) => {
+        if (underFor !== plan) {
+          under.clear();
+          for (const g of plan.gates) g.cells.forEach(([x, y], n) => under.set(y * MAPW + x, g.under[n]));
+          underFor = plan;
+        }
+        return under.get(k);
+      };
+      const at = (x, y) => {
+        const plan = planFor(i),
+          k = y * MAPW + x;
+        if (plan.solid.has(k)) return V.FLOOR;
+        let t = game.world.tiles[y]?.[x];
+        if (t === GATE) t = gateUnder(plan, k) ?? FLOOR;
+        if (t === ACCENT) return V.PATH;
+        if (t === HAZARD) return hzTile;
+        if (WALKABLE(t)) return V.FLOOR;
+        return V.WALL;
+      };
+      const rgbOf = h => (h ? toRgb(h) : null),
+        floorStyle = th.floor.style === 'stone' ? 'stone' : th.floor.style,
+        hazardPal = { a: hz.a, b: hz.b, c: hz.c };
+      const lavaLike = hz.style === 'lava',
+        liquidLook = (w, b) => {
+          if (w !== hzTile) return null;
+          const A = toRgb(hz.a),
+            B = toRgb(hz.b),
+            C = toRgb(hz.c),
+            mid = (p, q, t) => p.map((v, k) => v + (q[k] - v) * t);
+          if (lavaLike)
+            return {
+              tones: [A, mid(A, B, 0.5), B, mid(B, C, 0.4)],
+              glints: [hz.c, '#fff6c0'],
+              speed: 0.35,
+              streak: 1.8
+            };
+          if (hz.style === 'clouds')
+            return {
+              tones: [A, mid(A, B, 0.5), B, mid(B, C, 0.5)],
+              glints: ['#ffffff', hz.c],
+              speed: 0.3,
+              streak: 2.6
+            };
+          if (hz.style === 'stars' || hz.style === 'void')
+            return {
+              tones: [A, mid(A, B, 0.3), mid(A, B, 0.6), B],
+              glints: [hz.c, '#ffffff'],
+              speed: 0.08,
+              streak: 1
+            };
+          return null;
+        };
+      const look = CANAAN_UNDER_LOOK.create({
+        T: V,
+        at,
+        biomeAt: () => 0,
+        bridges: new Map(),
+        WET: new Set([hzTile]),
+        BIOMES: [{ floor: V.FLOOR, lake: hazardPal, river: hazardPal, mud: th.floor }],
+        themeOf: () => ({
+          wall: { ...th.wall, style: th.wall.style === 'rock' ? 'rock' : 'brick' },
+          floors: { [V.FLOOR]: { ...th.floor, style: floorStyle }, [V.PATH]: th.accent }
+        }),
+        dress: (b, t) => {
+          const p = t === V.PATH ? th.accent : th.floor;
+          return {
+            pebbles: p.style === 'dirt' ? 0.05 : 0.02,
+            rune: p.style === 'flagstone' || p.style === 'tiles' ? rgbOf(th.rune) : null,
+            glow:
+              rgbOf(p.glow) ||
+              (p.style === 'grate' ? rgbOf(p.c) : p.style === 'basalt' ? rgbOf(hz.glow) : null),
+            joint: p.style === 'marble' ? rgbOf(p.c) : null
+          };
+        },
+        // Dessus des murs bien plus sombre que le sol : on lit tout de suite où l'on peut marcher.
+        rockPal: () => ({
+          a: mixHex(th.wall.top, '#000000', 0.15),
+          b: mixHex(th.wall.top, '#000000', 0.45),
+          c: mixHex(th.wall.top, th.wall.dark, 0.45)
+        }),
+        rockAmp: () => (th.wall.style === 'rock' ? 0.7 : 0.12),
+        rockSharp: th.wall.style === 'rock' ? 1.3 : 2.2,
+        pathSharp: th.accent.style !== 'gravel',
+        pathBorder: th.accent.style === 'carpet' ? () => toRgb(th.accent.c) : null,
+        deep: w => deep && w === hzTile,
+        liquidLook,
+        key: () => {
+          if (game.world.tiles !== lookTiles) {
+            lookTiles = game.world.tiles;
+            lookGen++;
+          }
+          return game.world.instance?.index === i ? lookGen : -1;
+        },
+        live: () => game.world.instance?.index === i,
+        afterChunk: (g, x0, y0, x1, y1) => {
+          if (th.accent.style === 'rails')
+            for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) rails(g, x, y, at);
+        }
+      });
+      LOOKS.set(i, look.active() ? look : null);
+      return LOOKS.get(i);
+    }
+    // Voie de mine : traverses de bois et deux rails d'acier, dans le sens de l'allée.
+    function rails(g, x, y, at) {
+      if (at(x, y) !== V.PATH) return;
+      const ac = THEMES[game.world.instance.index].accent,
+        X = x * TS,
+        Y = y * TS,
+        same = (xx, yy) => at(xx, yy) === V.PATH,
+        horizontal = same(x - 1, y) || same(x + 1, y),
+        vertical = same(x, y - 1) || same(x, y + 1);
+      if (vertical || !horizontal)
+        for (let k = 3; k < 48; k += 12) {
+          g.fillStyle = 'rgba(0,0,0,.35)';
+          g.fillRect(X + 9, Y + k + 5, 32, 2);
+          g.fillStyle = ac.b;
+          g.fillRect(X + 8, Y + k, 32, 5);
+          g.fillStyle = 'rgba(255,230,190,.18)';
+          g.fillRect(X + 8, Y + k, 32, 1);
+        }
+      if (horizontal)
+        for (let k = 3; k < 48; k += 12) {
+          g.fillStyle = 'rgba(0,0,0,.35)';
+          g.fillRect(X + k + 5, Y + 9, 2, 32);
+          g.fillStyle = ac.b;
+          g.fillRect(X + k, Y + 8, 5, 32);
+        }
+      if (vertical || !horizontal)
+        for (const vx of [12, 33]) {
+          g.fillStyle = '#1a1614';
+          g.fillRect(X + vx + 1, Y, 3, 48);
+          g.fillStyle = ac.c;
+          g.fillRect(X + vx, Y, 2, 48);
+        }
+      if (horizontal)
+        for (const vy of [12, 33]) {
+          g.fillStyle = '#1a1614';
+          g.fillRect(X, Y + vy + 1, 48, 3);
+          g.fillStyle = ac.c;
+          g.fillRect(X, Y + vy, 48, 2);
+        }
+    }
+    // Passages secrets déjà vus ouverts, par instance : à l'ouverture, seuls les blocs touchés sont repeints.
+    let seenSecrets = -1,
+      seenFor = null;
+    function syncSecrets(i, look) {
+      const bits = dunState()?.secrets ?? 0;
+      if (seenFor !== lookTiles) {
+        seenFor = lookTiles;
+        seenSecrets = bits;
+        return;
+      }
+      if (bits === seenSecrets) return;
+      const plan = planFor(i);
+      plan.secretWalls.forEach((w, k) => {
+        if (!(bits & (1 << k)) || seenSecrets & (1 << k)) return;
+        const cells = [...w.cells, ...(plan.masks[k] || [])];
+        let x0 = 1e9,
+          y0 = 1e9,
+          x1 = -1,
+          y1 = -1;
+        for (const [x, y] of cells) {
+          x0 = Math.min(x0, x);
+          y0 = Math.min(y0, y);
+          x1 = Math.max(x1, x);
+          y1 = Math.max(y1, y);
+        }
+        look.forget(x0, y0, x1, y1);
+      });
+      seenSecrets = bits;
+    }
+    // Sol de l'instance à l'écran : peint par blocs ; sans canevas (tests), case par case.
+    function drawDungeonGround(c, x0, x1, y0, y1) {
+      const i = game.world.instance.index,
+        look = lookFor(i);
+      if (look) {
+        look.key?.();
+        syncSecrets(i, look);
+      }
+      if (!look || !look.drawGround(c, x0, x1, y0, y1)) {
+        for (let y = y0; y < y1; y++)
+          for (let x = x0; x < x1; x++) drawDungeonTile(c, x, y, game.world.tiles[y][x]);
+        return;
+      }
+      // Par-dessus : lézarde des passages secrets qu'on examine, étincelles de la lave et des étoiles.
+      const th = THEMES[i],
+        plan = planFor(i);
+      for (const w of plan.secretWalls || [])
+        if (w.kind === 'wall')
+          for (const [x, y] of w.cells) if (game.world.tiles[y]?.[x] === SECRET) crack(c, x, y);
+      if (th.hazard.style === 'lava' || th.hazard.style === 'stars')
+        for (let y = y0; y < y1; y++)
+          for (let x = x0; x < x1; x++) {
+            if (game.world.tiles[y][x] !== HAZARD) continue;
+            const tw = hash(x, y, Math.floor(time / 20));
+            if (tw > 0.85) {
+              c.fillStyle = th.hazard.c;
+              c.fillRect(x * TS + Math.floor(tw * 20) * 2, y * TS + Math.floor((tw * 977) % 20) * 2, 4, 4);
+            }
+          }
+    }
     // Dessin d'une case d'instance, appelé par la boucle de rendu à la place des tuiles du monde.
     function drawDungeonTile(c, x, y, t) {
       if (t === SECRET) {
@@ -783,7 +1016,14 @@
         drawDungeonTile(c, x, y, WALL);
         const plan = planFor(game.world.instance.index),
           wall = plan.secretWalls.find(w => w.cells.some(([cx, cy]) => cx === x && cy === y));
-        if (!wall || wall.kind !== 'wall') return;
+        if (wall?.kind === 'wall') crack(c, x, y);
+        return;
+      }
+      drawTile(c, x, y, t);
+    }
+    // Fine lézarde et filet de poussière d'un passage secret qu'on examine, visibles seulement de près.
+    function crack(c, x, y) {
+      {
         const d = Math.hypot(P.x / TS - (x + 0.5), P.y / TS - (y + 0.5));
         if (d > 3.2) return;
         const X = x * TS,
@@ -802,8 +1042,10 @@
           c.fillStyle = 'rgba(220,200,170,.5)';
           c.fillRect(X + 21, Y + 36 + ((time * 0.5) % 10), 2, 2);
         }
-        return;
       }
+    }
+    // Case d'instance en pixel art (sans canevas complet, ou si le sol peint est indisponible).
+    function drawTile(c, x, y, t) {
       const i = game.world.instance.index,
         th = THEMES[i],
         art = themeArt(i),
@@ -2628,6 +2870,7 @@
     return Object.freeze({
       THEMES,
       drawDungeonTile,
+      drawDungeonGround,
       drawDungeonDecor,
       dungeonAmbience,
       drawDungeonEntrance,
