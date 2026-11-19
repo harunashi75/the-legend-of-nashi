@@ -318,3 +318,15 @@ test('Arène : les cercles au sol ne touchent que les héros qui sont dedans',()
  }
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Dessin : une erreur en cours d’image remet le canevas à zéro (sinon la caméra s’empilait et l’écran restait noir)',()=>{
+ const {run}=require('./helpers/canaan-runtime.cjs')(source);
+ run('started=true;paused=false;P.dead=false;globalThis.__resets=0;ctx.reset=()=>__resets++');
+ run('enterArena()');
+ run('globalThis.__hud=CanaanStages.drawArenaHud;CanaanStages.drawArenaHud=()=>{throw new Error("image cassée")}');
+ assert.throws(()=>run('runDrawPipeline()'),/image cassée/);
+ assert.equal(run('__resets'),1,'le canevas est remis à zéro après l’erreur');
+ run('CanaanStages.drawArenaHud=__hud');run('runDrawPipeline()');assert.equal(run('__resets'),1,'une image normale ne touche à rien');
+ // Le colisée se dessine sans passage secret (son plan n’en a aucun).
+ run('leaveInstance()');run('runDrawPipeline()');
+});

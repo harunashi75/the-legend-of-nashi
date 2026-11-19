@@ -63,7 +63,15 @@ function runUpdatePipeline() {
   readInput();
   simulateStep();
 }
+// Une erreur pendant le dessin laisserait le canevas décalé (ctx.save() et la caméra sans ctx.restore()) : les
+// décalages s'empileraient image après image et l'écran resterait noir, même une fois l'erreur passée.
 function runDrawPipeline() {
-  draw();
-  for (const name of CANAAN_PIPELINE.draw) CanaanStages[name]();
+  try {
+    draw();
+    for (const name of CANAAN_PIPELINE.draw) CanaanStages[name]();
+  } catch (error) {
+    if (typeof ctx.reset === 'function') ctx.reset();
+    else ctx.setTransform(1, 0, 0, 1, 0, 0);
+    throw error;
+  }
 }

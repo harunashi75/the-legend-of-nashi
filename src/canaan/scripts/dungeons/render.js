@@ -39,11 +39,172 @@
     });
     const THEMES = DUNGEON_LAYOUTS.map((layout, i) => theme(layout, DUNGEON_ACTORS[i], DUNGEON_PALETTES[i]));
     THEMES.arena = theme(DUNGEON_ARENA_LAYOUT, { mobs: [], bosses: [] }, DUNGEON_ARENA_PALETTE);
-    // Gradins du colisée : rangées de grès et public animé, sur l'anneau de murs autour de la piste.
+    // Gradins du colisée en gros pixels, comme le décor de l'île : chaque case est peinte une fois en petit (16 × 16),
+    // puis agrandie ×3 sans lissage. Marches de grès ombrées et jointoyées, public de petits personnages cernés
+    // d'encre (tenue, teint, cheveux, chapeau, capuche ou casque) ; quand la foule acclame, ils sautent bras levés.
+    // En haut des gradins, une promenade dallée et sa balustrade.
     const CROWD = ['#7a1424', '#2a4a7a', '#c8a050', '#3a6a3a', '#6a3a7a', '#a85a2a', '#d8d0c0', '#4a4a52'];
+    const SKIN = ['#f0c8a0', '#d8a47a', '#a8744e', '#6e4a32'],
+      HAIR = ['#2a1c14', '#5a3a20', '#a8742e', '#e0c070', '#8a8a90', '#7a2a1a'],
+      HATS = ['#c8a050', '#7a1424', '#3a5a2a', '#e8dcc0'];
+    const STAND = { art: 16, seat: 13 },
+      standCache = { fans: new Map(), seats: new Map(), tiles: new Map() };
+    const ink = cv => (typeof window.canaanOutline === 'function' ? window.canaanOutline(cv, 1) : cv);
+    // Spectateur (7 × 10 pixels avant le contour) : tête, buste ombré à droite, bras le long du corps ou levés.
+    function fanLook(x, y, k) {
+      const h = hash(x, y, k),
+        h2 = hash(y, x, k + 7);
+      return {
+        shirt: CROWD[Math.floor(h * 97) % CROWD.length],
+        skin: SKIN[Math.floor(h * 53) % SKIN.length],
+        hair: HAIR[Math.floor(h2 * 61) % HAIR.length],
+        hat: HATS[Math.floor(h2 * 29) % HATS.length],
+        top: h2 < 0.12 ? 'hat' : h2 < 0.2 ? 'hood' : h2 < 0.24 ? 'helm' : h2 > 0.72 ? 'long' : 'hair'
+      };
+    }
+    function fanSprite(look, up) {
+      const key = look.shirt + look.skin + look.hair + look.hat + look.top + (up ? 1 : 0);
+      let img = standCache.fans.get(key);
+      if (img) return img;
+      const cv = canvas(7, 10),
+        g = cv.getContext('2d'),
+        P1 = (x, y, col, w = 1, h = 1) => rect(g, x, y, w, h, col),
+        shirtL = mixHex(look.shirt, '#ffffff', 0.2),
+        shirtD = mixHex(look.shirt, '#000000', 0.3),
+        skinD = mixHex(look.skin, '#000000', 0.18);
+      // Buste et épaules, éclairés par la gauche ; col plus clair, bas dans l'ombre du banc.
+      P1(1, 4, look.shirt, 5, 5);
+      P1(1, 4, shirtL, 1, 4);
+      P1(5, 4, shirtD, 1, 5);
+      P1(3, 4, shirtL);
+      P1(1, 8, shirtD, 5, 1);
+      // Tête : visage, yeux, menton ombré.
+      P1(2, 1, look.skin, 3, 3);
+      P1(2, 3, skinD, 3, 1);
+      P1(2, 2, '#2a1c14');
+      P1(4, 2, '#2a1c14');
+      if (look.top === 'hat') {
+        P1(1, 1, mixHex(look.hat, '#000000', 0.2), 5, 1);
+        P1(2, 0, look.hat, 3, 1);
+      } else if (look.top === 'hood') {
+        P1(2, 0, shirtD, 3, 1);
+        P1(1, 1, shirtD, 1, 3);
+        P1(5, 1, shirtD, 1, 3);
+      } else if (look.top === 'helm') {
+        P1(1, 0, '#8a8a94', 5, 2);
+        P1(2, 0, '#c8c8d0', 2, 1);
+        P1(3, 2, '#5a5a62');
+      } else {
+        P1(2, 0, look.hair, 3, 1);
+        P1(2, 1, look.hair, 1, 1);
+        if (look.top === 'long') {
+          P1(1, 1, look.hair, 1, 4);
+          P1(5, 1, look.hair, 1, 4);
+        }
+      }
+      if (up) {
+        // Bras levés : manches de chaque côté, mains au-dessus de la tête.
+        P1(0, 2, shirtL, 1, 3);
+        P1(6, 2, shirtD, 1, 3);
+        P1(0, 1, look.skin);
+        P1(6, 1, look.skin);
+      } else {
+        P1(1, 7, look.skin);
+        P1(5, 7, skinD);
+      }
+      img = ink(cv);
+      standCache.fans.set(key, img);
+      return img;
+    }
+    // Grain de la pierre à l'échelle de l'art : n pixels clairs ou sombres entre les lignes y0 et y0 + h.
+    function grain(g, y0, h, n, cols, seed) {
+      for (let k = 0; k < n; k++)
+        rect(
+          g,
+          Math.floor(hash(k, seed, 3) * 16),
+          y0 + Math.floor(hash(seed, k, 5) * h),
+          k % 3 ? 1 : 2,
+          1,
+          cols[k % 2]
+        );
+    }
+    // Marche (16 × 16) : contremarche jointoyée en haut, ombre, assise claire, nez de marche et son ombre ;
+    // promenade (rangée du haut) : dalles et balustrade.
+    function seatTile(th, band, v) {
+      const key = band + ':' + v;
+      let cv = standCache.seats.get(key);
+      if (cv) return cv;
+      cv = canvas(STAND.art, STAND.art);
+      const g = cv.getContext('2d'),
+        w = th.wall,
+        P1 = (x, y, col, ww = 1, hh = 1) => rect(g, x, y, ww, hh, col),
+        tone = band % 2 ? 0.12 : 0;
+      if (band >= 6) {
+        const slab = mixHex(mixHex(w.face, w.light, 0.55), '#000000', tone);
+        P1(0, 0, slab, 16, 16);
+        for (let y = 0; y < 11; y += 5) P1(0, y, mixHex(slab, w.dark, 0.35), 16, 1);
+        for (let y = 0; y < 11; y += 5) P1(((v * 5 + y) % 8) + 3, y, mixHex(slab, w.dark, 0.35), 1, 5);
+        grain(g, 0, 10, 6, [mixHex(slab, '#ffffff', 0.2), mixHex(slab, w.dark, 0.25)], 31 + v);
+        // Balustrade : main courante et balustres.
+        P1(0, 10, th.pillar[2], 16, 1);
+        P1(0, 11, th.pillar[0], 16, 1);
+        for (let x = 1; x < 16; x += 4) {
+          P1(x, 12, th.pillar[0], 2, 3);
+          P1(x, 12, th.pillar[2], 1, 3);
+        }
+        P1(0, 15, w.dark, 16, 1);
+      } else {
+        const riser = mixHex(mixHex(w.face, w.dark, 0.3), '#000000', tone),
+          joint = mixHex(riser, w.dark, 0.55),
+          seat = mixHex(mixHex(w.face, w.light, 0.45), '#000000', tone);
+        P1(0, 0, riser, 16, 7);
+        P1(0, 3, joint, 16, 1);
+        for (let x = v % 8; x < 16; x += 8) {
+          P1(x, 0, joint, 1, 3);
+          P1((x + 4) % 16, 4, joint, 1, 3);
+        }
+        P1(0, 7, w.dark, 16, 1);
+        P1(0, 8, seat, 16, 5);
+        grain(g, 8, 5, 7, [mixHex(seat, '#ffffff', 0.22), mixHex(seat, w.dark, 0.3)], 17 + v * 3);
+        P1(0, 13, th.pillar[2], 16, 1);
+        P1(0, 14, mixHex(w.face, w.dark, 0.25), 16, 1);
+        P1(0, 15, w.dark, 16, 1);
+      }
+      standCache.seats.set(key, cv);
+      return cv;
+    }
+    // Spectateurs d'une case : deux places (le sprite contouré fait 9 pixels de large), quelques-unes vides.
+    function fansAt(x, y) {
+      const out = [];
+      for (let k = 0; k < 2; k++) {
+        const hsh = hash(x, y, k);
+        if (hsh < 0.14) continue;
+        out.push({ k, dx: k ? 7 : hsh > 0.6 ? 1 : 0, look: fanLook(x, y, k), hsh });
+      }
+      return out;
+    }
+    // Case au repos (marche et public assis), peinte une fois.
+    function standTile(th, x, y, band) {
+      const key = y * MAPW + x;
+      let cv = standCache.tiles.get(key);
+      if (cv) return cv;
+      cv = canvas(STAND.art, STAND.art);
+      const g = cv.getContext('2d');
+      g.drawImage(seatTile(th, band, (x * 7 + y * 3) % 8), 0, 0);
+      if (band < 6)
+        for (const f of fansAt(x, y)) {
+          const img = fanSprite(f.look, false);
+          g.drawImage(img, f.dx, STAND.seat - img.height + 1);
+        }
+      standCache.tiles.set(key, cv);
+      return cv;
+    }
     function drawArenaStands(c) {
       const { cx, cy, r } = DUNGEON_ARENA,
+        th = THEMES.arena,
         cheer = CANAAN_ARENA.cheer();
+      c.save();
+      c.imageSmoothingEnabled = false;
       for (let y = cy - 20; y <= cy + 15; y++)
         for (let x = cx - 20; x <= cx + 20; x++) {
           const d = Math.hypot(x - cx, y - cy);
@@ -52,23 +213,27 @@
           const X = x * TS,
             Y = y * TS;
           if (X < camX - TS || X > camX + W || Y < camY - TS || Y > camY + H) continue;
-          const band = Math.floor(d - r);
-          R(c, X, Y, TS, TS, band % 2 ? '#7a6248' : '#8a7052');
-          R(c, X, Y, TS, 4, band % 2 ? '#a08462' : '#b0946e');
-          R(c, X, Y + 26, TS, 3, '#5a4632');
-          if (band > 5) continue;
-          for (let k = 0; k < 3; k++) {
-            const hsh = hash(x, y, k);
-            if (hsh < 0.18) continue;
-            const px = X + 6 + k * 14,
-              jump =
-                cheer > 0 && hash(x, k, y) < 0.7 ? Math.abs(Math.sin(time * 0.35 + hsh * 9)) * 6 * cheer : 0,
-              py = Y + 6 + (hsh > 0.6 ? 18 : 0) - jump;
-            R(c, px, py + 7, 10, 9, CROWD[Math.floor(hsh * 97) % CROWD.length]);
-            R(c, px + 2, py, 6, 7, hsh > 0.5 ? '#e0b48a' : '#a87a5a');
-            if (jump > 2) R(c, px - 2, py + 2, 2, 6, '#e0b48a');
+          const band = Math.min(6, Math.floor(d - r));
+          if (cheer <= 0 || band >= 6) {
+            c.drawImage(standTile(th, x, y, band), X, Y, TS, TS);
+            continue;
+          }
+          // Acclamations : la marche seule, puis chaque spectateur, debout et bras levés pour la plupart.
+          c.drawImage(seatTile(th, band, (x * 7 + y * 3) % 8), X, Y, TS, TS);
+          for (const f of fansAt(x, y)) {
+            const up = hash(x, f.k, y) < 0.7,
+              jump = up ? Math.round(Math.abs(Math.sin(time * 0.35 + f.hsh * 9)) * 2 * cheer) : 0,
+              img = fanSprite(f.look, up);
+            c.drawImage(
+              img,
+              X + f.dx * 3,
+              Y + (STAND.seat - img.height + 1 - jump) * 3,
+              img.width * 3,
+              img.height * 3
+            );
           }
         }
+      c.restore();
     }
     // Portail de retour en pixels : anneau de pierre runique et tourbillon à la couleur de l'instance.
     function drawExitPortal(c, th) {
@@ -952,16 +1117,18 @@
     // Passages secrets déjà vus ouverts, par instance : à l'ouverture, seuls les blocs touchés sont repeints.
     let seenSecrets = -1,
       seenFor = null;
+    // Repère d'entrée : les cases de l'instance (game.world.tiles), neuves à chaque entrée ; le cache du sol (lookTiles)
+    // ne les voit qu'après ce contrôle. L'Arène n'a aucun passage secret.
     function syncSecrets(i, look) {
       const bits = dunState()?.secrets ?? 0;
-      if (seenFor !== lookTiles) {
-        seenFor = lookTiles;
+      if (seenFor !== game.world.tiles) {
+        seenFor = game.world.tiles;
         seenSecrets = bits;
         return;
       }
       if (bits === seenSecrets) return;
       const plan = planFor(i);
-      plan.secretWalls.forEach((w, k) => {
+      (plan.secretWalls || []).forEach((w, k) => {
         if (!(bits & (1 << k)) || seenSecrets & (1 << k)) return;
         const cells = [...w.cells, ...(plan.masks[k] || [])];
         let x0 = 1e9,
@@ -1292,6 +1459,7 @@
           R(c, cx - 4, by - 12, 8, 14, '#3a3a40');
           R(c, cx - 18, by - 22, 36, 10, '#4a4a52');
           R(c, cx - 18, by - 22, 36, 3, '#6a6a72');
+          if (p.still) break;
           flame(c, cx, by - 22, 1.6, th.flame, seed);
           canaanLight(cx, by - 30, 220, th.flame[1]);
           break;
@@ -1661,58 +1829,98 @@
         }
       }
     }
+    // Motifs au sol en gros pixels (art au tiers, agrandi ×3 sans lissage), peints une fois par instance.
+    const decalCache = new Map();
+    function fillOval(g, cx, cy, rx, ry, col) {
+      g.fillStyle = col;
+      for (let y = -Math.floor(ry); y <= Math.floor(ry); y++) {
+        const half = rx * Math.sqrt(Math.max(0, 1 - (y / ry) ** 2));
+        g.fillRect(Math.round(cx - half), cy + y, Math.max(1, Math.round(half * 2)), 1);
+      }
+    }
+    function ringOval(g, cx, cy, rx, ry, col, from = 0, to = Math.PI * 2) {
+      g.fillStyle = col;
+      const n = Math.ceil((rx + ry) * 4);
+      for (let k = 0; k <= n; k++) {
+        const a = from + ((to - from) * k) / n;
+        g.fillRect(Math.round(cx + Math.cos(a) * rx), Math.round(cy + Math.sin(a) * ry), 1, 1);
+      }
+    }
+    function decalArt(kind, th) {
+      const key = kind + th.rune + th.pillar.join('');
+      let cv = decalCache.get(key);
+      if (cv) return cv;
+      const rune = th.rune,
+        deep = mixHex(rune, '#000000', 0.55);
+      if (kind === 'portal') {
+        // Margelle de pierre cerclée d'encre, runes gravées, bassin de lumière à la couleur de l'instance.
+        cv = canvas(28, 16);
+        const g = cv.getContext('2d'),
+          [pc, pd, pl] = th.pillar;
+        fillOval(g, 14, 8, 13.5, 7.5, '#1a1210');
+        fillOval(g, 14, 8, 12.5, 6.5, pd);
+        ringOval(g, 14, 8, 12, 6, pc, Math.PI, Math.PI * 2);
+        ringOval(g, 14, 8, 11, 5, pl, Math.PI * 1.15, Math.PI * 1.85);
+        fillOval(g, 14, 8, 9.5, 4.5, '#0a0810');
+        fillOval(g, 14, 8, 8.5, 3.5, deep);
+        fillOval(g, 14, 8, 5.5, 2.5, rune);
+        fillOval(g, 14, 8, 2.5, 1.2, mixHex(rune, '#ffffff', 0.6));
+        for (let k = 0; k < 6; k++) {
+          const a = (k / 6) * Math.PI * 2 + 0.5;
+          rect(g, Math.round(14 + Math.cos(a) * 11), Math.round(8 + Math.sin(a) * 5.5), 1, 1, rune);
+        }
+      } else {
+        // Cercle runique gravé : deux anneaux et leur trait d'ombre, douze glyphes ; éclipse au centre.
+        cv = canvas(78, 48);
+        const g = cv.getContext('2d');
+        for (const [rx, ry] of [
+          [36, 21.5],
+          [28, 16.8]
+        ]) {
+          ringOval(g, 39, 25, rx, ry, deep);
+          ringOval(g, 39, 24, rx, ry, rune);
+        }
+        for (let k = 0; k < 12; k++) {
+          const a = (k / 12) * Math.PI * 2,
+            gx = Math.round(39 + Math.cos(a) * 32) - 1,
+            gy = Math.round(24 + Math.sin(a) * 19.2) - 1;
+          rect(g, gx, gy + 1, 3, 2, deep);
+          rect(g, gx, gy, 3, 2, rune);
+          rect(g, gx + (k % 3), gy + (k % 2), 1, 1, mixHex(rune, '#ffffff', 0.55));
+        }
+        if (kind === 'eclipse') {
+          fillOval(g, 39, 24, 17, 10, '#e0b04a');
+          fillOval(g, 44, 23, 16, 9.6, '#120a1c');
+        }
+      }
+      decalCache.set(key, cv);
+      return cv;
+    }
     function drawDecal(c, dcl, th) {
       const x = dcl.x * TS + 24,
         y = dcl.y * TS + 24;
-      if (dcl.kind === 'portal') {
-        const r = 34 + Math.sin(time * 0.05) * 3;
+      if (dcl.kind === 'portal' || dcl.kind === 'runecircle' || dcl.kind === 'eclipse') {
+        const art = decalArt(dcl.kind, th),
+          portal = dcl.kind === 'portal';
         c.save();
-        c.globalAlpha = 0.85;
-        c.strokeStyle = th.rune;
-        c.lineWidth = 6;
-        c.beginPath();
-        c.ellipse(x, y, r, r * 0.55, 0, 0, Math.PI * 2);
-        c.stroke();
-        c.globalAlpha = 0.35;
-        c.fillStyle = th.rune;
-        c.beginPath();
-        c.ellipse(x, y, r * 0.8, r * 0.42, 0, 0, Math.PI * 2);
-        c.fill();
-        for (let k = 0; k < 6; k++) {
-          const a = time * 0.04 + k;
-          c.globalAlpha = 0.8;
-          c.fillRect(x + Math.cos(a) * r - 2, y + Math.sin(a) * r * 0.55 - 2, 4, 4);
-        }
-        c.restore();
-        canaanLight(x, y, 170, th.rune);
-      } else if (dcl.kind === 'runecircle' || dcl.kind === 'eclipse') {
-        const r = 110;
-        c.save();
-        c.globalAlpha = 0.5;
-        c.strokeStyle = th.rune;
-        c.lineWidth = 4;
-        c.beginPath();
-        c.ellipse(x, y, r, r * 0.6, 0, 0, Math.PI * 2);
-        c.stroke();
-        c.lineWidth = 2;
-        c.beginPath();
-        c.ellipse(x, y, r * 0.78, r * 0.47, 0, 0, Math.PI * 2);
-        c.stroke();
-        for (let k = 0; k < 12; k++) {
-          const a = (k / 12) * Math.PI * 2 + time * 0.004;
+        c.imageSmoothingEnabled = false;
+        c.globalAlpha = portal ? 1 : 0.55;
+        c.drawImage(art, x - art.width * 1.5, y - art.height * 1.5, art.width * 3, art.height * 3);
+        if (portal) {
+          // Bassin qui pulse et étincelles qui tournent autour de la margelle, calées sur la grille des pixels.
+          c.globalAlpha = 0.18 + Math.sin(time * 0.05) * 0.1;
+          c.globalCompositeOperation = 'lighter';
+          c.drawImage(art, x - art.width * 1.5, y - art.height * 1.5, art.width * 3, art.height * 3);
+          c.globalCompositeOperation = 'source-over';
+          c.globalAlpha = 0.9;
           c.fillStyle = th.rune;
-          c.fillRect(x + Math.cos(a) * r * 0.89 - 3, y + Math.sin(a) * r * 0.535 - 3, 6, 6);
-        }
-        if (dcl.kind === 'eclipse') {
-          c.globalAlpha = 0.55;
-          c.fillStyle = '#e0b04a';
-          c.beginPath();
-          c.ellipse(x, y, 52, 31, 0, 0, Math.PI * 2);
-          c.fill();
-          c.fillStyle = '#120a1c';
-          c.beginPath();
-          c.ellipse(x + 14, y - 4, 48, 29, 0, 0, Math.PI * 2);
-          c.fill();
+          for (let k = 0; k < 6; k++) {
+            const a = time * 0.04 + k,
+              sx = Math.round((x + Math.cos(a) * 42) / 3) * 3,
+              sy = Math.round((y + Math.sin(a) * 23 - 6) / 3) * 3;
+            c.fillRect(sx, sy, 3, 3);
+          }
+          canaanLight(x, y, 170, th.rune);
         }
         c.restore();
       } else if (dcl.kind === 'splat') {
@@ -2365,10 +2573,19 @@
     ]);
     let propCache = { key: null, map: new Map() };
     function pixelProp(c, p, th, i) {
-      if (LIVE_PROPS.has(p.kind) || typeof window.canaanOutline !== 'function')
-        return drawFloorProp(c, p, th);
+      if (typeof window.canaanOutline !== 'function') return drawFloorProp(c, p, th);
+      // Brasero : coupe et pied peints une fois, la flamme reste animée.
+      if (p.kind === 'brazier' && !p.still) {
+        pixelProp(c, { ...p, still: true }, th, i);
+        const cx = p.x * TS + 24,
+          by = p.y * TS + 40;
+        flame(c, cx, by - 22, 1.6, th.flame, p.x * 5 + p.y * 3);
+        canaanLight(cx, by - 30, 220, th.flame[1]);
+        return;
+      }
+      if (LIVE_PROPS.has(p.kind) && !p.still) return drawFloorProp(c, p, th);
       if (propCache.key !== i) propCache = { key: i, map: new Map() };
-      const id = p.x + ',' + p.y;
+      const id = p.x + ',' + p.y + (p.still ? ':still' : '');
       let e = propCache.map.get(id);
       if (!e) {
         const big = canvas(144, 144),
@@ -2424,7 +2641,6 @@
         ) {
           if (p.wall) drawWallProp(c, p, th);
           else if (p.center) drawCenterpiece(c, p, th);
-          else if (plan.arena) drawFloorProp(c, p, th);
           else pixelProp(c, p, th, i);
         }
       for (const g of plan.gates)

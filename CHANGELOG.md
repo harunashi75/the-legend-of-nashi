@@ -2,6 +2,14 @@
 
 Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ; la version unique est `CANAAN_VERSION` dans `src/canaan/scripts/runtime-config.js`. Le détail du contenu est dans [docs/GAMEPLAY.md](docs/GAMEPLAY.md).
 
+## [Non publié]
+
+### Corrigé
+- **Écran noir des invités dans l’Arène** : en entrant dans le colisée, le dessin du sol s’interrompait sur une erreur à chaque image (l’Arène n’a pas de passage secret), et la caméra restait décalée image après image : l’écran devenait noir, même revenu sur l’île, jusqu’au retour à l’accueil. L’erreur est corrigée, et une erreur de dessin ne peut plus laisser l’écran décalé.
+
+### Modifié
+- **Arène au rendu de l’île** ⚔️ : gradins en gros pixels (marches de grès ombrées et jointoyées, promenade dallée et balustrade en haut) et vrai public de petits personnages cernés d’encre, chacun sa tenue, son teint, ses cheveux, chapeau, capuche ou casque, qui se lèvent bras en l’air quand la foule acclame. Statues, braseros, râteliers et caisses au même rendu que les donjons ; margelle du portail de sortie et cercle runique de la piste repeints en pixels (aussi à l’entrée des donjons).
+
 ## [0.10.0] — 2026-11-18
 
 Première version publique.
