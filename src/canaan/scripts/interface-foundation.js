@@ -56,6 +56,17 @@ function canaanTabs(action, current, tabs, extra = '') {
     '</div>'
   );
 }
+// Fenêtre Groupe : en-tête et onglets communs à ses deux pages, le groupe (G, group.js) et l'échange entre joueurs
+// (J, trade.js).
+function canaanGroupHead(current) {
+  return (
+    canaanHead('👥 Groupe') +
+    canaanTabs('groupTab', current, [
+      ['group', '👥 Compagnons'],
+      ['trade', '🤝 Échange']
+    ])
+  );
+}
 // En-tête commun d'une fenêtre : son titre, et à droite d'éventuels boutons.
 function canaanHead(title, right = '') {
   return '<div class="rpg-head"><h2>' + title + '</h2>' + right + '</div>';

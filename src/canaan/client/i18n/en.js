@@ -179,6 +179,7 @@ export default {
   'Personnage': 'Character',
   'Groupe': 'Group',
   'Échange': 'Trade',
+  'Compagnons': 'Companions',
   'Métiers': 'Professions',
   'Journal de quêtes': 'Quest log',
   'Collections': 'Collections',

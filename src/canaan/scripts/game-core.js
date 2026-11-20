@@ -239,11 +239,19 @@ function canaanPanelKey(action) {
   canaanTrackPanels();
   if (!modalOpen()) return false;
   // C ferme la fiche quel que soit son onglet, V les Collections quel que soit le leur (même ouvertes autrement).
+  // Fenêtre Groupe : G ferme la page Compagnons, J la page Échange, et chacune passe à l'autre page.
   const shownPanel = document.getElementById('window')?.dataset.canaanPanel,
+    groupPage = document.querySelector('#window .group-panel')
+      ? 'toggleGroup'
+      : document.querySelector('#window .trade-panel')
+        ? 'toggleTrade'
+        : null,
     same =
-      canaanPanelOpen === name ||
-      (shownPanel === 'character' && name === 'toggleCharacter') ||
-      (shownPanel === 'collections' && name === 'toggleCollections');
+      groupPage && (name === 'toggleGroup' || name === 'toggleTrade')
+        ? groupPage === name
+        : canaanPanelOpen === name ||
+          (shownPanel === 'character' && name === 'toggleCharacter') ||
+          (shownPanel === 'collections' && name === 'toggleCollections');
   closePanels();
   canaanPanelOpen = null;
   if (!same) window[name]();

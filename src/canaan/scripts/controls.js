@@ -84,6 +84,8 @@
     toggleCollections: () => toggleCollections(),
     collectionsTab: element => canaanCollections(actionText(element, 'tab')),
     toggleWardrobe: () => toggleWardrobe(),
+    // Fenêtre Groupe : ses onglets Compagnons et Échange.
+    groupTab: element => (actionText(element, 'tab') === 'trade' ? canaanOpenTrade() : canaanOpenGroup()),
     // Cité elfique : écouter le Grand Arbre, sa bénédiction, l'armurerie et l'atelier de la Tisseuse.
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),
     cityBless: () => CANAAN_CITY.actions.bless(),

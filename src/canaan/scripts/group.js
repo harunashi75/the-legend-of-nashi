@@ -594,7 +594,8 @@
   function render() {
     const list = guests();
     showPanel(
-      '<div class="rpg-head"><h2>👥 Groupe</h2></div><div class="rpg-paper group-panel">' +
+      canaanGroupHead('group') +
+        '<div class="rpg-paper group-panel">' +
         '<p class="group-note">Tes amis te rejoignent en ligne avec le code du salon ; un compagnon local suit ton héros et combat seul. Chacun garde son propre butin, et tous sont enregistrés dans cette aventure : ' +
         GUEST_LIMIT +
         ' au plus, ' +
@@ -622,15 +623,19 @@
     saveGame();
     render();
   }
+  // Ouvre la page Compagnons de la fenêtre Groupe (touche G, ou son onglet).
+  function open() {
+    ui.removing = null;
+    ui.message = '';
+    render();
+  }
   function toggle() {
     if (!started || paused) return;
     if (modalOpen()) {
       closePanels();
       return;
     }
-    ui.removing = null;
-    ui.message = '';
-    render();
+    open();
   }
   window.CANAAN_GROUP = Object.freeze({
     guestLimit: GUEST_LIMIT,
@@ -704,6 +709,7 @@
     })
   });
   window.toggleGroup = toggle;
+  window.canaanOpenGroup = open;
   // Le panneau se met à jour quand l'état du salon change (code reçu, invité arrivé ou parti).
   window.addEventListener('canaan-net', () => {
     if (started && document.getElementById('groupPseudo') !== null) render();

@@ -428,7 +428,8 @@
       '|' +
       Math.floor(P.gold);
     showPanel(
-      '<div class="rpg-head"><h2>🤝 Échange</h2></div><div class="rpg-paper trade-panel">' +
+      canaanGroupHead('trade') +
+        '<div class="rpg-paper trade-panel">' +
         (v.note ? '<p class="trade-note" role="status">' + esc(v.note) + '</p>' : '') +
         body(v) +
         '</div>'
@@ -441,6 +442,11 @@
       closePanels();
       if (mine) return;
     }
+    open();
+  }
+  // Ouvre la page Échange de la fenêtre Groupe (touche J, ou son onglet).
+  function open() {
+    if (!started) return;
     ui.gold = null;
     showPanel('<div class="rpg-paper trade-panel"></div>');
     render();
@@ -538,4 +544,5 @@
     render
   });
   window.toggleTrade = toggle;
+  window.canaanOpenTrade = open;
 })();

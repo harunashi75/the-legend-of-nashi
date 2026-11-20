@@ -236,6 +236,12 @@ test('Jouer avec Tailscale dans le jeu : l’hôte ouvre le salon, copie l’inv
   // Le panneau montre l'adresse, le nom MagicDNS, le code, l'aide Tailscale et le pare-feu ; l'invitation est copiée.
   host.run('toggleGroup()');const panel=host.run('document.getElementById("window").innerHTML');
   for(const t of [local,'mon-pc.tail55b3f7.ts.net',code,'groupCopyInvitation','réseau Tailscale','tailscale0'])assert.ok(panel.includes(t),t);
+  // Fenêtre Groupe : onglets Compagnons et Échange ; J passe à l'Échange, G revient aux Compagnons, puis le referme.
+  assert.match(panel,/data-action="groupTab" data-tab="trade"/);
+  host.run('canaanOpenTrade()');assert.ok(host.run('!!document.querySelector("#window .trade-panel")'));assert.match(host.run('document.getElementById("window").innerHTML'),/data-tab="trade"[^>]*class="on"|class="on"[^>]*data-tab="trade"/);
+  host.run('canaanPanelKey("group")');assert.ok(host.run('!!document.querySelector("#window .group-panel")'));
+  host.run('canaanPanelKey("group")');assert.equal(host.run('modalOpen()'),false);
+  host.run('toggleGroup()');
   host.run('CANAAN_NET.copyInvitation()');const invitation=host.run('canaanDesktop.hosting.copied[0]');
   assert.equal(invitation,'Rejoins ma partie The Legend of Nashi ! Relais : '+local+' · Code : '+code);
   // L'invité colle l'invitation : relais et code se remplissent ; il rejoint.
