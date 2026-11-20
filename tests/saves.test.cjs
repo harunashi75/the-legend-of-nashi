@@ -185,6 +185,10 @@ test('Slots d’aventure : résumé, création sans écrasement, suppression ave
  assert.equal(p.summary(2).state,'aventure');assert.equal(p.summary(2).nom,created.nom);assert.doesNotMatch(created.nom,/[<>]/);
  assert.equal(p.createSlot(2,'Autre'),false);assert.equal(JSON.parse(g.db.get('canaan_slot_2')).nom,created.nom);
  assert.equal(p.createSlot(4,'x'),false);assert.equal(p.createSlot(3,''),true);assert.equal(p.summary(3).nom,'Aventure 3');
+ // Nom du héros : nettoyé, gardé dans la sauvegarde et le résumé ; « Héros » s'il est laissé vide.
+ assert.equal(p.summary(3).heros,'Héros');p.deleteSlot(3);
+ assert.equal(p.createSlot(3,'Monde','',null,'  Lira <la> Brave  '),true);
+ assert.equal(JSON.parse(g.db.get('canaan_slot_3')).heros.hote.name,'Lira la Brave');assert.equal(p.summary(3).heros,'Lira la Brave');
  g.db.set('canaan_slot_1','{cassé');assert.equal(p.summary(1).state,'illisible');
  // Invités listés pour la confirmation de suppression.
  const withGuests=JSON.parse(g.db.get('canaan_slot_3'));withGuests.heros.invites={a:{pseudo:'Ami 1'},b:{pseudo:'Ami 2'}};
@@ -280,7 +284,7 @@ test('Format partagé des sauvegardes : schéma 10, aventure neuve, résumé, im
  assert.equal(s.isValidSave({schema:10,heros:{}}),false);assert.equal(s.isValidSave({...fresh,schema:9}),false);
  assert.deepEqual(s.summarizeSave(null,1),{slot:1,state:'vide'});assert.equal(s.summarizeSave('{x',1).state,'illisible');
  const sum=s.summarizeSave(JSON.stringify({...fresh,resume:{level:37.4,gold:12.9},heros:{...fresh.heros,invites:{a:{pseudo:'Lina'}}}}),2);
- assert.deepEqual({...sum},{slot:2,state:'aventure',nom:'Mon monde',updated:5,level:37,gold:12,classe:null,invites:['Lina']});
+ assert.deepEqual({...sum},{slot:2,state:'aventure',nom:'Mon monde',updated:5,level:37,gold:12,classe:null,heros:'Héros',invites:['Lina']});
  // Classe choisie à la création : dans le héros et le résumé ; une classe inconnue est ignorée.
  const druid=s.freshSave({nom:'D',slot:1,version:'1.9.0',now:5,spawn:{x:1,y:2},baseMana:300,classe:'druide'});
  assert.deepEqual(druid.heros.hote.classe,{id:'druide',talents:[]});assert.equal(s.summarizeSave(JSON.stringify(druid),1).classe,'druide');

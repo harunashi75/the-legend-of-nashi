@@ -266,6 +266,7 @@ export default {
   'Ouvrir': 'Open',
   'Nouvelle aventure': 'New adventure',
   'Nom de l’aventure': 'Adventure name',
+  'Nom du héros': 'Hero name',
   'Créer': 'Create',
   'Emplacement libre': 'Empty slot',
   'Un nouveau monde et un nouveau héros.': 'A new world and a new hero.',

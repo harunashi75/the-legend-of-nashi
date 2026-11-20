@@ -1014,7 +1014,7 @@
     const clean = cleanChat(text);
     if (!clean) return false;
     if (game.mode === 'guest') send({ t: 'chat', text: clean });
-    else if (game.mode === 'host') send({ t: 'chat', from: 'Hôte', text: clean });
+    else if (game.mode === 'host') send({ t: 'chat', from: game.hero.name || 'Hôte', text: clean });
     return game.mode !== 'solo';
   }
 

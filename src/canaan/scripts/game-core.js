@@ -1138,7 +1138,7 @@ function updateView() {
     playerStun > 0
       ? '💫 ÉTOURDI (' + playerStun.toFixed(1) + 's)'
       : game.mode !== 'guest'
-        ? 'Héros'
+        ? game.hero.name || 'Héros'
         : P.dead
           ? game.world.instance?.arena
             ? '💀 À terre : un allié peut te relever'

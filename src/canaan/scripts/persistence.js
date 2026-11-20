@@ -137,6 +137,7 @@ window.CANAAN_PERSISTENCE = {
   heroSnapshot(position, hero = game.hero) {
     const p = hero.player;
     return {
+      name: cleanHeroName(hero.name),
       look: sanitizeLook(hero.look),
       // Garde-robe : apparences trouvées (la tenue portée est dans l'apparence).
       skins: { owned: [...(hero.skins?.owned || [])] },
@@ -195,11 +196,12 @@ window.CANAAN_PERSISTENCE = {
       heros: { hote: this.heroSnapshot(position), invites: CANAAN_GROUP.exportGuests(() => position) }
     };
   },
-  freshSnapshot(nom = this.meta.nom, look = null, classe = null) {
+  freshSnapshot(nom = this.meta.nom, look = null, classe = null, heroName = '') {
     return freshSave({
       nom,
       look,
       classe,
+      heroName,
       slot: this.slot,
       version: window.CANAAN_VERSION,
       now: Date.now(),
@@ -219,11 +221,11 @@ window.CANAAN_PERSISTENCE = {
     }
   },
   // Nouvelle aventure dans un slot vide. Un slot occupé n'est jamais remplacé.
-  createSlot(slot, nom, look = null, classe = null) {
+  createSlot(slot, nom, look = null, classe = null, heroName = '') {
     if (!this.validSlot(slot) || CANAAN_SAVE_STORE.read(slot) !== null) return false;
     const previous = this.slot;
     this.slot = slot;
-    const data = this.freshSnapshot(nom, look, classe);
+    const data = this.freshSnapshot(nom, look, classe, heroName);
     this.slot = previous;
     return CANAAN_SAVE_STORE.write(slot, JSON.stringify(data)) === true;
   },
@@ -369,6 +371,8 @@ window.CANAAN_PERSISTENCE = {
     P.gold = nonnegative(p.gold);
     P.keys = nonnegative(p.keys);
     game.hero.kills = nonnegative(h.kills);
+    // Nom choisi à la création (« Héros » pour les aventures d'avant les noms).
+    game.hero.name = cleanHeroName(h.name);
     // Apparence (les aventures d'avant la création de personnage gardent le héros d'origine).
     game.hero.look = sanitizeLook(h.look);
     // Garde-robe : seulement des apparences connues ; la tenue portée doit en faire partie.

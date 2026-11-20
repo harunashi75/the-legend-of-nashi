@@ -13,6 +13,7 @@
     lookFor: null,
     face: 0,
     name: '',
+    heroName: '',
     draft: null,
     focusName: false,
     classe: 'druide'
@@ -48,7 +49,9 @@
         n +
         '</span><h3>' +
         esc(info.nom) +
-        '</h3><p class="slot-meta">' +
+        '</h3>' +
+        (info.heros ? '<p class="slot-hero">' + esc(info.heros) + '</p>' : '') +
+        '<p class="slot-meta">' +
         (classById(info.classe)
           ? classById(info.classe).icon + ' ' + esc(classById(info.classe).name) + ' · '
           : '') +
@@ -161,7 +164,10 @@
       '</p></div>' +
       '<div class="look-fields">' +
       (forSlot
-        ? '<label class="slot-label" for="slotName">Nom de l’aventure</label><input id="slotName" class="slot-input" type="text" maxlength="32" autocomplete="off" value="' +
+        ? '<label class="slot-label" for="heroName">Nom du héros</label><input id="heroName" class="slot-input" type="text" maxlength="24" autocomplete="off" placeholder="Héros" value="' +
+          esc(ui.heroName) +
+          '">' +
+          '<label class="slot-label" for="slotName">Nom de l’aventure</label><input id="slotName" class="slot-input" type="text" maxlength="32" autocomplete="off" value="' +
           esc(ui.name) +
           '">'
         : '') +
@@ -257,6 +263,7 @@
   function keepTyped() {
     const value = id => document.getElementById(id)?.value;
     if (ui.lookFor === 'slot' && typeof value('slotName') === 'string') ui.name = value('slotName');
+    if (ui.lookFor === 'slot' && typeof value('heroName') === 'string') ui.heroName = value('heroName');
   }
   function lookSet(key, index) {
     keepTyped();
@@ -289,7 +296,7 @@
     if (ui.lookFor) {
       menu.innerHTML =
         creator() + (ui.message ? '<p class="slot-message" role="status">' + esc(ui.message) + '</p>' : '');
-      const input = document.getElementById('slotName');
+      const input = document.getElementById('heroName') || document.getElementById('slotName');
       if (ui.focusName && input && typeof input.focus === 'function') {
         input.focus();
         if (typeof input.select === 'function') input.select();
@@ -363,10 +370,10 @@
     return true;
   }
   function create(slot) {
-    const input = document.getElementById('slotName');
+    keepTyped();
     let ok = false;
     try {
-      ok = CANAAN_PERSISTENCE.createSlot(slot, input ? input.value : ui.name, ui.look, ui.classe);
+      ok = CANAAN_PERSISTENCE.createSlot(slot, ui.name, ui.look, ui.classe, ui.heroName);
     } catch (error) {
       console.error('[CANAAN] Création de l’aventure impossible', error);
     }
@@ -395,7 +402,7 @@
   }
   // Entrée valide la création ; Échap annule.
   document.getElementById('slotMenu').addEventListener('keydown', event => {
-    if (event.target?.id !== 'slotName') return;
+    if (event.target?.id !== 'slotName' && event.target?.id !== 'heroName') return;
     if (event.key === 'Enter') create(ui.creating);
     else if (event.key === 'Escape') reset();
     event.stopPropagation();
@@ -433,6 +440,7 @@
       ui.look = defaultLook();
       ui.face = 0;
       ui.name = 'Aventure ' + slot;
+      ui.heroName = '';
       ui.focusName = true;
       render();
     },

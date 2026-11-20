@@ -51,6 +51,18 @@ export function cleanAdventureName(name, slot) {
     .slice(0, 32);
   return text || 'Aventure ' + slot;
 }
+// Nom du héros choisi à la création : mêmes règles qu'un pseudo (24 caractères), « Héros » s'il est vide.
+/**
+ * @param {unknown} name
+ * @returns {string}
+ */
+export function cleanHeroName(name) {
+  const text = String(name ?? '')
+    .replace(/[\u0000-\u001f<>]/g, '')
+    .trim()
+    .slice(0, 24);
+  return text || 'Héros';
+}
 // Classe choisie à la création (shared/data/classes.js), ou aucune (choisie en jeu).
 /** @type {(id: unknown) => string | null} */
 const knownClass = id => (typeof id === 'string' && CLASS_IDS.includes(id) ? id : null);
@@ -61,9 +73,11 @@ const knownClass = id => (typeof id === 'string' && CLASS_IDS.includes(id) ? id 
  * @param {number} options.baseMana
  * @param {unknown} [options.look] apparence choisie (vérifiée)
  * @param {string | null} [options.classe]
+ * @param {unknown} [options.name] nom choisi (nettoyé)
  */
-export function freshHero({ spawn, baseMana, look, classe = null }) {
+export function freshHero({ spawn, baseMana, look, classe = null, name = '' }) {
   return {
+    name: cleanHeroName(name),
     // Apparence choisie à la création (voir shared/data/looks.js).
     look: sanitizeLook(look),
     player: { x: spawn.x, y: spawn.y, hp: 100, mp: baseMana, gold: 0 },
@@ -104,8 +118,9 @@ export function freshHero({ spawn, baseMana, look, classe = null }) {
  * @param {number} options.baseMana
  * @param {unknown} [options.look]
  * @param {string | null} [options.classe]
+ * @param {unknown} [options.heroName]
  */
-export function freshSave({ nom, slot, version, now, spawn, baseMana, look, classe = null }) {
+export function freshSave({ nom, slot, version, now, spawn, baseMana, look, classe = null, heroName = '' }) {
   return {
     schema: SAVE_SCHEMA,
     version,
@@ -114,7 +129,7 @@ export function freshSave({ nom, slot, version, now, spawn, baseMana, look, clas
     updated: now,
     resume: { level: 1, gold: 0, classe: knownClass(classe) },
     monde: { openedChests: [], worldBossTimers: {} },
-    heros: { hote: freshHero({ spawn, baseMana, look, classe }), invites: {} }
+    heros: { hote: freshHero({ spawn, baseMana, look, classe, name: heroName }), invites: {} }
   };
 }
 // Résumé d'un slot pour le menu : vide, illisible, ou aventure (nom, niveau, classe, or, pseudos des invités).
@@ -144,6 +159,8 @@ export function summarizeSave(raw, slot) {
       : levelFromIlvl(data.resume?.ilvl),
     gold: Math.max(0, Math.floor(Number(data.resume?.gold) || 0)),
     classe: knownClass(data.resume?.classe),
+    // Nom du héros de l'hôte (absent des aventures d'avant les noms).
+    heros: typeof data.heros.hote.name === 'string' ? cleanHeroName(data.heros.hote.name) : '',
     invites: guests.map(guest => cleanAdventureName(guest?.pseudo, '?'))
   };
 }

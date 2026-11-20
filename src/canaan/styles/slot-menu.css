@@ -54,6 +54,13 @@
   color: var(--rpg-gold-light, #f6dc98);
   overflow-wrap: anywhere;
 }
+#title #slotMenu p.slot-hero {
+  margin: 0;
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-size: calc(15px * var(--font-scale));
+  color: #fff4d0;
+  overflow-wrap: anywhere;
+}
 #title #slotMenu p.slot-meta,
 #title #slotMenu p.slot-date,
 #title #slotMenu p.slot-warning,
