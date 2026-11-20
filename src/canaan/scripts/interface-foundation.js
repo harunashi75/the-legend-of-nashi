@@ -29,6 +29,38 @@ function rpgHeader(title) {
   );
 }
 
+// Onglets communs à toutes les fenêtres (même allure partout) : tabs = [[id, libellé, compteur?], …]. Chaque bouton
+// porte data-action et data-tab ; l'onglet `current` est allumé.
+function canaanTabs(action, current, tabs, extra = '') {
+  return (
+    '<div class="ui-tabs' +
+    (extra ? ' ' + extra : '') +
+    '" role="tablist">' +
+    tabs
+      .map(
+        ([id, label, count]) =>
+          '<button type="button" role="tab" aria-selected="' +
+          (id === current) +
+          '" class="' +
+          (id === current ? 'on' : '') +
+          '" data-action="' +
+          action +
+          '" data-tab="' +
+          id +
+          '">' +
+          label +
+          (count !== undefined && count !== null && count !== '' ? ' <small>' + count + '</small>' : '') +
+          '</button>'
+      )
+      .join('') +
+    '</div>'
+  );
+}
+// En-tête commun d'une fenêtre : son titre, et à droite d'éventuels boutons.
+function canaanHead(title, right = '') {
+  return '<div class="rpg-head"><h2>' + title + '</h2>' + right + '</div>';
+}
+
 // Survol d'une instance dans la liste de la carte M : elle est entourée sur la carte.
 function highlightMapInstance(i, active) {
   drawBigMap(active ? i : null);

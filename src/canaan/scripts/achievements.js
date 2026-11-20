@@ -1769,20 +1769,7 @@
         '</b> points</div><div class="ach-bar big"><i style="width:' +
         Math.round((100 * done) / LIST.length) +
         '%"></i></div></div>' +
-        '<div class="prof-tabs">' +
-        tabs
-          .map(
-            ([id, label]) =>
-              '<button type="button" class="' +
-              (ui.tab === id ? 'on' : '') +
-              '" data-action="achTab" data-tab="' +
-              id +
-              '">' +
-              label +
-              '</button>'
-          )
-          .join('') +
-        '</div>' +
+        canaanTabs('achTab', ui.tab, tabs) +
         '<div class="ach-scroll">' +
         (ui.tab === 'bestiaire'
           ? tabBestiaire(h)

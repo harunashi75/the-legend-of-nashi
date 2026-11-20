@@ -973,20 +973,7 @@
     shown = signature();
     showPanel(
       '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +
-        '<div class="prof-tabs">' +
-        tabs
-          .map(
-            ([id, label]) =>
-              '<button type="button" class="' +
-              (ui.tab === id ? 'on' : '') +
-              '" data-action="profTab" data-tab="' +
-              id +
-              '">' +
-              label +
-              '</button>'
-          )
-          .join('') +
-        '</div>' +
+        canaanTabs('profTab', ui.tab, tabs) +
         (ui.tab === 'peche'
           ? tabFishing()
           : ui.tab === 'chasse'

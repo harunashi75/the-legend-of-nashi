@@ -236,7 +236,6 @@
   width: 100%;
   box-sizing: border-box;
 }
-#window .ach-panel .prof-tabs button.on,
 #window .ach-chips button.on,
 #window .ach-titles button.on {
   background: linear-gradient(180deg, #8a6420, #5a3e12);
@@ -518,30 +517,39 @@
   font-size: calc(12px * var(--font-scale));
 }
 
-/* Onglets (fiche C) et rubriques du sac (touche I). */
-#window .bag-tabs {
+/* Onglets communs à toutes les fenêtres (canaanTabs, interface-foundation.js) : fiche, métiers, succès, quêtes,
+   collections… Une même rangée d'onglets dorés sous le titre, l'onglet ouvert allumé, son compteur en petit. */
+#window .ui-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rpg-gold-dark, #6a4e2a);
 }
-#window .bag-tabs button {
+#window .ui-tabs button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: linear-gradient(180deg, #33251a, #1a120c);
+  border: 1px solid #6a4e2a;
+  border-radius: 4px 4px 0 0;
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
 }
-#window .bag-tabs button small {
+#window .ui-tabs button small {
   color: var(--rpg-muted, #b8a483);
   font-size: calc(11px * var(--font-scale));
 }
-#window .bag-tabs button.on {
+#window .ui-tabs button.on {
   background: linear-gradient(180deg, #8a6420, #5a3e12);
   border-color: #f6dc98;
   color: #fff4d0;
 }
-#window .bag-tabs button.on small {
+#window .ui-tabs button.on small {
   color: #ffe9a8;
 }
+/* Rubriques du sac (touche I). */
 #window .bag-subhead {
   margin: 12px 0 6px;
   color: #f6dc98;

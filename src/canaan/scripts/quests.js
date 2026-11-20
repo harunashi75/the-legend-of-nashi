@@ -2745,20 +2745,10 @@
       ['done', '✓ Terminées']
     ];
     modernPanel(
-      '<div class="quest-journal"><h2>📜 Journal de quêtes</h2><div class="quest-tabs">' +
-        tabs
-          .map(
-            ([id, t]) =>
-              '<button class="' +
-              (tab === id ? 'on' : '') +
-              '" data-action="questTab" data-tab="' +
-              id +
-              '">' +
-              t +
-              '</button>'
-          )
-          .join('') +
-        '</div><div class="quest-body">' +
+      '<div class="quest-journal">' +
+        canaanHead('📜 Journal de quêtes') +
+        canaanTabs('questTab', tab, tabs) +
+        '<div class="quest-body">' +
         html +
         '</div></div>'
     );

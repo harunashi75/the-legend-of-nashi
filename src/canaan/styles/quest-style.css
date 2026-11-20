@@ -95,16 +95,6 @@
 #window .quest-track.on {
   border-color: var(--rpg-gold);
 }
-#window .quest-tabs {
-  display: flex;
-  gap: 6px;
-  margin: 10px 0;
-  flex-wrap: wrap;
-}
-#window .quest-tabs button.on {
-  border-color: var(--rpg-gold);
-  color: var(--rpg-gold-light);
-}
 #window .quest-body {
   max-height: 64vh;
   overflow-y: auto;

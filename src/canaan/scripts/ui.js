@@ -225,42 +225,17 @@
       extTabs = CANAAN_EXT.charTabs(),
       extTab = extTabs.find(t => t.id === charTab) || null;
     if (!CHAR_TABS.includes(charTab) && !extTab) charTab = 'gear';
-    const tabs =
-      '<div class="bag-tabs char-tabs">' +
-      '<button type="button" class="' +
-      (charTab === 'gear' ? 'on' : '') +
-      '" data-action="characterSection" data-tab="gear">⚔️ Équipement <small>' +
-      count +
-      ' / 10</small></button>' +
-      '<button type="button" class="' +
-      (rubis ? 'on' : '') +
-      '" data-action="characterSection" data-tab="rubis">⟦rune⟧ Runes <small>' +
-      worn +
-      ' / ' +
-      window.CANAAN_RUBIS.slots +
-      '</small></button>' +
-      '<button type="button" class="' +
-      (wardrobe ? 'on' : '') +
-      '" data-action="characterSection" data-tab="wardrobe">👗 Garde-robe <small>' +
-      window.CANAAN_WARDROBE.count() +
-      ' / ' +
-      SKINS.length +
-      '</small></button>' +
-      extTabs
-        .map(
-          t =>
-            '<button type="button" class="' +
-            (charTab === t.id ? 'on' : '') +
-            '" data-action="characterSection" data-tab="' +
-            t.id +
-            '">' +
-            t.label +
-            ' <small>' +
-            t.count +
-            '</small></button>'
-        )
-        .join('') +
-      '</div>';
+    const tabs = canaanTabs(
+      'characterSection',
+      charTab,
+      [
+        ['gear', '⚔️ Équipement', count + ' / 10'],
+        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots],
+        ['wardrobe', '👗 Garde-robe', window.CANAAN_WARDROBE.count() + ' / ' + SKINS.length],
+        ...extTabs.map(t => [t.id, t.label, t.count])
+      ],
+      'char-tabs'
+    );
     const gear =
       '<div class="character-layout"><div class="character-left"><div class="rpg-paper"><div class="character-doll">' +
       '<div class="doll-column">' +
