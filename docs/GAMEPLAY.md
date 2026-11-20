@@ -451,12 +451,12 @@ Le plan est fixe (cases comptées depuis le feu) et posé après les bâtiments 
 
 ## Difficulté des donjons et des raids
 
-Les instances sont plus exigeantes et rapportent moins d’XP, pour que la campagne et l’exploration gardent leur place :
+Les instances sont plus exigeantes que l’île ; elles rapportent à peu près un niveau par passage, à tous les niveaux :
 
-- **XP** : comme les quêtes, une part du niveau de l’instance (`xpToNext`), pour qu’une instance vaille autant à tous les niveaux. Boss de donjon : 12 % d’un niveau, donjon terminé : 25 % (≈ 60 % d’un niveau par donjon) ; boss de raid : 8 %, raid terminé : 30 % (≈ 80 % par raid). Les monstres ordinaires d’une instance rapportent 75 % de leur XP. Un boss mondial vaut 12 monstres de son niveau (45 % d’un niveau pour Fenrir, 3 720 XP au niveau 60). Un héros plus fort que le boss ou l’instance reçoit moins, avec la même pénalité que pour les monstres (−15 % par niveau d’écart, 10 % au-delà de 5 niveaux) ; jamais de bonus contre un boss plus fort.
-- **Monstres** : 25 % de PV et 12 % de dégâts en plus que dehors. Boss de donjon : ×2,9 PV et ×1,3 dégâts d’un monstre de leur niveau ; boss de raid : ×3,4 et ×1,22.
+- **XP** : comme les quêtes, une part du niveau de l’instance (`xpToNext`), pour qu’une instance vaille autant à tous les niveaux. Boss de donjon : 12 % d’un niveau, donjon terminé : 25 % (≈ 60 % d’un niveau par donjon) ; boss de raid : 8 %, raid terminé : 30 % (≈ 80 % par raid). Les monstres ordinaires d’une instance rapportent 75 % de leur XP. Un boss mondial vaut 12 monstres de son niveau (45 % d’un niveau pour Fenrir, 3 720 XP au niveau 60). Un héros plus fort que le boss ou l’instance reçoit moins, avec la même pénalité que pour les monstres (−15 % par niveau d’écart, 10 % au-delà de 5 niveaux) ; jamais de bonus contre un boss plus fort. Avec les boss cachés, les renforts et les monstres, un donjon complet rapporte en pratique de 100 à 135 % d’un niveau.
+- **Monstres** : PV ×1,25 et dégâts ×1,5 par rapport à dehors ; une élite d’instance a 1,6 fois les PV d’un monstre (au lieu de 2,4). Les boss sont un niveau au-dessus de l’instance (deux en raid) : boss de donjon ×12 PV et ×1,9 dégâts d’un monstre de leur niveau, boss de raid ×14 et ×2,1 (`bossHealth`, `bossDamage`). S’y ajoutent la difficulté (Héroïque) et la taille du groupe : PV ×1 ; ×1,7 ; ×2,4 ; ×3,1 et dégâts ×1 ; ×1 ; ×1,05 ; ×1,1 de 1 à 4 héros (`ARENA_GROUP`).
 - **Mécaniques des boss** : voir « Donjons et raids » (rotation propre à chaque boss, seize mécaniques).
-- Vérifié par les jalons automatiques : un groupe de quatre (niveau 10, Épique) finit la Cave des Terriers en 1 min 40 environ, et un groupe niveau 48 en Mythique, avec ses classes, finit le Bastion du Roi Sanglant en un peu plus de 4 min, en frôlant la mort.
+- Mesuré avec le pilote de groupe des tests (`tests/helpers/group-bot.js`, quatre héros avec leurs classes) : niveau 12 en Épique, la Cave des Terriers en 2 min 35 environ ; niveaux 25 à 37 en Mythique, un donjon en 3 à 4 min (100 à 135 % d’un niveau) ; niveau 48 en Mythique, le Bastion du Roi Sanglant complet en 7 min (120 % d’un niveau). Les donjons des Tréfonds, toujours au niveau du groupe, rapportent autant à durée égale (99 à 123 % d’un niveau en 3 à 4 min) : leur XP n’est pas réduite.
 
 ## Niveaux, statistiques, instances et raids
 
@@ -495,7 +495,7 @@ Exemple : une épée légendaire de niveau 45 donne +196 Attaque, +122 Défense,
 
 La fiche du personnage (touche C) montre le niveau, la barre d’XP et deux tableaux, statistiques principales et secondaires, en points seulement.
 
-**Monstres** : chacun a un niveau fixe, celui de sa zone, de son instance ou de son boss. Ses PV (150 + 42 × niveau, selon son espèce, ×2,4 pour une élite) et ses dégâts (6 + 1,5 × niveau) en découlent. Les boss ont ×2,6 PV et ×1,25 dégâts (donjon), ×3,4 et ×1,4 (raid) ou ×4 et ×1,5 (boss mondial). Frapper un monstre plus fort que soi réduit les dégâts de 5 % par niveau d’écart (jusqu’à −50 %).
+**Monstres** : chacun a un niveau fixe, celui de sa zone, de son instance ou de son boss. Ses PV (150 + 42 × niveau, selon son espèce, ×2,4 pour une élite) et ses dégâts (6 + 1,5 × niveau) en découlent. Les boss ont ×12 PV et ×1,9 dégâts (donjon), ×14 et ×2,1 (raid) ou ×8 et ×1,8 (boss mondial). Frapper un monstre plus fort que soi réduit les dégâts de 5 % par niveau d’écart (jusqu’à −50 %).
 
 | Zone | Niveaux des monstres | Boss mondiaux |
 | --- | --- | --- |
