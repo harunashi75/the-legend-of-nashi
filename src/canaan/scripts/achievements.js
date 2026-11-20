@@ -1,6 +1,6 @@
-// Succès et collections (touche Y) : cent succès en cinq catégories, avec leur récompense (or, expérience,
-// équipement, Rubis, repas, titres), et le bestiaire : monstres du monde, créatures des donjons, boss mondiaux,
-// boss de donjon et de raid, boss de l'Arène, chacun découvert (vu de près) puis vaincu.
+// Succès (touche Y) : cent succès en cinq catégories, avec leur récompense (or, expérience, équipement, Rubis,
+// repas, titres), et le bestiaire (onglet des Collections, touche V) : monstres du monde, créatures des donjons,
+// boss mondiaux, boss de donjon et de raid, boss de l'Arène, chacun découvert (vu de près) puis vaincu.
 // Chaque héros a son carnet (hero.succes : { done, s, sets, best, title }), sauvegardé avec lui. L'hôte décide :
 // il compte les exploits de tout le groupe (événements du jeu et relevé chaque seconde), donne les récompenses et
 // envoie à chaque invité son carnet dans son message privé ; l'invité choisit son titre (action ach-title).
@@ -1742,8 +1742,7 @@
       stateOf(game.hero).done,
       stateOf(game.hero).title,
       ui,
-      ui.tab === 'succes' ? stateOf(game.hero).s : Object.keys(stateOf(game.hero).best).length,
-      ui.tab === 'fouilles' ? CANAAN_DIG.signature(game.hero) : ''
+      ui.tab === 'succes' ? stateOf(game.hero).s : ''
     ]);
   function render() {
     if (!isOpen()) return;
@@ -1753,13 +1752,12 @@
       done = Object.keys(st.done).length,
       tabs = [
         ['succes', '⟦menu_achievements⟧ Succès'],
-        ['bestiaire', '📖 Bestiaire'],
-        ['fouilles', '⟦tool_shovel⟧ Fouilles'],
         ['titres', '👑 Titres']
       ];
     const scroll = document.querySelector('#window .ach-scroll')?.scrollTop || 0;
     showPanel(
-      '<div class="rpg-head"><h2>⟦menu_achievements⟧ Succès & collections</h2></div><div class="rpg-paper ach-panel">' +
+      canaanHead('⟦menu_achievements⟧ Succès') +
+        '<div class="rpg-paper ach-panel">' +
         '<div class="ach-top"><div class="ach-total"><b>' +
         done +
         ' / ' +
@@ -1771,13 +1769,7 @@
         '%"></i></div></div>' +
         canaanTabs('achTab', ui.tab, tabs) +
         '<div class="ach-scroll">' +
-        (ui.tab === 'bestiaire'
-          ? tabBestiaire(h)
-          : ui.tab === 'fouilles'
-            ? CANAAN_DIG.tab(h)
-            : ui.tab === 'titres'
-              ? tabTitres(h)
-              : tabSucces(h)) +
+        (ui.tab === 'titres' ? tabTitres(h) : tabSucces(h)) +
         '</div></div>'
     );
     const box = document.querySelector('#window .ach-scroll');
@@ -1799,7 +1791,7 @@
   }, 500);
   const actions = {
     tab(id) {
-      if (!['succes', 'bestiaire', 'fouilles', 'titres'].includes(id)) return false;
+      if (!['succes', 'titres'].includes(id)) return false;
       ui.tab = id;
       render();
       return true;
@@ -1844,6 +1836,9 @@
     toggle,
     isOpen,
     actions,
+    // Onglet Bestiaire des Collections (V) : son contenu et son compteur.
+    bestiary: tabBestiaire,
+    bestiaryCount: h => catalog().filter(b => stateOf(h).best[b.key]?.[0]).length + ' / ' + catalog().length,
     steamSync
   });
   Object.assign(window, { canaanAchieve: event, toggleAchievements: toggle });

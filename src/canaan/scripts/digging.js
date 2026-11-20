@@ -6,7 +6,7 @@
 //   l'interrompt) ; le sol se creuse peu à peu, puis un petit trou reste là un moment. On ne creuse pas deux fois au
 //   même endroit tant que le trou est visible.
 // - Trouvailles : rien (ou un ver de terre), quelques pièces d'or, un trésor à vendre (pile du sac, rubrique
-//   Autre), ou une relique du biome qui manque encore à la collection (onglet Fouilles de la touche Y).
+//   Autre), ou une relique du biome qui manque encore à la collection (onglet Fouilles des Collections, touche V).
 // L'hôte décide (actions dig et shovel-buy) ; il envoie les trous à tous (état : holes) pour qu'ils se voient chez
 // chacun.
 (() => {
@@ -136,7 +136,7 @@
           found +
           ' / ' +
           Object.keys(RELICS).length +
-          ' (touche Y).'
+          ' (touche V).'
       );
       if (mine) sound('fanfare');
     } else if (roll < TREASURE_CHANCE) {
@@ -307,12 +307,12 @@
     c.restore();
   }
 
-  // ---------------------------------------------------------------- Boutique et onglet Fouilles (Y)
+  // ---------------------------------------------------------------- Boutique et onglet Fouilles des Collections (V)
   function shopHTML() {
     const owned = has(game.hero);
     return (
       '<section class="bag-upgrade shovel-offer"><div><strong>⟦tool_shovel⟧ Pelle de fouilleur</strong>' +
-      '<p>Creuse la terre, l’herbe et le sable de l’île (touche E) : de l’or, des trésors à vendre et des reliques à collectionner (touche Y).</p></div>' +
+      '<p>Creuse la terre, l’herbe et le sable de l’île (touche E) : de l’or, des trésors à vendre et des reliques à collectionner (touche V).</p></div>' +
       (owned
         ? '<b class="bag-max">✓ Tu as ta pelle</b>'
         : '<button type="button" data-action="buyShovel" ' +

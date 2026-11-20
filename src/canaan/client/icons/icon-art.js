@@ -1180,6 +1180,28 @@ const A = {
     r(8, 26, 16, 3.5, WOD, 0.6) +
     s(star(5, 3.4, 1.4, 16, 10.5), '#fff4c0') +
     hi('M12 7 L12.4 12'),
+  // Collections : fer à cheval porte-bonheur, clous dorés, une étoile au-dessus.
+  menu_collections:
+    L('M8.5 7 L8.5 16 C8.5 26.5 23.5 26.5 23.5 16 L23.5 7', '#9aa6b4', 4.4) +
+    l('M10 8 L10 16 C10 20 12 22.5 14 23.5', '#e6eef6', 1.1) +
+    c(8.5, 11, 1.1, GO) +
+    c(9.3, 17, 1.1, GO) +
+    c(23.5, 11, 1.1, GO) +
+    c(22.7, 17, 1.1, GO) +
+    c(16, 23.3, 1.1, GO) +
+    s(star(5, 3.6, 1.5, 16, 8), '#fff4c0'),
+  // Menu du jeu (Échap) : rouage de laiton.
+  menu_options:
+    '<circle cx="16" cy="16" r="11" fill="none" stroke="' +
+    INK +
+    '" stroke-width="7" stroke-dasharray="4.3 4.34"/>' +
+    '<circle cx="16" cy="16" r="11" fill="none" stroke="' +
+    GOD +
+    '" stroke-width="5" stroke-dasharray="4.3 4.34"/>' +
+    c(16, 16, 9, GO) +
+    s('M16 7 A9 9 0 0 1 16 25 Z', GOM) +
+    c(16, 16, 3.6, INK) +
+    hi('M10.5 12 C11.5 10 13 9 15 8.6'),
   // ---------------------------------------------------------------- Ressources des Tréfonds
   ore_fer_noir: oreArt('#6a6e80', '#2a2c38'),
   ore_quartz: oreArt('#f4f0ff', '#b8a8e0'),

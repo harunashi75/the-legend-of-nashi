@@ -842,7 +842,7 @@
     key: action => MOUNTS().key(action),
     bossKilled: (m, hero) => BOSS().bossKilled(m, hero),
     spawnBosses: () => BOSS().spawnBosses(),
-    charTabs: () => MOUNTS().charTabs(),
+    collectionTabs: () => MOUNTS().collectionTabs(),
     mapPaint,
     markers
   });

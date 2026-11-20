@@ -202,13 +202,13 @@
       '</span></div>'
     );
   }
-  // Onglet de la fiche (C), comme le sac : 'gear' (le personnage et son équipement), 'rubis' (ses six
-  // emplacements de Rubis et sa collection) ou 'wardrobe' (la garde-robe, aussi ouverte par la touche V).
+  // Onglet de la fiche (C) : 'gear' (le personnage et son équipement) ou 'rubis' (ses six emplacements de Rubis
+  // et sa collection). Ce que le héros collectionne (garde-robe, bestiaire…) est dans les Collections (V).
   // L'onglet choisi est gardé d'une ouverture à l'autre.
-  const CHAR_TABS = ['gear', 'rubis', 'wardrobe'];
+  const CHAR_TABS = ['gear', 'rubis'];
   let charTab = 'gear';
   function characterSection(tab) {
-    if (CHAR_TABS.includes(tab) || CANAAN_EXT.charTabs().some(t => t.id === tab)) charTab = tab;
+    if (CHAR_TABS.includes(tab)) charTab = tab;
     renderCharacter();
   }
   function renderCharacter() {
@@ -218,21 +218,14 @@
     const st = characterStats(),
       count = Object.values(game.hero.equipment).filter(Boolean).length,
       rubis = charTab === 'rubis',
-      wardrobe = charTab === 'wardrobe',
       worn = window.CANAAN_RUBIS.equipped().filter(Boolean).length,
-      need = xpToNext(st.level),
-      // Onglets des extensions présentes ; un onglet d'une extension absente revient à l'équipement.
-      extTabs = CANAAN_EXT.charTabs(),
-      extTab = extTabs.find(t => t.id === charTab) || null;
-    if (!CHAR_TABS.includes(charTab) && !extTab) charTab = 'gear';
+      need = xpToNext(st.level);
     const tabs = canaanTabs(
       'characterSection',
       charTab,
       [
         ['gear', '⚔️ Équipement', count + ' / 10'],
-        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots],
-        ['wardrobe', '👗 Garde-robe', window.CANAAN_WARDROBE.count() + ' / ' + SKINS.length],
-        ...extTabs.map(t => [t.id, t.label, t.count])
+        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots]
       ],
       'char-tabs'
     );
@@ -264,13 +257,7 @@
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
         tabs +
-        (extTab
-          ? extTab.section()
-          : rubis
-            ? window.CANAAN_RUBIS.section()
-            : wardrobe
-              ? window.CANAAN_WARDROBE.section()
-              : gear)
+        (rubis ? window.CANAAN_RUBIS.section() : gear)
     );
     drawCharacterPreview();
     prepare('character');

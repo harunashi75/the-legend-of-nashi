@@ -6,7 +6,7 @@
 // - En selle : vitesse augmentée du bonus de la monture. On descend tout seul en attaquant, en lançant une compétence,
 //   en roulant, en étant touché (combat), en tombant, ou en entrant dans un lieu fermé.
 // - Coopératif : l'hôte décide (action ext « mount », « buy », « choose ») ; chacun voit les montures de tous.
-// - Onglet « Montures » de la fiche du personnage (C) : journal de collection — liste à gauche (obtenues en couleur,
+// - Onglet « Montures » des Collections (V) : journal de collection — liste à gauche (obtenues en couleur,
 //   les autres grisées), monture sélectionnée en grand à droite avec où l'obtenir (styles communs .collection-*,
 //   equipment-style.css, partagés avec la garde-robe).
 (() => {
@@ -262,7 +262,7 @@
         '</div></div>'
     );
   }
-  // Onglet « Montures » de la fiche du personnage, en journal de collection : la liste à gauche (montures obtenues
+  // Onglet « Montures » des Collections (V), en journal de collection : la liste à gauche (montures obtenues
   // d'abord, en couleur ; les autres grisées), la monture sélectionnée en grand à droite, avec où l'obtenir.
   let picked = null; // monture affichée à droite (interface locale, jamais envoyée)
   // Où obtenir une monture : son lieu (data.js) et son prix, s'il y en a un.
@@ -371,7 +371,7 @@
       '</div></div>'
     );
   }
-  const charTabs = () => [
+  const collectionTabs = () => [
     {
       id: 'mounts',
       label: '🐎 ' + tt('Montures'),
@@ -381,8 +381,8 @@
   ];
   const refresh = () => {
     const shown = document.getElementById('window')?.dataset?.canaanPanel;
-    if (CANAAN_VALLEY.nearStable(P) && !shown?.startsWith('character')) shop();
-    else if (typeof canaanCharacterSection === 'function' && modalOpen()) canaanCharacterSection('mounts');
+    if (CANAAN_VALLEY.nearStable(P) && shown !== 'collections') shop();
+    else if (typeof canaanCollections === 'function' && modalOpen()) canaanCollections('mounts');
   };
 
   // ---------------------------------------------------------------- Actions (joueur, réseau)
@@ -404,7 +404,7 @@
     pick: id => {
       if (!BY[id]) return;
       picked = id;
-      canaanCharacterSection('mounts');
+      canaanCollections('mounts');
     },
     summon: () => ui.mount() && setTimeout(refresh, 120)
   };
@@ -461,7 +461,7 @@
     speed,
     heroBody,
     shop,
-    charTabs,
+    collectionTabs,
     ui,
     handle,
     key,

@@ -157,8 +157,9 @@ test('Vallée des Héros (build de test) : terre ouverte, lieux posés, créatur
   assert.equal(errors.length, 0, errors.join('\n'));
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.keysOf("mount"))')), ['h']);
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_KEYS.keysOf("wardrobe"))')), ['v']);
-  // La fiche du personnage a son onglet Montures.
-  assert.equal(JSON.parse(run('JSON.stringify(CANAAN_EXT.charTabs().map(t=>t.id))'))[0], 'mounts');
+  // Les Collections (V) ont l'onglet Montures, en premier.
+  assert.equal(JSON.parse(run('JSON.stringify(CANAAN_EXT.collectionTabs().map(t=>t.id))'))[0], 'mounts');
+  assert.equal(JSON.parse(run('JSON.stringify(CANAAN_COLLECTIONS.tabs())'))[0], 'mounts');
 });
 
 test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en combat, monde ouvert seulement, sauvegarde', () => {
@@ -187,7 +188,7 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
     'pas un cheval qu’on ne possède pas'
   );
   // Onglet Montures : obtenues d'abord, les autres verrouillées avec où les obtenir ; la vue suit la sélection.
-  run('closePanels();canaanCharacterSection("mounts")');
+  run('closePanels();canaanCollections("mounts")');
   const tab = () => {
     const html = run('document.getElementById("window").innerHTML'),
       items = [...html.matchAll(/class="collection-item (owned|locked)[^"]*"[^>]*data-id="(\w+)"/g)];

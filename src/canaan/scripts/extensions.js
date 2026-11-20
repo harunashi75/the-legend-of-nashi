@@ -85,7 +85,7 @@ function canaanLockedAt(px, py) {
 //   key(action)               touche d'une action réservée à l'extension : true si elle l'a prise
 //   bossKilled(m, hero)       un boss mondial vient de tomber : true si l'extension fait sa récompense
 //   spawnBosses()             au rythme des boss mondiaux de l'île : faire apparaître les siens
-//   charTabs()                onglets ajoutés à la fiche du personnage (C) : [{ id, label, count, section() }]
+//   collectionTabs()          onglets ajoutés aux Collections (V) : [{ id, label, count, section() }]
 //   mapPaint(g, px)           dessin sur l'image de l'île des cartes (px pixels par case)
 //   markers()                 repères des cartes : [{ kind, x, y, name, extra }]
 const CANAAN_EXT = (() => {
@@ -155,7 +155,7 @@ const CANAAN_EXT = (() => {
     bossKilled: (m, hero) => !!first('bossKilled', m, hero),
     spawnBosses: () => each('spawnBosses'),
     // Onglets de la fiche du personnage (C) : [{ id, label, count, section() }].
-    charTabs: () => list.flatMap(e => e.charTabs?.() || []),
+    collectionTabs: () => list.flatMap(e => e.collectionTabs?.() || []),
     // Carte : dessin d'une extension sur l'image de l'île (g, PX pixels par case) et ses repères [{ kind, x, y, name }].
     mapPaint(id, g, px) {
       const e = list.find(e => e.id === id);

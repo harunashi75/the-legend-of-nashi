@@ -169,10 +169,11 @@
   right: 5px;
 }
 
-/* Journaux de collection de la fiche (C) : Garde-robe (V) et onglets des extensions. La liste à gauche (obtenues en
+/* Journaux des Collections (V) : Garde-robe et onglets des extensions. La liste à gauche (obtenues en
    couleur, les autres grisées et verrouillées), l'élément sélectionné en grand à droite, avec où l'obtenir. */
-/* Les onglets de la fiche gardent la même largeur de fenêtre. */
-#window:has(.char-tabs) {
+/* La fiche et les Collections gardent la même largeur de fenêtre, quel que soit l'onglet. */
+#window:has(.char-tabs),
+#window:has(.collections-panel) {
   width: min(1220px, 98vw);
   max-width: none;
 }

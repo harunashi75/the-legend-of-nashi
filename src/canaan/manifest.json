@@ -414,6 +414,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-collections",
+      "file": "scripts/collections.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-persistence",
       "file": "scripts/persistence.js"
     },

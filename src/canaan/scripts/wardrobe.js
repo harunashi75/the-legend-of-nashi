@@ -1,4 +1,4 @@
-// Garde-robe (touche V, onglet de la fiche C, en journal de collection) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
+// Garde-robe (onglet des Collections, touche V, en journal de collection) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
 // Une apparence est une tenue complète, purement visuelle (shared/data/skins.js). Elle tombe des monstres, des élites,
 // des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets, avec une qualité : plus elle
 // est haute, plus la tenue est travaillée. Une apparence déjà possédée est revendue d'office.
@@ -85,12 +85,9 @@
     previews.set(key, url);
     return url;
   }
-  // Ouverte : la fenêtre affichée est la fiche (C) sur son onglet Garde-robe (toute autre fenêtre efface cette
+  // Ouverte : la fenêtre affichée est Collections (V) sur son onglet Garde-robe (toute autre fenêtre efface cette
   // marque, voir showPanel).
-  const shown = () =>
-    modalOpen() &&
-    document.getElementById('window')?.dataset.canaanPanel === 'character' &&
-    window.canaanCharacterTab?.() === 'wardrobe';
+  const shown = () => CANAAN_COLLECTIONS.current() === 'wardrobe';
   const count = () => ownedOf(game.hero).length;
   // Où trouver une apparence : les sources de butin qui tirent sa qualité (SKIN_DROPS), ou la boutique de la Tisseuse
   // pour les tenues elfiques. Chaque source est une étiquette à part (traduite seule).
@@ -113,7 +110,7 @@
       .map(([key]) => chip(SOURCE_NAMES[key] || key))
       .join('');
   }
-  // Onglet Garde-robe de la fiche (C), en journal de collection : la liste à gauche (la tenue
+  // Onglet Garde-robe des Collections (V), en journal de collection : la liste à gauche (la tenue
   // d'origine, les apparences obtenues en couleur, puis les autres grisées), l'apparence sélectionnée en grand à
   // droite, portée par le héros, avec où la trouver.
   let picked = null; // apparence affichée à droite ('' : la tenue d'origine) — interface locale
@@ -218,9 +215,9 @@
       '</div></div>'
     );
   }
-  // Ouvre (ou redessine) la fiche sur son onglet Garde-robe.
+  // Ouvre (ou redessine) les Collections sur leur onglet Garde-robe.
   function render() {
-    window.canaanCharacterSection('wardrobe');
+    window.canaanCollections('wardrobe');
   }
   function toggle() {
     if (shown()) return closePanels();

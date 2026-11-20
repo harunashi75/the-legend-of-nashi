@@ -80,7 +80,9 @@
     toggleTalents: () => toggleTalents(),
     toggleJournal: () => toggleJournal(),
     toggleAchievements: () => toggleAchievements(),
-    // Garde-robe (V) : ouvrir, porter une apparence (vide : la retirer).
+    // Collections (V) : ouvrir, changer d'onglet ; la Garde-robe seule (son onglet).
+    toggleCollections: () => toggleCollections(),
+    collectionsTab: element => canaanCollections(actionText(element, 'tab')),
     toggleWardrobe: () => toggleWardrobe(),
     // Cité elfique : écouter le Grand Arbre, sa bénédiction, l'armurerie et l'atelier de la Tisseuse.
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),

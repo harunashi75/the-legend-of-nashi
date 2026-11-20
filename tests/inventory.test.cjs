@@ -121,9 +121,9 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),true);assert.equal(run('CANAAN_WARDROBE.grant(game.hero,"pirate")'),false);assert.equal(run('P.gold'),300);
  assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"dragon")'),false,'pas possédée');assert.equal(run('(game.hero.look||{}).wear||""'),'');
  assert.equal(run('CANAAN_WARDROBE.wear(game.hero,"pirate")'),true);assert.equal(run('game.hero.look.wear'),'pirate');
- // La garde-robe est un onglet de la fiche (C) : V l'ouvre sur cet onglet, sans bouton sous le personnage.
+ // La garde-robe est un onglet des Collections (V), plus de la fiche (C).
  run('closePanels();toggleWardrobe()');
- assert.equal(run('document.getElementById("window").dataset.canaanPanel'),'character');assert.equal(run('canaanCharacterTab()'),'wardrobe');
+ assert.equal(run('document.getElementById("window").dataset.canaanPanel'),'collections');assert.equal(run('CANAAN_COLLECTIONS.current()'),'wardrobe');
  assert.match(run('document.getElementById("window").innerHTML'),/data-tab="wardrobe"[^>]*>[^<]*Garde-robe[^]*collection-list/);
  // Journal de collection : la tenue d'origine d'abord, une apparence non obtenue grisée avec où la trouver ; obtenue, on la porte.
  const view=()=>run('document.getElementById("window").innerHTML').split('collection-view')[1]||'';
@@ -134,7 +134,12 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  run('CANAAN_WARDROBE.choose("fermier")');assert.equal(run('game.hero.look.wear'),'fermier');assert.match(view(),/✔ Portée/);
  run('game.hero.skins=__skins;CANAAN_WARDROBE.choose(__wear)');
  run('toggleWardrobe()');assert.equal(run('modalOpen()'),false,'V referme l’onglet Garde-robe');
- run('canaanCharacterSection("gear")');assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/wardrobe-open|wardrobe-tab/);
+ run('canaanCharacterSection("gear")');assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/wardrobe-open|wardrobe-tab|data-tab="wardrobe"/);
+ // Collections : un onglet par collection, le dernier ouvert gardé ; V les referme quel que soit l'onglet.
+ run('closePanels();canaanCollections("bestiary")');assert.match(run('document.getElementById("window").innerHTML'),/data-tab="bestiary"[^]*beast-card/);
+ run('canaanCollections("digging")');assert.match(run('document.getElementById("window").innerHTML'),/Reliques trouvées/);
+ run('closePanels();started=true;paused=false;toggleCollections()');assert.equal(run('CANAAN_COLLECTIONS.current()'),'digging');
+ run('toggleCollections()');assert.equal(run('modalOpen()'),false);
  // Onglet Runes : Runes équipées et Collection en haut, Effets actifs dessous.
  run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rubis-coll[^]*rubis-fx/);
  run('closePanels()');

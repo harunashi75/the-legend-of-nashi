@@ -26,8 +26,9 @@
     ['trade', 'Échange', ['j'], 'Menus'],
     ['professions', 'Métiers', ['p'], 'Menus'],
     ['journal', 'Journal de quêtes', ['l'], 'Menus'],
-    ['achievements', 'Succès et collections', ['y'], 'Menus'],
-    ['wardrobe', 'Garde-robe', ['v'], 'Menus'],
+    ['achievements', 'Succès', ['y'], 'Menus'],
+    // Identifiant « wardrobe » gardé : les touches déjà choisies dans les sauvegardes restent valables.
+    ['wardrobe', 'Collections', ['v'], 'Menus'],
     ['chat', 'Écrire dans la discussion', ['enter'], 'Menus'],
     // Actions des extensions présentes (déclarées avec leurs données : extensions.js).
     ...canaanExtensionIds().flatMap(id => canaanExtension(id).keys || [])
@@ -254,7 +255,8 @@
     toggleTrade: 'trade',
     toggleProfessions: 'professions',
     toggleJournal: 'journal',
-    toggleAchievements: 'achievements'
+    toggleAchievements: 'achievements',
+    toggleCollections: 'wardrobe'
   };
   function refreshLabels() {
     for (const [action, id] of Object.entries(MENU_BUTTONS)) {

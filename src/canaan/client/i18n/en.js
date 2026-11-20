@@ -49,7 +49,9 @@ export default {
   'Métiers ({k})': 'Professions ({k})',
   'Métiers : pêche et cuisine ({k})': 'Professions: fishing and cooking ({k})',
   'Journal de quêtes ({k})': 'Quest log ({k})',
-  'Succès et collections ({k})': 'Achievements and collections ({k})',
+  'Succès ({k})': 'Achievements ({k})',
+  'Collections ({k})': 'Collections ({k})',
+  'Collections : garde-robe, bestiaire, fouilles ({k})': 'Collections: wardrobe, bestiary, digging ({k})',
 
   // ------------------------------------------------------------ Menu pause
   'Menu pause': 'Pause menu',
@@ -179,7 +181,7 @@ export default {
   'Échange': 'Trade',
   'Métiers': 'Professions',
   'Journal de quêtes': 'Quest log',
-  'Succès et collections': 'Achievements and collections',
+  'Collections': 'Collections',
   'Garde-robe': 'Wardrobe',
   'Écrire dans la discussion': 'Write in the chat',
   'touche|Espace': 'Space',
@@ -2373,13 +2375,13 @@ export default {
   'Appuie sur E sur la terre, l’herbe ou le sable pour creuser.': 'Press E on soil, grass or sand to dig.',
   'Il te faut une pelle : le marchand en vend une.': 'You need a shovel: the merchant sells one.',
   'Relique trouvée : {nom} !': 'Relic found: {nom}!',
-  'Collection des fouilles : {n} / {m} (touche Y).': 'Dig collection: {n} / {m} (Y key).',
+  'Collection des fouilles : {n} / {m} (touche V).': 'Dig collection: {n} / {m} (V key).',
   'Sac plein : tu laisses {nom} au fond du trou.':
     'Materials full: you leave {nom} at the bottom of the hole.',
   'Rien qu’un ver de terre…': 'Just an earthworm…',
   'Pelle de fouilleur': 'Digger’s shovel',
-  'Creuse la terre, l’herbe et le sable de l’île (touche E) : de l’or, des trésors à vendre et des reliques à collectionner (touche Y).':
-    'Dig the island’s soil, grass and sand (E key): gold, treasures to sell and relics to collect (Y key).',
+  'Creuse la terre, l’herbe et le sable de l’île (touche E) : de l’or, des trésors à vendre et des reliques à collectionner (touche V).':
+    'Dig the island’s soil, grass and sand (E key): gold, treasures to sell and relics to collect (V key).',
   'Tu as ta pelle': 'You have your shovel',
   'Acheter la pelle': 'Buy the shovel',
   'Fouilles': 'Digging',

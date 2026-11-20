@@ -202,7 +202,7 @@ const CANAAN_PANEL_KEYS = {
   professions: 'toggleProfessions',
   journal: 'toggleJournal',
   achievements: 'toggleAchievements',
-  wardrobe: 'toggleWardrobe'
+  wardrobe: 'toggleCollections'
 };
 let canaanPanelOpen = null,
   canaanPanelOpening = null,
@@ -238,13 +238,12 @@ function canaanPanelKey(action) {
   if (!name || typeof window[name] !== 'function') return false;
   canaanTrackPanels();
   if (!modalOpen()) return false;
-  // La garde-robe est un onglet de la fiche : C ferme la fiche quel que soit l'onglet, V ferme l'onglet Garde-robe.
+  // C ferme la fiche quel que soit son onglet, V les Collections quel que soit le leur (même ouvertes autrement).
   const shownPanel = document.getElementById('window')?.dataset.canaanPanel,
     same =
       canaanPanelOpen === name ||
-      (shownPanel === 'character' &&
-        (name === 'toggleCharacter' ||
-          (name === 'toggleWardrobe' && window.canaanCharacterTab?.() === 'wardrobe')));
+      (shownPanel === 'character' && name === 'toggleCharacter') ||
+      (shownPanel === 'collections' && name === 'toggleCollections');
   closePanels();
   canaanPanelOpen = null;
   if (!same) window[name]();

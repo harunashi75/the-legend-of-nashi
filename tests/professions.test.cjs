@@ -288,10 +288,10 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  // Réseau : carnet envoyé à l'invité au plus toutes les 3 s, sauf déblocage.
  assert.ok(run('CANAAN_ACHIEVEMENTS.netView(ally)'));assert.equal(run('CANAAN_ACHIEVEMENTS.netView(ally)'),undefined);
  assert.equal(run('CANAAN_ACHIEVEMENTS.handle(ally,{op:"ach-title",id:"c3"})'),false,'pas débloqué par l’allié');
- // Panneau : succès, bestiaire (silhouettes « ??? » pour l'inconnu) et titres.
+ // Panneau : succès et titres ; le bestiaire (silhouettes « ??? » pour l'inconnu) est dans les Collections (V).
  run('toggleAchievements()');let html=run('document.getElementById("window").innerHTML');assert.match(html,/ach-panel/);assert.match(html,/Le Pourfendeur|Fléau des ténèbres/);
- run('CANAAN_ACHIEVEMENTS.actions.tab("bestiaire")');html=run('document.getElementById("window").innerHTML');assert.match(html,/beast-card killed/);assert.match(html,/\?\?\?/);assert.match(html,/Fenrir|Pas encore croisée/);
- run('CANAAN_ACHIEVEMENTS.actions.tab("titres")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
+ run('canaanCollections("bestiary")');html=run('document.getElementById("window").innerHTML');assert.match(html,/beast-card killed/);assert.match(html,/\?\?\?/);assert.match(html,/Fenrir|Pas encore croisée/);
+ run('closePanels();toggleAchievements();CANAAN_ACHIEVEMENTS.actions.tab("titres")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -323,7 +323,7 @@ test('Règles partagées des métiers : courbe d’XP, qualités, repas, tirages
  assert.deepEqual(R.profSanitize('cassé'),R.profFresh());
 });
 
-test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au sol, or, trésors à vendre et reliques (touche Y)',async()=>{
+test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au sol, or, trésors à vendre et reliques (touche V)',async()=>{
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
  assert.deepEqual(n.sanitizeAction({op:'dig',x:5}),{op:'dig'});assert.deepEqual(n.sanitizeAction({op:'shovel-buy'}),{op:'shovel-buy'});
  assert.ok(n.STACK_TOKEN.test('treasure:perle:0*3'));
@@ -366,7 +366,7 @@ test('Fouilles : pelle achetée chez le marchand, coup de pelle minuté, trou au
  const tok=run('CANAAN_BAG.token(CANAAN_BAG.tiles(game.hero,"main").find(p=>p.kind==="treasure"))');
  run('{const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+40};globalThis.g1=P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,'+JSON.stringify(tok)+')'),true);
  assert.equal(run('P.gold-g1'),run('CANAAN_DIG.TREASURES['+JSON.stringify(tok.split(':')[1])+'].value'));
- // Onglet Fouilles de la touche Y.
+ // Onglet Fouilles des Collections (touche V).
  assert.match(run('CANAAN_DIG.tab(game.hero)'),/Reliques trouvées <b>1 \/ 18<\/b>/);
  // Sauvegarde et réseau : pelle, reliques et trésors vérifiés.
  assert.deepEqual(JSON.parse(run('JSON.stringify((({shovel,finds,treasure})=>({shovel,finds,treasure}))(CANAAN_PROF.sanitize({shovel:true,finds:{toupie:1,inconnue:3,oeuf:"x"},treasure:{"perle:0":2,"perle:3":1,"faux:0":4}})))')),{shovel:1,finds:{toupie:1},treasure:{'perle:0':3}});
