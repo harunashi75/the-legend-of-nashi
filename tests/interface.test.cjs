@@ -458,7 +458,24 @@ test('Fenêtres façon MMO : le héros joue fenêtre ouverte, le sac s’ouvre a
  fire(g,'keydown',{key:'i'});assert.equal(run('modalOpen()'),false,'I referme le sac');
  // Place retenue après un déplacement : elle prime sur le bouton.
  run('CANAAN_PREFERENCES.write("layout",{windows:{toggleInventory:{x:300,y:200}}})');
- fire(g,'keydown',{key:'i'});assert.equal(run('document.getElementById("window").style.left'),'300px');run('closePanels()');
+ fire(g,'keydown',{key:'i'});assert.equal(run('document.getElementById("window").style.left'),'300px');
+ // Redimensionner par le coin en bas à gauche : le bord droit reste en place ; taille et place retenues.
+ run('{const w=document.getElementById("window");w.__props={};w.style.setProperty=(k,v)=>w.__props[k]=v;w.style.removeProperty=k=>delete w.__props[k];w.getBoundingClientRect=()=>({left:300,top:200,width:470,height:500,right:770,bottom:700})}');
+ const win=run('document.getElementById("window")'),grip={closest:s=>s==='.dock-grip'?{dataset:{edge:'bl'}}:null};
+ fire(win,'pointerdown',{button:0,target:grip,clientX:300,clientY:700,pointerId:7});
+ fire(win,'pointermove',{target:grip,clientX:200,clientY:760,pointerId:7});
+ assert.equal(run('document.getElementById("window").__props["--panel-w"]'),'570px');
+ assert.equal(run('document.getElementById("window").__props["--panel-h"]'),'560px');
+ assert.equal(run('document.getElementById("window").style.left'),'200px','le bord droit ne bouge pas');
+ fire(win,'pointerup',{pointerId:7});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PREFERENCES.read("layout",{}).windows.toggleInventory)')),{x:200,y:200,w:570,h:560});
+ // Jamais plus petite que sa taille minimale.
+ fire(win,'pointerdown',{button:0,target:grip,clientX:300,clientY:700,pointerId:8});fire(win,'pointermove',{target:grip,clientX:900,clientY:100,pointerId:8});fire(win,'pointerup',{pointerId:8});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PREFERENCES.read("layout",{}).windows.toggleInventory)')).w,340);
+ // Double-clic sur la poignée : taille d'origine, la place reste.
+ fire(win,'dblclick',{target:grip});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PREFERENCES.read("layout",{}).windows.toggleInventory)')),{x:430,y:200});
+ run('closePanels()');
  // Fenêtre ouverte depuis le dialogue d'un PNJ (marchand) : centrée, et fermée quand le héros s'éloigne.
  run('P.x=1000;P.y=1000');fire(run('document.getElementById("dialog")'),'click');
  run('showPanel(\'<div class="shop-panel"></div>\')');assert.equal(run('CANAAN_DOCK.owner()'),'free:shop-panel');

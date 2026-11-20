@@ -29,3 +29,54 @@
   cursor: var(--cursor-grabbing);
   user-select: none;
 }
+/* Poignées de redimensionnement : trois coins (la croix occupe le quatrième), des traits dorés discrets. */
+#window#window .dock-grip {
+  position: absolute;
+  z-index: 5;
+  width: 16px;
+  height: 16px;
+  opacity: 0.45;
+  cursor: var(--cursor-grab);
+  --grip: var(--rpg-gold, #c9a14a);
+  transition: opacity 0.15s;
+}
+#window#window .dock-grip:hover,
+#window#window.dock-dragging .dock-grip {
+  opacity: 1;
+}
+#window#window .dock-grip[data-edge='br'] {
+  right: 1px;
+  bottom: 1px;
+  background: linear-gradient(
+    135deg,
+    transparent 0 48%,
+    var(--grip) 48% 56%,
+    transparent 56% 70%,
+    var(--grip) 70% 78%,
+    transparent 78%
+  );
+}
+#window#window .dock-grip[data-edge='bl'] {
+  left: 1px;
+  bottom: 1px;
+  background: linear-gradient(
+    225deg,
+    transparent 0 48%,
+    var(--grip) 48% 56%,
+    transparent 56% 70%,
+    var(--grip) 70% 78%,
+    transparent 78%
+  );
+}
+#window#window .dock-grip[data-edge='tr'] {
+  right: 1px;
+  top: 1px;
+  background: linear-gradient(
+    45deg,
+    transparent 0 48%,
+    var(--grip) 48% 56%,
+    transparent 56% 70%,
+    var(--grip) 70% 78%,
+    transparent 78%
+  );
+}

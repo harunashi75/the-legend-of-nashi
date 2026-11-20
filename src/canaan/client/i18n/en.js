@@ -3073,6 +3073,8 @@ export default {
   '{piece} de l’Aube': '{piece} of the Dawn',
   'Fermer la fenêtre': 'Close the window',
   'Fermer (Échap)': 'Close (Esc)',
+  'Redimensionner': 'Resize',
+  'double-clic : taille d’origine': 'double-click: original size',
   '{n} objets communs vendus : +{m} or': '{n} common items sold: +{m} gold',
   'Choisis une difficulté': 'Choose a difficulty',
   'Retour dans les Tréfonds': 'Back to the Depths',

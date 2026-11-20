@@ -6,6 +6,9 @@
 //   portail…) s'ouvrent au centre.
 // - On la déplace en la saisissant par son en-tête ; sa place est retenue pour la prochaine fois (préférence
 //   « layout », clé windows). Un double-clic sur l'en-tête la remet à sa place d'origine.
+// - Une fenêtre à taille fixe (sac, fiche, talents, quêtes, marchand…) se redimensionne par ses poignées de coin (en bas
+//   à droite, en bas à gauche, en haut à droite : en haut à gauche se trouve la croix). Sa taille est retenue ; un
+//   double-clic sur une poignée lui rend sa taille d'origine.
 // - Une fenêtre ouverte en parlant à quelqu'un ou en touchant un objet du monde (marchand, banque, portail…) se ferme
 //   quand le héros s'en éloigne.
 (() => {
@@ -15,6 +18,9 @@
   if (!overlay || !win) return;
   const MARGIN = 8,
     GAP = 10,
+    MIN_W = 340,
+    MIN_H = 280,
+    GRIPS = ['br', 'bl', 'tr'],
     LEASH = 260,
     INTERACTIVE =
       'button, input, select, textarea, a, label, canvas, [data-action], [data-tab], [draggable="true"], [data-tooltip-index], [data-tooltip-slot], [contenteditable="true"]';
@@ -26,10 +32,13 @@
 
   const isOpen = () => overlay.style.display === 'flex';
   const savedAll = () => CANAAN_PREFERENCES.read('layout', {}).windows || {};
-  function writeSaved(key, pos) {
+  // Place et taille retenues d'une fenêtre : { x, y } (déplacée) et { w, h } (redimensionnée), chacune facultative.
+  function writeSaved(key, changes) {
     const obj = CANAAN_PREFERENCES.read('layout', {}),
-      windows = { ...(obj.windows || {}) };
-    if (pos) windows[key] = pos;
+      windows = { ...(obj.windows || {}) },
+      next = { ...(windows[key] || {}), ...changes };
+    for (const k of Object.keys(next)) if (next[k] == null) delete next[k];
+    if (Object.keys(next).length) windows[key] = next;
     else delete windows[key];
     obj.windows = windows;
     CANAAN_PREFERENCES.write('layout', obj);
@@ -60,10 +69,22 @@
     win.style.top = y + 'px';
     return { x, y };
   }
+  // Taille choisie par le joueur : elle remplace celle de data-size (styles/panel-sizes.css), toujours bornée à l'écran.
+  function applySize(saved) {
+    if (win.dataset.size && saved.w && saved.h) {
+      win.style.setProperty('--panel-w', saved.w + 'px');
+      win.style.setProperty('--panel-h', saved.h + 'px');
+    } else {
+      win.style.removeProperty('--panel-w');
+      win.style.removeProperty('--panel-h');
+    }
+  }
   function place() {
     if (!isOpen() || drag) return;
-    const saved = owner && savedAll()[owner],
-      r = !saved && buttonRect();
+    const saved = (owner && savedAll()[owner]) || {},
+      moved = Number.isFinite(saved.x) && Number.isFinite(saved.y);
+    applySize(saved);
+    const r = !moved && buttonRect();
     // Au-dessus du bouton : la fenêtre ne descend jamais sur la barre des menus (sa hauteur s'adapte).
     if (r) {
       win.style.setProperty('--dock-max-h', Math.max(240, r.top - GAP - MARGIN) + 'px');
@@ -71,7 +92,7 @@
       return;
     }
     win.style.removeProperty('--dock-max-h');
-    if (saved) setPos(saved.x, saved.y);
+    if (moved) setPos(saved.x, saved.y);
     else
       setPos(
         ((innerWidth || 0) - (win.offsetWidth || 0)) / 2,
@@ -98,6 +119,17 @@
       owner = 'free:' + sig;
       leash = fromWorld ? { x: P.x, y: P.y } : null;
     }
+    // Poignées de redimensionnement (fenêtres à taille fixe), remises à chaque dessin.
+    if (win.dataset.size && win.insertAdjacentHTML)
+      win.insertAdjacentHTML(
+        'beforeend',
+        GRIPS.map(
+          edge =>
+            '<div class="dock-grip" data-edge="' +
+            edge +
+            '" title="Redimensionner · double-clic : taille d’origine"></div>'
+        ).join('')
+      );
     place();
     return r;
   };
@@ -146,38 +178,79 @@
   // ---------------------------------------------------------------- Déplacement à la souris
   function handle(e) {
     const t = e.target;
-    if (!t || !t.closest || t.closest(INTERACTIVE)) return false;
+    if (!t || !t.closest || t.closest(INTERACTIVE + ', .dock-grip')) return false;
     if (t === win || t.closest('.rpg-head, h2')) return true;
     // La bande du haut de la fenêtre sert aussi de poignée.
     return e.clientY - win.getBoundingClientRect().top < 34;
   }
   win.addEventListener('pointerdown', e => {
-    if (e.button !== 0 || (e.pointerType && e.pointerType !== 'mouse') || !handle(e)) return;
-    e.preventDefault();
-    const r = win.getBoundingClientRect();
-    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId, moved: false };
+    if (e.button !== 0) return;
+    const grip = e.target?.closest?.('.dock-grip'),
+      r = win.getBoundingClientRect();
+    if (grip) {
+      e.preventDefault();
+      drag = {
+        mode: 'resize',
+        edge: grip.dataset.edge,
+        sx: e.clientX,
+        sy: e.clientY,
+        x: r.left,
+        y: r.top,
+        w: r.width,
+        h: r.height,
+        id: e.pointerId,
+        moved: false
+      };
+    } else {
+      if ((e.pointerType && e.pointerType !== 'mouse') || !handle(e)) return;
+      e.preventDefault();
+      drag = { mode: 'move', dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId, moved: false };
+    }
     win.setPointerCapture(e.pointerId);
     win.classList.add('dock-dragging');
   });
+  // Redimensionner par un coin : le bord opposé reste en place ; la fenêtre reste entre sa taille minimale et l'écran.
+  function resizeTo(e) {
+    const d = drag,
+      dx = e.clientX - d.sx,
+      dy = e.clientY - d.sy,
+      maxW = innerWidth - 2 * MARGIN,
+      maxH = innerHeight - 2 * MARGIN,
+      left = d.edge.includes('l'),
+      top = d.edge.includes('t');
+    const w = Math.round(Math.max(MIN_W, Math.min(maxW, d.w + (left ? -dx : dx)))),
+      h = Math.round(Math.max(MIN_H, Math.min(maxH, d.h + (top ? -dy : dy))));
+    d.nw = w;
+    d.nh = h;
+    win.style.setProperty('--panel-w', w + 'px');
+    win.style.setProperty('--panel-h', h + 'px');
+    setPos(left ? d.x + d.w - w : d.x, top ? d.y + d.h - h : d.y);
+  }
   win.addEventListener('pointermove', e => {
     if (!drag || e.pointerId !== drag.id) return;
     drag.moved = true;
     win.style.removeProperty('--dock-max-h');
-    setPos(e.clientX - drag.dx, e.clientY - drag.dy);
+    if (drag.mode === 'resize') resizeTo(e);
+    else setPos(e.clientX - drag.dx, e.clientY - drag.dy);
   });
   const drop = e => {
     if (!drag || e.pointerId !== drag.id) return;
-    const moved = drag.moved;
+    const { moved, mode, nw, nh } = drag;
     drag = null;
     win.classList.remove('dock-dragging');
-    if (moved && owner)
-      writeSaved(owner, { x: parseInt(win.style.left, 10), y: parseInt(win.style.top, 10) });
+    if (!moved || !owner) return;
+    const pos = { x: parseInt(win.style.left, 10), y: parseInt(win.style.top, 10) };
+    // Redimensionnée, la fenêtre garde aussi sa place (elle ne se recolle pas au-dessus de son bouton).
+    writeSaved(owner, mode === 'resize' ? { ...pos, w: nw, h: nh } : pos);
   };
   win.addEventListener('pointerup', drop);
   win.addEventListener('pointercancel', drop);
+  // Double-clic : sur une poignée, la taille d'origine ; sur l'en-tête, la place d'origine.
   win.addEventListener('dblclick', e => {
-    if (!owner || !handle(e)) return;
-    writeSaved(owner, null);
+    if (!owner) return;
+    if (e.target?.closest?.('.dock-grip')) writeSaved(owner, { w: null, h: null });
+    else if (handle(e)) writeSaved(owner, { x: null, y: null });
+    else return;
     place();
   });
   // Après un clic dans la fenêtre, le bouton cliqué rend le clavier au jeu : Espace (roulade) ou Entrée ne le
