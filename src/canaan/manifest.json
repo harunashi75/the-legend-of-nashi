@@ -324,6 +324,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-barber",
+      "file": "scripts/barber.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-pipeline",
       "file": "scripts/pipeline.js"
     },

@@ -463,6 +463,8 @@ function interact() {
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
     // Cité elfique : porte (l'hôte la fait passer), Grand Arbre et marchands (fenêtres chez l'invité).
     if (!game.world.instance && !canaanUnder() && CANAAN_CITY.guestUse()) return;
+    // Salon de coiffure du camp : la fenêtre s'ouvre chez l'invité, « Valider » passe par l'hôte.
+    if (CANAAN_BARBER.guestUse()) return;
     // Extensions : leurs lieux et personnages (fenêtres chez l'invité, le reste demandé à l'hôte).
     if (!canaanUnder() && CANAAN_EXT.guestUse()) return;
     // Donjon : mur fissuré, brasero, levier, stèle ou porte scellée (l'hôte agit pour lui).
@@ -493,6 +495,7 @@ function interact() {
   }
   if (openNearbyChest()) return;
   if (!game.world.instance && !canaanUnder() && CANAAN_CITY.interact()) return;
+  if (CANAAN_BARBER.interact()) return;
   if (!canaanUnder() && CANAAN_EXT.interact(game.hero)) return;
   if (!game.world.instance && !canaanUnder() && CANAAN_QUESTS.interact()) return;
   if (!game.world.instance && CANAAN_HOUSE.interact()) return;
@@ -1203,6 +1206,8 @@ function draw() {
     CANAAN_HOUSE.draw(ctx);
     // Ferme, enclos, verger, jardin et fontaine du Camp de l'Aurore.
     canaanCampLife.draw(ctx);
+    // Sélène, la coiffeuse, sur le tapis de son salon.
+    CANAAN_BARBER.draw(ctx);
     // Sylvaëlle, la cité elfique : porte, bâtiments, Grand Arbre, fontaine, lanternes, elfes et animaux.
     CANAAN_CITY.draw(ctx);
     // Extensions : bâtiments, statues et habitants de leurs terres.
@@ -1292,6 +1297,7 @@ function draw() {
   // Invitations « [E] Entrer » des bâtiments, au-dessus des façades et des personnages.
   CANAAN_HOUSE.drawPrompts(ctx);
   CANAAN_CITY.drawPrompts(ctx);
+  CANAAN_BARBER.drawPrompts(ctx);
   // Titres et aura des succès, au-dessus de chaque héros.
   CANAAN_ACHIEVEMENTS.draw(ctx);
   // Lignes de pêche et bouchons.

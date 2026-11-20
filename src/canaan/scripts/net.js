@@ -460,6 +460,7 @@
     if (action.op === 'dungeon-use') return CANAAN_DUNGEON_EXPLORE.interact(hero);
     if (action.op === 'skin-wear') return CANAAN_WARDROBE.handle(hero, action);
     if (action.op.startsWith('city-')) return CANAAN_CITY.handle(hero, action);
+    if (action.op === 'barber-look') return CANAAN_BARBER.handle(hero, action);
     if (action.op === 'ext') return CANAAN_EXT.handle(hero, action);
     if (action.op === 'sell') return sellItemFor(hero, action.id);
     if (action.op === 'sell-common') return sellCommonFor(hero);

@@ -243,6 +243,9 @@ export function sanitizeAction(raw) {
       ? { op: 'ext', ext: r.ext, act: r.act, id: r.id ?? null }
       : null;
   if (r.op === 'city-skin') return word(r.id) ? { op: r.op, id: r.id } : null;
+  // Salon de coiffure : la nouvelle apparence en forme compacte (vérifiée par decodeLook chez l'hôte).
+  if (r.op === 'barber-look')
+    return typeof r.look === 'string' && r.look.length <= 120 ? { op: r.op, look: r.look } : null;
   if (r.op === 'rubis-unequip')
     return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.

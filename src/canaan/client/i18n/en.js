@@ -298,6 +298,18 @@ export default {
   'Créer l’aventure': 'Create the adventure',
   'Enregistrer mon héros': 'Save my hero',
   'Classe': 'Class',
+
+  // ------------------------------------------------------------ Salon de coiffure du camp
+  'Salon de coiffure': 'Barber shop',
+  'Sélène, la coiffeuse': 'Sélène, the hairdresser',
+  '« Assieds-toi, je m’occupe de tout. Une nouvelle tête, un nouveau départ ! » Rien ne change avant de valider. Ta tenue et ta garde-robe restent les mêmes.':
+    '“Have a seat, I’ll take care of everything. A new look, a fresh start!” Nothing changes until you confirm. Your outfit and wardrobe stay the same.',
+  'Valider': 'Confirm',
+  'Comme avant': 'As before',
+  '[E] Changer d’apparence': '[E] Change appearance',
+  'Changer d’apparence': 'Change appearance',
+  'Nouvelle apparence !': 'New look!',
+  'Approche-toi de Sélène pour changer d’apparence.': 'Get closer to Sélène to change your appearance.',
   'Sort spécial (F) : {sort}': 'Special spell (F): {sort}',
   'Tu pourras changer de classe au Camp de l’Aurore.': 'You can change class at the Dawn Camp.',
   'Rejoindre la partie d’un ami': 'Join a friend’s game',

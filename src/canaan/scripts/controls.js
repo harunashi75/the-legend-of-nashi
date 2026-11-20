@@ -90,6 +90,13 @@
     cityTreeTalk: () => CANAAN_CITY.actions.talk(),
     cityBless: () => CANAAN_CITY.actions.bless(),
     cityBuySkin: element => CANAAN_CITY.actions.buySkin(actionText(element, 'skin')),
+    // Salon de coiffure du camp : choisir, tourner l'aperçu, au hasard, comme avant, valider.
+    barberSet: element =>
+      CANAAN_BARBER.actions.set(actionText(element, 'key'), actionInteger(element, 'index')),
+    barberTurn: element => CANAAN_BARBER.actions.turn(actionInteger(element, 'dir')),
+    barberRandom: () => CANAAN_BARBER.actions.random(),
+    barberReset: () => CANAAN_BARBER.actions.reset(),
+    barberApply: () => CANAAN_BARBER.actions.apply(),
     // Extensions : un bouton de leurs fenêtres (data-ext, data-act, data-id).
     extAction: element =>
       CANAAN_EXT.ui(actionText(element, 'ext'), actionText(element, 'act'), element.dataset.id || null),

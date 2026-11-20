@@ -44,6 +44,12 @@
   FORGE_SPOTS.sort(
     (a, b) => Math.abs(a[0] - 9) + Math.abs(a[1] - 1) - (Math.abs(b[0] - 9) + Math.abs(b[1] - 1))
   );
+  // Salon de coiffure en plein air (barber.js) : à l'est de la fontaine, ou à la place libre la plus proche.
+  const BARBER_SPOTS = [];
+  for (let dy = -10; dy <= 10; dy += 1) for (let dx = -24; dx <= 24; dx += 1) BARBER_SPOTS.push([dx, dy]);
+  BARBER_SPOTS.sort(
+    (a, b) => Math.abs(a[0] - 6) + Math.abs(a[1] + 3) - (Math.abs(b[0] - 6) + Math.abs(b[1] + 3))
+  );
   const PROPS = [
     { kind: 'barn', x: 2, y: 6, w: 5, h: 4, block: true },
     { kind: 'silo', x: 7, y: 8, w: 2, h: 2, block: true },
@@ -73,6 +79,9 @@
     { kind: 'chop', x: -3, y: 2, w: 1, h: 1, block: true },
     // Forge du camp : là seulement se fabriquent les enchantements (canaan-gathering).
     { kind: 'forge', x: -6, y: -5, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
+    // Salon de coiffure : auvent, enseigne, fauteuil et coiffeuse sur la rangée du haut (qui bloque), tapis sur celle
+    // du bas, où se tient la coiffeuse.
+    { kind: 'barber', x: 6, y: -3, w: 3, h: 2, alt: BARBER_SPOTS },
     // Fontaine au centre du camp, sur les pavés de la place (là où était le feu de camp).
     { kind: 'fountain', x: -1, y: -1, w: 3, h: 3, block: true, onRoad: true },
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
@@ -450,6 +459,7 @@
         for (let x = x0 - 1; x <= x0 + p.w; x++) if (!ground.has(key(x, y))) clear(x, y);
       const item = { ...p, tx: x0, ty: y0, x: x0 * T, y: y0 * T, base: (y0 + p.h) * T };
       if (p.block) for (const [x, y] of cells) solid.add(key(x, y));
+      if (p.kind === 'barber') for (const [x, y] of cells) if (y === y0) solid.add(key(x, y));
       if (p.kind === 'pen' || p.kind === 'garden')
         for (const [x, y] of cells) {
           const edge = x === x0 || y === y0 || x === x0 + p.w - 1 || y === y0 + p.h - 1,
@@ -633,6 +643,7 @@
     coop: 150,
     apple: 190,
     forge: 150,
+    barber: 150,
     fountain: 160,
     stall: 110,
     board: 100,
@@ -653,7 +664,8 @@
     for (const it of items) {
       const hgt = TALL_ITEMS[it.kind];
       if (!hgt || it.part) continue;
-      const bottom = it.y + it.h * T;
+      // Salon de coiffure : seul le mobilier (rangée du haut) cache ; le tapis devant reste au sol.
+      const bottom = it.y + (it.kind === 'barber' ? 1 : it.h) * T;
       if (
         it.x + it.w * T < camX - 200 ||
         it.x > camX + W + 200 ||
@@ -1054,6 +1066,88 @@
       // Seau d'eau et outils.
       R(92, 62, 7, 9, '#5a6070');
       R(92, 62, 7, 2, '#58a8e0');
+    });
+  // Salon de coiffure (3 cases sur 2) : auvent rayé, enseigne de barbier (4 images : ses rayures tournent), fauteuil
+  // de cuir rouge sur son pied chromé, coiffeuse au miroir ovale (flacons, peigne, ciseaux), tapis rond devant.
+  const barberSprite = frame =>
+    sprite('barbier' + frame, 72, 80, (R, D, E, L) => {
+      // Tapis rond, sur la rangée du bas.
+      E(38, 66, 30, 9, '#c8a050');
+      E(38, 66, 28, 8, '#8a2a3a');
+      E(38, 66, 20, 5, '#a8404e');
+      E(38, 66, 8, 2, '#e0b860');
+      // Plancher sous le mobilier.
+      R(10, 50, 62, 6, '#8a6440');
+      R(10, 50, 62, 1, '#b08a5a');
+      for (let x = 18; x < 72; x += 10) R(x, 51, 1, 5, '#6a4a2e');
+      // Poteaux de l'auvent.
+      R(12, 10, 3, 42, '#6a4a2e');
+      R(12, 10, 1, 42, '#9a7048');
+      R(68, 10, 3, 42, '#6a4a2e');
+      R(68, 10, 1, 42, '#9a7048');
+      // Coiffeuse : meuble à tiroirs, miroir ovale dans son cadre doré.
+      R(48, 36, 18, 15, '#7a4a2a');
+      R(48, 36, 18, 2, '#a06a3a');
+      R(64, 38, 2, 13, '#5a3420');
+      R(50, 41, 14, 4, '#6a3e22');
+      R(50, 46, 14, 4, '#6a3e22');
+      R(56, 42, 2, 1, '#e0b860');
+      R(56, 47, 2, 1, '#e0b860');
+      E(57, 23, 8, 11, '#c8a050');
+      E(57, 23, 7, 10, '#8a6a30');
+      E(57, 23, 6, 9, '#bfe0f0');
+      L(53, 19, 58, 15, '#ffffff', 1);
+      L(54, 24, 60, 18, '#e8f6ff', 1);
+      R(55, 33, 4, 3, '#8a6a30');
+      // Flacons, peigne et ciseaux sur la coiffeuse.
+      R(49, 31, 2, 5, '#5ab0e0');
+      R(49, 30, 2, 1, '#e0e0e0');
+      R(52, 32, 2, 4, '#e07ab0');
+      R(52, 31, 2, 1, '#e0e0e0');
+      R(60, 34, 5, 1, '#3a2a1e');
+      for (let x = 61; x < 65; x += 2) R(x, 35, 1, 1, '#3a2a1e');
+      D(46, 34, 1, '#b8c0c8');
+      L(47, 34, 47, 30, '#d8e0e8', 1);
+      // Fauteuil de barbier : pied chromé, repose-pieds, assise et dossier de cuir rouge, appuie-tête.
+      R(26, 52, 14, 2, '#8a929a');
+      R(31, 44, 4, 8, '#b8c0c8');
+      R(31, 44, 1, 8, '#e8eef4');
+      R(27, 44, 12, 2, '#8a929a');
+      R(23, 36, 20, 7, '#a8322a');
+      R(23, 36, 20, 2, '#d0564a');
+      R(25, 20, 16, 17, '#a8322a');
+      R(26, 21, 3, 15, '#d0564a');
+      R(38, 21, 3, 15, '#7a2018');
+      R(29, 15, 8, 5, '#a8322a');
+      R(30, 15, 6, 1, '#d0564a');
+      R(21, 32, 4, 3, '#b8c0c8');
+      R(41, 32, 4, 3, '#b8c0c8');
+      R(21, 32, 4, 1, '#e8eef4');
+      R(41, 32, 4, 1, '#e8eef4');
+      // Auvent rayé rouge et blanc, bord festonné.
+      for (let x = 9; x < 74; x++) {
+        const band = Math.floor((x - 9) / 6) % 2 ? '#f4ecdc' : '#c8382e';
+        R(x, 3, 1, 9, band);
+        if ((x - 9) % 6 < 4) R(x, 12, 1, 2, band);
+      }
+      R(9, 3, 65, 1, '#ffffff66');
+      R(9, 2, 65, 1, '#7a2018');
+      // Enseigne de barbier : socle et chapeaux de laiton, cylindre de verre aux rayures qui tournent.
+      R(2, 50, 8, 4, '#a8802a');
+      R(2, 50, 8, 1, '#e0c060');
+      R(4, 46, 4, 4, '#a8802a');
+      R(3, 14, 6, 32, '#f4f4f0');
+      for (let y = 14; y < 46; y++)
+        for (let x = 3; x < 9; x++) {
+          const k = (((y + x - frame * 2) % 12) + 12) % 12;
+          if (k < 3) R(x, y, 1, 1, '#c8382e');
+          else if (k >= 6 && k < 9) R(x, y, 1, 1, '#3a5ab0');
+        }
+      R(3, 14, 1, 32, '#ffffff88');
+      R(8, 14, 1, 32, '#00000022');
+      R(2, 11, 8, 3, '#a8802a');
+      R(2, 11, 8, 1, '#e0c060');
+      D(6, 9, 2, '#e0c060');
     });
   const fountainSprite = () =>
     sprite('fontaine', 76, 64, (R, D, E) => {
@@ -3149,6 +3243,14 @@
         shadow(c, cx, bottom - 8, 20, 5);
         put(c, planterSprite((it.tx * 3 + it.ty) % 3), cx, bottom - 6);
         break;
+      case 'barber': {
+        const top = bottom - T;
+        shadow(c, cx, top - 6, w * 0.52, 9);
+        put(c, barberSprite(Math.floor(time / 12) % 4), cx, bottom - 4);
+        if (Math.hypot(P.x - cx, P.y - bottom) < 360)
+          drawCanaanName(c, '✂️ ' + tt('Salon de coiffure'), cx, bottom - 172);
+        break;
+      }
       case 'stall':
         shadow(c, cx, bottom - 8, w * 0.5, 8);
         put(c, stallSprite(), cx, bottom - 4);
@@ -3310,6 +3412,11 @@
     forge() {
       const f = items.find(it => it.kind === 'forge');
       return f ? { x: (f.tx + f.w / 2) * TS, y: (f.ty + f.h) * TS } : null;
+    },
+    // Salon de coiffure : où se tient la coiffeuse (sur le tapis, à droite du fauteuil, en pixels), ou null.
+    barber() {
+      const b = items.find(it => it.kind === 'barber');
+      return b ? { x: (b.tx + 2) * TS, y: (b.ty + 1) * TS + 28 } : null;
     },
     groundAt: (tx, ty) => ground.get(key(tx, ty))?.type || null,
     // Navire draconique amarré au quai (centre de sa ligne d'eau, en pixels), ou null s'il n'a pas trouvé sa place :

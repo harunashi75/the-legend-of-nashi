@@ -348,6 +348,75 @@
   }
 }
 
+/* Salon de coiffure du camp : aperçu du héros à gauche, choix à droite. */
+#window .barber-body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+#window .barber-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(232, 200, 120, 0.4);
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 70%, rgba(255, 210, 140, 0.16), rgba(10, 8, 6, 0.4) 70%);
+}
+#window .barber-stage canvas {
+  image-rendering: pixelated;
+}
+#window .barber-turn {
+  display: flex;
+  gap: 6px;
+}
+#window .barber-fields {
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#window .barber-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#window .barber-title {
+  flex: 0 0 76px;
+  font-size: calc(13px * var(--font-scale));
+  color: var(--rpg-muted, #b8a483);
+}
+#window .barber-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1 1 200px;
+}
+#window .barber-choice {
+  padding: 5px 9px;
+  font-size: calc(13px * var(--font-scale));
+}
+#window .barber-choice.on {
+  border-color: var(--rpg-gold-light, #f6dc98);
+  box-shadow: 0 0 0 1px var(--rpg-gold-light, #f6dc98);
+  color: #fff4d0;
+}
+#window .barber-swatch {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+}
+#window .barber-swatch.on {
+  outline: 2px solid var(--rpg-gold-light, #f6dc98);
+  outline-offset: 2px;
+}
+
 /* Cité elfique : boutiques (armurerie, atelier) et paroles du Grand Arbre. */
 #window .city-shop {
   display: grid;

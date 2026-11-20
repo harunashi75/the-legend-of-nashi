@@ -353,6 +353,16 @@ const I = {
     p('M5.5 14 C5.5 11.6 18.5 11.6 18.5 14 C18.5 16.4 5.5 16.4 5.5 14 Z', '#0c0a10') +
     l('M6 12 L9 11.3', '#8a7a64', 1.2),
   cross: l('M5 5 L19 19 M19 5 L5 19', INK, 5) + l('M5 5 L19 19 M19 5 L5 19', RED, 2.8),
+  // Salon de coiffure : ciseaux ouverts, lames d'acier et anneaux rouges.
+  scissors:
+    p('M11 13 L19.5 3 L20.5 4 L13 14 Z', STEEL) +
+    p('M13 13 L4.5 3 L3.5 4 L11 14 Z', STEEL) +
+    hi('M14 11 L18.5 5.2') +
+    c(12, 13.5, 1, GOLD) +
+    c(7.5, 18, 3, RED) +
+    c(16.5, 18, 3, RED) +
+    c(7.5, 18, 1.3, '#2a1a1a') +
+    c(16.5, 18, 1.3, '#2a1a1a'),
   // Garde-robe : robe sur un cintre.
   dress:
     l('M12 3 L12 5 M8 6 L12 4.5 L16 6', STEELD, 1.4) +
@@ -1060,6 +1070,7 @@ const MAP = {
   '⛓': 'chain',
   '🔒': 'lock',
   '👗': 'dress',
+  '✂': 'scissors',
   '🔓': 'unlock',
   '🗝': 'key',
   '🕳': 'hole',
