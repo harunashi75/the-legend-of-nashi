@@ -64,13 +64,13 @@
 #window #bigMap {
   width: 100%;
   height: 100%;
-  cursor: grab;
+  cursor: var(--cursor-grab);
   touch-action: none;
   image-rendering: pixelated;
   display: block;
 }
 #window #bigMap.dragging {
-  cursor: grabbing;
+  cursor: var(--cursor-grabbing);
 }
 /* Boutons posés sur la carte : recentrer et vue d'ensemble en haut à gauche, zoom à droite. */
 #window .map-tools {

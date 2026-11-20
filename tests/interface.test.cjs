@@ -408,3 +408,15 @@ test('Caméra : sur l’île, elle reste dans la carte près des bords ; dans un
  // Vue plus grande que la carte : centrée.
  assert.equal(run('canaanClampCam(-10,500,300)===-100&&canaanClampCam(-10,100,300)===0&&canaanClampCam(999,100,300)===200'),true);
 });
+
+test('Curseur du jeu partout : chaque forme est un gantelet, aucune forme du curseur du système dans les styles',()=>{
+ const dir=path.join(__dirname,'..','src','canaan'),files=[];
+ (function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(e.name.endsWith('.css'))files.push(p)}})(dir);
+ for(const f of files){
+  const css=fs.readFileSync(f,'utf8');
+  // Seules les variables du gantelet (leur dernier recours compris) donnent un curseur ; « none » cache le curseur à la manette.
+  for(const [,value] of css.matchAll(/(?<![-\w])cursor:\s*([^;]+);/g))assert.match(value.trim(),/^(var\(--cursor-[a-z-]+\)|none)$/,path.relative(dir,f)+' : cursor: '+value);
+ }
+ const overlay=fs.readFileSync(path.join(dir,'styles','ui-overlay.css'),'utf8');
+ for(const name of ['default','pointer','blocked','text','grab','grabbing','help'])assert.match(overlay,new RegExp('--cursor-'+name+':\\s*\\n\\s*url\\("data:image/svg\\+xml,'),name);
+});

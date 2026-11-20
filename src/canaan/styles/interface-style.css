@@ -302,7 +302,7 @@ body {
 }
 #window {
   width: min(900px, 96vw);
-  max-height: 85vh;
+  max-height: calc(100vh - 36px);
   overflow: auto;
   background: linear-gradient(135deg, #17152e, #252044);
   border: 1px solid #8574c8;
@@ -1291,10 +1291,10 @@ body.layout-edit #ui .panel[data-movable='1'] {
 /* Paramètres : onglets (Audio, Affichage, Graphismes, Interface, Clavier, Manette), un panneau à la fois.
    La carte garde une hauteur fixe pour ne pas sauter d'un onglet à l'autre. */
 #settingsCard {
-  width: min(760px, 96vw);
+  width: min(860px, 96vw);
   display: flex;
   flex-direction: column;
-  height: min(720px, 92vh);
+  height: min(900px, calc(100vh - 36px));
   overflow: hidden;
   scrollbar-color: #8a6a3a #1a120a;
 }

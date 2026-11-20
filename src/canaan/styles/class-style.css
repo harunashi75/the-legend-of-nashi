@@ -111,7 +111,7 @@
   position: relative;
   padding-left: 14px;
   color: #f6dfb0;
-  cursor: help;
+  cursor: var(--cursor-help);
 }
 #window .class-talent-names li::before {
   content: '◆';
@@ -137,7 +137,7 @@
   color: #f6dfb0;
   font-size: calc(11px * var(--font-scale));
   text-align: center;
-  cursor: help;
+  cursor: var(--cursor-help);
 }
 #window .class-pact-spells .skill-svg {
   width: 38px;

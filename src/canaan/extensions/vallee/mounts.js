@@ -331,11 +331,17 @@
       esc('+{n} % de vitesse', { n: M.speed }) +
       '</p><p class="muted">' +
       esc(M.desc) +
-      '</p><p class="collection-source">📍 <b>' +
+      '</p><div class="collection-source">📍 <b>' +
       esc('Où l’obtenir') +
-      '</b> : ' +
-      sourceText(M) +
-      '</p><div class="collection-actions">' +
+      '</b><div class="collection-chips"><span class="collection-chip">' +
+      esc(M.source || 'Écurie des Héros') +
+      '</span>' +
+      (M.price
+        ? '<span class="collection-chip">' +
+          esc('{or} or', { or: M.price.toLocaleString('fr-FR') }) +
+          '</span>'
+        : '') +
+      '</div></div><div class="collection-actions">' +
       action +
       '</div></div>'
     );

@@ -149,7 +149,7 @@
 /* Collection : poissons pêchés et gibier chassé. */
 #window .prof-codex {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 6px;
 }
 #window .prof-card {
@@ -255,8 +255,9 @@
 #window .ach-total b {
   color: #ffe9a8;
 }
+/* À la hauteur de l'écran : la fenêtre elle-même ne défile pas en plus de la liste. */
 #window .ach-scroll {
-  max-height: 62vh;
+  max-height: max(240px, calc(100vh - 348px));
   overflow-y: auto;
   padding-right: 6px;
 }
