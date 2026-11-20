@@ -39,16 +39,17 @@
     CANAAN_CLASS.onLevel(hero);
     window.CANAAN_PERSISTENCE.requestSave();
   }
-  // XP d'une victoire, partagée par les héros présents : chacun selon son propre niveau.
+  // XP d'une victoire, partagée par les héros présents : chacun selon son propre niveau (un héros bien plus fort que
+  // le monstre, le boss ou l'instance reçoit moins).
   function killXp(m, killer = game.hero) {
     if (!m || game.world.instance?.arena) return;
     const level = canaanMobLevel(m);
     for (const hero of sharers(m, killer)) {
       const lv = clampLevel(hero.level),
         amount = m.worldBoss
-          ? bossXp(level, 'world')
+          ? bossXp(level, 'world', lv)
           : m.boss
-            ? bossXp(level, bossTier(m).raid ? 'raid' : 'dungeon')
+            ? bossXp(level, bossTier(m).raid ? 'raid' : 'dungeon', lv)
             : // Dans un donjon ou un raid, les monstres ordinaires rapportent moins (le boss et le coffre comptent).
               Math.round(mobXp(level, lv, !!m.elite) * (game.world.instance ? 0.6 : 1));
       grantXp(hero, amount, m);
@@ -60,7 +61,7 @@
     if (!d) return 0;
     const mode = instanceDifficulty(),
       level = game.world.instance?.scaledLevel || mode?.mobLevel || d.mobLevel || 1;
-    return grantXp(hero, clearXp(level, !!d.raid), hero.player);
+    return grantXp(hero, clearXp(level, !!d.raid, clampLevel(hero.level)), hero.player);
   }
   // Barre d'XP et niveau de l'affichage tête haute.
   function hud() {

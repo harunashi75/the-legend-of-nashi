@@ -263,10 +263,24 @@ export function xpToNext(level) {
  * @returns {number}
  */
 export function mobXp(mobLevel, heroLevel, elite = false) {
-  const gap = clampLevel(mobLevel) - clampLevel(heroLevel),
-    factor = gap >= 3 ? 1.2 : gap >= 0 ? 1 + 0.066 * gap : gap >= -5 ? 1 + 0.15 * gap : 0.1;
-  return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 3 : 1) * factor));
+  return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 3 : 1) * xpGapFactor(mobLevel, heroLevel)));
 }
+// Écart de niveau sur l'XP : jusqu'à +20 % contre plus fort que soi, −15 % par niveau de moins, 10 % au-delà de 5.
+/**
+ * @param {number} foeLevel niveau du monstre, du boss ou de l'instance
+ * @param {number} heroLevel
+ * @returns {number}
+ */
+export function xpGapFactor(foeLevel, heroLevel) {
+  const gap = clampLevel(foeLevel) - clampLevel(heroLevel);
+  return gap >= 3 ? 1.2 : gap >= 0 ? 1 + 0.066 * gap : gap >= -5 ? 1 + 0.15 * gap : 0.1;
+}
+// Boss et coffres : seulement la pénalité (jamais de bonus), les instances étant déjà au-dessus du niveau conseillé.
+/**
+ * @param {number} foeLevel
+ * @param {number | undefined} heroLevel
+ */
+const bossGap = (foeLevel, heroLevel) => (heroLevel == null ? 1 : Math.min(1, xpGapFactor(foeLevel, heroLevel)));
 // XP d'un boss (dungeon, raid ou world) et d'une instance terminée (coffre ouvert).
 // Boss de donjon et de raid, fin d'instance : une part du niveau de l'instance, comme les quêtes, pour qu'une instance
 // vaille autant à tous les niveaux (donjon ≈ 3 × 12 % + 25 % ≈ 60 % d'un niveau, raid ≈ 6 × 8 % + 30 % ≈ 80 %).
@@ -276,22 +290,28 @@ const BOSS_XP_SHARE = Object.freeze({ dungeon: 0.12, raid: 0.08 });
 const WORLD_BOSS_XP = 12;
 /** @param {number} level */
 const levelShare = level => xpToNext(Math.min(MAX_LEVEL - 1, clampLevel(level)));
+// heroLevel (facultatif) : un héros plus fort que le boss ou l'instance reçoit moins, comme pour les monstres.
 /**
  * @param {number} level
  * @param {string} [kind] dungeon, raid ou world
+ * @param {number} [heroLevel]
  * @returns {number}
  */
-export function bossXp(level, kind) {
-  if (kind === 'world') return Math.round((10 + 5 * clampLevel(level)) * WORLD_BOSS_XP);
-  return Math.round(levelShare(level) * (BOSS_XP_SHARE[kind ?? 'dungeon'] || BOSS_XP_SHARE.dungeon));
+export function bossXp(level, kind, heroLevel) {
+  const base =
+    kind === 'world'
+      ? (10 + 5 * clampLevel(level)) * WORLD_BOSS_XP
+      : levelShare(level) * (BOSS_XP_SHARE[kind ?? 'dungeon'] || BOSS_XP_SHARE.dungeon);
+  return Math.max(1, Math.round(base * bossGap(level, heroLevel)));
 }
 /**
  * @param {number} level
  * @param {boolean} raid
+ * @param {number} [heroLevel]
  * @returns {number}
  */
-export function clearXp(level, raid) {
-  return Math.round(levelShare(level) * (raid ? 0.3 : 0.25));
+export function clearXp(level, raid, heroLevel) {
+  return Math.max(1, Math.round(levelShare(level) * (raid ? 0.3 : 0.25) * bossGap(level, heroLevel)));
 }
 // Ajoute de l'XP à {level, exp} ; renvoie le nombre de niveaux gagnés. Au niveau 60, l'XP s'arrête.
 /**

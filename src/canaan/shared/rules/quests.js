@@ -28,7 +28,7 @@ import { clampLevel, xpToNext } from './stats.js';
 
 /** @type {(id: number) => Quest | null} */
 export const questById = id => QUESTS.find(q => q.id === id) || null;
-// XP d'une quête : une part du niveau recommandé (60 % pour une principale, 35 % pour une secondaire).
+// XP d'une quête : une part du niveau recommandé (80 % pour une principale, 45 % pour une secondaire).
 // Un bon coup de pouce, jamais nécessaire pour monter jusqu'au niveau 60.
 /**
  * @param {Quest | null | undefined} quest
@@ -36,7 +36,7 @@ export const questById = id => QUESTS.find(q => q.id === id) || null;
  */
 export function questXp(quest) {
   const level = Math.min(59, clampLevel(quest?.level));
-  return Math.round(xpToNext(level) * (quest?.main ? 0.6 : 0.35));
+  return Math.round(xpToNext(level) * (quest?.main ? 0.8 : 0.45));
 }
 // Drapeaux d'histoire connus (récompenses et lieux débloqués).
 const FLAGS = new Set([

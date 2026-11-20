@@ -262,6 +262,9 @@ test('Donjons et raids : moins d’XP, plus coriaces, et des boss aux mécanique
  assert.equal(run('bossXp(10,"dungeon")'),run('Math.round(xpToNext(10)*0.12)'));assert.equal(run('bossXp(10,"raid")'),run('Math.round(xpToNext(10)*0.08)'));
  assert.equal(run('clearXp(10,false)'),run('Math.round(xpToNext(10)*0.25)'));assert.equal(run('clearXp(10,true)'),run('Math.round(xpToNext(10)*0.3)'));
  assert.equal(run('bossXp(60,"raid")'),run('Math.round(xpToNext(59)*0.08)'));assert.equal(run('bossXp(10,"world")'),(10+50)*12);
+ // Écart de niveau : la même pénalité que les monstres (−15 % par niveau de moins, 10 % au-delà de 5), jamais de bonus.
+ assert.equal(run('bossXp(10,"dungeon",12)'),run('Math.round(xpToNext(10)*0.12*0.7)'));assert.equal(run('bossXp(10,"dungeon",7)'),run('bossXp(10,"dungeon")'));
+ assert.equal(run('clearXp(10,true,30)'),run('Math.round(xpToNext(10)*0.3*0.1)'));assert.equal(run('xpGapFactor(10,10)'),1);
  assert.ok(run('bossHealth(30,"raid")>bossHealth(30,"dungeon")&&bossDamage(30,"dungeon")>mobDamage(30)'));
  run('started=true;paused=false;P.dead=false;game.view={notify:()=>{},chat:()=>{}};game.hero.level=10;recomputeStats();P.hp=P.mhp;enterInstance(0)');
  assert.ok(run('(m=>m.mhp>=Math.round(mobHealth(m.level,false,(MOB_TYPES.find(t=>t.name===m.t)||{hp:100}).hp)*1.2))(game.world.monsters.find(m=>!m.boss))'));
