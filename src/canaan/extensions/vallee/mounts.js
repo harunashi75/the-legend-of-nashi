@@ -7,7 +7,8 @@
 //   en roulant, en étant touché (combat), en tombant, ou en entrant dans un lieu fermé.
 // - Coopératif : l'hôte décide (action ext « mount », « buy », « choose ») ; chacun voit les montures de tous.
 // - Onglet « Montures » de la fiche du personnage (C) : journal de collection — liste à gauche (obtenues en couleur,
-//   les autres grisées), monture sélectionnée en grand à droite avec où l'obtenir.
+//   les autres grisées), monture sélectionnée en grand à droite avec où l'obtenir (styles communs .collection-*,
+//   equipment-style.css, partagés avec la garde-robe).
 (() => {
   'use strict';
   const EXT = canaanExtension('vallee'),
@@ -275,7 +276,7 @@
     const mine = owns(hero, M.id),
       col = rarityColor(M.rarity);
     return (
-      '<button type="button" class="vallee-journal-item' +
+      '<button type="button" class="collection-item' +
       (mine ? ' owned' : ' locked') +
       (M.id === picked ? ' picked' : '') +
       '" style="--rarity:' +
@@ -284,11 +285,11 @@
       M.id +
       '">' +
       preview(M, mine) +
-      '<span class="vallee-journal-name"><b>' +
+      '<span class="collection-name"><b>' +
       esc(M.name) +
       '</b><small>' +
       (mine ? esc(M.rarity) + ' · ' + esc('+{n} % de vitesse', { n: M.speed }) : sourceText(M)) +
-      '</small></span><span class="vallee-journal-mark">' +
+      '</small></span><span class="collection-mark">' +
       (!mine ? '🔒' : s.active === M.id ? '★' : '') +
       '</span></button>'
     );
@@ -298,7 +299,7 @@
       col = rarityColor(M.rarity),
       key = CANAAN_KEYS.labelOf('mount');
     let action;
-    if (!mine) action = '<span class="vallee-journal-lock">🔒 ' + esc('Pas encore obtenue') + '</span>';
+    if (!mine) action = '<span class="collection-lock">🔒 ' + esc('Pas encore obtenue') + '</span>';
     else if (s.active !== M.id)
       action =
         '<button type="button" data-action="extAction" data-ext="vallee" data-act="choose" data-id="' +
@@ -308,33 +309,33 @@
         '</button>';
     else
       action =
-        '<b class="vallee-active">' +
+        '<b>' +
         esc('✔ Monture choisie') +
         '</b><button type="button" data-action="extAction" data-ext="vallee" data-act="summon">' +
         esc(hero.riding ? 'Renvoyer ({touche})' : 'Appeler ({touche})', { touche: key }) +
         '</button>';
     return (
-      '<div class="vallee-journal-view' +
+      '<div class="collection-view' +
       (mine ? '' : ' locked') +
       '" style="--rarity:' +
       col +
-      '"><div class="vallee-journal-stage">' +
+      '"><div class="collection-stage">' +
       preview(M, mine) +
       '</div><h3 style="color:' +
       (mine ? col : '#9a948a') +
       '">' +
       esc(M.name) +
-      '</h3><p class="vallee-journal-sub">' +
+      '</h3><p class="collection-sub">' +
       esc(M.rarity) +
       ' · ' +
       esc('+{n} % de vitesse', { n: M.speed }) +
       '</p><p class="muted">' +
       esc(M.desc) +
-      '</p><p class="vallee-journal-source">📍 <b>' +
+      '</p><p class="collection-source">📍 <b>' +
       esc('Où l’obtenir') +
       '</b> : ' +
       sourceText(M) +
-      '</p><div class="vallee-journal-actions">' +
+      '</p><div class="collection-actions">' +
       action +
       '</div></div>'
     );
@@ -351,7 +352,7 @@
         { touche: CANAAN_KEYS.labelOf('mount') }
       ) +
       (hero.riding ? ' <b>' + esc('🐎 En selle : {nom}', { nom: tt(BY[hero.riding].name) }) + '</b>' : '') +
-      '</p><div class="vallee-journal"><div class="vallee-journal-list"><div class="vallee-journal-head">' +
+      '</p><div class="collection"><div class="collection-list"><div class="collection-head">' +
       esc('Montures obtenues') +
       ' <b>' +
       s.mounts.length +

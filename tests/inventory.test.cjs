@@ -124,9 +124,17 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  // La garde-robe est un onglet de la fiche (C) : V l'ouvre sur cet onglet, sans bouton sous le personnage.
  run('closePanels();toggleWardrobe()');
  assert.equal(run('document.getElementById("window").dataset.canaanPanel'),'character');assert.equal(run('canaanCharacterTab()'),'wardrobe');
- assert.match(run('document.getElementById("window").innerHTML'),/data-tab="wardrobe"[^>]*>[^<]*Garde-robe[^]*skin-grid/);
+ assert.match(run('document.getElementById("window").innerHTML'),/data-tab="wardrobe"[^>]*>[^<]*Garde-robe[^]*collection-list/);
+ // Journal de collection : la tenue d'origine d'abord, une apparence non obtenue grisée avec où la trouver ; obtenue, on la porte.
+ const view=()=>run('document.getElementById("window").innerHTML').split('collection-view')[1]||'';
+ assert.match(run('document.getElementById("window").innerHTML'),/class="collection-list"><div class="collection-head">[^]*?data-skin=""/);
+ run('globalThis.__skins=game.hero.skins;globalThis.__wear=game.hero.look.wear;game.hero.skins={owned:[]};CANAAN_WARDROBE.pick("fermier")');assert.match(view(),/^ locked[^]*collection-chip">Monstres[^]*Pas encore obtenue/);
+ run('CANAAN_WARDROBE.pick("elfe_reine")');assert.match(view(),/Elwyn, la Tisseuse/);
+ run('CANAAN_WARDROBE.grant(game.hero,"fermier");CANAAN_WARDROBE.pick("fermier")');assert.match(view(),/data-action="wearSkin" data-skin="fermier"/);
+ run('CANAAN_WARDROBE.choose("fermier")');assert.equal(run('game.hero.look.wear'),'fermier');assert.match(view(),/✔ Portée/);
+ run('game.hero.skins=__skins;CANAAN_WARDROBE.choose(__wear)');
  run('toggleWardrobe()');assert.equal(run('modalOpen()'),false,'V referme l’onglet Garde-robe');
- run('canaanCharacterSection("gear")');assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/wardrobe-open|skin-grid/);
+ run('canaanCharacterSection("gear")');assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/wardrobe-open|wardrobe-tab/);
  // Onglet Runes : Runes équipées et Collection en haut, Effets actifs dessous.
  run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rubis-coll[^]*rubis-fx/);
  run('closePanels()');

@@ -579,6 +579,16 @@ export default {
   'Tenue d’origine': 'Original outfit',
   'Retirer l’apparence': 'Remove the appearance',
   'Aucune apparence portée.': 'No appearance worn.',
+  'Apparences obtenues': 'Appearances collected',
+  'Ta tenue de création': 'Your starting outfit',
+  'Porter': 'Wear',
+  '✔ Portée': '✔ Worn',
+  'Pas encore obtenue': 'Not collected yet',
+  'Où l’obtenir': 'Where to get it',
+  'Boss de donjon': 'Dungeon bosses',
+  'Boss de raid': 'Raid bosses',
+  'Boss cachés': 'Hidden bosses',
+  'Coffres secrets': 'Secret chests',
 
   // ------------------------------------------------------------ Boutique
   'Marchand': 'Merchant',

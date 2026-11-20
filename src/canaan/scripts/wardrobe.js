@@ -1,4 +1,4 @@
-// Garde-robe (touche V, onglet de la fiche C) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
+// Garde-robe (touche V, onglet de la fiche C, en journal de collection) : les apparences (transmogrification) trouvées en jouant, à porter par-dessus son équipement.
 // Une apparence est une tenue complète, purement visuelle (shared/data/skins.js). Elle tombe des monstres, des élites,
 // des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets, avec une qualité : plus elle
 // est haute, plus la tenue est travaillée. Une apparence déjà possédée est revendue d'office.
@@ -92,56 +92,129 @@
     document.getElementById('window')?.dataset.canaanPanel === 'character' &&
     window.canaanCharacterTab?.() === 'wardrobe';
   const count = () => ownedOf(game.hero).length;
-  // Onglet Garde-robe de la fiche (C) : la tenue portée, puis toutes les apparences du jeu.
+  // Où trouver une apparence : les sources de butin qui tirent sa qualité (SKIN_DROPS), ou la boutique de la Tisseuse
+  // pour les tenues elfiques. Chaque source est une étiquette à part (traduite seule).
+  const SOURCE_NAMES = {
+    normal: 'Monstres',
+    elite: 'Élites',
+    dungeon: 'Boss de donjon',
+    raid: 'Boss de raid',
+    secretBoss: 'Boss cachés',
+    worldBoss: 'Boss mondiaux',
+    secretChest: 'Coffres secrets',
+    arenaBoss: 'Boss de l’Arène'
+  };
+  const chip = text => '<span class="collection-chip">' + esc(text) + '</span>';
+  function sources(sk) {
+    if (sk.shop)
+      return chip('Elwyn, la Tisseuse') + chip('Sylvaëlle, la Cité des Elfes') + chip(sk.shop + ' or');
+    return Object.entries(SKIN_DROPS)
+      .filter(([, d]) => d.weights[sk.rarity] > 0)
+      .map(([key]) => chip(SOURCE_NAMES[key] || key))
+      .join('');
+  }
+  // Onglet Garde-robe de la fiche (C), en journal de collection : la liste à gauche (la tenue
+  // d'origine, les apparences obtenues en couleur, puis les autres grisées), l'apparence sélectionnée en grand à
+  // droite, portée par le héros, avec où la trouver.
+  let picked = null; // apparence affichée à droite ('' : la tenue d'origine) — interface locale
+  const ORIGIN = { id: '', name: 'Tenue d’origine', rarity: 0 };
+  function pick(id) {
+    picked = id === '' || skinById(id) ? id : null;
+    render();
+  }
   function section() {
     const hero = game.hero,
       owned = ownedOf(hero),
-      worn = hero.look?.wear || '',
-      card = sk => {
+      worn = hero.look?.wear || '';
+    if (picked === null || (picked && !skinById(picked))) picked = worn;
+    const mine = sk => sk === ORIGIN || owned.includes(sk.id),
+      list = [
+        ORIGIN,
+        ...SKINS.filter(sk => owned.includes(sk.id)),
+        ...SKINS.filter(sk => !owned.includes(sk.id))
+      ],
+      item = sk => {
         const r = rarityOf(sk),
-          mine = owned.includes(sk.id),
-          img = mine ? preview({ ...hero.look, wear: sk.id }) : '',
-          on = worn === sk.id;
+          ok = mine(sk),
+          img = preview({ ...hero.look, wear: sk.id });
         return (
-          '<button type="button" class="skin-card' +
-          (mine ? '' : ' locked') +
-          (on ? ' worn' : '') +
+          '<button type="button" class="collection-item' +
+          (ok ? ' owned' : ' locked') +
+          (sk.id === picked ? ' picked' : '') +
           '" style="--rarity:' +
-          r.color +
-          '"' +
-          (mine ? ' data-action="wearSkin" data-skin="' + sk.id + '"' : '') +
-          ' title="' +
-          esc(mine ? sk.name + ' · ' + r.name : 'Apparence ' + r.name + ' à découvrir') +
-          '"' +
-          canaanPrestige({ rarity: r.name }) +
-          '>' +
-          (img ? '<img alt="" src="' + img + '">' : '<span class="skin-unknown">?</span>') +
-          '<span class="skin-name">' +
-          esc(mine ? sk.name : '???') +
-          '</span><span class="skin-rarity">' +
-          esc(r.name) +
-          (on ? ' · portée' : '') +
+          (sk === ORIGIN ? '#d8d0c0' : r.color) +
+          '" data-action="wardrobePick" data-skin="' +
+          sk.id +
+          '">' +
+          (img ? '<img alt="" src="' + img + '">' : '<span>👗</span>') +
+          '<span class="collection-name"><b>' +
+          esc(sk.name) +
+          '</b><small>' +
+          esc(sk === ORIGIN ? 'Ta tenue de création' : r.name) +
+          (worn === sk.id ? ' · ' + esc('portée') : '') +
+          '</small></span><span class="collection-mark">' +
+          (!ok ? '🔒' : worn === sk.id ? '★' : '') +
           '</span></button>'
         );
       };
+    const sk = picked ? skinById(picked) : ORIGIN,
+      r = rarityOf(sk),
+      ok = mine(sk),
+      col = sk === ORIGIN ? '#d8d0c0' : r.color,
+      big = preview({ ...hero.look, wear: sk.id });
+    let action;
+    if (!ok) action = '<span class="collection-lock">🔒 ' + esc('Pas encore obtenue') + '</span>';
+    else if (worn === sk.id) action = '<b>' + esc('✔ Portée') + '</b>';
+    else
+      action =
+        '<button type="button" data-action="wearSkin" data-skin="' +
+        sk.id +
+        '">' +
+        esc(sk === ORIGIN ? 'Retirer l’apparence' : 'Porter') +
+        '</button>';
+    const view =
+      '<div class="collection-view' +
+      (ok ? '' : ' locked') +
+      '" style="--rarity:' +
+      col +
+      '"' +
+      canaanPrestige({ rarity: sk === ORIGIN ? 'Commun' : r.name }) +
+      '><div class="collection-stage">' +
+      (big ? '<img alt="" src="' + big + '">' : '<span>👗</span>') +
+      '</div><h3 style="color:' +
+      (ok ? col : '#9a948a') +
+      '">' +
+      esc(sk.name) +
+      '</h3><p class="collection-sub">' +
+      esc(sk === ORIGIN ? 'Ta tenue de création' : r.name) +
+      '</p>' +
+      (sk === ORIGIN
+        ? ''
+        : '<div class="collection-source">📍 <b>' +
+          esc('Où l’obtenir') +
+          '</b><div class="collection-chips">' +
+          sources(sk) +
+          '</div></div>') +
+      '<div class="collection-actions">' +
+      action +
+      '</div></div>';
     return (
       '<div class="rpg-paper rubis-paper wardrobe-tab"><div class="rubis-head"><h3>👗 Garde-robe</h3><span>' +
       owned.length +
       ' / ' +
       SKINS.length +
       ' apparences</span></div>' +
-      '<p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules). Clique pour porter.</p>' +
-      '<div class="skin-current"><img alt="" src="' +
-      preview(hero.look) +
-      '"><div><b>' +
-      esc(worn ? skinById(worn).name : 'Tenue d’origine') +
-      '</b>' +
-      (worn
-        ? '<button type="button" data-action="wearSkin" data-skin="">Retirer l’apparence</button>'
-        : '<span class="muted">Aucune apparence portée.</span>') +
-      '</div></div>' +
-      '<div class="skin-grid">' +
-      SKINS.map(card).join('') +
+      '<p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules).</p>' +
+      '<div class="collection"><div class="collection-list"><div class="collection-head">' +
+      esc('Apparences obtenues') +
+      ' <b>' +
+      owned.length +
+      ' / ' +
+      SKINS.length +
+      '</b></div>' +
+      list.map(item).join('') +
+      '</div>' +
+      view +
       '</div></div>'
     );
   }
@@ -184,6 +257,7 @@
     applyRemote,
     render,
     section,
+    pick,
     count
   });
   window.toggleWardrobe = toggle;

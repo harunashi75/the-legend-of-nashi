@@ -57,8 +57,6 @@ CANAAN_I18N.extend('en', {
   '{or} or': '{or} gold',
   or: 'gold',
   Choisir: 'Choose',
-  'Où l’obtenir': 'Where to get it',
-  'Pas encore obtenue': 'Not collected yet',
   'Appeler ({touche})': 'Summon ({touche})',
   'Renvoyer ({touche})': 'Dismiss ({touche})',
   // Lieux et habitants.

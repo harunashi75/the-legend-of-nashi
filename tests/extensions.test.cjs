@@ -190,10 +190,10 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   run('closePanels();canaanCharacterSection("mounts")');
   const tab = () => {
     const html = run('document.getElementById("window").innerHTML'),
-      items = [...html.matchAll(/class="vallee-journal-item (owned|locked)[^"]*"[^>]*data-id="(\w+)"/g)];
+      items = [...html.matchAll(/class="collection-item (owned|locked)[^"]*"[^>]*data-id="(\w+)"/g)];
     return {
       items: items.map(m => [m[2], m[1] === 'locked']),
-      view: html.split('vallee-journal-view')[1] || ''
+      view: html.split('collection-view')[1] || ''
     };
   };
   assert.deepEqual(tab().items, [
