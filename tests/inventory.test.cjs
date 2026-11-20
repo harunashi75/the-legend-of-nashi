@@ -127,7 +127,7 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  assert.match(run('document.getElementById("window").innerHTML'),/data-tab="wardrobe"[^>]*>[^<]*Garde-robe[^]*collection-list/);
  // Journal de collection : la tenue d'origine d'abord, une apparence non obtenue grisée avec où la trouver ; obtenue, on la porte.
  const view=()=>run('document.getElementById("window").innerHTML').split('collection-view')[1]||'';
- assert.match(run('document.getElementById("window").innerHTML'),/class="collection-list"><div class="collection-head">[^]*?data-skin=""/);
+ assert.match(run('document.getElementById("window").innerHTML'),/class="collection-list" data-keep-scroll="wardrobe"><div class="collection-head">[^]*?data-skin=""/);
  run('globalThis.__skins=game.hero.skins;globalThis.__wear=game.hero.look.wear;game.hero.skins={owned:[]};CANAAN_WARDROBE.pick("fermier")');assert.match(view(),/^ locked[^]*collection-chip">Monstres[^]*Pas encore obtenue/);
  run('CANAAN_WARDROBE.pick("elfe_reine")');assert.match(view(),/Elwyn, la Tisseuse/);
  run('CANAAN_WARDROBE.grant(game.hero,"fermier");CANAAN_WARDROBE.pick("fermier")');assert.match(view(),/data-action="wearSkin" data-skin="fermier"/);

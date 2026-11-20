@@ -151,21 +151,48 @@ function closePanels() {
   document.getElementById('overlay').style.display = 'none';
   hideGearTooltip();
 }
+// Position de défilement d'une zone, reconnue d'un dessin à l'autre : son nom (data-keep-scroll) ou la suite de ses
+// classes jusqu'à la fenêtre (deux zones de même forme dans deux onglets différents portent un data-keep-scroll).
+function canaanScrollKey(el, win) {
+  if (el.dataset.keepScroll) return 'k:' + el.dataset.keepScroll;
+  const path = [];
+  for (let e = el; e && e !== win; e = e.parentElement)
+    path.push(e.tagName + '.' + (e.getAttribute('class') || ''));
+  return path.join('<');
+}
+// Toute fenêtre redessinée garde la position de chacune de ses zones qui défilent (un clic dans une longue liste ne
+// la remet pas en haut) ; une zone absente du nouveau dessin repart du haut.
 function showPanel(html) {
   clearTouchControls();
-  let win = document.getElementById('window'),
+  const win = document.getElementById('window'),
     oldScroll = win.scrollTop,
-    oldInner = [...win.querySelectorAll('.scroll')].map(x => x.scrollTop);
+    kept = new Map();
+  for (const el of win.querySelectorAll('*')) {
+    if (!el.scrollTop) continue;
+    const key = canaanScrollKey(el, win);
+    if (!kept.has(key)) kept.set(key, []);
+    kept.get(key).push(el.scrollTop);
+  }
   // Toute nouvelle fenêtre remplace le sac ou la fiche : ils se réinscrivent eux-mêmes (prepare) une fois dessinés.
   currentGearPanel = '';
   delete win.dataset.canaanPanel;
   document.getElementById('dialog').style.display = 'none';
   document.getElementById('overlay').style.display = 'flex';
-  document.getElementById('window').innerHTML =
+  win.innerHTML =
     '<button type="button" class="os-close" aria-label="Fermer la fenêtre" title="Fermer (Échap)" data-action="closePanels">×</button>' +
     html;
   win.scrollTop = oldScroll;
-  win.querySelectorAll('.scroll').forEach((el, i) => (el.scrollTop = oldInner[i] || 0));
+  if (!kept.size) return;
+  const seen = new Map();
+  for (const el of win.querySelectorAll('*')) {
+    if (el.scrollHeight <= el.clientHeight) continue;
+    const key = canaanScrollKey(el, win),
+      list = kept.get(key);
+    if (!list) continue;
+    const i = seen.get(key) || 0;
+    seen.set(key, i + 1);
+    if (list[i]) el.scrollTop = list[i];
+  }
 }
 let currentGearPanel = '';
 function toggleInventory() {

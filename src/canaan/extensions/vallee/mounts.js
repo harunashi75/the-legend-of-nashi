@@ -358,7 +358,7 @@
         { touche: CANAAN_KEYS.labelOf('mount') }
       ) +
       (hero.riding ? ' <b>' + esc('🐎 En selle : {nom}', { nom: tt(BY[hero.riding].name) }) + '</b>' : '') +
-      '</p><div class="collection"><div class="collection-list"><div class="collection-head">' +
+      '</p><div class="collection"><div class="collection-list" data-keep-scroll="mounts"><div class="collection-head">' +
       esc('Montures obtenues') +
       ' <b>' +
       s.mounts.length +

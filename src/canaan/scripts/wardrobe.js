@@ -205,7 +205,7 @@
       SKINS.length +
       ' apparences</span></div>' +
       '<p class="muted">Des tenues complètes, purement visuelles, portées par-dessus ton équipement. Elles tombent des monstres, des boss (donjons, raids, boss cachés, boss mondiaux, Arène) et des coffres secrets ; plus la qualité est haute, plus la tenue est travaillée (ailes, aura, particules).</p>' +
-      '<div class="collection"><div class="collection-list"><div class="collection-head">' +
+      '<div class="collection"><div class="collection-list" data-keep-scroll="wardrobe"><div class="collection-head">' +
       esc('Apparences obtenues') +
       ' <b>' +
       owned.length +
