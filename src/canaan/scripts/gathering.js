@@ -687,12 +687,8 @@
         Math.round(img.height * k)
       );
       if (job && n.kind === 'ore') cracks(c, n, job.p, img.width * k, img.height * k);
-      if (i === near && !empty && !job) {
-        c.font = 'bold 11px sans-serif';
-        c.textAlign = 'center';
-        c.fillStyle = '#fff2cb';
-        c.fillText(n.kind === 'ore' ? '[E] Miner' : '[E] Cueillir', n.x, n.y - img.height * k + 6);
-      }
+      if (i === near && !empty && !job)
+        drawCanaanPrompt(c, n.kind === 'ore' ? '[E] Miner' : '[E] Cueillir', n.x, n.y - img.height * k + 6);
     });
     c.restore();
   }

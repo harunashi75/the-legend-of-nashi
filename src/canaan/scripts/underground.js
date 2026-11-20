@@ -1625,21 +1625,14 @@
       if (v.tool === 'lantern') canaanLight(v.x - 18, v.y - 4, 120, '#ffd36d');
       const near = Math.hypot(P.x - v.x, P.y - v.y);
       if (near < 190) {
-        c.font = 'bold 11px sans-serif';
-        c.textAlign = 'center';
-        c.lineWidth = 3;
-        c.strokeStyle = '#120c07';
-        c.fillStyle = v.type ? '#ffe08a' : '#f6e2b1';
-        const label = v.name + (v.role && !v.type ? '' : '');
-        c.strokeText(label, v.x, v.y - 48 * s);
-        c.fillText(label, v.x, v.y - 48 * s);
-        if (near < 95) {
-          c.font = '12px sans-serif';
-          c.fillStyle = '#fff';
-          const hint = v.type === 'shop' ? '[E] Commercer' : v.type === 'bank' ? '[E] Banque' : '[E] Parler';
-          c.strokeText(hint, v.x, v.y - 62 * s);
-          c.fillText(hint, v.x, v.y - 62 * s);
-        }
+        drawCanaanName(c, v.name, v.x, v.y - 48 * s, v.type ? '#ffe08a' : '#f6e2b1');
+        if (near < 95)
+          drawCanaanPrompt(
+            c,
+            v.type === 'shop' ? '[E] Commercer' : v.type === 'bank' ? '[E] Banque' : '[E] Parler',
+            v.x,
+            v.y - 62 * s
+          );
       }
       if (v.bubble) bubble(c, v.x, v.y - 70 * s, v.bubble.text);
     }
@@ -2628,13 +2621,8 @@
     c.fillStyle = '#ffe8a8';
     c.strokeText(text, x, y);
     c.fillText(text, x, y);
-    if (sub) {
-      c.font = 'bold 12px system-ui';
-      c.fillStyle = '#fff';
-      c.strokeText(sub, x, y + 16);
-      c.fillText(sub, x, y + 16);
-    }
     c.restore();
+    if (sub) drawCanaanPrompt(c, sub, x, y + 17);
   }
   const inView = (x, y, m = 200) => x > camX - m && x < camX + W + m && y > camY - m && y < camY + H + m;
   // Entrées vues de l'île (appelé par la boucle de rendu, à la surface).

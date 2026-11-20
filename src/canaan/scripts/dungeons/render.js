@@ -320,16 +320,7 @@
       c.globalAlpha = 1;
       canaanLight(x, y - 14, 190, th.rune);
       const near = exitNear(P);
-      c.save();
-      c.textAlign = 'center';
-      c.font = 'bold 13px Palatino Linotype, Georgia, serif';
-      c.lineWidth = 3;
-      c.strokeStyle = '#1a1008';
-      const text = near ? '[E] Sortir de l’instance' : '🌀 Portail de retour';
-      c.strokeText(text, x, y - 62);
-      c.fillStyle = '#f6dc98';
-      c.fillText(text, x, y - 62);
-      c.restore();
+      drawCanaanPrompt(c, near ? '[E] Sortir de l’instance' : '🌀 Portail de retour', x, y - 62);
     }
     // ---------------------------------------------------------------- Textures des cases
     function canvas(w, h) {
@@ -2603,16 +2594,7 @@
           search: '[E] Fouiller l’urne'
         }[what.kind];
       }
-      c.save();
-      c.font = 'bold 13px Palatino Linotype, Georgia, serif';
-      c.textAlign = 'center';
-      c.lineWidth = 3;
-      c.strokeStyle = '#1a1008';
-      const label = translateText(text);
-      c.strokeText(label, at[0] * TS + 24, at[1] * TS - 18);
-      c.fillStyle = '#f6dc98';
-      c.fillText(label, at[0] * TS + 24, at[1] * TS - 18);
-      c.restore();
+      drawCanaanPrompt(c, translateText(text), at[0] * TS + 24, at[1] * TS - 18);
     }
     // Objets au sol en gros pixels cernés d'encre, comme le décor de l'île : peints une fois (leurs lumières notées),
     // réduits au tiers sans lissage, contourés, puis réutilisés. Les objets animés restent dessinés à chaque image.
@@ -2721,10 +2703,7 @@
         c.fillStyle = th.rune;
         c.fillText(title, plan.title.x * TS + 24, plan.title.y * TS);
       }
-      c.textAlign = 'center';
-      c.font = 'bold 13px monospace';
-      c.fillStyle = '#fff2cb';
-      c.fillText('↟ SORTIE [E] ↟', instanceEntrance.x, instanceEntrance.y + 62);
+      drawCanaanPrompt(c, '↟ SORTIE [E] ↟', instanceEntrance.x, instanceEntrance.y + 62);
       c.restore();
     }
 

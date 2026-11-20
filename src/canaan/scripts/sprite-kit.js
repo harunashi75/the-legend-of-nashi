@@ -478,8 +478,32 @@
     c.restore();
     canaanLight(x, y - h * 0.2, boss ? 200 : 80, boss ? '#fff0a8' : '#ffd36b');
   }
+  // ---------------------------------------------------------------- Textes au-dessus du monde
+  // Une seule facture pour tout ce qui s'active avec la touche E (entrées des donjons et des raids, bâtiments,
+  // marchands, PNJ, coffres, récolte, mécanismes) : serif doré cerné d'encre, comme les coffres secrets. Les noms des
+  // PNJ et des lieux prennent la même police et le même contour, en parchemin, pour se distinguer de l'invitation.
+  const WORLD_FONT = 'Palatino Linotype, Georgia, serif';
+  function worldText(c, text, x, y, size, color) {
+    c.save();
+    c.font = 'bold ' + size + 'px ' + WORLD_FONT;
+    c.textAlign = 'center';
+    c.textBaseline = 'alphabetic';
+    c.lineJoin = 'round';
+    c.lineWidth = 3;
+    c.strokeStyle = '#1a1008';
+    c.strokeText(text, x, y);
+    c.fillStyle = color;
+    c.fillText(text, x, y);
+    c.restore();
+  }
+  // Invitation à interagir : « [E] Entrer », « [E] Parler », « [E] Ouvrir »…
+  const drawCanaanPrompt = (c, text, x, y, color = '#f6dc98') => worldText(c, text, x, y, 13, color);
+  // Nom d'un PNJ ou d'un lieu.
+  const drawCanaanName = (c, text, x, y, color = '#f6e2b1') => worldText(c, text, x, y, 12, color);
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, {
+    drawCanaanPrompt,
+    drawCanaanName,
     canaanOutline,
     canaanPolish,
     canaanActorSprite: actor,

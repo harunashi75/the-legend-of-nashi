@@ -2763,15 +2763,7 @@
   };
   const visible = (x, y, m = 80) =>
     Math.abs(x - camX - W / 2) < W / 2 + m && Math.abs(y - camY - H / 2) < H / 2 + m;
-  function prompt(c, x, y, text) {
-    c.font = 'bold 12px system-ui';
-    c.textAlign = 'center';
-    c.lineWidth = 3;
-    c.strokeStyle = '#0c1a24';
-    c.fillStyle = '#fff2cb';
-    c.strokeText('[E] ' + text, x, y);
-    c.fillText('[E] ' + text, x, y);
-  }
+  const prompt = (c, x, y, text) => drawCanaanPrompt(c, '[E] ' + text, x, y);
   function glow(c, x, y, r, col, a = 0.35) {
     const g = c.createRadialGradient(x, y, 1, x, y, r);
     g.addColorStop(0, col);
@@ -3629,15 +3621,7 @@
       dragonArt(c, x, y, flap);
     }
   }
-  function nameTag(c, x, y, text) {
-    c.font = 'bold 11px sans-serif';
-    c.textAlign = 'center';
-    c.lineWidth = 3;
-    c.strokeStyle = '#120c07';
-    c.fillStyle = '#f6e2b1';
-    c.strokeText(text, x, y);
-    c.fillText(text, x, y);
-  }
+  const nameTag = (c, x, y, text) => drawCanaanName(c, text, x, y);
   // Décors propres à chaque lieu : traces, ombres, rayon, lucioles, panneaux, nénuphars, pont, mouton.
   function drawSiteExtras(c, site) {
     const hero = game.hero,

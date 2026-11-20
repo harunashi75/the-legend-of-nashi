@@ -473,14 +473,8 @@
     const b = land.box;
     return visible(((b.x0 + b.x1) / 2) * TS, ((b.y0 + b.y1) / 2) * TS, ((b.x1 - b.x0) / 2 + 10) * TS);
   };
-  function label(c, text, x, y, col = '#f6e2b1') {
-    c.font = 'bold 12px sans-serif';
-    c.textAlign = 'center';
-    c.fillStyle = 'rgba(20,12,6,.75)';
-    c.fillText(text, x + 1, y + 1);
-    c.fillStyle = col;
-    c.fillText(text, x, y);
-  }
+  // Noms : même facture que les invitations [E] (sprite-kit.js).
+  const label = (c, text, x, y, col) => drawCanaanName(c, text, x, y, col);
   // Sol de l'arène : anneaux de dalles et soleil de mosaïque au centre, peint une fois.
   let arenaFloor = null;
   function floor() {
@@ -734,7 +728,7 @@
     );
     if (Math.hypot(P.x - x, P.y - y) < 220) {
       label(c, tt(n.name), x, y - 62);
-      if (Math.hypot(P.x - x, P.y - y) < 110) label(c, '[E] ' + tt('Parler'), x, y - 80, '#ffffff');
+      if (Math.hypot(P.x - x, P.y - y) < 110) drawCanaanPrompt(c, '[E] ' + tt('Parler'), x, y - 80);
     }
   }
   function drawWorld(c) {
@@ -745,14 +739,13 @@
     // Invitations près des statues et des sceaux.
     const r = reach(P);
     if (r?.kind === 'statue')
-      label(c, '[E] ' + tt('Lire la plaque'), (r.s.x + 0.5) * TS, (r.s.y + 1) * TS - 120, '#ffffff');
+      drawCanaanPrompt(c, '[E] ' + tt('Lire la plaque'), (r.s.x + 0.5) * TS, (r.s.y + 1) * TS - 120);
     if (r?.kind === 'seal' && BOSS().canSeal(r.i))
-      label(
+      drawCanaanPrompt(
         c,
         '[E] ' + tt('Activer le sceau'),
         (plan.arena.statues[r.i].x + 0.5) * TS,
-        (plan.arena.statues[r.i].y + 1) * TS - 140,
-        '#ffe88a'
+        (plan.arena.statues[r.i].y + 1) * TS - 140
       );
   }
   function occluders() {

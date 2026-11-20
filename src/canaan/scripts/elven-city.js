@@ -689,17 +689,8 @@
     return builtArt.get(b);
   }
   const visible = (x, y, m = 300) => x > camX - m && x < camX + W + m && y > camY - m && y < camY + H + m;
-  function label(c, text, x, y, col = '#f6e2b1') {
-    c.save();
-    c.font = 'bold 12px Palatino Linotype, Georgia, serif';
-    c.textAlign = 'center';
-    c.lineWidth = 3;
-    c.strokeStyle = '#101b20';
-    c.strokeText(text, x, y);
-    c.fillStyle = col;
-    c.fillText(text, x, y);
-    c.restore();
-  }
+  // Noms des elfes et des lieux : même facture que les invitations [E] (sprite-kit.js).
+  const label = (c, text, x, y, col) => drawCanaanName(c, text, x, y, col);
   // Parties fixes, dessinées avant les personnages (passe de profondeur pour passer derrière). Les étangs sont à plat
   // (dessinés d'abord, jamais par-dessus un personnage).
   const parts = [];
@@ -921,7 +912,7 @@
     c.imageSmoothingEnabled = false;
     for (const n of folk) if (n.room === room.id) drawElf(c, n);
     const what = reach(P);
-    if (PROMPTS[what]) label(c, PROMPTS[what], P.x, P.y - 78, '#fff2cb');
+    if (PROMPTS[what]) drawCanaanPrompt(c, PROMPTS[what], P.x, P.y - 78);
     c.restore();
   }
   function draw(c) {
@@ -1045,7 +1036,7 @@
         armurier: '[E] Armurerie',
         tisseuse: '[E] Atelier de la Tisseuse'
       }[what];
-      label(c, text, P.x, P.y - 78, '#fff2cb');
+      drawCanaanPrompt(c, text, P.x, P.y - 78);
     }
     c.restore();
   }

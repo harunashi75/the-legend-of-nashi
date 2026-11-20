@@ -1558,18 +1558,11 @@
       for (const layer of ['rug', 'wall', 'curtain', 'floor'])
         for (const it of list) if (CATALOG[it.k].layer === layer) drawItem(c, room, it);
       const d = insideDoor(room);
-      if (Math.hypot(P.x - d.x, P.y - d.y) < 90) label(c, '[E] Sortir', d.x, d.y + 30, '#fff2cb');
+      if (Math.hypot(P.x - d.x, P.y - d.y) < 90) drawCanaanPrompt(c, '[E] Sortir', d.x, d.y + 30);
       c.restore();
     }
-    function label(c, text, x, y, col = '#f6e2b1') {
-      c.font = 'bold 12px system-ui';
-      c.textAlign = 'center';
-      c.lineWidth = 3;
-      c.strokeStyle = '#101b20';
-      c.fillStyle = col;
-      c.strokeText(text, x, y);
-      c.fillText(text, x, y);
-    }
+    // Noms des lieux : même facture que les invitations [E] (sprite-kit.js).
+    const label = (c, text, x, y, col) => drawCanaanName(c, text, x, y, col);
 
     // ---------------------------------------------------------------- Dessin : façades en pixel art
     // Même facture que l'île, les donjons et les raids : volumes en blocs de pixels, contour sombre, lumière venant du
@@ -3475,14 +3468,14 @@
           const d = outsideDoor(b);
           if (Math.hypot(P.x - d.x, P.y - d.y) >= 90) continue;
           const base = (b.y + b.h) * TS;
-          label(c, '[E] Entrer', d.x, builtOf(b)?.art ? base - 52 : base - 86, '#fff2cb');
+          drawCanaanPrompt(c, '[E] Entrer', d.x, builtOf(b)?.art ? base - 52 : base - 86);
         }
       // Bâtiments des autres modules : seulement l'invitation à entrer, devant la porte.
       for (const b of externals()) {
         if (!!b.under !== (game.world.layer === 'under')) continue;
         const d = outsideDoor(b);
         if (Math.hypot(P.x - d.x, P.y - d.y) < 90)
-          label(c, '[E] Entrer · ' + b.label, d.x, d.y - 40, '#fff2cb');
+          drawCanaanPrompt(c, '[E] Entrer · ' + b.label, d.x, d.y - 40);
       }
       c.restore();
     }

@@ -1240,25 +1240,15 @@ function draw() {
         if (canaanRoomAt(n.x / TS, n.y / TS) !== canaanRoomAt(P.x / TS, P.y / TS)) return;
         if (n.type === 'portal' || n.type === 'arena') {
           if (Math.hypot(P.x - n.x, P.y - n.y) < 115) {
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 12px system-ui';
-            ctx.fillStyle = '#fff2cb';
             const at = CANAAN_PORTAL_ART.labelAt(n.type === 'arena' ? 'arena' : n.instance);
-            if (at) ctx.fillText('[E] Entrer', at.x, at.y);
-            else ctx.fillText('[E] Entrer', n.x, n.type === 'arena' ? n.y - 166 : n.y - 91);
+            if (at) drawCanaanPrompt(ctx, '[E] Entrer', at.x, at.y);
+            else drawCanaanPrompt(ctx, '[E] Entrer', n.x, n.type === 'arena' ? n.y - 166 : n.y - 91);
           }
           return;
         }
         drawCanaanMerchant(ctx, n);
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 11px sans-serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(n.name, n.x, n.y - 53);
-        if (Math.hypot(P.x - n.x, P.y - n.y) < 120) {
-          ctx.fillStyle = '#fff';
-          ctx.font = '12px sans-serif';
-          ctx.fillText('[E] Parler', n.x, n.y - 80);
-        }
+        drawCanaanName(ctx, n.name, n.x, n.y - 53);
+        if (Math.hypot(P.x - n.x, P.y - n.y) < 120) drawCanaanPrompt(ctx, '[E] Parler', n.x, n.y - 80);
       });
   drawChests();
   if (!game.world.instance) drawWaterRipples(ctx);

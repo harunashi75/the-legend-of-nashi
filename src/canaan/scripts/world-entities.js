@@ -971,21 +971,13 @@ function drawChests() {
       y = ch.y * TS;
     drawCanaanChest(ctx, x, y, !!ch.instance, ch.x * 7 + ch.y);
     if (Math.hypot(P.x - x, P.y - y) < 95) {
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 13px Palatino Linotype, Georgia, serif';
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#1a1008';
       // Coffre secret : il faut une clé des secrets.
       const text = ch.instance
         ? '[E] Ouvrir'
         : Number(P.keys) > 0
           ? '[E] Ouvrir (🗝️ ' + Math.floor(P.keys) + ')'
           : '🔒 Clé des secrets requise';
-      ctx.strokeText(text, x, y - 40);
-      ctx.fillStyle = '#f6dc98';
-      ctx.fillText(text, x, y - 40);
-      ctx.restore();
+      drawCanaanPrompt(ctx, text, x, y - 40);
     }
   }
 }

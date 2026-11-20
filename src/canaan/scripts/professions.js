@@ -530,13 +530,7 @@
       }
       if (i === near && !busy) {
         c.globalAlpha = 1;
-        c.font = 'bold 12px system-ui';
-        c.textAlign = 'center';
-        c.lineWidth = 3;
-        c.strokeStyle = '#0c1a24';
-        c.fillStyle = '#fff2cb';
-        c.strokeText('[E] Pêcher', s.x, s.y - 26);
-        c.fillText('[E] Pêcher', s.x, s.y - 26);
+        drawCanaanPrompt(c, '[E] Pêcher', s.x, s.y - 26);
       }
     });
     c.restore();

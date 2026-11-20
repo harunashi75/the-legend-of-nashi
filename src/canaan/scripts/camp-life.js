@@ -2990,14 +2990,7 @@
     canaanLight(wx, wy, 70, '#ffb040');
     canaanLight(...at(119, 54), 90, '#ff7a30');
     if (!redrawing && Math.hypot(P.x - cx, P.y - wl) < 420) {
-      c.font = 'bold 12px system-ui';
-      c.textAlign = 'center';
-      c.lineWidth = 3;
-      c.strokeStyle = '#101b20';
-      const name = '🐉 ' + tt('Le Souffle du Dragon');
-      c.strokeText(name, cx, top - 14);
-      c.fillStyle = '#ffc890';
-      c.fillText(name, cx, top - 14);
+      drawCanaanName(c, '🐉 ' + tt('Le Souffle du Dragon'), cx, top - 14, '#ffc890');
     }
   }
   const BIG = { barn: barnSprite, silo: siloSprite, coop: coopSprite, hay: haySprite, cart: cartSprite };
@@ -3033,14 +3026,7 @@
           canaanLight(X + 44, bottom - 70, 70, '#ffd36b');
           canaanLight(X + w - 44, bottom - 70, 70, '#ffd36b');
           if (Math.hypot(P.x - cx, P.y - bottom) < 360) {
-            c.font = 'bold 12px system-ui';
-            c.textAlign = 'center';
-            c.lineWidth = 3;
-            c.strokeStyle = '#101b20';
-            const name = '🌾 ' + tt('Ferme de l’Aurore');
-            c.strokeText(name, cx, Y - 74);
-            c.fillStyle = '#f6e2b1';
-            c.fillText(name, cx, Y - 74);
+            drawCanaanName(c, '🌾 ' + tt('Ferme de l’Aurore'), cx, Y - 74);
           }
         }
         if (it.kind === 'coop') {

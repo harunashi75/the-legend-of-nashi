@@ -1509,16 +1509,8 @@
         Math.round(spr.height * s)
       );
       // Nom au-dessus, quand le héros est proche.
-      if (Math.hypot(P.x - v.x, P.y - v.y) < TALK * 1.6) {
-        c.font = 'bold 11px sans-serif';
-        c.textAlign = 'center';
-        c.lineWidth = 3;
-        c.strokeStyle = '#120c07';
-        c.fillStyle = '#f6e2b1';
-        const name = translateText(v.name);
-        c.strokeText(name, v.x, v.y - 48 * s);
-        c.fillText(name, v.x, v.y - 48 * s);
-      }
+      if (Math.hypot(P.x - v.x, P.y - v.y) < TALK * 1.6)
+        drawCanaanName(c, translateText(v.name), v.x, v.y - 48 * s);
     }
     c.restore();
   }
