@@ -1553,3 +1553,36 @@ svg.ico.solo {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+/* Barre des menus façon MMO : les fenêtres dans l'ordre (Personnage, Talents, Métiers, Succès, Quêtes, Groupe,
+   Collections, Carte, Menu du jeu), puis le Sac à part, plus grand, après un filet. */
+#menuButtons button.menu-bag {
+  flex-basis: 56px;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  margin-left: 12px;
+  font-size: calc(30px * var(--font-scale));
+}
+#menuButtons button.menu-bag::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 8px;
+  bottom: 8px;
+  border-left: 1px solid var(--rpg-gold-dark, #8d79dd);
+  pointer-events: none;
+}
+@media (max-width: 750px) {
+  #menuButtons button.menu-bag {
+    flex-basis: 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin-left: 8px;
+    font-size: calc(22px * var(--font-scale));
+  }
+  #menuButtons button.menu-bag::before {
+    left: -6px;
+  }
+}

@@ -27,7 +27,7 @@ Les données d'une extension dans une sauvegarde (`hero.ext.vallee` : montures) 
 - `extensions/vallee/data.js` : zone, créatures, Valérion, montures, touche H (déclarés avant la génération de l'île).
 - `extensions/vallee/i18n.js` : traductions anglaises de l'extension (hors de `client/i18n/en.js`).
 - `extensions/vallee/art.js` : pixel art (chevaux, statues, écurie, moulin, clôtures, ponts, dalles), avec le kit commun.
-- `extensions/vallee/mounts.js` : montures (achat, H, vitesse, descente en combat, onglet Montures de la fiche C).
+- `extensions/vallee/mounts.js` : montures (achat, H, vitesse, descente en combat, onglet Montures des Collections V).
 - `extensions/vallee/valerion.js` : Valérion, le Dernier Champion (trois phases, PV selon les participants, butin).
 - `extensions/vallee/vallee.js` : lieux, habitants, interactions, carte ; enregistre l'extension.
 

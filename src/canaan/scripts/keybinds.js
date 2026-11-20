@@ -252,7 +252,6 @@
     toggleCharacter: 'character',
     toggleMap: 'map',
     toggleGroup: 'group',
-    toggleTrade: 'trade',
     toggleProfessions: 'professions',
     toggleJournal: 'journal',
     toggleAchievements: 'achievements',

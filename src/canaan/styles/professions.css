@@ -10,7 +10,7 @@
 /* Liste des métiers à gauche (récolte, puis artisanat), la page du métier choisi à droite. */
 #window .prof-layout {
   display: grid;
-  grid-template-columns: minmax(170px, 210px) 1fr;
+  grid-template-columns: minmax(200px, 230px) 1fr;
   gap: 14px;
   align-items: start;
 }
@@ -42,6 +42,9 @@
   border-radius: 4px;
   color: var(--rpg-gold-light, #f6dc98);
   font-family: var(--rpg-serif);
+}
+#window .prof-nav button span {
+  white-space: nowrap;
 }
 #window .prof-nav button small {
   color: var(--rpg-muted, #b8a483);
@@ -598,8 +601,6 @@
   flex-wrap: wrap;
   gap: 6px;
   margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--rpg-gold-dark, #6a4e2a);
 }
 #window .ui-tabs button {
   display: inline-flex;
