@@ -202,10 +202,10 @@
       '</span></div>'
     );
   }
-  // Onglet de la fiche (C) : 'gear' (le personnage et son équipement) ou 'rubis' (ses six emplacements de Rubis
-  // et sa collection). Ce que le héros collectionne (garde-robe, bestiaire…) est dans les Collections (V).
+  // Onglet de la fiche (C) : 'gear' (le personnage et son équipement), 'rubis' (ses six emplacements de Rubis
+  // et sa collection) ou 'titles' (le titre affiché au-dessus du héros, achievements.js). Ce que le héros collectionne (garde-robe, bestiaire…) est dans les Collections (V).
   // L'onglet choisi est gardé d'une ouverture à l'autre.
-  const CHAR_TABS = ['gear', 'rubis'];
+  const CHAR_TABS = ['gear', 'rubis', 'titles'];
   let charTab = 'gear';
   function characterSection(tab) {
     if (CHAR_TABS.includes(tab)) charTab = tab;
@@ -225,7 +225,8 @@
       charTab,
       [
         ['gear', '⚔️ Équipement', count + ' / 10'],
-        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots]
+        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots],
+        ['titles', '👑 Titres', CANAAN_ACHIEVEMENTS.titlesCount(game.hero)]
       ],
       'char-tabs'
     );
@@ -257,7 +258,11 @@
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
         tabs +
-        (rubis ? window.CANAAN_RUBIS.section() : gear)
+        (rubis
+          ? window.CANAAN_RUBIS.section()
+          : charTab === 'titles'
+            ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
+            : gear)
     );
     drawCharacterPreview();
     prepare('character');

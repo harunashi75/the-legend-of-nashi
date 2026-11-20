@@ -99,7 +99,6 @@
       CANAAN_WARDROBE.pick(
         element.dataset.skin && /^[a-z_]{2,32}$/.test(element.dataset.skin) ? element.dataset.skin : ''
       ),
-    achTab: element => CANAAN_ACHIEVEMENTS.actions.tab(actionText(element, 'tab')),
     achCat: element => CANAAN_ACHIEVEMENTS.actions.cat(actionText(element, 'cat')),
     achTitle: element => CANAAN_ACHIEVEMENTS.actions.title(actionText(element, 'title')),
     questTab: element => questTab(actionText(element, 'tab')),

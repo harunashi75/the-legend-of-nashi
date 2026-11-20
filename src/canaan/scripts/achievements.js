@@ -1476,6 +1476,7 @@
     steamSync();
     next._remote = true;
     render();
+    refreshTitles();
   }
   function setTitle(hero, id) {
     const st = stateOf(hero);
@@ -1533,7 +1534,7 @@
   }
 
   // ---------------------------------------------------------------- Panneau (touche Y)
-  const ui = { tab: 'succes', cat: 'all' };
+  const ui = { cat: 'all' };
   const portraits = new Map();
   function portrait(b) {
     if (portraits.has(b.key)) return portraits.get(b.key);
@@ -1703,6 +1704,12 @@
       }).join('')
     );
   }
+  // Onglet Titres de la fiche (C) : choisir le titre affiché au-dessus du héros, parmi ceux des succès débloqués.
+  const titlesCount = h => TITLES.filter(a => stateOf(h).done[a.id]).length + ' / ' + TITLES.length;
+  // La fiche ouverte sur cet onglet est redessinée (titre choisi, ou carnet reçu de l'hôte).
+  function refreshTitles() {
+    if (window.canaanCharacterTab() === 'titles') refreshGearPanel();
+  }
   function tabTitres(h) {
     const st = stateOf(h),
       mine = TITLES.filter(a => st.done[a.id]);
@@ -1738,22 +1745,13 @@
   const isOpen = () => modalOpen() && !!document.querySelector('#window .ach-panel');
   let shown = '';
   const signature = () =>
-    JSON.stringify([
-      stateOf(game.hero).done,
-      stateOf(game.hero).title,
-      ui,
-      ui.tab === 'succes' ? stateOf(game.hero).s : ''
-    ]);
+    JSON.stringify([stateOf(game.hero).done, stateOf(game.hero).title, ui, stateOf(game.hero).s]);
   function render() {
     if (!isOpen()) return;
     shown = signature();
     const h = game.hero,
       st = stateOf(h),
-      done = Object.keys(st.done).length,
-      tabs = [
-        ['succes', '⟦menu_achievements⟧ Succès'],
-        ['titres', '👑 Titres']
-      ];
+      done = Object.keys(st.done).length;
     const scroll = document.querySelector('#window .ach-scroll')?.scrollTop || 0;
     showPanel(
       canaanHead('⟦menu_achievements⟧ Succès') +
@@ -1767,9 +1765,8 @@
         '</b> points</div><div class="ach-bar big"><i style="width:' +
         Math.round((100 * done) / LIST.length) +
         '%"></i></div></div>' +
-        canaanTabs('achTab', ui.tab, tabs) +
         '<div class="ach-scroll">' +
-        (ui.tab === 'titres' ? tabTitres(h) : tabSucces(h)) +
+        tabSucces(h) +
         '</div></div>'
     );
     const box = document.querySelector('#window .ach-scroll');
@@ -1790,12 +1787,6 @@
     if (started && isOpen() && signature() !== shown) render();
   }, 500);
   const actions = {
-    tab(id) {
-      if (!['succes', 'titres'].includes(id)) return false;
-      ui.tab = id;
-      render();
-      return true;
-    },
     cat(id) {
       if (id !== 'all' && id !== 'recent' && !CATS.some(c => c.id === id)) return false;
       ui.cat = id;
@@ -1807,7 +1798,7 @@
     title(id) {
       if (guest()) return CANAAN_NET.requestAction({ op: 'ach-title', id });
       const ok = setTitle(game.hero, id === 'none' ? '' : id);
-      render();
+      refreshTitles();
       return ok;
     }
   };
@@ -1838,6 +1829,8 @@
     actions,
     // Onglet Bestiaire des Collections (V) : son contenu et son compteur.
     bestiary: tabBestiaire,
+    titles: tabTitres,
+    titlesCount,
     bestiaryCount: h => catalog().filter(b => stateOf(h).best[b.key]?.[0]).length + ' / ' + catalog().length,
     steamSync
   });

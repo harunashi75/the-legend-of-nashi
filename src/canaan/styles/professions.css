@@ -436,6 +436,10 @@
   border-color: rgba(246, 220, 152, 0.55);
   background: linear-gradient(160deg, rgba(110, 78, 22, 0.4), rgba(30, 20, 8, 0.45));
 }
+/* Onglet Titres de la fiche (C). */
+#window .titles-tab {
+  padding: 14px 16px;
+}
 #window .ach-titles {
   display: flex;
   flex-wrap: wrap;

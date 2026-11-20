@@ -288,10 +288,10 @@ test('Succès et bestiaire : cent succès adaptés, exploits comptés par l’h�
  // Réseau : carnet envoyé à l'invité au plus toutes les 3 s, sauf déblocage.
  assert.ok(run('CANAAN_ACHIEVEMENTS.netView(ally)'));assert.equal(run('CANAAN_ACHIEVEMENTS.netView(ally)'),undefined);
  assert.equal(run('CANAAN_ACHIEVEMENTS.handle(ally,{op:"ach-title",id:"c3"})'),false,'pas débloqué par l’allié');
- // Panneau : succès et titres ; le bestiaire (silhouettes « ??? » pour l'inconnu) est dans les Collections (V).
+ // Panneau : les succès ; les titres sont un onglet de la fiche (C) ; le bestiaire (silhouettes « ??? » pour l'inconnu) est dans les Collections (V).
  run('toggleAchievements()');let html=run('document.getElementById("window").innerHTML');assert.match(html,/ach-panel/);assert.match(html,/Le Pourfendeur|Fléau des ténèbres/);
  run('canaanCollections("bestiary")');html=run('document.getElementById("window").innerHTML');assert.match(html,/beast-card killed/);assert.match(html,/\?\?\?/);assert.match(html,/Fenrir|Pas encore croisée/);
- run('closePanels();toggleAchievements();CANAAN_ACHIEVEMENTS.actions.tab("titres")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
+ run('closePanels();canaanCharacterSection("titles")');assert.match(run('document.getElementById("window").innerHTML'),/« Le Pourfendeur »/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
