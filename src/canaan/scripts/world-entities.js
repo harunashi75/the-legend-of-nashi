@@ -894,7 +894,7 @@ function spawnRewardChest() {
   const spot = dungeonChestSpot(game.world.instance.index);
   game.world.chests = [{ id: 'instance_' + game.world.instance.index, x: spot.x, y: spot.y, instance: true }];
 }
-// Coffre de fin d'instance : une bourse d'or (60–100 en donjon, 150–250 en raid) et la grosse récompense d'XP pour
+// Coffre de fin d'instance : une bourse d'or (400–600 en donjon, 1 000–1 500 en raid, ×1,5 en héroïque) et la grosse récompense d'XP pour
 // chaque héros du groupe ; l'équipement vient des boss (30 % de chance chacun, dungeons.js).
 // Coffre secret de l'île ou des Tréfonds : il faut une clé des secrets (boss cachés des donjons) ; seul celui qui
 // l'ouvre est récompensé : un équipement Épique au niveau de la zone, 200 à 400 or, et 25 % de chance d'un Rubis.
@@ -921,9 +921,11 @@ function openNearbyChest(hero = game.hero) {
       canaanAchieve(member, 'clear', index);
       // Instance terminée : grosse récompense d'XP pour chacun.
       CANAAN_PROGRESSION.clearInstanceXp(index, member);
-      const gold = instances[index].raid
-        ? 150 + Math.floor(Math.random() * 101)
-        : 60 + Math.floor(Math.random() * 41);
+      const gold = instanceChestGold(
+        !!instances[index].raid,
+        game.world.instance.difficulty === 'heroic',
+        Math.random
+      );
       member.player.gold += gold;
       canaanLootNotice(member, '💰 +' + gold + ' or dans le coffre');
     }

@@ -26,8 +26,8 @@ test('Chacun à son niveau : monstres à niveau fixe, chacun frappe et encaisse 
   assert.equal(errors.length,0,errors.join('\n'));}
  {const {run}=require('./helpers/canaan-runtime.cjs')(source);
   run('started=true;globalThis.l=canaanCreateHero({name:"L",x:0,y:0})');
-  // Sac : 10 places au départ ; un héros enregistré sous l'ancienne règle (40 places par défaut) revient à 10.
-  assert.equal(run('canaanBagLimit(l)'),10);
+  // Sac : 20 places au départ ; un héros enregistré sous l'ancienne règle (40 places par défaut) revient au départ.
+  assert.equal(run('canaanBagLimit(l)'),20);
   run('CANAAN_GROUP.importGuests({"local-a":{pseudo:"A",bagLevel:3},"local-b":{pseudo:"B",bagLevel:5},"local-c":{pseudo:"C",bagLevel:2,bagVersion:2}})');
   assert.deepEqual([run('game.guests["local-a"].bagLevel'),run('game.guests["local-b"].bagLevel'),run('game.guests["local-c"].bagLevel')],[0,2,2]);
   assert.equal(run('CANAAN_GROUP.exportGuests(h=>h.player)["local-c"].bagVersion'),2);}

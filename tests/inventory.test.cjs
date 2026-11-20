@@ -185,7 +185,7 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);
  const at=re=>inv.search(re);
  assert.ok(at(/Équipement/)<at(/Utilitaire/)&&at(/Utilitaire/)<at(/key:secret/)&&at(/key:secret/)<at(/meal:soupe/)&&at(/meal:soupe/)<at(/Autre/)&&at(/Autre/)<at(/treasure:perle/)&&at(/treasure:perle/)<at(/Matériaux/)&&at(/Matériaux/)<at(/fish:gardon/),'rubriques dans l’ordre');
- assert.match(inv,/Matériaux <small>4 \/ 100/);assert.match(inv,/Libres <small>7</);assert.match(inv,/data-action="sortBag"[^>]*disabled/);
+ assert.match(inv,/Matériaux <small>4 \/ 100/);assert.match(inv,/Libres <small>17</);assert.match(inv,/data-action="sortBag"[^>]*disabled/);
  run('delete game.hero.prof.treasure["perle:0"];game.hero.player.keys=0');
  // Trier : l'équipement par emplacement (armes d'abord), puis la meilleure qualité, puis le plus haut niveau.
  run('game.hero.inventory=[{id:"a",slot:"ring",rarity:"Commun",level:5},{id:"b",slot:"helm",rarity:"Rare",level:3},{id:"c",slot:"helm",rarity:"Épique",level:2},{id:"d",slot:"weapon",weaponType:"sword",rarity:"Commun",level:1},{id:"e",slot:"helm",rarity:"Rare",level:9}];renderInventory()');

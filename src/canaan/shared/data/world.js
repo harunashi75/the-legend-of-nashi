@@ -531,4 +531,4 @@ export const WORLD_BOSS_DEFS = deepFreeze([
     opts: { style: 'clock' }
   }
 ]);
-export const BOSS_RESPAWN_MS = 3 * 60 * 1000;
+export const BOSS_RESPAWN_MS = 12 * 60 * 1000;

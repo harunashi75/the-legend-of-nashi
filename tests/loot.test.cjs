@@ -154,7 +154,8 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  const boss='recordKill({x:P.x,y:P.y,t:"Fenrir",hp:0,worldBoss:true,worldBossId:"fenrir"})';
  const chest='{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot);P.x=at.x*TS;P.y=at.y*TS;openNearbyChest()}';
  // Chaque objet a le niveau de sa source. Mob normal : 38 % de chance d'un objet (80 % Commun, 17 % Peu commun,
- // 3 % Rare). Élite : un objet à coup sûr (60/30/9/1 jusqu'à l'Épique). Boss mondial : Rare (+1 000 à 1 500 or).
+ // 3 % Rare). Élite : un objet à coup sûr (60/30/9/1 jusqu'à l'Épique). Boss mondial : Rare (+ or selon son niveau :
+ // 350 à 525 pour Fenrir, niveau 10).
  let r=reward(mob,0);assert.deepEqual(r.items,[['Commun',7]]);assert.equal(r.hero.includes('materials'),false);
  r=reward(mob,.379);assert.deepEqual(r.items,[['Commun',7]]);
  r=reward(mob,.38);assert.deepEqual(r.items,[],'pas d’objet au-delà de 38 %');
@@ -165,7 +166,7 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  r=reward(elite,.5);assert.deepEqual(r.items,[['Commun',12]]);
  assert.deepEqual(rolled(elite,[.99,.7]),[['Peu commun',12]],'une élite lâche toujours un objet');
  assert.deepEqual(rolled(elite,[0,.95]),[['Rare',12]]);assert.deepEqual(rolled(elite,[0,.995]),[['Épique',12]]);
- r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=1000&&r.gold<=1500,String(r.gold));
+ r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=350&&r.gold<=525,String(r.gold));
  // Coffre secret : verrouillé sans clé des secrets ; avec une clé (consommée), un Épique du niveau de sa zone
  // (milieu de la plage), 200 à 400 or et 25 % de chance d'un Rubis.
  const chestLevel=run('(()=>{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot),[lo,hi]=ZONE_LEVELS[canaanZoneIndexAt(at.x,at.y)];return Math.round((lo+hi)/2)})()');
@@ -241,9 +242,9 @@ test('Butin individuel : objets et or de chaque victime vont au héros qui l’a
  assert.ok(run('__chat.some(l=>l.startsWith("Butin: Lina — 🎁"))'),'message de butin de l’allié dans le chat');assert.ok(run('!__notes.some(n=>n.startsWith("🎁"))'));
  // Boss de monde : or et objet Rare pour l'allié.
  run('globalThis.boss={t:"Fenrir",worldBoss:true,worldBossId:"fenrir",x:ally.player.x,y:ally.player.y,hp:1,mhp:1,r:30,g:0};game.world.monsters.push(boss);canaanDamageMonster(boss,5,ally)');
- assert.ok(run('ally.player.gold')>=1000);assert.equal(run('ally.inventory.some(i=>i.rarity==="Rare")'),true);
+ assert.ok(run('ally.player.gold')>=170);assert.equal(run('ally.inventory.some(i=>i.rarity==="Rare")'),true);
  assert.equal(run('P.gold'),host.gold);assert.ok(run('game.world.worldBossTimers.fenrir')>0,'le minuteur du boss reste celui du monde');
- // Sac plein (40 places pour un allié) : un Commun est démantelé en poudre pour lui (plus d'or), un Rare va dans sa sacoche.
+ // Sac plein (40 objets, au-delà des 20 places d’un allié) : un Commun est démantelé en poudre pour lui (plus d'or), un Rare va dans sa sacoche.
  run('ally.inventory=Array.from({length:40},(_,i)=>({id:"f"+i,slot:"ring",level:1,rarity:"Commun"}));globalThis.goldBefore=ally.player.gold;giveGear(1,"normal","Commun",ally)');
  assert.equal(run('ally.inventory.length'),40);assert.equal(run('ally.player.gold'),run('goldBefore'));
  assert.ok(run('CANAAN_BAG.count(ally,"dust","poussiere",0)')>=1);
@@ -271,6 +272,14 @@ test('Règles partagées de l’économie : butin garanti d’une instance, pres
  assert.equal(E.instanceLoot(hard,null,1,seq([0,0.9])).level,hard.difficulties.normal.level);
  assert.equal(E.instanceLoot(hard,hard.difficulties.heroic,1,seq([0,0.005])).rarity,'Mythique');
  const deep=W.INSTANCE_DEFS.find(d=>d.scaled);assert.equal(E.instanceLoot(deep,null,44,seq([0.9])).level,44);
- // Boss mondial : 1 000 à 1 500 or.
- assert.equal(E.worldBossGold(seq([0])),1000);assert.equal(E.worldBossGold(seq([0.99999])),1500);
+ // Boss mondial : 150 + 20 × niveau, jusqu'à 1,5 fois plus (350 à 525 au niveau 10, 1 350 à 2 025 au niveau 60).
+ assert.equal(E.worldBossGold(10,seq([0])),350);assert.equal(E.worldBossGold(10,seq([0.99999])),525);
+ assert.equal(E.worldBossGold(60,seq([0])),1350);assert.equal(E.worldBossGold(60,seq([0.99999])),2025);
+ // Coffre de fin d'instance : 400 à 600 or en donjon, 1 000 à 1 500 en raid, ×1,5 en héroïque.
+ assert.equal(E.instanceChestGold(false,false,seq([0])),400);assert.equal(E.instanceChestGold(false,false,seq([0.99999])),600);
+ assert.equal(E.instanceChestGold(true,false,seq([0])),1000);assert.equal(E.instanceChestGold(true,false,seq([0.99999])),1500);
+ assert.equal(E.instanceChestGold(true,true,seq([0])),1500);assert.equal(E.instanceChestGold(true,true,seq([0.99999])),2250);
+ // Sac : 20 places au départ, +10 par agrandissement (neuf), 110 au plus ; un niveau invalide vaut 0.
+ assert.equal(E.bagSlots(0),20);assert.equal(E.bagSlots(3),50);assert.equal(E.bagSlots(9),110);assert.equal(E.bagSlots(42),110);assert.equal(E.bagSlots('x'),20);
+ assert.equal(E.BAG_MAX_LEVEL,9);
 });

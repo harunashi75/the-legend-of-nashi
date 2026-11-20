@@ -31,7 +31,7 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   await step(20);
   // Sac et équipement : l'invité voit son propre héros, tel que l'hôte le garde.
   assert.equal(guest.run('game.hero.equipment.weapon.name'),'Épée de recrue');
-  assert.equal(guest.run('updateCapacity(),BAG_LIMIT'),10,'capacité du sac donnée par l’hôte : 10 places au départ, comme l’hôte');assert.equal(guest.run('game.hero.name'),'Lina');
+  assert.equal(guest.run('updateCapacity(),BAG_LIMIT'),20,'capacité du sac donnée par l’hôte : 20 places au départ, comme l’hôte');assert.equal(guest.run('game.hero.name'),'Lina');
   assert.ok(guest.run('CANAAN_NET.debug.speed')>0,'vitesse donnée par l’hôte');
   // Prédiction : l'invité avance dès le premier pas, sans attendre l'hôte ; ensuite les deux positions coïncident.
   const y0=guest.run('P.y');guest.run('keys.s=true;time++;readInput();CANAAN_NET.tick()');
@@ -141,7 +141,7 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   const bagCount=host.run(G+'.inventory.length'),goldBuy=host.run(G+'.player.gold');
   guest.run('buyGear()');guest.run('buyBagUpgrade()');await step(10);
   assert.equal(host.run(G+'.inventory.length'),bagCount+1,'équipement acheté');assert.equal(host.run(G+'.bagLevel'),1,'sac agrandi');
-  assert.ok(host.run(G+'.player.gold')<goldBuy);assert.equal(guest.run('BAG_LIMIT'),20,'20 places chez l’invité');assert.equal(guest.run('CANAAN_BAG_VIEW().level'),1);
+  assert.ok(host.run(G+'.player.gold')<goldBuy);assert.equal(guest.run('BAG_LIMIT'),30,'30 places chez l’invité');assert.equal(guest.run('CANAAN_BAG_VIEW().level'),1);
   assert.equal(host.run('saveGame()'),true);assert.equal(JSON.parse(host.run('localStorage.getItem("canaan_slot_1")')).heros.invites[id].bagLevel,1,'niveau du sac sauvegardé');
   // Plus de forge : une ancienne demande d'amélioration ou de passif est refusée par l'hôte.
   guest.run('CANAAN_NET.requestAction({op:"upgrade",id:String(game.hero.equipment.weapon.id)});CANAAN_NET.requestAction({op:"passive",id:String(game.hero.equipment.weapon.id),passive:"lifesteal"})');await step(10);

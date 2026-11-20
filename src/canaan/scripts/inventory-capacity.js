@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  // Prix des neuf agrandissements du sac : shared/data/economy.js (BAG_PRICES). Ils s'achètent chez le marchand
+  // Places et prix des neuf agrandissements du sac : shared/data/economy.js (BAG_BASE, BAG_STEP, BAG_PRICES) et
+  // shared/rules/economy.js (bagSlots). Ils s'achètent chez le marchand
   // (colonne Marchandise de la boutique), plus dans le sac.
   let bagLevelCore = 0;
   // Invité en ligne : la capacité de son sac vient de l'hôte (game.hero.bagLimit), pas des agrandissements locaux.
@@ -9,15 +10,18 @@
       BAG_LIMIT = game.hero.bagLimit;
       return;
     }
-    BAG_LIMIT = Math.max(10 + bagLevelCore * 10, Math.min(100, game.hero.inventory.length));
+    BAG_LIMIT = Math.max(
+      bagSlots(bagLevelCore),
+      Math.min(bagSlots(BAG_MAX_LEVEL), game.hero.inventory.length)
+    );
   };
 
   updateCapacity();
-  // Agrandir le sac d'un allié (invité en ligne, à sa demande) : 40 places au départ, +10 par achat, 100 au plus.
+  // Agrandir le sac d'un allié (invité en ligne, à sa demande) : mêmes places et mêmes prix que l'hôte.
   window.buyBagUpgradeFor = function (hero) {
     if (hero === game.hero) return false;
     const level = canaanBagLevel(hero);
-    if (level >= 9) {
+    if (level >= BAG_MAX_LEVEL) {
       canaanLootNotice(hero, '🎒 Ton sac est déjà au maximum !');
       return false;
     }
@@ -33,7 +37,7 @@
   };
   window.buyBagUpgrade = function () {
     if (game.mode === 'guest') return CANAAN_NET.requestAction({ op: 'bag-upgrade' });
-    if (bagLevelCore >= 9) {
+    if (bagLevelCore >= BAG_MAX_LEVEL) {
       toast('🎒 Ton sac est déjà au maximum !');
       return;
     }
@@ -55,18 +59,18 @@
   window.CANAAN_BAG_VIEW = () => {
     if (game.mode !== 'guest') return hostView();
     const level = canaanBagLevel(game.hero);
-    return { level, capacity: 10 + level * 10, price: BAG_PRICES[level], max: level >= 9 };
+    return { level, capacity: bagSlots(level), price: BAG_PRICES[level], max: level >= BAG_MAX_LEVEL };
   };
   const hostView = () => ({
     level: bagLevelCore,
-    capacity: 10 + bagLevelCore * 10,
+    capacity: bagSlots(bagLevelCore),
     price: BAG_PRICES[bagLevelCore],
-    max: bagLevelCore >= 9
+    max: bagLevelCore >= BAG_MAX_LEVEL
   });
   window.CANAAN_BAG_STATE = {
     export: () => bagLevelCore,
     import(level) {
-      bagLevelCore = Math.max(0, Math.min(9, Math.floor(Number(level) || 0)));
+      bagLevelCore = clampBagLevel(level);
       updateCapacity();
     }
   };

@@ -163,10 +163,10 @@ test('Échange entre joueurs : demande, offres, validations, vérifications de l
   assert.equal(host.run('P.gold'),520);assert.equal(host.run(G+'.player.gold'),60);
   assert.deepEqual(J(guest,'game.hero.inventory.map(i=>i.id)'),['arc-hote'],'sac de l’invitée à jour');
   // Sac plein : l'échange est suspendu, rien ne bouge.
-  host.run(G+'.inventory=Array.from({length:10},(_,k)=>({id:"x"+k,name:"Pierre",slot:"ring",rarity:"Commun",ilvl:1}))');
+  host.run(G+'.inventory=Array.from({length:20},(_,k)=>({id:"x"+k,name:"Pierre",slot:"ring",rarity:"Commun",ilvl:1}))');
   host.run('CANAAN_TRADE.actions.request("'+id+'")');host.run(`CANAAN_TRADE.handle(${G},{op:'trade-answer',yes:true})`);
   host.run('CANAAN_TRADE.actions.add(0)');host.run('CANAAN_TRADE.actions.ready()');host.run(`CANAAN_TRADE.handle(${G},{op:'trade-ready',yes:true})`);
-  assert.equal(host.run(G+'.inventory.length'),10);assert.equal(host.run('game.hero.inventory.length'),2);assert.equal(host.run('CANAAN_TRADE.sessions()'),1);
+  assert.equal(host.run(G+'.inventory.length'),20);assert.equal(host.run('game.hero.inventory.length'),2);assert.equal(host.run('CANAAN_TRADE.sessions()'),1);
   // Départ d'un joueur : l'échange est annulé.
   guest.run('CANAAN_NET.debug.socket.close()');for(let i=0;i<1000&&!host.run('!!'+G+'.away');i++)await wait(10);
   host.run('CANAAN_TRADE.check()');assert.equal(host.run('CANAAN_TRADE.sessions()'),0);

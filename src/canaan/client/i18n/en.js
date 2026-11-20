@@ -313,11 +313,11 @@ export default {
     'Appearance saved: your friends will see it in game.',
 
   // ------------------------------------------------------------ Sac, matériaux et personnage
-  'Capacité du sac : {n} / 100': 'Bag capacity: {n} / 100',
-  'Amélioration permanente : +10 emplacements par achat': 'Permanent upgrade: +10 slots per purchase',
-  '{n}/9 améliorations': '{n}/9 upgrades',
+  'Capacité du sac : {n} / {m}': 'Bag capacity: {n} / {m}',
+  'Amélioration permanente : +{n} emplacements par achat': 'Permanent upgrade: +{n} slots per purchase',
+  '{n}/{m} améliorations': '{n}/{m} upgrades',
   'Capacité maximale atteinte': 'Maximum capacity reached',
-  '＋ 10 emplacements': '＋ 10 slots',
+  '＋ {n} emplacements': '＋ {n} slots',
   'Emplacement vide': 'Empty slot',
   'Vide': 'Empty',
   'cliquer pour équiper': 'click to equip',
@@ -2673,6 +2673,8 @@ export default {
   '+{n} PV': '+{n} HP',
   '+{n} mana': '+{n} mana',
   '{nom} vaincu !': '{nom} defeated!',
+  '{nom} vaincu ! {n} or et un objet Rare reçus. Réapparition dans {m} minutes.':
+    '{nom} defeated! {n} gold and a Rare item received. Respawns in {m} minutes.',
   '{nom} est vaincu ! Une Rune pour chaque héros de l’arène.':
     '{nom} is defeated! A Rune for every hero in the arena.',
   'Le héros': 'The hero',

@@ -14,14 +14,22 @@
     return (
       '<section class="bag-upgrade"><div><strong>🎒 Capacité du sac : ' +
       state.capacity +
-      ' / 100</strong><p>Amélioration permanente : +10 emplacements par achat · ' +
+      ' / ' +
+      bagSlots(BAG_MAX_LEVEL) +
+      '</strong><p>Amélioration permanente : +' +
+      BAG_STEP +
+      ' emplacements par achat · ' +
       state.level +
-      '/9 améliorations</p></div>' +
+      '/' +
+      BAG_MAX_LEVEL +
+      ' améliorations</p></div>' +
       (state.max
         ? '<b class="bag-max">✓ Capacité maximale atteinte</b>'
         : '<button type="button" data-action="buyBagUpgrade" ' +
           (P.gold < state.price ? 'disabled' : '') +
-          '>＋ 10 emplacements · 🪙 ' +
+          '>＋ ' +
+          BAG_STEP +
+          ' emplacements · 🪙 ' +
           state.price +
           ' or</button>') +
       '</section>'

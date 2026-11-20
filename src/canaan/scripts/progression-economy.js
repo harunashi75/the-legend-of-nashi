@@ -87,18 +87,23 @@ game.world.npcs.push({
   color: '#f2c87b',
   village: CANAAN_CAMP.name
 });
-// Boss mondiaux : or et objet Rare garanti.
+// Boss mondiaux : or selon leur niveau et objet Rare garanti.
 function onWorldBossKilled(m, hero = game.hero) {
   // Boss d'une extension : sa propre récompense (chaque participant) et son propre délai de réapparition.
   if (CANAAN_EXT.bossKilled(m, hero)) return;
   game.world.worldBossTimers[m.worldBossId] = Date.now() + BOSS_RESPAWN_MS;
-  const gold = worldBossGold(Math.random);
+  const gold = worldBossGold(canaanMobLevel(m), Math.random);
   hero.player.gold += gold;
   grantSourceReward('worldBoss', hero, canaanMobLevel(m));
   canaanLootNotice(hero, '🏆 ' + m.t + ' : +' + gold + ' or !');
   chat(
     'Boss mondial',
-    m.t + ' vaincu ! ' + gold + ' or et un objet Rare reçus. Réapparition dans 3 minutes.'
+    m.t +
+      ' vaincu ! ' +
+      gold +
+      ' or et un objet Rare reçus. Réapparition dans ' +
+      Math.round(BOSS_RESPAWN_MS / 60000) +
+      ' minutes.'
   );
   saveGame();
 }

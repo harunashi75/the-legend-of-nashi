@@ -128,13 +128,12 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
   return hero;
 }
 // Capacité du sac d'un héros : celle de l'hôte suit ses agrandissements (BAG_LIMIT) ; un allié commence comme lui
-// à 10 places et s'agrandit de 10 par achat.
+// et s'agrandit de la même façon (bagSlots, shared/rules/economy.js).
 function canaanBagLevel(hero) {
-  const level = Math.floor(Number(hero.bagLevel));
-  return Math.max(0, Math.min(9, Number.isFinite(level) ? level : 0));
+  return clampBagLevel(hero.bagLevel);
 }
 function canaanBagLimit(hero) {
-  return hero === game.hero ? BAG_LIMIT : 10 + canaanBagLevel(hero) * 10;
+  return hero === game.hero ? BAG_LIMIT : bagSlots(canaanBagLevel(hero));
 }
 // Message de butin : à l'écran pour l'hôte, dans le chat pour un allié.
 // Un invité en ligne reçoit aussi le message sur son écran (game.view.remote, branché par canaan-net).

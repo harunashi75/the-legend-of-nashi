@@ -2,7 +2,14 @@
 // Règles économiques : qualité du butin par source, prix de vente et de la boutique.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { GEAR_RARITIES, PRESTIGE_DROPS } from '../data/equipment.js';
-import { MOB_GOLD, WORLD_BOSS_GOLD } from '../data/economy.js';
+import {
+  BAG_BASE,
+  BAG_PRICES,
+  BAG_STEP,
+  INSTANCE_CHEST_GOLD,
+  MOB_GOLD,
+  WORLD_BOSS_GOLD
+} from '../data/economy.js';
 import { clampLevel } from './stats.js';
 import { rarityInfo } from './items.js';
 
@@ -105,12 +112,52 @@ export function mobGold(level, elite = false) {
   const lv = Math.max(1, Number(level) || 1);
   return Math.round((MOB_GOLD.base + MOB_GOLD.perLevel * lv) * (elite ? MOB_GOLD.elite : 1));
 }
-// Bourse d'or d'un boss mondial.
+// Tirage entier entre lo et hi (bornes comprises).
 /**
+ * @param {number} lo
+ * @param {number} hi
+ * @param {() => number} rng
+ */
+const between = (lo, hi, rng) => lo + Math.floor(rng() * (hi - lo + 1));
+// Bourse d'or d'un boss mondial, selon son niveau.
+/**
+ * @param {unknown} level
  * @param {() => number} rng
  * @returns {number}
  */
-export function worldBossGold(rng) {
-  const [lo, hi] = WORLD_BOSS_GOLD;
-  return lo + Math.floor(rng() * (hi - lo + 1));
+export function worldBossGold(level, rng) {
+  const lv = Math.max(1, Number(level) || 1),
+    lo = Math.round(WORLD_BOSS_GOLD.base + WORLD_BOSS_GOLD.perLevel * lv);
+  return between(lo, Math.round(lo * WORLD_BOSS_GOLD.spread), rng);
+}
+// Bourse d'or du coffre de fin d'instance (donjon ou raid ; plus en héroïque).
+/**
+ * @param {boolean} raid
+ * @param {boolean} heroic
+ * @param {() => number} rng
+ * @returns {number}
+ */
+export function instanceChestGold(raid, heroic, rng) {
+  const [lo, hi] = raid ? INSTANCE_CHEST_GOLD.raid : INSTANCE_CHEST_GOLD.dungeon,
+    k = heroic ? INSTANCE_CHEST_GOLD.heroic : 1;
+  return between(Math.round(lo * k), Math.round(hi * k), rng);
+}
+// Niveau d'agrandissement du sac le plus haut.
+export const BAG_MAX_LEVEL = BAG_PRICES.length;
+// Niveau d'agrandissement valide (0 à BAG_MAX_LEVEL) ; toute valeur invalide vaut 0.
+/**
+ * @param {unknown} level
+ * @returns {number}
+ */
+export function clampBagLevel(level) {
+  const n = Math.floor(Number(level));
+  return Number.isFinite(n) ? Math.max(0, Math.min(BAG_MAX_LEVEL, n)) : 0;
+}
+// Places du sac à ce niveau d'agrandissement.
+/**
+ * @param {unknown} level
+ * @returns {number}
+ */
+export function bagSlots(level) {
+  return BAG_BASE + clampBagLevel(level) * BAG_STEP;
 }

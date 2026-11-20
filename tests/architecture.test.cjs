@@ -69,7 +69,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   assert.ok(!html.includes('bag-upgrade'),'l’agrandissement du sac s’achète chez le marchand');assert.ok(html.includes('Arme 2'));
   // La vente se fait chez le marchand : plus de bouton 🪙 dans le sac ; chaque pièce a son menu du clic droit (démanteler…).
   assert.equal((html.match(/class="bag-sale"/g)||[]).length,0);assert.equal((html.match(/data-menu="gear"/g)||[]).length,2);
-  assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,8);
+  assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,18);
   assert.equal(g.CANAAN_UI.inspect().panel,'inventory');
   run("inventory[0].name='<img src=x onerror=alert(1)>';inventory[0].weaponType='bow'");
   g.CANAAN_UI.openInventory();html=nodes.get('window').innerHTML;
@@ -124,8 +124,8 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   // Le texte passe par l'échappement HTML même sans normalisation préalable.
   run("inventory[0].name='<img src=x onerror=alert(1)>';showGearTooltip(0,{clientX:1,clientY:1})");
   assert.ok(run("gearTooltip.innerHTML.includes('&lt;img')"));assert.ok(!run("gearTooltip.innerHTML.includes('<img')"));
-  run('P.gold=250;buyBagUpgrade()');
-  assert.equal(run('BAG_LIMIT'),20);assert.equal(run('P.gold'),0);
+  run('P.gold=400;buyBagUpgrade()');
+  assert.equal(run('BAG_LIMIT'),30);assert.equal(run('P.gold'),0);
   assert.equal((nodes.get('window').innerHTML.match(/class="bag-cell empty"/g)||[]).length,run('BAG_LIMIT-inventory.length'));
   assert.equal(runtime.errors.length,0,runtime.errors.join('\n'));
   // Le parcours de récupération fonctionne aussi avec tous les modules réels chargés.
@@ -138,7 +138,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   assert.equal(g.localStorage.getItem(persistence.lastBackupKey),broken);
   assert.equal(nodes.get('saveRecovery').hidden,true);
   assert.equal(run('loadGame()'),true);assert.equal(run('saveGame()'),true);
-  assert.equal(run('inventory.length'),2);assert.equal(run('P.gold'),0);assert.equal(run('BAG_LIMIT'),10);
+  assert.equal(run('inventory.length'),2);assert.equal(run('P.gold'),0);assert.equal(run('BAG_LIMIT'),20);
   assert.equal(run('characterStats().level'),1);assert.equal(run('P.mhp'),104);
   assert.equal(run('inventory.every(item=>Object.keys(item.sec).length===2&&item.level===1)'),true);
   assert.equal(runtime.errors.length,1); // L'erreur de lecture volontaire est signalée.
@@ -251,7 +251,7 @@ test('Nettoyage : systèmes morts absents et progression par équipement conserv
  run("inventory.length=0;const cleanupItem={id:'cleanup20',slot:'armor',rarity:'Peu commun',level:20};applyItemName(cleanupItem);CANAAN_STATS_PREPARE(cleanupItem);globalThis.cleanupBefore=JSON.stringify({name:cleanupItem.name,sec:cleanupItem.sec});inventory.push(cleanupItem);CANAAN_GEAR.normalizeAll()");
  assert.equal(run('inventory[0].level'),20);
  assert.equal(run('JSON.stringify({name:inventory[0].name,sec:inventory[0].sec})'),g.cleanupBefore);
- g.CANAAN_BAG_STATE.import(3);run('updateCapacity()');assert.equal(run('BAG_LIMIT'),40);
+ g.CANAAN_BAG_STATE.import(3);run('updateCapacity()');assert.equal(run('BAG_LIMIT'),50);
  run('started=true');assert.equal(run('saveGame()'),true);
  const saved=JSON.parse(g.localStorage.getItem(g.CANAAN_PERSISTENCE.key));
  assert.equal(saved.schema,10);assert.equal(saved.version,version);
@@ -308,7 +308,7 @@ test('Surcharges consolidées : une seule définition et comportements fusionné
  run('globalThis.realRandom=Math.random;Math.random=()=>0');
  try{assert.equal(run('openNearbyChest()'),true)}finally{run('Math.random=realRandom')}
  const purse=run('P.gold');
- assert.equal(purse,raid?150:60);
+ assert.equal(purse,raid?1000:400);
  assert.equal(run('openNearbyChest()'),false);assert.equal(run('P.gold'),purse);
  // Sortie d'instance et retour au titre pilotent la musique directement.
  run('leaveInstance()');assert.equal(run('instanceState'),null);assert.equal(restarts,1);
