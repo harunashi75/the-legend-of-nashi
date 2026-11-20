@@ -316,7 +316,7 @@ test('Les Tréfonds : monde souterrain sous l’île, quatre biomes, forteresse 
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Salon de coiffure du camp : Sélène change l’apparence du héros, jamais sa tenue, sa garde-robe ni son nom',async()=>{
+test('Salon de coiffure du camp : pour 100 or, Sélène change l’apparence du héros, jamais sa tenue, sa garde-robe ni son nom',async()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  assert.ok(run('CANAAN_CAMP_LIFE.audit().kinds.includes("barber")'),'salon posé au camp');
@@ -333,13 +333,16 @@ test('Salon de coiffure du camp : Sélène change l’apparence du héros, jamai
  assert.equal(run('CANAAN_BARBER.near(P)'),true);
  run('globalThis.__html="";showPanel=h=>{__html=h;document.getElementById("overlay").style.display="flex"};CANAAN_BARBER.interact()');
  assert.match(run('__html'),/Sélène/);assert.match(run('__html'),/data-action="barberSet"/);assert.doesNotMatch(run('__html'),/data-key="outfit"/);
- assert.equal(run('CANAAN_BARBER.handle(game.hero,{op:"barber-look",look:'+want+'})'),true);
+ assert.equal(run('CANAAN_BARBER.PRICE'),100);
+ run('P.gold=99');assert.equal(run('CANAAN_BARBER.handle(game.hero,{op:"barber-look",look:'+want+'})'),false,'pas assez d’or');
+ run('P.gold=250');assert.equal(run('CANAAN_BARBER.handle(game.hero,{op:"barber-look",look:'+want+'})'),true);assert.equal(run('P.gold'),150);
+ assert.equal(run('CANAAN_BARBER.handle(game.hero,{op:"barber-look",look:'+want+'})'),false,'rien ne change : rien à payer');assert.equal(run('P.gold'),150);
  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.look)')),{sex:'f',race:'orc',skin:'#58803a',hairStyle:'tresses',hair:'#6a8ad8',eyes:'#c83a3a',outfit:'foret'});
  assert.equal(run('game.hero.name'),'Lira');
  // Fenêtre : choisir une coiffure puis valider (l'hôte sauvegarde).
  run('CANAAN_BARBER.interact();CANAAN_BARBER.actions.set("hairStyle",LOOK_HAIR_STYLES.findIndex(x=>x.id==="crete"))');
  assert.equal(run('game.hero.look.hairStyle'),'tresses','rien avant de valider');
- assert.equal(run('CANAAN_BARBER.actions.apply()'),true);assert.equal(run('game.hero.look.hairStyle'),'crete');assert.equal(run('game.hero.look.outfit'),'foret');
+ assert.equal(run('CANAAN_BARBER.actions.apply()'),true);assert.equal(run('game.hero.look.hairStyle'),'crete');assert.equal(run('P.gold'),50);assert.equal(run('game.hero.look.outfit'),'foret');
  // Réseau : l'action passe le filtre de l'hôte.
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
  assert.deepEqual(n.sanitizeAction({op:'barber-look',look:'f|orc'}),{op:'barber-look',look:'f|orc'});

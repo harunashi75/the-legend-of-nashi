@@ -44,11 +44,12 @@
   FORGE_SPOTS.sort(
     (a, b) => Math.abs(a[0] - 9) + Math.abs(a[1] - 1) - (Math.abs(b[0] - 9) + Math.abs(b[1] - 1))
   );
-  // Salon de coiffure en plein air (barber.js) : à l'est de la fontaine, ou à la place libre la plus proche.
+  // Salon de coiffure en plein air (barber.js) : sur la pelouse au nord-est de la fontaine, entre la route de la forge
+  // et l'allée de la Demeure, ou à la place libre la plus proche (jamais sur un chemin).
   const BARBER_SPOTS = [];
   for (let dy = -10; dy <= 10; dy += 1) for (let dx = -24; dx <= 24; dx += 1) BARBER_SPOTS.push([dx, dy]);
   BARBER_SPOTS.sort(
-    (a, b) => Math.abs(a[0] - 6) + Math.abs(a[1] + 3) - (Math.abs(b[0] - 6) + Math.abs(b[1] + 3))
+    (a, b) => Math.abs(a[0] - 2) + Math.abs(a[1] + 5) - (Math.abs(b[0] - 2) + Math.abs(b[1] + 5))
   );
   const PROPS = [
     { kind: 'barn', x: 2, y: 6, w: 5, h: 4, block: true },
@@ -81,7 +82,7 @@
     { kind: 'forge', x: -6, y: -5, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
     // Salon de coiffure : auvent, enseigne, fauteuil et coiffeuse sur la rangée du haut (qui bloque), tapis sur celle
     // du bas, où se tient la coiffeuse.
-    { kind: 'barber', x: 6, y: -3, w: 3, h: 2, alt: BARBER_SPOTS },
+    { kind: 'barber', x: 2, y: -5, w: 3, h: 2, alt: BARBER_SPOTS },
     // Fontaine au centre du camp, sur les pavés de la place (là où était le feu de camp).
     { kind: 'fountain', x: -1, y: -1, w: 3, h: 3, block: true, onRoad: true },
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
@@ -250,6 +251,8 @@
       sites = Object.values(CANAAN_QUESTS.sites()),
       taken = tools.taken();
     // Une case libre : sur l'île, ni roche ni eau, hors des bâtiments, des lieux de quête et des coffres.
+    // Cases gardées libres sans bloquer : le tapis du salon de coiffure, où se tient la coiffeuse.
+    const kept = new Set();
     const house = (x, y) =>
       houses.some(b => x >= b.x - 1 && x <= b.x + b.w && y >= b.y - 1 && y <= b.y + b.h);
     const quest = (x, y) =>
@@ -265,7 +268,8 @@
       !quest(x, y) &&
       !spot(x, y) &&
       (ground.get(key(x, y))?.type || 'lawn') === 'lawn' &&
-      !solid.has(key(x, y));
+      !solid.has(key(x, y)) &&
+      !kept.has(key(x, y));
     const clear = (x, y) => {
       if (grid[y]) grid[y][x] = null;
     };
@@ -433,7 +437,14 @@
             : p.kind === 'arch'
               ? land(x, y) || ground.get(key(x, y))?.type === 'gpath'
               : fits(x, y) &&
-                (!(p.block || p.kind === 'pen' || p.kind === 'garden' || p.kind === 'field') || !path(x, y))
+                (!(
+                  p.block ||
+                  p.kind === 'pen' ||
+                  p.kind === 'garden' ||
+                  p.kind === 'field' ||
+                  p.kind === 'barber'
+                ) ||
+                  !path(x, y))
         );
       // Place prévue, puis les places de rechange (alt) dans l'ordre : la première libre.
       let x0 = cx + p.x,
@@ -459,7 +470,7 @@
         for (let x = x0 - 1; x <= x0 + p.w; x++) if (!ground.has(key(x, y))) clear(x, y);
       const item = { ...p, tx: x0, ty: y0, x: x0 * T, y: y0 * T, base: (y0 + p.h) * T };
       if (p.block) for (const [x, y] of cells) solid.add(key(x, y));
-      if (p.kind === 'barber') for (const [x, y] of cells) if (y === y0) solid.add(key(x, y));
+      if (p.kind === 'barber') for (const [x, y] of cells) (y === y0 ? solid : kept).add(key(x, y));
       if (p.kind === 'pen' || p.kind === 'garden')
         for (const [x, y] of cells) {
           const edge = x === x0 || y === y0 || x === x0 + p.w - 1 || y === y0 + p.h - 1,

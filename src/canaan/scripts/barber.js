@@ -1,6 +1,7 @@
 // Salon de coiffure du Camp de l'Aurore : Sélène, la coiffeuse, change l'apparence du héros (sexe, race, peau,
 // coiffure, couleurs des cheveux et des yeux), comme à la création. Le nom, la classe, la tenue de création et
-// l'apparence portée (garde-robe, V) ne changent pas. C'est gratuit et purement visuel.
+// l'apparence portée (garde-robe, V) ne changent pas. Purement visuel, pour 100 or (rien
+// n'est payé si rien ne change).
 // Le salon est posé par camp-life.js (CANAAN_CAMP_LIFE.barber() : où se tient la coiffeuse). La fenêtre montre un
 // aperçu animé ; rien ne change avant « Valider ».
 // L'hôte décide : coiffeuse à portée, apparence vérifiée (action barber-look d'un invité). Un invité garde aussi la
@@ -10,6 +11,7 @@
   const esc = text => safeGearText(text);
   const NAME = 'Sélène, la coiffeuse';
   const REACH = 120;
+  const PRICE = 100;
   // Apparence de Sélène (dessinée avec le sprite des héros).
   const LOOK = sanitizeLook({
     sex: 'f',
@@ -52,12 +54,26 @@
     hero.netBag = null;
     return true;
   }
+  // L'apparence proposée est-elle celle que le héros a déjà (pour ce que le salon change) ?
+  function same(hero, look) {
+    const a = sanitizeLook(hero.look),
+      b = sanitizeLook(look);
+    return FIELDS.every(([key]) => a[key] === b[key]);
+  }
+  // Chez l'hôte (pour lui ou un invité) : coiffeuse à portée, un changement, l'or payé ; puis la nouvelle apparence.
+  function restyleFor(hero, look) {
+    if (!near(hero.player)) return false;
+    if (same(hero, look)) return (canaanLootNotice(hero, '✂️ Rien n’a changé : rien à payer.'), false);
+    if (hero.player.gold < PRICE) return (canaanLootNotice(hero, '💰 Il faut ' + PRICE + ' or.'), false);
+    hero.player.gold -= PRICE;
+    restyle(hero, look);
+    canaanLootNotice(hero, '✂️ Nouvelle apparence ! (−' + PRICE + ' or)');
+    return true;
+  }
   // Action d'un invité, chez l'hôte.
   function handle(hero, action) {
-    if (action.op !== 'barber-look' || !near(hero.player)) return false;
-    restyle(hero, decodeLook(action.look));
-    canaanLootNotice(hero, '✂️ Nouvelle apparence !');
-    return true;
+    if (action.op !== 'barber-look') return false;
+    return restyleFor(hero, decodeLook(action.look));
   }
 
   // ---------------------------------------------------------------- Fenêtre
@@ -107,14 +123,18 @@
     const look = ui.draft;
     modernPanel(
       rpgHeader('✂️ Salon de coiffure · ' + esc(NAME)) +
-        '<div class="modern-body barber-panel panel-scroll" data-panel-size="char"><p class="muted">« Assieds-toi, je m’occupe de tout. Une nouvelle tête, un nouveau départ ! » Rien ne change avant de valider. Ta tenue et ta garde-robe restent les mêmes.</p>' +
+        '<div class="modern-body barber-panel panel-scroll" data-panel-size="char"><p class="muted">« Assieds-toi, je m’occupe de tout. Une nouvelle tête, un nouveau départ ! » Rien ne change avant de valider. Ta tenue et ta garde-robe restent les mêmes. · Ton or : <b>' +
+        Math.floor(P.gold) +
+        '</b></p>' +
         '<div class="barber-body"><div class="barber-stage"><canvas id="barberPreview" width="160" height="200" aria-label="Aperçu du héros"></canvas>' +
         '<div class="barber-turn"><button type="button" data-action="barberTurn" data-dir="-1" aria-label="Tourner à gauche">⟲</button>' +
         '<button type="button" data-action="barberRandom">🎲 Au hasard</button>' +
         '<button type="button" data-action="barberTurn" data-dir="1" aria-label="Tourner à droite">⟳</button></div></div>' +
         '<div class="barber-fields">' +
         FIELDS.map(f => row(look, f)).join('') +
-        '</div></div><div class="modern-foot"><button type="button" class="epic" data-action="barberApply">✂️ Valider</button>' +
+        '</div></div><div class="modern-foot"><button type="button" class="epic" data-action="barberApply">✂️ Valider (' +
+        PRICE +
+        ' or)</button>' +
         '<button type="button" data-action="barberReset">↺ Comme avant</button></div></div>'
     );
     drawPreview();
@@ -175,16 +195,24 @@
       return false;
     }
     const look = ui.draft;
+    if (same(game.hero, look)) {
+      toast('✂️ Rien n’a changé : rien à payer.');
+      return false;
+    }
+    if (P.gold < PRICE) {
+      toast('💰 Il faut ' + PRICE + ' or.');
+      return false;
+    }
     if (game.mode === 'guest') {
-      // Chez l'invité : tout de suite à l'écran, gardé dans ses réglages, et demandé à l'hôte.
+      // Chez l'invité : tout de suite à l'écran, gardé dans ses réglages, et demandé à l'hôte (qui encaisse).
       restyle(game.hero, look);
       CANAAN_NET.setLook({ ...look, outfit: game.hero.look.outfit, wear: '' });
       CANAAN_NET.requestAction({ op: 'barber-look', look: encodeLook({ ...look, wear: '' }) });
+      toast('✂️ Nouvelle apparence ! (−' + PRICE + ' or)');
     } else {
-      restyle(game.hero, look);
+      if (!restyleFor(game.hero, look)) return false;
       saveGame();
     }
-    toast('✂️ Nouvelle apparence !');
     ui.draft = null;
     closePanels();
     return true;
@@ -228,6 +256,7 @@
   }
 
   window.CANAAN_BARBER = Object.freeze({
+    PRICE,
     near,
     restyle,
     handle,
