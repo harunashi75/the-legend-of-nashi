@@ -436,3 +436,34 @@ test('Fenêtres à taille fixe, comme dans les MMO : petit sac et petite fiche, 
  const css=fs.readFileSync(path.join(__dirname,'..','src','canaan','styles','panel-sizes.css'),'utf8');
  for(const s of ['bag','char','md','lg'])assert.match(css,new RegExp("data-size='"+s+"'\\]\\s*\\{\\s*--panel-w"),s);
 });
+
+test('Fenêtres façon MMO : le héros joue fenêtre ouverte, le sac s’ouvre au-dessus de I, se déplace et se ferme loin du marchand',()=>{
+ const {g,run,fire,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ run('started=true;paused=false;P.dead=false;closePanels();for(const k in keys)keys[k]=false');
+ // Le bouton I de la barre des menus, en bas à droite d'un écran de 1280 × 720.
+ run('{const q=document.querySelector.bind(document),i={getBoundingClientRect:()=>({left:1200,right:1250,top:650,bottom:690,width:50,height:40})};document.querySelector=s=>s===\'#menuButtons button[data-action="toggleInventory"]\'?i:q(s)}');
+ fire(g,'keydown',{key:'i'});assert.equal(run('modalOpen()'),true,'I ouvre le sac');
+ assert.equal(run('CANAAN_DOCK.owner()'),'toggleInventory');
+ // Fenêtre de 200 × 100 : bord droit aligné sur le bouton, 10 px au-dessus.
+ assert.equal(run('document.getElementById("window").style.left'),'1050px');
+ assert.equal(run('document.getElementById("window").style.top'),'540px');
+ // Sac ouvert : on avance toujours, et le sac redessiné (butin) garde sa place.
+ fire(g,'keydown',{key:'ArrowUp'});run('readInput()');assert.equal(run('game.hero.intent.dy'),-1,'le héros avance sac ouvert');
+ fire(g,'keyup',{key:'ArrowUp'});
+ run('refreshGearPanel()');assert.equal(run('CANAAN_DOCK.owner()'),'toggleInventory');
+ // Une saisie dans un champ de la fenêtre garde ses touches.
+ fire(g,'keydown',{key:'ArrowUp',target:{closest:s=>/input/.test(s)?{}:null}});run('readInput()');assert.equal(run('game.hero.intent.dy'),0);
+ fire(g,'keyup',{key:'ArrowUp'});
+ // La même touche ferme le sac.
+ fire(g,'keydown',{key:'i'});assert.equal(run('modalOpen()'),false,'I referme le sac');
+ // Place retenue après un déplacement : elle prime sur le bouton.
+ run('CANAAN_PREFERENCES.write("layout",{windows:{toggleInventory:{x:300,y:200}}})');
+ fire(g,'keydown',{key:'i'});assert.equal(run('document.getElementById("window").style.left'),'300px');run('closePanels()');
+ // Fenêtre ouverte depuis le dialogue d'un PNJ (marchand) : centrée, et fermée quand le héros s'éloigne.
+ run('P.x=1000;P.y=1000');fire(run('document.getElementById("dialog")'),'click');
+ run('showPanel(\'<div class="shop-panel"></div>\')');assert.equal(run('CANAAN_DOCK.owner()'),'free:shop-panel');
+ run('P.x=1100;CANAAN_DOCK.tick()');assert.equal(run('modalOpen()'),true,'encore à portée');
+ run('P.x=1400;CANAAN_DOCK.tick()');assert.equal(run('modalOpen()'),false,'trop loin : fermée');
+ // Fenêtre ouverte sans quitter le jeu (sac par sa touche) : jamais liée au lieu.
+ fire(g,'keydown',{key:'i'});run('P.x=5000;CANAAN_DOCK.tick()');assert.equal(run('modalOpen()'),true);run('closePanels()');
+});

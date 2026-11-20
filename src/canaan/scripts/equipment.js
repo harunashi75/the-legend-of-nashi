@@ -100,7 +100,6 @@
       paused ||
       P.dead ||
       playerStun > 0 ||
-      modalOpen() ||
       document.getElementById('dialog').style.display === 'block'
     )
       return false;

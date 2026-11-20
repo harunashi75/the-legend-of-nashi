@@ -292,7 +292,8 @@ addEventListener('keydown', e => {
     e.preventDefault();
     return;
   }
-  if (paused || modalOpen()) return;
+  // Une fenêtre ouverte (sac, carte, fiche…) ne bloque pas le héros ; seule la saisie dans un champ garde ses touches.
+  if (paused || typing) return;
   canaanTrackPanels();
   keys[k] = true;
   if (!action || e.repeat) return;
@@ -331,14 +332,7 @@ function canaanMoveAxes() {
 }
 addEventListener('keyup', e => (keys[e.key.toLowerCase()] = false));
 cv.addEventListener('mousedown', e => {
-  if (
-    !started ||
-    paused ||
-    P.dead ||
-    modalOpen() ||
-    document.getElementById('dialog').style.display === 'block'
-  )
-    return;
+  if (!started || paused || P.dead || document.getElementById('dialog').style.display === 'block') return;
   // Clic gauche : attaque de base rapide · clic droit : attaque de base lourde (sans mana, maintien possible).
   canaanHoldBasicAttack(e.button, true, e.clientX, e.clientY);
 });
@@ -464,7 +458,7 @@ function canaanHostRespawn(message) {
 function interact() {
   // Un invité n'ouvre ni coffre ni portail lui-même : le monde appartient à l'hôte. Il peut parler au marchand.
   if (game.mode === 'guest') {
-    if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
+    if (document.getElementById('dialog').style.display === 'block') return;
     // Un coffre à côté : l'hôte vérifie que le héros y est bien, puis l'ouvre pour lui.
     if (nearbyChest(P)) return CANAAN_NET.requestAction({ op: 'open-chest' });
     // Cité elfique : porte (l'hôte la fait passer), Grand Arbre et marchands (fenêtres chez l'invité).
@@ -498,11 +492,11 @@ function interact() {
     return;
   }
   if (openNearbyChest()) return;
-  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_CITY.interact()) return;
-  if (!canaanUnder() && !modalOpen() && CANAAN_EXT.interact(game.hero)) return;
-  if (!game.world.instance && !canaanUnder() && !modalOpen() && CANAAN_QUESTS.interact()) return;
-  if (!game.world.instance && !modalOpen() && CANAAN_HOUSE.interact()) return;
-  if (!game.world.instance && !modalOpen() && CANAAN_PROF.interact()) return;
+  if (!game.world.instance && !canaanUnder() && CANAAN_CITY.interact()) return;
+  if (!canaanUnder() && CANAAN_EXT.interact(game.hero)) return;
+  if (!game.world.instance && !canaanUnder() && CANAAN_QUESTS.interact()) return;
+  if (!game.world.instance && CANAAN_HOUSE.interact()) return;
+  if (!game.world.instance && CANAAN_PROF.interact()) return;
   if (game.world.instance?.arena) {
     CANAAN_ARENA.interact();
     return;
@@ -521,7 +515,7 @@ function interact() {
       return;
     }
   }
-  if (modalOpen() || document.getElementById('dialog').style.display === 'block') return;
+  if (document.getElementById('dialog').style.display === 'block') return;
   let n = game.world.npcs
     .filter(
       n =>

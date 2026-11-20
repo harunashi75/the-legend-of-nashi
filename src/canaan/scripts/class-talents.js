@@ -855,7 +855,7 @@
   }
   // Touche F : un invité demande le sort à l'hôte.
   function useSpecial() {
-    if (!started || paused || modalOpen()) return false;
+    if (!started || paused) return false;
     if (!def(game.hero)) {
       toast('Choisis d’abord ta classe (T).');
       return false;
@@ -1425,7 +1425,8 @@
   // Touche du sort de classe (F par défaut, Paramètres → Clavier) et clic sur la case du sort spécial.
   addEventListener('keydown', e => {
     if (e.repeat || document.activeElement === chatInput || !CANAAN_KEYS.is(e, 'special')) return;
-    if (!started || paused || modalOpen()) return;
+    if (e.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+    if (!started || paused) return;
     useSpecial();
   });
   addEventListener('click', e => {

@@ -479,6 +479,11 @@
     },
     {
       "kind": "style",
+      "id": "canaan-panel-dock-style",
+      "file": "styles/panel-dock.css"
+    },
+    {
+      "kind": "style",
       "id": "canaan-rpg-theme",
       "file": "styles/rpg-theme.css"
     },
@@ -496,6 +501,11 @@
       "kind": "script",
       "id": "canaan-ui-overlay",
       "file": "scripts/ui-overlay.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-panel-dock",
+      "file": "scripts/panel-dock.js"
     },
     {
       "kind": "script",

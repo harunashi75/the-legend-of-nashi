@@ -680,7 +680,6 @@
       paused ||
       P.dead ||
       playerStun > 0 ||
-      modalOpen() ||
       document.activeElement === chatInput ||
       document.getElementById('dialog').style.display === 'block'
     )
@@ -721,12 +720,10 @@
   function basicReady() {
     return basicLock <= 0 && started && !paused && !P.dead && playerStun <= 0;
   }
-  // Interface : un menu, le chat ou un dialogue ouvert empêche d'attaquer à la souris.
+  // Interface : le chat ou un dialogue ouvert empêche d'attaquer à la souris (une fenêtre du jeu, non).
   function uiBlocked() {
     return (
-      modalOpen() ||
-      document.activeElement === chatInput ||
-      document.getElementById('dialog').style.display === 'block'
+      document.activeElement === chatInput || document.getElementById('dialog').style.display === 'block'
     );
   }
   // Attaque déclenchée par l'interface (clic, bouton tactile).

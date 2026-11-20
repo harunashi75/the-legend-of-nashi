@@ -114,7 +114,6 @@
         P.dead ||
         playerStun > 0 ||
         roll ||
-        modalOpen() ||
         document.getElementById('dialog').style.display === 'block'
       )
         return false;

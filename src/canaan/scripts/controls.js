@@ -248,13 +248,7 @@
       keys[key] = [...touchDirections.values()].includes(key);
   }
   function touchGameActive() {
-    return (
-      started &&
-      !paused &&
-      !P.dead &&
-      !modalOpen() &&
-      document.getElementById('dialog').style.display !== 'block'
-    );
+    return started && !paused && !P.dead && document.getElementById('dialog').style.display !== 'block';
   }
   function aimTouchAttack() {
     const target = game.world.monsters
