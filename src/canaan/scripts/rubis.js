@@ -493,6 +493,7 @@
           };
   }
   api.within = within;
+  api.family = n => showFamily(n);
   window.CANAAN_RUBIS = api;
 
   // ---------------------------------------------------------------- Étape de simulation
@@ -598,125 +599,157 @@
       '</b></span>'
     );
   }
-  // Onglet Rubis de la fiche (C) : le héros entouré de ses six emplacements et la collection des 48 en haut, ses effets
-  // actifs dessous.
+  // Onglet Runes de la fiche (C), en deux colonnes sans défilement : à gauche les six emplacements, chacun avec le
+  // nom et l'effet de sa Rune ; à droite la collection, filtrée par famille (onglets) : toutes en grille compacte,
+  // ou une famille en cartes nommées.
   // Le héros affiché est celui de cette application (l'invité chez lui).
+  let family = -1;
+  function showFamily(n) {
+    family = Number.isInteger(n) && n >= 0 && n < FAMILIES.length ? n : -1;
+    const panel = document.getElementById('window')?.dataset.canaanPanel;
+    if (modalOpen() && panel === 'character') renderCharacter();
+    return family;
+  }
   function section() {
     return within(game.hero, sectionHtml);
   }
+  // Un emplacement : la Rune équipée (clic : la retirer) et son effet, ou un socle vide.
   function slotHtml(k) {
     const r = BY_ID.get(gems().equipped[k]);
-    return r
-      ? '<button type="button" class="rubis-slot filled" data-action="unequipRubis" data-slot="' +
-          k +
-          '" data-tooltip-rubis="' +
-          r.id +
-          '" aria-label="Retirer ' +
-          esc(r.name) +
-          '">' +
-          gem(r, 'big') +
-          '<em>' +
-          esc(r.name) +
-          '</em></button>'
-      : '<div class="rubis-slot empty"><span class="rubis-socket"></span><em title="Emplacement de Rune">Libre · ' +
-          (k + 1) +
-          '</em></div>';
+    if (!r)
+      return (
+        '<div class="rune-slot empty"><span class="rubis-socket"></span><div><b>Emplacement libre</b>' +
+        '<span>Choisis une Rune dans ta collection.</span></div></div>'
+      );
+    return (
+      '<button type="button" class="rune-slot filled" data-action="unequipRubis" data-slot="' +
+      k +
+      '" data-rubis="' +
+      r.id +
+      '" data-menu="rune" data-tooltip-rubis="' +
+      r.id +
+      '" aria-label="Retirer ' +
+      esc(r.name) +
+      '">' +
+      gem(r, 'big') +
+      '<div><b style="color:' +
+      FAMILIES[r.family].light +
+      '">' +
+      esc(r.name) +
+      '</b><span>' +
+      esc(r.desc) +
+      '</span></div></button>'
+    );
+  }
+  const familyFound = fi => RUBIS.filter(r => r.family === fi && ownedCount(r.id)).length;
+  function familyTabs() {
+    const tab = (n, label, count, color) =>
+      '<button type="button" class="rune-filter' +
+      (family === n ? ' on' : '') +
+      '" data-action="rubisFamily" data-family="' +
+      n +
+      '"' +
+      (color ? ' style="--fam:' + color + '"' : '') +
+      ' title="' +
+      esc(n < 0 ? 'Toutes les Runes' : FAMILIES[n].name) +
+      '">' +
+      label +
+      (count ? ' <small>' + count + '</small>' : '') +
+      '</button>';
+    return (
+      '<div class="rune-filters" role="tablist">' +
+      tab(-1, 'Toutes', '') +
+      FAMILIES.map((f, fi) => tab(fi, f.icon, familyFound(fi) + '/8', f.light)).join('') +
+      '</div>'
+    );
+  }
+  // Une Rune de la collection : possédée (clic : équiper ou retirer), ou inconnue (« ? »).
+  function cellHtml(r, named) {
+    const n = ownedCount(r.id),
+      worn = gems().equipped.includes(r.id);
+    if (!n)
+      return (
+        '<span class="rubis-cell unknown' +
+        (named ? ' named' : '') +
+        '" data-tooltip-rubis="' +
+        r.id +
+        '">?' +
+        (named ? '<em>N°' + String(r.n).padStart(2, '0') + '</em>' : '') +
+        '</span>'
+      );
+    return (
+      '<button type="button" class="rubis-cell owned' +
+      (worn ? ' worn' : '') +
+      (named ? ' named' : '') +
+      '" data-action="toggleRubis" data-rubis="' +
+      r.id +
+      '" data-menu="rune" data-tooltip-rubis="' +
+      r.id +
+      '" aria-label="' +
+      esc(r.name) +
+      '">' +
+      gem(r) +
+      (named ? '<em>' + esc(r.name) + '</em>' : '') +
+      (n > 1 ? '<sup>×' + n + '</sup>' : '') +
+      '</button>'
+    );
   }
   function collectionHtml() {
-    let html = '<div class="rubis-collection">';
-    FAMILIES.forEach((f, fi) => {
-      html +=
-        '<div class="rubis-family"><span class="rubis-family-name" style="color:' +
-        f.light +
-        '">' +
-        f.icon +
-        ' ' +
-        esc(f.short) +
-        '</span><div class="rubis-row">';
-      for (const r of RUBIS.filter(x => x.family === fi)) {
-        const n = ownedCount(r.id),
-          worn = gems().equipped.includes(r.id);
-        // Possédé : clic pour équiper ou retirer. Jamais trouvé : « ? ».
-        html += n
-          ? '<button type="button" class="rubis-cell owned' +
-            (worn ? ' worn' : '') +
-            '" data-action="toggleRubis" data-rubis="' +
-            r.id +
-            '" data-tooltip-rubis="' +
-            r.id +
-            '" aria-label="' +
-            esc(r.name) +
-            '">' +
-            gem(r) +
-            (n > 1 ? '<sup>×' + n + '</sup>' : '') +
-            '</button>'
-          : '<span class="rubis-cell unknown" data-tooltip-rubis="' + r.id + '">?</span>';
-      }
-      html += '</div></div>';
-    });
-    return html + '</div>';
-  }
-  function effectsHtml() {
-    const worn = gems()
-      .equipped.filter(Boolean)
-      .map(id => BY_ID.get(id));
-    if (!worn.length) return '<p class="muted">Aucune Rune équipée : choisis-en dans ta collection.</p>';
+    if (family >= 0)
+      return (
+        '<div class="rune-cards">' +
+        RUBIS.filter(r => r.family === family)
+          .map(r => cellHtml(r, true))
+          .join('') +
+        '</div>'
+      );
+    // Toutes : une ligne par famille, marquée de son icône.
     return (
-      '<ul class="rubis-effects">' +
-      worn
-        .map(
-          r =>
-            '<li data-tooltip-rubis="' +
-            r.id +
-            '">' +
-            gem(r) +
-            '<div><b style="color:' +
-            FAMILIES[r.family].light +
-            '">' +
-            esc(r.name) +
-            '</b><span>' +
-            esc(r.desc) +
-            '</span></div></li>'
-        )
-        .join('') +
-      '</ul>'
+      '<div class="rubis-collection">' +
+      FAMILIES.map(
+        (f, fi) =>
+          '<div class="rubis-family"><span class="rubis-family-name" style="color:' +
+          f.light +
+          '" title="' +
+          esc(f.name) +
+          '">' +
+          f.icon +
+          '</span><div class="rubis-row">' +
+          RUBIS.filter(r => r.family === fi)
+            .map(r => cellHtml(r, false))
+            .join('') +
+          '</div></div>'
+      ).join('') +
+      '</div>'
     );
   }
   function sectionHtml() {
     const lock = canChange(),
-      count = gems().equipped.filter(Boolean).length,
-      half = SLOTS / 2;
-    const left = Array.from({ length: half }, (_, k) => slotHtml(k)).join(''),
-      right = Array.from({ length: SLOTS - half }, (_, k) => slotHtml(half + k)).join('');
+      count = gems().equipped.filter(Boolean).length;
     let notes = '';
     if (!lock.ok) notes += '<p class="rubis-lock">🔒 ' + esc(lock.why) + '</p>';
     else if (!discovered())
       notes +=
         '<p class="rubis-lock">⚔️ Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.</p>';
-    // Grille alignée : Runes équipées et Collection côte à côte, les effets actifs sur toute la largeur dessous.
     return (
       '<div class="character-layout rubis-layout">' +
-      '<div class="rpg-paper rubis-paper rubis-worn"><div class="rubis-head"><h3>⟦rune⟧ Runes équipées</h3><span>' +
+      '<div class="rpg-paper rubis-paper rubis-worn"><div class="rubis-head"><h3>⟦rune⟧ Équipées</h3><span>' +
       count +
       '/' +
       SLOTS +
-      ' équipées</span></div>' +
-      '<div class="rubis-doll"><div class="rubis-doll-col">' +
-      left +
-      '</div><div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas></div>' +
-      '<div class="rubis-doll-col">' +
-      right +
-      '</div></div>' +
+      '</span></div><div class="rune-slots">' +
+      Array.from({ length: SLOTS }, (_, k) => slotHtml(k)).join('') +
+      '</div>' +
       notes +
       '</div>' +
       '<div class="rpg-paper rubis-paper rubis-coll"><div class="rubis-head"><h3>📖 Collection</h3><span>' +
       discovered() +
-      '/48 découvertes</span></div>' +
-      '<p class="rubis-hint">Clique une Rune de ta collection pour l’équiper ou la retirer ; clique un emplacement pour le libérer.</p>' +
+      '/' +
+      RUBIS.length +
+      ' découvertes</span></div>' +
+      familyTabs() +
       collectionHtml() +
-      '</div>' +
-      '<div class="rpg-paper rubis-paper rubis-fx"><div class="rubis-head"><h3>✨ Effets actifs</h3></div>' +
-      effectsHtml() +
+      '<p class="rubis-hint">Clic : équiper ou retirer · clic droit : options</p>' +
       '</div></div>'
     );
   }

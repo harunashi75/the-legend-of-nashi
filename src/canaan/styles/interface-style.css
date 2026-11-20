@@ -872,21 +872,6 @@ body.layout-edit #ui .panel[data-movable='1'] {
   position: relative;
   padding-bottom: 28px;
 }
-#window .weapon-reserve {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background: #3b5a83;
-  border: 1px solid #a4cfff;
-  border-radius: 5px;
-  padding: 3px 7px;
-  font-size: calc(10px * var(--font-scale));
-  color: #fff;
-  z-index: 2;
-}
-#window .weapon-reserve:hover {
-  background: #587bb5;
-}
 #window .active-weapon {
   box-shadow: inset 0 0 0 2px #65dcb7;
 }

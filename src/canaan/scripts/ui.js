@@ -27,8 +27,8 @@
       '</section>'
     );
   }
-  // Case d'une pièce du sac : clic pour l'équiper, ⚒ pour la démanteler, « 2 » pour une arme de réserve. La vente se
-  // fait dans la fenêtre du marchand (shop.js), plus depuis le sac.
+  // Case d'une pièce du sac : clic pour l'équiper ; clic droit pour le menu (Arme 2, vendre près d'un marchand,
+  // démanteler : item-menu.js).
   function bagCell(item, index) {
     if (!item)
       return '<div class="bag-sale-wrap"><div class="bag-cell empty" title="Emplacement vide"><span class="bag-icon">＋</span><span class="bag-name">Vide</span></div></div>';
@@ -46,11 +46,11 @@
       rarity.color +
       '" data-tooltip-index="' +
       index +
-      '" data-action="equipBagIndex" data-index="' +
+      '" data-action="equipBagIndex" data-menu="gear" data-index="' +
       index +
       '" title="' +
       safeGearText(gearDisplayName(item)) +
-      ' · cliquer pour équiper">' +
+      ' · clic : équiper · clic droit : options">' +
       '<span class="bag-icon">' +
       icon +
       '</span><span class="bag-name" style="color:' +
@@ -62,12 +62,6 @@
       '">' +
       itemLevel(item) +
       '</span></button>' +
-      CANAAN_SALVAGE.salvageButton(item) +
-      (item.slot === 'weapon'
-        ? '<button type="button" class="weapon-reserve" data-action="equipReserve" data-index="' +
-          index +
-          '" title="Équiper cette arme dans le deuxième emplacement (Arme 2)">2</button>'
-        : '') +
       '</div>'
     );
   }
@@ -106,7 +100,7 @@
         '<div class="bag-sale-wrap">' +
         CANAAN_BAG.cell(
           p,
-          'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '"'
+          'data-action="useBagStack" data-token="' + safeGearText(CANAAN_BAG.token(p)) + '" data-menu="stack"'
         ) +
         '</div>',
       gear = game.hero.inventory.map((item, i) => bagCell(item, i)),
@@ -124,8 +118,8 @@
           '>⇅ Trier</button>'
       ) +
         // Une ligne d'aide ; le détail au survol.
-        '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
-        'Clic : équiper · 2 : arme de réserve · ⚒ démanteler · ' +
+        '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic droit : Arme 2 (réserve, Q pour changer en combat), vendre chez un marchand, démanteler. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
+        'Clic : équiper · Clic droit : options · ' +
         (merchant ? '💰 Marchand proche : vente disponible.' : '💰 Vente chez un marchand (E).') +
         '</p>' +
         '<div class="modern-body bag-panel panel-scroll" data-panel-size="bag">' +
@@ -138,7 +132,7 @@
             '</small></h3><div class="modern-bag">' +
             Array.from({ length: free }, () => bagCell(null)).join('') +
             '</div>'
-          : '<p class="weapon-hint">🎒 Sac plein : démantèle (⚒), vends ou dépose des objets, ou agrandis ton sac chez un marchand. Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.</p>') +
+          : '<p class="weapon-hint">🎒 Sac plein : démantèle (clic droit), vends ou dépose des objets, ou agrandis ton sac chez un marchand. Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.</p>') +
         CANAAN_SALVAGE.section() +
         '<div class="bag-section-mat">' +
         bagGroup(

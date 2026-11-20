@@ -191,7 +191,7 @@
           i +
           '" data-item-id="' +
           esc(item.id) +
-          '" title="Vendre ' +
+          '" data-menu="gear" title="Vendre ' +
           esc(gearDisplayName(item)) +
           ' pour ' +
           gearSellValue(item) +
@@ -213,7 +213,7 @@
               p,
               'data-action="shopSellStack" data-token="' +
                 esc(CANAAN_BAG.token(p)) +
-                '" title="Vendre pour ' +
+                '" data-menu="stack" title="Vendre pour ' +
                 CANAAN_BAG.price(p) +
                 ' or"'
             )
@@ -228,7 +228,7 @@
       ' / ' +
       canaanBagLimit(hero) +
       '</h3>' +
-      '<p class="muted">Clique un objet pour le vendre. Or : <b>🪙 ' +
+      '<p class="muted">Clique un objet pour le vendre ; clic droit pour plus d’options. Or : <b>🪙 ' +
       Math.floor(P.gold) +
       '</b></p>' +
       '<div class="modern-bag">' +

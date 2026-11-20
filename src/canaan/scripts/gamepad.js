@@ -184,6 +184,8 @@
   const shown = el => !!el && !el.hidden && !!el.getClientRects?.().length;
   // Fenêtre au premier plan, ou null en jeu.
   function menuScope() {
+    // Menu du clic droit ouvert (bouton X sur un objet) : on choisit dedans.
+    if (CANAAN_ITEM_MENU.isOpen()) return document.getElementById('itemMenu');
     const recovery = document.getElementById('saveRecovery');
     if (shown(recovery)) return recovery;
     const settings = document.getElementById('settingsScreen');
@@ -312,7 +314,10 @@
     if (rs.mag) scrollerOf(focus || scope)?.scrollBy(0, rs.y * 24);
     for (const b of edges.down) {
       if (b === B.A && focus) activate(focus);
+      else if (b === B.B && scope.id === 'itemMenu') CANAAN_ITEM_MENU.close();
       else if (b === B.B) back(scope);
+      // X : le menu du clic droit de l'objet choisi (équiper en Arme 2, vendre, démanteler…).
+      else if (b === B.X && focus?.dataset?.menu) CANAAN_ITEM_MENU.openFor(focus);
       // LB / RB : onglet précédent ou suivant (Paramètres).
       else if ((b === B.LB || b === B.RB) && scope.querySelector?.('.settings-tabs'))
         settingsTabStep(b === B.RB ? 1 : -1);

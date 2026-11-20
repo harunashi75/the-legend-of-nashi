@@ -164,11 +164,6 @@
   padding-right: 9px;
   padding-top: 30px;
 }
-#window .bag-sale-wrap .weapon-reserve {
-  bottom: 5px;
-  right: 5px;
-}
-
 /* Journaux des Collections (V) : Garde-robe et onglets des extensions. La liste à gauche (obtenues en
    couleur, les autres grisées et verrouillées), l'élément sélectionné en grand à droite, avec où l'obtenir. */
 /* La fiche et les Collections gardent la même largeur de fenêtre, quel que soit l'onglet. */

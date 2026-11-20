@@ -67,8 +67,8 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   g.CANAAN_UI.openInventory();
   let html=nodes.get('window').innerHTML;
   assert.ok(!html.includes('bag-upgrade'),'l’agrandissement du sac s’achète chez le marchand');assert.ok(html.includes('Arme 2'));
-  // La vente se fait chez le marchand : plus de bouton 🪙 dans le sac ; chaque pièce a son bouton ⚒ (démanteler).
-  assert.equal((html.match(/class="bag-sale"/g)||[]).length,0);assert.equal((html.match(/class="bag-salvage"/g)||[]).length,2);
+  // La vente se fait chez le marchand : plus de bouton 🪙 dans le sac ; chaque pièce a son menu du clic droit (démanteler…).
+  assert.equal((html.match(/class="bag-sale"/g)||[]).length,0);assert.equal((html.match(/data-menu="gear"/g)||[]).length,2);
   assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,8);
   assert.equal(g.CANAAN_UI.inspect().panel,'inventory');
   run("inventory[0].name='<img src=x onerror=alert(1)>';inventory[0].weaponType='bow'");

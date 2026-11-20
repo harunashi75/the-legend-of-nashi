@@ -245,7 +245,7 @@
         icon: d.icon,
         color: d.color,
         sub: 'Poudre d’enchantement',
-        desc: 'Obtenue en démantelant un équipement (bouton ⚒ du sac). L’enchanteur s’en sert, avec les minerais, pour forger les enchantements des métaux rares et pour changer la statistique d’un enchantement posé.',
+        desc: 'Obtenue en démantelant un équipement (clic droit sur une pièce du sac). L’enchanteur s’en sert, avec les minerais, pour forger les enchantements des métaux rares et pour changer la statistique d’un enchantement posé.',
         quality: null
       };
     }
@@ -395,10 +395,7 @@
       '</div>' +
       '<div class="skill-tip-meta">' +
       (sellable(p)
-        ? 'Vente : ' +
-          unitPrice(p) +
-          ' or l’unité' +
-          (merchant ? ' · clic droit ou bouton pièce chez le marchand' : '')
+        ? 'Vente : ' + unitPrice(p) + ' or l’unité' + (merchant ? ' · clic droit : vendre' : '')
         : 'Ne se vend pas.') +
       '</div>'
     );

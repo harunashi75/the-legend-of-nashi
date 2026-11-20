@@ -237,3 +237,74 @@ html.cursor-press {
     inset 0 1px 0 rgba(255, 230, 170, 0.4),
     0 0 12px rgba(240, 190, 90, 0.45);
 }
+
+/* Menu contextuel des objets (clic droit, scripts/item-menu.js) : même habillage que les info-bulles. */
+#itemMenu {
+  position: fixed;
+  z-index: 145;
+  min-width: 190px;
+  max-width: min(280px, calc(100vw - 8px));
+  padding: 4px;
+  border: 2px solid var(--rpg-gold-dark);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #221810, #120c08);
+  box-shadow:
+    0 0 0 1px #0c0805,
+    inset 0 0 0 1px rgba(255, 226, 160, 0.15),
+    0 8px 26px rgba(0, 0, 0, 0.8);
+  font-family: var(--rpg-serif);
+  animation: uiTipIn 0.1s ease-out;
+}
+#itemMenu .item-menu-title {
+  padding: 5px 9px 6px;
+  margin-bottom: 3px;
+  border-bottom: 1px solid rgba(212, 170, 90, 0.25);
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#itemMenu .item-menu-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--rpg-ink);
+  font: calc(13px * var(--font-scale)) var(--rpg-serif);
+  text-align: left;
+  text-shadow: 0 1px 0 #000;
+  cursor: var(--cursor-pointer);
+}
+#itemMenu .item-menu-entry:hover,
+#itemMenu .item-menu-entry:focus-visible,
+#itemMenu .item-menu-entry.pad-focus {
+  outline: none;
+  background: rgba(212, 170, 90, 0.18);
+  color: var(--rpg-gold-light);
+}
+#itemMenu .item-menu-entry.danger {
+  color: #ffb39a;
+}
+#itemMenu .item-menu-entry.cancel {
+  margin-top: 3px;
+  border-top: 1px solid rgba(212, 170, 90, 0.15);
+  border-radius: 0 0 3px 3px;
+  color: var(--rpg-muted);
+}
+#itemMenu .item-menu-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  flex: none;
+}
+#itemMenu .item-menu-icon svg {
+  width: 16px;
+  height: 16px;
+}

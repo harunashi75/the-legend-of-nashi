@@ -162,11 +162,7 @@
     enchantPick: element => CANAAN_GATHER.actions.pick(element.dataset.token),
     enchantApply: element => CANAAN_GATHER.actions.apply(element.dataset.ref),
     enchantReroll: element => CANAAN_GATHER.actions.reroll(element.dataset.ref),
-    // Démantèlement et sacoche de butin (salvage.js).
-    salvageItem: (element, event) => {
-      event?.stopPropagation();
-      CANAAN_SALVAGE.salvageMine(element.dataset.id);
-    },
+    // Sacoche de butin (salvage.js) ; démanteler passe par le menu du clic droit (item-menu.js).
     satchelTake: element => CANAAN_SALVAGE.takeMine(element.dataset.id),
     bankDeposit: element => CANAAN_BANK.depositRef(element.dataset.ref),
     bankWithdraw: element => CANAAN_BANK.withdrawRef(element.dataset.ref),
@@ -187,6 +183,8 @@
     classPageTo: element => classPageTo(actionInteger(element, 'page')),
     buyGear: () => buyGear(),
     equipRubis: element => equipRubis(actionText(element, 'rubis')),
+    // Onglet Runes : filtre de la collection (-1 : toutes, sinon une famille).
+    rubisFamily: element => CANAAN_RUBIS.family(actionInteger(element, 'family')),
     toggleRubis: element => {
       hideGearTooltip();
       toggleRubis(actionText(element, 'rubis'));

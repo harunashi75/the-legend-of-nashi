@@ -140,8 +140,8 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  run('canaanCollections("digging")');assert.match(run('document.getElementById("window").innerHTML'),/Reliques trouvées/);
  run('closePanels();started=true;paused=false;toggleCollections()');assert.equal(run('CANAAN_COLLECTIONS.current()'),'digging');
  run('toggleCollections()');assert.equal(run('modalOpen()'),false);
- // Onglet Runes : Runes équipées et Collection en haut, Effets actifs dessous.
- run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rubis-coll[^]*rubis-fx/);
+ // Onglet Runes : Runes équipées (avec leurs effets) à gauche, Collection filtrée par famille à droite.
+ run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rune-slots[^]*rubis-coll[^]*rune-filters/);
  run('closePanels()');
  // Le sprite d'une tenue a de la place pour les ailes ; sans tenue, rien ne change.
  assert.equal(run('canaanHeroSprite({...game.hero.look,wear:"dragon"},0,0).padX'),12);assert.equal(run('canaanHeroSprite(defaultLook(),0,0).padX'),0);
@@ -291,9 +291,24 @@ test('Démantèlement, poudres et sacoche de butin : rien n’est perdu ni chang
  assert.equal(run('CANAAN_SALVAGE.take(game.hero,myth.id)'),false);
  assert.equal(run('CANAAN_SALVAGE.salvage(game.hero,"f0")'),true);assert.equal(run('CANAAN_SALVAGE.take(game.hero,myth.id)'),true);
  assert.equal(run('game.hero.inventory.at(-1)===myth&&game.hero.satchel.length===9'),true);
- // Le sac (I) affiche le bouton ⚒ de chaque pièce et la sacoche quand elle n'est pas vide.
+ // Le sac (I) : chaque pièce a son menu du clic droit, et la sacoche s'affiche quand elle n'est pas vide.
  run('renderInventory()');const html=run('document.getElementById("window").innerHTML');
- assert.match(html,/data-action="salvageItem"/);assert.match(html,/Sacoche de butin <small>9 \/ 10/);assert.match(html,/data-action="satchelTake"/);
+ assert.match(html,/data-menu="gear" data-index="0"/);assert.match(html,/Sacoche de butin <small>9 \/ 10/);assert.match(html,/data-action="satchelTake" data-menu="satchel"/);
+ assert.doesNotMatch(html,/bag-salvage|weapon-reserve/,'plus de petits boutons dans les coins des cases');
+ // Menu du clic droit : équiper et démanteler ; une arme a aussi « Arme 2 » ; vendre seulement près d'un marchand.
+ const entries=menu=>JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:'+JSON.stringify(menu)+'}))'));
+ assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper','Démanteler']);
+ assert.deepEqual(entries({menu:'satchel',id:run('game.hero.satchel[0].id')}),['Reprendre dans le sac','Démanteler']);
+ run('globalThis.ring=game.hero.inventory[0];game.hero.inventory[0]={id:"w1",slot:"weapon",weaponType:"sword",level:1,rarity:"Commun"}');
+ assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper (Arme 1)','Équiper en Arme 2','Démanteler']);
+ run('globalThis.nearMerchantWas=nearMerchant;nearMerchant=()=>true');
+ assert.deepEqual(entries({menu:'gear',index:'0'}).map(e=>e.replace(/· \d+ or/,'· N or')),['Équiper (Arme 1)','Équiper en Arme 2','Vendre · N or','Démanteler']);
+ run('nearMerchant=nearMerchantWas;game.hero.inventory[0]=ring');
+ // Choisir « Démanteler » dans le menu réduit la pièce en poudre.
+ run('CANAAN_ITEM_MENU.open({dataset:{menu:"gear",index:"1"}},10,10)');assert.equal(run('CANAAN_ITEM_MENU.isOpen()'),true);
+ run('CANAAN_ITEM_MENU.choose(1)');assert.equal(run('CANAAN_ITEM_MENU.isOpen()'),false);
+ assert.equal(run('game.hero.inventory.some(it=>it.id==="f2")'),false);
+ run('game.hero.inventory.splice(1,0,{id:"f2",slot:"ring",level:1,rarity:"Commun"})');
  // Clé des secrets : même sac plein, elle est gardée.
  run('game.hero.player.keys=0;CANAAN_BAG.add(game.hero,"key","secret",0,1)');assert.equal(run('game.hero.player.keys'),1);
  // Changer la statistique d'un enchantement posé : 2 essences, le métal est gardé.

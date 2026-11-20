@@ -1,5 +1,5 @@
 // Démantèlement et sacoche de butin : plus aucun équipement n'est perdu ni changé en or quand le sac est plein.
-// - Démanteler (bouton ⚒ d'une pièce du sac, partout, même en donjon) réduit la pièce en poudres d'enchantement
+// - Démanteler (clic droit sur une pièce du sac, partout, même en donjon) réduit la pièce en poudres d'enchantement
 //   (Poussière, Essence, Éclat selon sa qualité : PROF_SALVAGE) ; l'enchanteur s'en sert avec les minerais.
 // - Sacoche de butin (hero.satchel, SATCHEL_SIZE places) : un butin Rare ou mieux qui ne rentre pas dans le sac y
 //   est rangé ; on le reprend depuis le sac (I) dès qu'une case se libère. Un butin moins bon, ou qui ne trouve plus
@@ -147,7 +147,7 @@
     return act({ op: 'salvage', id: String(item.id) });
   }
   const takeMine = id => act({ op: 'satchel-take', id: String(id) });
-  // Case d'une pièce de la sacoche : clic pour la reprendre, bouton ⚒ pour la démanteler.
+  // Case d'une pièce de la sacoche : clic pour la reprendre, clic droit pour la démanteler (item-menu.js).
   function cell(item) {
     const rarity = rarityInfo(item),
       icon = weaponIcon(item) || itemIcon[item.slot] || '💎';
@@ -160,7 +160,7 @@
       rarity.color +
       '" data-tooltip-satchel="' +
       esc(item.id) +
-      '" data-action="satchelTake" data-id="' +
+      '" data-action="satchelTake" data-menu="satchel" data-id="' +
       esc(item.id) +
       '" title="' +
       esc(gearDisplayName(item) + ' · cliquer pour le reprendre dans le sac') +
@@ -173,19 +173,7 @@
       '</span><span class="bag-ilvl">' +
       itemLevel(item) +
       '</span></button>' +
-      salvageButton(item) +
       '</div>'
-    );
-  }
-  // Bouton ⚒ d'une pièce (sac ou sacoche).
-  function salvageButton(item) {
-    if (!canSalvage(item)) return '';
-    return (
-      '<button type="button" class="bag-salvage" data-action="salvageItem" data-id="' +
-      esc(item.id) +
-      '" title="' +
-      esc('Démanteler ' + gearDisplayName(item) + ' en poudres d’enchantement') +
-      '">⚒</button>'
     );
   }
   // Rubrique de la sacoche dans le sac (I) : seulement quand elle contient quelque chose.
@@ -200,7 +188,7 @@
       ' · butin Rare ou mieux gardé quand le sac était plein</small></h3>' +
       '<div class="modern-bag">' +
       list.map(cell).join('') +
-      '</div><p class="muted">Clique une pièce pour la reprendre dans le sac (il faut une case libre).</p></div>'
+      '</div><p class="muted">Clique une pièce pour la reprendre dans le sac (il faut une case libre) ; clic droit pour la démanteler.</p></div>'
     );
   }
   function showTooltip(id, event) {
@@ -225,7 +213,6 @@
     export: exportSatchel,
     salvageMine,
     takeMine,
-    salvageButton,
     section,
     showTooltip
   });

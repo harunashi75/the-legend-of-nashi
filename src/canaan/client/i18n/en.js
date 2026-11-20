@@ -323,8 +323,9 @@ export default {
   'cliquer pour équiper': 'click to equip',
   'Vendre': 'Sell',
   'Vendre {objet} pour {n} or': 'Sell {objet} for {n} gold',
-  'Équiper cette arme dans le deuxième emplacement (Arme 2)':
-    'Equip this weapon in the second slot (Weapon 2)',
+  'clic : équiper': 'click: equip',
+  'clic droit : options': 'right click: options',
+  'Clic droit : options': 'Right click: options',
   'Sac': 'Bag',
   'Matériaux': 'Materials',
   'Matériaux — {n}/{max} emplacements': 'Materials — {n}/{max} slots',
@@ -333,8 +334,6 @@ export default {
   'Clique pour l’équiper (un repas se mange).': 'Click to equip it (a meal is eaten).',
   'Marchand proche : vente disponible.': 'Merchant nearby: selling available.',
   'Pour vendre, rends-toi chez un marchand et appuie sur E.': 'To sell, go to a merchant and press E.',
-  '2 : arme de réserve': '2: reserve weapon',
-  '⚒ démanteler': '⚒ salvage',
   'Vente chez un marchand (E).': 'Sell at a merchant (E).',
   'Leurs {n} cases de 100 ne prennent pas la place du sac.': 'Their {n} slots of 100 take no bag space.',
   'Autre': 'Other',
@@ -346,8 +345,8 @@ export default {
   'Trier': 'Sort',
   'Ranger l’équipement : par emplacement, qualité puis niveau':
     'Tidy the equipment: by slot, quality, then level',
-  'Sac plein : démantèle (⚒), vends ou dépose des objets, ou agrandis ton sac chez un marchand.':
-    'Bag full: salvage (⚒), sell or deposit items, or enlarge your bag at a merchant.',
+  'Sac plein : démantèle (clic droit), vends ou dépose des objets, ou agrandis ton sac chez un marchand.':
+    'Bag full: salvage (right click), sell or deposit items, or enlarge your bag at a merchant.',
   'Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.':
     'Rare or better loot waits in the satchel; the rest is salvaged automatically.',
   'Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.':
@@ -368,14 +367,19 @@ export default {
   'Démanteler un objet précieux': 'Salvage a precious item',
   'Démanteler': 'Salvage',
   'cliquer pour le reprendre dans le sac': 'click to take it back into the bag',
-  'Démanteler {nom} en poudres d’enchantement': 'Salvage {nom} into enchanting dust',
   'Sacoche de butin': 'Loot satchel',
   'butin Rare ou mieux gardé quand le sac était plein': 'Rare or better loot kept while the bag was full',
-  'Clique une pièce pour la reprendre dans le sac (il faut une case libre).':
-    'Click a piece to take it back into the bag (a free slot is needed).',
-  'Clic sur une arme : Arme 1': 'Click a weapon: Weapon 1',
-  'Bouton « Arme 2 » : réserve': '“Weapon 2” button: reserve',
-  'Q : changer en combat.': 'Q: switch in combat.',
+  'Clique une pièce pour la reprendre dans le sac (il faut une case libre) ; clic droit pour la démanteler.':
+    'Click a piece to take it back into the bag (a free slot is needed); right click to salvage it.',
+  'Clic droit : Arme 2 (réserve, Q pour changer en combat), vendre chez un marchand, démanteler.':
+    'Right click: Weapon 2 (reserve, Q to switch in combat), sell at a merchant, salvage.',
+  // Menu du clic droit sur un objet (item-menu.js)
+  'Équiper (Arme 1)': 'Equip (Weapon 1)',
+  'Équiper en Arme 2': 'Equip as Weapon 2',
+  'Vendre ×{n}': 'Sell ×{n}',
+  'Reprendre dans le sac': 'Take back into the bag',
+  'Enchanter une pièce': 'Enchant a piece',
+  'Ouvrir l’enchanteur': 'Open the enchanter',
   'Vendre les objets communs': 'Sell common items',
   'arme liée, elle grandit avec toi': 'bound weapon, it grows with you',
   'Q pour changer': 'Q to switch',
@@ -498,7 +502,7 @@ export default {
   'Clic : choisir la pièce à enchanter.': 'Click: choose the piece to enchant.',
   'Clic : manger.': 'Click: eat.',
   'Vente : {n} or l’unité': 'Sells for {n} gold each',
-  'clic droit ou bouton pièce chez le marchand': 'right click or coin button at the merchant',
+  'clic droit : vendre': 'right click: sell',
   'Ne se vend pas.': 'Cannot be sold.',
   'Ne se vend pas': 'Cannot be sold',
   'Approche-toi d’un coffre secret et appuie sur E pour l’ouvrir avec une clé.':
@@ -620,7 +624,8 @@ export default {
   'Acheter {objet}': 'Buy {objet}',
   'Vendre {objet}': 'Sell {objet}',
   'Vendre pour {n} or': 'Sell for {n} gold',
-  'Clique un objet pour le vendre. Or :': 'Click an item to sell it. Gold:',
+  'Clique un objet pour le vendre ; clic droit pour plus d’options. Or :':
+    'Click an item to sell it; right click for more options. Gold:',
   'Approche-toi du marchand pour voir sa marchandise.': 'Go up to the merchant to see the wares.',
   'Pour devenir plus fort, il faut trouver mieux : monstres, boss mondiaux, donjons et raids lâchent des équipements toujours plus puissants.':
     'To get stronger, you need better finds: monsters, world bosses, dungeons and raids drop ever more powerful gear.',
@@ -2190,15 +2195,14 @@ export default {
   '{n}/{max} équipées': '{n}/{max} equipped',
   '{n}/48 découvertes': '{n}/48 discovered',
   'Retirer {nom}': 'Remove {nom}',
-  'Emplacement de Rune': 'Rune slot',
-  'Libre · {n}': 'Empty · {n}',
+  'Choisis une Rune dans ta collection.': 'Pick a Rune from your collection.',
+  'Toutes': 'All',
+  'Toutes les Runes': 'All Runes',
+  'Équipées': 'Equipped',
+  'Clic : équiper ou retirer': 'Click: equip or remove',
   'Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.':
     'Runes are won in the Arena of Trials, east of the camp.',
-  'Clique une Rune de ta collection pour l’équiper ou la retirer ; clique un emplacement pour le libérer.':
-    'Click a Rune in your collection to equip or remove it; click a slot to free it.',
-  'Runes équipées': 'Equipped Runes',
   'Collection': 'Collection',
-  'Aucune Rune équipée : choisis-en dans ta collection.': 'No Rune equipped: pick some from your collection.',
   'Les 6 emplacements sont occupés : retire d’abord une Rune.': 'All 6 slots are taken: remove a Rune first.',
   'Rune {nom} équipée': 'Rune {nom} equipped',
   'Rune inconnue': 'Unknown Rune',
@@ -2312,8 +2316,8 @@ export default {
   'Choisis une pièce déjà enchantée.': 'Choose an already enchanted piece.',
   'Cet enchantement donne déjà {stat}.': 'This enchantment already gives {stat}.',
   'Poudre en plus dès l’étain': 'Dust needed from tin upward',
-  'Dès l’étain, il faut aussi de la poudre d’enchantement : démantèle les pièces dont tu n’as plus besoin (bouton ⚒ du sac).':
-    'From tin upward, you also need enchanting dust: salvage the pieces you no longer need (⚒ button in the bag).',
+  'Dès l’étain, il faut aussi de la poudre d’enchantement : démantèle les pièces dont tu n’as plus besoin (clic droit sur une pièce du sac).':
+    'From tin upward, you also need enchanting dust: salvage the pieces you no longer need (right click a piece in the bag).',
   'Il manque de la poudre': 'Dust missing',
   'Changer la statistique d’un enchantement': 'Change an enchantment’s stat',
   'Choisis la statistique en haut ({stat}), puis clique une pièce enchantée : l’enchantement garde son métal.':
@@ -2407,8 +2411,8 @@ export default {
   'Essence d’enchantement': 'Enchanting Essence',
   'Éclat d’enchantement': 'Enchanting Shard',
   'Poudre d’enchantement': 'Enchanting dust',
-  'Obtenue en démantelant un équipement (bouton ⚒ du sac).':
-    'Obtained by salvaging gear (⚒ button in the bag).',
+  'Obtenue en démantelant un équipement (clic droit sur une pièce du sac).':
+    'Obtained by salvaging gear (right click a piece in the bag).',
   'L’enchanteur s’en sert, avec les minerais, pour forger les enchantements des métaux rares et pour changer la statistique d’un enchantement posé.':
     'The enchanter uses it, along with ores, to forge enchantments of the rare metals and to change the stat of an applied enchantment.',
   'Trouvé en creusant avec la pelle.': 'Found by digging with the shovel.',

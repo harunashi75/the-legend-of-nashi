@@ -36,13 +36,19 @@ test('Rubis : 48 effets en six familles, six emplacements, collection, verrous e
  // leurs effets et la collection des 48 (un clic équipe ou retire).
  run('renderCharacter()');let html=g.document.getElementById('window').innerHTML;
  assert.match(html,/data-action="characterSection" data-tab="rubis"/);
- assert.equal((html.match(/class="rubis-slot /g)||[]).length,0,'les Rubis ont leur onglet');
+ assert.equal((html.match(/class="rune-slot /g)||[]).length,0,'les Rubis ont leur onglet');
  run('canaanCharacterSection("rubis")');html=g.document.getElementById('window').innerHTML;
- assert.match(html,/class="rubis-doll"[\s\S]*heroPreview/);
- assert.equal((html.match(/class="rubis-slot /g)||[]).length,6);
+ assert.equal((html.match(/class="rune-slot /g)||[]).length,6);
  assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
- assert.match(html,/class="rubis-effects"[\s\S]*Berserker/);
- assert.match(html,/data-action="toggleRubis" data-rubis="colosse"/);
+ // L'emplacement montre l'effet de sa Rune (plus de liste d'effets à part).
+ assert.match(html,/class="rune-slot filled"[^>]*data-rubis="berserker"[\s\S]*Berserker<\/b><span>\+15 %/);
+ assert.match(html,/data-action="toggleRubis" data-rubis="colosse" data-menu="rune"/);
+ // Filtre par famille : ses huit Runes en cartes nommées ; « Toutes » revient aux 48.
+ run('CANAAN_RUBIS.family(1)');html=g.document.getElementById('window').innerHTML;
+ assert.equal((html.match(/class="rubis-cell [^"]*named/g)||[]).length,8);assert.match(html,/<em>Colosse<\/em>/);
+ run('CANAAN_RUBIS.family(-1)');html=g.document.getElementById('window').innerHTML;
+ assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"rune",rubis:"berserker"}}))')),['Retirer']);
  // Les Rubis ne sont plus dans le sac (I) et n'y prennent pas de place ; ils restent des piles (banque, échange).
  assert.equal(run('CANAAN_BAG.tiles(game.hero,"rubis").length'),run('48-game.hero.rubis.equipped.filter(Boolean).length'));
  assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").filter(p=>p.kind==="rubis").length'),0);

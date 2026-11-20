@@ -174,11 +174,6 @@
   padding-top: 3px;
   padding-bottom: 3px;
 }
-/* Runes : emplacements, puis collection et effets, l'un sous l'autre. */
-#window[data-size='char'] .char-body > .rubis-layout,
-#window[data-size='char'] .char-body .rubis-grid {
-  grid-template-columns: 1fr;
-}
 
 /* ---------------------------------------------------------------- Quêtes (L) */
 #window[data-size] .quest-journal .rpg-head {

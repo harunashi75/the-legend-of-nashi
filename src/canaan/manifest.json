@@ -389,6 +389,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-item-menu",
+      "file": "scripts/item-menu.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-gear-engine",
       "file": "scripts/gear-engine.js"
     },
