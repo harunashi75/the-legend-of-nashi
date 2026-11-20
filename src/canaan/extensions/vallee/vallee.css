@@ -1,0 +1,150 @@
+/* Extension 1 — la Vallée des Héros : onglet « Montures » de la fiche du personnage (C), en journal de collection.
+   La liste à gauche (montures obtenues en couleur, les autres grisées et verrouillées), la monture sélectionnée en
+   grand à droite, avec où l'obtenir. Assemblé seulement avec node tools/build.cjs --extensions. */
+#window .vallee-journal {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  gap: 14px;
+  margin-top: 10px;
+  min-height: 380px;
+}
+#window .vallee-journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+#window .vallee-journal-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid rgba(232, 200, 120, 0.3);
+  color: var(--rpg-gold-light, #f3e6c4);
+}
+#window button.vallee-journal-item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 10px 4px 4px;
+  text-align: left;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rarity) 18%, #1a120c), rgba(20, 13, 8, 0.85));
+  border: 1px solid color-mix(in srgb, var(--rarity) 55%, transparent);
+  border-left: 4px solid var(--rarity);
+  font-weight: 400;
+}
+#window button.vallee-journal-item .vallee-horse {
+  width: 56px;
+  height: auto;
+  image-rendering: pixelated;
+}
+#window .vallee-journal-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+#window .vallee-journal-name b {
+  color: var(--rarity);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#window .vallee-journal-name small {
+  color: var(--rpg-muted, #b8a888);
+  font-size: 11px;
+}
+#window .vallee-journal-mark {
+  color: #ffe07a;
+  font-size: 16px;
+}
+#window button.vallee-journal-item.picked {
+  box-shadow:
+    0 0 0 2px #fff2cb,
+    0 0 12px var(--rarity);
+}
+/* Pas encore obtenue : grisée, comme dans un journal de collection. */
+#window button.vallee-journal-item.locked {
+  background: rgba(24, 20, 18, 0.8);
+  border-color: rgba(140, 132, 120, 0.35);
+  border-left-color: #6a645c;
+}
+#window button.vallee-journal-item.locked .vallee-horse {
+  filter: grayscale(1) brightness(0.55);
+}
+#window button.vallee-journal-item.locked .vallee-journal-name b {
+  color: #8f8a82;
+}
+#window .vallee-journal-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--rarity) 50%, transparent);
+  border-radius: 8px;
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    color-mix(in srgb, var(--rarity) 26%, transparent),
+    rgba(14, 10, 8, 0.7) 70%
+  );
+  text-align: center;
+}
+#window .vallee-journal-stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 240px;
+}
+#window .vallee-journal-stage .vallee-horse {
+  width: min(100%, 322px);
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.55));
+}
+#window .vallee-journal-view h3 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+#window .vallee-journal-sub {
+  margin: 0;
+  color: var(--rpg-gold-light, #f3e6c4);
+}
+#window .vallee-journal-view .muted {
+  max-width: 46ch;
+}
+#window .vallee-journal-source {
+  margin: 6px 0;
+  padding: 6px 12px;
+  border: 1px dashed rgba(232, 200, 120, 0.4);
+  border-radius: 6px;
+  background: rgba(20, 14, 10, 0.5);
+}
+#window .vallee-journal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+#window .vallee-journal-view.locked {
+  border-color: rgba(140, 132, 120, 0.35);
+  background: radial-gradient(ellipse at 50% 30%, rgba(120, 116, 110, 0.18), rgba(14, 10, 8, 0.7) 70%);
+}
+#window .vallee-journal-view.locked .vallee-horse {
+  filter: grayscale(1) brightness(0.5) drop-shadow(0 8px 6px rgba(0, 0, 0, 0.55));
+}
+#window .vallee-journal-lock {
+  color: #a8a298;
+}
+@media (max-width: 720px) {
+  #window .vallee-journal {
+    grid-template-columns: 1fr;
+  }
+  #window .vallee-journal-list {
+    max-height: 40vh;
+  }
+}

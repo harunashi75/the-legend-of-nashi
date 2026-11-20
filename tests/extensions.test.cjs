@@ -186,6 +186,27 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
     false,
     'pas un cheval qu’on ne possède pas'
   );
+  // Onglet Montures : obtenues d'abord, les autres verrouillées avec où les obtenir ; la vue suit la sélection.
+  run('closePanels();canaanCharacterSection("mounts")');
+  const tab = () => {
+    const html = run('document.getElementById("window").innerHTML'),
+      items = [...html.matchAll(/class="vallee-journal-item (owned|locked)[^"]*"[^>]*data-id="(\w+)"/g)];
+    return {
+      items: items.map(m => [m[2], m[1] === 'locked']),
+      view: html.split('vallee-journal-view')[1] || ''
+    };
+  };
+  assert.deepEqual(tab().items, [
+    ['plaines', false],
+    ['aurore', false],
+    ['argent', true],
+    ['crepuscule', true]
+  ]);
+  assert.match(tab().view, /Coursier de l’Aurore/);
+  run('CANAAN_EXT.ui("vallee","pick","argent")');
+  assert.match(tab().view, /Pas encore obtenue/);
+  assert.match(tab().view, /Écurie des Héros, Vallée des Héros/);
+  assert.match(tab().view, /8\s000 or/);
   // Touche H : en selle, vitesse +75 % (Coursier de l'Aurore), dessin du cavalier dans les quatre directions.
   run('closePanels()');
   fire(run('globalThis'), 'keydown', { key: 'h' });
@@ -233,7 +254,7 @@ test('Valérion : PV selon les participants, attaques annoncées, abris du Jugem
   const ar = JSON.parse(run('JSON.stringify(CANAAN_VALLEY.plan().arena)'));
   run('spawnWorldBosses()');
   assert.equal(run('game.world.monsters.filter(m=>m.worldBossId==="valerion").length'), 1);
-  const base = run("CANAAN_VALLEY_BOSS.baseHp()");
+  const base = run('CANAAN_VALLEY_BOSS.baseHp()');
   assert.equal(base, run('bossHealth(60,"raid")*5'));
   assert.equal(run('game.world.monsters.find(m=>m.worldBossId==="valerion").mhp'), base);
   // Un héros entre dans l'arène : le combat commence ; un deuxième : +75 % de PV, part de PV gardée.
@@ -250,7 +271,9 @@ test('Valérion : PV selon les participants, attaques annoncées, abris du Jugem
       `CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;CANAAN_VALLEY_BOSS.cast("${kind}");if(CANAAN_VALLEY_BOSS.zones().some(z=>z.at-time<48))throw new Error("${kind} trop rapide")`
     );
   // Dégâts en part des PV max (la Défense n'en retire qu'un quart au plus) : la Riposte, collé à lui, ≈ un tiers.
-  run('CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;P.roll=0;P.x=__m.x+30;P.y=__m.y;globalThis.__h0=P.hp');
+  run(
+    'CANAAN_VALLEY_BOSS.zones().length=0;__m.castUntil=0;P.roll=0;P.x=__m.x+30;P.y=__m.y;globalThis.__h0=P.hp'
+  );
   run('CANAAN_VALLEY_BOSS.cast("riposte");for(let i=0;i<60;i++){time++;CANAAN_EXT.step()}');
   const share = run('(__h0-P.hp)/P.mhp');
   assert.ok(share >= 0.26 && share <= 0.35, 'Riposte : ' + share);
@@ -288,6 +311,15 @@ test('Valérion : PV selon les participants, attaques annoncées, abris du Jugem
     assert.ok(bag.includes('Épique'), JSON.stringify(loot));
     assert.ok(bag.includes('Mythique'), JSON.stringify(loot));
   }
+  // La pièce Mythique est de niveau 63 et se porte dès le niveau 60.
+  assert.deepEqual(
+    JSON.parse(
+      run(
+        'JSON.stringify(game.hero.inventory.filter(i=>i.rarity==="Mythique").map(i=>[i.level,requiredLevel(i)]))'
+      )
+    ),
+    [[63, 60]]
+  );
   assert.ok(
     run('game.world.worldBossTimers.valerion-Date.now()') > 14 * 60 * 1000,
     'réapparition dans 15 minutes'

@@ -7,11 +7,14 @@
   'use strict';
   // Montures de l'Écurie des Héros : achetées une fois par personnage, avec l'or du jeu. speed : bonus de vitesse
   // (%), coat : robe [clair, base, ombre, profond], mane : crins [clair, sombre], sock : balzanes, glow : lueur.
+  // source : où l'obtenir (onglet Montures de la fiche du personnage) ; price : son prix en or, s'il s'achète.
+  const STABLE = 'Écurie des Héros, Vallée des Héros (sud-ouest de l’île)';
   const MOUNTS = [
     {
       id: 'plaines',
       name: 'Destrier des Plaines',
       rarity: 'Rare',
+      source: STABLE,
       price: 5000,
       speed: 40,
       coat: ['#b8804e', '#94603a', '#6e4428', '#462a16'],
@@ -24,6 +27,7 @@
       id: 'argent',
       name: 'Coursier d’Argent',
       rarity: 'Rare',
+      source: STABLE,
       price: 8000,
       speed: 50,
       coat: ['#eef1f5', '#c6ccd6', '#98a2b2', '#646e80'],
@@ -36,6 +40,7 @@
       id: 'crepuscule',
       name: 'Destrier du Crépuscule',
       rarity: 'Épique',
+      source: STABLE,
       price: 20000,
       speed: 65,
       coat: ['#4a3c5e', '#30263e', '#201a2c', '#120e1a'],
@@ -49,6 +54,7 @@
       id: 'aurore',
       name: 'Coursier de l’Aurore',
       rarity: 'Épique',
+      source: STABLE,
       price: 35000,
       speed: 75,
       coat: ['#fff0a8', '#f4cc58', '#d29c30', '#946418'],

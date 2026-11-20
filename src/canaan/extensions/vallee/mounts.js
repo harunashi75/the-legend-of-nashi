@@ -6,7 +6,8 @@
 // - En selle : vitesse augmentée du bonus de la monture. On descend tout seul en attaquant, en lançant une compétence,
 //   en roulant, en étant touché (combat), en tombant, ou en entrant dans un lieu fermé.
 // - Coopératif : l'hôte décide (action ext « mount », « buy », « choose ») ; chacun voit les montures de tous.
-// - Onglet « Montures » de la fiche du personnage (C).
+// - Onglet « Montures » de la fiche du personnage (C) : journal de collection — liste à gauche (obtenues en couleur,
+//   les autres grisées), monture sélectionnée en grand à droite avec où l'obtenir.
 (() => {
   'use strict';
   const EXT = canaanExtension('vallee'),
@@ -206,41 +207,26 @@
       ? '<img class="vallee-horse" alt="" src="' + src + '" width="92" height="76">'
       : '<span class="vallee-horse">🐎</span>';
   }
-  function card(hero, M, shop) {
+  // Carte d'un cheval à la boutique de l'Écurie des Héros.
+  function card(hero, M) {
     const mine = owns(hero, M.id),
-      active = stateOf(hero).active === M.id,
       col = rarityColor(M.rarity);
-    let action;
-    if (shop)
-      action = mine
-        ? '<span class="muted">' + esc('Déjà dans ton écurie') + '</span>'
-        : '<button type="button" data-action="extAction" data-ext="vallee" data-act="buy" data-id="' +
-          M.id +
-          '"' +
-          (hero.player.gold < M.price ? ' disabled' : '') +
-          '>' +
-          M.price.toLocaleString('fr-FR') +
-          ' ' +
-          esc('or') +
-          '</button>';
-    else
-      action = !mine
-        ? '<span class="muted">' +
-          esc('À l’Écurie des Héros : {or} or', { or: M.price.toLocaleString('fr-FR') }) +
-          '</span>'
-        : active
-          ? '<b class="vallee-active">' + esc('✔ Monture choisie') + '</b>'
-          : '<button type="button" data-action="extAction" data-ext="vallee" data-act="choose" data-id="' +
-            M.id +
-            '">' +
-            esc('Choisir') +
-            '</button>';
+    const action = mine
+      ? '<span class="muted">' + esc('Déjà dans ton écurie') + '</span>'
+      : '<button type="button" data-action="extAction" data-ext="vallee" data-act="buy" data-id="' +
+        M.id +
+        '"' +
+        (hero.player.gold < M.price ? ' disabled' : '') +
+        '>' +
+        M.price.toLocaleString('fr-FR') +
+        ' ' +
+        esc('or') +
+        '</button>';
     return (
       '<div class="city-row vallee-mount" style="--rarity:' +
       col +
-      (mine || shop ? '' : ';opacity:.72') +
       '">' +
-      preview(M, mine && !shop) +
+      preview(M) +
       '<div class="vallee-mount-text"><b style="color:' +
       col +
       '">' +
@@ -271,35 +257,111 @@
         ' : <b>' +
         Math.floor(hero.player.gold).toLocaleString('fr-FR') +
         '</b></p><div class="city-shop">' +
-        MOUNTS.map(M => card(hero, M, true)).join('') +
+        MOUNTS.map(M => card(hero, M)).join('') +
         '</div></div>'
     );
   }
-  // Onglet « Montures » de la fiche du personnage.
+  // Onglet « Montures » de la fiche du personnage, en journal de collection : la liste à gauche (montures obtenues
+  // d'abord, en couleur ; les autres grisées), la monture sélectionnée en grand à droite, avec où l'obtenir.
+  let picked = null; // monture affichée à droite (interface locale, jamais envoyée)
+  // Où obtenir une monture : son lieu (data.js) et son prix, s'il y en a un.
+  function sourceText(M) {
+    return (
+      esc(M.source || 'Écurie des Héros') +
+      (M.price ? ' · ' + esc('{or} or', { or: M.price.toLocaleString('fr-FR') }) : '')
+    );
+  }
+  function listItem(hero, M, s) {
+    const mine = owns(hero, M.id),
+      col = rarityColor(M.rarity);
+    return (
+      '<button type="button" class="vallee-journal-item' +
+      (mine ? ' owned' : ' locked') +
+      (M.id === picked ? ' picked' : '') +
+      '" style="--rarity:' +
+      col +
+      '" data-action="extAction" data-ext="vallee" data-act="pick" data-id="' +
+      M.id +
+      '">' +
+      preview(M, mine) +
+      '<span class="vallee-journal-name"><b>' +
+      esc(M.name) +
+      '</b><small>' +
+      (mine ? esc(M.rarity) + ' · ' + esc('+{n} % de vitesse', { n: M.speed }) : sourceText(M)) +
+      '</small></span><span class="vallee-journal-mark">' +
+      (!mine ? '🔒' : s.active === M.id ? '★' : '') +
+      '</span></button>'
+    );
+  }
+  function detail(hero, M, s) {
+    const mine = owns(hero, M.id),
+      col = rarityColor(M.rarity),
+      key = CANAAN_KEYS.labelOf('mount');
+    let action;
+    if (!mine) action = '<span class="vallee-journal-lock">🔒 ' + esc('Pas encore obtenue') + '</span>';
+    else if (s.active !== M.id)
+      action =
+        '<button type="button" data-action="extAction" data-ext="vallee" data-act="choose" data-id="' +
+        M.id +
+        '">' +
+        esc('Choisir') +
+        '</button>';
+    else
+      action =
+        '<b class="vallee-active">' +
+        esc('✔ Monture choisie') +
+        '</b><button type="button" data-action="extAction" data-ext="vallee" data-act="summon">' +
+        esc(hero.riding ? 'Renvoyer ({touche})' : 'Appeler ({touche})', { touche: key }) +
+        '</button>';
+    return (
+      '<div class="vallee-journal-view' +
+      (mine ? '' : ' locked') +
+      '" style="--rarity:' +
+      col +
+      '"><div class="vallee-journal-stage">' +
+      preview(M, mine) +
+      '</div><h3 style="color:' +
+      (mine ? col : '#9a948a') +
+      '">' +
+      esc(M.name) +
+      '</h3><p class="vallee-journal-sub">' +
+      esc(M.rarity) +
+      ' · ' +
+      esc('+{n} % de vitesse', { n: M.speed }) +
+      '</p><p class="muted">' +
+      esc(M.desc) +
+      '</p><p class="vallee-journal-source">📍 <b>' +
+      esc('Où l’obtenir') +
+      '</b> : ' +
+      sourceText(M) +
+      '</p><div class="vallee-journal-actions">' +
+      action +
+      '</div></div>'
+    );
+  }
   function section() {
     const hero = game.hero,
       s = stateOf(hero);
+    if (!BY[picked]) picked = s.active || MOUNTS[0].id;
+    const list = [...MOUNTS.filter(M => owns(hero, M.id)), ...MOUNTS.filter(M => !owns(hero, M.id))];
     return (
       '<div class="rpg-paper"><p class="muted">' +
       esc(
         'Touche {touche} : appeler ou renvoyer ta monture, dans le monde ouvert et hors combat. On descend de selle en combattant.',
         { touche: CANAAN_KEYS.labelOf('mount') }
       ) +
-      '</p>' +
-      (hero.riding
-        ? '<p><b>' + esc('🐎 En selle : {nom}', { nom: tt(BY[hero.riding].name) }) + '</b></p>'
-        : '') +
-      '<div class="city-shop">' +
-      MOUNTS.map(M => card(hero, M, false)).join('') +
+      (hero.riding ? ' <b>' + esc('🐎 En selle : {nom}', { nom: tt(BY[hero.riding].name) }) + '</b>' : '') +
+      '</p><div class="vallee-journal"><div class="vallee-journal-list"><div class="vallee-journal-head">' +
+      esc('Montures obtenues') +
+      ' <b>' +
+      s.mounts.length +
+      ' / ' +
+      MOUNTS.length +
+      '</b></div>' +
+      list.map(M => listItem(hero, M, s)).join('') +
       '</div>' +
-      (s.mounts.length
-        ? ''
-        : '<p class="muted">' +
-          esc(
-            'Aucune monture pour l’instant : l’Écurie des Héros est dans la Vallée des Héros, au sud-ouest de l’île.'
-          ) +
-          '</p>') +
-      '</div>'
+      detail(hero, BY[picked], s) +
+      '</div></div>'
     );
   }
   const charTabs = () => [
@@ -330,7 +392,14 @@
   const ui = {
     buy: id => act('buy', id, () => buy(game.hero, id)) && setTimeout(refresh, 120),
     choose: id => act('choose', id, () => choose(game.hero, id)) && setTimeout(refresh, 120),
-    mount: () => act('mount', null, () => toggle(game.hero))
+    mount: () => act('mount', null, () => toggle(game.hero)),
+    // Onglet Montures : afficher une monture à droite, appeler ou renvoyer la monture choisie.
+    pick: id => {
+      if (!BY[id]) return;
+      picked = id;
+      canaanCharacterSection('mounts');
+    },
+    summon: () => ui.mount() && setTimeout(refresh, 120)
   };
   function handle(hero, action) {
     if (action.act === 'buy') return buy(hero, action.id);

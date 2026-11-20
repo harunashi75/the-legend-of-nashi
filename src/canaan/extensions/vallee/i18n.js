@@ -51,6 +51,16 @@ CANAAN_I18N.extend('en', {
   'Aucune monture pour l’instant : l’Écurie des Héros est dans la Vallée des Héros, au sud-ouest de l’île.':
     'No mount yet: the Heroes’ Stable is in the Valley of Heroes, in the south-west of the island.',
   '🐎 En selle : {nom}': '🐎 Riding: {nom}',
+  'Écurie des Héros, Vallée des Héros (sud-ouest de l’île)':
+    'Heroes’ Stable, Valley of Heroes (south-west of the island)',
+  'Montures obtenues': 'Mounts collected',
+  '{or} or': '{or} gold',
+  or: 'gold',
+  Choisir: 'Choose',
+  'Où l’obtenir': 'Where to get it',
+  'Pas encore obtenue': 'Not collected yet',
+  'Appeler ({touche})': 'Summon ({touche})',
+  'Renvoyer ({touche})': 'Dismiss ({touche})',
   // Lieux et habitants.
   'Écurie des Héros': 'Heroes’ Stable',
   'Allée des Légendes': 'Avenue of Legends',

@@ -483,6 +483,12 @@
       "file": "scripts/ui-overlay.js"
     },
     {
+      "kind": "style",
+      "id": "canaan-ext-vallee-style",
+      "file": "extensions/vallee/vallee.css",
+      "extension": "vallee"
+    },
+    {
       "kind": "script",
       "id": "canaan-ext-vallee-art",
       "file": "extensions/vallee/art.js",
