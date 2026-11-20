@@ -49,7 +49,7 @@
   const BARBER_SPOTS = [];
   for (let dy = -10; dy <= 10; dy += 1) for (let dx = -24; dx <= 24; dx += 1) BARBER_SPOTS.push([dx, dy]);
   BARBER_SPOTS.sort(
-    (a, b) => Math.abs(a[0] - 2) + Math.abs(a[1] + 5) - (Math.abs(b[0] - 2) + Math.abs(b[1] + 5))
+    (a, b) => Math.abs(a[0] - 3) + Math.abs(a[1] + 4) - (Math.abs(b[0] - 3) + Math.abs(b[1] + 4))
   );
   const PROPS = [
     { kind: 'barn', x: 2, y: 6, w: 5, h: 4, block: true },
@@ -82,7 +82,7 @@
     { kind: 'forge', x: -6, y: -5, w: 3, h: 2, block: true, alt: FORGE_SPOTS },
     // Salon de coiffure : auvent, enseigne, fauteuil et coiffeuse sur la rangée du haut (qui bloque), tapis sur celle
     // du bas, où se tient la coiffeuse.
-    { kind: 'barber', x: 2, y: -5, w: 3, h: 2, alt: BARBER_SPOTS },
+    { kind: 'barber', x: 3, y: -4, w: 3, h: 2, alt: BARBER_SPOTS },
     // Fontaine au centre du camp, sur les pavés de la place (là où était le feu de camp).
     { kind: 'fountain', x: -1, y: -1, w: 3, h: 3, block: true, onRoad: true },
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
