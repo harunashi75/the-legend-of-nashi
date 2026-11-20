@@ -1291,6 +1291,7 @@ function draw() {
   CANAAN_EXT.draw(ctx, 'air');
   // Invitations « [E] Entrer » des bâtiments, au-dessus des façades et des personnages.
   CANAAN_HOUSE.drawPrompts(ctx);
+  CANAAN_CITY.drawPrompts(ctx);
   // Titres et aura des succès, au-dessus de chaque héros.
   CANAAN_ACHIEVEMENTS.draw(ctx);
   // Lignes de pêche et bouchons.

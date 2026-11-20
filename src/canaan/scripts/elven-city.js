@@ -900,6 +900,16 @@
     if (Math.hypot(P.x - x, P.y - y) < 200)
       label(c, n.name, x, y - 62, n.kind === 'walker' || n.kind === 'indoor' ? '#d8f0e0' : '#f6dc98');
   }
+  // Où écrire l'invitation [E] : au-dessus de ce qu'elle désigne (porte, Grand Arbre, marchand), pas du héros.
+  function promptAt(what) {
+    const P0 = plan(),
+      g = P0.gate;
+    if (what === 'gateIn' || what === 'gateOut')
+      return { x: (g.x + 0.5) * TS, y: (g.y + 1) * TS - (gateArt ? gateArt.height : 160) - 6 };
+    if (what === 'tree') return { x: (P0.tree.x + 0.5) * TS, y: (P0.tree.y + 1.5) * TS - 70 };
+    const n = folk && folk.find(v => v.kind === what);
+    return n ? { x: n.x * TS, y: n.y * TS - 80 } : { x: P.x, y: P.y - 78 };
+  }
   const PROMPTS = {
     armurier: '[E] Armurerie',
     tisseuse: '[E] Atelier de la Tisseuse'
@@ -911,8 +921,6 @@
     c.save();
     c.imageSmoothingEnabled = false;
     for (const n of folk) if (n.room === room.id) drawElf(c, n);
-    const what = reach(P);
-    if (PROMPTS[what]) drawCanaanPrompt(c, PROMPTS[what], P.x, P.y - 78);
     c.restore();
   }
   function draw(c) {
@@ -1026,19 +1034,26 @@
     pixies(c, P0);
     // Elfes de la rue : gardes et flâneurs (ceux des bâtiments sont dessinés dedans).
     for (const n of folk) if (!n.room) drawElf(c, n);
-    // Invitation à agir.
-    const what = reach(P);
-    if (what) {
-      const text = {
-        gateIn: '[E] Demander à entrer (niveau ' + P0.level + ')',
-        gateOut: '[E] Sortir de Sylvaëlle',
-        tree: '[E] Parler à Ylvarë',
-        armurier: '[E] Armurerie',
-        tisseuse: '[E] Atelier de la Tisseuse'
-      }[what];
-      drawCanaanPrompt(c, text, P.x, P.y - 78);
-    }
     c.restore();
+  }
+  // Invitation à agir, au-dessus de sa cible ; dessinée après l'occlusion (game-core.js) pour que la porte ou le
+  // Grand Arbre redessinés devant le héros ne la cachent pas.
+  function drawPrompts(c) {
+    const P0 = plan(),
+      room =
+        !game.world.instance && typeof canaanRoomAt === 'function' ? canaanRoomAt(P.x / TS, P.y / TS) : null,
+      indoor = !!room && room.id.startsWith('sylv_');
+    if (!P0 || game.world.instance || canaanUnder() || (room && !indoor)) return;
+    const what = reach(P);
+    if (!what || (indoor && !PROMPTS[what])) return;
+    const text = {
+      gateIn: '[E] Demander à entrer (niveau ' + P0.level + ')',
+      gateOut: '[E] Sortir de Sylvaëlle',
+      tree: '[E] Parler à Ylvarë',
+      ...PROMPTS
+    }[what];
+    const at = promptAt(what);
+    drawCanaanPrompt(c, text, at.x, at.y);
   }
   // Grands objets à redessiner devant un personnage passé derrière (world-look.js) ; jamais les étangs.
   function occluders() {
@@ -1084,6 +1099,7 @@
   window.CANAAN_CITY = Object.freeze({
     blocked,
     draw,
+    drawPrompts,
     occluders,
     interact,
     guestUse,
