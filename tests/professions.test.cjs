@@ -43,6 +43,19 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  assert.equal(run('game.hero.prof.meals["soupe:3"]'),2,'niveau 20 : jusqu’à Épique');assert.equal(run('game.hero.prof.fish["gardon:4"]'),undefined);
  for(const [r,q] of [['grillade',2],['mijote',0],['fume',3],['ragout',1]])assert.equal(run(`CANAAN_PROF.cook(game.hero,"${r}",${q},1)`),true,r);
  assert.equal(run('CANAAN_PROF.cook(game.hero,"soupe",4,1)'),false,'plus de gardon');
+ // Festins (Festin astral, Brochette d'espadon, Banquet céleste) : deux ingrédients par repas.
+ run('game.hero.prof.fish={"espadon:1":5}');
+ assert.equal(run('CANAAN_PROF.cook(game.hero,"brochette",1,20)'),true);
+ assert.equal(run('game.hero.prof.meals["brochette:1"]'),2,'5 espadons : 2 brochettes');assert.equal(run('game.hero.prof.fish["espadon:1"]'),1);
+ assert.equal(run('CANAAN_PROF.cook(game.hero,"brochette",1,1)'),false,'un seul espadon : pas assez');assert.equal(run('game.hero.prof.fish["espadon:1"]'),1);
+ // Prix d'un repas : 3 fois celui de ses ingrédients (un festin compte ses deux ingrédients).
+ const unit=t=>run('CANAAN_BAG.unitPrice('+JSON.stringify(t)+')');
+ assert.equal(unit({kind:'meal',id:'soupe',q:2}),3*unit({kind:'fish',id:'gardon',q:2}));
+ assert.equal(unit({kind:'meal',id:'civet',q:0}),3*unit({kind:'meat',id:'lievre',q:0}));
+ assert.equal(unit({kind:'meal',id:'brochette',q:1}),6*unit({kind:'fish',id:'espadon',q:1}));
+ // Minerais : plus le métal est rare, plus il vaut cher ; les minerais rares des Tréfonds bien plus encore.
+ const ores=['cuivre','etain','fer','argent','or','mithril','fer_noir','geode'].map(id=>unit({kind:'ore',id,q:0}));
+ assert.deepEqual(ores,[6,7,9,12,15,18,30,48]);
  // Repas : PV et mana tout de suite (délai partagé), soins sur la durée, bonus de dégâts et de protection.
  run('P.mhp=1000;P.hp=100;P.mmp=500;P.mp=0');
  assert.equal(run('CANAAN_PROF.eat(game.hero,"soupe",3)'),true);assert.equal(run('P.hp'),100+Math.round((100+30)*2.3));
@@ -174,18 +187,19 @@ test('Minage, cueillette et enchanteur : filons et herbes dans chaque biome, enc
  assert.equal(run('CANAAN_GATHER.gather(game.hero,ni)'),true);assert.equal(run('CANAAN_GATHER.gather(game.hero,ni)'),false);
  assert.ok(run('CANAAN_BAG.tiles(game.hero).some(p=>p.kind==="ore")'));assert.ok(run('game.hero.prof.mining.exp')>0);
  run('time+=90*60+1');assert.equal(run('CANAAN_GATHER.depleted(game.hero).length'),0,'le filon s’est reformé');
- // Enchanteur : 3 minerais d'un métal (+ de la poudre dès l'étain) → un enchantement ; rang verrouillé par le niveau.
- run('game.hero.prof.ore={"fer:1":7};game.hero.prof.enchanting.level=12;game.hero.prof.dust={"poussiere:0":3}');
+ // Enchanteur : 3 à 5 minerais d'un métal selon son rang (fer : 4) (+ de la poudre dès l'étain) → un enchantement ;
+ // rang verrouillé par le niveau.
+ run('game.hero.prof.ore={"fer:1":9};game.hero.prof.enchanting.level=12;game.hero.prof.dust={"poussiere:0":3}');
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),false,'loin de la forge');
  run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y+30}');
  // Fer : 2 poussières par enchantement ; avec 3, un seul se forge, le minerai du second reste.
- assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),1);assert.equal(run('game.hero.prof.ore["fer:1"]'),4);
+ assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),1);assert.equal(run('game.hero.prof.ore["fer:1"]'),5);
  assert.equal(run('game.hero.prof.dust["poussiere:0"]'),1);assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,1)'),false,'plus assez de poussière');
  run('game.hero.prof.dust["poussiere:0"]=3');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",2,5)'),true);assert.equal(run('game.hero.prof.ench["haste:2"]'),2);assert.equal(run('game.hero.prof.ore["fer:1"]'),1);
  assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",4,1)'),false,'pas de pépites d’or');
  // Niveaux requis : cuivre 1, étain 6, fer 12, argent 20, or 28, mithril 35.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_GATHER.ENCH_LEVEL)')),[1,6,12,20,28,35]);
- run('game.hero.prof.ore["mithril:0"]=3;game.hero.prof.enchanting.level=34');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 35');
+ run('game.hero.prof.ore["mithril:0"]=5;game.hero.prof.enchanting.level=34');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : niveau 35');
  run('game.hero.prof.enchanting.level=35');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),false,'mithril : un éclat');
  run('game.hero.prof.dust["eclat:0"]=1');assert.equal(run('CANAAN_GATHER.craft(game.hero,"haste",5,1)'),true);assert.equal(run('game.hero.prof.dust["eclat:0"]'),undefined);
  run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Fer <small>[^<]*<\/small><\/h4><p>[^<]*<b class="ko">tu en as 1<\/b><\/p><p>2 × [^<]*Poussière d’enchantement · <b class="ko">tu en as 1<\/b><\/p><div class="prof-actions"><button[^>]*disabled>🔒 Enchanteur niv\. 12</);

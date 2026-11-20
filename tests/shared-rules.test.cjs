@@ -168,7 +168,7 @@ test('Règles partagées dans Node : objets, statistiques, niveaux, XP, économi
  assert.equal(economy.legacyMaterialGold({ore:3,wood:2,essence:1,core:1},prices),300);
  assert.equal(economy.legacyMaterialGold({ore:'Infinity',wood:-4,core:'2'},prices),400);assert.equal(economy.legacyMaterialGold(null,prices),0);
  assert.equal(economy.lootRarity('dungeon').name,'Rare');assert.equal(economy.lootRarity('chest').name,'Peu commun');
- assert.equal(economy.shopPriceAt(10),150);assert.equal(classRules.talentSlotsAt(1),1);assert.equal(classRules.talentSlotsAt(25),3);assert.equal(classRules.talentSlotsAt(60),5);
+ assert.equal(economy.shopPriceAt(10),350);assert.equal(economy.shopPriceAt(60),1350);assert.equal(classRules.talentSlotsAt(1),1);assert.equal(classRules.talentSlotsAt(25),3);assert.equal(classRules.talentSlotsAt(60),5);
  assert.deepEqual(classRules.sanitizeClasse({id:'assassin',talents:[3,3,9,10]},20),{id:'assassin',talents:[3,9]});
  assert.deepEqual(classRules.sanitizeClasse(null,60),{id:null,talents:[]});
  assert.deepEqual(classRules.refreshDot({dps:5,until:10},3,12),{dps:5,until:12});assert.deepEqual(classRules.refreshDot(null,3,12),{dps:3,until:12});

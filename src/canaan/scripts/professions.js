@@ -289,9 +289,13 @@
       tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp ou un refuge).');
       return false;
     }
-    const have = prof[ING[r.fish].bag]?.[r.fish + ':' + quality] || 0;
-    if (!have) return false;
-    const n = Math.max(1, Math.min(count | 0, have, 20));
+    const have = prof[ING[r.fish].bag]?.[r.fish + ':' + quality] || 0,
+      need = profRecipeCost(recipe);
+    if (have < need) {
+      if (have) tell(hero, '🍳 Il faut ' + need + ' × ' + ING[r.fish].name + ' pour ce repas.');
+      return false;
+    }
+    const n = Math.max(1, Math.min(count | 0, Math.floor(have / need), 20));
     return CANAAN_GATHER.startCook(
       hero,
       { x: hero.player.x + TS * 0.6, y: hero.player.y - TS * 0.4 },
@@ -307,18 +311,20 @@
       tell(hero, '🍳 Approche-toi d’une cuisinière pour cuisiner (La Marmite dorée au camp ou un refuge).');
       return false;
     }
+    // Ingrédients par repas : 1, ou 2 pour les festins (profRecipeCost).
     const bag = prof[ING[r.fish].bag],
       key = r.fish + ':' + quality,
-      n = Math.max(1, Math.min(count | 0, bag[key] || 0, 20));
-    if (!bag[key]) return false;
+      need = profRecipeCost(recipe),
+      n = Math.max(1, Math.min(count | 0, Math.floor((bag[key] || 0) / need), 20));
+    if ((bag[key] || 0) < need) return false;
     let made = 0;
     for (let i = 0; i < n; i++) {
       const mq = Math.min(quality, capOf(prof.cooking.level)),
         meal = recipe + ':' + mq;
-      bag[key]--;
+      bag[key] -= need;
       // Le repas prend sa place dans le sac (l'ingrédient vient de libérer la sienne s'il était le dernier).
       if (!CANAAN_BAG.room(hero, 'meal', recipe, mq)) {
-        bag[key]++;
+        bag[key] += need;
         tell(hero, '🎒 Sac plein : impossible de ranger d’autres repas.');
         break;
       }
@@ -841,23 +847,25 @@
       ) +
       tips(
         [
-          '1 ingrédient = 1 repas',
+          '1 ingrédient = 1 repas (2 pour un festin)',
           'Qualité max : <b style="color:' + qualityColor(cap) + '">' + esc(qualityName(cap)) + '</b>',
           '⏳ 6 s, reste immobile'
         ],
         'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (' +
           esc(qualityName(cap)) +
-          '). Il y a donc un bouton par qualité d’ingrédient. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore et les refuges.'
+          '). Il y a donc un bouton par qualité d’ingrédient. Les festins (Festin astral, Brochette d’espadon, Banquet céleste) demandent deux ingrédients. Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière. Les cuisinières : La Marmite dorée au Camp de l’Aurore et les refuges.'
       ) +
       '<div class="prof-recipes">' +
       Object.entries(RECIPES)
         .filter(([id]) => knows(game.hero, id))
         .map(([id, r]) => {
-          const owned = stock(prof[ING[r.fish].bag], f => f === r.fish);
+          const owned = stock(prof[ING[r.fish].bag], f => f === r.fish),
+            need = profRecipeCost(id);
           return (
             '<article class="prof-recipe"><h4>' +
             esc(r.name) +
             '</h4><p>' +
+            (need > 1 ? need + ' × ' : '') +
             ING[r.fish].icon +
             ' ' +
             esc(ING[r.fish].name) +
@@ -868,14 +876,15 @@
               ? '<div class="prof-actions">' +
                 owned
                   .map(x => {
-                    const mq = Math.min(x.q, cap);
+                    const mq = Math.min(x.q, cap),
+                      meals = Math.floor(x.n / need);
                     return (
                       '<button type="button" data-action="profCook" data-recipe="' +
                       id +
                       '" data-quality="' +
                       x.q +
                       '"' +
-                      (fire ? '' : ' disabled') +
+                      (fire && meals ? '' : ' disabled') +
                       ' style="border-color:' +
                       qualityColor(mq) +
                       '">Cuisiner ' +
@@ -883,7 +892,7 @@
                       ' (' +
                       x.n +
                       ')</button>' +
-                      (x.n > 1
+                      (meals > 1
                         ? '<button type="button" data-action="profCookAll" data-recipe="' +
                           id +
                           '" data-quality="' +
@@ -891,7 +900,7 @@
                           '"' +
                           (fire ? '' : ' disabled') +
                           '>× ' +
-                          Math.min(20, x.n) +
+                          Math.min(20, meals) +
                           '</button>'
                         : '')
                     );

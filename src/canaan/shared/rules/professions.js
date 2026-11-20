@@ -23,6 +23,22 @@ import {
   PROF_TREASURES
 } from '../data/professions.js';
 
+// Ingrédients demandés par un repas de cette recette (1 par défaut, 2 pour les festins).
+/**
+ * @param {string} recipe
+ * @returns {number}
+ */
+export function profRecipeCost(recipe) {
+  return /** @type {Record<string, { count?: number }>} */ (PROF_RECIPES)[recipe]?.count || 1;
+}
+// Genre d'un ingrédient de cuisine (sa place dans le sac) : poisson, viande ou herbe.
+/**
+ * @param {string} id
+ * @returns {'fish' | 'meat' | 'herb'}
+ */
+export function profIngredientKind(id) {
+  return Object.hasOwn(PROF_FISH, id) ? 'fish' : Object.hasOwn(PROF_MEAT, id) ? 'meat' : 'herb';
+}
 /**
  * Niveau et expérience d'un métier.
  * @typedef {{ level: number, exp: number }} SkillState

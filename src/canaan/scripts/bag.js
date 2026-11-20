@@ -69,6 +69,7 @@
   const UNIT_PRICE = {
     fish: q => 4 + 4 * q,
     meat: q => 5 + 5 * q,
+    // Repas : PROF_MEAL_PRICE_FACTOR fois le prix de ses ingrédients (mealPrice) ; recette inconnue : ce prix.
     meal: q => 10 + 8 * q,
     rubis: () => 300,
     ore: q => 6 + 5 * q,
@@ -337,16 +338,26 @@
       quality: qual
     };
   }
-  // Minerais rares des Tréfonds : leur prix est multiplié (value).
+  // Repas : plusieurs fois le prix de ses ingrédients, pour que cuisiner rapporte.
+  const mealPrice = p => {
+    const ing = PROF_RECIPES[p.id]?.fish;
+    if (!ing) return UNIT_PRICE.meal(p.q);
+    return PROF_MEAL_PRICE_FACTOR * UNIT_PRICE[profIngredientKind(ing)](p.q) * profRecipeCost(p.id);
+  };
+  // Minerais : leur prix est multiplié selon le métal (value), bien plus pour les minerais rares des Tréfonds.
   const unitPrice = p =>
-    UNIT_PRICE[p.kind](p.q) *
-    (p.kind === 'ore'
-      ? CANAAN_GATHER.ORES[p.id]?.value || 1
-      : p.kind === 'treasure'
-        ? PROF_TREASURES[p.id]?.value || 1
-        : p.kind === 'dust'
-          ? PROF_DUSTS[p.id]?.value || 1
-          : 1);
+    p.kind === 'meal'
+      ? mealPrice(p)
+      : Math.round(
+          UNIT_PRICE[p.kind](p.q) *
+            (p.kind === 'ore'
+              ? CANAAN_GATHER.ORES[p.id]?.value || 1
+              : p.kind === 'treasure'
+                ? PROF_TREASURES[p.id]?.value || 1
+                : p.kind === 'dust'
+                  ? PROF_DUSTS[p.id]?.value || 1
+                  : 1)
+        );
   const price = p => unitPrice(p) * p.n;
   const esc = s =>
     String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);

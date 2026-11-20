@@ -281,6 +281,7 @@ export const PROF_MEAT = deepFreeze({
   crabe: { name: 'Chair de crabe', icon: '⟦meat_crabe⟧' }
 });
 // Recettes : effet du repas. kind : heal / mana (tout de suite), hot / regen (sur la durée), buff (bonus).
+// count : ingrédients par repas (1 par défaut ; 2 pour les festins, les repas aux effets les plus forts).
 export const PROF_RECIPES = deepFreeze({
   soupe: { name: 'Soupe de gardon', fish: 'gardon', kind: 'heal' },
   grillade: { name: 'Truite grillée', fish: 'truite', kind: 'mana' },
@@ -288,8 +289,15 @@ export const PROF_RECIPES = deepFreeze({
   epices: { name: 'Silure aux épices', fish: 'silure', kind: 'buff', stat: 'speed', seconds: 120 },
   fume: { name: 'Saumon fumé', fish: 'saumon', kind: 'buff', stat: 'damage', seconds: 60 },
   ragout: { name: 'Ragoût de thon', fish: 'thon', kind: 'buff', stat: 'armor', seconds: 60 },
-  brochette: { name: 'Brochette d’espadon', fish: 'espadon', kind: 'buff', stat: 'feast', seconds: 120 },
-  astral: { name: 'Festin astral', fish: 'lune', kind: 'regen', seconds: 10 },
+  brochette: {
+    name: 'Brochette d’espadon',
+    fish: 'espadon',
+    kind: 'buff',
+    stat: 'feast',
+    seconds: 120,
+    count: 2
+  },
+  astral: { name: 'Festin astral', fish: 'lune', kind: 'regen', seconds: 10, count: 2 },
   civet: { name: 'Civet de lièvre', fish: 'lievre', kind: 'both' },
   roti: { name: 'Rôti de venaison', fish: 'venaison', kind: 'buff', stat: 'warrior', seconds: 120 },
   gigot: { name: 'Gigot aux herbes', fish: 'gigot', kind: 'hot', seconds: 8 },
@@ -300,7 +308,7 @@ export const PROF_RECIPES = deepFreeze({
     stat: 'speed',
     seconds: 180
   },
-  banquet: { name: 'Banquet céleste', fish: 'astrale', kind: 'regen', seconds: 15 },
+  banquet: { name: 'Banquet céleste', fish: 'astrale', kind: 'regen', seconds: 15, count: 2 },
   meuniere: { name: 'Perche meunière', fish: 'perche', kind: 'heal' },
   quenelles: { name: 'Quenelles de brochet', fish: 'brochet', kind: 'buff', stat: 'damage', seconds: 90 },
   fumee: { name: 'Anguille fumée', fish: 'anguille', kind: 'hot', seconds: 6 },
@@ -398,7 +406,8 @@ export const PROF_FISH_TABLES = deepFreeze({
     ]
   ]
 });
-// Un métal par biome (ordre des ZONES) ; son rang donne la force de l'enchantement.
+// Un métal par biome (ordre des ZONES) ; son rang donne la force de l'enchantement. value : multiplicateur du prix de
+// vente d'une unité chez le marchand (plus le métal est rare, plus il vaut cher).
 export const PROF_ORES = deepFreeze({
   cuivre: {
     name: 'Minerai de cuivre',
@@ -406,7 +415,8 @@ export const PROF_ORES = deepFreeze({
     tier: 0,
     zone: 0,
     color: '#d07a3a',
-    icon: '⟦ore_cuivre⟧'
+    icon: '⟦ore_cuivre⟧',
+    value: 1
   },
   etain: {
     name: 'Minerai d’étain',
@@ -414,25 +424,44 @@ export const PROF_ORES = deepFreeze({
     tier: 1,
     zone: 1,
     color: '#b8c4c8',
-    icon: '⟦ore_etain⟧'
+    icon: '⟦ore_etain⟧',
+    value: 1.2
   },
-  fer: { name: 'Minerai de fer', metal: 'fer', tier: 2, zone: 2, color: '#8a6a5a', icon: '⟦ore_fer⟧' },
+  fer: {
+    name: 'Minerai de fer',
+    metal: 'fer',
+    tier: 2,
+    zone: 2,
+    color: '#8a6a5a',
+    icon: '⟦ore_fer⟧',
+    value: 1.5
+  },
   argent: {
     name: 'Minerai d’argent',
     metal: 'argent',
     tier: 3,
     zone: 3,
     color: '#e8eef4',
-    icon: '⟦ore_argent⟧'
+    icon: '⟦ore_argent⟧',
+    value: 2
   },
-  or: { name: 'Pépite d’or', metal: 'or', tier: 4, zone: 4, color: '#f0c040', icon: '⟦ore_or⟧' },
+  or: {
+    name: 'Pépite d’or',
+    metal: 'or',
+    tier: 4,
+    zone: 4,
+    color: '#f0c040',
+    icon: '⟦ore_or⟧',
+    value: 2.5
+  },
   mithril: {
     name: 'Minerai de mithril',
     metal: 'mithril',
     tier: 5,
     zone: 5,
     color: '#7ae8f0',
-    icon: '⟦ore_mithril⟧'
+    icon: '⟦ore_mithril⟧',
+    value: 3
   },
   // Minerais rares des Tréfonds (zones 6 à 9) : ils ne font pas d'enchantement, mais se vendent très cher (value).
   fer_noir: {
@@ -442,7 +471,7 @@ export const PROF_ORES = deepFreeze({
     zone: 6,
     color: '#5a5e6e',
     icon: '⟦ore_fer_noir⟧',
-    value: 3,
+    value: 5,
     rare: true
   },
   quartz: {
@@ -452,7 +481,7 @@ export const PROF_ORES = deepFreeze({
     zone: 7,
     color: '#e8e0f8',
     icon: '⟦ore_quartz⟧',
-    value: 3,
+    value: 5.5,
     rare: true
   },
   obsidienne: {
@@ -462,7 +491,7 @@ export const PROF_ORES = deepFreeze({
     zone: 8,
     color: '#3a2a4a',
     icon: '⟦ore_obsidienne⟧',
-    value: 4,
+    value: 7,
     rare: true
   },
   geode: {
@@ -472,7 +501,7 @@ export const PROF_ORES = deepFreeze({
     zone: 9,
     color: '#e870c0',
     icon: '⟦ore_geode⟧',
-    value: 5,
+    value: 8,
     rare: true
   }
 });
@@ -559,7 +588,10 @@ export const PROF_METALS = deepFreeze(['cuivre', 'etain', 'fer', 'argent', 'or',
 // aussi de 1 % par niveau (jusqu'à +40 %).
 export const PROF_ENCH_MULT = deepFreeze([0.16, 0.2, 0.24, 0.28, 0.33, 0.4]);
 export const PROF_ENCH_LEVEL = deepFreeze([1, 6, 12, 20, 28, 35]);
-export const PROF_ORES_PER_ENCHANT = 3;
+// Prix de vente d'un repas : ce multiple du prix de ses ingrédients (cuisiner rapporte).
+export const PROF_MEAL_PRICE_FACTOR = 3;
+// Minerais d'un même métal par enchantement, selon le rang du métal : plus le métal est rare, plus il en faut.
+export const PROF_ORES_PER_ENCHANT = deepFreeze([3, 3, 4, 4, 5, 5]);
 
 // ---------------------------------------------------------------- Démantèlement et poudres d'enchantement
 // Démanteler une pièce d'équipement (bouton ⚒ du sac, partout, même en donjon) la réduit en poudre. Les poudres sont
@@ -604,7 +636,7 @@ export const SATCHEL_MIN_RARITY = 2;
 // ---------------------------------------------------------------- Fouilles (pelle)
 // La pelle s'achète une fois pour toutes chez le marchand du Camp de l'Aurore. Chaque coup de pelle sur la terre,
 // l'herbe ou le sable de l'île peut faire sortir un peu d'or, un trésor à vendre ou une relique à collectionner.
-export const PROF_SHOVEL_PRICE = 6000;
+export const PROF_SHOVEL_PRICE = 12000;
 // Trésors enfouis : objets du sac (matériaux, piles de 100) qui ne servent qu'à être vendus. value : prix d'une
 // unité chez le marchand ; weight : chance relative d'en trouver un.
 export const PROF_TREASURES = deepFreeze({

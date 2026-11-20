@@ -46,13 +46,14 @@ export function legacyMaterialGold(materials, prices) {
 export function sellValue(item, level) {
   return Math.max(5, Math.round((6 + 7 * Math.max(1, Number(level) || 1)) * rarityInfo(item).mult));
 }
-// Prix de l'équipement vert du marchand, selon le niveau du héros.
+// Prix de l'équipement vert du marchand, selon le niveau du héros : 150 + 20 × niveau (bien plus que la revente d'un
+// objet, pour que l'achat reste un choix).
 /**
  * @param {unknown} level
  * @returns {number}
  */
 export function shopPriceAt(level) {
-  return 60 + Math.round(Math.max(1, Number(level) || 1) * 9);
+  return 150 + Math.round(Math.max(1, Number(level) || 1) * 20);
 }
 // Qualité de prestige tirée pour un butin (null : la qualité normale de la source). Un seul tirage : chaque qualité
 // occupe sa part, de la plus rare à la plus courante, si bien que les chances affichées sont les chances réelles.

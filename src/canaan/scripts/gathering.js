@@ -33,7 +33,8 @@
     CANAAN_PROF.profOf(hero).enchanting.level +
     ').';
   const levelBonus = hero => 1 + 0.01 * (CANAAN_PROF.profOf(hero).enchanting.level || 1);
-  const ORES_PER_ENCHANT = PROF_ORES_PER_ENCHANT;
+  // Minerais par enchantement de ce métal (3 pour le cuivre … 5 pour le mithril).
+  const oresPer = tier => PROF_ORES_PER_ENCHANT[tier];
   // Poudre demandée par enchantement de ce métal ([poudre, nombre] ou null), et ce qu'en a le héros.
   const dustNeed = tier => PROF_ENCH_DUST[tier] || null;
   const dustHave = (hero, id) => CANAAN_BAG.count(hero, 'dust', id, 0);
@@ -180,7 +181,7 @@
     let made = 0;
     for (let k = 0; k < Math.max(1, Math.min(20, count | 0)); k++) {
       const have = () => Array.from({ length: 8 }, (_, q) => CANAAN_BAG.count(hero, 'ore', metal, q));
-      if (have().reduce((a, b) => a + b, 0) < ORES_PER_ENCHANT) break;
+      if (have().reduce((a, b) => a + b, 0) < oresPer(tier)) break;
       if (dustBatches(hero, tier) < 1) {
         if (made) break;
         const need = dustNeed(tier);
@@ -191,7 +192,7 @@
       }
       // Le minerai part avant que l'enchantement prenne sa place dans le sac.
       const spent = [];
-      let left = ORES_PER_ENCHANT;
+      let left = oresPer(tier);
       for (let q = 0; q < 8 && left > 0; q++) {
         const n = Math.min(left, CANAAN_BAG.count(hero, 'ore', metal, q));
         if (n > 0) {
@@ -215,7 +216,7 @@
       return (
         tell(
           hero,
-          '✨ Il faut ' + ORES_PER_ENCHANT + ' ' + ORES[metal].name.toLowerCase() + ' pour cet enchantement.'
+          '✨ Il faut ' + oresPer(tier) + ' ' + ORES[metal].name.toLowerCase() + ' pour cet enchantement.'
         ),
         false
       );
@@ -378,12 +379,12 @@
         (a, b) => a + b,
         0
       ),
-      n = Math.max(1, Math.min(20, count | 0, Math.floor(have / ORES_PER_ENCHANT), dustBatches(hero, tier)));
-    if (have < ORES_PER_ENCHANT)
+      n = Math.max(1, Math.min(20, count | 0, Math.floor(have / oresPer(tier)), dustBatches(hero, tier)));
+    if (have < oresPer(tier))
       return (
         tell(
           hero,
-          '✨ Il faut ' + ORES_PER_ENCHANT + ' ' + ORES[metal].name.toLowerCase() + ' pour cet enchantement.'
+          '✨ Il faut ' + oresPer(tier) + ' ' + ORES[metal].name.toLowerCase() + ' pour cet enchantement.'
         ),
         false
       );
@@ -774,7 +775,7 @@
       (full ? h.status(false, '🎒 Sac plein : libère une case pour ranger l’enchantement.') : '') +
       h.tips(
         [
-          ORES_PER_ENCHANT + ' minerais du même métal = 1 enchantement',
+          oresPer(0) + ' à ' + oresPer(METALS.length - 1) + ' minerais du même métal = 1 enchantement',
           '⚒ Poudre en plus dès l’étain',
           'Toutes les qualités comptent',
           'Ton niveau : +' + level + ' % de force'
@@ -813,18 +814,15 @@
           need = dustNeed(tier),
           dust = need ? dustHave(game.hero, need[0]) : 0,
           dustOk = !need || dust >= need[1],
-          enough = have >= ORES_PER_ENCHANT,
+          enough = have >= oresPer(tier),
           ok = forge && enough && dustOk && !locked,
           pct = Math.round(ENCH_MULT[tier] * levelBonus(game.hero) * 100),
-          batch = Math.min(20, Math.floor(have / ORES_PER_ENCHANT), dustBatches(game.hero, tier)),
+          batch = Math.min(20, Math.floor(have / oresPer(tier)), dustBatches(game.hero, tier)),
           // La raison du blocage est écrite sur le bouton lui-même.
           label = locked
             ? '🔒 Enchanteur niv. ' + ENCH_LEVEL[tier]
             : !enough
-              ? 'Il manque ' +
-                (ORES_PER_ENCHANT - have) +
-                ' minerai' +
-                (ORES_PER_ENCHANT - have > 1 ? 's' : '')
+              ? 'Il manque ' + (oresPer(tier) - have) + ' minerai' + (oresPer(tier) - have > 1 ? 's' : '')
               : !dustOk
                 ? 'Il manque de la poudre'
                 : !forge
@@ -842,7 +840,7 @@
           pct +
           ' %</small></h4>' +
           '<p>' +
-          ORES_PER_ENCHANT +
+          oresPer(tier) +
           ' × ' +
           esc(o.name) +
           ' · <b class="' +

@@ -2278,12 +2278,15 @@ export default {
   'Tu es près d’une cuisinière : tu peux cuisiner.': 'You are near a stove: you can cook.',
   'Va près d’une cuisinière : Marmite dorée (camp) ou refuge.':
     'Go near a stove: Golden Pot (camp) or a shelter.',
-  '1 ingrédient = 1 repas': '1 ingredient = 1 meal',
+  '1 ingrédient = 1 repas (2 pour un festin)': '1 ingredient = 1 meal (2 for a feast)',
   'Qualité max :': 'Max quality:',
   '6 s, reste immobile': '6 s, stand still',
   'Un poisson, une viande ou une herbe donne un repas de sa qualité, plafonnée par ton niveau de cuisine (':
     'A fish, meat or herb gives a meal of its quality, capped by your cooking level (',
   'Il y a donc un bouton par qualité d’ingrédient.': 'So there is one button per ingredient quality.',
+  'Les festins (Festin astral, Brochette d’espadon, Banquet céleste) demandent deux ingrédients.':
+    'Feasts (Astral feast, Swordfish skewer, Celestial banquet) take two ingredients.',
+  'Il faut {n} × {nom} pour ce repas.': 'You need {n} × {nom} for this meal.',
   'Préparer un repas prend 6 s (un peu plus en série) : reste immobile près de la cuisinière.':
     'Preparing a meal takes 6 s (a bit longer in batches): stand still near the stove.',
   'Les cuisinières : La Marmite dorée au Camp de l’Aurore et les refuges.':
@@ -2353,7 +2356,7 @@ export default {
   'Tu es à la forge : tu peux fabriquer.': 'You are at the forge: you can craft.',
   'Va à une forge pour fabriquer : Camp de l’Aurore (à l’est du feu) ou Forteresse de Durgrim (Tréfonds).':
     'Go to a forge to craft: Dawn Camp (east of the fire) or Fortress of Durgrim (Depths).',
-  '{n} minerais du même métal = 1 enchantement': '{n} ores of the same metal = 1 enchantment',
+  '{n} à {m} minerais du même métal = 1 enchantement': '{n} to {m} ores of the same metal = 1 enchantment',
   'Toutes les qualités comptent': 'All qualities count',
   'Ton niveau : +{n} % de force': 'Your level: +{n}% strength',
   'Choisis la statistique, puis le métal : plus le métal est rare, plus l’enchantement est fort, mais il demande un niveau d’enchanteur plus haut (':
