@@ -19,14 +19,15 @@
 //   un héros bien équipé), +75 % par héros en plus (jamais réduits pendant un combat). Plus personne dans l'arène
 //   pendant 4 s : il se relève et retourne à sa garde.
 // - Butin : chaque participant éligible (il a frappé Valérion et se trouve à moins de 20 cases à sa chute) reçoit sa
-//   bourse d'or, une pièce Épique de niveau 60 et tire seul sa chance de 11 % d'une pièce Mythique (pièce au hasard
-//   parmi les neuf emplacements d'équipement). Réapparition 15 minutes après sa chute.
+//   bourse d'or, une pièce Épique de niveau 60 et tire seul sa chance de 11 % d'une pièce Mythique de niveau 63
+//   (niveau requis 60 : le meilleur butin de l'extension ; pièce au hasard parmi les neuf emplacements d'équipement). Réapparition 15 minutes après sa chute.
 (() => {
   'use strict';
   const DEF = canaanExtension('vallee').worldBosses.find(b => b.id === 'valerion');
   const T = TS;
   const RESPAWN_MS = 15 * 60 * 1000;
   const MYTHIC = 0.11;
+  const MYTHIC_LEVEL = 63; // au-dessus du niveau maximal : se porte dès le niveau 60 (requiredLevel)
   const R = 9; // rayon de l'arène, en cases
   const HP_MULT = 5; // PV : cinq boss de raid de niveau 60
   const ENRAGE = 7 * 60 * 60; // Colère du Champion : après 7 minutes de combat (ticks)
@@ -509,7 +510,7 @@
       if (Math.random() < MYTHIC) {
         mythics++;
         const item = giveGear(
-          60,
+          MYTHIC_LEVEL,
           'worldBoss',
           'Mythique',
           hero,
@@ -737,6 +738,7 @@
     spawn,
     baseHp,
     RESPAWN_MS,
-    MYTHIC
+    MYTHIC,
+    MYTHIC_LEVEL
   });
 })();

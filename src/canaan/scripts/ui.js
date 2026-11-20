@@ -58,7 +58,7 @@
       '">' +
       safeGearText(gearDisplayName(item)) +
       '</span><span class="bag-ilvl' +
-      (itemLevel(item) > clampLevel(game.hero.level) ? ' too-high' : '') +
+      (requiredLevel(item) > clampLevel(game.hero.level) ? ' too-high' : '') +
       '">' +
       itemLevel(item) +
       '</span></button>' +

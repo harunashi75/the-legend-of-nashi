@@ -122,7 +122,7 @@
       // Arme liée (Invocateur) : jamais remplacée.
       if (slot === 'weapon' && isBoundItem(hero.equipment.weapon)) continue;
       const best = hero.inventory
-        .filter(it => it.slot === slot && itemLevel(it) <= clampLevel(hero.level))
+        .filter(it => it.slot === slot && requiredLevel(it) <= clampLevel(hero.level))
         .sort((a, b) => gearScore(b) - gearScore(a))[0];
       if (!best || gearScore(best) <= gearScore(hero.equipment[slot])) continue;
       hero.inventory.splice(hero.inventory.indexOf(best), 1);

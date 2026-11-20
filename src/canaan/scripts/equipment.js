@@ -31,7 +31,7 @@
   const remote = action => game.mode === 'guest' && CANAAN_NET.requestAction(action);
   // Un objet ne s'équipe qu'à partir de son niveau.
   function tooHigh(item, hero) {
-    const need = itemLevel(item);
+    const need = requiredLevel(item);
     if (need <= clampLevel(hero.level)) return false;
     canaanLootNotice(hero, '🔒 Niveau ' + need + ' requis pour ' + gearDisplayName(item) + '.');
     return true;

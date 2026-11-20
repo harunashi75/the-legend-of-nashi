@@ -11,7 +11,7 @@
     if (item.slot !== 'weapon') return;
     if (!knownWeapon(item, item.weaponType)) item.weaponType = 'sword';
   }
-  // Normalisation unique : identité, qualité, niveau (1 à 60) et deux secondaires tirées une seule fois.
+  // Normalisation unique : identité, qualité, niveau (1 à 63) et deux secondaires tirées une seule fois.
   // Anciennes sauvegardes : l'iLvl devient un niveau (levelFromIlvl) et les points Ratings52 disparaissent.
   function normalizeItem(item) {
     if (!item || !item.slot) return item;
@@ -58,7 +58,7 @@
     // createRawGear fournit l'objet brut ; ce moteur le normalise puis le dépose (slot : pièce choisie).
     const item = createRawGear(level, source, guaranteed, slot);
     if (!item) return item;
-    item.level = clampLevel(level);
+    item.level = clampItemLevel(level);
     // Sans qualité imposée : monstres et coffres donnent du Commun.
     if (!guaranteed)
       item.rarity = ['normal', 'chest', 'hidden_common'].includes(source) ? 'Commun' : rarityInfo(item).name;

@@ -356,7 +356,7 @@
     const lv = clampLevel(hero.level),
       score = it => (typeof gearScore === 'function' ? gearScore(it) : itemLevel(it)),
       best = hero.inventory
-        .filter(it => it && it.slot === 'weapon' && !isBoundItem(it) && itemLevel(it) <= lv)
+        .filter(it => it && it.slot === 'weapon' && !isBoundItem(it) && requiredLevel(it) <= lv)
         .sort((a, b) => score(b) - score(a))[0];
     if (!best) return;
     hero.inventory.splice(hero.inventory.indexOf(best), 1);

@@ -13,7 +13,8 @@ import {
   WEAPON_TYPES
 } from '../data/equipment.js';
 import { GEAR_NAMES, RELIC_NAMES, WEAPON_NAMES } from '../data/item-names.js';
-import { clampLevel, secondaryRange } from './stats.js';
+import { MAX_LEVEL } from '../data/stats.js';
+import { clampItemLevel, clampLevel, secondaryRange } from './stats.js';
 /** @typedef {import('../types.js').Item} Item */
 
 // Qualité d'un objet ; une qualité absente ou inconnue vaut Commun.
@@ -45,13 +46,22 @@ export function ensureWeaponType(item) {
   if (item && item.slot === 'weapon' && !Object.hasOwn(WEAPON_TYPES, item.weaponType ?? ''))
     item.weaponType = 'sword';
 }
-// Niveau d'un objet (1 à 60) ; 0 pour un emplacement vide.
+// Niveau d'un objet (1 à 63) ; 0 pour un emplacement vide.
 /**
  * @param {Item | null | undefined} item
  * @returns {number}
  */
 export function itemLevel(item) {
-  return item ? Math.max(1, Math.min(60, Math.round(Number(item.level) || 1))) : 0;
+  return item ? clampItemLevel(item.level) : 0;
+}
+// Niveau requis pour équiper un objet : son niveau, sans dépasser le niveau maximal du personnage (une pièce de
+// niveau 63 se porte dès le niveau 60) ; 0 pour un emplacement vide.
+/**
+ * @param {Item | null | undefined} item
+ * @returns {number}
+ */
+export function requiredLevel(item) {
+  return item ? Math.min(itemLevel(item), MAX_LEVEL) : 0;
 }
 // Nom affiché d'un objet (pas d'amélioration : c'est le nom du drop).
 /**

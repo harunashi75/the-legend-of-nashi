@@ -225,7 +225,7 @@
   }
   // Ligne « Niveau requis » en rouge si le héros n'a pas encore le niveau de l'objet.
   function requirement(item) {
-    const level = itemLevel(item),
+    const level = requiredLevel(item),
       ok = level <= heroLevel();
     return '<div class="tooltip-req' + (ok ? '' : ' too-high') + '">Niveau requis : ' + level + '</div>';
   }

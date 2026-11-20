@@ -135,7 +135,10 @@ test('Règles partagées dans Node : objets, statistiques, niveaux, XP, économi
  const economy=await import(url('rules/economy.js')),classRules=await import(url('rules/classes.js'));
  // Objets : qualité, niveau, tirage déterministe, type d'arme, nom affiché (sans amélioration).
  assert.equal(items.rarityInfo({rarity:'Inconnue'}).name,'Commun');
- assert.deepEqual([items.itemLevel({level:0}),items.itemLevel({level:45}),items.itemLevel({level:99}),items.itemLevel(null)],[1,45,60,0]);
+ assert.deepEqual([items.itemLevel({level:0}),items.itemLevel({level:45}),items.itemLevel({level:99}),items.itemLevel(null)],[1,45,63,0]);
+ // Niveau requis : celui de l'objet, sans dépasser 60 (les pièces Mythiques de Valérion sont de niveau 63).
+ assert.deepEqual([items.requiredLevel({level:45}),items.requiredLevel({level:63}),items.requiredLevel(null)],[45,60,0]);
+ assert.ok(stats.statBase(63,'Mythique')>stats.statBase(60,'Mythique'));
  const seq=values=>{let i=0;return()=>values[i++]};
  assert.equal(items.rollRarity(()=>0).name,'Commun');assert.equal(items.rollRarity(()=>0.9905).name,'Épique');assert.equal(items.rollRarity(()=>0.99999).name,'Épique');
  const w={slot:'weapon',weaponType:'fronde'};items.ensureWeaponType(w);assert.equal(w.weaponType,'sword');

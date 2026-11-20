@@ -3,6 +3,7 @@
 // par niveau et courbe d'XP. Remplace l'ancien système Ratings52 et l'iLvl.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import {
+  MAX_ITEM_LEVEL,
   MAX_LEVEL,
   PRIMARY_KEYS,
   QUALITY_FACTOR,
@@ -20,7 +21,9 @@ import {
 
 /** @type {(level: unknown) => number} Niveau borné à [1, 60], entier. */
 const clampLevel = level => Math.max(1, Math.min(MAX_LEVEL, Math.round(Number(level) || 1)));
-export { clampLevel };
+/** @type {(level: unknown) => number} Niveau d'objet borné à [1, 63], entier. */
+const clampItemLevel = level => Math.max(1, Math.min(MAX_ITEM_LEVEL, Math.round(Number(level) || 1)));
+export { clampLevel, clampItemLevel };
 // Force d'une qualité ; celle d'une Relique dépend de son niveau.
 /**
  * @param {string | undefined} rarity
@@ -42,7 +45,7 @@ export function qualityFactor(rarity, level) {
  * @returns {number}
  */
 export function statBase(level, rarity) {
-  return (6 + 2.2 * clampLevel(level)) * qualityFactor(rarity, level);
+  return (6 + 2.2 * clampItemLevel(level)) * qualityFactor(rarity, level);
 }
 // Statistiques principales d'un équipement classique : fixées par son niveau, sa qualité et son emplacement.
 // L'artéfact n'en a pas (seul son passif agit).
