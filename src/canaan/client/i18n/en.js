@@ -527,6 +527,14 @@ export default {
   'Clique un objet pour le déposer.': 'Click an item to deposit it.',
   'Les objets portés et les Runes restent sur toi.': 'Worn items and Runes stay on you.',
   'Aucun matériau.': 'No materials.',
+  'Ta banque': 'Your bank',
+  'Ta banque est vide.': 'Your bank is empty.',
+  '{n} places libres': '{n} free slots',
+  'Clic : reprendre dans ton sac': 'Click: take back into your bag',
+  'Clic : déposer à la banque': 'Click: deposit in the bank',
+  'Ton sac': 'Your bag',
+  'Ton sac est vide.': 'Your bag is empty.',
+  'Objets': 'Items',
 
   // ------------------------------------------------------------ Équipement
   'L’équipement se prépare avant d’entrer dans l’Arène.': 'Gear is prepared before entering the Arena.',
@@ -609,6 +617,11 @@ export default {
   // ------------------------------------------------------------ Boutique
   'Marchand': 'Merchant',
   'Marchandise · {lieu}': 'Wares · {lieu}',
+  'Marchandise': 'Wares',
+  'Services': 'Services',
+  'Clic : vendre': 'Click: sell',
+  'Clic : acheter': 'Click: buy',
+  'Survol : comparer': 'Hover: compare',
   'Équipement Peu commun de ton niveau.': 'Uncommon gear of your level.',
   'Survole un objet pour le comparer, clique pour l’acheter.':
     'Hover over an item to compare it, click to buy it.',

@@ -209,7 +209,7 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),17);
  assert.ok(run('CANAAN_SHOP.stock(game.hero).every(i=>i.rarity==="Peu commun"&&i.level===20)'));
  assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.weaponType||i.slot))])')).length,17);
- const panel=run('document.getElementById("window").innerHTML');assert.match(panel,/class="shop-panel shop-columns"/);assert.match(panel,/shop-side bag-side/);
+ const panel=run('document.getElementById("window").innerHTML');assert.match(panel,/class="shop-panel shop-columns[ "]/);assert.match(panel,/shop-side bag-side/);
  const want=run('CANAAN_SHOP.stock(game.hero)[2].slot'),gold0=run('P.gold');
  assert.equal(run('CANAAN_SHOP.buy(game.hero,2)'),true);assert.equal(run('game.hero.inventory.at(-1).slot'),want);assert.equal(run('P.gold'),gold0-run('shopPriceAt(20)'));
  assert.equal(run('CANAAN_SHOP.stock(game.hero)[2].slot'),want,'remplacé par un objet du même genre');
@@ -257,7 +257,7 @@ test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, 
  // Sauvegarde et vérification au chargement.
  const snap=JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.snapshot().heros.hote.bank)'));assert.deepEqual(snap.stacks,{'fish:gardon:1':60});
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.sanitize({items:[{slot:"x"}],stacks:{"fish:gardon:1":5,"or:x:1":3,"meat:lievre:0":-2}}))')),{items:[],stacks:{'fish:gardon:1':5}});
- run('CANAAN_BANK.open()');assert.match(run('document.getElementById("window").innerHTML'),/class="bank-panel shop-columns"[\s\S]*data-action="bankWithdraw"[\s\S]*data-action="bankDeposit"/);
+ run('CANAAN_BANK.open()');assert.match(run('document.getElementById("window").innerHTML'),/class="bank-panel shop-columns[ "][\s\S]*data-action="bankWithdraw"[\s\S]*data-action="bankDeposit"/);
  // Voile d'ombre : les monstres ne voient plus l'Assassin (ni ne se tournent vers lui) ; les boss si.
  run('closePanels();game.hero.classe={id:"assassin",talents:[]};P.mp=300;P.x=150*TS;P.y=150*TS;game.world.instance=null');
  run('game.world.monsters=[{t:"Loup",x:P.x+150,y:P.y,hp:500,mhp:500,r:14,cd:0,g:0,level:20,_levelHp:true},{t:"Boss",boss:true,x:P.x-150,y:P.y,hp:5000,mhp:5000,r:20,cd:0,g:0,level:20},{t:"Titan",worldBoss:true,x:P.x,y:P.y+160,hp:5000,mhp:5000,r:20,cd:0,g:0,level:20}]');

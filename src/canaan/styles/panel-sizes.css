@@ -2,7 +2,7 @@
    Chaque fenêtre déclare sa taille (data-panel-size) ; showPanel la pose en data-size (scripts/world-entities.js) :
      bag   le sac (I), petit et haut
      char  la fiche du personnage (C), petite
-     md    quêtes (L), groupe et échange (G, J), succès (Y)
+     md    quêtes (L), groupe et échange (G, J), succès (Y), marchand et banque
      lg    talents (T), métiers (P), collections (V)
    La fenêtre ne défile jamais elle-même : l'en-tête et les onglets restent en place, seule sa zone .panel-scroll
    défile, et seulement quand son contenu déborde. .panel-fill passe la hauteur restante à ses enfants.
@@ -229,4 +229,99 @@
   margin: 0 0 8px;
   padding: 2px 0 8px;
   background: linear-gradient(180deg, #21180f 85%, rgba(33, 24, 15, 0));
+}
+
+/* ---------------------------------------------------------------- Marchand et banque (fenêtres des PNJ) */
+/* Deux colonnes de même hauteur qui remplissent la fenêtre ; dans chacune, seule la zone du milieu défile. */
+#window#window[data-size] .npc-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+#window#window[data-size] .npc-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px 12px;
+}
+#window#window[data-size] .npc-col > * {
+  flex-shrink: 0;
+}
+#window#window[data-size] .npc-col > .panel-scroll {
+  flex: 1 1 auto;
+}
+#window#window[data-size] .npc-col-title {
+  margin: 0 0 4px;
+  font-size: calc(15px * var(--font-scale));
+}
+#window#window[data-size] .npc-col-title small {
+  margin-left: 4px;
+  color: var(--rpg-muted, #b8a483);
+  font-weight: normal;
+  font-size: 0.8em;
+}
+#window#window[data-size] .npc-col .bag-subhead {
+  margin: 10px 0 4px;
+}
+#window#window[data-size] .npc-col .panel-scroll > .bag-subhead:first-child {
+  margin-top: 0;
+}
+#window#window[data-size] .npc-col .modern-bag {
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  gap: 6px;
+}
+#window#window[data-size] .npc-col .shop-stock {
+  row-gap: 22px;
+  margin-bottom: 22px;
+}
+#window#window[data-size] .npc-col .bag-upgrade {
+  margin: 6px 0;
+}
+#window#window[data-size] .npc-col .bank-free {
+  margin: 10px 0 0;
+}
+/* Ligne d'aide, pied et or : comme dans le sac (I). */
+#window#window[data-size] .npc-col .bag-hint {
+  margin: 0 0 8px;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.35;
+}
+#window#window[data-size] .npc-col .bag-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rpg-gold-dark, #6a4e2a);
+  font-size: calc(12px * var(--font-scale));
+}
+#window#window[data-size] .npc-col .bag-foot button {
+  margin: 0;
+}
+#window#window[data-size] .npc-col .bag-gold {
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  font-size: calc(14px * var(--font-scale));
+  font-weight: bold;
+  white-space: nowrap;
+}
+#window#window[data-size] .npc-col .bag-gold::before {
+  content: '';
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2b0, #e8b84a 55%, #8a5a1a);
+  box-shadow: 0 0 0 1px #3a2408;
+  vertical-align: -0.05em;
+}
+@media (max-width: 900px) {
+  #window#window[data-size] .npc-panel {
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }

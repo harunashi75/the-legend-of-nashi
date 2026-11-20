@@ -91,6 +91,101 @@ function modernPanel(html) {
   document.getElementById('window').classList.add('rpg-modern');
 }
 
+// ---------------------------------------------------------------- Fenêtres des PNJ (marchand, banque)
+// Même modèle que le sac (I), en taille « md » : un en-tête, puis deux colonnes (ce que propose le PNJ à gauche, le
+// sac du héros à droite). Chaque colonne a son titre, une ligne d'aide, sa zone qui défile et son pied.
+// Case d'un équipement : attrs porte l'action, l'info-bulle et le titre ; bare : sans son cadre (case de la boutique,
+// qui a le sien pour le prix).
+function canaanGearTile(item, attrs, bare = false) {
+  const rarity = rarityInfo(item),
+    icon = weaponIcon(item) || itemIcon[item.slot];
+  return (
+    (bare ? '' : '<div class="bag-sale-wrap">') +
+    '<button type="button" class="bag-cell"' +
+    canaanPrestige(item) +
+    ' style="border-color:' +
+    rarity.color +
+    ';--rarity:' +
+    rarity.color +
+    '" ' +
+    attrs +
+    '><span class="bag-icon">' +
+    icon +
+    '</span><span class="bag-name">' +
+    safeGearText(gearDisplayName(item)) +
+    '</span><span class="bag-ilvl">' +
+    itemLevel(item) +
+    '</span></button>' +
+    (bare ? '' : '</div>')
+  );
+}
+const canaanEmptyTiles = n =>
+  Array.from(
+    { length: Math.max(0, n) },
+    () =>
+      '<div class="bag-sale-wrap"><div class="bag-cell empty"><span class="bag-icon">＋</span></div></div>'
+  ).join('');
+// Groupe de cases sous un sous-titre (comme dans le sac) ; un groupe vide n'est pas affiché.
+function canaanTileGroup(icon, title, count, cells) {
+  if (!cells.length) return '';
+  return (
+    '<h3 class="bag-subhead">' +
+    icon +
+    ' ' +
+    title +
+    ' <small>' +
+    count +
+    '</small></h3><div class="modern-bag">' +
+    cells.join('') +
+    '</div>'
+  );
+}
+// Une colonne : titre, aide, contenu qui défile (scrollKey : sa position est gardée d'un dessin à l'autre), pied.
+function canaanNpcColumn(extra, title, hint, body, scrollKey, foot) {
+  return (
+    '<section class="shop-side ' +
+    (extra ? extra + ' ' : '') +
+    'npc-col"><h3 class="npc-col-title">' +
+    title +
+    '</h3>' +
+    (hint ? '<p class="bag-hint muted">' + hint + '</p>' : '') +
+    '<div class="panel-scroll" data-keep-scroll="' +
+    scrollKey +
+    '">' +
+    body +
+    '</div><div class="bag-foot">' +
+    (foot || '<span></span>') +
+    '</div></section>'
+  );
+}
+const canaanGoldTag = () =>
+  '<span class="bag-gold">' + Math.floor(P.gold).toLocaleString('fr-FR') + ' or</span>';
+// Colonne du sac chez un PNJ : équipement, objets, places libres et matériaux ; gearAttrs(item, i) et stackAttrs(pile)
+// donnent l'action de chaque case (vendre, déposer…).
+function canaanBagColumn(hero, { gearAttrs, stackAttrs, hint, foot }) {
+  const tile = p => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, stackAttrs(p)) + '</div>',
+    gear = hero.inventory.map((item, i) => canaanGearTile(item, gearAttrs(item, i))),
+    stacks = CANAAN_BAG.tiles(hero, 'main').map(tile),
+    mats = CANAAN_BAG.tiles(hero, 'mat').map(tile),
+    limit = canaanBagLimit(hero),
+    used = gear.length + stacks.length,
+    free = Math.max(0, limit - used);
+  const body =
+    canaanTileGroup('⚔️', 'Équipement', gear.length, gear) +
+    canaanTileGroup('🗝️', 'Objets', stacks.length, stacks) +
+    canaanTileGroup('＋', 'Libres', free, free ? [canaanEmptyTiles(free)] : []) +
+    canaanTileGroup('⟦prof_mining⟧', 'Matériaux', mats.length + ' / ' + CANAAN_BAG.MAT_LIMIT, mats) +
+    (used || mats.length ? '' : '<p class="muted bag-none">Ton sac est vide.</p>');
+  return canaanNpcColumn(
+    'bag-side',
+    '⟦menu_inventory⟧ Ton sac <small>' + used + ' / ' + limit + '</small>',
+    hint,
+    body,
+    'npc-bag',
+    foot
+  );
+}
+
 // Tooltips façon MMORPG : survol de la case, sans clic ni panneau en bas.
 const gearTooltip = document.createElement('div');
 gearTooltip.id = 'gearHoverTooltip';

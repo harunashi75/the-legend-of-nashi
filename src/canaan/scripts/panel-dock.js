@@ -34,12 +34,14 @@
     obj.windows = windows;
     CANAAN_PREFERENCES.write('layout', obj);
   }
-  // Nom stable d'une fenêtre sans bouton : la première classe propre à son contenu (shop-panel, bank-panel…).
+  // Nom stable d'une fenêtre sans bouton : la première classe en « -panel » de son contenu (shop-panel, bank-panel…),
+  // même après un en-tête commun ; sinon la première classe propre à son contenu.
+  const GENERIC = /^(rpg-head|rpg-paper|rpg-modern|panel-fill|panel-scroll|ui-tabs|muted)$/;
   function signature(html) {
-    const m = /class="([^"]+)"/.exec(html);
-    if (!m) return 'panel';
-    const classes = m[1].trim().split(/\s+/);
-    return classes.find(c => !/^(rpg-paper|rpg-modern|panel-fill|panel-scroll)$/.test(c)) || classes[0];
+    const classes = [...html.slice(0, 2000).matchAll(/class="([^"]+)"/g)].flatMap(m =>
+      m[1].trim().split(/\s+/)
+    );
+    return classes.find(c => /-panel$/.test(c)) || classes.find(c => !GENERIC.test(c)) || 'panel';
   }
   function buttonRect() {
     if (!owner || owner.startsWith('free:')) return null;

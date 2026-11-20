@@ -143,35 +143,6 @@
   let remote = null;
   const isOpen = () => modalOpen() && !!document.querySelector('#window .bank-panel');
   const myBank = () => (guest() ? remote : view(game.hero));
-  function gearTile(item, attrs) {
-    const rarity = rarityInfo(item),
-      icon = weaponIcon(item) || itemIcon[item.slot];
-    return (
-      '<div class="bag-sale-wrap"><button type="button" class="bag-cell"' +
-      canaanPrestige(item) +
-      ' style="border-color:' +
-      rarity.color +
-      ';--rarity:' +
-      rarity.color +
-      '" ' +
-      attrs +
-      '>' +
-      '<span class="bag-icon">' +
-      icon +
-      '</span><span class="bag-name">' +
-      esc(gearDisplayName(item)) +
-      '</span><span class="bag-ilvl">' +
-      itemLevel(item) +
-      '</span></button></div>'
-    );
-  }
-  const stackTile = (p, attrs) => '<div class="bag-sale-wrap">' + CANAAN_BAG.cell(p, attrs) + '</div>';
-  const empty = n =>
-    Array.from(
-      { length: Math.max(0, n) },
-      () =>
-        '<div class="bag-sale-wrap"><div class="bag-cell empty"><span class="bag-icon">＋</span></div></div>'
-    ).join('');
   let shown = '';
   const signature = () =>
     JSON.stringify([
@@ -179,91 +150,65 @@
       game.hero.inventory.map(i => i.id),
       CANAAN_BAG.tiles(game.hero).map(p => CANAAN_BAG.token(p))
     ]);
+  // Fenêtre au modèle du sac (taille md) : la banque à gauche, le sac à droite.
   function render() {
     if (!isOpen()) return;
     shown = signature();
     const bank = myBank(),
-      hero = game.hero;
-    let left;
-    if (!bank) left = '<p class="muted">Approche-toi du banquier pour ouvrir ta banque.</p>';
+      hero = game.hero,
+      take = '" title="' + tt('Reprendre', null, 'banque') + '"',
+      stackTile = p =>
+        '<div class="bag-sale-wrap">' +
+        CANAAN_BAG.cell(p, 'data-action="bankWithdraw" data-ref="' + esc(CANAAN_BAG.token(p)) + take) +
+        '</div>';
+    let body;
+    if (!bank) body = '<p class="muted">Approche-toi du banquier pour ouvrir ta banque.</p>';
     else {
-      const tiles = [
-        ...bank.items.map(it =>
-          gearTile(
+      const gear = bank.items.map(it =>
+          canaanGearTile(
             it,
-            'data-tooltip-bank="' +
-              esc(it.id) +
-              '" data-action="bankWithdraw" data-ref="' +
-              esc(it.id) +
-              '" title="' +
-              tt('Reprendre', null, 'banque') +
-              '"'
+            'data-tooltip-bank="' + esc(it.id) + '" data-action="bankWithdraw" data-ref="' + esc(it.id) + take
           )
         ),
-        ...stackTiles(bank).map(p =>
-          stackTile(
-            p,
-            'data-action="bankWithdraw" data-ref="' +
-              esc(CANAAN_BAG.token(p)) +
-              '" title="' +
-              tt('Reprendre', null, 'banque') +
-              '"'
-          )
-        )
-      ];
-      // Toutes les cases occupées, puis assez de cases libres pour remplir la dernière rangée (la place restante est indiquée).
-      left =
-        '<p class="muted">Clique un objet pour le reprendre dans ton sac.</p><div class="modern-bag bank-grid">' +
-        tiles.join('') +
-        empty(Math.min(CAPACITY - tiles.length, 40)) +
-        '</div>';
+        piles = stackTiles(bank),
+        stacks = piles.filter(p => !CANAAN_BAG.isMat(p.kind)).map(stackTile),
+        mats = piles.filter(p => CANAAN_BAG.isMat(p.kind)).map(stackTile),
+        free = CAPACITY - used(bank);
+      body =
+        canaanTileGroup('⚔️', 'Équipement', gear.length, gear) +
+        canaanTileGroup('🗝️', 'Objets', stacks.length, stacks) +
+        canaanTileGroup('⟦prof_mining⟧', 'Matériaux', mats.length, mats) +
+        (gear.length || piles.length ? '' : '<p class="muted bag-none">Ta banque est vide.</p>') +
+        '<p class="muted bank-free">＋ ' +
+        tt('{n} places libres', { n: free }) +
+        '</p>';
     }
-    const gear = hero.inventory.map((it, i) =>
-        gearTile(
-          it,
-          'data-tooltip-index="' +
+    modernPanel(
+      rpgHeader('🏦 Banque <small>Banquier Orvin</small>') +
+        '<div class="bank-panel shop-columns npc-panel" data-panel-size="md">' +
+        canaanNpcColumn(
+          '',
+          '🏦 Ta banque <small>' + (bank ? used(bank) : 0) + ' / ' + CAPACITY + '</small>',
+          'Clic : reprendre dans ton sac',
+          body,
+          'npc-bank',
+          '<span class="muted">Les objets portés et les Runes restent sur toi.</span>'
+        ) +
+        canaanBagColumn(hero, {
+          gearAttrs: (it, i) =>
+            'data-tooltip-index="' +
             i +
             '" data-action="bankDeposit" data-ref="' +
             esc(it.id) +
-            '" title="Déposer à la banque"'
-        )
-      ),
-      depositTile = p =>
-        stackTile(
-          p,
-          'data-action="bankDeposit" data-ref="' + esc(CANAAN_BAG.token(p)) + '" title="Déposer à la banque"'
-        ),
-      stacks = CANAAN_BAG.tiles(hero, 'main').map(depositTile),
-      mats = CANAAN_BAG.tiles(hero, 'mat').map(depositTile);
-    showPanel(
-      '<div class="rpg-head"><h2>🏦 Banque</h2></div><div class="bank-panel shop-columns">' +
-        '<section class="shop-side"><h3>🏦 Ta banque · ' +
-        (bank ? used(bank) : 0) +
-        ' / ' +
-        CAPACITY +
-        '</h3>' +
-        left +
-        '</section>' +
-        '<section class="shop-side bag-side"><h3>⟦menu_inventory⟧ Ton sac · ' +
-        canaanBagUsed(hero) +
-        ' / ' +
-        canaanBagLimit(hero) +
-        '</h3>' +
-        '<p class="muted">Clique un objet pour le déposer. Les objets portés et les Runes restent sur toi.</p>' +
-        '<div class="modern-bag">' +
-        gear.join('') +
-        stacks.join('') +
-        empty(canaanBagLimit(hero) - gear.length - stacks.length) +
-        '</div>' +
-        '<h3 class="bag-subhead">⟦prof_mining⟧ Matériaux · ' +
-        mats.length +
-        ' / ' +
-        CANAAN_BAG.MAT_LIMIT +
-        '</h3>' +
-        (mats.length
-          ? '<div class="modern-bag">' + mats.join('') + '</div>'
-          : '<p class="muted">Aucun matériau.</p>') +
-        '</section></div>'
+            '" title="Déposer à la banque"',
+          stackAttrs: p =>
+            'data-action="bankDeposit" data-ref="' +
+            esc(CANAAN_BAG.token(p)) +
+            '" title="Déposer à la banque"',
+          hint: 'Clic : déposer à la banque',
+          foot: '<span></span>' + canaanGoldTag()
+        }) +
+        '</div>'
     );
   }
   function open() {

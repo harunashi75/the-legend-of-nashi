@@ -842,12 +842,6 @@ body {
   grid-column: 1 / -1;
   margin: 6px 0;
 }
-/* Banque : jusqu'à 500 cases, la grille défile dans sa fenêtre. */
-#window#window .bank-grid {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 6px 4px 6px 0;
-}
 /* Enchantements : troisième secondaire dans l'info-bulle, marque sur la case, enchantement choisi. */
 #gearHoverTooltip .stat-line.enchant {
   color: #d9a8ff;
