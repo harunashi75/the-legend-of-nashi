@@ -66,7 +66,7 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({qv:2,fish:{"thon:4":1}}).fish)')),{'thon:4':1});
  // Fenêtre P : trois onglets.
  run('toggleProfessions()');const html=()=>g.document.getElementById('window').innerHTML;
- assert.match(html(),/Tes poissons sont des objets de ton sac/);assert.doesNotMatch(html(),/Bourriche/);run('CANAAN_PROF.actions.tab("cuisine")');assert.match(html(),/Soupe de gardon/);run('CANAAN_PROF.actions.tab("repas")');assert.match(html(),/Manger|garde-manger/);
+ assert.match(html(),/Tes poissons sont des objets de ton sac/);assert.doesNotMatch(html(),/Bourriche/);run('CANAAN_PROF.actions.tab("cuisine")');assert.match(html(),/Soupe de gardon/);run('CANAAN_PROF.actions.tab("repas")');assert.match(html(),/Manger|garde-manger/);assert.match(html(),/class="on" data-action="profTab" data-tab="cuisine"/,'Repas fait partie de la Cuisine');assert.match(html(),/prof-nav[^]*Récolte[^]*data-tab="peche"[^]*Artisanat[^]*data-tab="cuisine"/);
  assert.equal(errors.length,0,errors.join('\n'));
 });
 

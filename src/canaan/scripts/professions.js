@@ -908,6 +908,58 @@
       '</div>'
     );
   }
+  // Liste des métiers, à gauche de la fenêtre (comme le livre des métiers des grands MMO) : la récolte, puis
+  // l'artisanat ; chacun avec son niveau. La cuisine réunit la préparation des repas et le garde-manger.
+  const NAV = [
+    [
+      'Récolte',
+      [
+        ['peche', '⟦prof_fishing⟧ Pêche', 'fishing'],
+        ['chasse', '⟦prof_hunting⟧ Chasse', 'hunting'],
+        ['minage', '⟦prof_mining⟧ Minage', 'mining'],
+        ['cueillette', '⟦prof_herbalism⟧ Cueillette', 'herbalism']
+      ]
+    ],
+    [
+      'Artisanat',
+      [
+        ['cuisine', '⟦prof_cooking⟧ Cuisine', 'cooking'],
+        // « Enchantement » : ici le métier (Enchanting), pas l'objet (Enchantment).
+        ['enchant', '⟦prof_enchanting⟧ ' + tt('Enchantement', null, 'métier'), 'enchanting']
+      ]
+    ]
+  ];
+  const TABS = NAV.flatMap(([, list]) => list.map(([id]) => id));
+  function nav() {
+    const prof = myProf();
+    return (
+      '<nav class="prof-nav" role="tablist">' +
+      NAV.map(
+        ([group, list]) =>
+          '<h4>' +
+          esc(group) +
+          '</h4>' +
+          list
+            .map(
+              ([id, label, skill]) =>
+                '<button type="button" role="tab" aria-selected="' +
+                (ui.tab === id) +
+                '" class="' +
+                (ui.tab === id ? 'on' : '') +
+                '" data-action="profTab" data-tab="' +
+                id +
+                '"><span>' +
+                label +
+                '</span><small>' +
+                esc(tt('Niv. {n}', { n: prof[skill].level })) +
+                '</small></button>'
+            )
+            .join('')
+      ).join('') +
+      '</nav>'
+    );
+  }
+  // Garde-manger, sous les recettes de l'onglet Cuisine : bonus en cours et repas du sac, à manger.
   function tabMeals() {
     const meals = stock(myProf().meals, id => RECIPES[id]),
       live = myLive();
@@ -959,21 +1011,13 @@
   let shown = '';
   function render() {
     if (!modalOpen() || !document.querySelector('#window .prof-panel')) return;
-    const tabs = [
-      ['peche', '⟦prof_fishing⟧ Pêche'],
-      ['chasse', '⟦prof_hunting⟧ Chasse'],
-      ['minage', '⟦prof_mining⟧ Minage'],
-      ['cueillette', '⟦prof_herbalism⟧ Cueillette'],
-      ['cuisine', '⟦prof_cooking⟧ Cuisine'],
-      // « Enchantement » : ici le métier (Enchanting), pas l'objet (Enchantment).
-      ['enchant', '⟦prof_enchanting⟧ ' + tt('Enchantement', null, 'métier')],
-      ['repas', '🍽️ Repas']
-    ];
     const helpers = { bar, esc, tips, status };
     shown = signature();
     showPanel(
-      '<div class="rpg-head"><h2>🎣 Métiers</h2></div><div class="rpg-paper prof-panel">' +
-        canaanTabs('profTab', ui.tab, tabs) +
+      canaanHead('⟦menu_professions⟧ Métiers') +
+        '<div class="rpg-paper prof-panel"><div class="prof-layout">' +
+        nav() +
+        '<div class="prof-page">' +
         (ui.tab === 'peche'
           ? tabFishing()
           : ui.tab === 'chasse'
@@ -984,10 +1028,8 @@
                 ? CANAAN_GATHER.tabs.herbalism(helpers)
                 : ui.tab === 'enchant'
                   ? CANAAN_GATHER.tabs.enchant(helpers)
-                  : ui.tab === 'cuisine'
-                    ? tabCooking()
-                    : tabMeals()) +
-        '</div>'
+                  : tabCooking() + '<h3>🍽️ Garde-manger</h3>' + tabMeals()) +
+        '</div></div></div>'
     );
   }
   // Ce qui change l'affichage : métiers, pêche et repas en cours, onglet, sac et équipement (enchantement).
@@ -1047,8 +1089,8 @@
   };
   const actions = {
     tab(id) {
-      if (['peche', 'chasse', 'minage', 'cueillette', 'cuisine', 'enchant', 'repas'].includes(id))
-        ui.tab = id;
+      if (id === 'repas') id = 'cuisine'; // l'ancien onglet Repas fait partie de la Cuisine
+      if (TABS.includes(id)) ui.tab = id;
       render();
     },
     codex(kind) {

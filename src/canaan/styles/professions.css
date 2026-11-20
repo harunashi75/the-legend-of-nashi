@@ -7,6 +7,76 @@
   width: 100%;
   box-sizing: border-box;
 }
+/* Liste des métiers à gauche (récolte, puis artisanat), la page du métier choisi à droite. */
+#window .prof-layout {
+  display: grid;
+  grid-template-columns: minmax(170px, 210px) 1fr;
+  gap: 14px;
+  align-items: start;
+}
+#window .prof-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 12px;
+  border-right: 1px solid var(--rpg-gold-dark, #6a4e2a);
+}
+#window .prof-nav h4 {
+  margin: 8px 0 2px;
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#window .prof-nav h4:first-child {
+  margin-top: 0;
+}
+#window .prof-nav button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background: linear-gradient(180deg, #33251a, #1a120c);
+  border: 1px solid #6a4e2a;
+  border-radius: 4px;
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+}
+#window .prof-nav button small {
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(11px * var(--font-scale));
+  white-space: nowrap;
+}
+#window .prof-nav button.on {
+  background: linear-gradient(180deg, #8a6420, #5a3e12);
+  border-color: #f6dc98;
+  color: #fff4d0;
+}
+#window .prof-nav button.on small {
+  color: #ffe9a8;
+}
+#window .prof-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  #window .prof-layout {
+    grid-template-columns: 1fr;
+  }
+  #window .prof-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-right: 0;
+    border-right: 0;
+  }
+  #window .prof-nav h4 {
+    display: none;
+  }
+}
+/* Pastilles de choix dans une page (statistique d'enchantement). */
 #window .prof-tabs {
   display: flex;
   flex-wrap: wrap;
