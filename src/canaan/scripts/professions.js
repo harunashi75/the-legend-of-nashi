@@ -1015,9 +1015,11 @@
     shown = signature();
     showPanel(
       canaanHead('⟦menu_professions⟧ Métiers') +
-        '<div class="rpg-paper prof-panel"><div class="prof-layout">' +
+        '<div class="rpg-paper prof-panel panel-fill" data-panel-size="lg"><div class="prof-layout">' +
         nav() +
-        '<div class="prof-page">' +
+        '<div class="prof-page panel-scroll" data-keep-scroll="prof-' +
+        ui.tab +
+        '">' +
         (ui.tab === 'peche'
           ? tabFishing()
           : ui.tab === 'chasse'

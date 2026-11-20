@@ -429,7 +429,7 @@
       Math.floor(P.gold);
     showPanel(
       canaanGroupHead('trade') +
-        '<div class="rpg-paper trade-panel">' +
+        '<div class="rpg-paper trade-panel panel-scroll" data-panel-size="md">' +
         (v.note ? '<p class="trade-note" role="status">' + esc(v.note) + '</p>' : '') +
         body(v) +
         '</div>'

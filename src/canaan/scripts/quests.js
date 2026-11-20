@@ -2745,10 +2745,12 @@
       ['done', '✓ Terminées']
     ];
     modernPanel(
-      '<div class="quest-journal">' +
+      '<div class="quest-journal panel-fill" data-panel-size="md">' +
         canaanHead('📜 Journal de quêtes') +
         canaanTabs('questTab', tab, tabs) +
-        '<div class="quest-body">' +
+        '<div class="quest-body panel-scroll" data-keep-scroll="quest-' +
+        tab +
+        '">' +
         html +
         '</div></div>'
     );

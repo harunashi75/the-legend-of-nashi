@@ -595,7 +595,7 @@
     const list = guests();
     showPanel(
       canaanGroupHead('group') +
-        '<div class="rpg-paper group-panel">' +
+        '<div class="rpg-paper group-panel panel-scroll" data-panel-size="md">' +
         '<p class="group-note">Tes amis te rejoignent en ligne avec le code du salon ; un compagnon local suit ton héros et combat seul. Chacun garde son propre butin, et tous sont enregistrés dans cette aventure : ' +
         GUEST_LIMIT +
         ' au plus, ' +

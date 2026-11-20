@@ -420,3 +420,19 @@ test('Curseur du jeu partout : chaque forme est un gantelet, aucune forme du cur
  const overlay=fs.readFileSync(path.join(dir,'styles','ui-overlay.css'),'utf8');
  for(const name of ['default','pointer','blocked','text','grab','grabbing','help'])assert.match(overlay,new RegExp('--cursor-'+name+':\\s*\\n\\s*url\\("data:image/svg\\+xml,'),name);
 });
+
+test('Fenêtres à taille fixe, comme dans les MMO : petit sac et petite fiche, grandes collections ; une seule zone défile',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const size=()=>run('document.getElementById("window").dataset.size||""');
+ const scrolls=()=>(run('document.getElementById("window").innerHTML').match(/class="[^"]*\bpanel-scroll\b/g)||[]).length;
+ run('closePanels();renderInventory()');assert.equal(size(),'bag');assert.equal(scrolls(),1,'le sac : sa grille défile, pas son en-tête ni son pied');
+ assert.match(run('document.getElementById("window").innerHTML'),/class="bag-foot"[^]*class="bag-gold"/);
+ run('canaanCharacterSection("gear")');assert.equal(size(),'char');assert.equal(scrolls(),1);
+ run('canaanCollections("bestiary")');assert.equal(size(),'lg');assert.equal(scrolls(),1);
+ run('canaanCharacterSection("titles")');assert.equal(size(),'char');
+ // Les autres fenêtres (dialogues, boutiques, portails) gardent la taille de leur contenu ; fermer efface la taille.
+ run('showPanel("<p>Dialogue</p>")');assert.equal(size(),'');
+ run('canaanCollections("wardrobe");closePanels()');assert.equal(size(),'');
+ const css=fs.readFileSync(path.join(__dirname,'..','src','canaan','styles','panel-sizes.css'),'utf8');
+ for(const s of ['bag','char','md','lg'])assert.match(css,new RegExp("data-size='"+s+"'\\]\\s*\\{\\s*--panel-w"),s);
+});

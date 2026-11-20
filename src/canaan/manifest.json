@@ -469,6 +469,11 @@
     },
     {
       "kind": "style",
+      "id": "canaan-panel-sizes",
+      "file": "styles/panel-sizes.css"
+    },
+    {
+      "kind": "style",
       "id": "canaan-rpg-theme",
       "file": "styles/rpg-theme.css"
     },

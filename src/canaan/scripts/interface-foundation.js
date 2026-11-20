@@ -21,12 +21,9 @@ function canaanPrestige(item) {
         ? ' data-prestige="relique"'
         : '';
 }
-function rpgHeader(title) {
-  return (
-    '<div class="rpg-head"><h2>' +
-    title +
-    '</h2><div class="rpg-tabs"><button data-action="renderInventory">⟦menu_inventory⟧ Sac</button><button data-action="renderCharacter">⟦menu_character⟧ Personnage</button></div></div>'
-  );
+// En-tête du sac et de la fiche (comme toute fenêtre : C et I passent de l'une à l'autre).
+function rpgHeader(title, right = '') {
+  return canaanHead(title, right);
 }
 
 // Onglets communs à toutes les fenêtres (même allure partout) : tabs = [[id, libellé, compteur?], …]. Chaque bouton

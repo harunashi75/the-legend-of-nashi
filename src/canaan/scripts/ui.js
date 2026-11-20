@@ -117,17 +117,18 @@
       free = Math.max(0, BAG_LIMIT - used),
       matUsed = CANAAN_BAG.matUsed(game.hero);
     modernPanel(
-      rpgHeader('🎒 Sac — ' + used + '/' + BAG_LIMIT + ' emplacements') +
-        '<div class="modern-body">' +
-        '<div class="bag-toolbar"><p class="muted">Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). ' +
-        (merchant
-          ? '💰 Marchand proche : vente disponible.'
-          : '💰 Pour vendre, rends-toi chez un marchand et appuie sur E.') +
-        '</p><button type="button" class="bag-sort" data-action="sortBag" title="Ranger l’équipement : par emplacement, qualité puis niveau"' +
-        (game.hero.inventory.length < 2 ? ' disabled' : '') +
-        '>⇅ Trier</button></div>' +
-        '<p class="weapon-hint">⚔️ Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat.</p>' +
-        '<p class="weapon-hint">⚒ Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.</p>' +
+      rpgHeader(
+        '🎒 Sac <small>' + used + ' / ' + BAG_LIMIT + '</small>',
+        '<button type="button" class="bag-sort" data-action="sortBag" title="Ranger l’équipement : par emplacement, qualité puis niveau"' +
+          (game.hero.inventory.length < 2 ? ' disabled' : '') +
+          '>⇅ Trier</button>'
+      ) +
+        // Une ligne d'aide ; le détail au survol.
+        '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic sur une arme : Arme 1 · Bouton « Arme 2 » : réserve · Q : changer en combat. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
+        'Clic : équiper · 2 : arme de réserve · ⚒ démanteler · ' +
+        (merchant ? '💰 Marchand proche : vente disponible.' : '💰 Vente chez un marchand (E).') +
+        '</p>' +
+        '<div class="modern-body bag-panel panel-scroll" data-panel-size="bag">' +
         bagGroup('⚔️', 'Équipement', gear.length, gear) +
         bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
         bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
@@ -150,10 +151,15 @@
         '<p class="muted">Leurs ' +
         CANAAN_BAG.MAT_LIMIT +
         ' cases de 100 ne prennent pas la place du sac.</p></div>' +
+        '</div>' +
+        // Pied du sac, comme dans les MMO : l'or du héros (et la vente rapide près d'un marchand).
+        '<div class="bag-foot">' +
         (merchant
-          ? '<div class="modern-foot"><button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button></div>'
-          : '') +
-        '</div>'
+          ? '<button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button>'
+          : '<span></span>') +
+        '<span class="bag-gold">' +
+        Math.floor(P.gold).toLocaleString('fr-FR') +
+        ' or</span></div>'
     );
     prepare('inventory');
   }
@@ -258,11 +264,15 @@
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
         tabs +
+        '<div class="char-body panel-scroll" data-panel-size="char" data-keep-scroll="char-' +
+        charTab +
+        '">' +
         (rubis
           ? window.CANAAN_RUBIS.section()
           : charTab === 'titles'
             ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
-            : gear)
+            : gear) +
+        '</div>'
     );
     drawCharacterPreview();
     prepare('character');

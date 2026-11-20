@@ -15,12 +15,18 @@ const CANAAN_COLLECTIONS = (() => {
       id: 'bestiary',
       label: '📖 Bestiaire',
       count: CANAAN_ACHIEVEMENTS.bestiaryCount(game.hero),
-      section: () => '<div class="ach-scroll">' + CANAAN_ACHIEVEMENTS.bestiary(game.hero) + '</div>'
+      section: () =>
+        '<div class="ach-scroll panel-scroll" data-keep-scroll="bestiary">' +
+        CANAAN_ACHIEVEMENTS.bestiary(game.hero) +
+        '</div>'
     },
     {
       id: 'digging',
       label: '⟦tool_shovel⟧ Fouilles',
-      section: () => '<div class="ach-scroll">' + CANAAN_DIG.tab(game.hero) + '</div>'
+      section: () =>
+        '<div class="ach-scroll panel-scroll" data-keep-scroll="digging">' +
+        CANAAN_DIG.tab(game.hero) +
+        '</div>'
     }
   ];
   const tabs = () => [...CANAAN_EXT.collectionTabs(), ...own()];
@@ -40,15 +46,18 @@ const CANAAN_COLLECTIONS = (() => {
     hideGearTooltip();
     shown = signature();
     showPanel(
-      '<div class="collections-panel">' +
+      '<div class="collections-panel panel-fill" data-panel-size="lg">' +
         canaanHead('⟦menu_collections⟧ Collections') +
         canaanTabs(
           'collectionsTab',
           tab,
           list.map(t => [t.id, t.label, t.count])
         ) +
+        '<div class="collections-body panel-fill" data-tab="' +
+        tab +
+        '">' +
         at.section() +
-        '</div>'
+        '</div></div>'
     );
     win().dataset.canaanPanel = 'collections';
   }

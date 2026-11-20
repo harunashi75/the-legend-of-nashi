@@ -1755,7 +1755,7 @@
     const scroll = document.querySelector('#window .ach-scroll')?.scrollTop || 0;
     showPanel(
       canaanHead('⟦menu_achievements⟧ Succès') +
-        '<div class="rpg-paper ach-panel">' +
+        '<div class="rpg-paper ach-panel panel-fill" data-panel-size="md">' +
         '<div class="ach-top"><div class="ach-total"><b>' +
         done +
         ' / ' +
@@ -1765,7 +1765,7 @@
         '</b> points</div><div class="ach-bar big"><i style="width:' +
         Math.round((100 * done) / LIST.length) +
         '%"></i></div></div>' +
-        '<div class="ach-scroll">' +
+        '<div class="ach-scroll panel-scroll">' +
         tabSucces(h) +
         '</div></div>'
     );

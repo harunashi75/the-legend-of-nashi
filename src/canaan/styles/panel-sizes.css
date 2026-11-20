@@ -1,0 +1,237 @@
+/* Tailles des fenêtres, comme dans les grands MMO : chaque fenêtre a une taille fixe adaptée à ce qu'elle montre.
+   Chaque fenêtre déclare sa taille (data-panel-size) ; showPanel la pose en data-size (scripts/world-entities.js) :
+     bag   le sac (I), petit et haut
+     char  la fiche du personnage (C), petite
+     md    quêtes (L), groupe et échange (G, J), succès (Y)
+     lg    talents (T), métiers (P), collections (V)
+   La fenêtre ne défile jamais elle-même : l'en-tête et les onglets restent en place, seule sa zone .panel-scroll
+   défile, et seulement quand son contenu déborde. .panel-fill passe la hauteur restante à ses enfants.
+   Chargée juste avant le thème : ses sélecteurs (#window#window[data-size]) remplacent les largeurs et hauteurs
+   données ailleurs à ces fenêtres. */
+#window#window[data-size] {
+  --panel-w: 880px;
+  --panel-h: 660px;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--panel-w), calc(100vw - 24px));
+  max-width: none;
+  height: min(var(--panel-h), calc(100vh - 36px));
+  max-height: none;
+  overflow: hidden;
+  padding: 14px 18px 16px;
+}
+#window#window[data-size='bag'] {
+  --panel-w: 470px;
+  --panel-h: 680px;
+}
+#window#window[data-size='char'] {
+  --panel-w: 760px;
+  --panel-h: 660px;
+}
+#window#window[data-size='md'] {
+  --panel-w: 880px;
+  --panel-h: 680px;
+}
+#window#window[data-size='lg'] {
+  --panel-w: 1140px;
+  --panel-h: 780px;
+}
+#window[data-size] > * {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+#window[data-size] .panel-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#window[data-size] .panel-fill > * {
+  flex-shrink: 0;
+}
+#window[data-size] .panel-fill > .panel-fill,
+#window[data-size] .panel-fill > .panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+#window[data-size] .panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+/* En-tête : le titre à droite du bouton de fermeture, sur une seule ligne. */
+#window[data-size] .rpg-head {
+  min-height: 34px;
+  padding: 0 0 8px 44px;
+  margin-bottom: 10px;
+}
+#window[data-size] .rpg-head h2 {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#window[data-size] .rpg-head h2 small {
+  margin-left: 6px;
+  color: var(--rpg-muted, #b8a483);
+  font-size: 0.6em;
+  font-weight: normal;
+}
+#window[data-size] .ui-tabs {
+  margin-bottom: 10px;
+}
+#window[data-size] .classes > h2 {
+  padding-left: 44px;
+}
+
+/* ---------------------------------------------------------------- Sac (I) */
+#window[data-size='bag'] .bag-hint {
+  margin: 0 0 8px;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.35;
+  cursor: var(--cursor-help);
+}
+#window[data-size='bag'] .bag-panel .bag-subhead {
+  margin: 8px 0 4px;
+}
+#window[data-size='bag'] .bag-panel .bag-subhead:first-child {
+  margin-top: 0;
+}
+#window[data-size='bag'] .bag-panel .modern-bag {
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+}
+#window[data-size='bag'] .bag-panel .bag-none {
+  margin: 0;
+}
+#window[data-size='bag'] .bag-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rpg-gold-dark, #6a4e2a);
+}
+#window[data-size='bag'] .bag-foot button {
+  margin: 0;
+}
+#window[data-size='bag'] .bag-gold {
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  font-weight: bold;
+}
+#window[data-size='bag'] .bag-gold::before {
+  content: '';
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2b0, #e8b84a 55%, #8a5a1a);
+  box-shadow: 0 0 0 1px #3a2408;
+  vertical-align: -0.05em;
+}
+#window[data-size='bag'] .rpg-head .bag-sort {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------- Personnage (C) */
+/* Équipement : la poupée (emplacements de chaque côté du héros), les statistiques compactes à côté. */
+#window[data-size='char'] .character-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+#window[data-size='char'] .character-left .rpg-paper,
+#window[data-size='char'] .character-layout > .rpg-paper {
+  margin: 0;
+  padding: 10px;
+}
+/* #window#window : plus fort que les règles de la poupée du thème. */
+#window#window[data-size='char'] .character-doll {
+  column-gap: 12px;
+}
+#window#window[data-size='char'] .doll-center {
+  width: 140px;
+}
+#window[data-size='char'] .doll-center canvas {
+  width: 136px;
+  height: 200px;
+}
+#window[data-size='char'] .stat-desc {
+  font-size: calc(10.5px * var(--font-scale));
+  line-height: 1.25;
+}
+#window[data-size='char'] .stat-table td,
+#window[data-size='char'] .stat-table th {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+/* Runes : emplacements, puis collection et effets, l'un sous l'autre. */
+#window[data-size='char'] .char-body > .rubis-layout,
+#window[data-size='char'] .char-body .rubis-grid {
+  grid-template-columns: 1fr;
+}
+
+/* ---------------------------------------------------------------- Quêtes (L) */
+#window[data-size] .quest-journal .rpg-head {
+  margin-bottom: 10px;
+}
+
+/* ---------------------------------------------------------------- Métiers (P) : la liste reste, la page défile. */
+#window[data-size] .prof-panel {
+  padding: 12px 14px;
+}
+#window[data-size] .prof-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+}
+#window[data-size] .prof-nav {
+  overflow: hidden auto;
+}
+#window[data-size] .prof-page .prof-recipes,
+#window[data-size] .prof-page .prof-grid {
+  max-height: none;
+  overflow: visible;
+}
+
+/* ---------------------------------------------------------------- Collections (V) */
+/* Journaux de collection : seule la liste défile ; bestiaire et fouilles : toute la page défile. */
+#window[data-size] .collections-body > .rpg-paper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#window[data-size] .collections-body .collection {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+/* ---------------------------------------------------------------- Groupe (G) et échange (J) */
+#window[data-size] .group-panel,
+#window[data-size] .trade-panel {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- Succès (Y) : les catégories restent en haut. */
+#window[data-size] .ach-scroll .ach-chips {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0 0 8px;
+  padding: 2px 0 8px;
+  background: linear-gradient(180deg, #21180f 85%, rgba(33, 24, 15, 0));
+}

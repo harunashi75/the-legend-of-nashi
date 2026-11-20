@@ -148,6 +148,7 @@ function modalOpen() {
 function closePanels() {
   currentGearPanel = '';
   document.getElementById('window').classList.remove('rpg-modern');
+  delete document.getElementById('window').dataset.size;
   document.getElementById('overlay').style.display = 'none';
   hideGearTooltip();
 }
@@ -159,6 +160,17 @@ function canaanScrollKey(el, win) {
   for (let e = el; e && e !== win; e = e.parentElement)
     path.push(e.tagName + '.' + (e.getAttribute('class') || ''));
   return path.join('<');
+}
+// Taille de chaque fenêtre, comme dans les grands MMO : une taille fixe adaptée à ce qu'elle montre (petit sac,
+// petite fiche, grands talents et collections…). Chaque fenêtre la déclare dans son propre contenu
+// (data-panel-size="bag", "char", "md" ou "lg") ; showPanel la pose en data-size sur la fenêtre, décrite dans
+// styles/panel-sizes.css. Sans déclaration (dialogues, boutiques, portails, carte), la fenêtre garde la taille de son
+// contenu. Dans une fenêtre à taille fixe, seule sa zone .panel-scroll défile, et seulement si elle déborde.
+const CANAAN_PANEL_SIZE = /data-panel-size="(bag|char|md|lg)"/;
+function canaanPanelSize(win, html) {
+  const found = CANAAN_PANEL_SIZE.exec(html);
+  if (found) win.dataset.size = found[1];
+  else delete win.dataset.size;
 }
 // Toute fenêtre redessinée garde la position de chacune de ses zones qui défilent (un clic dans une longue liste ne
 // la remet pas en haut) ; une zone absente du nouveau dessin repart du haut.
@@ -181,6 +193,7 @@ function showPanel(html) {
   win.innerHTML =
     '<button type="button" class="os-close" aria-label="Fermer la fenêtre" title="Fermer (Échap)" data-action="closePanels">×</button>' +
     html;
+  canaanPanelSize(win, html);
   win.scrollTop = oldScroll;
   if (!kept.size) return;
   const seen = new Map();

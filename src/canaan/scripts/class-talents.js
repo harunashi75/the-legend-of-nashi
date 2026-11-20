@@ -1252,7 +1252,7 @@
       page = ((ui.page % n) + n) % n,
       c = CLASSES[page];
     return (
-      '<div class="classes class-picker"><h2>⚔️ Choisis ta classe <small>· ' +
+      '<div class="classes class-picker panel-scroll" data-panel-size="lg"><h2>⚔️ Choisis ta classe <small>· ' +
       (page + 1) +
       ' / ' +
       n +
@@ -1296,7 +1296,7 @@
       fighting = inCombat(hero),
       next = TALENT_SLOT_LEVELS[open];
     let html =
-      '<div class="classes" style="--class-color:' +
+      '<div class="classes panel-scroll" data-panel-size="lg" style="--class-color:' +
       c.color +
       '"><h2>' +
       c.icon +
