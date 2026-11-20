@@ -526,12 +526,12 @@ Chaque instance déclare son niveau requis (`level`), le niveau de ses ennemis (
 
 Le raid 4, **Le Jugement de Célestia**, déclare plutôt des `difficulties` choisies au portail ; en Héroïque, ses ennemis ont ×1,65 PV et ×1,40 dégâts. La difficulté jouée est gardée dans `instanceState.difficulty` et lue par `instanceDifficulty()`. Chaque instance déclare aussi son biome (`biome`) ; sa position est fixée par la génération de l’île.
 
-Hors instance, les récompenses sont décrites une seule fois dans `SOURCE_REWARDS` (`shared/data/economy.js`) : un objet garanti ; sac plein, l’objet est converti en or. Les ennemis ordinaires des donjons et raids (ligne « Mob d’instance ») ne donnent rien, pour ne pas remplir le sac : l’équipement d’une instance vient de ses boss.
+Hors instance, les récompenses sont décrites une seule fois dans `SOURCE_REWARDS` (`shared/data/economy.js`) : un objet garanti, ou tiré pour les monstres (chance d’un objet, puis qualité selon des poids ; règle `sourceDrop`, `shared/rules/economy.js`) ; sac plein, l’objet est converti en or. Chaque monstre de l’île et des Tréfonds lâche aussi de l’or au sol : 10 + 3 × son niveau, ×3,5 pour une élite (`MOB_GOLD`, règle `mobGold`). Les ennemis ordinaires des donjons et raids (ligne « Mob d’instance ») ne donnent rien, pour ne pas remplir le sac : l’équipement d’une instance vient de ses boss.
 
-| Source | Objet garanti | En plus |
+| Source | Objet | En plus |
 | --- | --- | --- |
-| Mob normal | Commun, au niveau du monstre (Peu commun une fois sur sept avec la Rune Prospecteur) | — |
-| Mob élite | Commun, au niveau du monstre | — |
+| Mob normal | 38 % de chance, au niveau du monstre : Commun 80 %, Peu commun 17 %, Rare 3 % (un Commun devient Peu commun 15 % du temps avec la Rune Prospecteur) | 10 + 3 × niveau or |
+| Mob élite | Toujours, au niveau du monstre : Commun 60 %, Peu commun 30 %, Rare 9 %, Épique 1 % | (10 + 3 × niveau) × 3,5 or |
 | Mob d’instance | Aucun | — |
 | Boss mondial | Rare, au niveau du boss | 1000–1500 or |
 | Coffre secret (une clé des secrets) | Épique, au niveau de sa zone (milieu de la plage) ; 25 % de chance d’une Rune | 200–400 or |
@@ -542,7 +542,7 @@ Hors instance, les récompenses sont décrites une seule fois dans `SOURCE_REWAR
 
 Il n’y a plus de forge : un équipement garde toute sa vie les statistiques de son drop. Pas d’amélioration +1 à +5, pas de points ajoutés, pas de passif d’arme. Pour devenir plus fort, il faut trouver mieux sur les monstres, les boss mondiaux, les donjons et les raids. La touche K et le bouton ⚒️ ont disparu, de même que les matériaux (minerai ancien, bois runique, essence magique, noyau astral).
 
-La Rune **Prospecteur** (🔍) suit cette direction : un monstre ordinaire a 15 % de chances de lâcher un objet Peu commun au lieu d’un Commun (`CANAAN_RUBIS.betterDrop`).
+La Rune **Prospecteur** (🔍) suit cette direction : quand un monstre ordinaire lâche un objet Commun, il a 15 % de chances d’être Peu commun à la place (`CANAAN_RUBIS.betterDrop`).
 
 Anciennes sauvegardes, au chargement :
 - les améliorations (`item.upgrade`) et passifs de forge (`item.craftPassive`) sont retirés par `CANAAN_GEAR.normalize` ;

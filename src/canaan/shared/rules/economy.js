@@ -2,7 +2,7 @@
 // Règles économiques : qualité du butin par source, prix de vente et de la boutique.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { GEAR_RARITIES, PRESTIGE_DROPS } from '../data/equipment.js';
-import { WORLD_BOSS_GOLD } from '../data/economy.js';
+import { MOB_GOLD, WORLD_BOSS_GOLD } from '../data/economy.js';
 import { clampLevel } from './stats.js';
 import { rarityInfo } from './items.js';
 
@@ -79,6 +79,31 @@ export function instanceLoot(def, difficulty, heroLevel, rng) {
       : reward.level + Math.floor(rng() * (reward.dropLevel - reward.level + 1)),
     rarity = rollPrestige(reward.prestige, rng) || reward.rarity;
   return { level, rarity, origin: def.raid ? 'raid' : 'donjon' };
+}
+// Qualité de l'objet lâché par une source (SOURCE_REWARDS), ou null si elle ne lâche rien cette fois. Qualité
+// garantie (rarity) : aucun tirage. Butin tiré : d'abord la chance d'un objet, puis la qualité selon les poids.
+/**
+ * @param {{ rarity?: string | null, chance?: number, rarities?: ReadonlyArray<readonly [string, number]> }} reward
+ * @param {() => number} rng
+ * @returns {string | null}
+ */
+export function sourceDrop(reward, rng) {
+  if (!reward.rarities) return reward.rarity || null;
+  if (rng() >= (reward.chance ?? 1)) return null;
+  const total = reward.rarities.reduce((n, [, w]) => n + w, 0);
+  let roll = rng() * total;
+  for (const [rarity, weight] of reward.rarities) if ((roll -= weight) < 0) return rarity;
+  return reward.rarities[reward.rarities.length - 1][0];
+}
+// Or lâché par un monstre de son niveau (élite : plus).
+/**
+ * @param {unknown} level
+ * @param {boolean} [elite]
+ * @returns {number}
+ */
+export function mobGold(level, elite = false) {
+  const lv = Math.max(1, Number(level) || 1);
+  return Math.round((MOB_GOLD.base + MOB_GOLD.perLevel * lv) * (elite ? MOB_GOLD.elite : 1));
 }
 // Bourse d'or d'un boss mondial.
 /**

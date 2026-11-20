@@ -54,8 +54,9 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   guest.run('CANAAN_NET.requestAction({op:"equip",id:"objet-inexistant"})');guest.run('CANAAN_NET.requestAction({op:"unequip",slot:"__proto__"})');await step(6);
   assert.equal(host.run(G+'.equipment.weapon.id'),'lance-lina');
   // Combat partagé : un monstre de l'hôte, frappé par l'invité ; chiffres et éclats chez l'invité, butin et victime pour lui.
-  // Ce jalon vérifie le réseau : la règle « chaque héros à son niveau » (testée à part) est neutralisée.
-   host.run('globalThis.mob={t:"Loup",x:'+G+'.player.x+70,y:'+G+'.player.y,hp:40,mhp:40,r:14,cd:1e9,g:9,level:1,_levelHp:true};game.world.monsters.push(mob)');
+  // Ce jalon vérifie le réseau : la règle « chaque héros à son niveau » (testée à part) est neutralisée. Une élite
+  // lâche toujours un objet (un monstre ordinaire, 38 % du temps).
+   host.run('globalThis.mob={t:"Loup",x:'+G+'.player.x+70,y:'+G+'.player.y,hp:40,mhp:40,r:14,cd:1e9,g:9,level:1,elite:true,_levelHp:true};game.world.monsters.push(mob)');
   await step(8);
   assert.equal(guest.run('game.world.monsters.some(m=>m.k==='+host.run('mob.netId')+'&&m.t==="Loup")'),true);
   assert.equal(guest.run('game.world.monsters.length'),host.run('game.world.monsters.length'),'l’invité voit les monstres de l’hôte : '+host.run('JSON.stringify(game.world.monsters.map(m=>[m.t,m.hp]))'));

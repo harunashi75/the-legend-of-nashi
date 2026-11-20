@@ -1158,7 +1158,7 @@
         t: type.name,
         r: elite ? 19 : 16,
         cd: 0,
-        g: Math.round((8 + level * 1.6) * (elite ? 3 : 1)),
+        g: mobGold(level, elite),
         mobColor: type.color,
         elite,
         _levelHp: true

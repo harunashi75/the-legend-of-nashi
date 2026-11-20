@@ -153,10 +153,18 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  const mob='recordKill({x:P.x,y:P.y,t:"Loup",hp:0,level:7})',elite='recordKill({x:P.x,y:P.y,t:"Loup",hp:0,elite:true,level:12})';
  const boss='recordKill({x:P.x,y:P.y,t:"Fenrir",hp:0,worldBoss:true,worldBossId:"fenrir"})';
  const chest='{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot);P.x=at.x*TS;P.y=at.y*TS;openNearbyChest()}';
- // Chaque objet a le niveau de sa source : mob normal et élite Commun, boss mondial Rare (+1 000 à 1 500 or).
+ // Chaque objet a le niveau de sa source. Mob normal : 38 % de chance d'un objet (80 % Commun, 17 % Peu commun,
+ // 3 % Rare). Élite : un objet à coup sûr (60/30/9/1 jusqu'à l'Épique). Boss mondial : Rare (+1 000 à 1 500 or).
  let r=reward(mob,0);assert.deepEqual(r.items,[['Commun',7]]);assert.equal(r.hero.includes('materials'),false);
- r=reward(mob,.999);assert.deepEqual(r.items,[['Commun',7]]);
+ r=reward(mob,.379);assert.deepEqual(r.items,[['Commun',7]]);
+ r=reward(mob,.38);assert.deepEqual(r.items,[],'pas d’objet au-delà de 38 %');
+ r=reward(mob,.999);assert.deepEqual(r.items,[]);
+ const seq=xs=>'(()=>{const q='+JSON.stringify(xs)+';return()=>q.length?q.shift():0})()';
+ const rolled=(code,xs)=>JSON.parse(run('instanceState=null;inventory=[];Math.random='+seq(xs)+';'+code+';JSON.stringify(inventory.map(i=>[i.rarity,i.level]))'));
+ assert.deepEqual(rolled(mob,[0,.85]),[['Peu commun',7]]);assert.deepEqual(rolled(mob,[0,.98]),[['Rare',7]]);
  r=reward(elite,.5);assert.deepEqual(r.items,[['Commun',12]]);
+ assert.deepEqual(rolled(elite,[.99,.7]),[['Peu commun',12]],'une élite lâche toujours un objet');
+ assert.deepEqual(rolled(elite,[0,.95]),[['Rare',12]]);assert.deepEqual(rolled(elite,[0,.995]),[['Épique',12]]);
  r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=1000&&r.gold<=1500,String(r.gold));
  // Coffre secret : verrouillé sans clé des secrets ; avec une clé (consommée), un Épique du niveau de sa zone
  // (milieu de la plage), 200 à 400 or et 25 % de chance d'un Rubis.
