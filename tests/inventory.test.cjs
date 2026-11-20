@@ -49,8 +49,10 @@ test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances,
  function mobXpAt(m,h){return run('mobXp('+m+','+h+')')}
  run('game.hero.exp=0;kill(30,{worldBoss:true,worldBossId:"leviathan",t:"Léviathan"})');assert.equal(run('game.hero.exp'),run('bossXp(30,"world")'));
  run('game.hero.level=10;game.hero.exp=0;CANAAN_PROGRESSION.clearInstanceXp(0,game.hero)');
- // Un donjon terminé rapporte une bonne part d'un niveau, sans en faire gagner plusieurs d'un coup.
- assert.ok(run('game.hero.level>10||game.hero.exp>xpToNext(10)*0.3'),'un donjon fini rapporte gros');assert.ok(run('game.hero.level')<=11,'mais pas plusieurs niveaux');
+ // Le coffre d'un donjon rapporte un quart d'un niveau de l'instance (les boss en donnent autant chacun ou presque),
+ // sans en faire gagner plusieurs d'un coup.
+ assert.ok(run('game.hero.level>10||game.hero.exp===clearXp(9,false)'),'un donjon fini rapporte un quart de niveau');
+ assert.ok(run('clearXp(9,false)>xpToNext(9)*0.2'));assert.ok(run('game.hero.level')<=11,'mais pas plusieurs niveaux');
  // Niveau 60 : l'XP s'arrête.
  run('game.hero.level=60;game.hero.exp=0;kill(60)');assert.equal(run('game.hero.level+"/"+game.hero.exp'),'60/0');
  // Niveau requis pour équiper.

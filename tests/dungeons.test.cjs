@@ -258,7 +258,10 @@ test('Jalon de la phase 2 : quatre héros explorent un donjon sans écran, énig
 
 test('Donjons et raids : moins d’XP, plus coriaces, et des boss aux mécaniques propres (rotation, renforts, totems, frénésie, rage)',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
- assert.equal(run('bossXp(10,"dungeon")'),(10+50)*8);assert.equal(run('bossXp(10,"raid")'),(10+50)*12);assert.equal(run('clearXp(10,false)'),(10+50)*12);
+ // Boss et fin d'instance : une part du niveau de l'instance (comme les quêtes) ; boss mondial : 12 monstres de son niveau.
+ assert.equal(run('bossXp(10,"dungeon")'),run('Math.round(xpToNext(10)*0.12)'));assert.equal(run('bossXp(10,"raid")'),run('Math.round(xpToNext(10)*0.08)'));
+ assert.equal(run('clearXp(10,false)'),run('Math.round(xpToNext(10)*0.25)'));assert.equal(run('clearXp(10,true)'),run('Math.round(xpToNext(10)*0.3)'));
+ assert.equal(run('bossXp(60,"raid")'),run('Math.round(xpToNext(59)*0.08)'));assert.equal(run('bossXp(10,"world")'),(10+50)*12);
  assert.ok(run('bossHealth(30,"raid")>bossHealth(30,"dungeon")&&bossDamage(30,"dungeon")>mobDamage(30)'));
  run('started=true;paused=false;P.dead=false;game.view={notify:()=>{},chat:()=>{}};game.hero.level=10;recomputeStats();P.hp=P.mhp;enterInstance(0)');
  assert.ok(run('(m=>m.mhp>=Math.round(mobHealth(m.level,false,(MOB_TYPES.find(t=>t.name===m.t)||{hp:100}).hp)*1.2))(game.world.monsters.find(m=>!m.boss))'));

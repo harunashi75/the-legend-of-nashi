@@ -453,7 +453,7 @@ Le plan est fixe (cases comptées depuis le feu) et posé après les bâtiments 
 
 Les instances sont plus exigeantes et rapportent moins d’XP, pour que la campagne et l’exploration gardent leur place :
 
-- **XP** : boss de donjon ×8 et de raid ×12 (au lieu de ×15 et ×25), instance terminée ×12 et ×20 (au lieu de ×30 et ×50) ; les monstres ordinaires d’une instance rapportent 60 % de leur XP.
+- **XP** : comme les quêtes, une part du niveau de l’instance (`xpToNext`), pour qu’une instance vaille autant à tous les niveaux. Boss de donjon : 12 % d’un niveau, donjon terminé : 25 % (≈ 60 % d’un niveau par donjon) ; boss de raid : 8 %, raid terminé : 30 % (≈ 80 % par raid). Les monstres ordinaires d’une instance rapportent 60 % de leur XP. Un boss mondial vaut 12 monstres de son niveau (45 % d’un niveau pour Fenrir, 3 720 XP au niveau 60).
 - **Monstres** : 25 % de PV et 12 % de dégâts en plus que dehors. Boss de donjon : ×2,9 PV et ×1,3 dégâts d’un monstre de leur niveau ; boss de raid : ×3,4 et ×1,22.
 - **Mécaniques des boss** : voir « Donjons et raids » (rotation propre à chaque boss, seize mécaniques).
 - Vérifié par les jalons automatiques : un groupe de quatre (niveau 10, Épique) finit la Cave des Terriers en 1 min 40 environ, et un groupe niveau 48 en Mythique, avec ses classes, finit le Bastion du Roi Sanglant en un peu plus de 4 min, en frôlant la mort.

@@ -268,15 +268,22 @@ export function mobXp(mobLevel, heroLevel, elite = false) {
   return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 3 : 1) * factor));
 }
 // XP d'un boss (dungeon, raid ou world) et d'une instance terminée (coffre ouvert).
+// Boss de donjon et de raid, fin d'instance : une part du niveau de l'instance, comme les quêtes, pour qu'une instance
+// vaille autant à tous les niveaux (donjon ≈ 3 × 12 % + 25 % ≈ 60 % d'un niveau, raid ≈ 6 × 8 % + 30 % ≈ 80 %).
+// Boss mondial : 12 monstres de son niveau (8 fois leurs PV), soloable et de retour toutes les 12 minutes.
+/** @type {Readonly<Record<string, number>>} */
+const BOSS_XP_SHARE = Object.freeze({ dungeon: 0.12, raid: 0.08 });
+const WORLD_BOSS_XP = 12;
+/** @param {number} level */
+const levelShare = level => xpToNext(Math.min(MAX_LEVEL - 1, clampLevel(level)));
 /**
  * @param {number} level
  * @param {string} [kind] dungeon, raid ou world
  * @returns {number}
  */
 export function bossXp(level, kind) {
-  /** @type {Record<string, number>} */
-  const factor = { dungeon: 8, raid: 12, world: 30 };
-  return Math.round((10 + 5 * clampLevel(level)) * (factor[kind ?? 'dungeon'] || 8));
+  if (kind === 'world') return Math.round((10 + 5 * clampLevel(level)) * WORLD_BOSS_XP);
+  return Math.round(levelShare(level) * (BOSS_XP_SHARE[kind ?? 'dungeon'] || BOSS_XP_SHARE.dungeon));
 }
 /**
  * @param {number} level
@@ -284,7 +291,7 @@ export function bossXp(level, kind) {
  * @returns {number}
  */
 export function clearXp(level, raid) {
-  return Math.round((10 + 5 * clampLevel(level)) * (raid ? 20 : 12));
+  return Math.round(levelShare(level) * (raid ? 0.3 : 0.25));
 }
 // Ajoute de l'XP à {level, exp} ; renvoie le nombre de niveaux gagnés. Au niveau 60, l'XP s'arrête.
 /**
