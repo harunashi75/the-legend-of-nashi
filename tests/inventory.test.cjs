@@ -47,6 +47,10 @@ test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances,
  // Un monstre bien trop faible ne rapporte presque rien ; un boss mondial et une instance terminée rapportent gros.
  run('game.hero.level=30;game.hero.exp=0;kill(5)');assert.ok(run('game.hero.exp')<=mobXpAt(5,30)+1);
  function mobXpAt(m,h){return run('mobXp('+m+','+h+')')}
+ // Une élite vaut 4 monstres ; un monstre ordinaire de donjon ou de raid, 75 % de son XP.
+ assert.equal(run('mobXp(30,30,true)'),4*mobXpAt(30,30));
+ run('game.hero.exp=0;kill(30,{elite:true})');assert.equal(run('game.hero.exp'),run('mobXp(30,30,true)'));
+ run('game.hero.exp=0;game.world.instance={};kill(30);game.world.instance=null');assert.equal(run('game.hero.exp'),Math.round(mobXpAt(30,30)*0.75));
  run('game.hero.exp=0;kill(30,{worldBoss:true,worldBossId:"leviathan",t:"Léviathan"})');assert.equal(run('game.hero.exp'),run('bossXp(30,"world")'));
  run('game.hero.level=10;game.hero.exp=0;CANAAN_PROGRESSION.clearInstanceXp(0,game.hero)');
  // Le coffre d'un donjon rapporte un quart d'un niveau de l'instance (les boss en donnent autant chacun ou presque),

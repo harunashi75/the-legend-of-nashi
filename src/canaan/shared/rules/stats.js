@@ -263,7 +263,8 @@ export function xpToNext(level) {
  * @returns {number}
  */
 export function mobXp(mobLevel, heroLevel, elite = false) {
-  return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 3 : 1) * xpGapFactor(mobLevel, heroLevel)));
+  // Élite : ×4 pour ×2,4 de PV, pour qu'elle vaille le détour.
+  return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 4 : 1) * xpGapFactor(mobLevel, heroLevel)));
 }
 // Écart de niveau sur l'XP : jusqu'à +20 % contre plus fort que soi, −15 % par niveau de moins, 10 % au-delà de 5.
 /**

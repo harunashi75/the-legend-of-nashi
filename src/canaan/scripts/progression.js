@@ -50,8 +50,8 @@
           ? bossXp(level, 'world', lv)
           : m.boss
             ? bossXp(level, bossTier(m).raid ? 'raid' : 'dungeon', lv)
-            : // Dans un donjon ou un raid, les monstres ordinaires rapportent moins (le boss et le coffre comptent).
-              Math.round(mobXp(level, lv, !!m.elite) * (game.world.instance ? 0.6 : 1));
+            : // Dans un donjon ou un raid, les monstres ordinaires rapportent 75 % (les boss et le coffre comptent).
+              Math.round(mobXp(level, lv, !!m.elite) * (game.world.instance ? 0.75 : 1));
       grantXp(hero, amount, m);
     }
   }
