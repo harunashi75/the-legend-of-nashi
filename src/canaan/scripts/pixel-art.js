@@ -947,7 +947,7 @@
       orc = race === 'orc',
       elf = race === 'elfe',
       bull = race === 'minotaure',
-      wolf = race === 'worgen',
+      wolf = race === 'vargar',
       broad = orc || bull || wolf,
       claw = '#ece4d4',
       fang = '#f4f0dc',
@@ -978,7 +978,7 @@
     R(13, 25 - walk, 6, 3, bull ? '#2a2420' : wolf ? skinD : '#24202d');
     R(7, 24 + walk, 5, 1, armorL);
     R(14, 24 - walk, 4, 1, armorL);
-    // Pattes du worgen : griffes au bout des pieds nus.
+    // Pattes du Vargar : griffes au bout des pieds nus.
     if (wolf && !back) {
       R(side && !right ? 7 : 10, 27 + walk, 1, 1, claw);
       R(side && !right ? 9 : 12, 27 + walk, 1, 1, claw);
@@ -1016,7 +1016,7 @@
       if (capeKind === 'leafcape')
         for (let x = 6; x < 19; x += 2) R(x, 26 + (x % 4 ? 1 : 0), 2, 2, x % 4 ? capeL : sk.trim);
     }
-    // Queue touffue du worgen : de dos, sur la cape ; de profil, à l'opposé du regard (le torse la recouvre en partie).
+    // Queue touffue du Vargar : de dos, sur la cape ; de profil, à l'opposé du regard (le torse la recouvre en partie).
     if (wolf && back) {
       R(11, 20, 4, 6, skin);
       R(12, 21, 2, 5, skinL);
@@ -1026,7 +1026,7 @@
       R(right ? 1 : 22, 22, 3, 2, skinD);
       R(right ? 3 : 19, 21, 4, 1, skinL);
     }
-    // Torse : plus fin pour une héroïne, plus large pour un orc, un minotaure ou un worgen.
+    // Torse : plus fin pour une héroïne, plus large pour un orc, un minotaure ou un Vargar.
     tx = female ? 8 : broad ? 6 : 7;
     tw = female ? 9 : broad ? 13 : 11;
     R(tx, 12, tw, 9, armorM);
@@ -1206,7 +1206,7 @@
         }
       }
     }
-    // Oreilles pointues du worgen, par-dessus la crinière (visibles sous tous les angles).
+    // Oreilles pointues du Vargar, par-dessus la crinière (visibles sous tous les angles).
     if (wolf) {
       const ear = (x, inner) => {
         R(x, 2, 2, 4, skinD);
@@ -1434,7 +1434,7 @@
     const lift = mount ? mount.lift : 0;
     const bob = mount ? mount.bob : moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
     const shown = mount ? canaanHeroSprite(look, face, 0, hero ? { tool: 'none' } : {}) : spr;
-    // Le minotaure et le worgen sont un peu plus grands.
+    // Le minotaure et le Vargar sont un peu plus grands.
     const scale = feral ? 1.0 : lookRace(look?.race).scale;
     c.save();
     if (body.veiled) c.globalAlpha *= 0.3;

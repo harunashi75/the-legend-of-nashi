@@ -45,12 +45,12 @@ export const LOOK_RACES = Object.freeze([
     lore: 'Colosses des hauts plateaux, les minotaures sont aussi calmes que redoutables.'
   },
   {
-    id: 'worgen',
-    name: 'Worgen',
+    id: 'vargar',
+    name: 'Vargar',
     skins: ['#7a7470', '#3e3a38', '#6a4a32', '#a8885a', '#d8d2c8', '#8a4a2a'],
     fur: true,
     scale: 1.08,
-    lore: 'Frappés par une malédiction lunaire, les worgens ont appris à dompter la bête qui sommeille en eux.'
+    lore: 'Frappés par une malédiction lunaire, les Vargars ont appris à dompter la bête qui sommeille en eux.'
   }
 ]);
 // Race d'un identifiant (inconnue : la première).
@@ -175,7 +175,8 @@ export function defaultLook() {
 export function sanitizeLook(raw) {
   const base = defaultLook();
   if (!raw || typeof raw !== 'object') return base;
-  const race = lookRace(raw.race);
+  // « worgen » : ancien nom des Vargars (quelques heures dans la 0.11.0), gardé pour les héros déjà créés.
+  const race = lookRace(raw.race === 'worgen' ? 'vargar' : raw.race);
   return {
     sex: pick(ids(LOOK_SEXES), raw.sex, base.sex),
     race: race.id,

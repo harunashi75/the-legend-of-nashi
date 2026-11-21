@@ -386,12 +386,18 @@
     render();
     return true;
   }
+  // Décor de l'écran titre : celui de la race (styles/slot-menu.css), ou la nuit de pleine lune par défaut.
+  function setScene(race) {
+    const title = document.getElementById('title');
+    if (title?.dataset) title.dataset.scene = race ? lookRace(race).id : '';
+  }
   function render() {
     const menu = document.getElementById('slotMenu');
     menu.hidden = false;
     const title = document.getElementById('title');
     if (title?.classList) title.classList.toggle('creating', !!ui.lookFor);
     if (ui.lookFor) {
+      setScene(ui.look.race);
       menu.innerHTML =
         creator() + (ui.message ? '<p class="slot-message" role="status">' + esc(ui.message) + '</p>' : '');
       const input = document.getElementById('heroName') || document.getElementById('slotName');
@@ -408,6 +414,7 @@
     for (let slot = 1; slot <= CANAAN_SLOT_COUNT; slot++) summaries.push(CANAAN_PERSISTENCE.summary(slot));
     // Le slot affiché reste celui choisi tant qu'il existe ; sinon, la première aventure.
     if (!selectedInfo()) ui.selected = summaries.find(occupied)?.slot ?? null;
+    setScene(selectedInfo()?.look?.race);
     const info = selectedInfo(),
       confirming = summaries.find(s => s.slot === ui.confirming && s.state === 'aventure');
     menu.innerHTML =
