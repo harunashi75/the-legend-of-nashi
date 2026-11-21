@@ -665,20 +665,28 @@
     0 0 0 1px var(--cls, #f6dc98),
     0 0 12px color-mix(in srgb, var(--cls, #f6dc98) 50%, transparent);
 }
+/* Pied : Annuler à gauche, noms au centre de l'écran (sous le héros), Créer à droite. */
 #slotMenu .cc-foot {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 16px;
+}
+#slotMenu .cc-foot .cc-back {
+  justify-self: start;
+}
+#slotMenu .cc-foot .cc-create {
+  justify-self: end;
 }
 #slotMenu .cc-names {
   display: grid;
-  grid-template-columns: auto minmax(140px, 220px) auto minmax(140px, 240px);
+  grid-template-columns: auto minmax(120px, 220px) auto minmax(120px, 240px);
   align-items: center;
   gap: 6px 10px;
 }
 #title #slotMenu button.cc-create {
-  padding: 12px 40px;
+  padding: 12px clamp(18px, 2.2vw, 40px);
+  white-space: nowrap;
   font-family: var(--rpg-serif, Georgia, serif);
   font-size: calc(18px * var(--font-scale));
   font-weight: 700;
@@ -1013,7 +1021,11 @@
     width: auto;
   }
   #slotMenu .cc-foot {
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
+  }
+  #slotMenu .cc-foot .cc-back,
+  #slotMenu .cc-foot .cc-create {
+    justify-self: center;
   }
   #slotMenu .cc-names {
     grid-template-columns: 1fr;
