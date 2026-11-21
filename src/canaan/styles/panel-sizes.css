@@ -26,7 +26,7 @@
 }
 #window#window[data-size='char'] {
   --panel-w: 760px;
-  --panel-h: 800px;
+  --panel-h: 700px;
 }
 #window#window[data-size='md'] {
   --panel-w: 880px;
@@ -157,18 +157,6 @@
 /* #window#window : plus fort que les règles de la poupée du thème. */
 #window#window[data-size='char'] .character-doll {
   column-gap: 12px;
-}
-/* Emplacements un peu plus petits que dans le thème : les artéfacts tiennent dessous sans défiler. */
-#window#window[data-size='char'] .doll-column {
-  gap: 6px;
-}
-#window#window[data-size='char'] .equip-square {
-  width: 60px;
-  height: 60px;
-}
-#window#window[data-size='char'] .equip-square .eq-icon svg.ico {
-  width: 36px;
-  height: 36px;
 }
 #window#window[data-size='char'] .doll-center {
   width: 140px;
