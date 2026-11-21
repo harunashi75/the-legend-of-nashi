@@ -600,8 +600,8 @@
     );
   }
   // Onglet Runes de la fiche (C), en deux colonnes sans défilement : à gauche les six emplacements, chacun avec le
-  // nom et l'effet de sa Rune ; à droite la collection, filtrée par famille (onglets) : toutes en grille compacte,
-  // ou une famille en cartes nommées.
+  // nom et l'effet de sa Rune ; à droite la collection, filtrée par famille (onglets) : toutes, rangées par
+  // rubriques (une par famille), ou une famille en cartes nommées.
   // Le héros affiché est celui de cette application (l'invité chez lui).
   let family = -1;
   function showFamily(n) {
@@ -703,22 +703,24 @@
           .join('') +
         '</div>'
       );
-    // Toutes : une ligne par famille, marquée de son icône.
+    // Toutes : une rubrique par famille (comme le sac), son nom et ce qui en est trouvé, puis ses huit Runes.
     return (
       '<div class="rubis-collection">' +
       FAMILIES.map(
         (f, fi) =>
-          '<div class="rubis-family"><span class="rubis-family-name" style="color:' +
+          '<section class="rubis-family" style="--fam:' +
           f.light +
-          '" title="' +
-          esc(f.name) +
-          '">' +
+          '"><h4 class="rubis-family-head">' +
           f.icon +
-          '</span><div class="rubis-row">' +
+          ' <span>' +
+          esc(f.name) +
+          '</span> <small>' +
+          familyFound(fi) +
+          '/8</small></h4><div class="rubis-row">' +
           RUBIS.filter(r => r.family === fi)
             .map(r => cellHtml(r, false))
             .join('') +
-          '</div></div>'
+          '</div></section>'
       ).join('') +
       '</div>'
     );
