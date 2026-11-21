@@ -253,7 +253,6 @@ body {
   transition: 0.2s;
 }
 #title button:hover {
-  transform: scale(1.06);
   box-shadow: 0 0 70px rgba(200, 110, 255, 0.8);
 }
 #toast {

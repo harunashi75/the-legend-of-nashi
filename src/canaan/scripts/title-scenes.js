@@ -1,8 +1,8 @@
 // Décors peints de l'écran titre, en pixel art : chaque race a un biome de l'île (Plaines verdoyantes et Camp de
 // l'Aurore, Bois d'automne, Forêt enchantée, Désert oublié, Forêt ancienne de nuit) et le Marais brumeux s'affiche
 // sans héros. Le canevas est en basse résolution (environ 360 pixels de haut) et agrandi sans lissage. Les plans du
-// fond sont dessinés une fois par scène et par taille et glissent un peu avec la souris (parallaxe) ; le sol, avec le
-// chemin du biome, est dessiné sous les pieds du héros (repérés sur son aperçu) et ne bouge pas. Par-dessus : nuages,
+// fond sont dessinés une fois par scène et par taille ; le sol, avec le chemin du biome, est dessiné sous les pieds
+// du héros (repérés sur son aperçu). Par-dessus : nuages,
 // fumées, feu de camp, moutons, feuilles qui tombent, caravane, aurore, lucioles, hibou, feux follets…
 // Sans canevas utilisable, le fond CSS de styles/slot-menu.css reste affiché.
 (() => {
@@ -321,11 +321,11 @@
   // Une scène par race, dans un biome de l'île : Plaines verdoyantes et Camp de l'Aurore (Humain), Bois d'automne
   // (Orc), Forêt enchantée (Elfe), Désert oublié (Minotaure), Forêt ancienne de nuit (Vargar), Marais brumeux
   // (sans héros). Chaque scène donne :
-  //  - back : les plans du fond (canevas, profondeur de parallaxe, animation éventuelle) ;
-  //  - ground(fx, fy) : le sol où se tient le héros (ses pieds en fx, fy), avec le chemin du biome, sans parallaxe ;
+  //  - back : les plans du fond (canevas, animation éventuelle) ;
+  //  - ground(fx, fy) : le sol où se tient le héros (ses pieds en fx, fy), avec le chemin du biome ;
   //  - front : les plans du premier plan, sur les côtés ;
   //  - fx : les effets par-dessus tout.
-  // W, H : taille visible ; M : marge de chaque côté pour la parallaxe. Les plans font W + 2M de large.
+  // W, H : taille visible ; M : marge de chaque côté (les plans font W + 2M de large, dessinés en -M).
   const SCENES = {};
 
   // ---------------------------------------------------------------- Effets partagés
@@ -939,19 +939,17 @@
     );
     return {
       back: [
-        { c: skyC, depth: 0.02 },
+        { c: skyC },
         {
           c: sea,
-          depth: 0.05,
           anim(g, t, x0) {
             drawWater(g, 0, H * 0.555, W, H * 0.05, t, [200, 240, 255]);
           }
         },
-        { c: far, depth: 0.1 },
-        { c: hills, depth: 0.25 },
+        { c: far },
+        { c: hills },
         {
           c: camp,
-          depth: 0.4,
           anim(g, t, x0, dt) {
             chimneys.forEach((ch, i) => drawSmoke(g, smokes[i], dt, t, ch.cx + x0, ch.cy));
             const f = Math.sin(t * 13) * Math.sin(t * 7.1);
@@ -1112,18 +1110,16 @@
     );
     return {
       back: [
-        { c: skyC, depth: 0.02 },
-        { c: far, depth: 0.12 },
+        { c: skyC },
+        { c: far },
         {
           c: lake,
-          depth: 0.2,
           anim(g, t) {
             drawWater(g, 0, ly, W, lh, t, [255, 220, 170]);
           }
         },
         {
           c: mid,
-          depth: 0.4,
           anim(g, t, x0, dt) {
             drawSmoke(g, sm, dt, t, chim.cx + x0, chim.cy);
           }
@@ -1264,11 +1260,10 @@
     const vultures = [0, 2.1].map(ph => ({ ph }));
     return {
       back: [
-        { c: skyC, depth: 0.02 },
-        { c: far, depth: 0.1 },
+        { c: skyC },
+        { c: far },
         {
           c: dunes,
-          depth: 0.25,
           anim(g, t, x0, dt) {
             caravanX += dt * 4;
             if (caravanX > W + 80) caravanX = -80;
@@ -1280,7 +1275,7 @@
             }
           }
         },
-        { c: oasis, depth: 0.4 }
+        { c: oasis }
       ],
       ground: (fx, fy) =>
         groundLayer(r, W, H, M, fx, fy, {
@@ -1449,7 +1444,6 @@
       back: [
         {
           c: skyC,
-          depth: 0.02,
           anim(g, t, x0) {
             drawStars(g, stars, t, x0);
             for (let x = 0; x < W; x += 2) {
@@ -1463,7 +1457,6 @@
         },
         {
           c: far,
-          depth: 0.1,
           anim(g, t, x0) {
             halo(g, tx + x0, ty - 48, 1, 7, '#aef8ff', 0.4 + 0.2 * Math.sin(t * 2));
             rect(g, '#ffffff', tx + x0, ty - 48, 1, 1);
@@ -1471,14 +1464,12 @@
         },
         {
           c: lake,
-          depth: 0.2,
           anim(g, t) {
             drawWater(g, 0, ly, W, lh, t, [210, 220, 255], 1.5);
           }
         },
         {
           c: mid,
-          depth: 0.4,
           anim(g, t, x0) {
             for (const c of crystals)
               halo(g, c.x + x0, c.y - 4, 1, 6, '#9ff0ff', 0.25 + 0.15 * Math.sin(t * 2 + c.x));
@@ -1624,23 +1615,20 @@
       back: [
         {
           c: skyC,
-          depth: 0.02,
           anim(g, t, x0, dt) {
             drawStars(g, stars, t, x0);
             drawClouds(g, cl, dt, W, x0, 0);
           }
         },
-        { c: far, depth: 0.15 },
+        { c: far },
         {
           c: layer(1, 1),
-          depth: 0.3,
           anim(g, t, x0) {
             drawFog(g, fog1, t, 3, H * 0.6, W, x0);
           }
         },
         {
           c: mid,
-          depth: 0.4,
           anim(g, t, x0, dt) {
             drawSmoke(g, sm, dt, t, chim.cx + x0, chim.cy, [140, 150, 180]);
             halo(g, hx + 24 - 7 + x0, hgy - 5, 1, 8, '#ffc860', 0.12 + 0.04 * Math.sin(t * 3));
@@ -1658,7 +1646,6 @@
         },
         {
           c: shafts,
-          depth: 0.4,
           anim() {}
         }
       ],
@@ -1775,22 +1762,19 @@
       back: [
         {
           c: skyC,
-          depth: 0.02,
           anim(g, t, x0) {
             drawStars(g, stars, t, x0);
           }
         },
-        { c: far, depth: 0.12 },
+        { c: far },
         {
           c: water,
-          depth: 0.2,
           anim(g, t) {
             drawWater(g, 0, wy, W, H - wy, t, [200, 230, 210], 0.7);
           }
         },
         {
           c: mid,
-          depth: 0.4,
           anim(g, t, x0) {
             drawFog(g, fog1, t, 3, H * 0.56, W, x0);
           }
@@ -1848,8 +1832,6 @@
     groundY0 = 0,
     running = false,
     last = 0,
-    par = 0,
-    target = 0,
     failed = false;
   const cache = new Map();
   function size() {
@@ -1914,7 +1896,6 @@
         groundY0 = ground.y0;
         groundKey = gk;
       }
-      par += (target - par) * Math.min(1, dt * 3);
       const t = now / 1000;
       g.imageSmoothingEnabled = false;
       // Les plans du fond sont dessinés pour un sol qui commence vers 72 % de la hauteur ; quand les pieds du
@@ -1923,18 +1904,14 @@
       g.save();
       g.translate(0, lift);
       for (const l of s.back) {
-        const x0 = Math.round(-s.M + par * l.depth * s.M);
+        const x0 = -s.M;
         if (l.c.width > 1) g.drawImage(l.c, x0, 0);
         if (l.anim) l.anim(g, t, x0, dt);
       }
       g.restore();
-      // Le sol ne glisse pas : le héros reste posé dessus.
       g.drawImage(groundC, -s.M, 0);
-      for (const l of s.front) {
-        const x0 = Math.round(-s.M + par * l.depth * s.M);
-        g.drawImage(l.c, x0, 0);
-      }
-      s.fx(g, t, dt, Math.round(par * s.M));
+      for (const l of s.front) g.drawImage(l.c, -s.M, 0);
+      s.fx(g, t, dt, 0);
     } catch (error) {
       failed = true;
       title.classList.remove('painted');
@@ -1948,10 +1925,6 @@
     running = true;
     requestAnimationFrame(frame);
   }
-  // Parallaxe : le décor suit doucement la souris.
-  window.addEventListener('pointermove', event => {
-    target = clamp(((event.clientX || 0) / (window.innerWidth || 1)) * 2 - 1, -1, 1);
-  });
   window.CANAAN_TITLE_SCENE = Object.freeze({
     names: Object.freeze(Object.keys(SCENES)),
     // Scène d'une race (inconnue ou vide : le Marais brumeux, sans héros).
