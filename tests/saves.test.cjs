@@ -156,12 +156,12 @@ test('Sauvegardes en fichiers : écriture sûre, schéma 10, copies vérifiées,
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'canaan-saves-'));
  try{
   const store=createSaveStore(dir),text=JSON.stringify({schema:10,nom:'Test',heros:{hote:{}}});
-  assert.equal(store.read(1),null);assert.deepEqual(store.list().map(s=>s.text),[null,null,null]);
+  assert.equal(store.read(1),null);assert.deepEqual(store.list().map(s=>s.text),Array(8).fill(null));
   assert.equal(store.write(1,text),true);assert.equal(store.read(1),text);
   assert.equal(fs.existsSync(path.join(dir,'slot-1.json')),true);assert.equal(fs.existsSync(path.join(dir,'slot-1.json.tmp')),false);
   // Refus : autre schéma, JSON invalide, slot inconnu, contenu non textuel ; le fichier existant reste intact.
   assert.throws(()=>store.write(1,JSON.stringify({schema:9})),/Schéma/);assert.throws(()=>store.write(1,'{x'));
-  for(const slot of [0,4,'1',1.5])assert.throws(()=>store.write(slot,text),/Slot invalide/);
+  for(const slot of [0,9,'1',1.5])assert.throws(()=>store.write(slot,text),/Slot invalide/);
   assert.throws(()=>store.write(2,{schema:10}),/invalide/);assert.equal(store.read(1),text);
   assert.throws(()=>store.backupText('../x','session',text),/invalide/);
   // Copies « session » : seules les plus récentes sont gardées ; les autres raisons ne sont jamais effacées.
@@ -179,12 +179,12 @@ test('Sauvegardes en fichiers : écriture sûre, schéma 10, copies vérifiées,
 
 test('Slots d’aventure : résumé, création sans écrasement, suppression avec secours et importation unique du schéma 9',()=>{
  const g=storageGame(),p=g.CANAAN_PERSISTENCE;
- assert.deepEqual([1,2,3].map(n=>p.summary(n).state),['vide','vide','vide']);
+ assert.deepEqual([1,2,3,4,5,6,7,8].map(n=>p.summary(n).state),Array(8).fill('vide'));
  assert.equal(p.createSlot(2,'  Monde <b>de</b> Lira  '),true);
  const created=JSON.parse(g.db.get('canaan_slot_2'));assert.equal(created.schema,10);assert.equal(created.nom,'Monde bde/b Lira');
  assert.equal(p.summary(2).state,'aventure');assert.equal(p.summary(2).nom,created.nom);assert.doesNotMatch(created.nom,/[<>]/);
  assert.equal(p.createSlot(2,'Autre'),false);assert.equal(JSON.parse(g.db.get('canaan_slot_2')).nom,created.nom);
- assert.equal(p.createSlot(4,'x'),false);assert.equal(p.createSlot(3,''),true);assert.equal(p.summary(3).nom,'Aventure 3');
+ assert.equal(p.createSlot(9,'x'),false);assert.equal(p.createSlot(0,'x'),false);assert.equal(p.createSlot(3,''),true);assert.equal(p.summary(3).nom,'Aventure 3');
  // Nom du héros : nettoyé, gardé dans la sauvegarde et le résumé ; « Héros » s'il est laissé vide.
  assert.equal(p.summary(3).heros,'Héros');p.deleteSlot(3);
  assert.equal(p.createSlot(3,'Monde','',null,'  Lira <la> Brave  '),true);
@@ -219,7 +219,7 @@ test('Slots d’aventure : résumé, création sans écrasement, suppression ave
  // Slot à ouvrir après rechargement : lu une seule fois, validé.
  const session=new Map();g.sessionStorage={setItem:(a,b)=>session.set(a,b),getItem:a=>session.get(a)??null,removeItem:a=>session.delete(a)};
  assert.equal(p.setPending(2),true);assert.equal(p.takePending(),2);assert.equal(p.takePending(),null);
- session.set('canaan_pending_slot','7');assert.equal(p.takePending(),null);
+ session.set('canaan_pending_slot','7');assert.equal(p.takePending(),7);session.set('canaan_pending_slot','9');assert.equal(p.takePending(),null);
  assert.throws(()=>p.selectSlot(0),/Slot invalide/);
 });
 
@@ -228,7 +228,7 @@ test('Menu des aventures : trois cartes, création, confirmation de suppression 
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
  const html=()=>nodes.get('slotMenu').innerHTML;
  // Sans aventure choisie, le jeu ne démarre pas : le menu s'affiche.
- assert.equal(run('started'),false);assert.equal((html().match(/class="slot-card/g)||[]).length,3);
+ assert.equal(run('started'),false);assert.equal((html().match(/class="slot-card/g)||[]).length,8);assert.match(html(),/data-action="newSlot" data-slot="8"/);
  assert.match(html(),/data-action="newSlot" data-slot="1"/);assert.doesNotMatch(html(),/openSaveFolder/);
  run('CANAAN_SLOT_MENU.newSlot(2)');assert.match(html(),/id="slotName"[^>]*value="Aventure 2"/);
  g.document.getElementById('slotName').value='<img src=x onerror=alert(1)>';
@@ -277,8 +277,8 @@ test('Démarrage sur un slot choisi : chargement, copie de session, partie lanc�
 
 test('Format partagé des sauvegardes : schéma 10, aventure neuve, résumé, import du schéma 9, même source pour le jeu et l’application',async()=>{
  const s=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','save','schema.js')).href);
- assert.equal(s.SAVE_SCHEMA,10);assert.equal(s.SLOT_COUNT,3);assert.equal(require('../app/saves.js').SAVE_SCHEMA,s.SAVE_SCHEMA);
- assert.deepEqual([0,1,3,4,'1'].map(s.isValidSlot),[false,true,true,false,false]);
+ assert.equal(s.SAVE_SCHEMA,10);assert.equal(s.SLOT_COUNT,8);assert.equal(require('../app/saves.js').SAVE_SCHEMA,s.SAVE_SCHEMA);
+ assert.deepEqual([0,1,3,8,9,'1'].map(s.isValidSlot),[false,true,true,true,false,false]);
  const fresh=s.freshSave({nom:' <Mon> monde ',slot:2,version:'1.9.0',now:5,spawn:{x:1,y:2},baseMana:300});
  assert.equal(s.isValidSave(fresh),true);assert.equal(fresh.nom,'Mon monde');assert.equal(fresh.heros.hote.player.mp,300);
  assert.deepEqual(Object.keys(fresh.heros.hote.equipment).sort(),[...s.SAVED_GEAR_SLOTS].sort());assert.deepEqual(fresh.heros.invites,{});

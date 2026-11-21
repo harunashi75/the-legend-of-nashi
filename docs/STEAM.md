@@ -39,7 +39,7 @@ Les sauvegardes sont des fichiers ; Steam les synchronise sans code. *Applicatio
   |---|---|---|---|
   | `WinAppDataRoaming` | Linux | `LinuxXdgConfigHome` | *(vide)* |
 
-Seules les trois aventures (`slot-1.json` à `slot-3.json`) voyagent : les copies de secours (`saves/backups/`) et les réglages d’affichage restent propres à chaque appareil.
+Seules les huit aventures (`slot-1.json` à `slot-8.json`) voyagent : les copies de secours (`saves/backups/`) et les réglages d’affichage restent propres à chaque appareil.
 
 ### 3. Dépôts et lancement (SteamPipe)
 

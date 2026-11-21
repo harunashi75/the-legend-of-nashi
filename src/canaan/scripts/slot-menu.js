@@ -1,4 +1,4 @@
-// Écran titre : sélection des aventures (trois slots, héros affiché au centre, liste à droite) et création du héros
+// Écran titre : sélection des aventures (huit slots, héros affiché au centre, liste à droite) et création du héros
 // (races à gauche, aperçu au centre, classe et apparence à droite).
 // Choisir un slot recharge la page : chaque aventure démarre dans un état neuf, sans reste d'une autre.
 (() => {

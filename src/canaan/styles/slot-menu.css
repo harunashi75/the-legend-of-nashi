@@ -227,17 +227,25 @@
   color: var(--rpg-gold-light, #f6dc98);
   border-bottom: 1px solid rgba(232, 184, 80, 0.35);
 }
+/* Huit aventures : la liste défile seule si elle ne tient pas, « Rejoindre » reste visible en bas. */
 #slotMenu .slot-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #7a5a2a transparent;
 }
 #title #slotMenu button.slot-card {
   display: flex;
   align-items: center;
+  flex: none;
   gap: 12px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 5px 10px 5px 6px;
   text-align: left;
   letter-spacing: 0;
   text-shadow: none;
@@ -266,8 +274,8 @@
 #slotMenu .slot-face,
 #slotMenu .slot-plus {
   flex: none;
-  width: 66px;
-  height: 45px;
+  width: 57px;
+  height: 39px;
   border-radius: 4px;
   border: 1px solid rgba(232, 184, 80, 0.4);
   background: radial-gradient(ellipse at 50% 70%, rgba(140, 110, 70, 0.45), rgba(8, 6, 4, 0.85));

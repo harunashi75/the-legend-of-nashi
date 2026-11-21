@@ -89,7 +89,7 @@ npm run app      # ouvre la fenêtre sans réassembler
 - La fenêtre est isolée : pas d’accès à Node.js pour le jeu, aucune navigation ni nouvelle fenêtre, aucune autorisation (caméra, micro…).
 - `tools/run_app.cjs` lance Electron en retirant `ELECTRON_RUN_AS_NODE`, que certains terminaux (celui de VS Code, par exemple) définissent et qui ferait démarrer Electron comme un simple Node.
 - Les données de l’application sont dans `~/.config/The Legend of Nashi` sous Linux (dossier de données propre à chaque utilisateur). Au premier lancement, les sauvegardes et réglages de l’ancien dossier `~/.config/Canaan Online` y sont copiés (l’ancien dossier n’est pas modifié).
-- **Trois aventures** (slots) sur l’écran titre : Continuer, Nouvelle aventure (avec un nom) ou Supprimer, avec une confirmation qui liste les héros invités perdus. Dans l’application, chaque aventure est un fichier `saves/slot-1.json` à `slot-3.json` du dossier de données, avec un bouton « Ouvrir le dossier des sauvegardes ». Le build HTML garde les mêmes trois slots dans le stockage du navigateur. Détails dans [docs/SAVES.md](SAVES.md).
+- **Huit aventures** (slots) sur l’écran titre : Continuer, Nouvelle aventure (avec un nom) ou Supprimer, avec une confirmation qui liste les héros invités perdus. Dans l’application, chaque aventure est un fichier `saves/slot-1.json` à `slot-8.json` du dossier de données, avec un bouton « Ouvrir le dossier des sauvegardes ». Le build HTML garde les mêmes huit slots dans le stockage du navigateur. Détails dans [docs/SAVES.md](SAVES.md).
 
 ## Fluidité
 

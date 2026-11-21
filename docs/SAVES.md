@@ -4,11 +4,11 @@ Le schéma courant est **10**. Le format (schéma, validation, aventure neuve, r
 
 ## Trois aventures
 
-Chaque installation a trois slots d’aventure. Un slot contient le monde de l’aventure et tous les héros qui y ont joué : celui de l’hôte et, plus tard, ceux des invités.
+Chaque installation a huit slots d’aventure. Un slot contient le monde de l’aventure et tous les héros qui y ont joué : celui de l’hôte et, plus tard, ceux des invités.
 
 | Où | Slots | Copies de secours |
 | --- | --- | --- |
-| Application de bureau | `saves/slot-1.json` à `slot-3.json` dans le dossier de données (`~/.config/The Legend of Nashi` sous Linux (les sauvegardes de l’ancien dossier `Canaan Online` y sont copiées au premier lancement)) | `saves/backups/` |
+| Application de bureau | `saves/slot-1.json` à `slot-8.json` dans le dossier de données (`~/.config/The Legend of Nashi` sous Linux (les sauvegardes de l’ancien dossier `Canaan Online` y sont copiées au premier lancement)) | `saves/backups/` |
 | Build HTML de test | clés `canaan_slot_1` à `canaan_slot_3` du stockage local | clés `<clé>_backup_<horodatage>` |
 
 Le menu de l’écran titre (`canaan-slot-menu`) propose Continuer, Nouvelle aventure (avec un nom, 32 caractères au plus) ou Supprimer. Un slot occupé n’est jamais remplacé par une nouvelle aventure : il faut d’abord le supprimer. La suppression demande une confirmation qui liste les pseudos des invités dont le héros sera perdu, et garde toujours une copie `suppression` dans les copies de secours.

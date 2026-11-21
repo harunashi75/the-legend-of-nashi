@@ -7,7 +7,7 @@ import { levelFromIlvl } from '../rules/stats.js';
 import { CLASS_IDS } from '../data/classes.js';
 
 export const SAVE_SCHEMA = 10;
-export const SLOT_COUNT = 3;
+export const SLOT_COUNT = 8;
 // Champs d'un héros, repris du schéma 9 ; la conversion 9 → 10 les déplace sous heros.hote.
 export const HERO_FIELDS = Object.freeze([
   'player',
