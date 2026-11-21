@@ -54,7 +54,9 @@
   }
   function buttonRect() {
     if (!owner || owner.startsWith('free:')) return null;
-    const btn = document.querySelector('#menuButtons button[data-action="' + owner + '"]');
+    // Sac et fiche côte à côte : au-dessus du bouton du sac.
+    const action = owner === 'duo' ? 'toggleInventory' : owner;
+    const btn = document.querySelector('#menuButtons button[data-action="' + action + '"]');
     const r = btn?.getBoundingClientRect?.();
     return r && r.width > 0 ? r : null;
   }
@@ -102,7 +104,9 @@
 
   // ---------------------------------------------------------------- Ouverture et fermeture
   const show = window.showPanel,
-    close = window.closePanels;
+    close = window.closePanels,
+    GEAR = { bag: 'toggleInventory', char: 'toggleCharacter', duo: 'duo' },
+    GEAR_OWNERS = { toggleInventory: GEAR, toggleCharacter: GEAR };
   window.showPanel = function (...args) {
     const was = isOpen(),
       opening = typeof canaanPanelOpening !== 'undefined' ? canaanPanelOpening : null,
@@ -113,7 +117,8 @@
     // Nouvelle fenêtre : ouverte par sa touche / son bouton, depuis le monde, ou fenêtre fermée jusque-là.
     // Sinon c'est la fenêtre affichée qui se redessine (onglet, objet équipé, butin ramassé…) : elle garde sa place.
     if (opening) {
-      owner = opening;
+      // I ou C peut afficher le sac, la fiche ou les deux : chacun garde sa propre place et sa propre taille.
+      owner = GEAR_OWNERS[opening] ? GEAR_OWNERS[opening][win.dataset.size] || opening : opening;
       leash = null;
     } else if (!was || (fromWorld && !same)) {
       owner = 'free:' + sig;

@@ -4,7 +4,8 @@
   function prepare(panel) {
     const win = document.getElementById('window');
     win.dataset.canaanPanel = panel;
-    currentGearPanel = panel;
+    // Sac et fiche côte à côte : les rafraîchissements du sac (renderInventory) redessinent les deux.
+    currentGearPanel = panel === 'duo' ? 'inventory' : panel;
     win.querySelectorAll('button').forEach(button => {
       if (!button.hasAttribute('type')) button.type = 'button';
     });
@@ -99,10 +100,16 @@
     saveGame();
   }
   function renderInventory() {
-    updateCapacity();
-    game.hero.inventory.forEach(item => window.CANAAN_GEAR.normalize(item));
+    if (gearDuo) return renderGearDuo();
     currentGearPanel = 'inventory';
     hideGearTooltip();
+    modernPanel(inventoryHTML());
+    prepare('inventory');
+  }
+  // Contenu du sac (I), seul ou à côté de la fiche.
+  function inventoryHTML() {
+    updateCapacity();
+    game.hero.inventory.forEach(item => window.CANAAN_GEAR.normalize(item));
     const merchant = nearMerchant(),
       stackCell = p =>
         '<div class="bag-sale-wrap">' +
@@ -119,56 +126,53 @@
       used = canaanBagUsed(game.hero),
       free = Math.max(0, BAG_LIMIT - used),
       matUsed = CANAAN_BAG.matUsed(game.hero);
-    modernPanel(
+    return (
       rpgHeader(
         '🎒 Sac <small>' + used + ' / ' + BAG_LIMIT + '</small>',
         '<button type="button" class="bag-sort" data-action="sortBag" title="Ranger l’équipement : par emplacement, qualité puis niveau"' +
           (game.hero.inventory.length < 2 ? ' disabled' : '') +
           '>⇅ Trier</button>'
       ) +
-        // Une ligne d'aide ; le détail au survol.
-        '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic droit : Arme 2 (réserve, Q pour changer en combat), vendre chez un marchand, démanteler. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
-        'Clic : équiper · Clic droit : options · ' +
-        (merchant ? '💰 Marchand proche : vente disponible.' : '💰 Vente chez un marchand (E).') +
-        '</p>' +
-        '<div class="modern-body bag-panel panel-scroll" data-panel-size="bag">' +
-        bagGroup('⚔️', 'Équipement', gear.length, gear) +
-        // Artéfacts de l'Arène (non équipés) : liés au héros, sans place prise ; un clic les équipe.
-        (artefacts.length
-          ? bagGroup('🔮', 'Artéfacts', artefacts.length, artefacts, 'sans place prise')
-          : '') +
-        bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
-        bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
-        (free
-          ? '<h3 class="bag-subhead">＋ Libres <small>' +
-            free +
-            '</small></h3><div class="modern-bag">' +
-            Array.from({ length: free }, () => bagCell(null)).join('') +
-            '</div>'
-          : '<p class="weapon-hint">🎒 Sac plein : démantèle (clic droit), vends ou dépose des objets, ou agrandis ton sac chez un marchand. Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.</p>') +
-        CANAAN_SALVAGE.section() +
-        '<div class="bag-section-mat">' +
-        bagGroup(
-          '⟦prof_mining⟧',
-          'Matériaux',
-          matUsed + ' / ' + CANAAN_BAG.MAT_LIMIT,
-          mats,
-          'minerais, herbes, poissons, viandes, poudres'
-        ) +
-        '<p class="muted">Leurs ' +
-        CANAAN_BAG.MAT_LIMIT +
-        ' cases de 100 ne prennent pas la place du sac.</p></div>' +
-        '</div>' +
-        // Pied du sac, comme dans les MMO : l'or du héros (et la vente rapide près d'un marchand).
-        '<div class="bag-foot">' +
-        (merchant
-          ? '<button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button>'
-          : '<span></span>') +
-        '<span class="bag-gold">' +
-        Math.floor(P.gold).toLocaleString('fr-FR') +
-        ' or</span></div>'
+      // Une ligne d'aide ; le détail au survol.
+      '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic droit : Arme 2 (réserve, Q pour changer en combat), vendre chez un marchand, démanteler. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
+      'Clic : équiper · Clic droit : options · ' +
+      (merchant ? '💰 Marchand proche : vente disponible.' : '💰 Vente chez un marchand (E).') +
+      '</p>' +
+      '<div class="modern-body bag-panel panel-scroll" data-panel-size="bag">' +
+      bagGroup('⚔️', 'Équipement', gear.length, gear) +
+      // Artéfacts de l'Arène (non équipés) : liés au héros, sans place prise ; un clic les équipe.
+      (artefacts.length ? bagGroup('🔮', 'Artéfacts', artefacts.length, artefacts, 'sans place prise') : '') +
+      bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
+      bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
+      (free
+        ? '<h3 class="bag-subhead">＋ Libres <small>' +
+          free +
+          '</small></h3><div class="modern-bag">' +
+          Array.from({ length: free }, () => bagCell(null)).join('') +
+          '</div>'
+        : '<p class="weapon-hint">🎒 Sac plein : démantèle (clic droit), vends ou dépose des objets, ou agrandis ton sac chez un marchand. Le butin Rare ou mieux attend dans la sacoche ; le reste est démantelé tout seul.</p>') +
+      CANAAN_SALVAGE.section() +
+      '<div class="bag-section-mat">' +
+      bagGroup(
+        '⟦prof_mining⟧',
+        'Matériaux',
+        matUsed + ' / ' + CANAAN_BAG.MAT_LIMIT,
+        mats,
+        'minerais, herbes, poissons, viandes, poudres'
+      ) +
+      '<p class="muted">Leurs ' +
+      CANAAN_BAG.MAT_LIMIT +
+      ' cases de 100 ne prennent pas la place du sac.</p></div>' +
+      '</div>' +
+      // Pied du sac, comme dans les MMO : l'or du héros (et la vente rapide près d'un marchand).
+      '<div class="bag-foot">' +
+      (merchant
+        ? '<button type="button" data-action="sellAllCommon">💰 Vendre les objets communs</button>'
+        : '<span></span>') +
+      '<span class="bag-gold">' +
+      Math.floor(P.gold).toLocaleString('fr-FR') +
+      ' or</span></div>'
     );
-    prepare('inventory');
   }
   function charSlot(slot) {
     const item = game.hero.equipment[slot],
@@ -225,9 +229,31 @@
     renderCharacter();
   }
   function renderCharacter() {
-    Object.values(game.hero.equipment).forEach(item => window.CANAAN_GEAR.normalize(item));
+    if (gearDuo) return renderGearDuo();
     currentGearPanel = 'character';
     hideGearTooltip();
+    modernPanel(characterHTML());
+    drawCharacterPreview();
+    prepare('character');
+  }
+  // Sac et fiche ouverts ensemble (I avec la fiche ouverte, ou C avec le sac ouvert) : côte à côte dans la fenêtre,
+  // la fiche à gauche, le sac à droite. La croix ferme les deux ; I ou C referme seulement le sien.
+  function renderGearDuo() {
+    currentGearPanel = 'inventory';
+    hideGearTooltip();
+    modernPanel(
+      '<div class="gear-duo" data-panel-size="duo"><section class="duo-pane duo-char">' +
+        characterHTML() +
+        '</section><section class="duo-pane duo-bag">' +
+        inventoryHTML() +
+        '</section></div>'
+    );
+    drawCharacterPreview();
+    prepare('duo');
+  }
+  // Contenu de la fiche (C), seule ou à côté du sac.
+  function characterHTML() {
+    Object.values(game.hero.equipment).forEach(item => window.CANAAN_GEAR.normalize(item));
     const st = characterStats(),
       count = Object.values(game.hero.equipment).filter(Boolean).length,
       need = xpToNext(st.level);
@@ -263,23 +289,21 @@
       '</span></div></div>' +
       window.CANAAN_STATS_VIEW.panel(st) +
       '</div></div></div>';
-    modernPanel(
+    return (
       rpgHeader(
         '🧙 Personnage · Niveau ' +
           st.level +
           (game.hero.quetes?.flags?.title ? ' · ✨ Gardien de l’Aurore' : '')
       ) +
-        tabs +
-        '<div class="char-body panel-scroll" data-panel-size="char" data-keep-scroll="char-' +
-        charTab +
-        '">' +
-        (charTab === 'titles'
-          ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
-          : gear) +
-        '</div>'
+      tabs +
+      '<div class="char-body panel-scroll" data-panel-size="char" data-keep-scroll="char-' +
+      charTab +
+      '">' +
+      (charTab === 'titles'
+        ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
+        : gear) +
+      '</div>'
     );
-    drawCharacterPreview();
-    prepare('character');
   }
   function showGearTooltip(index, event) {
     const item = game.hero.inventory[index];

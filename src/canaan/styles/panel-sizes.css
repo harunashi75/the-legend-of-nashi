@@ -32,6 +32,10 @@
   --panel-w: 880px;
   --panel-h: 680px;
 }
+#window#window[data-size='duo'] {
+  --panel-w: 1250px;
+  --panel-h: 700px;
+}
 #window#window[data-size='lg'] {
   --panel-w: 1140px;
   --panel-h: 780px;
@@ -89,27 +93,33 @@
 }
 
 /* ---------------------------------------------------------------- Sac (I) */
-#window[data-size='bag'] .bag-hint {
+#window[data-size='bag'] .bag-hint,
+#window[data-size='duo'] .duo-bag .bag-hint {
   margin: 0 0 8px;
   font-size: calc(12px * var(--font-scale));
   line-height: 1.35;
   cursor: var(--cursor-help);
 }
-#window[data-size='bag'] .bag-panel .bag-subhead {
+#window[data-size='bag'] .bag-panel .bag-subhead,
+#window[data-size='duo'] .duo-bag .bag-panel .bag-subhead {
   margin: 8px 0 4px;
 }
-#window[data-size='bag'] .bag-panel .bag-subhead:first-child {
+#window[data-size='bag'] .bag-panel .bag-subhead:first-child,
+#window[data-size='duo'] .duo-bag .bag-panel .bag-subhead:first-child {
   margin-top: 0;
 }
-#window[data-size='bag'] .bag-panel .modern-bag {
+#window[data-size='bag'] .bag-panel .modern-bag,
+#window[data-size='duo'] .duo-bag .bag-panel .modern-bag {
   grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   gap: 6px;
   margin-top: 4px;
 }
-#window[data-size='bag'] .bag-panel .bag-none {
+#window[data-size='bag'] .bag-panel .bag-none,
+#window[data-size='duo'] .duo-bag .bag-panel .bag-none {
   margin: 0;
 }
-#window[data-size='bag'] .bag-foot {
+#window[data-size='bag'] .bag-foot,
+#window[data-size='duo'] .duo-bag .bag-foot {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -118,15 +128,18 @@
   padding-top: 8px;
   border-top: 1px solid var(--rpg-gold-dark, #6a4e2a);
 }
-#window[data-size='bag'] .bag-foot button {
+#window[data-size='bag'] .bag-foot button,
+#window[data-size='duo'] .duo-bag .bag-foot button {
   margin: 0;
 }
-#window[data-size='bag'] .bag-gold {
+#window[data-size='bag'] .bag-gold,
+#window[data-size='duo'] .duo-bag .bag-gold {
   color: var(--rpg-gold-light, #f6dc98);
   font-family: var(--rpg-serif);
   font-weight: bold;
 }
-#window[data-size='bag'] .bag-gold::before {
+#window[data-size='bag'] .bag-gold::before,
+#window[data-size='duo'] .duo-bag .bag-gold::before {
   content: '';
   display: inline-block;
   width: 0.8em;
@@ -137,66 +150,119 @@
   box-shadow: 0 0 0 1px #3a2408;
   vertical-align: -0.05em;
 }
-#window[data-size='bag'] .rpg-head .bag-sort {
+#window[data-size='bag'] .rpg-head .bag-sort,
+#window[data-size='duo'] .duo-bag .rpg-head .bag-sort {
   margin: 0;
 }
 
 /* ---------------------------------------------------------------- Personnage (C) */
 /* Équipement : la poupée (emplacements de chaque côté du héros), les statistiques compactes à côté. */
-#window[data-size='char'] .character-layout {
+#window[data-size='char'] .character-layout,
+#window[data-size='duo'] .duo-char .character-layout {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
 #window[data-size='char'] .character-left .rpg-paper,
-#window[data-size='char'] .character-layout > .rpg-paper {
+#window[data-size='duo'] .duo-char .character-left .rpg-paper,
+#window[data-size='char'] .character-layout > .rpg-paper,
+#window[data-size='duo'] .duo-char .character-layout > .rpg-paper {
   margin: 0;
   padding: 10px;
 }
 /* #window#window : plus fort que les règles de la poupée du thème. */
-#window#window[data-size='char'] .character-doll {
+#window#window[data-size='char'] .character-doll,
+#window#window[data-size='duo'] .duo-char .character-doll {
   column-gap: 16px;
   justify-content: space-between;
 }
 /* Cases de la poupée poussées vers les rebords du cadre. */
-#window[data-size='char'] .character-left > .rpg-paper:first-child {
+#window[data-size='char'] .character-left > .rpg-paper:first-child,
+#window[data-size='duo'] .duo-char .character-left > .rpg-paper:first-child {
   padding-inline: 4px;
 }
-#window#window[data-size='char'] .doll-center {
+#window#window[data-size='char'] .doll-center,
+#window#window[data-size='duo'] .duo-char .doll-center {
   width: 140px;
 }
-#window[data-size='char'] .doll-center canvas {
+#window[data-size='char'] .doll-center canvas,
+#window[data-size='duo'] .duo-char .doll-center canvas {
   width: 136px;
   height: 200px;
 }
 /* Artéfacts de l'Arène, sous le héros : compacts, pour tenir sous la poupée sans défiler. */
-#window[data-size='char'] .art-paper {
+#window[data-size='char'] .art-paper,
+#window[data-size='duo'] .duo-char .art-paper {
   padding: 8px 10px 10px;
 }
-#window[data-size='char'] .art-head {
+#window[data-size='char'] .art-head,
+#window[data-size='duo'] .duo-char .art-head {
   margin-bottom: 6px;
 }
-#window[data-size='char'] .art-head h3 {
+#window[data-size='char'] .art-head h3,
+#window[data-size='duo'] .duo-char .art-head h3 {
   font-size: calc(15px * var(--font-scale));
 }
-#window[data-size='char'] .art-slot {
+#window[data-size='char'] .art-slot,
+#window[data-size='duo'] .duo-char .art-slot {
   max-height: 56px;
 }
-#window[data-size='char'] .art-slot b {
+#window[data-size='char'] .art-slot b,
+#window[data-size='duo'] .duo-char .art-slot b {
   font-size: calc(24px * var(--font-scale));
 }
-#window[data-size='char'] .art-note {
+#window[data-size='char'] .art-note,
+#window[data-size='duo'] .duo-char .art-note {
   margin-top: 6px;
 }
-#window[data-size='char'] .stat-desc {
+#window[data-size='char'] .stat-desc,
+#window[data-size='duo'] .duo-char .stat-desc {
   font-size: calc(10.5px * var(--font-scale));
   line-height: 1.25;
 }
 #window[data-size='char'] .stat-table td,
-#window[data-size='char'] .stat-table th {
+#window[data-size='duo'] .duo-char .stat-table td,
+#window[data-size='char'] .stat-table th,
+#window[data-size='duo'] .duo-char .stat-table th {
   padding-top: 3px;
   padding-bottom: 3px;
+}
+
+/* ---------------------------------------------------------------- Sac et fiche ensemble (C puis I, ou I puis C) */
+/* Deux panneaux côte à côte, chacun sur son fond : la fiche à gauche, le sac à droite. Chacun défile à part. */
+#window#window[data-size='duo'] .gear-duo {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 760fr) minmax(0, 470fr);
+  gap: 14px;
+}
+#window[data-size='duo'] .duo-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--rpg-gold-dark, #6a4e2a);
+  border-radius: 10px;
+  background: #1a120cc0;
+}
+#window[data-size='duo'] .duo-pane > * {
+  flex-shrink: 0;
+}
+#window[data-size='duo'] .duo-pane > .panel-scroll {
+  flex: 1 1 auto;
+}
+/* La croix de la fenêtre est au-dessus de la fiche : le titre du sac n'a pas à lui laisser de place. */
+#window[data-size='duo'] .duo-bag .rpg-head {
+  padding-left: 0;
+}
+@media (max-width: 1100px) {
+  #window#window[data-size='duo'] .gear-duo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
 
 /* ---------------------------------------------------------------- Quêtes (L) */

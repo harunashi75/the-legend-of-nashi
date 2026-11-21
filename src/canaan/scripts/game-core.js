@@ -238,6 +238,11 @@ function canaanPanelKey(action) {
   if (!name || typeof window[name] !== 'function') return false;
   canaanTrackPanels();
   if (!modalOpen()) return false;
+  // Sac et fiche : I et C les ouvrent côte à côte ou referment le leur (toggleInventory, toggleCharacter).
+  if ((name === 'toggleInventory' || name === 'toggleCharacter') && shownGearPanel()) {
+    window[name]();
+    return true;
+  }
   // C ferme la fiche quel que soit son onglet, V les Collections quel que soit le leur (même ouvertes autrement).
   // Fenêtre Groupe : G ferme la page Compagnons, J la page Échange, et chacune passe à l'autre page.
   const shownPanel = document.getElementById('window')?.dataset.canaanPanel,

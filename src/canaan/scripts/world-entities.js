@@ -143,6 +143,7 @@ function modalOpen() {
 }
 function closePanels() {
   currentGearPanel = '';
+  gearDuo = false;
   document.getElementById('window').classList.remove('rpg-modern');
   delete document.getElementById('window').dataset.size;
   document.getElementById('overlay').style.display = 'none';
@@ -159,10 +160,10 @@ function canaanScrollKey(el, win) {
 }
 // Taille de chaque fenêtre, comme dans les grands MMO : une taille fixe adaptée à ce qu'elle montre (petit sac,
 // petite fiche, grands talents et collections…). Chaque fenêtre la déclare dans son propre contenu
-// (data-panel-size="bag", "char", "md" ou "lg") ; showPanel la pose en data-size sur la fenêtre, décrite dans
+// (data-panel-size="bag", "char", "duo", "md" ou "lg") ; showPanel la pose en data-size sur la fenêtre, décrite dans
 // styles/panel-sizes.css. Sans déclaration (dialogues, boutiques, portails, carte), la fenêtre garde la taille de son
 // contenu. Dans une fenêtre à taille fixe, seule sa zone .panel-scroll défile, et seulement si elle déborde.
-const CANAAN_PANEL_SIZE = /data-panel-size="(bag|char|md|lg)"/;
+const CANAAN_PANEL_SIZE = /data-panel-size="(bag|char|duo|md|lg)"/;
 function canaanPanelSize(win, html) {
   const found = CANAAN_PANEL_SIZE.exec(html);
   if (found) win.dataset.size = found[1];
@@ -183,6 +184,7 @@ function showPanel(html) {
   }
   // Toute nouvelle fenêtre remplace le sac ou la fiche : ils se réinscrivent eux-mêmes (prepare) une fois dessinés.
   currentGearPanel = '';
+  if (!String(html).includes('data-panel-size="duo"')) gearDuo = false;
   delete win.dataset.canaanPanel;
   document.getElementById('dialog').style.display = 'none';
   document.getElementById('overlay').style.display = 'flex';
@@ -203,20 +205,35 @@ function showPanel(html) {
     if (list[i]) el.scrollTop = list[i];
   }
 }
-let currentGearPanel = '';
-function toggleInventory() {
+let currentGearPanel = '',
+  gearDuo = false; // sac et fiche affichés côte à côte (ui.js, renderGearDuo)
+// Sac ou fiche affiché : 'inventory', 'character', 'duo' (les deux), sinon null.
+function shownGearPanel() {
+  const shown = modalOpen() && document.getElementById('window').dataset.canaanPanel;
+  return shown === 'inventory' || shown === 'character' || shown === 'duo' ? shown : null;
+}
+// I avec la fiche ouverte (ou C avec le sac ouvert) ajoute l'autre à côté ; I ou C referme ensuite seulement le sien.
+function toggleGearPanel(mine, other) {
+  const shown = shownGearPanel();
+  if (shown === other || shown === 'duo') {
+    gearDuo = shown === other;
+    if (gearDuo) renderInventory();
+    else if (other === 'character') renderCharacter();
+    else renderInventory();
+    return;
+  }
   if (modalOpen()) {
     closePanels();
     return;
   }
-  renderInventory();
+  if (mine === 'inventory') renderInventory();
+  else renderCharacter();
+}
+function toggleInventory() {
+  toggleGearPanel('inventory', 'character');
 }
 function toggleCharacter() {
-  if (modalOpen()) {
-    closePanels();
-    return;
-  }
-  renderCharacter();
+  toggleGearPanel('character', 'inventory');
 }
 // Redessine le sac ou la fiche seulement s'ils sont la fenêtre affichée : jamais par-dessus une autre (T, J, marchand…).
 function refreshGearPanel() {
