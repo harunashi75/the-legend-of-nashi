@@ -24,7 +24,7 @@ test('Objets : normalisation unique, butin de chaque instance à son niveau, anc
     g.Math.random=()=>{if(first){first=false;return .999}return .2};
     assert.equal(g.CANAAN_LOOT.instance(index),true);
     const item=run('inventory[0]');assert.equal(item.rarity,rarity);assert.equal(item.level,level);assert.equal(item.ilvl,undefined);
-    if(item.slot!=='artifact')assert.equal(Object.keys(item.sec).length,2);
+    assert.notEqual(item.slot,'artifact');assert.equal(Object.keys(item.sec).length,2);
     assert.equal(item.origin,index<6?'donjon':'raid');assert.doesNotMatch(item.name,/ — (Relique du donjon|Héritage du raid)/);
   }
   // Sac plein : la récompense garantie n'est plus perdue, elle attend dans la sacoche de butin.
@@ -168,20 +168,15 @@ test('Butin des monstres, élites, boss mondiaux et coffres secrets : un objet g
  assert.deepEqual(rolled(elite,[0,.95]),[['Rare',12]]);assert.deepEqual(rolled(elite,[0,.995]),[['Épique',12]]);
  r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'Fenrir est niveau 10');assert.ok(r.gold>=350&&r.gold<=525,String(r.gold));
  // Coffre secret : verrouillé sans clé des secrets ; avec une clé (consommée), un Épique du niveau de sa zone
- // (milieu de la plage), 200 à 400 or et 25 % de chance d'un Rubis.
+ // (milieu de la plage) et 200 à 400 or.
  const chestLevel=run('(()=>{const spot=hiddenChestSpots.find(c=>!openedChests.includes(c.id)),at=chestPosition(spot),[lo,hi]=ZONE_LEVELS[canaanZoneIndexAt(at.x,at.y)];return Math.round((lo+hi)/2)})()');
  const opened0=run('openedChests.length');
  r=reward('P.keys=0;'+chest,0);assert.deepEqual(r.items,[]);assert.equal(r.gold,0);assert.equal(run('openedChests.length'),opened0,'sans clé, il reste fermé');
- const rubis0=run('Object.values(CANAAN_RUBIS_STATE.export().owned).reduce((a,b)=>a+b,0)');
  r=reward('P.keys=2;'+chest,0);assert.deepEqual(r.items,[['Épique',chestLevel]]);assert.equal(r.gold,200);assert.equal(run('P.keys'),1,'une clé consommée');
- assert.equal(run('Object.values(CANAAN_RUBIS_STATE.export().owned).reduce((a,b)=>a+b,0)'),rubis0+1,'Rubis gagné');
  r=reward('P.keys=1;'+chest,0.99);assert.deepEqual(r.items,[['Épique',chestLevel]]);assert.equal(r.gold,398);
  // Les ennemis d’une instance, même élites, ne donnent rien : le coffre du boss fait le butin.
  r=reward('instanceState={index:0,cleared:false};'+mob,0);assert.deepEqual(r.items,[]);
  r=reward('instanceState={index:6,cleared:false};'+elite,.46);assert.deepEqual(r.items,[]);
- // Rubis Prospecteur : 15 % de chances qu’un mob normal lâche un objet Peu commun (jamais en instance).
- run('CANAAN_RUBIS.betterDrop=()=>true');r=reward(mob,0);assert.deepEqual(r.items,[['Peu commun',7]]);
- r=reward(boss,0);assert.deepEqual(r.items,[['Rare',10]],'le Prospecteur ne change que les mobs ordinaires');
 });
 
 test('Qualité Unique et types d’armure absents du jeu et du butin',()=>{

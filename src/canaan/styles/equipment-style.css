@@ -125,28 +125,6 @@
   margin: 7px 0;
   color: #b2f1dc;
 }
-#gearHoverTooltip .artifact56 {
-  border: 1px solid #bc9c66;
-  border-radius: 10px;
-  background: linear-gradient(130deg, #34263b, #182638);
-  padding: 11px;
-  margin-top: 10px;
-  color: #f9e1ae;
-  font-size: calc(12px * var(--font-scale));
-  line-height: 1.6;
-}
-#gearHoverTooltip .artifact56 b {
-  color: #ffe5a0;
-}
-#window .artifact56-compare {
-  border: 1px solid #826b9c;
-  border-radius: 9px;
-  padding: 10px;
-  margin-top: 8px;
-  background: #1a2036;
-  font-size: calc(12px * var(--font-scale));
-  line-height: 1.6;
-}
 #window .bag-sale-wrap {
   position: relative;
   min-width: 0;

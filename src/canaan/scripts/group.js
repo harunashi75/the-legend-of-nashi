@@ -112,8 +112,8 @@
     p.x = P.x;
     p.y = P.y;
   }
-  // Équipe les meilleures pièces du sac (les plus fortes de son niveau, par emplacement) ; l'ancienne pièce
-  // retourne au sac.
+  // Équipe les meilleures pièces du sac (les plus fortes de son niveau, par emplacement, les deux bagues comprises) ;
+  // l'ancienne pièce retourne au sac.
   function equipBest(id) {
     const hero = game.guests[id];
     if (!hero) return 0;
@@ -122,7 +122,7 @@
       // Arme liée (Invocateur) : jamais remplacée.
       if (slot === 'weapon' && isBoundItem(hero.equipment.weapon)) continue;
       const best = hero.inventory
-        .filter(it => it.slot === slot && requiredLevel(it) <= clampLevel(hero.level))
+        .filter(it => it.slot === itemSlotOf(slot) && requiredLevel(it) <= clampLevel(hero.level))
         .sort((a, b) => gearScore(b) - gearScore(a))[0];
       if (!best || gearScore(best) <= gearScore(hero.equipment[slot])) continue;
       hero.inventory.splice(hero.inventory.indexOf(best), 1);
@@ -145,7 +145,7 @@
     typeof it === 'object' &&
     !Array.isArray(it) &&
     Object.hasOwn(gearSlots, it.slot) &&
-    it.slot !== 'weapon2' &&
+    !SECOND_SLOT_OF[it.slot] &&
     Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
     Number(it.level ?? it.ilvl ?? 1) > 0;
   const count = v => (Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0);
@@ -180,7 +180,7 @@
         // Version du niveau de sac : sans elle, un niveau 3 venait du départ à 40 places (ancienne règle).
         bagVersion: 2,
         classe: { id: hero.classe.id, talents: [...hero.classe.talents] },
-        rubis: { owned: { ...hero.rubis.owned }, equipped: [...hero.rubis.equipped] },
+        artefacts: CANAAN_ARTEFACTS.clean(hero.artefacts),
         arena: { ...hero.arena },
         prof: CANAAN_PROF.sanitize(hero.prof),
         succes: CANAAN_ACHIEVEMENTS.export(hero),
@@ -228,8 +228,7 @@
       hero.satchel = CANAAN_SALVAGE.sanitize(d.sacoche);
       for (const slot of Object.keys(hero.equipment)) {
         const it = d.equipment?.[slot];
-        hero.equipment[slot] =
-          validItem(it) && it.slot === (slot === 'weapon2' ? 'weapon' : slot) ? it : null;
+        hero.equipment[slot] = validItem(it) && it.slot === itemSlotOf(slot) ? it : null;
       }
       hero.kills = count(d.kills);
       // Niveau : celui sauvegardé ; ancienne sauvegarde (avant les niveaux) : de quoi porter son équipement.
@@ -243,29 +242,21 @@
       hero.bagLevel = canaanBagLevel({
         bagLevel: d.bagVersion === 2 ? d.bagLevel : Math.max(0, (Number(d.bagLevel) || 0) - 3)
       });
-      // Anciens matériaux de forge (supprimés) : rendus en or.
-      hero.player.gold = count(p.gold) + legacyMaterialGold(d.materials, LEGACY_MATERIAL_GOLD);
+      // Anciens matériaux de forge, Runes et anciens objets artéfact (supprimés) : rendus en or.
+      hero.player.gold =
+        count(p.gold) +
+        legacyMaterialGold(d.materials, LEGACY_MATERIAL_GOLD) +
+        CANAAN_ARTEFACTS.legacyRefund(d).gold;
       hero.player.keys = count(p.keys);
       hero.player.mhp = characterStats(hero).maxHp;
       hero.player.hp = Math.max(1, Math.min(hero.player.mhp, Number(p.hp) || hero.player.mhp));
-      // Classe et Rubis agissent en combat : mêmes vérifications que pour l'hôte (classe connue, talents
-      // différents dans la limite des emplacements, Rubis connus, possédés et jamais deux fois).
+      // Classe et artéfacts agissent en combat : mêmes vérifications que pour l'hôte (classe connue, talents
+      // différents dans la limite des emplacements, artéfacts connus, possédés et jamais deux fois).
       CANAAN_CLASS.setClasse(hero, d.classe);
       // Compagnon d'avant les classes : il en reçoit une, avec ses talents.
       if (hero.local && !hero.classe.id) giveClass(hero);
-      const rubis = CANAAN_BANK.withBankedRubis(d.bank, d.rubis);
-      if (rubis?.owned && typeof rubis.owned === 'object')
-        for (const [k, n] of Object.entries(rubis.owned))
-          if (CANAAN_RUBIS.get(k) && count(n)) hero.rubis.owned[k] = count(n);
-      const worn = new Set();
-      if (Array.isArray(rubis?.equipped))
-        hero.rubis.equipped = Array.from({ length: 6 }, (_, k) => {
-          const id = rubis.equipped[k];
-          if (typeof id !== 'string' || !hero.rubis.owned[id] || worn.has(id)) return null;
-          worn.add(id);
-          return id;
-        });
-      // PV maximum avec sa classe et ses Rubis, une fois ceux-ci vérifiés.
+      hero.artefacts = CANAAN_ARTEFACTS.clean(d.artefacts);
+      // PV maximum avec sa classe et ses artéfacts, une fois ceux-ci vérifiés.
       hero.player.mhp = characterStats(hero).maxHp;
       hero.player.hp = Math.max(1, Math.min(hero.player.mhp, Number(p.hp) || hero.player.mhp));
       if (d.arena && typeof d.arena === 'object')
@@ -273,8 +264,7 @@
           best: Math.min(12, count(d.arena.best)),
           attempts: count(d.arena.attempts),
           completed: !!d.arena.completed,
-          lastBoss: typeof d.arena.lastBoss === 'string' ? d.arena.lastBoss.slice(0, 80) : '',
-          pendingChoice: !!d.arena.pendingChoice
+          lastBoss: typeof d.arena.lastBoss === 'string' ? d.arena.lastBoss.slice(0, 80) : ''
         };
       for (const it of [...hero.inventory, ...Object.values(hero.equipment)])
         if (it) window.CANAAN_GEAR.normalize(it);

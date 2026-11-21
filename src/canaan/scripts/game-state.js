@@ -25,7 +25,7 @@ const game = {
       gloves: null,
       neck: null,
       ring: null,
-      artifact: null
+      ring2: null
     },
     // Compteur de victimes.
     kills: 0,
@@ -37,10 +37,10 @@ const game = {
     classe: { id: null, talents: [] },
     // Quêtes et histoire (shared/rules/quests.js : sanitizeQuests).
     quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null, troc: 0, shells: [], paid: 0 },
-    // Rubis : nombre d'exemplaires possédés par identifiant et six emplacements.
-    rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
+    // Artéfacts de l'Arène : rang de chaque artéfact possédé et quatre emplacements.
+    artefacts: { ranks: {}, equipped: [null, null, null, null] },
     // Records de l'Arène des Épreuves.
-    arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
+    arena: { best: 0, attempts: 0, completed: false, lastBoss: '' },
     // Métiers : pêche et cuisine (niveaux, poissons, repas).
     prof: profFresh()
   },
@@ -78,7 +78,7 @@ const game = {
 game.heroes = [game.hero];
 // Invités enregistrés dans l'aventure (présents ou non), par identifiant : 6 au plus (canaan-group).
 game.guests = {};
-// Crée un héros au format de game.hero : équipement vide, sac vide, aucun talent ni Rubis.
+// Crée un héros au format de game.hero : équipement vide, sac vide, aucun talent ni artéfact.
 // Ses PV maximum viennent de son équipement ; il n'est ajouté à game.heroes que par l'appelant.
 function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
   const hero = {
@@ -111,7 +111,7 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
       gloves: null,
       neck: null,
       ring: null,
-      artifact: null,
+      ring2: null,
       ...equipment
     },
     // Niveau du sac d'un allié : 0 = 10 places, jusqu'à 9 = 100 places (comme l'hôte, mêmes prix).
@@ -120,8 +120,8 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
     intent: { dx: 0, dy: 0, attack: null, skill: null, aimX: x, aimY: y },
     classe: { id: null, talents: [] },
     quetes: { active: {}, done: {}, flags: {}, choices: {}, track: null, troc: 0, shells: [], paid: 0 },
-    rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
-    arena: { best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false },
+    artefacts: { ranks: {}, equipped: [null, null, null, null] },
+    arena: { best: 0, attempts: 0, completed: false, lastBoss: '' },
     prof: profFresh()
   };
   hero.player.mhp = hero.player.hp = characterStats(hero).maxHp;

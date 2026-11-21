@@ -26,7 +26,7 @@
 }
 #window#window[data-size='char'] {
   --panel-w: 760px;
-  --panel-h: 660px;
+  --panel-h: 800px;
 }
 #window#window[data-size='md'] {
   --panel-w: 880px;
@@ -158,12 +158,53 @@
 #window#window[data-size='char'] .character-doll {
   column-gap: 12px;
 }
+/* Emplacements un peu plus petits que dans le thème : les artéfacts tiennent dessous sans défiler. */
+#window#window[data-size='char'] .doll-column {
+  gap: 6px;
+}
+#window#window[data-size='char'] .equip-square {
+  width: 60px;
+  height: 60px;
+}
+#window#window[data-size='char'] .equip-square .eq-icon svg.ico {
+  width: 36px;
+  height: 36px;
+}
 #window#window[data-size='char'] .doll-center {
   width: 140px;
 }
 #window[data-size='char'] .doll-center canvas {
   width: 136px;
   height: 200px;
+}
+/* Artéfacts de l'Arène, sous le héros : compacts, pour tenir sous la poupée sans défiler. */
+#window[data-size='char'] .art-paper {
+  padding: 8px 10px 10px;
+}
+#window[data-size='char'] .art-head {
+  margin-bottom: 6px;
+}
+#window[data-size='char'] .art-head h3 {
+  font-size: calc(15px * var(--font-scale));
+}
+#window[data-size='char'] .art-slot {
+  max-height: 56px;
+}
+#window[data-size='char'] .art-slot b {
+  font-size: calc(24px * var(--font-scale));
+}
+#window[data-size='char'] .art-grid {
+  margin-top: 6px;
+  gap: 4px;
+}
+#window[data-size='char'] .art-cell {
+  height: 34px;
+}
+#window[data-size='char'] .art-cell b {
+  font-size: calc(18px * var(--font-scale));
+}
+#window[data-size='char'] .art-note {
+  margin-top: 6px;
 }
 #window[data-size='char'] .stat-desc {
   font-size: calc(10.5px * var(--font-scale));

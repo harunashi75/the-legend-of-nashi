@@ -25,8 +25,8 @@ En cas d’échec, le démarrage est bloqué et l’écran d’accueil affiche l
 | `canaan-equipment` | `equipItem`, `unequip`, `equipReserveWeapon`, `switchWeapon` |
 | `canaan-economy` | `dropTierGear` |
 | `canaan-combat` | `hit`, `monsterDamage`, `canaanHurtPlayer`, `canaanDodge` |
-| `canaan-rubis` | `CANAAN_RUBIS`, `CANAAN_RUBIS_STATE`, `equipRubis`, `unequipRubis`, `toggleRubis`, `showRubisTooltip`, `drawRubisGem` |
-| `canaan-arena` | `CANAAN_ARENA`, `CANAAN_ARENA_STATE`, `enterArena`, `openArenaPortal`, `claimArenaRubis` |
+| `canaan-artefacts` | `CANAAN_ARTEFACTS`, `CANAAN_ARTEFACTS_STATE`, `equipArtefact`, `unequipArtefact`, `toggleArtefact`, `showArtefactTooltip`, `drawArtefact` |
+| `canaan-arena` | `CANAAN_ARENA`, `CANAAN_ARENA_STATE`, `enterArena`, `openArenaPortal` |
 | `canaan-portals` | `openPortal` |
 | `canaan-map-panel` | `toggleMap` |
 | `canaan-sprite-kit` | `canaanOutline`, `canaanPolish`, `canaanActorSprite`, `drawCanaanActor`, `canaanLight`, `resetCanaanLights`, `drawCanaanLighting`, `drawCanaanBossFrame` |
@@ -56,7 +56,7 @@ Chaque étape de mise à jour est un objet de `CanaanStages` qui peut définir `
 | `facing` | `canaan-stats` | Orientation des monstres proches |
 | `classes` | `canaan-class-talents` | Ralentissements, déclencheurs de PV, effets sur la durée et zones des talents de classe |
 | `dodge` | `canaan-combat` | Déplacement de la roulade d'esquive |
-| `rubis` | `canaan-rubis` | Ralentissements, régénérations, brûlures et minuteurs des Rubis équipés |
+| `artefacts` | `canaan-artefacts` | Bouclier, régénération, brûlures et saignements des artéfacts de l’Arène équipés |
 | `arena` | `canaan-arena` | Vagues, intelligence des boss de l'Arène, annonces, projectiles et sols dangereux |
 | `quests` | `canaan-quests` | Traces et points à atteindre, poisson doré, mouton de Milo, nénuphars qui coulent |
 
@@ -68,7 +68,7 @@ Pour ajouter une étape, installer son objet dans le module propriétaire, l'ins
 
 Les scripts classiques partagent une seule portée globale. Un module encapsulé enveloppe son code dans `(() => { … })();` : ses déclarations restent privées, et ses noms publics sont exportés en une ligne, `Object.assign(window, { … })`, à la fin du module.
 
-Sont encapsulés : `canaan-world-settlements`, `canaan-world-generation`, `canaan-sprite-kit`, `canaan-dungeons`, `canaan-world-look`, `canaan-rubis`, `canaan-arena`, `canaan-map-panel`, `canaan-pixel-art`, `canaan-monster-scaling`, `canaan-merchants`, `canaan-controls` et `canaan-bootstrap`. Beaucoup d'autres modules exposent déjà leur interface via un objet `window.CANAAN_…` construit dans une fonction auto-exécutée.
+Sont encapsulés : `canaan-world-settlements`, `canaan-world-generation`, `canaan-sprite-kit`, `canaan-dungeons`, `canaan-world-look`, `canaan-artefacts`, `canaan-arena`, `canaan-map-panel`, `canaan-pixel-art`, `canaan-monster-scaling`, `canaan-merchants`, `canaan-controls` et `canaan-bootstrap`. Beaucoup d'autres modules exposent déjà leur interface via un objet `window.CANAAN_…` construit dans une fonction auto-exécutée.
 
 Restent globaux par conception les états partagés que plusieurs modules réaffectent, comme `monsters`, `world`, `inventory`, `instanceState` ou `materials`, ainsi que les fonctions que les tests remplacent par des doublures. Un nom exporté ne doit jamais être réaffecté hors de son module : le module continuerait d'utiliser sa propre version. Pour encapsuler un nouveau module, vérifier d'abord qu'aucun de ses noms publics n'est réaffecté ailleurs.
 

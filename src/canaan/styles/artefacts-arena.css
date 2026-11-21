@@ -1,0 +1,266 @@
+/* Artéfacts de l'Arène (fiche du personnage, sous le héros) et Arène des Épreuves (portail, records). */
+
+/* Colonne gauche de la fiche (onglet Équipement) : le personnage, son équipement et ses artéfacts. */
+#window .character-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+/* Bloc d'un onglet (artéfacts, garde-robe) : titre à gauche, compteur à droite. */
+#window .tab-paper,
+#window .art-paper {
+  padding: 12px 14px 14px;
+}
+#window .tab-head,
+#window .art-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#window .tab-head h3,
+#window .art-head h3 {
+  margin: 0;
+  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: calc(17px * var(--font-scale));
+  letter-spacing: 0.5px;
+}
+#window .tab-head span,
+#window .art-head span {
+  color: var(--rpg-muted, #b8a483);
+  font-size: calc(12px * var(--font-scale));
+}
+
+/* Artéfacts : cases carrées à bordure de leur couleur. Aucun filtre, découpage ni ombre floue : la fiche reste
+   fluide quand on la fait défiler ou qu'on déplace la fenêtre. */
+#window .art-slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+#window .art-slot,
+#window .art-cell {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 2px solid var(--art, rgba(212, 170, 90, 0.35));
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--rpg-ink, #f3e6c8);
+  font: inherit;
+  text-shadow: none;
+  box-shadow: none;
+}
+#window .art-slot {
+  aspect-ratio: 1;
+  max-height: 72px;
+}
+#window .art-slot b {
+  font-size: calc(30px * var(--font-scale));
+  line-height: 1;
+}
+#window .art-slot em {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font: 700 calc(11px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
+  font-style: normal;
+  color: var(--art-l, #f6dc98);
+}
+#window .art-slot.empty {
+  border-style: dashed;
+  border-color: rgba(212, 170, 90, 0.35);
+  color: rgba(212, 170, 90, 0.5);
+  font-size: calc(20px * var(--font-scale));
+}
+#window .art-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+#window .art-cell {
+  height: 50px;
+  align-content: center;
+  gap: 2px;
+}
+#window .art-cell b {
+  font-size: calc(22px * var(--font-scale));
+  line-height: 1;
+}
+#window .art-cell em {
+  font:
+    700 calc(10px * var(--font-scale)) system-ui,
+    sans-serif;
+  font-style: normal;
+  color: #6a5a48;
+}
+#window .art-cell.unknown {
+  border-style: dashed;
+  border-color: rgba(212, 170, 90, 0.2);
+  color: #6a5a48;
+}
+#window .art-cell.unknown b {
+  font: 700 calc(16px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
+}
+#window .art-cell.worn {
+  background: color-mix(in srgb, var(--art) 22%, rgba(0, 0, 0, 0.32));
+  outline: 2px solid #8fe3ae;
+  outline-offset: 1px;
+}
+#window button.art-slot,
+#window button.art-cell {
+  cursor: var(--cursor-pointer);
+}
+#window button.art-slot:hover,
+#window button.art-cell:hover {
+  border-color: var(--art-l, #f6dc98);
+  background: color-mix(in srgb, var(--art) 18%, rgba(0, 0, 0, 0.32));
+}
+.art-pips {
+  font:
+    normal calc(8px * var(--font-scale)) / 1 system-ui,
+    sans-serif;
+  letter-spacing: 1px;
+  color: var(--art-l, #f6dc98);
+}
+.art-pips s {
+  text-decoration: none;
+  opacity: 0.35;
+}
+#window .art-note {
+  margin: 10px 0 0;
+  font-size: calc(11.5px * var(--font-scale));
+  color: var(--rpg-muted, #b8a483);
+  text-align: center;
+}
+
+/* Infobulle d'un artéfact. */
+.art-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.art-tip .art-cell {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  border: 2px solid var(--art);
+  background: rgba(0, 0, 0, 0.35);
+}
+.art-tip .art-cell b {
+  font-size: calc(26px * var(--font-scale));
+}
+.art-tip-desc {
+  max-width: 300px;
+  line-height: 1.35;
+  margin: 4px 0;
+}
+.art-unknown {
+  color: #b8a483;
+}
+.art-tip-note {
+  max-width: 300px;
+  font-size: calc(11.5px * var(--font-scale));
+  color: #b8a483;
+  margin-top: 4px;
+}
+
+/* Portail de l'Arène : records, règles et douze épreuves. */
+#window .arena-motto {
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-style: italic;
+  color: var(--rpg-gold-light, #f6dc98);
+}
+#window .arena-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  text-align: left;
+}
+#window .arena-board,
+#window .arena-bosses {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 170, 90, 0.3);
+  background: rgba(0, 0, 0, 0.28);
+}
+#window .arena-board h3,
+#window .arena-bosses h3 {
+  margin: 0 0 8px;
+  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-size: calc(15px * var(--font-scale));
+}
+#window .arena-board h3 + .arena-record {
+  border-top: 0;
+}
+#window .arena-record + h3 {
+  margin-top: 14px;
+}
+#window .arena-record {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-top: 1px solid rgba(212, 170, 90, 0.15);
+}
+#window .arena-record b {
+  color: #ffd36d;
+}
+#window .arena-rules {
+  margin: 0;
+  padding-left: 18px;
+  font-size: calc(12.5px * var(--font-scale));
+  line-height: 1.45;
+}
+#window .arena-tier {
+  margin: 8px 0 3px;
+  font-size: calc(11px * var(--font-scale));
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffb347;
+}
+#window .arena-boss {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: calc(13px * var(--font-scale));
+}
+#window .arena-boss span {
+  color: var(--rpg-muted, #b8a483);
+  text-align: right;
+}
+#window .arena-boss.done b {
+  color: #8fe3ae;
+}
+#window .arena-boss em {
+  font-style: normal;
+  color: #8fe3ae;
+}
+#window .arena-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+@media (max-width: 760px) {
+  #window .arena-layout {
+    grid-template-columns: 1fr;
+  }
+  #window .art-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

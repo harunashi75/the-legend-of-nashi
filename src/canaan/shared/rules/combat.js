@@ -14,7 +14,7 @@ export function enemyCritChance(enemy) {
 // Dégâts finaux d'un coup reçu par un héros. stats : statistiques du héros (heroStats : defense, resist, guard,
 // dodge) ; attackerLevel : niveau de l'ennemi (la Défense compte moins contre un ennemi de haut niveau).
 // rng est tiré deux fois, dans cet ordre : déviation (dégâts ÷ 2), puis coup critique ennemi (×1,5).
-// critFactor réduit le bonus critique (Rubis Volonté, 1 sinon).
+// critFactor réduit le bonus critique (1 par défaut).
 /**
  * @param {number} raw dégâts bruts
  * @param {{ defense: number, resist?: number, guard?: number, dodge?: number }} stats
@@ -46,7 +46,7 @@ export function mitigateIncoming(raw, stats, attackerLevel, rng, critChance, cri
 // Dégâts d'un coup infligé par un héros, avant l'application à la cible.
 // value : dégâts de base ; stats : statistiques du héros (level, crit, critPower, damageBonus) ; target : le
 // monstre (niveau, élite, boss) ; rng est tiré une fois, pour le critique.
-// armorFactor et critFactor : Rubis du héros (Brise-armure, Précision), 1 sinon.
+// armorFactor et critFactor : modificateurs facultatifs de la défense ennemie et du critique (1 par défaut).
 /**
  * @param {unknown} value dégâts de base
  * @param {{ level: number, crit: number, critPower: number, damageBonus?: number }} stats

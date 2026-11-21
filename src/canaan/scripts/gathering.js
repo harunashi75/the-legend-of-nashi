@@ -249,8 +249,7 @@
     if (!p || p.kind !== 'ench' || CANAAN_BAG.count(hero, 'ench', p.id, p.q) < 1) return false;
     const worn = Object.hasOwn(hero.equipment, ref),
       item = worn ? hero.equipment[ref] : hero.inventory.find(it => it && String(it.id) === String(ref));
-    if (!item || item.slot === 'artifact')
-      return (tell(hero, '✨ Choisis une pièce d’équipement (pas un artefact).'), false);
+    if (!item) return (tell(hero, '✨ Choisis une pièce d’équipement.'), false);
     CANAAN_BAG.remove(hero, 'ench', p.id, p.q, 1);
     const before = item.ench;
     item.ench = { stat: p.id, value: value(item, p.q, hero), tier: p.q };
@@ -907,9 +906,9 @@
     const pick = CANAAN_BAG.parse(ui.apply),
       gear = [
         ...Object.entries(game.hero.equipment)
-          .filter(([slot, it]) => it && it.slot !== 'artifact')
+          .filter(([slot, it]) => it)
           .map(([slot, it]) => [it, slot, true]),
-        ...game.hero.inventory.filter(it => it && it.slot !== 'artifact').map(it => [it, it.id, false])
+        ...game.hero.inventory.filter(Boolean).map(it => [it, it.id, false])
       ];
     html +=
       '<div class="modern-bag ench-targets">' +

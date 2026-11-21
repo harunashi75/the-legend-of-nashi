@@ -210,8 +210,9 @@ test('Slots d’aventure : résumé, création sans écrasement, suppression ave
  assert.deepEqual(slot.heros.invites,{});assert.equal(slot.resume.gold,121914);assert.equal(slot.resume.level,Math.round(100*60/190),'niveau de la meilleure pièce portée');
  assert.equal(q.importLegacy(),false);
  // Le slot importé se charge comme une aventure normale.
- // Les 3 minerais de l'ancienne partie sont rendus en or au chargement (10 or l'unité).
- q.selectSlot(1);assert.equal(h.loadGame(),true);assert.equal(h.P.gold,121914+30);assert.equal(h.kills,7);assert.equal(h.openedChests[0],'c1');
+ // Les 3 minerais de l'ancienne partie sont rendus en or au chargement (10 or l'unité), et sa Rune aussi (300 or) :
+ // les Runes ont laissé place aux artéfacts de l'Arène.
+ q.selectSlot(1);assert.equal(h.loadGame(),true);assert.equal(h.P.gold,121914+30+300);assert.equal(h.kills,7);assert.equal(h.openedChests[0],'c1');
  assert.equal(q.meta.nom,'Aventure importée');
  // Un schéma 9 abîmé n'est jamais importé ni retiré.
  const k=storageGame();k.db.set('canaan_dev_18999_state','{abîmé');assert.equal(k.CANAAN_PERSISTENCE.importLegacy(),false);assert.equal(k.db.get('canaan_dev_18999_state'),'{abîmé');

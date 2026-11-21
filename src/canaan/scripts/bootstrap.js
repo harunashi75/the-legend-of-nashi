@@ -83,16 +83,6 @@
         'CANAAN_STATS_VIEW.panel': 'function'
       }
     },
-    {
-      name: 'artefacts',
-      exports: {
-        CANAAN_ARTIFACT_STATS: 'function',
-        CANAAN_ARTIFACT_PASSIVE: 'function',
-        'CANAAN_ARTIFACT_UI.stat': 'function',
-        'CANAAN_ARTIFACT_UI.compare': 'function',
-        'CANAAN_ARTIFACT_UI.tooltip': 'function'
-      }
-    },
     { name: 'noms des armes', exports: { WEAPON_NAMES: 'object', applyItemName: 'function' } },
     {
       name: 'classes et talents',
@@ -150,22 +140,22 @@
       }
     },
     {
-      name: 'rubis',
+      name: 'artéfacts de l’Arène',
       exports: {
-        'CANAAN_RUBIS.stats': 'function',
-        'CANAAN_RUBIS.attackBefore': 'function',
-        'CANAAN_RUBIS.attackAfter': 'function',
-        'CANAAN_RUBIS.defense': 'function',
-        'CANAAN_RUBIS.beforeHurt': 'function',
-        'CANAAN_RUBIS.section': 'function',
-        'CANAAN_RUBIS_STATE.export': 'function',
-        'CANAAN_RUBIS_STATE.import': 'function',
-        'CanaanStages.rubis.after': 'function',
-        equipRubis: 'function',
-        unequipRubis: 'function',
-        toggleRubis: 'function',
-        showRubisTooltip: 'function',
-        drawRubisGem: 'function'
+        'CANAAN_ARTEFACTS.stats': 'function',
+        'CANAAN_ARTEFACTS.attackBefore': 'function',
+        'CANAAN_ARTEFACTS.attackAfter': 'function',
+        'CANAAN_ARTEFACTS.defense': 'function',
+        'CANAAN_ARTEFACTS.beforeHurt': 'function',
+        'CANAAN_ARTEFACTS.section': 'function',
+        'CANAAN_ARTEFACTS_STATE.export': 'function',
+        'CANAAN_ARTEFACTS_STATE.import': 'function',
+        'CanaanStages.artefacts.after': 'function',
+        equipArtefact: 'function',
+        unequipArtefact: 'function',
+        toggleArtefact: 'function',
+        showArtefactTooltip: 'function',
+        drawArtefact: 'function'
       }
     },
     {
@@ -181,7 +171,6 @@
         'CanaanStages.drawArenaHud': 'function',
         enterArena: 'function',
         openArenaPortal: 'function',
-        claimArenaRubis: 'function',
         arenaLayout: 'function'
       }
     },

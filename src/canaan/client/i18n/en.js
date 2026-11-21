@@ -46,7 +46,7 @@ export default {
   'Groupe ({k})': 'Group ({k})',
   'Métiers ({k})': 'Professions ({k})',
   'Métiers : récolte et artisanat ({k})': 'Professions: gathering and crafting ({k})',
-  'Personnage : équipement, runes, titres ({k})': 'Character: gear, runes, titles ({k})',
+  'Personnage : équipement, artéfacts, titres ({k})': 'Character: gear, artifacts, titles ({k})',
   'Groupe : compagnons et échange ({k})': 'Group: companions and trade ({k})',
   'Menu du jeu (Échap)': 'Game menu (Esc)',
   'Menu du jeu': 'Game menu',
@@ -487,7 +487,6 @@ export default {
   'Armure brisée': 'Broken armor',
   'Affaibli': 'Weakened',
   'Marqué': 'Marked',
-  'Acharnement': 'Relentless',
   'Parade': 'Parry',
   'Invulnérable': 'Invulnerable',
 
@@ -498,8 +497,6 @@ export default {
     'Opens a secret chest on the island or in the Depths (E in front of the chest).',
   'Les boss cachés des donjons et des raids en donnent une à chaque héros.':
     'Hidden dungeon and raid bosses give one to each hero.',
-  'Runes': 'Runes',
-  'Rune': 'Rune',
   '(nouvelle !)': '(new!)',
   'Poisson': 'Fish',
   'Viande': 'Meat',
@@ -541,7 +538,6 @@ export default {
   'Clique un objet pour le reprendre dans ton sac.': 'Click an item to put it back in your bag.',
   'Déposer à la banque': 'Deposit in the bank',
   'Clique un objet pour le déposer.': 'Click an item to deposit it.',
-  'Les objets portés et les Runes restent sur toi.': 'Worn items and Runes stay on you.',
   'Aucun matériau.': 'No materials.',
   'Ta banque': 'Your bank',
   'Ta banque est vide.': 'Your bank is empty.',
@@ -581,27 +577,78 @@ export default {
   'Statistiques principales': 'Primary stats',
   'Statistiques secondaires': 'Secondary stats',
 
-  // ------------------------------------------------------------ Artefacts
-  'Artefact': 'Artifact',
-  'Ardeur': 'Ardor',
-  'Dégâts infligés et soins prodigués': 'Damage dealt and healing done',
-  'Bastion': 'Bastion',
-  'Points de vie maximum et réduction des dégâts reçus': 'Maximum health and damage taken reduction',
-  'Instinct': 'Instinct',
-  'Chance de critique et vitesse de déplacement': 'Critical chance and movement speed',
+  // ------------------------------------------------------------ Artéfacts de l'Arène (shared/data/arena-artefacts.js)
+  'Cœur de Fer': 'Iron Heart',
+  'Croc des Ombres': 'Shadow Fang',
+  'Pierre du Colosse': 'Colossus Stone',
+  'Fiole des Brumes': 'Mist Vial',
+  'Écu du Déchu': 'Fallen Knight’s Shield',
+  'Écaille Écarlate': 'Scarlet Scale',
+  'Œil des Tempêtes': 'Eye of Storms',
+  'Sceau de l’Exécuteur': 'Executioner’s Seal',
+  'Prisme de Cristal': 'Crystal Prism',
+  'Cœur de Cendres': 'Heart of Ashes',
+  'Voile du Néant': 'Veil of the Void',
+  'Couronne du Souverain': 'Sovereign’s Crown',
+  'Dégâts reçus −{n} %.': 'Damage taken −{n}%.',
+  'Chance critique +{n} points ; tes coups critiques font saigner ({m} % du coup en 4 s).':
+    'Critical chance +{n} points; your critical hits cause bleeding ({m}% of the hit over 4 s).',
+  'PV maximum +{n} %.': 'Maximum HP +{n}%.',
+  'Soins reçus +{n} % ; hors combat, tu récupères {m} % de tes PV maximum par seconde.':
+    'Healing received +{n}%; out of combat, you recover {m}% of your maximum HP per second.',
+  '{n} % de chances de parer un coup (aucun dégât) et de riposter ({m} % de ton Attaque).':
+    '{n}% chance to parry a blow (no damage) and strike back ({m}% of your Attack).',
+  'Tes coups enflamment l’ennemi : {n} % des dégâts infligés en brûlure sur 4 s.':
+    'Your hits set the enemy ablaze: {n}% of the damage dealt as a burn over 4 s.',
+  '{n} % de chances qu’un coup lance un éclair en chaîne : {m} % des dégâts sur la cible et deux ennemis proches.':
+    '{n}% chance for a hit to unleash chain lightning: {m}% of the damage to the target and two nearby enemies.',
+  '+{n} % de dégâts contre les ennemis sous 35 % de leurs PV.':
+    '+{n}% damage against enemies below 35% of their HP.',
+  'Toutes les 20 s, un bouclier absorbe {n} % de tes PV maximum.':
+    'Every 20 s, a shield absorbs {n}% of your maximum HP.',
+  'Compétences +{n} % de dégâts ; leurs recharges −{m} %.': 'Skills +{n}% damage; their cooldowns −{m}%.',
+  'Recharge de la roulade −{n} % ; après une roulade, +{m} % de dégâts pendant 3 s.':
+    'Dodge roll cooldown −{n}%; after a roll, +{m}% damage for 3 s.',
+  'Attaque, Défense et PV maximum +{n} % ; une fois toutes les 90 s, un coup fatal te laisse à 20 % de tes PV.':
+    'Attack, Defense and maximum HP +{n}%; once every 90 s, a fatal blow leaves you at 20% of your HP.',
+  // Fiche du personnage (C), info-bulles et effets en combat (scripts/arena-artefacts.js).
+  'Artéfacts': 'Artifacts',
+  '{n} / {m} équipés': '{n} / {m} equipped',
+  '{n} / {m} trouvés': '{n} / {m} found',
+  'Emplacement d’artéfact libre': 'Free artifact slot',
+  'Chaque boss de l’Arène des Épreuves donne son artéfact.':
+    'Each boss of the Arena of Trials gives its artifact.',
+  'un doublon fait monter le rang': 'a duplicate raises its rank',
+  'Clic : équiper ou retirer · un doublon fait monter le rang':
+    'Click: equip or remove · a duplicate raises its rank',
+  'Artéfact inconnu': 'Unknown artifact',
+  'Vaincs ce boss de l’Arène des Épreuves pour l’obtenir.':
+    'Defeat this boss of the Arena of Trials to get it.',
+  'Rang {rang}': 'Rank {rang}',
+  'Rang maximum : un nouveau doublon rapporte de l’or.': 'Maximum rank: another duplicate brings gold.',
+  'Équipé (emplacement {n})': 'Equipped (slot {n})',
+  'Les artéfacts se changent avant d’entrer dans l’Arène.':
+    'Artifacts are changed before entering the Arena.',
+  'Impossible de changer d’artéfact en combat.': 'Cannot change artifacts in combat.',
+  'Les 4 emplacements sont occupés : retire d’abord un artéfact.':
+    'All 4 slots are taken: remove an artifact first.',
+  '{nom} équipé': '{nom} equipped',
+  'PARADE': 'PARRY',
+  'SOUVERAIN': 'SOVEREIGN',
+  'Bouclier : absorbe {n} dégâts.': 'Shield: absorbs {n} damage.',
+  'Protection contre un coup fatal en recharge.': 'Protection against a fatal blow on cooldown.',
+  'Les Runes et les anciens artéfacts laissent place aux artéfacts de l’Arène : {n} or remboursés.':
+    'Runes and the old artifacts make way for the Arena artifacts: {n} gold refunded.',
+  // Deux bagues (fiche C, menu du clic droit).
+  'Bague 1': 'Ring 1',
+  'Bague 2': 'Ring 2',
+  'Équiper (Bague 1)': 'Equip (Ring 1)',
+  'Équiper en Bague 2': 'Equip as Ring 2',
   'Dégâts +{n} %': 'Damage +{n}%',
-  'Soins +{n} %': 'Healing +{n}%',
   'PV max +{n} %': 'Max HP +{n}%',
   'Dégâts reçus −{n} %': 'Damage taken −{n}%',
   'Chance critique +{n} points': 'Critical chance +{n} points',
   'Vitesse +{n} %': 'Speed +{n}%',
-  'PASSIF : {nom}': 'PASSIVE: {nom}',
-  'Sans statistiques principales ni secondaires.': 'No primary or secondary stats.',
-  'Aucun artefact équipé': 'No artifact equipped',
-  'Comparaison des passifs': 'Passive comparison',
-  'Actuel : {passif}': 'Current: {passif}',
-  'Nouveau : {passif}': 'New: {passif}',
-  'Aucun point de statistique : seul le passif est actif.': 'No stat points: only the passive is active.',
 
   // ------------------------------------------------------------ Garde-robe
   'Apparence déjà connue ({nom}) : revendue {n} or.': 'Appearance already known ({nom}): sold for {n} gold.',
@@ -1254,9 +1301,6 @@ export default {
   'Bottes trouées': 'Holey boots',
   'Pendentif en pierre': 'Stone pendant',
   'Anneau en tôle': 'Tin ring',
-  'Grimoire déchiré': 'Torn grimoire',
-  "Tesson d'argile": 'Clay shard',
-  'Branche séchée': 'Dried branch',
   'Casque de la garde': 'Guard helmet',
   'Spallières en cuir': 'Leather spaulders',
   'Cuirasse renforcée': 'Reinforced cuirass',
@@ -1264,9 +1308,6 @@ export default {
   'Bottes de patrouille': 'Patrol boots',
   'Amulette en os gravé': 'Carved bone amulet',
   'Bague de cuivre poli': 'Polished copper ring',
-  'Relique de disciple': 'Disciple’s relic',
-  'Totem gravé': 'Carved totem',
-  'Pierre de foyer': 'Hearthstone',
   'Heaume de mithril': 'Mithril helm',
   'Épaulières du traqueur': 'Tracker’s shoulderpads',
   'Plastron de givre': 'Frost breastplate',
@@ -1274,9 +1315,6 @@ export default {
   'Bottes du marcheur': 'Wanderer’s boots',
   'Pendentif de la brume': 'Mist pendant',
   'Anneau de saphir pur': 'Pure sapphire ring',
-  'Orbe des marées': 'Orb of the tides',
-  'Boussole des brumes': 'Compass of the mists',
-  "Rune d'eau vive": 'Rune of running water',
   'Casque de maître': 'Master’s helmet',
   'Spallières du conquérant': 'Conqueror’s spaulders',
   'Cuirasse du jugement': 'Cuirass of judgment',
@@ -1284,9 +1322,6 @@ export default {
   "Bottes d'ombre-pas": 'Shadowstep boots',
   'Amulette du cœur nocturne': 'Amulet of the night heart',
   'Sceau du souverain': 'Sovereign’s seal',
-  'Talisman du vide': 'Talisman of the void',
-  "Sceau d'ombre": 'Shadow seal',
-  "Sablier de l'éclipse": 'Hourglass of the eclipse',
   'Masque du drakôn': 'Mask of the drakôn',
   'Spallières de la fureur': 'Spaulders of fury',
   'Carapace de volcan': 'Volcano carapace',
@@ -1294,9 +1329,6 @@ export default {
   'Bottes de marche-flamme': 'Flamewalker boots',
   'Amulette de la résurgence': 'Amulet of resurgence',
   'Anneau du pacte draconique': 'Ring of the draconic pact',
-  'Cœur de brasier': 'Blaze heart',
-  'Idole du drakôn': 'Idol of the drakôn',
-  "Prisme d'étincelles": 'Prism of sparks',
   'Visage du cosmos': 'Face of the cosmos',
   "Spallières d'éther": 'Ether spaulders',
   'Carapace de starlight': 'Starlight carapace',
@@ -1304,13 +1336,6 @@ export default {
   'Bottes de marche-vide': 'Voidwalker boots',
   "Pendentif de l'éternité": 'Pendant of eternity',
   'Anneau de la singularité': 'Ring of the singularity',
-  'Orbe du néant': 'Orb of nothingness',
-  'Chronomètre astral': 'Astral chronometer',
-  'Prisme de singularité': 'Singularity prism',
-  'Augmente les dégâts et les soins': 'Increases damage and healing',
-  'Augmente les points de vie et l’armure': 'Increases health and armor',
-  'Augmente les chances de critique et la vitesse de déplacement':
-    'Increases critical chance and movement speed',
   'Grimoire de l’apprenti': 'Apprentice’s grimoire',
   'Grimoire des sépultures': 'Grimoire of the graves',
   'Codex putride': 'Putrid codex',
@@ -1561,140 +1586,30 @@ export default {
   'Phase 1 : l’épée': 'Phase 1: the sword',
   'Phase 2 : la magie céleste': 'Phase 2: celestial magic',
   'Phase 3 : le jugement du Souverain': 'Phase 3: the Sovereign’s judgment',
-  // ------------------------------------------------------------ Runes, apparence du héros et tenues (shared/data)
-  'Runes offensives': 'Offensive Runes',
+  // ------------------------------------------------------------ Apparence du héros et tenues (shared/data)
   'Offensive': 'Offensive',
-  'Runes défensives': 'Defensive Runes',
-  'Défensive': 'Defensive',
-  'Runes de soutien': 'Support Runes',
-  'Soutien': 'Support',
-  'Runes d’armes': 'Weapon Runes',
   'Arme': 'Weapon',
-  'Runes utilitaires': 'Utility Runes',
   'Utilitaire': 'Utility',
-  'Runes spéciales': 'Special Runes',
-  'Spéciale': 'Special',
-  'Berserker': 'Berserker',
-  '+15 % de dégâts lorsque tes PV sont sous 30 %.': '+15% damage when your HP is below 30%.',
-  'Duelliste': 'Duelist',
-  '+8 % de dégâts si un seul ennemi se trouve à moins de 5 cases.':
-    '+8% damage if only one enemy is within 5 tiles.',
   'Chasseur': 'Hunter',
-  '+15 % de dégâts contre les élites et les boss.': '+15% damage against elites and bosses.',
   'Briseur': 'Breaker',
-  'Les attaques ignorent 8 % de la défense ennemie.': 'Attacks ignore 8% of enemy defense.',
-  'Carnage': 'Carnage',
-  'Chaque élimination augmente les dégâts de 3 % pendant 8 s, cumulable 3 fois.':
-    'Each kill increases damage by 3% for 8 s, stacking 3 times.',
-  'Les coups critiques infligent 12 % de dégâts supplémentaires.': 'Critical hits deal 12% extra damage.',
-  'Frapper 4 fois la même cible augmente les dégâts contre elle de 10 % pendant 5 s.':
-    'Hitting the same target 4 times increases damage against it by 10% for 5 s.',
-  'Dernier souffle': 'Last breath',
-  '+20 % de dégâts contre les ennemis sous 30 % de PV.': '+20% damage against enemies below 30% HP.',
   'Colosse': 'Colossus',
-  '+10 % de PV maximum et +10 % de Défense.': '+10% maximum HP and +10% Defense.',
   'Gardien': 'Guardian',
-  'Toutes les 12 s, le prochain coup reçu est réduit de 50 %.':
-    'Every 12 s, the next hit taken is reduced by 50%.',
-  'Rempart': 'Rampart',
-  'Sous 40 % de PV, gagne un bouclier de 15 % des PV max pendant 5 s. Recharge : 45 s.':
-    'Below 40% HP, gain a shield worth 15% of max HP for 5 s. Cooldown: 45 s.',
-  'Peau de pierre': 'Stoneskin',
-  'Un coup reçu ne peut pas retirer plus de 25 % des PV max.':
-    'A single hit cannot take more than 25% of max HP.',
   'Volonté de fer': 'Iron will',
-  'Sous 50 % de PV, −15 % de dégâts reçus.': 'Below 50% HP, −15% damage taken.',
   'Forteresse': 'Fortress',
-  'Rester immobile pendant 2 s accorde −12 % de dégâts reçus jusqu’au déplacement.':
-    'Standing still for 2 s grants −12% damage taken until you move.',
   'Résilience': 'Resilience',
-  'Après avoir perdu 25 % des PV max en 3 s, récupère 8 % des PV max sur 5 s. Recharge : 30 s.':
-    'After losing 25% of max HP within 3 s, recover 8% of max HP over 5 s. Cooldown: 30 s.',
-  'Second souffle': 'Second wind',
-  'Une fois par combat, survivre à un coup fatal avec 10 % des PV max.':
-    'Once per fight, survive a fatal blow with 10% of max HP.',
-  'Guérisseur': 'Healer',
-  '+15 % de soins prodigués.': '+15% healing done.',
   'Régénération': 'Regeneration',
-  'Récupère 1 % des PV max toutes les 3 s.': 'Recover 1% of max HP every 3 s.',
   'Arcane': 'Arcane',
-  'Les compétences consomment 10 % de mana en moins.': 'Skills use 10% less mana.',
-  'Faucheur': 'Reaper',
-  'Chaque élimination restaure 5 % des PV max.': 'Each kill restores 5% of max HP.',
-  'Méditation': 'Meditation',
-  'Récupère 3 % du mana maximum toutes les 5 s.': 'Recover 3% of maximum mana every 5 s.',
   'Bénédiction': 'Blessing',
-  'Le soin reçu au-delà des PV max devient un bouclier, jusqu’à 10 % des PV max pendant 6 s.':
-    'Healing received beyond max HP becomes a shield, up to 10% of max HP for 6 s.',
-  'Source vitale': 'Vital spring',
-  'Les soins reçus sont augmentés de 20 %.': 'Healing received is increased by 20%.',
-  'Communion': 'Communion',
-  'Soigner un allié restaure également 3 % de tes PV max. Recharge : 8 s.':
-    'Healing an ally also restores 3% of your max HP. Cooldown: 8 s.',
   'Tempête': 'Storm',
-  'Les coups critiques ont 15 % de chance de déclencher un éclair infligeant 35 % des dégâts du coup.':
-    'Critical hits have a 15% chance to trigger a lightning bolt dealing 35% of the hit’s damage.',
   'Écho': 'Echo',
-  'Les compétences offensives ont 10 % de chance de répéter 30 % de leurs dégâts.':
-    'Offensive skills have a 10% chance to repeat 30% of their damage.',
   'Vampire': 'Vampire',
-  'Les coups critiques rendent 3 % des dégâts réellement infligés en PV.':
-    'Critical hits return 3% of the damage actually dealt as HP.',
-  'Toutes les 8 attaques réussies, une onde inflige 40 % des dégâts d’attaque aux ennemis proches.':
-    'Every 8 successful attacks, a wave deals 40% of attack damage to nearby enemies.',
-  'Lame ardente': 'Blazing blade',
-  'Les attaques ont 15 % de chance d’infliger une brûlure de 12 % des dégâts du coup sur 4 s.':
-    'Attacks have a 15% chance to inflict a burn for 12% of the hit’s damage over 4 s.',
-  'Gel mordant': 'Biting frost',
-  'Les attaques ont 12 % de chance de ralentir l’ennemi de 25 % pendant 3 s.':
-    'Attacks have a 12% chance to slow the enemy by 25% for 3 s.',
-  'Accélération': 'Acceleration',
-  'Utiliser une compétence augmente la vitesse d’attaque de 10 % pendant 4 s. Recharge : 10 s.':
-    'Using a skill increases attack speed by 10% for 4 s. Cooldown: 10 s.',
   'Résonance': 'Resonance',
-  'Toutes les 5 compétences offensives, la prochaine inflige +20 % de dégâts.':
-    'Every 5 offensive skills, the next one deals +20% damage.',
   'Voyageur': 'Traveler',
-  '+10 % de vitesse de déplacement.': '+10% movement speed.',
-  'Sprinteur': 'Sprinter',
-  'Après une esquive, +20 % de vitesse pendant 2 s.': 'After a dodge, +20% speed for 2 s.',
-  'Endurance': 'Endurance',
-  'Réduit le temps de recharge de l’esquive de 15 %.': 'Reduces the dodge cooldown by 15%.',
   'Récupération': 'Recovery',
-  'Après une élimination, réduit de 1 s la recharge de la dernière compétence utilisée. Recharge : 5 s.':
-    'After a kill, reduces the cooldown of the last skill used by 1 s. Cooldown: 5 s.',
-  'Prospecteur': 'Prospector',
-  '15 % de chances qu’un monstre ordinaire lâche un objet Peu commun au lieu d’un Commun.':
-    '15% chance that an ordinary monster drops an Uncommon item instead of a Common one.',
-  'Trésorier': 'Treasurer',
-  '+15 % d’or obtenu sur les monstres.': '+15% gold from monsters.',
-  'Explorateur': 'Explorer',
-  'Révèle les coffres secrets à moins de 12 cases sur la mini-carte.':
-    'Reveals secret chests within 12 tiles on the minimap.',
   'Élan': 'Momentum',
-  'Après 5 s de déplacement continu hors combat, gagne +15 % de vitesse jusqu’à l’arrêt.':
-    'After 5 s of continuous movement out of combat, gain +15% speed until you stop.',
-  'Phénix': 'Phoenix',
-  'Une fois par combat, survivre à un coup fatal avec 20 % des PV max et repousser les ennemis proches.':
-    'Once per fight, survive a fatal blow with 20% of max HP and knock back nearby enemies.',
-  '+18 % de dégâts, mais les PV max sont réduits de 12 %.': '+18% damage, but max HP is reduced by 12%.',
   'Miroir': 'Mirror',
-  '15 % des dégâts directs reçus sont renvoyés à l’attaquant, plafonnés à 5 % de ses PV max par coup.':
-    '15% of direct damage taken is reflected to the attacker, capped at 5% of their max HP per hit.',
   'Éclipse': 'Eclipse',
-  'Après 3 coups critiques, la prochaine compétence offensive inflige +25 % de dégâts.':
-    'After 3 critical hits, the next offensive skill deals +25% damage.',
-  'Âme liée': 'Bound soul',
-  'Lorsque tu soignes un allié, il reçoit un bouclier de 8 % de ses PV max pendant 5 s. Recharge : 15 s par allié.':
-    'When you heal an ally, they receive a shield worth 8% of their max HP for 5 s. Cooldown: 15 s per ally.',
-  'Chaos': 'Chaos',
-  'Chaque compétence offensive a 20 % de chance d’infliger +30 % de dégâts ou −10 % de dégâts, à chances égales.':
-    'Each offensive skill has a 20% chance to deal +30% damage or −10% damage, with equal odds.',
-  'Récupérer du mana grâce à un effet rend aussi 20 % de ce mana en PV, plafonnés à 3 % des PV max.':
-    'Recovering mana from an effect also restores 20% of that mana as HP, capped at 3% of max HP.',
   'Transcendance': 'Transcendence',
-  'Toutes les 30 s en combat, la prochaine compétence coûte 0 mana et inflige +15 % si elle est offensive.':
-    'Every 30 s in combat, the next skill costs 0 mana and deals +15% if it is offensive.',
   'Femme': 'Woman',
   'Homme': 'Man',
   'Humain': 'Human',
@@ -2043,7 +1958,7 @@ export default {
   '{n} % de vitesse pendant {s} min': '{n}% speed for {s} min',
   '{n} % de dégâts pendant {s} min': '{n}% damage for {s} min',
   '{n} % de dégâts subis pendant {s} min': '{n}% damage taken for {s} min',
-  // ------------------------------------------------------------ Lieux, régions, classes (panneau T) et Runes (panneau)
+  // ------------------------------------------------------------ Lieux, régions et classes (panneau T)
   'Camp de l’Aurore': 'Dawn Camp',
   'Ferme de l’Aurore': 'Dawn Farm',
   'Le Souffle du Dragon': 'The Dragon’s Breath',
@@ -2207,39 +2122,14 @@ export default {
     'it grows with you and changes its name every 10 levels.',
   'Choisis ta classe : {liste} ou {nom} (touche T).': 'Choose your class: {liste} or {nom} (T key).',
   'Choisis ta classe (T)': 'Choose your class (T)',
-  '+{n} PV ☯': '+{n} HP ☯',
-  'Bouclier : absorbe encore {n} dégâts.': 'Shield: absorbs {n} more damage.',
-  'Recharges −10 %.': 'Cooldowns −10%.',
-  'TRANSCENDANCE': 'TRANSCENDENCE',
-  'ÉCLIPSE': 'ECLIPSE',
-  'CHAOS +30 %': 'CHAOS +30%',
-  'CHAOS −10 %': 'CHAOS −10%',
-  'RÉSILIENCE': 'RESILIENCE',
-  'SECOND SOUFFLE': 'SECOND WIND',
-  'PHÉNIX': 'PHOENIX',
-  'REMPART': 'RAMPART',
-  'Transcendance prête': 'Transcendence ready',
-  'Les Runes se changent avant d’entrer dans l’Arène.': 'Runes are changed before entering the Arena.',
-  'Impossible de changer de Runes en combat.': 'Cannot change Runes in combat.',
   '{n}/{max} équipées': '{n}/{max} equipped',
   '{n}/48 découvertes': '{n}/48 discovered',
   'Retirer {nom}': 'Remove {nom}',
-  'Choisis une Rune dans ta collection.': 'Pick a Rune from your collection.',
   'Toutes': 'All',
-  'Toutes les Runes': 'All Runes',
-  'Équipées': 'Equipped',
   'Clic : équiper ou retirer': 'Click: equip or remove',
-  'Les Runes se gagnent dans l’Arène des Épreuves, à l’est du camp.':
-    'Runes are won in the Arena of Trials, east of the camp.',
   'Collection': 'Collection',
-  'Les 6 emplacements sont occupés : retire d’abord une Rune.': 'All 6 slots are taken: remove a Rune first.',
   'Rune {nom} équipée': 'Rune {nom} equipped',
-  'Rune inconnue': 'Unknown Rune',
   'N°{n}': 'No. {n}',
-  'À découvrir dans l’Arène des Épreuves.': 'To be discovered in the Arena of Trials.',
-  'possédée ×{n}': 'owned ×{n}',
-  'Effet de groupe : s’active en coopération.': 'Group effect: activates in co-op.',
-  'Équipée (emplacement {n})': 'Equipped (slot {n})',
   'clic : retirer': 'click: remove',
   'Clic : équiper': 'Click: equip',
   // ------------------------------------------------------------ Panneau des métiers (P), récolte et enchantement
@@ -2340,7 +2230,6 @@ export default {
   'Il faut {n} {minerai} pour cet enchantement.': 'You need {n} {minerai} for this enchantment.',
   '{n} × {nom} ({metal}) créé.': '{n} × {nom} ({metal}) created.',
   '{n} × {nom} ({metal}) créés.': '{n} × {nom} ({metal}) created.',
-  'Choisis une pièce d’équipement (pas un artefact).': 'Choose a piece of gear (not an artifact).',
   '{objet} : enchantement remplacé, +{n} {stat}.': '{objet}: enchantment replaced, +{n} {stat}.',
   '{objet} : enchantement changé, +{n} {stat}.': '{objet}: enchantment changed, +{n} {stat}.',
   'Il faut aussi {n} × {nom} pour cet enchantement.': 'You also need {n} × {nom} for this enchantment.',
@@ -2699,26 +2588,19 @@ export default {
   'Écho du Néant': 'Echo of the Void',
   'Vague {n} : {nom}': 'Wave {n}: {nom}',
   'Vague {n}/12 — {nom} entre dans l’arène !': 'Wave {n}/12 — {nom} enters the arena!',
-  'Rune obtenue : {nom} (nouvelle !)': 'Rune obtained: {nom} (new!)',
-  'Rune obtenue : {nom} (doublon)': 'Rune obtained: {nom} (duplicate)',
   'RELEVÉ': 'REVIVED',
   '+{n} PV': '+{n} HP',
   '+{n} mana': '+{n} mana',
   '{nom} vaincu !': '{nom} defeated!',
   '{nom} vaincu ! {n} or et un objet Rare reçus. Réapparition dans {m} minutes.':
     '{nom} defeated! {n} gold and a Rare item received. Respawns in {m} minutes.',
-  '{nom} est vaincu ! Une Rune pour chaque héros de l’arène.':
-    '{nom} is defeated! A Rune for every hero in the arena.',
   'Le héros': 'The hero',
   '{nom} remporte un objet LÉGENDAIRE : {objet} !': '{nom} wins a LEGENDARY item: {objet}!',
-  'Rune de la victoire : {nom}': 'Victory Rune: {nom}',
   'Collection complète : +2500 or': 'Collection complete: +2500 gold',
   'Les douze épreuves sont accomplies ! La victoire, elle, se mérite.':
     'The twelve trials are complete! Victory, though, must be earned.',
   '{nom} : avance sur la piste pour commencer': '{nom}: step onto the track to begin',
   'Arène des Épreuves': 'Arena of Trials',
-  'Tentative terminée : {n} vague(s) réussie(s), {m} Rune(s) gagnée(s).':
-    'Attempt over: {n} wave(s) cleared, {m} Rune(s) won.',
   'Impossible d’abandonner pendant un combat !': 'Cannot give up during a fight!',
   'IMMUNISÉ': 'IMMUNE',
   'CONTRE-ATTAQUE !': 'COUNTERATTACK!',
@@ -2735,8 +2617,6 @@ export default {
   '+20 % PV et mana': '+20% HP and mana',
   'Prochain boss : {nom}': 'Next boss: {nom}',
   'Entre sur la piste !': 'Step onto the track!',
-  '[E] au portail de l’antichambre pour quitter avec tes Runes':
-    '[E] at the antechamber portal to leave with your Runes',
   'L’ARÈNE EST VAINCUE': 'THE ARENA IS CONQUERED',
   'Retourne au portail de l’antichambre [E]': 'Return to the antechamber portal [E]',
   'RUNE OBTENUE': 'RUNE OBTAINED',
@@ -2748,7 +2628,6 @@ export default {
     '“The Arena is open to all. Victory, though, must be earned.”',
   'Tableau des records': 'Records board',
   'Meilleure vague': 'Best wave',
-  'Runes découvertes': 'Runes discovered',
   'Tentatives effectuées': 'Attempts made',
   'Arène terminée': 'Arena completed',
   'Non': 'No',
@@ -2758,20 +2637,11 @@ export default {
     '12 waves, one boss per wave, fixed difficulty from wave 1.',
   'Aucun niveau minimum : la difficulté ne s’adapte jamais à ton équipement.':
     'No minimum level: the difficulty never adapts to your gear.',
-  '1 Rune garantie par boss vaincu, en priorité une Rune que tu ne possèdes pas.':
-    '1 guaranteed Rune per boss defeated, preferably a Rune you do not own.',
-  'Équipement et Runes se préparent avant d’entrer.': 'Gear and Runes are prepared before entering.',
-  'Abandon possible entre les vagues ; la mort met fin à la tentative. Les Runes gagnées sont conservées.':
-    'You can give up between waves; death ends the attempt. Runes won are kept.',
   'Les attaques majeures sont annoncées au sol :': 'Major attacks are telegraphed on the ground:',
   'pour une roulade.': 'to dodge roll.',
   'Les douze épreuves': 'The twelve trials',
-  'Ta récompense finale t’attend : choisis une Rune.': 'Your final reward awaits: choose a Rune.',
   'Entrer dans l’Arène': 'Enter the Arena',
-  'Préparer mes Runes': 'Prepare my Runes',
   'Le Souverain est tombé': 'The Sovereign has fallen',
-  'Récompense finale : choisis une Rune que tu ne possèdes pas encore.':
-    'Final reward: choose a Rune you do not own yet.',
   'Récompense finale : {nom}': 'Final reward: {nom}',
   'Vague {n}/{max}': 'Wave {n}/{max}',
   'Phase {n}/{max}': 'Phase {n}/{max}',
@@ -2787,7 +2657,6 @@ export default {
   'Combat & armes': 'Combat & weapons',
   'Exploration & aventure': 'Exploration & adventure',
   'Économie & métiers': 'Economy & professions',
-  'Magie, Runes & progression': 'Magic, Runes & progression',
   'Défis & Arène': 'Challenges & Arena',
   'Vaincre 200 ennemis avec une arme de la famille {arme}.':
     'Defeat 200 enemies with a weapon of the {arme} family.',
@@ -2827,7 +2696,6 @@ export default {
   'Bûcheron des âmes': 'Soul woodcutter',
   'Masse atomique': 'Atomic mace',
   'Résilience de Phénix': 'Phoenix resilience',
-  'Survivre à un coup fatal grâce à la Rune Phénix.': 'Survive a fatal blow thanks to the Phoenix Rune.',
   'Bourreau des cœurs': 'Heartbreaker',
   'Vaincre un boss mondial moins de 30 secondes après le premier coup.':
     'Defeat a world boss less than 30 seconds after the first hit.',
@@ -2919,8 +2787,6 @@ export default {
   'Enchanteur débutant': 'Novice enchanter',
   'Avoir une pièce d’équipement enchantée.': 'Own an enchanted piece of gear.',
   'Runes mystiques': 'Mystic runes',
-  'Porter huit pièces enchantées (toutes sauf l’artéfact).':
-    'Wear eight enchanted pieces (all but the artifact).',
   'Le Runiste': 'The Runesmith',
   'Chasseur de viande': 'Meat hunter',
   'Chasser 50 animaux.': 'Hunt 50 animals.',
@@ -2933,22 +2799,13 @@ export default {
   'Transcendance totale': 'Total transcendence',
   'Atteindre le niveau maximum (60).': 'Reach the maximum level (60).',
   'L’Immortel': 'The Immortal',
-  'Première Rune': 'First Rune',
-  'Équiper ta première Rune.': 'Equip your first Rune.',
   'Collection de runes': 'Rune collection',
-  'Posséder 20 Runes différentes.': 'Own 20 different Runes.',
   'Maître des runes': 'Rune master',
-  'Posséder les 48 Runes.': 'Own all 48 Runes.',
   'Le Maître des runes': 'The Rune Master',
   'Puissance écarlate': 'Scarlet power',
-  'Remplir tes six emplacements avec des Runes offensives.': 'Fill your six slots with offensive Runes.',
   'Forteresse impénétrable': 'Impregnable fortress',
-  'Remplir tes six emplacements avec des Runes défensives.': 'Fill your six slots with defensive Runes.',
   'Bénédiction divine': 'Divine blessing',
-  'Remplir tes six emplacements avec des Runes de soutien.': 'Fill your six slots with support Runes.',
   'Immortalité du Phénix': 'Phoenix immortality',
-  'Être sauvé par la Rune Phénix en plein combat de boss.':
-    'Be saved by the Phoenix Rune in the middle of a boss fight.',
   'Spécialisation de classe': 'Class specialization',
   'Maître Druide': 'Master Druid',
   'Remplir les cinq emplacements de talents en Druide.': 'Fill the five talent slots as a Druid.',
@@ -2968,11 +2825,7 @@ export default {
   'Obtenir un objet Mythique.': 'Obtain a Mythic item.',
   'Porteur de mythe': 'Myth bearer',
   'Panoplie épique': 'Epic set',
-  'Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).':
-    'Wear eight Epic or better pieces (all but the artifact).',
   'Collectionneur mythique': 'Mythic collector',
-  'Porter huit pièces Mythiques (toutes sauf l’artéfact).':
-    'Wear eight Mythic pieces (all but the artifact).',
   'Élu des Dieux': 'Chosen of the Gods',
   'Entrée dans l’Arène': 'Into the Arena',
   'Tenter l’Arène des Épreuves.': 'Attempt the Arena of Trials.',
@@ -3027,7 +2880,6 @@ export default {
   'Titre « {titre} »': 'Title “{titre}”',
   'aura dorée': 'golden aura',
   'un objet {qualite} de ton niveau': '{qualite} item of your level',
-  'une Rune qui te manque': 'a Rune you are missing',
   '{n} % d’un niveau d’XP': '{n}% of a level’s XP',
   'Récompense du succès « {nom} » : objet {qualite} de ton niveau ({objet})':
     'Achievement reward “{nom}”: {qualite} item of your level ({objet})',
@@ -3101,10 +2953,6 @@ export default {
   '(nouveau !)': '(new!)',
   'Clé des secrets requise': 'Key of secrets required',
   'Coffre secret ouvert : équipement Épique + {n} or !': 'Secret chest opened: Epic gear + {n} gold!',
-  'Coffre secret ouvert : équipement Épique + {n} or + Rune {nom} !':
-    'Secret chest opened: Epic gear + {n} gold + Rune {nom}!',
-  'Coffre secret ouvert : équipement Épique + {n} or + Rune {nom} (nouvelle !) !':
-    'Secret chest opened: Epic gear + {n} gold + Rune {nom} (new!)!',
   'Halte ! Ah, c’est toi. Rien à signaler.': 'Halt! Ah, it’s you. Nothing to report.',
   'Les loups rôdent à la lisière des plaines. Garde ton arme prête.':
     'Wolves prowl at the edge of the plains. Keep your weapon ready.',
@@ -3161,7 +3009,6 @@ export default {
   'Ces pierres se souviennent de l’Aube d’avant…': 'These stones remember the Dawn of old…',
   'Les squelettes ne dorment jamais vraiment.': 'Skeletons never truly sleep.',
   'Écoute… on entend encore les anciens murmurer.': 'Listen… you can still hear the ancients whisper.',
-  'Les Runes de l’Arène renferment une vieille magie.': 'The Arena’s Runes hold an old magic.',
   'D’ici, on voit loin. Les brumes cachent bien des choses.':
     'You can see far from here. The mists hide many things.',
   'J’ai repéré des coffres cachés… mais c’est un secret.':
@@ -4557,5 +4404,55 @@ export default {
   'Une brume épaisse recouvre ces terres. Nul ne sait ce qu’elle cache.':
     'A thick mist covers these lands. No one knows what it hides.',
   'Contenu différent : l’hôte et l’invité doivent avoir les mêmes extensions du jeu.':
-    'Different content: the host and the guest must have the same game extensions.'
+    'Different content: the host and the guest must have the same game extensions.',
+  // ------------------------------------------------------------ Arène : artéfacts gagnés (scripts/arena.js)
+  '{nom} (rang maximum) : +{n} or': '{nom} (maximum rank): +{n} gold',
+  'Artéfact obtenu : {nom} !': 'Artifact obtained: {nom}!',
+  '{nom} passe au rang {n} !': '{nom} reaches rank {n}!',
+  '{nom} est vaincu ! Son artéfact pour chaque héros de l’arène.':
+    '{nom} is defeated! Its artifact for every hero in the arena.',
+  'Tentative terminée : {n} vague(s) réussie(s), {m} artéfact(s) gagné(s).':
+    'Attempt over: {n} wave(s) cleared, {m} artifact(s) won.',
+  '[E] au portail de l’antichambre pour quitter avec tes artéfacts':
+    '[E] at the antechamber portal to leave with your artifacts',
+  'RANG MAXIMUM': 'MAXIMUM RANK',
+  '+{n} OR': '+{n} GOLD',
+  'ARTÉFACT OBTENU': 'ARTIFACT OBTAINED',
+  'ARTÉFACT': 'ARTIFACT',
+  'RANG {n} !': 'RANK {n}!',
+  'Rang {n} / {m}': 'Rank {n} / {m}',
+  'Artéfacts obtenus': 'Artifacts obtained',
+  'Chaque boss vaincu donne son artéfact ; un doublon le fait monter de rang (5 au plus).':
+    'Each boss defeated gives its artifact; a duplicate raises its rank (up to 5).',
+  'Équipement et artéfacts se préparent avant d’entrer.': 'Gear and artifacts are prepared before entering.',
+  'Abandon possible entre les vagues ; la mort met fin à la tentative. Les artéfacts gagnés sont conservés.':
+    'You can give up between waves; death ends the attempt. Artifacts won are kept.',
+  'Préparer mes artéfacts': 'Prepare my artifacts',
+  'Les artéfacts de l’Arène renferment une vieille magie.': 'The Arena’s artifacts hold an old magic.',
+  'Les objets portés et les artéfacts restent sur toi.': 'Worn items and artifacts stay on you.',
+  'Choisis une pièce d’équipement.': 'Choose a piece of gear.',
+  // Succès des artéfacts (scripts/achievements.js).
+  'Magie, artéfacts & progression': 'Magic, artifacts & progression',
+  'Résilience du Souverain': 'Sovereign’s resilience',
+  'Survivre à un coup fatal grâce à la Couronne du Souverain.':
+    'Survive a fatal blow thanks to the Sovereign’s Crown.',
+  'Premier artéfact': 'First artifact',
+  'Équiper ton premier artéfact de l’Arène.': 'Equip your first Arena artifact.',
+  'Collectionneur d’artéfacts': 'Artifact collector',
+  'Posséder 6 artéfacts différents.': 'Own 6 different artifacts.',
+  'Maître des artéfacts': 'Artifact master',
+  'Posséder les 12 artéfacts de l’Arène.': 'Own all 12 Arena artifacts.',
+  'Le Maître des artéfacts': 'The Artifact Master',
+  'Artéfact parfait': 'Perfect artifact',
+  'Faire monter un artéfact au rang 5.': 'Raise an artifact to rank 5.',
+  'Quatre reliques': 'Four relics',
+  'Remplir tes quatre emplacements d’artéfacts.': 'Fill your four artifact slots.',
+  'Arsenal du Souverain': 'Sovereign’s arsenal',
+  'Faire monter quatre artéfacts au rang 5.': 'Raise four artifacts to rank 5.',
+  'Immortalité du Souverain': 'Sovereign’s immortality',
+  'Être sauvé par la Couronne du Souverain en plein combat de boss.':
+    'Be saved by the Sovereign’s Crown in the middle of a boss fight.',
+  'Porter huit pièces enchantées.': 'Wear eight enchanted pieces.',
+  'Porter huit pièces Épiques ou mieux.': 'Wear eight Epic or better pieces.',
+  'Porter huit pièces Mythiques.': 'Wear eight Mythic pieces.'
 };

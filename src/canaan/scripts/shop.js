@@ -1,11 +1,10 @@
 // Boutique d'un marchand (touche E) : deux fenêtres côte à côte, comme dans un MMORPG.
 // À gauche, la marchandise, objet par objet (survol : statistiques et comparaison ; un objet acheté est aussitôt
 // remplacé par un autre du même genre). À droite, le sac : un clic vend l'objet ou la pile (poissons, viandes, repas…).
-// Les Rubis, liés au héros, ne se vendent pas.
 // - Marchand du Camp de l'Aurore (et des villages) : un objet Peu commun du niveau du héros pour chaque emplacement et
 //   chaque famille d'arme.
-// - Thalion, l'armurier de Sylvaëlle : équipement elfique de niveau 60, Rare ou Épique, pour chaque emplacement (artefact
-//   compris) et chaque famille d'arme.
+// - Thalion, l'armurier de Sylvaëlle : équipement elfique de niveau 60, Rare ou Épique, pour chaque emplacement et
+//   chaque famille d'arme.
 // L'hôte garde la marchandise de chaque héros et vérifie tout (marchand à portée, or, place) ; un invité reçoit la
 // sienne dans son message privé et envoie ses achats et ventes (actions shop-buy et sell-stack).
 (() => {
@@ -23,7 +22,6 @@
       const raw = createRawGear(level, offer.source, offer.rarity, slot);
       item = { ...raw, id: 'shop' + raw.id, rarity: offer.rarity, level: clampLevel(level) };
       if (offer.origin) item.origin = offer.origin;
-      if (slot === 'artifact') item.artifactVariant = Math.floor(Math.random() * 3);
     } else
       item = {
         id: 'shop' + Date.now() + Math.floor(Math.random() * 1e9),
@@ -51,7 +49,7 @@
         { rarity: 'Rare', price: 2500, source: 'elfe', origin: 'elfique' },
         { rarity: 'Épique', price: 7500, source: 'elfe', origin: 'elfique' }
       ],
-      slots: [...SLOTS, 'artifact'],
+      slots: SLOTS,
       near: hero => CANAAN_CITY.nearArmorer(hero),
       name: 'Thalion, l’armurier',
       place: 'Armurerie de Sylvaëlle',
@@ -108,10 +106,7 @@
     const p = CANAAN_BAG.parse(text);
     if (!p) return false;
     if (!CANAAN_BAG.sellable(p))
-      return (
-        say(hero, (p.kind === 'rubis' ? '⟦rune⟧ ' : '🗝️ ') + CANAAN_BAG.info(p).name + ' : ne se vend pas.'),
-        false
-      );
+      return (say(hero, '🗝️ ' + CANAAN_BAG.info(p).name + ' : ne se vend pas.'), false);
     if (!nearMerchant(hero)) return (say(hero, '💰 Va voir un marchand pour vendre !'), false);
     if (!CANAAN_BAG.remove(hero, p.kind, p.id, p.q, p.n)) return false;
     const gold = CANAAN_BAG.price(p);
@@ -269,7 +264,7 @@
     if (!item) return hideGearTooltip();
     gearTooltip.innerHTML =
       window.CANAAN_STATS_VIEW.tooltip(item) +
-      (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      (wornAgainst(item) ? gearComparison(item, wornAgainst(item)) : '');
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }

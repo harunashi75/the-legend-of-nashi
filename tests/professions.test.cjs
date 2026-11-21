@@ -205,7 +205,7 @@ test('Minage, cueillette et enchanteur : filons et herbes dans chaque biome, enc
  run('game.hero.prof.enchanting.level=1;CANAAN_PROF.open("enchant")');assert.match(run('document.getElementById("window").innerHTML'),/Fer <small>[^<]*<\/small><\/h4><p>[^<]*<b class="ko">tu en as 1<\/b><\/p><p>2 × [^<]*Poussière d’enchantement · <b class="ko">tu en as 1<\/b><\/p><div class="prof-actions"><button[^>]*disabled>🔒 Enchanteur niv\. 12</);
  run('closePanels();game.hero.prof.enchanting.level=12');
  // Poser : l'objet porté gagne une troisième secondaire, comptée dans les statistiques du héros.
- run('let it;do{giveGear(30,"normal","Rare");it=game.hero.inventory.at(-1)}while(it.slot==="artifact");globalThis.slot=it.slot;equipItem(it.id)');
+ run('giveGear(30,"normal","Rare");const it=game.hero.inventory.at(-1);globalThis.slot=CANAAN_EQUIPMENT.slotFor(it);equipItem(it.id)');
  const before=run('characterStats().secondary.haste');
  assert.equal(run('CANAAN_GATHER.apply(game.hero,"ench:haste:2*1",slot)'),true);
  const ench=JSON.parse(run('JSON.stringify(game.hero.equipment[slot].ench)'));assert.equal(ench.stat,'haste');assert.equal(ench.value,run('CANAAN_GATHER.value(game.hero.equipment[slot],2,game.hero)'));assert.ok(ench.value>run('CANAAN_GATHER.value(game.hero.equipment[slot],2)'),'bonus du niveau d’enchanteur');

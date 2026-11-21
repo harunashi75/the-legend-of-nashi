@@ -2,7 +2,7 @@
 // (échoppe de Lira, au Camp de l'Aurore) ouvre deux fenêtres côte à côte : la banque à gauche, le sac à droite ;
 // un clic dépose un objet du sac, un clic sur un objet de la banque le reprend.
 // La banque de chaque héros (hero.bank : { items, stacks }) contient des équipements et des piles (poissons,
-// viandes, repas ; 100 au plus par case ; les Rubis, liés au héros, n'y entrent pas), et elle est sauvegardée avec lui (l'hôte garde celle de ses invités).
+// viandes, repas ; 100 au plus par case ), et elle est sauvegardée avec lui (l'hôte garde celle de ses invités).
 // L'hôte décide : banquier à portée, place à la banque et dans le sac ; un invité reçoit sa banque dans son message
 // privé près du banquier et envoie ses dépôts et retraits (actions bank-deposit et bank-withdraw).
 (() => {
@@ -44,7 +44,7 @@
     const bank = bankOf(hero);
     if (CANAAN_BAG.isToken(ref)) {
       const p = CANAAN_BAG.parse(ref);
-      if (!p || CANAAN_BAG.bound(p) || CANAAN_BAG.count(hero, p.kind, p.id, p.q) < p.n) return false;
+      if (!p || CANAAN_BAG.count(hero, p.kind, p.id, p.q) < p.n) return false;
       const key = p.kind + ':' + p.id + ':' + p.q,
         now = bank.stacks[key] || 0;
       if (used(bank) + tilesFor(now + p.n) - tilesFor(now) > CAPACITY)
@@ -105,7 +105,7 @@
     typeof it === 'object' &&
     !Array.isArray(it) &&
     Object.hasOwn(gearSlots, it.slot) &&
-    it.slot !== 'weapon2' &&
+    !SECOND_SLOT_OF[it.slot] &&
     Number.isFinite(Number(it.level ?? 1)) &&
     Number(it.level ?? 1) > 0;
   // Banque valide : équipements reconnus, piles connues en quantités entières, 500 cases au plus.
@@ -119,23 +119,12 @@
       for (const [key, n] of Object.entries(raw.stacks)) {
         const count = Math.floor(Number(n)),
           p = CANAAN_BAG.parse(key + '*1');
-        if (count > 0 && p && !CANAAN_BAG.bound(p)) {
+        if (count > 0 && p) {
           const room = (CAPACITY - used(out)) * STACK;
           if (room > 0) out.stacks[key] = Math.min(count, room);
         }
       }
     return out;
-  }
-  // Les Rubis rangés à la banque avant qu'ils ne soient liés au héros reviennent dans sa collection, au chargement.
-  function withBankedRubis(rawBank, rawRubis) {
-    const rubis = rawRubis && typeof rawRubis === 'object' ? rawRubis : {},
-      owned = { ...(rubis.owned && typeof rubis.owned === 'object' ? rubis.owned : {}) };
-    for (const [key, n] of Object.entries(rawBank?.stacks || {})) {
-      const [kind, id] = key.split(':'),
-        count = Math.floor(Number(n));
-      if (kind === 'rubis' && count > 0) owned[id] = Math.max(0, Math.floor(Number(owned[id]) || 0)) + count;
-    }
-    return { ...rubis, owned };
   }
   const exportBank = hero => ({ items: bankOf(hero).items, stacks: { ...bankOf(hero).stacks } });
 
@@ -192,7 +181,7 @@
           'Clic : reprendre dans ton sac',
           body,
           'npc-bank',
-          '<span class="muted">Les objets portés et les Runes restent sur toi.</span>'
+          '<span class="muted">Les objets portés et les artéfacts restent sur toi.</span>'
         ) +
         canaanBagColumn(hero, {
           gearAttrs: (it, i) =>
@@ -221,7 +210,7 @@
     if (!item) return hideGearTooltip();
     gearTooltip.innerHTML =
       window.CANAAN_STATS_VIEW.tooltip(item) +
-      (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      (wornAgainst(item) ? gearComparison(item, wornAgainst(item)) : '');
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }
@@ -258,7 +247,6 @@
     handle,
     view,
     sanitize,
-    withBankedRubis,
     export: exportBank,
     open,
     render,

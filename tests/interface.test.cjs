@@ -220,7 +220,7 @@ test('Version 1.9.0 : affichage à la fréquence de l’écran par interpolation
  // En combat : 3 mana et 25 % de la régénération de vie hors combat.
  assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(true))')),{mana:3,health:3});
  assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(false))')),{mana:6,health:12});
- run('CANAAN_RUBIS.attackBefore({x:0,y:0,hp:10,mhp:10},1);P.mp=0;P.hp=1;for(let i=0;i<60;i++)update()');
+ run('CANAAN_ARTEFACTS.attackBefore({x:0,y:0,hp:10,mhp:10},1);P.mp=0;P.hp=1;for(let i=0;i<60;i++)update()');
  assert.ok(Math.abs(run('P.mp')-3)<1e-9,String(run('P.mp')));assert.ok(Math.abs(run('P.hp')-4)<1e-9,String(run('P.hp')));
  // Donjon 1 : niveau 7 requis.
  assert.equal(run('instances[0].level'),7);
@@ -304,12 +304,12 @@ test('Icônes illustrées, taille des textes et cases carrées : chaque objet a 
  const art=new Set(JSON.parse(run('JSON.stringify(Object.keys(CANAAN_ICON_ART))')));const miss=new Set();
  const walk=d=>{for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory())walk(p);else if(/\.(js|html)$/.test(f.name)&&f.name!=='icon-art.js')for(const m of fs.readFileSync(p,'utf8').matchAll(/⟦([a-z0-9_]+)⟧/g))if(!art.has(m[1]))miss.add(m[1])}};
  walk(path.join(__dirname,'..','src','canaan'));assert.deepEqual([...miss],[]);
- // Les objets ont leur propre icône : un Rubis, un emplacement, une statistique, une classe, un poisson, une difficulté.
- assert.equal(run('RUBIS_CATALOG.every(r=>r.icon==="⟦rubis_"+r.id+"⟧")'),true,'chaque Rubis a son illustration');
- assert.equal(run('Object.entries(itemIcon).every(([k,v])=>v==="⟦slot_"+k+"⟧"||k==="weapon2")'),true,'emplacements d’équipement');
+ // Les objets ont leur propre icône : un artéfact, un emplacement, une statistique, une classe, un poisson, une difficulté.
+ assert.equal(run('ARTEFACTS.every(a=>a.icon==="⟦artefact_"+a.id+"⟧")'),true,'chaque artéfact a son illustration');
+ assert.equal(run('Object.entries(itemIcon).every(([k,v])=>v==="⟦slot_"+itemSlotOf(k)+"⟧"||k==="weapon2")'),true,'emplacements d’équipement');
  assert.equal(run('Object.entries(WEAPON_DEFINITIONS).every(([k,w])=>w.icon==="⟦w_"+k+"⟧")'),true,'familles d’armes');
  assert.equal(run('CLASSES.every(c=>c.icon==="⟦cls_"+c.id+"⟧")'),true);
- assert.match(run('CANAAN_ICONS.html("⟦rubis_phenix⟧ Phénix")'),/^<svg class="ico art" viewBox="0 0 32 32"/);
+ assert.match(run('CANAAN_ICONS.html("⟦artefact_couronne_souverain⟧ Couronne")'),/^<svg class="ico art" viewBox="0 0 32 32"/);
  assert.equal(run('CANAAN_ICONS.html("⟦inconnu⟧X")'),'X','un repère inconnu ne s’affiche pas');
  assert.equal(run('CANAAN_ICONS.strip("⟦slot_helm⟧ Tête")'),'Tête');
  // Taille des textes : seules les polices grandissent (125 % par défaut, de 100 % à 160 %), l'interface n'est pas zoomée.

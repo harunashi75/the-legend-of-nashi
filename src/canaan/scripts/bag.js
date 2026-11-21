@@ -1,9 +1,9 @@
 // Sac unifié : chaque chose possédée est un objet du sac (touche I). En plus de l'équipement (hero.inventory), les
-// poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent de la place ; les Rubis
-// non équipés sont aussi des piles, mais rangés à part, dans l'onglet Rubis de la fiche (C), et liés au héros :
-// ils ne se vendent pas, ne se rangent pas à la banque et ne s'échangent pas ; les clés des secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise (hero.rubis.owned, hero.prof.fish / meat /
-// meals) : le sac en est la vue, sans changer les sauvegardes ni l'état envoyé aux invités.
-// Une pile se désigne par un repère texte « genre:id:qualité*nombre » (fish:gardon:2*30, rubis:phenix:0*1), utilisé
+// poissons, les viandes et les repas y sont des piles de 100 au plus par case, et prennent de la place ; les clés des
+// secrets (boss cachés des donjons), des piles de 20. Leurs quantités restent rangées où le jeu les utilise
+// (hero.player.keys, hero.prof.fish / meat / meals) : le sac en est la vue, sans changer les sauvegardes ni l'état
+// envoyé aux invités.
+// Une pile se désigne par un repère texte « genre:id:qualité*nombre » (fish:gardon:2*30, key:secret:0*1), utilisé
 // par la vente au marchand et par l'échange entre joueurs.
 (() => {
   'use strict';
@@ -11,20 +11,20 @@
   // Taille d'une pile selon le genre (100 par défaut ; clés des secrets : 20).
   const STACK_OF = { key: 20 };
   const stackOf = kind => STACK_OF[kind] || STACK;
-  // Trois sections : le sac (équipement, repas, enchantements, clés, trésors déterrés), les matériaux qu'on récolte
-  // (minerais, poissons, herbes, viandes, poudres d'enchantement), avec leur propre place : MAT_LIMIT cases, sans prendre celles du sac, et les
-  // Rubis, une collection sans limite de place (onglet Rubis de la fiche C).
+  // Deux sections : le sac (équipement, repas, enchantements, clés, trésors déterrés) et les matériaux qu'on récolte
+  // (minerais, poissons, herbes, viandes, poudres d'enchantement), avec leur propre place : MAT_LIMIT cases, sans
+  // prendre celles du sac.
   const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'dust']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
-  const sectionOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : 'main');
-  const KINDS = ['rubis', 'fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure', 'dust'];
+  const sectionOf = kind => (isMat(kind) ? 'mat' : 'main');
+  const KINDS = ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure', 'dust'];
   // Rubriques du sac (touche I) : l'équipement (hero.inventory), les utilitaires (clés, repas, enchantements) et le
   // reste (trésors déterrés), dans la place du sac ; puis les matériaux, dans la leur.
   const CATEGORY = { key: 'util', meal: 'util', ench: 'util', treasure: 'other' };
-  const categoryOf = kind => (kind === 'rubis' ? 'rubis' : isMat(kind) ? 'mat' : CATEGORY[kind] || 'other');
+  const categoryOf = kind => (isMat(kind) ? 'mat' : CATEGORY[kind] || 'other');
   // Ordre d'affichage des piles : par genre (dans cet ordre), la meilleure qualité d'abord, puis par nom.
-  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'dust', 'ore', 'herb', 'fish', 'meat', 'rubis'];
+  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'dust', 'ore', 'herb', 'fish', 'meat'];
   const byKind = (a, b) =>
     KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
     b.q - a.q ||
@@ -32,7 +32,7 @@
     b.n - a.n;
   // Trier l'équipement du sac (bouton Trier) : par emplacement (armes d'abord), la meilleure qualité, puis le plus
   // haut niveau, puis par nom. L'ordre est celui de hero.inventory : il est gardé dans la sauvegarde.
-  const SLOT_ORDER = ['weapon', 'helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'artifact'];
+  const SLOT_ORDER = ['weapon', 'helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring'];
   const slotRank = item =>
     SLOT_ORDER.includes(item.slot) ? SLOT_ORDER.indexOf(item.slot) : SLOT_ORDER.length;
   // Une arme liée (Relique) passe devant les qualités du tirage.
@@ -71,7 +71,6 @@
     meat: q => 5 + 5 * q,
     // Repas : PROF_MEAL_PRICE_FACTOR fois le prix de ses ingrédients (mealPrice) ; recette inconnue : ce prix.
     meal: q => 10 + 8 * q,
-    rubis: () => 300,
     ore: q => 6 + 5 * q,
     herb: q => 4 + 4 * q,
     ench: q => 60 + 40 * q,
@@ -80,35 +79,24 @@
     treasure: () => 1,
     dust: () => 1
   };
-  // Les Rubis sont liés au héros : ni vente, ni banque, ni échange. Les clés des secrets ne se vendent pas.
-  const bound = p => p.kind === 'rubis';
-  const sellable = p => p.kind !== 'key' && !bound(p);
+  // Les clés des secrets ne se vendent pas.
+  const sellable = p => p.kind !== 'key';
   const profOf = hero => hero.prof || (hero.prof = profFresh());
   // Qualités : les mêmes noms et couleurs que l'équipement (Commun à Mythique).
   const qualityName = q => GEAR_RARITIES[q]?.name || 'Commun';
   const qualityColor = q => GEAR_RARITIES[q]?.color || '#aeb4c0';
-  const rubisOf = hero => hero.rubis || { owned: {}, equipped: [] };
 
   // ---------------------------------------------------------------- Lecture
-  // Quantité d'une pile (Rubis : ceux qui ne sont pas équipés).
+  // Quantité d'une pile.
   function count(hero, kind, id, q = 0) {
     if (kind === 'key')
       return id === 'secret' && !q ? Math.max(0, Math.floor(Number(hero.player?.keys) || 0)) : 0;
-    if (kind === 'rubis') {
-      const r = rubisOf(hero);
-      return Math.max(0, (r.owned[id] || 0) - (r.equipped.includes(id) ? 1 : 0));
-    }
     const store = profOf(hero)[PROF_BAG[kind]];
     return store ? store[id + ':' + q] || 0 : 0;
   }
   // Toutes les piles du héros (une entrée par genre, id et qualité), avant découpage en cases de 100.
   function piles(hero) {
     const out = [];
-    const r = rubisOf(hero);
-    for (const id of Object.keys(r.owned || {}).sort()) {
-      const n = count(hero, 'rubis', id);
-      if (n > 0) out.push({ kind: 'rubis', id, q: 0, n });
-    }
     const keys = count(hero, 'key', 'secret');
     if (keys > 0) out.push({ kind: 'key', id: 'secret', q: 0, n: keys });
     const prof = profOf(hero);
@@ -120,7 +108,7 @@
     return out;
   }
   // Cases occupées par les piles (une pile de 230 prend 3 cases : 100, 100, 30). section : 'main' (le sac),
-  // 'mat' (les matériaux), 'rubis' (les Rubis non équipés), ou rien (toutes).
+  // 'mat' (les matériaux), ou rien (toutes).
   // category : une rubrique du sac ('util', 'other', 'mat'), à la place d'une section ; les piles sont alors rangées
   // dans l'ordre d'affichage (byKind).
   function tiles(hero, section, category) {
@@ -142,7 +130,6 @@
   const matUsed = hero => tiles(hero, 'mat').length;
   function free(hero, kind) {
     const section = sectionOf(kind);
-    if (section === 'rubis') return Infinity;
     return section === 'mat' ? MAT_LIMIT - matUsed(hero) : canaanBagLimit(hero) - used(hero);
   }
   // Peut-on ajouter n unités à cette pile ? Seules les cases supplémentaires demandent de la place, dans sa section.
@@ -155,10 +142,7 @@
   function add(hero, kind, id, q, n) {
     if (!(n > 0)) return;
     if (kind === 'key') hero.player.keys = count(hero, 'key', 'secret') + n;
-    else if (kind === 'rubis') {
-      const r = (hero.rubis ||= { owned: {}, equipped: [null, null, null, null, null, null] });
-      r.owned[id] = (r.owned[id] || 0) + n;
-    } else {
+    else {
       const store = (profOf(hero)[PROF_BAG[kind]] ||= {}),
         key = id + ':' + q;
       store[key] = (store[key] || 0) + n;
@@ -168,11 +152,7 @@
   function remove(hero, kind, id, q, n) {
     if (!(n > 0) || count(hero, kind, id, q) < n) return false;
     if (kind === 'key') hero.player.keys = count(hero, 'key', 'secret') - n;
-    else if (kind === 'rubis') {
-      const r = rubisOf(hero);
-      r.owned[id] -= n;
-      if (r.owned[id] <= 0) delete r.owned[id];
-    } else {
+    else {
       const store = profOf(hero)[PROF_BAG[kind]],
         key = id + ':' + q;
       store[key] -= n;
@@ -183,7 +163,7 @@
   }
 
   // ---------------------------------------------------------------- Repères (vente, échange)
-  const TOKEN = /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure|dust):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
+  const TOKEN = /^(fish|meat|meal|ore|herb|ench|key|treasure|dust):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
   const token = (p, n = p.n) => p.kind + ':' + p.id + ':' + p.q + '*' + n;
   function parse(text) {
     const m = TOKEN.exec(String(text || ''));
@@ -197,7 +177,6 @@
   function known(p) {
     if (!KINDS.includes(p.kind)) return false;
     if (p.kind === 'key') return p.id === 'secret' && p.q === 0;
-    if (p.kind === 'rubis') return !!RUBIS_CATALOG.find(r => r.id === p.id) && p.q === 0;
     const cat = {
       fish: CANAAN_PROF.FISH,
       meat: CANAAN_PROF.MEAT,
@@ -250,19 +229,7 @@
         quality: null
       };
     }
-    const qual = p.kind === 'rubis' ? null : { name: qualityName(p.q), color: qualityColor(p.q) };
-    if (p.kind === 'rubis') {
-      const r = RUBIS_CATALOG.find(x => x.id === p.id),
-        f = RUBIS_FAMILIES[r.family];
-      return {
-        name: r.name,
-        icon: r.icon,
-        color: f.light,
-        sub: 'Rune · ' + f.short,
-        desc: r.desc,
-        quality: null
-      };
-    }
+    const qual = { name: qualityName(p.q), color: qualityColor(p.q) };
     if (p.kind === 'fish') {
       const f = CANAAN_PROF.FISH[p.id];
       return {
@@ -412,21 +379,17 @@
     );
   }
   function showTooltip(text, event) {
-    const p = parse(text);
-    // Un Rubis garde son info-bulle complète (effet, famille).
-    if (p?.kind === 'rubis') return showRubisTooltip(p.id, event);
     const html = tooltip(text);
     if (!html) return;
     gearTooltip.innerHTML = html;
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }
-  // Utiliser une pile depuis le sac : équiper un Rubis, manger un repas.
+  // Utiliser une pile depuis le sac : manger un repas, poser un enchantement…
   function use(text) {
     const p = parse(text);
     if (!p) return false;
     hideGearTooltip();
-    if (p.kind === 'rubis') return equipRubis(p.id);
     if (p.kind === 'meal') return CANAAN_PROF.actions.eat(p.id, p.q);
     if (p.kind === 'ench') return CANAAN_GATHER.actions.use(text);
     if (p.kind === 'key')
@@ -440,7 +403,6 @@
   window.CANAAN_BAG = Object.freeze({
     STACK,
     stackOf,
-    bound,
     sellable,
     MAT_LIMIT,
     isMat,

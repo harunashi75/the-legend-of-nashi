@@ -1230,7 +1230,7 @@
         'Ces pierres se souviennent de l’Aube d’avant…',
         'Les squelettes ne dorment jamais vraiment.',
         'Écoute… on entend encore les anciens murmurer.',
-        'Les Runes de l’Arène renferment une vieille magie.'
+        'Les artéfacts de l’Arène renferment une vieille magie.'
       ]
     },
     // Kaelor, capitaine du Souffle du Dragon, sur le quai de l'Aurore (un seul, posé à part dans settle).

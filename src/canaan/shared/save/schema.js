@@ -66,7 +66,7 @@ export function cleanHeroName(name) {
 // Classe choisie à la création (shared/data/classes.js), ou aucune (choisie en jeu).
 /** @type {(id: unknown) => string | null} */
 const knownClass = id => (typeof id === 'string' && CLASS_IDS.includes(id) ? id : null);
-// Héros neuf : équipement de départ dans le sac, sa classe sans talent, aucun Rubis.
+// Héros neuf : équipement de départ dans le sac, sa classe sans talent, aucun artéfact.
 /**
  * @param {object} options
  * @param {{ x: number, y: number }} options.spawn point d'apparition, en pixels
@@ -93,7 +93,7 @@ export function freshHero({ spawn, baseMana, look, classe = null, name = '' }) {
     bagLevel: 0,
     // Classe et talents équipés (5 au plus, selon le niveau).
     classe: { id: knownClass(classe), talents: [] },
-    rubis: { owned: {}, equipped: [null, null, null, null, null, null] },
+    artefacts: { ranks: {}, equipped: [null, null, null, null] },
     arena: { best: 0, attempts: 0, completed: false, lastBoss: '' },
     // Métiers : pêche et cuisine au niveau 1, sans poisson ni repas.
     prof: {

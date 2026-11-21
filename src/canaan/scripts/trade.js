@@ -70,7 +70,7 @@
     return true;
   }
   // Objets proposés : un équipement par son identifiant, ou une pile du sac par son repère (fish:gardon:2*30,
-  // rubis:phenix:0*1…). Renvoie [{ gear }] ou [{ stack }], ou null si le héros ne les a plus.
+  // meal:roti:2*5…). Renvoie [{ gear }] ou [{ stack }], ou null si le héros ne les a plus.
   function resolve(hero, ids) {
     const used = new Set(),
       taken = new Map(),
@@ -78,8 +78,7 @@
     for (const id of ids) {
       if (CANAAN_BAG.isToken(id)) {
         const p = CANAAN_BAG.parse(id);
-        // Les Rubis sont liés au héros : ils ne s'échangent pas.
-        if (!p || CANAAN_BAG.bound(p)) return null;
+        if (!p) return null;
         const key = p.kind + ':' + p.id + ':' + p.q,
           n = (taken.get(key) || 0) + p.n;
         if (n > CANAAN_BAG.count(hero, p.kind, p.id, p.q)) return null;
@@ -306,7 +305,7 @@
     for (const { stack: p } of offered.filter(x => x.stack))
       minus.set(p.kind + ':' + p.id + ':' + p.q, (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0) + p.n);
     const stacks = [];
-    for (const p of CANAAN_BAG.piles(hero).filter(p => !CANAAN_BAG.bound(p))) {
+    for (const p of CANAAN_BAG.piles(hero)) {
       let n = p.n - (minus.get(p.kind + ':' + p.id + ':' + p.q) || 0);
       for (; n > 0; n -= CANAAN_BAG.STACK) stacks.push({ ...p, n: Math.min(CANAAN_BAG.STACK, n) });
     }
@@ -529,7 +528,7 @@
       if (!item) return hideGearTooltip();
       gearTooltip.innerHTML =
         window.CANAAN_STATS_VIEW.tooltip(item) +
-        (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+        (wornAgainst(item) ? gearComparison(item, wornAgainst(item)) : '');
       gearTooltip.style.display = 'block';
       moveGearTooltip(event);
     },

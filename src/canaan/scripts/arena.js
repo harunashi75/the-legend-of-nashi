@@ -1,4 +1,4 @@
-// Arène des Épreuves : douze vagues, un boss par vague, attaques annoncées au sol, un Rubis par victoire.
+// Arène des Épreuves : douze vagues, un boss par vague, attaques annoncées au sol ; chaque boss vaincu donne son artéfact.
 // Difficulté fixe : jamais adaptée au niveau. Seul le nombre de joueurs la changera (coopératif à venir).
 (() => {
   'use strict';
@@ -27,8 +27,7 @@
         best: Math.min(WAVES, n(d?.best)),
         attempts: n(d?.attempts),
         completed: !!d?.completed,
-        lastBoss: typeof d?.lastBoss === 'string' ? d.lastBoss.slice(0, 80) : '',
-        pendingChoice: !!d?.pendingChoice
+        lastBoss: typeof d?.lastBoss === 'string' ? d.lastBoss.slice(0, 80) : ''
       };
     }
   };
@@ -58,7 +57,7 @@
       curse: new Map(),
       revives: new Map(),
       failed: false,
-      rubisWon: 0,
+      artefactsWon: 0,
       banner: null,
       cheerUntil: 0
     };
@@ -127,7 +126,7 @@
   }
 
   // ---------------------------------------------------------------- Dégâts aux héros
-  // Coup direct sur un héros : esquive, Déviation, défense, armes, talents et Rubis s'appliquent (combat.incoming).
+  // Coup direct sur un héros : esquive, Déviation, défense, armes, talents et artéfacts s'appliquent (combat.incoming).
   function strike(mult, opts = {}, hero = game.hero) {
     const p = hero.player;
     if (!run?.boss || p.dead) return 0;
@@ -212,11 +211,7 @@
   }
   function slowFactor(b) {
     const t = time / 60;
-    return (
-      (b._rubisSlowUntil > t ? 0.75 : 1) *
-      (b.v1746_slow > 0 ? 0.75 : 1) *
-      (b._clsSlow && b._clsSlow.until > t ? 0.85 : 1)
-    );
+    return (b.v1746_slow > 0 ? 0.75 : 1) * (b._clsSlow && b._clsSlow.until > t ? 0.85 : 1);
   }
   function shoot(x, y, a, speed, mult, color, opts = {}) {
     run.shots.push({
@@ -799,7 +794,7 @@
     run.cheerUntil = run.clock + 2.5;
     setGate(true);
     run.group = players();
-    for (const hero of inArena()) CANAAN_RUBIS.newCombat(hero);
+    for (const hero of inArena()) CANAAN_ARTEFACTS.newCombat(hero);
     flash(b.x, b.y, 160, def.color, 0.8);
     toast('⚔️ Vague ' + run.wave + ' : ' + def.name);
     chat('Arène', 'Vague ' + run.wave + '/12 — ' + def.name + ' entre dans l’arène !');
@@ -816,7 +811,8 @@
     run.curse = new Map();
     game.world.monsters = game.world.monsters.filter(m => !m.arenaClone && !(m.arenaBoss && m.hp <= 0));
   }
-  // Mort du boss : arrêt immédiat de ses attaques. Chaque héros du colisée gagne son Rubis et son record ;
+  // Mort du boss : arrêt immédiat de ses attaques. Chaque héros du colisée gagne l'artéfact du boss (ou un rang de plus,
+  // ou de l'or s'il est déjà au rang maximum) et son record ;
   // les héros debout récupèrent 20 % de leurs PV et de leur mana, ceux à terre se relèvent avec 20 % de leurs PV.
   function onBossDown(m) {
     if (!run || m !== run.boss) return;
@@ -825,21 +821,27 @@
     clearField();
     run.boss = null;
     run.cheerUntil = run.clock + 4;
-    run.rubisWon++;
+    run.artefactsWon++;
     for (const hero of group) {
       const rec = records(hero),
         p = hero.player,
         host = hero === game.hero;
       rec.best = Math.max(rec.best, wave);
       rec.lastBoss = m.t;
-      const { rubis, fresh } = CANAAN_RUBIS.grant(null, hero),
-        text = '⟦rune⟧ Rune obtenue : ' + rubis.name + (fresh ? ' (nouvelle !)' : ' (doublon)');
+      const got = CANAAN_ARTEFACTS.grant(wave, hero),
+        a = got.artefact,
+        text = got.gold
+          ? '🔮 ' + a.name + ' (rang maximum) : +' + got.gold + ' or'
+          : got.fresh
+            ? '🔮 Artéfact obtenu : ' + a.name + ' !'
+            : '🔮 ' + a.name + ' passe au rang ' + got.rank + ' !',
+        banner = { id: a.id, rank: got.rank, fresh: got.fresh, gold: got.gold, until: run.clock + 5, wave };
       if (host) {
-        run.banner = { id: rubis.id, fresh, until: run.clock + 5, wave };
+        run.banner = banner;
         toast(text);
       } else {
         canaanLootNotice(hero, text);
-        (run.banners ??= new Map()).set(hero, { id: rubis.id, fresh, until: run.clock + 5, wave });
+        (run.banners ??= new Map()).set(hero, banner);
       }
       if (p.dead) {
         p.dead = false;
@@ -850,7 +852,8 @@
       }
       const before = p.hp;
       p.hp = Math.min(p.mhp, p.hp + p.mhp * RECOVERY);
-      const mana = CANAAN_RUBIS.restoreMana(p.mmp * RECOVERY, hero);
+      const mana = Math.max(0, Math.min(p.mmp - p.mp, p.mmp * RECOVERY));
+      p.mp += mana;
       float(
         p.x,
         p.y - 40,
@@ -860,7 +863,7 @@
     }
     if (!run.banner || run.banner.wave !== wave)
       run.banner = { text: m.t + ' vaincu !', until: run.clock + 4, wave };
-    chat('Arène', m.t + ' est vaincu ! Une Rune pour chaque héros de l’arène.');
+    chat('Arène', m.t + ' est vaincu ! Son artéfact pour chaque héros de l’arène.');
     setGate(false);
     if (wave >= WAVES) {
       run.phase = 'victory';
@@ -880,22 +883,6 @@
                 gearDisplayName(item) +
                 ' !'
             );
-        }
-        if (CANAAN_RUBIS.missing(hero).length) {
-          // L'hôte choisit son Rubis final ; un allié reçoit un Rubis qui lui manque.
-          if (hero === game.hero) {
-            rec.pendingChoice = true;
-            later(2.5, () => openFinalChoice());
-          } else {
-            const pick =
-              CANAAN_RUBIS.missing(hero)[Math.floor(Math.random() * CANAAN_RUBIS.missing(hero).length)];
-            CANAAN_RUBIS.grant(pick.id, hero);
-            canaanLootNotice(hero, '🏆 Rune de la victoire : ' + pick.name);
-          }
-        } else {
-          hero.player.gold += 2500;
-          if (hero === game.hero) toast('🏆 Collection complète : +2500 or');
-          else canaanLootNotice(hero, '🏆 Collection complète : +2500 or');
         }
       }
       chat('Arène', '🏆 Les douze épreuves sont accomplies ! La victoire, elle, se mérite.');
@@ -934,12 +921,12 @@
     CanaanStages.restartMusic();
     return true;
   }
-  // Sortie (abandon entre les vagues, défaite ou victoire) : les Rubis gagnés restent acquis.
+  // Sortie (abandon entre les vagues, défaite ou victoire) : les artéfacts gagnés restent acquis.
   function onLeave() {
     if (!run) return;
-    // Un boss vaincu = une vague réussie = un Rubis.
-    const won = run.rubisWon;
-    chat('Arène', 'Tentative terminée : ' + won + ' vague(s) réussie(s), ' + won + ' Rune(s) gagnée(s).');
+    // Un boss vaincu = une vague réussie = un artéfact (ou un rang).
+    const won = run.artefactsWon;
+    chat('Arène', 'Tentative terminée : ' + won + ' vague(s) réussie(s), ' + won + ' artéfact(s) gagné(s).');
     clearField();
     run = null;
   }
@@ -1539,7 +1526,7 @@
     }
     c.restore();
   }
-  // Interface : vague, compte à rebours, phase, Rubis obtenu et effets subis.
+  // Interface : vague, compte à rebours, phase, artéfact obtenu et effets subis.
   function drawHud() {
     if (!run || !game.world.instance?.arena || !started) return;
     const c = ctx,
@@ -1590,7 +1577,7 @@
       else text('Entre sur la piste !', W / 2, H * 0.3 + 52, 24, '#ffd36d');
       if (run.phase === 'rest')
         text(
-          '[E] au portail de l’antichambre pour quitter avec tes Runes',
+          '[E] au portail de l’antichambre pour quitter avec tes artéfacts',
           W / 2,
           H * 0.3 + 96,
           14,
@@ -1602,31 +1589,35 @@
       text('🏆 L’ARÈNE EST VAINCUE', W / 2, H * 0.26, 34, '#ffd36d', 7);
       text('Retourne au portail de l’antichambre [E]', W / 2, H * 0.26 + 40, 16, '#fff2cb', 4);
     }
-    // Bandeau : Rune obtenue ou nouvelle phase.
+    // Bandeau : artéfact obtenu (nouveau, rang de plus ou or) ou nouvelle phase.
     if (run.banner && run.clock < run.banner.until) {
       const k = Math.min(1, (run.banner.until - run.clock) / 0.5),
         y = H * 0.66;
       c.globalAlpha = k;
       if (run.banner.id) {
-        const r = CANAAN_RUBIS.get(run.banner.id),
-          fam = CANAAN_RUBIS.families[r.family];
+        const a = CANAAN_ARTEFACTS.get(run.banner.id),
+          rank = run.banner.rank || 1;
         c.fillStyle = 'rgba(18,12,8,.88)';
         c.fillRect(W / 2 - 230, y - 44, 460, 92);
-        c.strokeStyle = fam.color;
+        c.strokeStyle = a.color;
         c.lineWidth = 3;
         c.strokeRect(W / 2 - 230, y - 44, 460, 92);
-        drawRubisGem(c, W / 2 - 180, y + 2, 56, r.id);
+        drawArtefact(c, W / 2 - 180, y + 2, 56, a.id);
         c.textAlign = 'left';
         text(
-          '⟦rune⟧ RUNE OBTENUE' + (run.banner.fresh ? ' · NOUVELLE !' : ' · DOUBLON'),
+          run.banner.gold
+            ? '🔮 RANG MAXIMUM · +' + run.banner.gold + ' OR'
+            : run.banner.fresh
+              ? '🔮 ARTÉFACT OBTENU · NOUVEAU !'
+              : '🔮 ARTÉFACT · RANG ' + rank + ' !',
           W / 2 - 140,
           y - 16,
           13,
           '#ffd36d',
           4
         );
-        text(r.name, W / 2 - 140, y + 12, 24, fam.light, 5);
-        text(fam.name + ' · N°' + String(r.n).padStart(2, '0'), W / 2 - 140, y + 34, 12, '#d8c8a8', 3);
+        text(a.name, W / 2 - 140, y + 12, 24, a.light, 5);
+        text('Rang ' + rank + ' / ' + CANAAN_ARTEFACTS.maxRank, W / 2 - 140, y + 34, 12, '#d8c8a8', 3);
         c.textAlign = 'center';
       } else text(run.banner.text, W / 2, y, 24, '#ffb347', 6);
       c.globalAlpha = 1;
@@ -1798,26 +1789,25 @@
   function openArenaPortal() {
     // Le sol du colisée se peint pendant que le joueur lit le panneau (canaan-dungeons).
     if (!game.world.instance) window.prewarmInstance?.('arena');
-    const rubis = window.CANAAN_RUBIS,
-      row = (label, value) =>
-        '<div class="arena-record"><span>' + label + '</span><b>' + value + '</b></div>';
+    const row = (label, value) =>
+      '<div class="arena-record"><span>' + label + '</span><b>' + value + '</b></div>';
     let html =
       '<h2>⚔️ ' +
       esc(CANAAN_ARENA_NAME) +
       '</h2><p class="arena-motto">« L’Arène est ouverte à tous. La victoire, elle, se mérite. »</p>' +
       '<div class="arena-layout"><div class="arena-board"><h3>🏆 Tableau des records</h3>' +
       row('Meilleure vague', records().best + ' / ' + WAVES) +
-      row('Runes découvertes', rubis.discovered() + ' / 48') +
+      row('Artéfacts obtenus', CANAAN_ARTEFACTS.owned().length + ' / ' + CANAAN_ARTEFACTS.list.length) +
       row('Tentatives effectuées', records().attempts) +
       row('Arène terminée', records().completed ? 'Oui' : 'Non') +
       row('Dernier boss vaincu', records().lastBoss ? esc(records().lastBoss) : '—') +
       '<h3>📜 Règles</h3><ul class="arena-rules">' +
       '<li>12 vagues, un boss par vague, difficulté fixe dès la vague 1.</li>' +
       '<li>Aucun niveau minimum : la difficulté ne s’adapte jamais à ton équipement.</li>' +
-      '<li>1 Rune garantie par boss vaincu, en priorité une Rune que tu ne possèdes pas.</li>' +
+      '<li>Chaque boss vaincu donne son artéfact ; un doublon le fait monter de rang (5 au plus).</li>' +
       '<li>Entre deux vagues : +20 % des PV et du mana, 10 s de répit.</li>' +
-      '<li>Équipement et Runes se préparent avant d’entrer.</li>' +
-      '<li>Abandon possible entre les vagues ; la mort met fin à la tentative. Les Runes gagnées sont conservées.</li>' +
+      '<li>Équipement et artéfacts se préparent avant d’entrer.</li>' +
+      '<li>Abandon possible entre les vagues ; la mort met fin à la tentative. Les artéfacts gagnés sont conservés.</li>' +
       '<li>Les attaques majeures sont annoncées au sol : <b>Maj</b> ou <b>Espace</b> pour une roulade.</li>' +
       '</ul></div><div class="arena-bosses"><h3>👑 Les douze épreuves</h3>';
     BOSSES.forEach((def, k) => {
@@ -1835,57 +1825,12 @@
         '</em></div>';
     });
     html += '</div></div>';
-    if (records().pendingChoice)
-      html +=
-        '<p class="arena-choice-note">🎁 Ta récompense finale t’attend : choisis une Rune.</p>' +
-        choiceList();
     html +=
       '<div class="arena-actions"><button type="button" data-action="enterArena"' +
       (game.world.instance ? ' disabled' : '') +
-      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="rubis">⟦rune⟧ Préparer mes Runes</button></div>';
+      '>⚔️ Entrer dans l’Arène</button><button type="button" data-action="characterSection" data-tab="gear">🔮 Préparer mes artéfacts</button></div>';
     showPanel(html);
   }
-  function choiceList() {
-    return (
-      '<div class="arena-choice">' +
-      CANAAN_RUBIS.missing()
-        .map(
-          r =>
-            '<button type="button" data-action="claimArenaRubis" data-rubis="' +
-            r.id +
-            '" data-tooltip-rubis="' +
-            r.id +
-            '">' +
-            r.icon +
-            ' ' +
-            esc(r.name) +
-            '</button>'
-        )
-        .join('') +
-      '</div>'
-    );
-  }
-  // Récompense spéciale de la vague 12 : un Rubis au choix parmi ceux qui manquent.
-  function openFinalChoice() {
-    if (!records().pendingChoice) return;
-    showPanel(
-      '<h2>🏆 Le Souverain est tombé</h2><p>Récompense finale : choisis une Rune que tu ne possèdes pas encore.</p>' +
-        choiceList()
-    );
-  }
-  function claimArenaRubis(id) {
-    const r = CANAAN_RUBIS.get(id);
-    if (!records().pendingChoice || !r || CANAAN_RUBIS.known(id)) return false;
-    CANAAN_RUBIS.grant(id);
-    records().pendingChoice = false;
-    hideGearTooltip();
-    closePanels();
-    toast('⟦rune⟧ Récompense finale : ' + r.name);
-    if (run) run.banner = { id, fresh: true, until: run.clock + 5 };
-    saveGame();
-    return true;
-  }
-
   // ---------------------------------------------------------------- Accès publics
   window.CANAAN_ARENA = Object.freeze({
     waves: WAVES,
@@ -1944,5 +1889,5 @@
       ordered: BOSSES.every(b => b.phases.every((p, i) => !i || p.hp < b.phases[i - 1].hp))
     })
   });
-  Object.assign(window, { enterArena, openArenaPortal, claimArenaRubis });
+  Object.assign(window, { enterArena, openArenaPortal });
 })();

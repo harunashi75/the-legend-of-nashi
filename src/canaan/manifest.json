@@ -194,11 +194,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-artifacts",
-      "file": "scripts/artifacts.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-equipment",
       "file": "scripts/equipment.js"
     },
@@ -344,8 +339,8 @@
     },
     {
       "kind": "script",
-      "id": "canaan-rubis",
-      "file": "scripts/rubis.js"
+      "id": "canaan-artefacts",
+      "file": "scripts/arena-artefacts.js"
     },
     {
       "kind": "script",
@@ -444,8 +439,8 @@
     },
     {
       "kind": "style",
-      "id": "canaan-rubis-style",
-      "file": "styles/rubis-arena.css"
+      "id": "canaan-artefacts-style",
+      "file": "styles/artefacts-arena.css"
     },
     {
       "kind": "style",

@@ -17,7 +17,7 @@
  * Objet d'équipement, tel qu'il est sauvegardé et envoyé aux invités.
  * @typedef {object} Item
  * @property {string | number} [id]
- * @property {string} [slot] emplacement (helm, armor, weapon, artifact…)
+ * @property {string} [slot] emplacement (helm, armor, weapon, ring…)
  * @property {number} [level] niveau de l'objet (1 à 60)
  * @property {string} [rarity] qualité (Commun à Mythique)
  * @property {string} [weaponType] famille d'arme

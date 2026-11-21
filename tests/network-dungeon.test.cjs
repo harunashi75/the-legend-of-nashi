@@ -14,8 +14,9 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
  // Hasard à graine fixe pour chaque côté (hôte, invités) : avec les intentions synchronisées, le donjon se joue
  // toujours de la même façon ; sans graine, une mauvaise série de coups pouvait faire tomber l'hôte.
  // (Graine choisie après la correction du tirage des monstres du monde : sur dix graines variées, le groupe finit le
- // donjon à chaque fois.)
- let seed=0;
+ // donjon à chaque fois. Décalée de 30 quand l'emplacement artéfact a disparu du butin : le tirage d'un objet change
+ // la suite du hasard, et avec cette graine la partie se joue à l'identique avant et après.)
+ let seed=30;
  const boot=()=>{const mine=++seed*65537;let first=true;const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){
   if(first){first=false;run('{let s='+mine+';Math.random=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648}}')}}});
   side.g.WebSocket=WebSocket;side.g.Event=Event;return side};

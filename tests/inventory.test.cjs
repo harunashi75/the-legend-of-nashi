@@ -18,11 +18,9 @@ test('Noms : table officielle complète appliquée directement, identité et poi
       assert.equal(item.level,30);assert.equal(item.weaponType,type);assert.equal(item.id,'identity');assert.equal(item.sec,sec);
     }
   }
-  for(let variant=0;variant<3;variant++){
-    const item={slot:'artifact',rarity:'Rare',artifactVariant:variant,ilvl:90};
-    applyItemName(item);
-    assert.equal(item.name,GEAR_NAMES.Rare.artifact[variant]);
-  }
+  // Pièces : le nom de leur emplacement à leur qualité (plus d'emplacement artéfact).
+  for(const slot of ['helm','ring','neck']){const item={slot,rarity:'Rare',level:30};applyItemName(item);assert.equal(item.name,GEAR_NAMES.Rare[slot])}
+  assert.ok(Object.values(GEAR_NAMES).every(entry=>!('artifact' in entry)));
   // Famille d'arme inconnue : une épée ; pièce sans emplacement : inchangée.
   const odd={slot:'weapon',rarity:'Épique',weaponType:'lance-pierre'};assert.equal(applyItemName(odd).name,WEAPON_NAMES['Épique'].sword);
   const none={name:'Caillou'};assert.equal(applyItemName(none).name,'Caillou');
@@ -151,8 +149,8 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  run('canaanCollections("digging")');assert.match(run('document.getElementById("window").innerHTML'),/Reliques trouvées/);
  run('closePanels();started=true;paused=false;toggleCollections()');assert.equal(run('CANAAN_COLLECTIONS.current()'),'digging');
  run('toggleCollections()');assert.equal(run('modalOpen()'),false);
- // Onglet Runes : Runes équipées (avec leurs effets) à gauche, Collection filtrée par famille à droite.
- run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/rubis-worn[^]*rune-slots[^]*rubis-coll[^]*rune-filters/);
+ // Fiche (C) : sous le héros, ses quatre artéfacts de l'Arène et leur collection ; plus d'onglet Runes.
+ run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/character-doll[^]*art-slots[^]*art-grid/);
  run('closePanels()');
  // Le sprite d'une tenue a de la place pour les ailes ; sans tenue, rien ne change.
  assert.equal(run('canaanHeroSprite({...game.hero.look,wear:"dragon"},0,0).padX'),12);assert.equal(run('canaanHeroSprite(defaultLook(),0,0).padX'),0);
@@ -170,17 +168,17 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, poissons, viandes et repas sont des objets du sac',async()=>{
+test('Sac unifié, boutique à deux fenêtres et échange de piles : poissons, viandes et repas sont des objets du sac',async()=>{
  const n=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','net','messages.js')).href);
  assert.deepEqual(n.sanitizeAction({op:'shop-buy',index:3,gold:9}),{op:'shop-buy',index:3});assert.equal(n.sanitizeAction({op:'shop-buy',index:99}),null);
  assert.deepEqual(n.sanitizeAction({op:'sell-stack',token:'fish:gardon:2*30'}),{op:'sell-stack',token:'fish:gardon:2*30'});assert.equal(n.sanitizeAction({op:'sell-stack',token:'gold:x:1*5'}),null);
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;game.hero.level=20;P.gold=10000;game.hero.inventory=[];updateCapacity();toast=()=>{}');
  // Piles de 100 au plus par case, et elles prennent de la place.
- run('const h=game.hero;h.prof.fish["gardon:1"]=230;h.prof.meat["lievre:0"]=5;h.prof.meals["soupe:1"]=2;h.rubis.owned.phenix=2;h.rubis.equipped=["phenix",null,null,null,null,null]');
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero).map(p=>CANAAN_BAG.token(p)))')),['rubis:phenix:0*1','fish:gardon:1*100','fish:gardon:1*100','fish:gardon:1*30','meat:lievre:0*5','meal:soupe:1*2']);
- // Deux sections : le sac (Rubis, repas…) et les matériaux (poissons, viandes, minerais, herbes), chacun sa place.
- assert.equal(run('canaanBagUsed(game.hero)'),1,'les Rubis (onglet Rubis de la fiche C) et les matériaux ont leur section');
+ run('const h=game.hero;h.prof.fish["gardon:1"]=230;h.prof.meat["lievre:0"]=5;h.prof.meals["soupe:1"]=2');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BAG.tiles(game.hero).map(p=>CANAAN_BAG.token(p)))')),['fish:gardon:1*100','fish:gardon:1*100','fish:gardon:1*30','meat:lievre:0*5','meal:soupe:1*2']);
+ // Deux sections : le sac (repas…) et les matériaux (poissons, viandes, minerais, herbes), chacun sa place.
+ assert.equal(run('canaanBagUsed(game.hero)'),1,'les matériaux ont leur section');
  assert.equal(run('CANAAN_BAG.matUsed(game.hero)'),4);
  // Section pleine : un poisson qui demande une nouvelle case est refusé ; un de plus dans une pile entamée passe.
  run('game.hero.bagLimit=10;BAG_LIMIT=1');assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),true,'le sac plein ne bloque pas les matériaux');
@@ -189,10 +187,10 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,70)'),true);assert.equal(run('CANAAN_BAG.room(game.hero,"fish","gardon",1,71)'),false);
  assert.equal(run('CANAAN_BAG.room(game.hero,"fish","truite",0,1)'),false);run('delete game.hero.prof.ore["fer:0"]');
  // Le sac (I) : une seule vue par rubriques (Équipement, Utilitaire, Autre, puis Matériaux) ; un repas se mange d'un
- // clic. Les Rubis n'y sont plus. Un trésor déterré est dans Autre et prend la place du sac.
+ // clic. Un trésor déterré est dans Autre et prend la place du sac.
  run('game.hero.prof.treasure["perle:0"]=3;game.hero.player.keys=2;BAG_LIMIT=40;renderInventory()');let inv=run('document.getElementById("window").innerHTML');
  assert.equal(run('canaanBagUsed(game.hero)'),3,'repas, clés et trésor dans la place du sac');
- assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,7);assert.doesNotMatch(inv,/rubis:phenix/);assert.doesNotMatch(inv,/data-action="bagSection"/);
+ assert.equal((inv.match(/data-tooltip-stack="/g)||[]).length,7);assert.doesNotMatch(inv,/data-action="bagSection"/);
  assert.match(inv,/data-action="useBagStack" data-token="meal:soupe:1\*2"/);
  const at=re=>inv.search(re);
  assert.ok(at(/Équipement/)<at(/Utilitaire/)&&at(/Utilitaire/)<at(/key:secret/)&&at(/key:secret/)<at(/meal:soupe/)&&at(/meal:soupe/)<at(/Autre/)&&at(/Autre/)<at(/treasure:perle/)&&at(/treasure:perle/)<at(/Matériaux/)&&at(/Matériaux/)<at(/fish:gardon/),'rubriques dans l’ordre');
@@ -217,13 +215,13 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : Rubis, pois
  const g1=run('P.gold');assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);
  assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),130);assert.equal(run('P.gold'),g1+100*run('CANAAN_BAG.unitPrice({kind:"fish",q:1})'));
  assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"fish:gardon:1*100")'),false,'pas plus que ce qu’on a (30)');
- assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"rubis:phenix:0*1")'),false,'les Runes ne se vendent pas');assert.equal(run('game.hero.rubis.owned.phenix'),2);
+ assert.equal(run('CANAAN_SHOP.sellStack(game.hero,"key:secret:0*1")'),false,'les clés ne se vendent pas');
  // Échange : une pile change de main avec l'équipement ; un sac trop plein annule tout.
  run('game.mode="host";globalThis.ami=canaanCreateHero({name:"Ami",x:P.x,y:P.y});ami.id="g-ami";ami.peer="p1";ami.local=false;game.heroes.push(ami)');
  run('CANAAN_TRADE.handle(game.hero,{op:"trade-request",to:"g-ami"});CANAAN_TRADE.handle(ami,{op:"trade-answer",yes:true})');
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*6"],gold:0})'),false,'pas plus que la pile');
- assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["rubis:phenix:0*1"],gold:0})'),false,'les Runes ne s’échangent pas');
+ assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["rubis:phenix:0*1"],gold:0})'),false,'plus aucune Rune');
  assert.equal(run('CANAAN_TRADE.handle(game.hero,{op:"trade-offer",items:["meat:lievre:0*5","fish:gardon:1*30"],gold:0})'),true);
  run('CANAAN_TRADE.handle(game.hero,{op:"trade-ready",yes:true});CANAAN_TRADE.handle(ami,{op:"trade-ready",yes:true})');
  assert.equal(run('CANAAN_BAG.count(ami,"meat","lievre",0)'),5);assert.equal(run('CANAAN_BAG.count(ami,"fish","gardon",1)'),30);
@@ -243,10 +241,9 @@ test('Banque de 500 places par joueur et Voile d’ombre : déposer, reprendre, 
  assert.equal(run('CANAAN_BANK.deposit(game.hero,'+JSON.stringify(id)+')'),true);assert.equal(run('game.hero.inventory.length'),0);
  assert.equal(run('CANAAN_BANK.deposit(game.hero,"fish:gardon:1*100")'),true);assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),50);
  assert.equal(run('CANAAN_BANK.used(game.hero)'),2);
- // Les Runes sont liées au héros : pas de dépôt ; celles déjà rangées reviennent dans sa collection au chargement.
- run('game.hero.rubis.owned.colosse=1');assert.equal(run('CANAAN_BANK.deposit(game.hero,"rubis:colosse:0*1")'),false);assert.equal(run('game.hero.rubis.owned.colosse'),1);
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.sanitize({items:[],stacks:{"rubis:phenix:0":2,"fish:gardon:1":5}}).stacks)')),{'fish:gardon:1':5});
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.withBankedRubis({stacks:{"rubis:phenix:0":2}},{owned:{phenix:1,colosse:1},equipped:["phenix"]}))')),{owned:{phenix:3,colosse:1},equipped:['phenix']});
+ // Plus aucune Rune : une ancienne pile de Runes rangée à la banque disparaît (elle est remboursée au chargement).
+ assert.equal(run('CANAAN_BANK.deposit(game.hero,"rubis:colosse:0*1")'),false);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BANK.sanitize({items:[{id:"x",slot:"artifact",level:5}],stacks:{"rubis:phenix:0":2,"fish:gardon:1":5}}))')),{items:[],stacks:{'fish:gardon:1':5}});
  assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*101")'),false);assert.equal(run('CANAAN_BANK.withdraw(game.hero,"fish:gardon:1*40")'),true);
  assert.equal(run('CANAAN_BAG.count(game.hero,"fish","gardon",1)'),90);assert.equal(run('CANAAN_BANK.of(game.hero).stacks["fish:gardon:1"]'),60);
  // Sac plein : on ne reprend pas.
@@ -306,9 +303,11 @@ test('Démantèlement, poudres et sacoche de butin : rien n’est perdu ni chang
  run('renderInventory()');const html=run('document.getElementById("window").innerHTML');
  assert.match(html,/data-menu="gear" data-index="0"/);assert.match(html,/Sacoche de butin <small>9 \/ 10/);assert.match(html,/data-action="satchelTake" data-menu="satchel"/);
  assert.doesNotMatch(html,/bag-salvage|weapon-reserve/,'plus de petits boutons dans les coins des cases');
- // Menu du clic droit : équiper et démanteler ; une arme a aussi « Arme 2 » ; vendre seulement près d'un marchand.
+ // Menu du clic droit : équiper et démanteler ; une arme a aussi « Arme 2 », une bague « Bague 2 » ; vendre seulement
+ // près d'un marchand.
  const entries=menu=>JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:'+JSON.stringify(menu)+'}))'));
- assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper','Démanteler']);
+ assert.equal(run('game.hero.inventory[0].slot'),'ring');
+ assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper (Bague 1)','Équiper en Bague 2','Démanteler']);
  assert.deepEqual(entries({menu:'satchel',id:run('game.hero.satchel[0].id')}),['Reprendre dans le sac','Démanteler']);
  run('globalThis.ring=game.hero.inventory[0];game.hero.inventory[0]={id:"w1",slot:"weapon",weaponType:"sword",level:1,rarity:"Commun"}');
  assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper (Arme 1)','Équiper en Arme 2','Démanteler']);

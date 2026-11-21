@@ -17,8 +17,8 @@ test('Portée des modules : modules encapsulés, noms privés inaccessibles et n
   'canaan-sprite-kit':{private:['actor','WORLD_LOOKS','resolveLook','drawParticles','lightCanvas'],public:['canaanOutline','canaanActorSprite','drawCanaanActor','canaanLight','drawCanaanLighting','drawCanaanBossFrame']},
   'canaan-dungeons':{private:['THEMES','PLANS','planDungeon','drawFloorProp','membrane'],public:['makeDungeon','spawnInstanceBoss','onInstanceBossDown','drawDungeonTile','drawDungeonEntrance','dungeonAmbience','arenaLayout','CANAAN_DUNGEON_AUDIT']},
   'canaan-world-look':{private:['PAL','PRIORITY','fringe','paintTile','AMBIENCES'],public:['drawWorldTile','worldAmbience']},
-  'canaan-rubis':{private:['LIST','GROUP_ONLY','BY_ID','UTILITY','rt','refreshActive','secondary'],public:['CANAAN_RUBIS','CANAAN_RUBIS_STATE','equipRubis','unequipRubis','toggleRubis','showRubisTooltip','drawRubisGem']},
-  'canaan-arena':{private:['BOSSES','MOVES','HP_MULT','DMG_MULT','strike','tele','spawnBoss','onBossDown'],public:['CANAAN_ARENA','CANAAN_ARENA_STATE','enterArena','openArenaPortal','claimArenaRubis']},
+  'canaan-artefacts':{private:['LIST','BY_ID','BY_WAVE','rt','worn','secondary','dot','tooltipHtml'],public:['CANAAN_ARTEFACTS','CANAAN_ARTEFACTS_STATE','equipArtefact','unequipArtefact','toggleArtefact','showArtefactTooltip','drawArtefact']},
+  'canaan-arena':{private:['BOSSES','MOVES','HP_MULT','DMG_MULT','strike','tele','spawnBoss','onBossDown'],public:['CANAAN_ARENA','CANAAN_ARENA_STATE','enterArena','openArenaPortal']},
   'canaan-pixel-art':{private:['pixHash','PIX_COLORS','actorSprite','creatureSprite'],public:['PIXEL_TERRAIN','drawPixelMob','drawPixelRoads','drawHeroArt']},
   'canaan-monster-scaling':{private:['bossMaxHealth','setupMob','hpClock','instanceLevel'],public:['bossTier','scaleBossHp','canaanMobLevel','canaanSetupMob']},
   'canaan-progression':{private:['sharers','levelUp','SHARE'],public:['CANAAN_PROGRESSION','canaanKillXp','canaanGrantXp']},
@@ -210,26 +210,26 @@ test('Objet game : game.hero porte le héros, statistiques de n’importe quel h
  run('kills=5');assert.equal(run('game.hero.kills'),5);
  // Les effets d'affichage restent hors du monde simulé.
  assert.equal(run('"particles" in game.world||"floaters" in game.world'),false);
- // Classe, Rubis et records de l'Arène : état sauvegardé du héros dans game.hero, plus aucune copie dans les modules.
- for(const [file,names] of [['class-talents.js','classe|talents'],['rubis.js','owned|equipped'],['arena.js','state']])
+ // Classe, artéfacts et records de l'Arène : état sauvegardé du héros dans game.hero, plus aucune copie dans les modules.
+ for(const [file,names] of [['class-talents.js','classe|talents'],['arena-artefacts.js','ranks|equipped'],['arena.js','state']])
   assert.doesNotMatch(fs.readFileSync(path.join(dir,file),'utf8'),new RegExp('\\blet\\s+(?:'+names+')\\b'),file);
  run("game.hero.level=20;CANAAN_CLASS_STATE.import({id:'paladin',talents:[1,6]})");
  assert.equal(run('JSON.stringify(game.hero.classe)'),JSON.stringify({id:'paladin',talents:[1,6]}));
  assert.equal(JSON.stringify(run('CANAAN_CLASS.audit().talents')),'[1,6]');
- run("CANAAN_RUBIS_STATE.import({owned:{gardien:2,vampire:1},equipped:['gardien','vampire',null,null,null,null]})");
- assert.equal(run('game.hero.rubis.owned.gardien'),2);assert.equal(run('CANAAN_RUBIS.has("vampire")'),true);
- run('CANAAN_RUBIS.grant("tempete")');assert.equal(run('game.hero.rubis.owned.tempete'),1);
+ run("CANAAN_ARTEFACTS_STATE.import({ranks:{coeur_fer:2,croc_ombres:1},equipped:['coeur_fer','croc_ombres',null,null]})");
+ assert.equal(run('game.hero.artefacts.ranks.coeur_fer'),2);assert.equal(run('CANAAN_ARTEFACTS.equipped().includes("croc_ombres")'),true);
+ run('CANAAN_ARTEFACTS.grant(7)');assert.equal(run('game.hero.artefacts.ranks.oeil_tempetes'),1);
  run("CANAAN_ARENA_STATE.import({best:7,attempts:3,completed:false,lastBoss:'Zephiron'})");
  assert.equal(run('game.hero.arena.best+"/"+game.hero.arena.attempts'),'7/3');assert.equal(run('CANAAN_ARENA.state().lastBoss'),'Zephiron');
  // La sauvegarde lit ces mêmes états.
  const hero=JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.snapshot().heros.hote)'));
- assert.deepEqual(hero.classe,{id:'paladin',talents:[1,6]});assert.equal(hero.rubis.owned.tempete,1);assert.equal(hero.arena.best,7);assert.equal(run('equipment===game.hero.equipment&&inventory===game.hero.inventory'),true);
+ assert.deepEqual(hero.classe,{id:'paladin',talents:[1,6]});assert.equal(hero.artefacts.ranks.oeil_tempetes,1);assert.equal(hero.arena.best,7);assert.equal(run('equipment===game.hero.equipment&&inventory===game.hero.inventory'),true);
  // Remplacer par l'ancien nom met à jour game.hero (sauvegarde, tests et anciens scripts).
  run('inventory=[{id:"z",slot:"ring",level:5}]');assert.equal(run('game.hero.inventory[0].id'),'z');
- // Statistiques d'un autre héros : son équipement seul, sans la classe ni les Rubis de l'hôte.
+ // Statistiques d'un autre héros : son équipement seul, sans la classe ni les artéfacts de l'hôte.
  run('equipment={...Object.fromEntries(Object.keys(gearSlots).map(k=>[k,null]))}');
  const host=run('characterStats().maxHp');
- run('globalThis.ally={level:40,player:{},inventory:[],equipment:{...Object.fromEntries(Object.keys(gearSlots).map(k=>[k,{id:"a"+k,slot:k==="weapon2"?"weapon":k,level:40,rarity:"Héroïque",weaponType:"bow"}]))}}');
+ run('globalThis.ally={level:40,player:{},inventory:[],equipment:{...Object.fromEntries(Object.keys(gearSlots).map(k=>[k,{id:"a"+k,slot:itemSlotOf(k),level:40,rarity:"Héroïque",weaponType:"bow"}]))}}');
  assert.ok(run('characterStats(ally).maxHp')>host);assert.equal(run('characterStats().maxHp'),host);
  assert.equal(run('characterStats(ally).level'),40);assert.ok(run('characterStats(ally).primary.vitality')>0);
  assert.equal(errors.length,0,errors.join('\n'));

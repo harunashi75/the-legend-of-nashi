@@ -7,7 +7,7 @@ export const MAX_LEVEL = 60;
 // Niveau d'objet le plus haut : les pièces Mythiques de Valérion (extension 1) sont de niveau 63. Un objet au-delà du
 // niveau maximal du personnage ne demande que le niveau 60 (requiredLevel).
 export const MAX_ITEM_LEVEL = 63;
-// Trois statistiques principales, données par chaque équipement classique (pas l'artéfact).
+// Trois statistiques principales, données par chaque équipement.
 export const PRIMARY_STATS = deepFreeze({
   attack: {
     icon: '⟦st_attack⟧',

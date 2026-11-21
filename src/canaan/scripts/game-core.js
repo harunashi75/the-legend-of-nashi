@@ -159,7 +159,7 @@ const CANAAN_REGEN = Object.freeze({
   healthPercent: 0.01,
   healthCombat: 0.25
 });
-function canaanRegenRates(fighting = CANAAN_RUBIS.inCombat(), player = P) {
+function canaanRegenRates(fighting = CANAAN_ARTEFACTS.inCombat(), player = P) {
   const health = CANAAN_REGEN.health + player.mhp * CANAAN_REGEN.healthPercent;
   return {
     mana: fighting ? CANAAN_REGEN.manaCombat : CANAAN_REGEN.mana,
@@ -863,7 +863,7 @@ function readInput() {
 // Un pas de simulation du héros, des monstres, des projectiles et des butins.
 // Aucun accès à l'écran : les messages passent par game.view, l'affichage se fait dans updateView().
 // Déplacement et régénération d'un héros selon son intention, à sa propre vitesse.
-// L'hôte garde son étourdissement, son état de combat (Rubis) et la malédiction des soins de l'Arène.
+// L'hôte garde son étourdissement, son état de combat (artéfacts) et la malédiction des soins de l'Arène.
 function stepHero(hero) {
   const p = hero.player,
     host = hero === game.hero;
@@ -897,8 +897,8 @@ function stepHero(hero) {
     ny = p.y + dy * sp;
   if (canWalk(nx, p.y, true)) p.x = nx;
   if (canWalk(p.x, ny, true)) p.y = ny;
-  // Régénération : un héros est en combat 5 s après son dernier coup donné ou reçu (Rubis compris).
-  const fighting = CANAAN_RUBIS.inCombat(hero),
+  // Régénération : un héros est en combat 5 s après son dernier coup donné ou reçu (artéfacts compris).
+  const fighting = CANAAN_ARTEFACTS.inCombat(hero),
     regen = canaanRegenRates(fighting, p);
   p.mp = Math.min(p.mmp, p.mp + regen.mana / 60);
   p.hp = Math.min(p.mhp, p.hp + (regen.health / 60) * CANAAN_ARENA.healFactor(hero));
@@ -921,7 +921,7 @@ function nearestHero(m) {
   return best;
 }
 // Coup reçu par un allié : réduction par ses propres statistiques (règle partagée), sans effet de l'hôte.
-// Coup d'un monstre sur un allié : même moteur que pour l'hôte (roulade, déviation, postures, talents, Rubis).
+// Coup d'un monstre sur un allié : même moteur que pour l'hôte (roulade, déviation, postures, talents, artéfacts).
 function hurtAlly(hero, m) {
   return CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(m, null, {}, hero), m, hero);
 }

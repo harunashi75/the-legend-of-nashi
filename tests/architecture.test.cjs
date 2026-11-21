@@ -97,12 +97,17 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   assert.equal(counters.saves,3);assert.equal(counters.stats,3);assert.equal(counters.bars,2);assert.equal(run('P.mp'),7);
   run("unequip('weapon')");assert.equal(counters.saves,4);assert.equal(counters.stats,4);assert.equal(counters.bars,3);
   assert.equal(run('equipment.weapon'),null);
-  // Les info-bulles des statistiques et les passifs d'artefacts utilisent leurs services directs.
-  run("inventory.push({id:'artifact-test',name:'Relique',slot:'artifact',artifactVariant:0,rarity:'Commun',ilvl:10});showGearTooltip(inventory.length-1,{clientX:1,clientY:1})");
+  // Deux bagues : la première va dans la Bague 1, la suivante dans la Bague 2 ; l'info-bulle compare une nouvelle bague
+  // à celle qu'elle remplacerait.
+  run("inventory.push({id:'ring-a',name:'A',slot:'ring',rarity:'Commun',level:1},{id:'ring-b',name:'B',slot:'ring',rarity:'Commun',level:1},{id:'ring-c',name:'C',slot:'ring',rarity:'Rare',level:1})");
+  run("equipItem('ring-a');equipItem('ring-b')");
+  assert.equal(run('equipment.ring.id'),'ring-a');assert.equal(run('equipment.ring2.id'),'ring-b');
+  assert.equal(run("wornAgainst(inventory.find(it=>it.id==='ring-c')).id"),'ring-a');
+  run("equipItem('ring-c',game.hero,'ring2')");assert.equal(run('equipment.ring2.id'),'ring-c');
+  assert.ok(run("inventory.some(it=>it.id==='ring-b')"),'la bague remplacée revient au sac');
+  run("showGearTooltip(inventory.findIndex(it=>it.id==='ring-b'),{clientX:1,clientY:1})");
   assert.ok(nodes.get('gearHoverTooltip')===undefined); // L'infobulle est créée par createElement.
-  assert.ok(run("gearTooltip.innerHTML.includes('PASSIF')"));
-  assert.ok(run("gearStat(inventory[inventory.length-1]).includes('Ardeur')"));
-  assert.ok(run("gearComparison(inventory[inventory.length-1],null).includes('Comparaison des passifs')"));
+  assert.ok(run("gearTooltip.innerHTML.includes('Comparaison')"));
   run("showGearTooltip(0,{clientX:1,clientY:1})");assert.ok(run("gearTooltip.innerHTML.includes('Attaque')&&gearTooltip.innerHTML.includes('Niveau requis')"));
   run("closePanels()");assert.equal(run('gearTooltip.style.display'),'none');
   // Échecs sans effet de bord : objet absent, sac plein, vente périmée ou refusée.
@@ -160,13 +165,13 @@ test('Dépendances obligatoires : pas de garde optionnelle ni de fallback de mod
 
 test('Modules réellement absents : une erreur agrégée visible et aucun démarrage ni sauvegarde',()=>{
   let broken=source;
-  for(const id of ['canaan-stats','canaan-gear-engine','canaan-artifacts']){
+  for(const id of ['canaan-stats','canaan-gear-engine','canaan-artefacts']){
     const pattern=new RegExp('(<script\\b[^>]*id="'+id+'"[^>]*>)[\\s\\S]*?(</script>)');
     assert.ok(pattern.test(broken),id);broken=broken.replace(pattern,'$1\n$2');
   }
   const {g,nodes,errors,run}=require('./helpers/canaan-runtime.cjs')(broken);
   assert.equal(errors.length,1,errors.join('\n'));
-  for(const name of ['CANAAN_STATS_PREPARE','CANAAN_GEAR_ENGINE.normalize','CANAAN_ARTIFACT_STATS']){
+  for(const name of ['CANAAN_STATS_PREPARE','CANAAN_GEAR_ENGINE.normalize','CANAAN_ARTEFACTS.stats']){
     assert.ok(g.CANAAN_BOOT_ERROR.includes(name),name);
   }
   assert.equal(g.CANAAN_READY,false);assert.equal(run('started'),false);assert.equal(run('canaanLastFrame'),null);
@@ -291,7 +296,7 @@ test('Surcharges consolidées : une seule définition et comportements fusionné
  for(const m of scripts)assert.doesNotMatch(m[2],/titre historique neutralisé|ancienne capture supprimée|origine ligne|\/\/\s*(?:=+\s*)?(?:CANAAN\s+)?V?1\.\d+(?:\.\d+)+\s*[—:-]/,m[1]);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.equal(run("ARTIFACT_BUFFS.map(a=>a.name).join()"),'Ardeur,Bastion,Instinct');
+ assert.equal(run("ARTEFACTS.map(a=>a.wave).join()"),'1,2,3,4,5,6,7,8,9,10,11,12');
  // Un marchand par village, et le dialogue ouvre la boutique.
  assert.equal(run("villages.every(v=>npcs.filter(n=>n.type==='shop'&&n.village===v.name).length===1)"),true);
  // L'arme de réserve ne compte pas dans les statistiques.
@@ -321,7 +326,7 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
  assert.doesNotMatch(source,/const\s+\w+\s*=\s*(?:window\.)?CanaanStages\.\w+\s*;/);
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','summons','dodge','basicAttack','rubis','arena','professions','quests','dungeonPuzzles','elvenCity','bossMechanics','extensions','achievements']);
+ assert.deepEqual([...run('CANAAN_PIPELINE.update')],['companions','weaponEffects','mobScaling','bossScaling','weaponVfx','facing','classes','summons','dodge','basicAttack','artefacts','arena','professions','quests','dungeonPuzzles','elvenCity','bossMechanics','extensions','achievements']);
  // Les vraies étapes tournent sur une partie chargée.
  run('started=true;paused=false;P.dead=false');
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline();updateWorld()');
@@ -333,9 +338,9 @@ test('Pipeline : étapes déclarées, ordre imbriqué conservé, garde de pause 
   after:s.after&&(state=>calls.push('after:'+name+(state===undefined?'':'='+state)))}}
   update=()=>calls.push('core');draw=()=>calls.push('draw');CanaanStages.drawWeaponEffects=()=>calls.push('drawWeaponEffects')`);
  run('runUpdatePipeline();runDrawPipeline()');
- assert.deepEqual(calls,['before:rubis','before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
+ assert.deepEqual(calls,['before:classes','before:weaponVfx','before:bossScaling','before:weaponEffects','before:companions','core',
   'after:weaponEffects=weaponEffects','after:mobScaling','after:weaponVfx=weaponVfx','after:facing','after:classes=classes','after:summons',
-  'after:dodge','after:basicAttack','after:rubis=rubis','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:elvenCity','after:bossMechanics','after:extensions','after:achievements','draw','drawWeaponEffects']);
+  'after:dodge','after:basicAttack','after:artefacts','after:arena','after:professions','after:quests','after:dungeonPuzzles','after:elvenCity','after:bossMechanics','after:extensions','after:achievements','draw','drawWeaponEffects']);
  for(const state of ['paused=true','paused=false;P.dead=true','P.dead=false;started=false']){
   calls.length=0;run(state+';runUpdatePipeline()');assert.deepEqual(calls,[],state);
  }

@@ -4,115 +4,122 @@ const {
   source
 } = require('./helpers/context.cjs');
 
-test('Rubis : 48 effets en six familles, six emplacements, collection, verrous et fiche du personnage',()=>{
+test('Artéfacts de l’Arène : douze artéfacts, un par boss, rangs 1 à 5, quatre emplacements, verrous et fiche du personnage',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));assert.equal(g.CANAAN_READY,true);
- const list=JSON.parse(run('JSON.stringify(CANAAN_RUBIS.list)'));
- assert.equal(list.length,48);assert.equal(new Set(list.map(r=>r.id)).size,48);
- for(let f=0;f<6;f++)assert.equal(list.filter(r=>r.family===f).length,8,'famille '+f);
- assert.deepEqual([list[0].name,list[15].name,list[23].name,list[31].name,list[39].name,list[47].name],['Berserker','Second souffle','Communion','Résonance','Élan','Transcendance']);
+ const list=JSON.parse(run('JSON.stringify(CANAAN_ARTEFACTS.list)'));
+ assert.equal(list.length,12);assert.equal(new Set(list.map(a=>a.id)).size,12);
+ assert.deepEqual(list.map(a=>a.wave),[1,2,3,4,5,6,7,8,9,10,11,12],'un artéfact par boss, dans l’ordre des vagues');
+ assert.deepEqual([list[0].name,list[11].name],['Cœur de Fer','Couronne du Souverain']);
+ for(const a of list){
+  assert.equal(a.n.length,5,a.id);assert.ok(a.n.every((v,k)=>!k||v>=a.n[k-1]),'chaque rang renforce '+a.id);
+  assert.ok(!a.desc.includes('{m}')||a.m.length===5,a.id);
+ }
+ assert.equal(run('CANAAN_ARTEFACTS.slots'),4);assert.equal(run('CANAAN_ARTEFACTS.maxRank'),5);
  run('started=true;paused=false;P.dead=false;time=10000');
- // Un Rubis non possédé ne s'équipe pas ; doublons interdits ; six emplacements au plus.
- assert.equal(run("equipRubis('berserker')"),false);
- run("for(const r of CANAAN_RUBIS.list)CANAAN_RUBIS.grant(r.id)");
- assert.equal(run('CANAAN_RUBIS.discovered()'),48);
- for(const id of ['berserker','colosse','meditation','tempete','voyageur','phenix'])assert.equal(run("equipRubis('"+id+"')"),true,id);
- assert.equal(run("equipRubis('berserker')"),false);assert.equal(run("equipRubis('pacte')"),false);
- assert.equal(run("unequipRubis(0)"),true);assert.equal(run("equipRubis('pacte')"),true);
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_RUBIS.equipped())')),['pacte','colosse','meditation','tempete','voyageur','phenix']);
+ // Un artéfact non possédé ne s'équipe pas.
+ assert.equal(run("equipArtefact('coeur_fer')"),false);
+ // Le boss de la vague 1 donne le Cœur de Fer ; chaque doublon le fait monter d'un rang ; au rang 5, de l'or.
+ let got=JSON.parse(run('JSON.stringify(CANAAN_ARTEFACTS.grant(1))'));
+ assert.deepEqual([got.artefact.id,got.rank,got.fresh,got.gold],['coeur_fer',1,true,0]);
+ for(let k=2;k<=5;k++){got=JSON.parse(run('JSON.stringify(CANAAN_ARTEFACTS.grant(1))'));assert.deepEqual([got.rank,got.fresh,got.gold],[k,false,0])}
+ const gold0=run('P.gold');got=JSON.parse(run('JSON.stringify(CANAAN_ARTEFACTS.grant(1))'));
+ assert.equal(got.gold,run('artefactMaxedGold(1)'));assert.equal(run('P.gold'),gold0+got.gold);assert.equal(run("CANAAN_ARTEFACTS.rank('coeur_fer')"),5);
+ run('for(let w=2;w<=12;w++)CANAAN_ARTEFACTS.grant(w)');assert.equal(run('CANAAN_ARTEFACTS.owned().length'),12);
+ // Quatre emplacements, jamais deux fois le même.
+ for(const id of ['coeur_fer','pierre_colosse','sceau_executeur','couronne_souverain'])assert.equal(run("equipArtefact('"+id+"')"),true,id);
+ assert.equal(run("equipArtefact('voile_neant')"),false);assert.equal(run("equipArtefact('coeur_fer')"),false);
+ assert.equal(run('unequipArtefact(0)'),true);assert.equal(run("equipArtefact('voile_neant')"),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARTEFACTS.equipped())')),['voile_neant','pierre_colosse','sceau_executeur','couronne_souverain']);
  // Hors combat seulement, et jamais pendant une tentative de l'Arène.
- run("CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:0,y:0},10)");
- assert.equal(run("unequipRubis(1)"),false);
- run('time+=600');assert.equal(run("unequipRubis(1)"),true);
- run("instanceState={index:'arena',arena:true}");assert.equal(run("equipRubis('colosse')"),false);run('instanceState=null');
- // Gain : priorité aux Rubis manquants, un doublon reste dans la collection.
- run("CANAAN_RUBIS_STATE.import({owned:{berserker:1},equipped:['berserker','inconnu','berserker',null,null,null]})");
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_RUBIS.equipped())')),['berserker',null,null,null,null,null]);
- const fresh=JSON.parse(run('JSON.stringify(Array.from({length:47},()=>CANAAN_RUBIS.grant()).map(x=>x.fresh))'));
- assert.ok(fresh.every(Boolean));assert.equal(run('CANAAN_RUBIS.discovered()'),48);
- // Doublon nommé (non équipé) : un doublon tiré au hasard tombait une fois sur 48 sur le Rubis équipé, qui passait alors dans le sac.
- assert.equal(run('CANAAN_RUBIS.grant("colosse").fresh'),false);
- // Fiche du personnage : onglet Équipement sans Rubis ; onglet Rubis avec les six emplacements autour du héros,
- // leurs effets et la collection des 48 (un clic équipe ou retire).
+ run("CANAAN_ARTEFACTS.attackBefore({hp:9,mhp:9,x:0,y:0},10)");assert.equal(run('unequipArtefact(1)'),false);
+ run('time+=600');assert.equal(run('unequipArtefact(1)'),true);
+ run("instanceState={index:'arena',arena:true}");assert.equal(run("equipArtefact('pierre_colosse')"),false);run('instanceState=null');
+ // Données non fiables : rangs bornés, artéfacts inconnus ou non possédés retirés, jamais deux fois le même.
+ run("CANAAN_ARTEFACTS_STATE.import({ranks:{coeur_fer:9,inconnu:2,croc_ombres:0},equipped:['coeur_fer','inconnu','coeur_fer','croc_ombres']})");
+ assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.artefacts)')),{ranks:{coeur_fer:5},equipped:['coeur_fer',null,null,null]});
+ run("CANAAN_ARTEFACTS_STATE.import({ranks:Object.fromEntries(CANAAN_ARTEFACTS.list.map(a=>[a.id,3])),equipped:['coeur_fer','croc_ombres',null,null]})");
+ // Fiche du personnage : plus d'onglet Runes ; la seconde bague à la place de l'artéfact ; sous le héros, les quatre
+ // emplacements d'artéfacts puis la collection des douze.
  run('renderCharacter()');let html=g.document.getElementById('window').innerHTML;
- assert.match(html,/data-action="characterSection" data-tab="rubis"/);
- assert.equal((html.match(/class="rune-slot /g)||[]).length,0,'les Rubis ont leur onglet');
- run('canaanCharacterSection("rubis")');html=g.document.getElementById('window').innerHTML;
- assert.equal((html.match(/class="rune-slot /g)||[]).length,6);
- assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
- // L'emplacement montre l'effet de sa Rune (plus de liste d'effets à part).
- assert.match(html,/class="rune-slot filled"[^>]*data-rubis="berserker"[\s\S]*Berserker<\/b><span>\+15 %/);
- assert.match(html,/data-action="toggleRubis" data-rubis="colosse" data-menu="rune"/);
- // Filtre par famille : ses huit Runes en cartes nommées ; « Toutes » revient aux 48.
- run('CANAAN_RUBIS.family(1)');html=g.document.getElementById('window').innerHTML;
- assert.equal((html.match(/class="rubis-cell [^"]*named/g)||[]).length,8);assert.match(html,/<em>Colosse<\/em>/);
- run('CANAAN_RUBIS.family(-1)');html=g.document.getElementById('window').innerHTML;
- assert.equal((html.match(/class="rubis-cell /g)||[]).length,48);
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"rune",rubis:"berserker"}}))')),['Retirer']);
- // Les Rubis ne sont plus dans le sac (I) et n'y prennent pas de place ; ils restent des piles (banque, échange).
- assert.equal(run('CANAAN_BAG.tiles(game.hero,"rubis").length'),run('48-game.hero.rubis.equipped.filter(Boolean).length'));
- assert.equal(run('CANAAN_BAG.tiles(game.hero,"main").filter(p=>p.kind==="rubis").length'),0);
- assert.equal(run('CANAAN_BAG.room(game.hero,"rubis","colosse",0,500)'),true);
- run('renderInventory()');assert.equal((g.document.getElementById('window').innerHTML.match(/data-tooltip-stack="rubis:/g)||[]).length,0,'plus de Rubis dans le sac');
- run('canaanCharacterSection("gear")');
- run("showRubisTooltip('tempete',{clientX:0,clientY:0})");
- assert.match(g.gearTooltip?.innerHTML||run('gearTooltip.innerHTML'),/Tempête[\s\S]*15 %/);
- // Sauvegarde : Rubis et records de l'Arène dans l'instantané.
+ assert.doesNotMatch(html,/data-tab="rubis"/);assert.doesNotMatch(html,/data-tooltip-slot="artifact"/);
+ assert.match(html,/data-tooltip-slot="ring"[\s\S]*data-tooltip-slot="ring2"/);
+ assert.match(html,/character-doll[\s\S]*class="rpg-paper art-paper"/);
+ assert.equal((html.match(/class="art-slot[ "]/g)||[]).length,4);
+ assert.equal((html.match(/class="art-cell[ "]/g)||[]).length,12);
+ assert.match(html,/data-action="unequipArtefact" data-slot="0" data-menu="artefact" data-artefact="coeur_fer"/);
+ assert.match(html,/data-action="toggleArtefact" data-artefact="pierre_colosse"/);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"artefact",artefact:"coeur_fer"}}))')),['Retirer']);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"artefact",artefact:"pierre_colosse"}}))')),['Équiper']);
+ // Info-bulle : effet au rang actuel et au rang suivant.
+ run("showArtefactTooltip('coeur_fer',{clientX:0,clientY:0})");
+ assert.match(run('gearTooltip.innerHTML'),/Rang III[\s\S]*Dégâts reçus −19 %[\s\S]*Rang IV :<\/b> Dégâts reçus −21 %/);
+ // Barre des effets : chaque artéfact équipé, avec son effet au rang du héros.
+ assert.ok(run('CANAAN_BUFF_BAR.list().some(e=>e.name==="Cœur de Fer"&&e.text.includes("−19 %"))'));
+ // Plus aucune Rune : ni dans le sac, ni dans les piles reconnues.
+ assert.equal(run('CANAAN_BAG.parse("rubis:phenix:0*1")'),null);
+ // Sauvegarde : artéfacts et records de l'Arène dans l'instantané, plus de Runes.
  const snap=JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.snapshot())'));
- assert.equal(snap.schema,10);assert.equal(Object.keys(snap.heros.hote.rubis.owned).length,48);assert.ok('best' in snap.heros.hote.arena);
+ assert.equal(snap.schema,10);assert.equal(snap.heros.hote.artefacts.ranks.coeur_fer,3);assert.ok(!('rubis' in snap.heros.hote));
+ assert.ok('best' in snap.heros.hote.arena);
+ // Anciennes sauvegardes : chaque Rune (collection et banque) et chaque ancien objet artéfact sont rendus en or.
+ const refund=JSON.parse(run(`JSON.stringify(CANAAN_ARTEFACTS.legacyRefund({rubis:{owned:{berserker:2,phenix:1}},
+  bank:{items:[{id:'b1',slot:'artifact',level:10,rarity:'Rare'}],stacks:{'rubis:colosse:0':1}},
+  inventory:[{id:'i1',slot:'artifact',level:10,rarity:'Rare'},{id:'i2',slot:'helm',level:10,rarity:'Rare'}],
+  equipment:{artifact:{id:'e1',slot:'artifact',level:10,rarity:'Rare'}}}))`));
+ assert.equal(refund.runes,4);assert.equal(refund.items,3);
+ assert.equal(refund.gold,4*run('LEGACY_RUNE_GOLD')+3*run("gearSellValue({slot:'ring',level:10,rarity:'Rare'})"));
 });
 
-test('Rubis : effets en combat, survie aux coups fatals, soins, mana et utilitaires',()=>{
+test('Artéfacts : effets en combat, au rang du héros',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
- run('started=true;paused=false;P.dead=false;time=10000;for(const r of CANAAN_RUBIS.list)CANAAN_RUBIS.grant(r.id)');
- const wear=ids=>run("CANAAN_RUBIS_STATE.import({owned:Object.fromEntries(CANAAN_RUBIS.list.map(r=>[r.id,1])),equipped:"+JSON.stringify([...ids,...Array(6-ids.length).fill(null)])+"});recomputeStats()");
- wear([]);const hp0=run('characterStats().maxHp'),speed0=run('characterStats().speed');
- const def0=run('characterStats().defense');
- wear(['colosse']);assert.equal(run('characterStats().maxHp'),Math.round(hp0*1.1));assert.equal(run('characterStats().defense'),Math.round(def0*1.1));assert.equal(run('characterStats().speed'),speed0);
- // Voyageur : +10 % de vitesse, en combat comme hors combat.
- wear(['voyageur']);assert.equal(run('characterStats().speed'),speed0+10);run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},1)');assert.equal(run('CANAAN_RUBIS.inCombat()'),true);assert.equal(run('characterStats().speed'),speed0+10);run('time+=600');
- wear(['pacte']);assert.equal(run('characterStats().maxHp'),Math.round(hp0*0.88));
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},100)')-118)<1e-9);
- wear(['berserker','chasseur','dernier_souffle']);run('P.hp=P.mhp');
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999,elite:true},100)')-115)<1e-9);
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999,boss:true},100)')-115)<1e-9);
- run('P.hp=P.mhp*0.2');assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore({hp:2,mhp:9,x:9999,y:9999},100)')-115*1.2)<1e-9);
- wear(['briseur','precision','tresorier','volonte','arcane','endurance']);
- assert.deepEqual(JSON.parse(run('JSON.stringify([CANAAN_RUBIS.armorFactor(),CANAAN_RUBIS.critFactor(),CANAAN_RUBIS.goldFactor(),CANAAN_RUBIS.manaCost(100),CANAAN_RUBIS.dodgeCooldownFactor()])')),[0.92,1.12,1.15,90,0.85]);
- // Prospecteur : 15 % de chances d'un meilleur objet sur un mob ordinaire.
- wear(['prospecteur']);assert.equal(run('Math.random=()=>0.14;CANAAN_RUBIS.betterDrop()'),true);assert.equal(run('Math.random=()=>0.16;CANAAN_RUBIS.betterDrop()'),false);
- wear([]);assert.equal(run('Math.random=()=>0;CANAAN_RUBIS.betterDrop()'),false);
- // Défense : Peau de pierre plafonne un coup à 25 % des PV max ; Gardien divise un coup par deux toutes les 12 s ;
- // Volonté de fer sous 50 % de PV.
- run('P.hp=P.mhp');
- wear(['peau_de_pierre']);assert.equal(run('CANAAN_RUBIS.defense({},P.mhp*0.2,{})'),run('P.mhp*0.2'));assert.equal(run('CANAAN_RUBIS.defense({},P.mhp,{magic:true})'),run('P.mhp*0.25'));
- wear(['gardien']);assert.equal(run('CANAAN_RUBIS.defense({},100)'),50);assert.equal(run('CANAAN_RUBIS.defense({},100)'),100);
- run('time+=12*60');assert.equal(run('CANAAN_RUBIS.defense({},100)'),50);
- wear(['volonte']);assert.equal(run('CANAAN_RUBIS.defense({},100)'),100);run('P.hp=P.mhp*0.4');assert.equal(run('CANAAN_RUBIS.defense({},100)'),85);run('P.hp=P.mhp');
- // Second souffle puis Phénix : une fois chacun par combat, puis la mort.
- wear(['second_souffle','phenix']);run('P.hp=50');
- assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.1)));
+ run('started=true;paused=false;P.dead=false;time=10000');
+ const wear=(ids,rank=1)=>run("CANAAN_ARTEFACTS_STATE.import({ranks:Object.fromEntries(CANAAN_ARTEFACTS.list.map(a=>[a.id,"+rank+"])),equipped:"+JSON.stringify([...ids,...Array(4-ids.length).fill(null)])+"});recomputeStats();P.hp=P.mhp");
+ const near=(a,b,msg)=>assert.ok(Math.abs(a-b)<1e-6,(msg||'')+' '+a+' ≠ '+b);
+ wear([]);const st0=JSON.parse(run('JSON.stringify(characterStats())'));
+ // Statistiques : Pierre du Colosse, Croc des Ombres, Couronne du Souverain ; le rang les renforce.
+ wear(['pierre_colosse']);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.25));
+ wear(['pierre_colosse'],5);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.4));
+ wear(['croc_ombres']);near(run('characterStats().crit'),st0.crit+12);
+ wear(['couronne_souverain']);assert.equal(run('characterStats().attack'),Math.round(st0.attack*1.1));
+ assert.equal(run('characterStats().defense'),Math.round(st0.defense*1.1));assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.1));
+ // Dégâts reçus : Cœur de Fer.
+ wear(['coeur_fer']);near(run('CANAAN_ARTEFACTS.defense({},100)'),85);wear(['coeur_fer'],5);near(run('CANAAN_ARTEFACTS.defense({},100)'),76);
+ // Écu du Déchu : une parade annule le coup et riposte.
+ run('globalThis.__m={t:"Cible",hp:100000,mhp:100000,x:P.x+30,y:P.y,level:1,r:14};monsters.push(__m)');
+ wear(['ecu_dechu']);run('Math.random=()=>0.1');assert.equal(run('CANAAN_ARTEFACTS.defense(__m,100)'),0);assert.ok(run('__m.hp')<100000,'riposte');
+ run('Math.random=()=>0.9');assert.equal(run('CANAAN_ARTEFACTS.defense(__m,100)'),100);
+ // Sceau de l'Exécuteur : +40 % sous 35 % des PV de la cible.
+ wear(['sceau_executeur']);near(run('CANAAN_ARTEFACTS.attackBefore({hp:30,mhp:100},100)'),140);near(run('CANAAN_ARTEFACTS.attackBefore({hp:50,mhp:100},100)'),100);
+ // Voile du Néant : roulade plus courte, puis +30 % de dégâts pendant 3 s.
+ wear(['voile_neant']);near(run('CANAAN_ARTEFACTS.dodgeCooldownFactor()'),0.6);
+ run('CANAAN_ARTEFACTS.onDodge()');near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100)'),130);
+ run('time+=200');near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100)'),100);
+ // Cœur de Cendres : compétences plus fortes et recharges plus courtes.
+ wear(['coeur_cendres']);near(run('CANAAN_ARTEFACTS.cooldownFactor()'),0.85);near(run('CANAAN_ARTEFACTS.onCast("sword",0,"sword:0",{multiplier:1}).multiplier'),1.2);
+ // Fiole des Brumes : soins reçus +30 % ; hors combat, 3 % des PV max par seconde.
+ wear(['fiole_brumes']);near(run('CANAAN_ARTEFACTS.healFactor(false)'),1.3);
+ run('time+=600;P.hp=1');for(let i=0;i<60;i++)run('time++;CanaanStages.artefacts.after()');
+ near(run('P.hp'),1+run('P.mhp')*0.03,'régénération');
+ // Prisme de Cristal : un bouclier de 15 % des PV max, rechargé toutes les 20 s.
+ wear(['prisme_cristal']);run('time++;CanaanStages.artefacts.after()');const shield=run('P.mhp*0.15');
+ near(run('CANAAN_ARTEFACTS.defense({},1e6)'),1e6-shield);near(run('CANAAN_ARTEFACTS.defense({},100)'),100);
+ assert.ok(run('CANAAN_ARTEFACTS.auras().every(a=>a.id!=="prisme_cristal")'),'bouclier épuisé');
+ // Écaille Écarlate et Croc des Ombres : brûlure et saignement, réglés par le héros qui les pose, en 4 s.
+ run('monsters.length=0;globalThis.__m={t:"Cible",hp:100000,mhp:100000,x:P.x+30,y:P.y,level:1,r:14};monsters.push(__m)');
+ wear(['ecaille_ecarlate','croc_ombres']);run('__m._lastCrit=true;CANAAN_ARTEFACTS.attackAfter(__m,100)');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__m._artDots.map(d=>[d.kind,d.dps]))')),[['bleed',7.5],['burn',5]]);
+ const hp1=run('__m.hp');for(let i=0;i<60*4+2;i++)run('time++;CanaanStages.artefacts.after()');
+ assert.ok(run('__m.hp')<hp1,'les effets blessent');assert.equal(run('__m._artDots.length'),0,'puis s’arrêtent');
+ // Œil des Tempêtes : un éclair frappe la cible et deux ennemis proches.
+ run('monsters.length=0;globalThis.__ms=[0,1,2,3].map(k=>({t:"Cible",hp:100000,mhp:100000,x:P.x+30+k*20,y:P.y,level:1,r:14}));monsters.push(...__ms)');
+ wear(['oeil_tempetes']);run('Math.random=()=>0;CANAAN_ARTEFACTS.attackAfter(__ms[0],1000);Math.random=()=>0.9');
+ assert.equal(run('__ms.filter(m=>m.hp<100000).length'),3,'cible et deux voisins');
+ // Couronne du Souverain : un coup fatal laisse à 20 % des PV, une fois toutes les 90 s.
+ wear(['couronne_souverain']);run('P.hp=50');
  assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.2)));
  assert.ok(run('canaanHurtPlayer(9999,null)')>0);assert.ok(run('P.hp')<=0);
- // Soins : Guérisseur pour les soins directs, Source vitale pour tous ; Bénédiction : le soin en trop devient un bouclier.
- wear(['guerisseur','source_vitale','benediction']);run('P.dead=false;P.mhp=10000;P.hp=1');
- assert.ok(Math.abs(run('canaanApplyHeal(100,true)')-120)<1e-9);run('P.hp=1');
- const direct=run('canaanApplyHeal(100)');assert.ok(direct>=Math.round(100*1.15*1.2)-1,String(direct));
- run('P.hp=P.mhp-10;canaanApplyHeal(200)');assert.ok(run('CANAAN_RUBIS.auras().some(a=>a.id==="benediction")'),'bouclier de la Bénédiction');
- run('canaanApplyHeal(5000)');assert.equal(run('CANAAN_RUBIS.defense({},5000)'),5000-run('P.mhp')*0.1,'bouclier plafonné à 10 % des PV max');
- // Régénération : 1 % des PV max toutes les 3 s, même en combat.
- wear(['regeneration']);run('P.hp=1;CANAAN_RUBIS.attackBefore({hp:9,mhp:9,x:9999,y:9999},1)');
- for(let i=0;i<180;i++)run('time++;CanaanStages.rubis.after(new Map())');
- assert.ok(Math.abs(run('P.hp')-1-run('P.mhp')*0.01)<1e-6,String(run('P.hp')));run('time+=600');
- // Méditation et Symbiose : 3 % du mana toutes les 5 s, et des PV en retour.
- wear(['meditation','symbiose']);run('time+=600;P.mp=0;P.hp=1');const hpBefore=run('P.hp');
- for(let i=0;i<300;i++)run('time++;CanaanStages.rubis.after(new Map())');
- assert.ok(Math.abs(run('P.mp')-run('P.mmp')*0.03-300/60*0)<=run('P.mmp')*0.03+1e-9&&run('P.mp')>=run('P.mmp')*0.03-1e-9);
- assert.ok(run('P.hp')>hpBefore);
- // Explorateur : coffres secrets proches révélés sur la mini-carte.
- wear(['explorateur']);run('instanceState=null;openedChests=[];P.x=(hiddenChestSpots[0].x+2)*TS;P.y=hiddenChestSpots[0].y*TS');
- assert.ok(run('CANAAN_RUBIS.revealedChests().some(c=>c.id==="hidden_0")'));
 });
 
 test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompenses, records et sortie',()=>{
@@ -131,7 +138,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  assert.equal(audit.waves,12);assert.deepEqual(audit.missingMoves,[]);assert.equal(audit.ordered,true);assert.equal(audit.phases[11],3);
  // Aucun iLvl minimum : on entre avec iLvl 0, dans le colisée.
  run('started=true;paused=false;P.dead=false;time=1000;game.hero.level=1;recomputeStats();P.hp=P.mhp=1e6;openArenaPortal()');
- assert.match(g.document.getElementById('window').innerHTML,/Meilleure vague[\s\S]*Runes découvertes[\s\S]*Tentatives effectuées[\s\S]*Arène terminée[\s\S]*Dernier boss vaincu/);
+ assert.match(g.document.getElementById('window').innerHTML,/Meilleure vague[\s\S]*Artéfacts obtenus[\s\S]*Tentatives effectuées[\s\S]*Arène terminée[\s\S]*Dernier boss vaincu/);
  assert.equal(run('enterArena()'),true);assert.equal(run('instanceState.arena'),true);assert.equal(run('CANAAN_ARENA.state().attempts'),1);
  assert.equal(run('canWalk(P.x,P.y)'),true);assert.equal(run("CANAAN_ARENA.run().phase"),'enter');
  const tick=n=>{for(let i=0;i<n;i++)run('time++;runUpdatePipeline();P.hp=P.mhp')};
@@ -151,33 +158,31 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
   assert.equal(run("CANAAN_ARENA.playMove('"+name+"')"),true,name);tick(150);
  }
  assert.equal(errors.length,0,errors.join('\n'));
- // Victoire : 1 Rubis, +20 % PV et mana sans dépasser le maximum, herse ouverte, répit de 10 s.
+ // Victoire : l'artéfact du boss, +20 % PV et mana sans dépasser le maximum, herse ouverte, répit de 10 s.
  run('P.mhp=1000;P.hp=350;P.mmp=300;P.mp=100;{const b=CANAAN_ARENA.run().boss;b.shieldHp=0;b.parryUntil=0;b.immuneUntil=0;hit(b,1e9)}');
  assert.equal(run("CANAAN_ARENA.run().phase"),'rest');assert.equal(run('P.hp'),550);assert.equal(run('Math.round(P.mp)'),160);
- assert.equal(run('CANAAN_RUBIS.discovered()'),1);assert.equal(run('CANAAN_ARENA.state().best'),1);
+ assert.equal(run('CANAAN_ARTEFACTS.owned().length'),1);assert.equal(run("CANAAN_ARTEFACTS.rank('coeur_fer')"),1);assert.equal(run('CANAAN_ARENA.state().best'),1);
  assert.equal(run('CANAAN_ARENA.run().fx.length+CANAAN_ARENA.run().shots.length+CANAAN_ARENA.run().hazards.length'),0);
  assert.equal(run('monsters.some(m=>m.arenaClone)'),false);assert.equal(gate(),'20,20,20,20,20');
  // Équipement verrouillé pendant la tentative.
  run("inventory.push({id:'a1',slot:'ring',ilvl:5,rarity:'Commun'})");assert.equal(run("equipItem('a1')"),false);
- // Abandon entre les vagues : retour au monde, le Rubis reste acquis.
+ // Abandon entre les vagues : retour au monde, l'artéfact reste acquis.
  run('{const e=instanceEntrance;P.x=e.x;P.y=e.y;CANAAN_ARENA.interact()}');
- assert.equal(run('instanceState'),null);assert.equal(run('world'),run('overworld'));assert.equal(run('CANAAN_RUBIS.discovered()'),1);
- // Vague 12 : la victoire donne la récompense finale, un Rubis au choix parmi les manquants.
+ assert.equal(run('instanceState'),null);assert.equal(run('world'),run('overworld'));assert.equal(run('CANAAN_ARTEFACTS.owned().length'),1);
+ // Vague 12 : le Souverain vaincu donne sa Couronne.
  run('enterArena();{const r=CANAAN_ARENA.run(),L=arenaLayout();P.x=L.x;P.y=L.y+L.r*0.3;r.wave=12;r.phase="countdown";r.timer=0}');tick(2);
  assert.equal(run('CANAAN_ARENA.run().boss.mhp'),75000);assert.equal(run('CANAAN_ARENA.run().boss.def.phases.length'),3);
  assert.equal(run('CANAAN_ARENA.tempo(1)'),1);assert.ok(Math.abs(run('CANAAN_ARENA.tempo(12)')-0.758)<1e-9);
  run('{const b=CANAAN_ARENA.run().boss;b.shieldHp=0;b.parryUntil=0;b.immuneUntil=0;hit(b,1e9)}');
- assert.equal(run('CANAAN_ARENA.state().completed'),true);assert.equal(run('CANAAN_ARENA.state().pendingChoice'),true);
- const missing=run('CANAAN_RUBIS.missing()[0].id');
- assert.equal(run("claimArenaRubis('"+missing+"')"),true);assert.equal(run("claimArenaRubis('"+missing+"')"),false);
- assert.equal(run('CANAAN_RUBIS.discovered()'),3);
+ assert.equal(run('CANAAN_ARENA.state().completed'),true);assert.equal(run("CANAAN_ARTEFACTS.rank('couronne_souverain')"),1);
+ assert.equal(run('CANAAN_ARTEFACTS.owned().length'),2);
  // Une partie rechargée hors du colisée ne laisse ni combat ni malédiction en mémoire.
  run('{const r=CANAAN_ARENA.run();r.phase="fight";r.curseUntil=r.clock+60}instanceState=null');
  assert.equal(run('CANAAN_ARENA.fighting()'),false);assert.equal(run('CANAAN_ARENA.healFactor()'),1);
  run('world=overworld;time++;runUpdatePipeline()');assert.equal(run('CANAAN_ARENA.run()'),null);
 });
 
-test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relever un allié, un Rubis pour chacun, échec si tous tombent',()=>{
+test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relever un allié, un artéfact pour chacun, échec si tous tombent',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;globalThis.__toasts=[];toast=m=>__toasts.push(m);game.view.chat=()=>{};canaanRegenRates=()=>({mana:0,health:0});Math.random=()=>0.99');
  const gear=(w,tag)=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:48,rarity:"Mythique",weaponType:"'+w+'"}').join(',')+'}';
@@ -219,10 +224,10 @@ test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relev
  // Lina relève l'hôte.
  run('lina.player.x=P.x+20;lina.player.y=P.y');for(let i=0;i<60*3.2;i++)run('time++;simulateStep()');
  assert.equal(run('P.dead'),false,'l’hôte est relevé');
- // Boss vaincu : un Rubis et un record pour chacun ; un héros à terre se relève.
- run('oren.player.dead=true;oren.player.hp=0;globalThis.owned0=game.heroes.map(h=>Object.values(h.rubis.owned).reduce((a,b)=>a+b,0))');
+ // Boss vaincu : un artéfact (ou un rang) et un record pour chacun ; un héros à terre se relève.
+ run('oren.player.dead=true;oren.player.hp=0;globalThis.owned0=game.heroes.map(h=>Object.values(h.artefacts.ranks).reduce((a,b)=>a+b,0))');
  run('{const b=CANAAN_ARENA.run().boss;canaanDamageMonster(b,b.hp+1e6,game.hero)}');
- assert.equal(run('game.heroes.every((h,k)=>Object.values(h.rubis.owned).reduce((a,b)=>a+b,0)===owned0[k]+1)'),true,'un Rubis pour chaque héros');
+ assert.equal(run('game.heroes.every((h,k)=>Object.values(h.artefacts.ranks).reduce((a,b)=>a+b,0)===owned0[k]+1)'),true,'un artéfact pour chaque héros');
  assert.equal(run('game.heroes.every(h=>h.arena.best===1)'),true);assert.equal(run('oren.player.dead'),false,'relevé à la fin de la vague');
  // Tout le groupe à terre : la tentative échoue, retour au camp.
  run('CANAAN_ARENA.run().timer=0');for(let i=0;i<5;i++)run('time++;simulateStep()');
@@ -232,7 +237,7 @@ test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relev
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le boss et ses annonces, encaisse les zones et gagne son Rubis',async()=>{
+test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le boss et ses annonces, encaisse les zones et gagne son artéfact',async()=>{
  const {createRelay}=require('../relay/server.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -269,11 +274,11 @@ test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le b
   // Esquive possible (petite chance de base) : une seconde frappe, au même endroit.
   if(host.run(G+'.player.hp')>=hp0){host.run('{const b=CANAAN_ARENA.run().boss;'+G+'.player.x=b.x+40;'+G+'.player.y=b.y+50}');host.run('CANAAN_ARENA.playMove("slam")');await step(86)}
   assert.ok(host.run(G+'.player.hp')<hp0,'la zone touche aussi l’invité');
-  // Victoire : un Rubis pour l'invité, annoncé chez lui et rangé dans sa collection.
-  const owned0=guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)');
+  // Victoire : l'artéfact du boss pour l'invité, annoncé chez lui et rangé dans sa collection.
+  const owned0=guest.run('Object.values(game.hero.artefacts.ranks).reduce((a,b)=>a+b,0)');
   host.run('{const b=CANAAN_ARENA.run().boss;canaanDamageMonster(b,b.hp+1e6,game.hero)}');await step(12);
-  assert.ok(guest.run('__toasts.some(t=>t.startsWith("⟦rune⟧ Rune obtenue"))'),'Rune annoncée à l’invité');
-  assert.equal(guest.run('Object.values(game.hero.rubis.owned).reduce((a,b)=>a+b,0)'),owned0+1,'collection de l’invité');
+  assert.ok(guest.run('__toasts.some(t=>t.startsWith("🔮 Artéfact obtenu"))'),'artéfact annoncé à l’invité');
+  assert.equal(guest.run('Object.values(game.hero.artefacts.ranks).reduce((a,b)=>a+b,0)'),owned0+1,'collection de l’invité');
   assert.equal(guest.run('game.hero.arena.best'),1,'record de l’invité');
   assert.equal(guest.run('(([x,y])=>game.world.tiles[y][x])('+gate+')'),20,'herse rouverte');
   // Sortie : l'invité revient au monde avec l'hôte.

@@ -17,7 +17,7 @@ ACH_C15,Exécuteur silencieux,Vaincre 200 ennemis avec une arme de la famille Da
 ACH_C16,Bûcheron des âmes,Vaincre 200 ennemis avec une arme de la famille Hache.,Combat & armes,ACH_C16.png,ACH_C16_locked.png
 ACH_C17,Masse atomique,Vaincre 200 ennemis avec une arme de la famille Masse.,Combat & armes,ACH_C17.png,ACH_C17_locked.png
 ACH_C18,Surcharge arcanique,Vaincre 200 ennemis avec une arme de la famille Bâton arcanique.,Combat & armes,ACH_C18.png,ACH_C18_locked.png
-ACH_C19,Résilience de Phénix,Survivre à un coup fatal grâce à la Rune Phénix.,Combat & armes,ACH_C19.png,ACH_C19_locked.png
+ACH_C19,Résilience du Souverain,Survivre à un coup fatal grâce à la Couronne du Souverain.,Combat & armes,ACH_C19.png,ACH_C19_locked.png
 ACH_C20,Bourreau des cœurs,Vaincre un boss mondial moins de 30 secondes après le premier coup.,Combat & armes,ACH_C20.png,ACH_C20_locked.png
 ACH_E1,Le grand départ,Quitter le Camp de l’Aurore pour la première fois.,Exploration & aventure,ACH_E1.png,ACH_E1_locked.png
 ACH_E2,Promeneur solitaire,Marcher 10 km dans le monde ouvert (une case = 1 m).,Exploration & aventure,ACH_E2.png,ACH_E2_locked.png
@@ -56,29 +56,29 @@ ACH_P14,Pêcheur du dimanche,Pêcher ton tout premier poisson.,Économie & méti
 ACH_P15,Gros poisson,Pêcher un espadon ou un poisson-lune astral.,Économie & métiers,ACH_P15.png,ACH_P15_locked.png
 ACH_P16,Maître des profondeurs,Compléter la collection des poissons.,Économie & métiers,ACH_P16.png,ACH_P16_locked.png
 ACH_P17,Enchanteur débutant,Avoir une pièce d’équipement enchantée.,Économie & métiers,ACH_P17.png,ACH_P17_locked.png
-ACH_P18,Runes mystiques,Porter huit pièces enchantées (toutes sauf l’artéfact).,Économie & métiers,ACH_P18.png,ACH_P18_locked.png
+ACH_P18,Runes mystiques,Porter huit pièces enchantées.,Économie & métiers,ACH_P18.png,ACH_P18_locked.png
 ACH_P19,Chasseur de viande,Chasser 50 animaux.,Économie & métiers,ACH_P19.png,ACH_P19_locked.png
 ACH_P20,Le Philanthrope,Faire un échange avec un autre joueur.,Économie & métiers,ACH_P20.png,ACH_P20_locked.png
-ACH_M1,Éveil des pouvoirs,Atteindre le niveau 10.,"Magie, Runes & progression",ACH_M1.png,ACH_M1_locked.png
-ACH_M2,Force de l’âge,Atteindre le niveau 30.,"Magie, Runes & progression",ACH_M2.png,ACH_M2_locked.png
-ACH_M3,Transcendance totale,Atteindre le niveau maximum (60).,"Magie, Runes & progression",ACH_M3.png,ACH_M3_locked.png
-ACH_M4,Première Rune,Équiper ta première Rune.,"Magie, Runes & progression",ACH_M4.png,ACH_M4_locked.png
-ACH_M5,Collection de runes,Posséder 20 Runes différentes.,"Magie, Runes & progression",ACH_M5.png,ACH_M5_locked.png
-ACH_M6,Maître des runes,Posséder les 48 Runes.,"Magie, Runes & progression",ACH_M6.png,ACH_M6_locked.png
-ACH_M7,Puissance écarlate,Remplir tes six emplacements avec des Runes offensives.,"Magie, Runes & progression",ACH_M7.png,ACH_M7_locked.png
-ACH_M8,Forteresse impénétrable,Remplir tes six emplacements avec des Runes défensives.,"Magie, Runes & progression",ACH_M8.png,ACH_M8_locked.png
-ACH_M9,Bénédiction divine,Remplir tes six emplacements avec des Runes de soutien.,"Magie, Runes & progression",ACH_M9.png,ACH_M9_locked.png
-ACH_M10,Immortalité du Phénix,Être sauvé par la Rune Phénix en plein combat de boss.,"Magie, Runes & progression",ACH_M10.png,ACH_M10_locked.png
-ACH_M11,Spécialisation de classe,Choisir ta classe.,"Magie, Runes & progression",ACH_M11.png,ACH_M11_locked.png
-ACH_M12,Maître Druide,Remplir les cinq emplacements de talents en Druide.,"Magie, Runes & progression",ACH_M12.png,ACH_M12_locked.png
-ACH_M13,Paladin éternel,Remplir les cinq emplacements de talents en Paladin.,"Magie, Runes & progression",ACH_M13.png,ACH_M13_locked.png
-ACH_M14,Ombre mortelle,Remplir les cinq emplacements de talents en Assassin.,"Magie, Runes & progression",ACH_M14.png,ACH_M14_locked.png
-ACH_M15,Seigneur des Éléments,Remplir les cinq emplacements de talents en Élémentaliste.,"Magie, Runes & progression",ACH_M15.png,ACH_M15_locked.png
-ACH_M16,Toutes les voies,Jouer les quatre classes.,"Magie, Runes & progression",ACH_M16.png,ACH_M16_locked.png
-ACH_M17,Éclat légendaire,Obtenir un objet Légendaire.,"Magie, Runes & progression",ACH_M17.png,ACH_M17_locked.png
-ACH_M18,Mythe vivant,Obtenir un objet Mythique.,"Magie, Runes & progression",ACH_M18.png,ACH_M18_locked.png
-ACH_M19,Panoplie épique,Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).,"Magie, Runes & progression",ACH_M19.png,ACH_M19_locked.png
-ACH_M20,Collectionneur mythique,Porter huit pièces Mythiques (toutes sauf l’artéfact).,"Magie, Runes & progression",ACH_M20.png,ACH_M20_locked.png
+ACH_M1,Éveil des pouvoirs,Atteindre le niveau 10.,"Magie, artéfacts & progression",ACH_M1.png,ACH_M1_locked.png
+ACH_M2,Force de l’âge,Atteindre le niveau 30.,"Magie, artéfacts & progression",ACH_M2.png,ACH_M2_locked.png
+ACH_M3,Transcendance totale,Atteindre le niveau maximum (60).,"Magie, artéfacts & progression",ACH_M3.png,ACH_M3_locked.png
+ACH_M4,Premier artéfact,Équiper ton premier artéfact de l’Arène.,"Magie, artéfacts & progression",ACH_M4.png,ACH_M4_locked.png
+ACH_M5,Collectionneur d’artéfacts,Posséder 6 artéfacts différents.,"Magie, artéfacts & progression",ACH_M5.png,ACH_M5_locked.png
+ACH_M6,Maître des artéfacts,Posséder les 12 artéfacts de l’Arène.,"Magie, artéfacts & progression",ACH_M6.png,ACH_M6_locked.png
+ACH_M7,Artéfact parfait,Faire monter un artéfact au rang 5.,"Magie, artéfacts & progression",ACH_M7.png,ACH_M7_locked.png
+ACH_M8,Quatre reliques,Remplir tes quatre emplacements d’artéfacts.,"Magie, artéfacts & progression",ACH_M8.png,ACH_M8_locked.png
+ACH_M9,Arsenal du Souverain,Faire monter quatre artéfacts au rang 5.,"Magie, artéfacts & progression",ACH_M9.png,ACH_M9_locked.png
+ACH_M10,Immortalité du Souverain,Être sauvé par la Couronne du Souverain en plein combat de boss.,"Magie, artéfacts & progression",ACH_M10.png,ACH_M10_locked.png
+ACH_M11,Spécialisation de classe,Choisir ta classe.,"Magie, artéfacts & progression",ACH_M11.png,ACH_M11_locked.png
+ACH_M12,Maître Druide,Remplir les cinq emplacements de talents en Druide.,"Magie, artéfacts & progression",ACH_M12.png,ACH_M12_locked.png
+ACH_M13,Paladin éternel,Remplir les cinq emplacements de talents en Paladin.,"Magie, artéfacts & progression",ACH_M13.png,ACH_M13_locked.png
+ACH_M14,Ombre mortelle,Remplir les cinq emplacements de talents en Assassin.,"Magie, artéfacts & progression",ACH_M14.png,ACH_M14_locked.png
+ACH_M15,Seigneur des Éléments,Remplir les cinq emplacements de talents en Élémentaliste.,"Magie, artéfacts & progression",ACH_M15.png,ACH_M15_locked.png
+ACH_M16,Toutes les voies,Jouer les quatre classes.,"Magie, artéfacts & progression",ACH_M16.png,ACH_M16_locked.png
+ACH_M17,Éclat légendaire,Obtenir un objet Légendaire.,"Magie, artéfacts & progression",ACH_M17.png,ACH_M17_locked.png
+ACH_M18,Mythe vivant,Obtenir un objet Mythique.,"Magie, artéfacts & progression",ACH_M18.png,ACH_M18_locked.png
+ACH_M19,Panoplie épique,Porter huit pièces Épiques ou mieux.,"Magie, artéfacts & progression",ACH_M19.png,ACH_M19_locked.png
+ACH_M20,Collectionneur mythique,Porter huit pièces Mythiques.,"Magie, artéfacts & progression",ACH_M20.png,ACH_M20_locked.png
 ACH_D1,Entrée dans l’Arène,Tenter l’Arène des Épreuves.,Défis & Arène,ACH_D1.png,ACH_D1_locked.png
 ACH_D2,Gladiateur,Atteindre la vague 6 de l’Arène.,Défis & Arène,ACH_D2.png,ACH_D2_locked.png
 ACH_D3,Champion des champions,Vaincre les 12 vagues de l’Arène.,Défis & Arène,ACH_D3.png,ACH_D3_locked.png

@@ -35,7 +35,7 @@
     AIM_MEMORY_MS = 800;
   // Éléments qu'on peut atteindre dans les menus.
   const FOCUSABLE =
-    'button, [data-action], input:not([type="hidden"]), select, textarea, a[href], [data-tooltip-index], [data-tooltip-slot], [data-tooltip-stack], [data-tooltip-rubis], [data-tooltip-shop], [data-tooltip-trade], [data-tooltip-bank], [data-tooltip-satchel], [data-skill], [tabindex]:not([tabindex="-1"])';
+    'button, [data-action], input:not([type="hidden"]), select, textarea, a[href], [data-tooltip-index], [data-tooltip-slot], [data-tooltip-stack], [data-tooltip-artefact], [data-tooltip-shop], [data-tooltip-trade], [data-tooltip-bank], [data-tooltip-satchel], [data-skill], [tabindex]:not([tabindex="-1"])';
   // Action principale d'un écran (Créer l'aventure, Reprendre…), choisie en premier quand l'écran change.
   const PRIMARY = '.slot-primary, [autofocus], [data-action="resume"]';
   const BACK =

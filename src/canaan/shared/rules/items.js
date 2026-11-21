@@ -1,5 +1,5 @@
 // @ts-check
-// Règles des objets : qualité, niveau, tirage, type d'arme, icônes, artéfacts.
+// Règles des objets : qualité, niveau, tirage, type d'arme, icônes.
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Chaque fonction reçoit ses données en paramètres ; aucune ne lit l'état d'une partie.
 import {
@@ -79,29 +79,9 @@ export function weaponIcon(item) {
   if (item?.slot === 'weapon') return WEAPON_TYPES[item.weaponType ?? '']?.icon || '⚔️';
   return item?.slot && JEWEL_SLOTS.includes(item.slot) ? JEWEL_ICON[item.slot] : '';
 }
-// Variante d'artéfact (0 à 2) stable pour un même identifiant.
+// Nom officiel d'un objet d'après sa qualité et sa famille (armes) ou son emplacement (autres pièces). Seul le nom change : identité, niveau et statistiques restent ceux du drop.
 /**
- * @param {Item} item
- * @returns {number} variante 0 à 2
- */
-export function stableArtifact(item) {
-  let h = 0;
-  for (const c of String(item.id || item.name || 'artefact')) h = (Math.imul(h, 31) + c.charCodeAt(0)) | 0;
-  return (h >>> 0) % 3;
-}
-/**
- * @param {(Item & { artifactVariant?: number }) | null | undefined} item modifié sur place
- */
-export function ensureArtifact(item) {
-  if (item?.slot !== 'artifact') return;
-  const v = item.artifactVariant;
-  if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > 2)
-    item.artifactVariant = stableArtifact(item);
-}
-// Nom officiel d'un objet d'après sa qualité et sa famille (armes) ou son emplacement (autres pièces, variante
-// d'artéfact). Seul le nom change : identité, niveau et statistiques restent ceux du drop.
-/**
- * @param {Item & { artifactVariant?: number }} item modifié sur place
+ * @param {Item} item modifié sur place
  * @returns {Item} le même objet
  */
 export function applyItemName(item) {
@@ -116,10 +96,7 @@ export function applyItemName(item) {
     item.name = WEAPON_NAMES[rarity][item.weaponType ?? 'sword'];
   } else {
     const entry = GEAR_NAMES[rarity];
-    if (item.slot === 'artifact') {
-      ensureArtifact(item);
-      item.name = entry.artifact[item.artifactVariant ?? 0];
-    } else if (entry[item.slot]) item.name = entry[item.slot];
+    if (entry[item.slot]) item.name = entry[item.slot];
   }
   return item;
 }

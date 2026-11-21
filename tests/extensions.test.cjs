@@ -226,8 +226,8 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   run('P.atk=0.3;CANAAN_EXT.step()');
   assert.equal(run('game.hero.riding'), null);
   // (Un coup reçu peut être dévié au hasard : on passe par la défense, qui marque toujours le combat.)
-  run('P.atk=0;CANAAN_RUBIS.defense({x:P.x,y:P.y,t:"Test",level:60},5,{},game.hero)');
-  assert.equal(run('CANAAN_RUBIS.inCombat(game.hero)'), true);
+  run('P.atk=0;CANAAN_ARTEFACTS.defense({x:P.x,y:P.y,t:"Test",level:60},5,{},game.hero)');
+  assert.equal(run('CANAAN_ARTEFACTS.inCombat(game.hero)'), true);
   assert.equal(run('CANAAN_VALLEY_MOUNTS.mount(game.hero)'), false);
   // Hors du monde ouvert (instance) : pas de monture.
   run('enterInstance(0)');

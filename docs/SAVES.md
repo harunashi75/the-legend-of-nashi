@@ -27,7 +27,7 @@ Ouvrir une aventure recharge la page : le slot choisi est retenu dans le stockag
   "resume": { "ilvl": 121, "gold": 121914 },
   "monde": { "openedChests": [], "worldBossTimers": {}, "quetes": { "flags": { "bridge": true }, "solved": { "q13": true } } },
   "heros": {
-    "hote": { "player": {}, "kills": 0, "inventory": [], "equipment": {}, "materials": {}, "bagLevel": 0, "classe": { "id": "druide", "talents": [] }, "quetes": { "active": {}, "done": {}, "flags": {}, "choices": {}, "track": null, "troc": 0, "shells": [], "paid": 0 }, "rubis": {}, "arena": {} },
+    "hote": { "player": {}, "kills": 0, "inventory": [], "equipment": {}, "materials": {}, "bagLevel": 0, "classe": { "id": "druide", "talents": [] }, "quetes": { "active": {}, "done": {}, "flags": {}, "choices": {}, "track": null, "troc": 0, "shells": [], "paid": 0 }, "artefacts": { "ranks": {}, "equipped": [null, null, null, null] }, "arena": {} },
     "invites": {}
   }
 }
@@ -37,7 +37,7 @@ Les champs du héros reprennent ceux du schéma 9. `resume` sert uniquement au m
 
 Quêtes (« Les Échos de l’Aurore ») : chaque héros garde sa progression dans `quetes` : quêtes actives (`active[id] = { step, got }`, étape et objets trouvés), terminées (`done[id]`, date), drapeaux d’histoire (`flags` : Lumi, carte des sanctuaires, étoiles, bénédiction, raccourci, sanctuaires visités…), choix narratifs (`choices`), quête suivie (`track`), échanges du grand troc faits (`troc`, 0 à 13), coquillages chantants trouvés (`shells`, identifiants `c_q1`…`c_q30`) et paliers de Madame Nacre récompensés (`paid`, 0 à 6) ; les Cœurs d’Aurore sont des drapeaux (`heart_q2`… `heart_q27`, `heart_s15`, `heart_s25`). Ces trois champs manquent dans les anciennes sauvegardes : ils valent alors 0 ou une liste vide. Le monde garde `monde.quetes` : changements visibles par tous (`flags` : pont restauré, lanternes, sanctuaires ouverts, raccourci) et énigmes résolues (`solved`). Tout est vérifié au chargement (`sanitizeQuests`) ; une quête ou un drapeau inconnu est retiré.
 
-`heros.invites` contient les héros invités, par identifiant (6 au plus) : `pseudo`, `local` (compagnon local), `color`, puis les mêmes champs qu’un héros (`player`, `kills`, `inventory`, `equipment`, `materials`, `bagLevel`, `classe`, `quetes`, `rubis`, `arena`). Au chargement, chaque entrée est vérifiée comme le héros de l’hôte (objets invalides retirés, nombres positifs) ; une entrée abîmée est ignorée sans bloquer l’aventure.
+`heros.invites` contient les héros invités, par identifiant (6 au plus) : `pseudo`, `local` (compagnon local), `color`, puis les mêmes champs qu’un héros (`player`, `kills`, `inventory`, `equipment`, `materials`, `bagLevel`, `classe`, `quetes`, `artefacts`, `arena`). Au chargement, chaque entrée est vérifiée comme le héros de l’hôte (objets invalides retirés, nombres positifs) ; une entrée abîmée est ignorée sans bloquer l’aventure.
 
 ## Écriture sûre et copies
 

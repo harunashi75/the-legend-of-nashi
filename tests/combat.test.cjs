@@ -23,9 +23,9 @@ test('Mort : récompense unique, retrait du monstre et exécution des hooks suiv
 });
 
 test('Soin partagé : bonus appliqués une fois, plafond PV et mort respectés', () => {
-  const g = game(); modifiers(g,0,20,.1);
+  const g = game(); modifiers(g,0,20);
   assert.equal(vm.runInContext('typeof canaanApplyHeal',g),'function');
-  assert.equal(g.canaanApplyHeal(10),13); assert.equal(g.P.hp,33);
+  assert.equal(g.canaanApplyHeal(10),12); assert.equal(g.P.hp,32);
   g.P.hp=99; assert.equal(g.canaanApplyHeal(100),1);
   assert.equal(g.canaanApplyHeal(0),0);
   g.P.hp=0;g.P.dead=true;assert.equal(g.canaanApplyHeal(100),0);
@@ -45,8 +45,8 @@ test('Bouclier : soin immédiat et soin périodique du sol consacré', () => {
 });
 
 test('Le moteur de combat utilise également le soin et ses bonus', () => {
-  const g=game();modifiers(g,0,20,.1);
-  assert.equal(g.CANAAN_COMBAT.heal(10),13);
+  const g=game();modifiers(g,0,20);
+  assert.equal(g.CANAAN_COMBAT.heal(10),12);
 });
 
 test('Récupération : vrai verrou réduit, pas de double réduction, nouvelle utilisation après expiration', () => {
@@ -90,17 +90,21 @@ test('Statistiques d’un objet : trois principales selon niveau et qualité, de
   assert.equal(seen.size,15);
 });
 
-test('Artefacts sans statistiques ; statistiques du héros recalculées quand l’équipement change',()=>{
-  const g=game(),a=g.CANAAN_STATS_PREPARE({id:'a',slot:'artifact',level:30,sec:{crit:9,power:9}});
-  assert.equal(a.sec,undefined);assert.equal(JSON.stringify(g.itemStats(a)),'{"primary":{},"secondary":{},"enchant":null}');
+test('Deux bagues comptées ; statistiques du héros recalculées quand l’équipement change',()=>{
+  const g=game(),ring=()=>({id:'r'+Math.random(),slot:'ring',level:20,rarity:'Rare'});
+  const none=g.characterStats().primary.attack||0;g.equipment.ring=ring();const one=g.characterStats().primary.attack;
+  g.equipment.ring2=ring();const two=g.characterStats().primary.attack;
+  assert.ok(one>none&&two>one,'la seconde bague compte comme la première');
+  delete g.equipment.ring;delete g.equipment.ring2;
   const armor={id:'armor',slot:'armor',level:5,rarity:'Commun'};g.equipment.armor=armor;const before=g.characterStats().primary.defense;
   armor.level=10;const after=g.characterStats().primary.defense;
   assert.ok(after>before);assert.equal(after,g.itemStats(armor).primary.defense+g.itemStats(g.equipment.weapon).primary.defense);
 });
 
 test('Déviation : esquive totale puis second jet indépendant pour diviser les dégâts',()=>{
-  const g=game(),labels=[];
-  g.CANAAN_ARTIFACT_STATS=s=>{s.dodge=35;return s};
+  const g=game(),labels=[],classStats=g.CANAAN_CLASS_STATS;
+  // 35 % d'esquive, ajoutés là où les talents de classe complètent les statistiques du héros.
+  g.CANAAN_CLASS_STATS=(s,hero)=>{classStats(s,hero);s.dodge=35;return s};
   // Secondaires de l'arme tirées avant de compter les jets.
   g.characterStats();
   g.float=(x,y,label)=>labels.push(label);
@@ -155,10 +159,10 @@ test('Compétences : les 40 actions restent lançables par les dix familles',()=
   }
 });
 
-test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, réduite par Endurance',()=>{
+test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, réduite par le Voile du Néant',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
- run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
+ run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_ARTEFACTS_STATE.import({})');
  const x0=run('P.x');
  assert.equal(run('canaanDodge(1,0)'),true);assert.equal(run('CANAAN_COMBAT.invulnerable()'),true);
  assert.equal(run('monsterDamage({hp:9,mhp:9,x:0,y:0,boss:true},500)'),0);
@@ -166,8 +170,8 @@ test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, r�
  assert.ok(run('P.x')-x0>100,'distance '+(run('P.x')-x0));assert.equal(run('CANAAN_COMBAT.invulnerable()'),false);
  assert.equal(run('canaanDodge(1,0)'),false);
  assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-4)<1e-9);
- run("CANAAN_RUBIS_STATE.import({owned:{endurance:1},equipped:['endurance']})");
- assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-3.4)<1e-9);
+ run("CANAAN_ARTEFACTS_STATE.import({ranks:{voile_neant:1},equipped:['voile_neant']})");
+ assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-2.4)<1e-9);
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline()');
  assert.equal(run('canaanDodge(0,1)'),true);
 });
@@ -175,7 +179,7 @@ test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, r�
 test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintien et verrou commun',()=>{
  const {run,errors,fire,nodes}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
- run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
+ run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_ARTEFACTS_STATE.import({})');
  // Secondaires fixées sans Célérité : les verrous gardent leur durée de base (0,55 s et 1,15 s).
  run('equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"sword",rarity:"Commun",sec:{power:1,crit:1}};refreshWeaponBar()');
  run('monsters.length=0;monsters.push({x:P.x+60,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"});mouseWorldX=P.x+60;mouseWorldY=P.y;P.mp=0');
@@ -210,7 +214,7 @@ test('Règle partagée des dégâts reçus : Défense selon le niveau de l’att
  assert.deepEqual(c.mitigateIncoming(100,st,1,seq([0.9,0.9]),0.1),{damage:100,deflected:false,crit:false});
  assert.deepEqual(c.mitigateIncoming(100,st,1,seq([0.1,0.9]),0.1),{damage:50,deflected:true,crit:false});
  assert.deepEqual(c.mitigateIncoming(100,st,1,seq([0.9,0.05]),0.1),{damage:150,deflected:false,crit:true});
- assert.equal(c.mitigateIncoming(100,st,1,seq([0.9,0.05]),0.1,0.8).damage,140,'Rubis Volonté');
+ assert.equal(c.mitigateIncoming(100,st,1,seq([0.9,0.05]),0.1,0.8).damage,140,'critique réduit');
  // Défense : 82 points contre un attaquant de niveau 1 (60 + 22) = moitié des dégâts ; moins efficace contre plus fort.
  assert.equal(c.mitigateIncoming(100,{...st,defense:82},1,seq([0.9,0.9]),0).damage,50);
  assert.ok(c.mitigateIncoming(100,{...st,defense:82},40,seq([0.9,0.9]),0).damage>50);
@@ -223,14 +227,14 @@ test('Règle partagée des dégâts reçus : Défense selon le niveau de l’att
 test('Règle partagée des coups infligés : Puissance, écart de niveau, armure des élites et boss, critique ; puissance d’attaque',async()=>{
  const c=await import(require('node:url').pathToFileURL(path.join(__dirname,'..','src','canaan','shared','rules','combat.js')).href);
  const st={level:10,crit:10,critPower:50,damageBonus:0};
- // Monstre ordinaire de même niveau : 5 % d'armure ; critique +50 %, Rubis Précision ×1,12.
+ // Monstre ordinaire de même niveau : 5 % d'armure ; critique +50 %, modificateur du critique ×1,12.
  assert.deepEqual(c.resolveOutgoing(100,st,{level:10},()=>0.99),{damage:95,crit:false});
  assert.deepEqual(c.resolveOutgoing(100,st,{level:10},()=>0),{damage:Math.round(95*1.5),crit:true});
  assert.equal(c.resolveOutgoing(100,st,{level:10},()=>0,1,1.12).damage,Math.round(95*1.5*1.12));
  // Puissance : +20 % de tous les dégâts. Monstre 10 niveaux au-dessus : moitié des dégâts.
  assert.equal(c.resolveOutgoing(100,{...st,damageBonus:20},{level:10},()=>0.99).damage,114);
  assert.equal(c.resolveOutgoing(100,st,{level:20},()=>0.99).damage,48);
- // Boss de monde : 15 % d'armure, réduite par le Rubis Briseur.
+ // Boss de monde : 15 % d'armure, réduite par un modificateur d'armure.
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99).damage,85);
  assert.equal(c.resolveOutgoing(100,st,{level:10,worldBoss:true},()=>0.99,0.92).damage,86);
  assert.equal(c.heroPower(18),23);assert.equal(c.heroPower(100),105);assert.equal(c.heroMagicPower(18),23);assert.equal(c.heroMagicPower(100),c.heroPower(100));assert.equal(c.heroPower(0),8);
@@ -311,7 +315,7 @@ test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée 
 test('Attaque lourde : une animation propre à chaque arme, et les armes à distance frappent de loin',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
- run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_RUBIS_STATE.import({})');
+ run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_ARTEFACTS_STATE.import({})');
  const equip=type=>run('equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"'+type+'",rarity:"Commun",sec:{power:1,crit:1}};refreshWeaponBar();game.world.projectiles.length=0;monsters.length=0');
  const wait=n=>run('for(let i=0;i<'+n+';i++){time++;runUpdatePipeline()}');
  // Arc : la rapide tire une flèche, la lourde une rafale de cinq flèches coup sur coup.

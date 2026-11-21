@@ -66,7 +66,6 @@
       const types = [...WEAPONS];
       item.weaponType = types[Math.floor(rnd() * types.length)];
     }
-    if (item.slot === 'artifact') item.artifactVariant = Math.floor(rnd() * 3);
     normalizeItem(item);
     const where = CANAAN_SALVAGE.deliver(hero, item);
     if (where === 'dust') return null;

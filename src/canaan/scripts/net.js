@@ -400,7 +400,7 @@
       bagLevel: canaanBagLevel(hero),
       classe: { id: hero.classe.id, talents: hero.classe.talents },
       quetes: hero.quetes,
-      rubis: { owned: hero.rubis.owned, equipped: hero.rubis.equipped },
+      artefacts: CANAAN_ARTEFACTS.clean(hero.artefacts),
       arena: hero.arena,
       prof: CANAAN_PROF.bagOf(hero),
       skins: CANAAN_WARDROBE.export(hero),
@@ -433,7 +433,7 @@
     }
     return out;
   }
-  // Action d'un invité, déjà mise en forme : équipement, classe (choisir, talents, sort spécial) ou Rubis.
+  // Action d'un invité, déjà mise en forme : équipement, classe (choisir, talents, sort spécial) ou artéfacts.
   function heroAction(hero, action) {
     if (!action) return false;
     if (action.op.startsWith('trade-')) return CANAAN_TRADE.handle(hero, action);
@@ -454,8 +454,8 @@
     if (action.op === 'talent-equip') return CANAAN_CLASS.equip(action.talent, hero);
     if (action.op === 'talent-unequip') return CANAAN_CLASS.unequip(action.talent, hero);
     if (action.op === 'class-special') return CANAAN_CLASS.special(hero);
-    if (action.op === 'rubis-equip') return CANAAN_RUBIS.equipFor(hero, action.rubis);
-    if (action.op === 'rubis-unequip') return CANAAN_RUBIS.unequipFor(hero, action.slot);
+    if (action.op === 'artefact-equip') return CANAAN_ARTEFACTS.equipFor(hero, action.artefact);
+    if (action.op === 'artefact-unequip') return CANAAN_ARTEFACTS.unequipFor(hero, action.slot);
     if (action.op === 'open-chest') return openNearbyChest(hero);
     if (action.op === 'dungeon-use') return CANAAN_DUNGEON_EXPLORE.interact(hero);
     if (action.op === 'skin-wear') return CANAAN_WARDROBE.handle(hero, action);
@@ -787,7 +787,7 @@
       game.hero.satchel = CANAAN_SALVAGE.sanitize(bag.satchel);
       if (Number.isInteger(bag.limit)) game.hero.bagLimit = Math.max(10, Math.min(100, bag.limit));
       if (Number.isInteger(bag.bagLevel)) game.hero.bagLevel = canaanBagLevel({ bagLevel: bag.bagLevel });
-      applyClassAndRubis(bag);
+      applyClassAndArtefacts(bag);
       if (bag.prof && typeof bag.prof === 'object') game.hero.prof = CANAAN_PROF.sanitize(bag.prof);
       if (bag.skins && typeof bag.skins === 'object') CANAAN_WARDROBE.applyRemote(bag.skins);
       game.hero.blessing = CANAAN_CITY.blessingOf(bag.bless);
@@ -797,8 +797,7 @@
           best: Math.max(0, Math.min(CANAAN_ARENA.waves, bag.arena.best | 0)),
           attempts: Math.max(0, bag.arena.attempts | 0),
           completed: !!bag.arena.completed,
-          lastBoss: typeof bag.arena.lastBoss === 'string' ? bag.arena.lastBoss.slice(0, 80) : '',
-          pendingChoice: false
+          lastBoss: typeof bag.arena.lastBoss === 'string' ? bag.arena.lastBoss.slice(0, 80) : ''
         };
       updateCapacity();
       const weapon = game.hero.equipment.weapon?.id;
@@ -817,24 +816,16 @@
     }
     if (Number.isFinite(me.x) && Number.isFinite(me.y)) correct(me);
   }
-  // Classe, talents et Rubis de l'invité, tels que l'hôte les garde : affichés dans son panneau (T) et sur sa fiche.
-  function applyClassAndRubis(bag) {
-    const r = bag.rubis;
+  // Classe, talents et artéfacts de l'invité, tels que l'hôte les garde : affichés dans son panneau (T) et sur sa fiche.
+  function applyClassAndArtefacts(bag) {
     if (bag.classe && typeof bag.classe === 'object') {
       const before = game.hero.classe?.id;
       CANAAN_CLASS.setClasse(game.hero, bag.classe);
       if (before !== game.hero.classe.id) refreshWeaponBar();
       CANAAN_CLASS.promptClass();
     }
-    if (r && r.owned && typeof r.owned === 'object' && Array.isArray(r.equipped))
-      game.hero.rubis = {
-        owned: Object.fromEntries(
-          Object.entries(r.owned).filter(([id, n]) => CANAAN_RUBIS.get(id) && Number.isInteger(n) && n > 0)
-        ),
-        equipped: Array.from({ length: CANAAN_RUBIS.slots }, (_, k) =>
-          CANAAN_RUBIS.get(r.equipped[k]) ? r.equipped[k] : null
-        )
-      };
+    if (bag.artefacts && typeof bag.artefacts === 'object')
+      game.hero.artefacts = CANAAN_ARTEFACTS.clean(bag.artefacts);
   }
   // Réconciliation : la position confirmée par l'hôte est comparée à celle que l'invité avait prédite au même moment.
   function correct(me) {

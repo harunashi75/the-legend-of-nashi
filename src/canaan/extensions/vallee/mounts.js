@@ -51,7 +51,7 @@
       canaanLootNotice(hero, '🐎 Les montures ne servent que dans le monde ouvert.');
       return false;
     }
-    if (CANAAN_RUBIS.inCombat(hero)) {
+    if (CANAAN_ARTEFACTS.inCombat(hero)) {
       canaanLootNotice(hero, '🐎 Impossible d’appeler ta monture en plein combat.');
       return false;
     }
@@ -118,7 +118,7 @@
       const p = hero.player;
       if (!BY[hero.riding] || !owns(hero, hero.riding)) hero.riding = null;
       else if (!rideable(hero)) dismount(hero);
-      else if ((p.atk || 0) > 0 || p.roll || CANAAN_RUBIS.inCombat(hero))
+      else if ((p.atk || 0) > 0 || p.roll || CANAAN_ARTEFACTS.inCombat(hero))
         dismount(hero, '🐎 Tu sautes de ta monture pour combattre.');
       else if (hero.fishing || CANAAN_GATHER.workView(hero)) dismount(hero);
     }

@@ -1,6 +1,6 @@
 // Barre des effets, à gauche de la mini-carte (comme dans les MMORPG) : en haut les bonus actifs (repas, bénédiction
-// d'Ylvarë, talents et sort de classe, postures d'armes, rubis), en dessous les malus (étourdissement, malédiction,
-// saignement, brûlure), et en bas les passifs permanents (passif de classe, talents équipés, rubis sertis).
+// d'Ylvarë, talents et sort de classe, postures d'armes, artéfacts), en dessous les malus (étourdissement, malédiction,
+// saignement, brûlure), et en bas les passifs permanents (passif de classe, talents équipés, artéfacts équipés).
 // Chaque icône montre le temps restant, un voile qui tourne avec la durée et clignote à la fin ; au survol, une
 // info-bulle donne le nom, l'effet et le temps restant. Sous la barre d'un boss, ses bonus et les malus qu'on lui
 // inflige (drawMonster, appelé par sprite-kit.js). Lecture seule : rien n'est modifié.
@@ -162,15 +162,16 @@
         )
       );
   }
-  function rubisEffects(hero, out) {
-    if (!window.CANAAN_RUBIS) return;
-    for (const id of CANAAN_RUBIS.equipped(hero)) {
-      const r = id && CANAAN_RUBIS.get(id);
-      if (r) out.push(E('rb-' + id, r.icon, r.name, r.desc, 'passive'));
+  // Artéfacts de l'Arène équipés (passifs, avec leur effet au rang du héros) et leurs effets passagers.
+  function artefactEffects(hero, out) {
+    if (!window.CANAAN_ARTEFACTS) return;
+    for (const id of CANAAN_ARTEFACTS.equipped(hero)) {
+      const a = id && CANAAN_ARTEFACTS.get(id);
+      if (a)
+        out.push(E('art-' + id, a.icon, a.name, artefactText(a, CANAAN_ARTEFACTS.rank(id, hero)), 'passive'));
     }
-    if (CANAAN_RUBIS.auras)
-      for (const a of CANAAN_RUBIS.auras(hero))
-        out.push(E('rba-' + a.id, a.icon, a.name, a.text, 'buff', a.left));
+    for (const a of CANAAN_ARTEFACTS.auras(hero))
+      out.push(E('arta-' + a.id, a.icon, a.name, a.text, 'buff', a.left));
   }
   function debuffs(out) {
     if (game.mode !== 'guest' && typeof playerStun === 'number' && playerStun > 0)
@@ -201,7 +202,7 @@
       () => foodEffects(hero, out),
       () => classEffects(hero, out),
       () => stanceEffects(out),
-      () => rubisEffects(hero, out),
+      () => artefactEffects(hero, out),
       () => debuffs(out)
     ])
       try {
@@ -346,7 +347,7 @@
   if (typeof setInterval === 'function' && typeof document !== 'undefined') setInterval(render, 250);
 
   // ---------------------------------------------------------------- Effets d'un boss (sous sa barre de vie)
-  // Malus que les héros lui infligent (sorts d'armes, talents de classe, rubis) et ses propres bonus (rage, bouclier,
+  // Malus que les héros lui infligent (sorts d'armes, talents de classe, artéfacts) et ses propres bonus (rage, bouclier,
   // parade, invulnérabilité). L'hôte les calcule ; l'invité les reçoit avec le boss (champ fx de l'instantané).
   const MON = {
     stun: ['💫', 'Étourdi', 'debuff'],
@@ -362,7 +363,6 @@
     armor: ['🛡', 'Armure brisée', 'debuff'],
     weak: ['⬇', 'Affaibli', 'debuff'],
     mark: ['🎯', 'Marqué', 'debuff'],
-    focus: ['💢', 'Acharnement', 'debuff'],
     enraged: ['😡', 'Rage', 'buff'],
     berserk: ['🔥', 'Frénésie', 'buff'],
     shield: ['🛡', 'Bouclier', 'buff'],
@@ -385,8 +385,8 @@
     // Peste de l'Invocateur (charges cumulables).
     for (const p of m._plague || []) add('plague', p.until - t);
     if (m._clsSlow) add('slow', m._clsSlow.until - t);
-    add('slow', (m._rubisSlowUntil || 0) - t);
-    add('focus', (m._rubisFocusUntil || 0) - t);
+    // Brûlures et saignements des artéfacts de l'Arène.
+    for (const d of m._artDots || []) add(d.kind, d.until - t);
     const run = window.CANAAN_ARENA && CANAAN_ARENA.run ? CANAAN_ARENA.run() : null;
     if (run && m.arenaBoss) {
       const c = run.clock || 0;

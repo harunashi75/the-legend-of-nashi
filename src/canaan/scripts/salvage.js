@@ -97,7 +97,7 @@
     typeof it === 'object' &&
     !Array.isArray(it) &&
     Object.hasOwn(gearSlots, it.slot) &&
-    it.slot !== 'weapon2' &&
+    !SECOND_SLOT_OF[it.slot] &&
     Number.isFinite(Number(it.level ?? 1)) &&
     Number(it.level ?? 1) > 0;
   // Sacoche valide : équipements reconnus, SATCHEL_SIZE au plus.
@@ -196,7 +196,7 @@
     if (!item) return hideGearTooltip();
     gearTooltip.innerHTML =
       window.CANAAN_STATS_VIEW.tooltip(item) +
-      (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      (wornAgainst(item) ? gearComparison(item, wornAgainst(item)) : '');
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }

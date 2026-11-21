@@ -47,8 +47,7 @@ export function qualityFactor(rarity, level) {
 export function statBase(level, rarity) {
   return (6 + 2.2 * clampItemLevel(level)) * qualityFactor(rarity, level);
 }
-// Statistiques principales d'un équipement classique : fixées par son niveau, sa qualité et son emplacement.
-// L'artéfact n'en a pas (seul son passif agit).
+// Statistiques principales d'un équipement : fixées par son niveau, sa qualité et son emplacement.
 /**
  * @param {Item | null | undefined} item
  * @returns {StatMap}
@@ -142,8 +141,8 @@ export function defenseReduction(defense, attackerLevel) {
   const d = Math.max(0, Number(defense) || 0);
   return d / (d + 60 + 22 * clampLevel(attackerLevel));
 }
-// Statistiques d'un héros d'après son niveau et ses pièces actives (sans artéfact ni arme de réserve).
-// Les points sont convertis en effets réels ; les passifs d'artéfact, les talents de classe et les Rubis s'ajoutent ensuite.
+// Statistiques d'un héros d'après son niveau et ses pièces actives (sans l’arme de réserve).
+// Les points sont convertis en effets réels ; les talents de classe et les artéfacts de l'Arène s'ajoutent ensuite.
 /**
  * @param {number} level
  * @param {Iterable<Item>} pieces pièces actives
@@ -264,7 +263,10 @@ export function xpToNext(level) {
  */
 export function mobXp(mobLevel, heroLevel, elite = false) {
   // Élite : ×4 pour ×2,4 de PV, pour qu'elle vaille le détour.
-  return Math.max(1, Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 4 : 1) * xpGapFactor(mobLevel, heroLevel)));
+  return Math.max(
+    1,
+    Math.round((10 + 5 * clampLevel(mobLevel)) * (elite ? 4 : 1) * xpGapFactor(mobLevel, heroLevel))
+  );
 }
 // Écart de niveau sur l'XP : jusqu'à +20 % contre plus fort que soi, −15 % par niveau de moins, 10 % au-delà de 5.
 /**
@@ -281,7 +283,8 @@ export function xpGapFactor(foeLevel, heroLevel) {
  * @param {number} foeLevel
  * @param {number | undefined} heroLevel
  */
-const bossGap = (foeLevel, heroLevel) => (heroLevel == null ? 1 : Math.min(1, xpGapFactor(foeLevel, heroLevel)));
+const bossGap = (foeLevel, heroLevel) =>
+  heroLevel == null ? 1 : Math.min(1, xpGapFactor(foeLevel, heroLevel));
 // XP d'un boss (dungeon, raid ou world) et d'une instance terminée (coffre ouvert).
 // Boss de donjon et de raid, fin d'instance : une part du niveau de l'instance, comme les quêtes, pour qu'une instance
 // vaille autant à tous les niveaux (donjon ≈ 3 × 12 % + 25 % ≈ 60 % d'un niveau, raid ≈ 6 × 8 % + 30 % ≈ 80 %).

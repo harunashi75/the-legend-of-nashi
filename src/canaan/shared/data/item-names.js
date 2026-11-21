@@ -1,5 +1,5 @@
 // @ts-check
-// Noms officiels des objets (rareté × arme ou emplacement) et passifs des trois artéfacts.
+// Noms officiels des objets (rareté × arme ou emplacement).
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Noms officiels extraits du tableau fourni : rareté × famille d'arme.
 /** @type {Record<string, Record<string, string>>} Nom de chaque famille d'arme, par qualité. */
@@ -77,7 +77,7 @@ export const WEAPON_NAMES = {
     'lute': 'Luth des échos éternels'
   }
 };
-/** @type {Record<string, Record<string, any>>} Nom de chaque emplacement par qualité (artifact : trois variantes). */
+/** @type {Record<string, Record<string, any>>} Nom de chaque emplacement par qualité. */
 export const GEAR_NAMES = {
   'Commun': {
     'weapon': {
@@ -92,8 +92,7 @@ export const GEAR_NAMES = {
     'gloves': 'Gants râpés',
     'boots': 'Bottes trouées',
     'neck': 'Pendentif en pierre',
-    'ring': 'Anneau en tôle',
-    'artifact': ['Grimoire déchiré', "Tesson d'argile", 'Branche séchée']
+    'ring': 'Anneau en tôle'
   },
   'Peu commun': {
     'weapon': {
@@ -108,8 +107,7 @@ export const GEAR_NAMES = {
     'gloves': 'Gants en cuir ajustés',
     'boots': 'Bottes de patrouille',
     'neck': 'Amulette en os gravé',
-    'ring': 'Bague de cuivre poli',
-    'artifact': ['Relique de disciple', 'Totem gravé', 'Pierre de foyer']
+    'ring': 'Bague de cuivre poli'
   },
   'Rare': {
     'weapon': {
@@ -124,8 +122,7 @@ export const GEAR_NAMES = {
     'gloves': 'Gants arcaniques',
     'boots': 'Bottes du marcheur',
     'neck': 'Pendentif de la brume',
-    'ring': 'Anneau de saphir pur',
-    'artifact': ['Orbe des marées', 'Boussole des brumes', "Rune d'eau vive"]
+    'ring': 'Anneau de saphir pur'
   },
   'Épique': {
     'weapon': {
@@ -140,8 +137,7 @@ export const GEAR_NAMES = {
     'gloves': "Gants d'ombre-pas",
     'boots': "Bottes d'ombre-pas",
     'neck': 'Amulette du cœur nocturne',
-    'ring': 'Sceau du souverain',
-    'artifact': ['Talisman du vide', "Sceau d'ombre", "Sablier de l'éclipse"]
+    'ring': 'Sceau du souverain'
   },
   'Légendaire': {
     'weapon': {
@@ -156,8 +152,7 @@ export const GEAR_NAMES = {
     'gloves': 'Gants de brasier',
     'boots': 'Bottes de marche-flamme',
     'neck': 'Amulette de la résurgence',
-    'ring': 'Anneau du pacte draconique',
-    'artifact': ['Cœur de brasier', 'Idole du drakôn', "Prisme d'étincelles"]
+    'ring': 'Anneau du pacte draconique'
   },
   'Mythique': {
     'weapon': {
@@ -172,35 +167,9 @@ export const GEAR_NAMES = {
     'gloves': 'Gants du vide',
     'boots': 'Bottes de marche-vide',
     'neck': "Pendentif de l'éternité",
-    'ring': 'Anneau de la singularité',
-    'artifact': ['Orbe du néant', 'Chronomètre astral', 'Prisme de singularité']
+    'ring': 'Anneau de la singularité'
   }
 };
-// Passifs des trois artéfacts.
-export const ARTIFACT_BUFFS = [
-  {
-    name: 'Ardeur',
-    icon: '⟦art_ardeur⟧',
-    description: 'Augmente les dégâts et les soins',
-    stat: 'attack',
-    percent: 6
-  },
-  {
-    name: 'Bastion',
-    icon: '⟦art_bastion⟧',
-    description: 'Augmente les points de vie et l’armure',
-    stat: 'defense',
-    percent: 8
-  },
-  {
-    name: 'Instinct',
-    icon: '⟦art_instinct⟧',
-    description: 'Augmente les chances de critique et la vitesse de déplacement',
-    stat: 'crit',
-    percent: 7
-  }
-];
-
 // Noms d'une arme liée (qualité Relique) : elle change de nom en grandissant, à partir de chacun de ces niveaux.
 /** @type {Readonly<Record<string, ReadonlyArray<readonly [number, string]>>>} */
 export const RELIC_NAMES = Object.freeze({

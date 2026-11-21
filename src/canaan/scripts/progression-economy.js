@@ -10,12 +10,10 @@ function awardBossLoot(source, index, hero = game.hero) {
 // Récompense d'une source pour un héros (l'hôte par défaut), du niveau donné (celui du monstre, du boss ou de la
 // zone du coffre), dans son sac : objet garanti, ou tiré (chance puis qualité) pour les monstres. Règle :
 // sourceDrop (shared/rules/economy.js).
-// Rubis Prospecteur : un monstre ordinaire peut lâcher un objet Peu commun au lieu d'un Commun.
 function grantSourceReward(kind, hero = game.hero, level = 1) {
   const reward = SOURCE_REWARDS[kind];
   let rarity = sourceDrop(reward, Math.random);
   if (!rarity) return null;
-  if (kind === 'normal' && rarity === 'Commun' && CANAAN_RUBIS.betterDrop(hero)) rarity = 'Peu commun';
   return giveGear(level, reward.source, rarity, hero);
 }
 function gearItemLevel(item) {

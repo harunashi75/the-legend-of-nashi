@@ -154,7 +154,7 @@
       equipReserveWeapon(index);
     },
     sellAllCommon: () => sellAllCommon(),
-    // Sac unifié et boutique : utiliser une pile (Rubis, repas), acheter au marchand, vendre une pile.
+    // Sac unifié et boutique : utiliser une pile (repas, enchantement), acheter au marchand, vendre une pile.
     useBagStack: element => CANAAN_BAG.use(element.dataset.token),
     shopBuy: element => CANAAN_SHOP.buyAt(actionInteger(element, 'index')),
     shopSellStack: element => CANAAN_SHOP.sellToken(element.dataset.token),
@@ -189,22 +189,19 @@
     classPage: element => classPage(actionInteger(element, 'step')),
     classPageTo: element => classPageTo(actionInteger(element, 'page')),
     buyGear: () => buyGear(),
-    equipRubis: element => equipRubis(actionText(element, 'rubis')),
-    // Onglet Runes : filtre de la collection (-1 : toutes, sinon une famille).
-    rubisFamily: element => CANAAN_RUBIS.family(actionInteger(element, 'family')),
-    toggleRubis: element => {
+    // Artéfacts de l'Arène (fiche C) : équiper ou retirer depuis la collection, retirer depuis un emplacement.
+    toggleArtefact: element => {
       hideGearTooltip();
-      toggleRubis(actionText(element, 'rubis'));
+      toggleArtefact(actionText(element, 'artefact'));
     },
-    unequipRubis: element => {
+    unequipArtefact: element => {
       hideGearTooltip();
-      unequipRubis(actionInteger(element, 'slot'));
+      unequipArtefact(actionInteger(element, 'slot'));
     },
     enterArena: () => enterArena(),
-    claimArenaRubis: element => claimArenaRubis(actionText(element, 'rubis')),
     closePanels: () => closePanels()
   });
-  // Invité en ligne : son héros vit chez l'hôte, qui exécute ses changements d'équipement, de classe et de talents, de Rubis,
+  // Invité en ligne : son héros vit chez l'hôte, qui exécute ses changements d'équipement, de classe et de talents, d'artéfacts,
   // ses ventes et ses achats. Les actions qui modifieraient le monde de l'hôte (Arène, instances, groupe) sont refusées.
   const GUEST_BLOCKED = new Set([
     'pauseSave',
@@ -220,8 +217,7 @@
     'groupCloseInternet',
     'restartFresh',
     'enterInstance',
-    'enterArena',
-    'claimArenaRubis'
+    'enterArena'
   ]);
   window.CANAAN_GUEST_BLOCKED = GUEST_BLOCKED;
   function dispatchCanaanAction(element, event) {
@@ -304,7 +300,7 @@
 
   // Survol délégué : les événements pointerover/out remontent depuis les panneaux dynamiques.
   const CANAAN_HOVER_SELECTOR =
-    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel],[data-map-instance]';
+    '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-artefact],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel],[data-map-instance]';
   function canaanHover(event, enter) {
     const element = eventClosest(event, CANAAN_HOVER_SELECTOR);
     if (!element || (event.relatedTarget && element.contains(event.relatedTarget))) return;
@@ -323,8 +319,8 @@
       CANAAN_BANK.showTooltip(element.dataset.tooltipBank, event);
     else if (element.dataset.tooltipSatchel !== undefined)
       CANAAN_SALVAGE.showTooltip(element.dataset.tooltipSatchel, event);
-    else if (element.dataset.tooltipRubis !== undefined)
-      showRubisTooltip(element.dataset.tooltipRubis, event);
+    else if (element.dataset.tooltipArtefact !== undefined)
+      showArtefactTooltip(element.dataset.tooltipArtefact, event);
     else if (element.dataset.tooltipIndex !== undefined)
       showGearTooltip(Number(element.dataset.tooltipIndex), event);
     else showEquippedTooltip(element.dataset.tooltipSlot, event);
@@ -335,7 +331,7 @@
     if (
       eventClosest(
         event,
-        '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-rubis],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel]'
+        '[data-tooltip-index],[data-tooltip-slot],[data-tooltip-artefact],[data-tooltip-skill],[data-tooltip-stack],[data-tooltip-shop],[data-tooltip-trade],[data-tooltip-bank],[data-tooltip-satchel]'
       )
     )
       moveGearTooltip(event);

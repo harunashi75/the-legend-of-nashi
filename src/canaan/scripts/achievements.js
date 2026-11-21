@@ -1,4 +1,4 @@
-// Succès (touche Y) : cent succès en cinq catégories, avec leur récompense (or, expérience, équipement, Rubis,
+// Succès (touche Y) : cent succès en cinq catégories, avec leur récompense (or, expérience, équipement,
 // repas, titres), et le bestiaire (onglet des Collections, touche V) : monstres du monde, créatures des donjons,
 // boss mondiaux, boss de donjon et de raid, boss de l'Arène, chacun découvert (vu de près) puis vaincu.
 // Chaque héros a son carnet (hero.succes : { done, s, sets, best, title }), sauvegardé avec lui. L'hôte décide :
@@ -22,7 +22,7 @@
   const lvl = h => clampLevel(h.level);
   const profOf = h => CANAAN_PROF.profOf(h);
   const codex = h => profOf(h).codex || {};
-  const ARMOR = ['helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'weapon'];
+  const ARMOR = ['helm', 'shoulders', 'armor', 'gloves', 'boots', 'neck', 'ring', 'ring2', 'weapon'];
   const worn = h => ARMOR.map(slot => h.equipment?.[slot]).filter(Boolean);
   const allItems = h =>
     [...(h.inventory || []), ...Object.values(h.equipment || {}), ...((h.bank && h.bank.items) || [])].filter(
@@ -30,11 +30,10 @@
     );
   const rank = it => GEAR_RARITIES.findIndex(r => r.name === rarityInfo(it).name);
   const killed = (h, key) => (stateOf(h).best[key]?.[1] || 0) > 0;
-  const rubisFamily = id => RUBIS_CATALOG.find(r => r.id === id)?.family;
-  const familyFull = f => h => {
-    const eq = h.rubis?.equipped || [];
-    return eq.length >= RUBIS_SLOTS && eq.every(id => id && rubisFamily(id) === f) ? 1 : 0;
-  };
+  // Artéfacts de l'Arène : nombre possédés, nombre au rang maximum.
+  const artefactRanks = h => Object.values(h.artefacts?.ranks || {}).map(artefactRank);
+  const artefactCount = h => artefactRanks(h).filter(r => r > 0).length;
+  const artefactsAtMax = h => artefactRanks(h).filter(r => r >= ARTEFACT_MAX_RANK).length;
   const talentsFull = cls => h =>
     h.classe?.id === cls && (h.classe.talents || []).length >= TALENT_SLOT_LEVELS.length ? 1 : 0;
   const weaponKills = h =>
@@ -148,13 +147,13 @@
     catalog().filter(b => b.group === 'mob' || b.group === 'dungeon' || b.group === 'under');
 
   // ---------------------------------------------------------------- Catalogue des succès
-  // Récompenses : gold (or), exp (part d'un niveau d'XP), gear (qualité, au niveau du héros), rubis (un Rubis qui manque),
+  // Récompenses : gold (or), exp (part d'un niveau d'XP), gear (qualité, au niveau du héros),
   // stack ([genre, id, qualité, nombre] dans le sac), title (titre affichable), aura (aura dorée).
   const CATS = [
     { id: 'combat', icon: '⚔️', name: 'Combat & armes' },
     { id: 'explore', icon: '🗺️', name: 'Exploration & aventure' },
     { id: 'eco', icon: '💰', name: 'Économie & métiers' },
-    { id: 'magic', icon: '🔮', name: 'Magie, Runes & progression' },
+    { id: 'magic', icon: '🔮', name: 'Magie, artéfacts & progression' },
     { id: 'defi', icon: '🏆', name: 'Défis & Arène' }
   ];
   const A = (cat, id, icon, name, desc, goal, val, reward = {}, pts = 10) => ({
@@ -297,9 +296,9 @@
     A(
       'combat',
       'c19',
-      '⟦rubis_phenix⟧',
-      'Résilience de Phénix',
-      'Survivre à un coup fatal grâce à la Rune Phénix.',
+      '⟦artefact_couronne_souverain⟧',
+      'Résilience du Souverain',
+      'Survivre à un coup fatal grâce à la Couronne du Souverain.',
       1,
       S('phoenix'),
       { gold: 500 }
@@ -682,7 +681,7 @@
       'p18',
       '⟦prof_enchanting⟧',
       'Runes mystiques',
-      'Porter huit pièces enchantées (toutes sauf l’artéfact).',
+      'Porter huit pièces enchantées.',
       8,
       h => worn(h).filter(it => it.ench).length,
       { title: 'Le Runiste', gear: 'Épique' },
@@ -705,7 +704,7 @@
     A('eco', 'p20', '🤝', 'Le Philanthrope', 'Faire un échange avec un autre joueur.', 1, S('trades'), {
       title: 'Le Philanthrope'
     }),
-    // ---------------------------------------------------------------- Magie, Rubis & progression
+    // ---------------------------------------------------------------- Magie, artéfacts & progression
     A('magic', 'm1', '⭐', 'Éveil des pouvoirs', 'Atteindre le niveau 10.', 10, lvl, { gold: 300 }, 5),
     A('magic', 'm2', '⭐', 'Force de l’âge', 'Atteindre le niveau 30.', 30, lvl, {
       gear: 'Rare',
@@ -725,75 +724,75 @@
     A(
       'magic',
       'm4',
-      '⟦rune⟧',
-      'Première Rune',
-      'Équiper ta première Rune.',
+      '🔮',
+      'Premier artéfact',
+      'Équiper ton premier artéfact de l’Arène.',
       1,
-      h => (h.rubis?.equipped || []).filter(Boolean).length,
+      h => (h.artefacts?.equipped || []).filter(Boolean).length,
       { gold: 100 },
       5
     ),
     A(
       'magic',
       'm5',
-      '⟦rune⟧',
-      'Collection de runes',
-      'Posséder 20 Runes différentes.',
-      20,
-      h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
-      { rubis: 1 },
+      '🔮',
+      'Collectionneur d’artéfacts',
+      'Posséder 6 artéfacts différents.',
+      6,
+      artefactCount,
+      { gold: 1500 },
       15
     ),
     A(
       'magic',
       'm6',
-      '⟦rune⟧',
-      'Maître des runes',
-      'Posséder les 48 Runes.',
-      () => RUBIS_CATALOG.length,
-      h => Object.values(h.rubis?.owned || {}).filter(n => n > 0).length,
-      { title: 'Le Maître des runes' },
+      '🔮',
+      'Maître des artéfacts',
+      'Posséder les 12 artéfacts de l’Arène.',
+      () => ARTEFACTS.length,
+      artefactCount,
+      { title: 'Le Maître des artéfacts' },
       50
     ),
     A(
       'magic',
       'm7',
-      '⟦fam_offense⟧',
-      'Puissance écarlate',
-      'Remplir tes six emplacements avec des Runes offensives.',
+      '◆',
+      'Artéfact parfait',
+      'Faire monter un artéfact au rang 5.',
       1,
-      familyFull(0),
+      h => artefactsAtMax(h),
       { gold: 800 }
     ),
     A(
       'magic',
       'm8',
-      '⟦fam_defense⟧',
-      'Forteresse impénétrable',
-      'Remplir tes six emplacements avec des Runes défensives.',
-      1,
-      familyFull(1),
+      '🔮',
+      'Quatre reliques',
+      'Remplir tes quatre emplacements d’artéfacts.',
+      ARTEFACT_SLOTS,
+      h => (h.artefacts?.equipped || []).filter(Boolean).length,
       { gold: 800 }
     ),
     A(
       'magic',
       'm9',
-      '⟦fam_support⟧',
-      'Bénédiction divine',
-      'Remplir tes six emplacements avec des Runes de soutien.',
-      1,
-      familyFull(2),
+      '◆',
+      'Arsenal du Souverain',
+      'Faire monter quatre artéfacts au rang 5.',
+      4,
+      h => artefactsAtMax(h),
       { gold: 800 }
     ),
     A(
       'magic',
       'm10',
-      '⟦rubis_phenix⟧',
-      'Immortalité du Phénix',
-      'Être sauvé par la Rune Phénix en plein combat de boss.',
+      '⟦artefact_couronne_souverain⟧',
+      'Immortalité du Souverain',
+      'Être sauvé par la Couronne du Souverain en plein combat de boss.',
       1,
       S('phoenixBoss'),
-      { rubis: 1 },
+      { gold: 1500 },
       25
     ),
     A(
@@ -889,7 +888,7 @@
       'm19',
       '🛡️',
       'Panoplie épique',
-      'Porter huit pièces Épiques ou mieux (toutes sauf l’artéfact).',
+      'Porter huit pièces Épiques ou mieux.',
       8,
       h => worn(h).filter(it => rank(it) >= 3).length,
       { gold: 3000 },
@@ -900,7 +899,7 @@
       'm20',
       '👑',
       'Collectionneur mythique',
-      'Porter huit pièces Mythiques (toutes sauf l’artéfact).',
+      'Porter huit pièces Mythiques.',
       8,
       h => worn(h).filter(it => rank(it) >= 5).length,
       { title: 'Élu des Dieux' },
@@ -1035,7 +1034,7 @@
       'Vaincre un boss en ayant moins de 5 % de tes PV.',
       1,
       S('lowBoss'),
-      { rubis: 1 },
+      { gold: 1500 },
       25
     ),
     A(
@@ -1143,7 +1142,6 @@
     if (r.title) out.push('Titre « ' + r.title + ' »');
     if (r.aura) out.push('aura dorée');
     if (r.gear) out.push('un objet ' + r.gear + ' de ton niveau');
-    if (r.rubis) out.push('une Rune qui te manque');
     if (r.stack)
       out.push(
         r.stack[3] +
@@ -1175,11 +1173,6 @@
             ').'
         );
       }
-    }
-    if (r.rubis) {
-      const missing = CANAAN_RUBIS.missing(hero);
-      if (missing.length) CANAAN_RUBIS.grant(missing[Math.floor(Math.random() * missing.length)].id, hero);
-      else p.gold += 1500;
     }
     if (r.stack) {
       const [kind, id, q, n] = r.stack;

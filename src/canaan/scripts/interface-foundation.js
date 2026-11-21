@@ -6,8 +6,7 @@ const itemIcon = {
   shoulders: '⟦slot_shoulders⟧',
   gloves: '⟦slot_gloves⟧',
   neck: '⟦slot_neck⟧',
-  ring: '⟦slot_ring⟧',
-  artifact: '⟦slot_artifact⟧'
+  ring: '⟦slot_ring⟧'
 };
 // Objet de prestige (Légendaire, Mythique, Relique) : attribut des cases du sac et de la fiche, pour leur brillance
 // animée.

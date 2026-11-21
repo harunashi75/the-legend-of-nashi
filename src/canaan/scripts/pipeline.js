@@ -14,7 +14,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'summons',
     'dodge',
     'basicAttack',
-    'rubis',
+    'artefacts',
     'arena',
     'professions',
     'quests',

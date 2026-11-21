@@ -139,11 +139,11 @@
     effect('ring', x, y, 0, r, 0, c, 0.5);
     burst(x, y, c, 12);
   }
-  // Coup du lanceur : le moteur de combat, avec ses statistiques, ses talents de classe et ses Rubis (l'hôte ou un allié).
+  // Coup du lanceur : le moteur de combat, avec ses statistiques, ses talents de classe et ses artéfacts (l'hôte ou un allié).
   function strike(m, value, context) {
     return isHost() ? hit(m, value, context) : CANAAN_COMBAT.attack(m, value, context, actor);
   }
-  // Soin du lanceur, avec ses bonus de soins, ses talents de classe et ses Rubis. Renvoie les PV rendus.
+  // Soin du lanceur, avec ses bonus de soins, ses talents de classe et ses artéfacts. Renvoie les PV rendus.
   function healActor(amount) {
     return canaanApplyHeal(amount, false, actor);
   }
@@ -690,7 +690,7 @@
     const s = SKILLS[i],
       key = type + ':' + i;
     if (!s || (weaponCooldowns[key] || 0) > 0) return null;
-    const cost = CANAAN_RUBIS.manaCost(window.CANAAN_CLASS_MANA_COST(type, i, s.mp));
+    const cost = window.CANAAN_CLASS_MANA_COST(type, i, s.mp);
     if (P.mp < cost) {
       toast('Mana insuffisant');
       return null;
@@ -698,11 +698,11 @@
     P.mp -= cost;
     // La Célérité (et les talents) réduit le verrou réel, également utilisé par l'affichage et le changement d'arme.
     const recovery = Math.max(0, Math.min(80, stats().cooldownReduction || 0));
-    weaponCooldowns[key] = s.max * (1 - recovery / 100) * CANAAN_RUBIS.cooldownFactor();
+    weaponCooldowns[key] = s.max * (1 - recovery / 100) * CANAAN_ARTEFACTS.cooldownFactor();
     s.cd = weaponCooldowns[key];
     castContext = window.CANAAN_CLASS_CAST(type, i);
-    // Rubis de compétence : Résonance, Éclipse, Chaos, Transcendance, Écho, Accélération.
-    castContext = CANAAN_RUBIS.onCast(type, i, key, castContext);
+    // Artéfacts de l'Arène : Cœur de Cendres renforce les compétences.
+    castContext = CANAAN_ARTEFACTS.onCast(type, i, key, castContext);
     return type;
   }
 
@@ -907,7 +907,7 @@
     }
   };
 
-  // Compétence de l'hôte : barre, mana, recharges affichées, talents de classe et Rubis.
+  // Compétence de l'hôte : barre, mana, recharges affichées, talents de classe et artéfacts.
   function useSkill(i) {
     // Un invité demande la compétence à l'hôte, qui la lance avec ses statistiques.
     if (game.mode === 'guest') return CANAAN_NET.requestSkill(i);
@@ -920,8 +920,8 @@
     const type = hero.equipment.weapon?.weaponType || 'sword',
       spec = WEAPON_DEFINITIONS[type]?.sp?.[i];
     if (!spec) return null;
-    // Coût réel : réductions des talents (Concentration arcanique, Avatar élémentaire) et des Rubis (Arcane, Transcendance) du héros.
-    const cost = CANAAN_RUBIS.manaCost(window.CANAAN_CLASS_MANA_COST(type, i, spec[4], hero), hero);
+    // Coût réel : réductions des talents (Concentration arcanique, Avatar élémentaire) du héros.
+    const cost = window.CANAAN_CLASS_MANA_COST(type, i, spec[4], hero);
     return { type, key: type + ':' + i, cooldown: spec[3], mana: spec[4], cost };
   }
   function skillReady(hero, i) {
@@ -941,9 +941,9 @@
       recovery = Math.max(0, Math.min(80, characterStats(hero).cooldownReduction || 0));
     hero.player.mp -= spec.cost;
     skillStateOf(hero).cooldowns[spec.key] =
-      spec.cooldown * (1 - recovery / 100) * CANAAN_RUBIS.cooldownFactor(hero);
-    // Talents de classe (élément, Consécration…) et Rubis de compétence (Résonance, Éclipse, Chaos…) du lanceur.
-    const context = CANAAN_RUBIS.onCast(
+      spec.cooldown * (1 - recovery / 100) * CANAAN_ARTEFACTS.cooldownFactor(hero);
+    // Talents de classe (élément, Consécration…) et artéfacts de l'Arène (Cœur de Cendres) du lanceur.
+    const context = CANAAN_ARTEFACTS.onCast(
       spec.type,
       i,
       spec.key,

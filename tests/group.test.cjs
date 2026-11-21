@@ -88,7 +88,7 @@ test('Groupe local : créer, faire venir, renvoyer, supprimer ; 6 enregistrés, 
 test('Groupe enregistré : les invités sont sauvegardés dans heros.invites et reviennent au chargement, absents',()=>{
  const first=require('./helpers/canaan-runtime.cjs')(source);assert.equal(first.errors.length,0,first.errors.join('\n'));
  first.run('started=true;paused=false;globalThis.lina=CANAAN_GROUP.create("Lina");CANAAN_GROUP.join(lina.id);lina.player.gold=321;lina.kills=4');
- first.run('lina.inventory.push(CANAAN_GEAR.normalize({id:"lina-ring",slot:"ring",rarity:"Rare",ilvl:35}));lina.classe={id:"paladin",talents:[1]};lina.rubis.owned.vampire=1');
+ first.run('lina.inventory.push(CANAAN_GEAR.normalize({id:"lina-ring",slot:"ring",rarity:"Rare",ilvl:35}));lina.classe={id:"paladin",talents:[1]};lina.artefacts.ranks.croc_ombres=2');
  // Un compagnon local reçoit une classe au hasard, avec ses talents conseillés.
  assert.ok(first.run('CLASS_IDS.includes(game.guests[Object.keys(game.guests)[0]].classe.id)'));
  first.run('CANAAN_GROUP.create("Oren")');
@@ -97,7 +97,7 @@ test('Groupe enregistré : les invités sont sauvegardés dans heros.invites et 
  const guests=Object.values(save.heros.invites);assert.deepEqual(guests.map(x=>x.pseudo).sort(),['Lina','Oren']);
  const lina=guests.find(x=>x.pseudo==='Lina');
  assert.equal(lina.player.gold,321);assert.equal(lina.kills,4);assert.equal('materials' in lina,false);assert.equal(lina.inventory[0].id,'lina-ring');
- assert.equal(lina.equipment.weapon.name,'Épée de recrue');assert.deepEqual(lina.classe,{id:'paladin',talents:[1]});assert.equal(lina.rubis.owned.vampire,1);
+ assert.equal(lina.equipment.weapon.name,'Épée de recrue');assert.deepEqual(lina.classe,{id:'paladin',talents:[1]});assert.equal(lina.artefacts.ranks.croc_ombres,2);
  // Le menu liste leurs pseudos (confirmation de suppression de l'aventure).
  assert.equal(first.run('JSON.stringify(CANAAN_PERSISTENCE.summary(1).invites.slice().sort())'),'["Lina","Oren"]');
  // Nouvelle session sur la même aventure.
@@ -110,8 +110,8 @@ test('Groupe enregistré : les invités sont sauvegardés dans heros.invites et 
  assert.equal(second.run('Object.keys(game.guests).length'),2);assert.equal(second.run('game.heroes.length'),1,'les invités reviennent absents');
  const id=second.run('Object.values(game.guests).find(h=>h.name==="Lina").id');
  assert.equal(second.run('CANAAN_GROUP.join("'+id+'")'),true);
- assert.equal(second.run('JSON.stringify((h=>[h.player.gold,h.kills,h.inventory[0].id,h.equipment.weapon.weaponType,h.classe.id,h.classe.talents,h.rubis.owned.vampire])(game.guests["'+id+'"]))'),
-  JSON.stringify([321,4,'lina-ring','sword','paladin',[1],1]));
+ assert.equal(second.run('JSON.stringify((h=>[h.player.gold,h.kills,h.inventory[0].id,h.equipment.weapon.weaponType,h.classe.id,h.classe.talents,h.artefacts.ranks.croc_ombres])(game.guests["'+id+'"]))'),
+  JSON.stringify([321,4,'lina-ring','sword','paladin',[1],2]));
  // Une entrée abîmée est ignorée sans bloquer le chargement.
  second.run('CANAAN_GROUP.importGuests({"!!":{pseudo:"x"},ok:{pseudo:"Bon",inventory:[null,{slot:"nope"}],player:{gold:-5}}})');
  assert.equal(second.run('Object.keys(game.guests).join()'),'ok');assert.equal(second.run('game.guests.ok.inventory.length+"/"+game.guests.ok.player.gold'),'0/0');
@@ -182,7 +182,7 @@ test('Compétences pour tous les héros : les 40 compétences d’un allié, son
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Classes et Rubis pour tous les héros : chaque allié a sa classe, ses talents, ses Rubis, ses soins de soutien et l’état de leurs effets',()=>{
+test('Classes et artéfacts pour tous les héros : chaque allié a sa classe, ses talents, ses artéfacts, ses soins de soutien et l’état de leurs effets',()=>{
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__chat=[];globalThis.__toasts=[];game.view.chat=(w,m)=>__chat.push(w+": "+m);toast=m=>__toasts.push(m);canaanRegenRates=()=>({mana:0,health:0})');
  run('globalThis.ally=canaanCreateHero({name:"Lina",x:P.x+40,y:P.y,equipment:{weapon:{id:"w1",name:"Épée",slot:"weapon",ilvl:100,rarity:"Rare",weaponType:"sword"},armor:{id:"a1",name:"Tunique",slot:"armor",ilvl:100,rarity:"Rare"}}});game.heroes.push(ally);ally.level=60');
@@ -193,30 +193,30 @@ test('Classes et Rubis pour tous les héros : chaque allié a sa classe, ses tal
  assert.equal(run('(characterStats(ally).speed||0)-speed0'),5);
  assert.equal(run('characterStats().speed||0'),run('hostSpeed0'),'la classe de l’allié ne touche pas l’hôte');
  assert.equal(run('game.hero.classe.id'),null);
- // Rubis : Colosse (PV +10 %) porté par l'allié ; l'hôte ne le porte pas.
- run('ally.rubis.owned.colosse=1;ally.rubis.owned.pacte=1;ally.rubis.owned.peau_de_pierre=1;ally.rubis.owned.second_souffle=1');
- assert.equal(run('CANAAN_RUBIS.equipFor(ally,"colosse")'),true);assert.equal(run('CANAAN_RUBIS.equipFor(ally,"colosse")'),false,'jamais deux fois');
- assert.equal(run('CANAAN_RUBIS.equipFor(ally,"phenix")'),false,'Rubis non possédé');
- assert.equal(run('characterStats(ally).maxHp'),Math.round(run('hp0')*1.1));assert.equal(run('ally.player.mhp'),run('characterStats(ally).maxHp'),'PV max recalculés');
- assert.equal(run('characterStats().maxHp'),run('hostHp0'));assert.equal(run('CANAAN_RUBIS.has("colosse")'),false);assert.equal(run('CANAAN_RUBIS.has("colosse",ally)'),true);
- // Coups et dégâts reçus de l'allié : ses Rubis (Pacte +18 %, Peau de pierre : un coup plafonné à 25 % des PV max) et ses talents.
- run('CANAAN_RUBIS.equipFor(ally,"pacte");CANAAN_RUBIS.equipFor(ally,"peau_de_pierre");CANAAN_RUBIS.equipFor(ally,"second_souffle")');
- run('globalThis.wolf={t:"Loup",x:ally.player.x+50,y:ally.player.y,hp:1e6,mhp:1e6,r:14,cd:1e9,g:0};game.world.monsters.push(wolf)');
- assert.ok(Math.abs(run('CANAAN_RUBIS.attackBefore(wolf,100,{},ally)')-118)<1e-9);assert.equal(run('CANAAN_RUBIS.attackBefore(wolf,100,{})'),100);
- assert.ok(Math.abs(run('CANAAN_RUBIS.defense(wolf,ally.player.mhp,{},ally)')-run('ally.player.mhp')*0.25)<1e-9);assert.equal(run('CANAAN_RUBIS.defense(wolf,100,{},ally)'),100);assert.equal(run('CANAAN_RUBIS.defense(wolf,100,{})'),100);
- // L'allié frappe par le moteur de combat : le Pacte compte dans ses dégâts réels.
+ // Artéfacts : Pierre du Colosse (PV +25 %) portée par l'allié ; l'hôte ne la porte pas.
+ run('Object.assign(ally.artefacts.ranks,{pierre_colosse:1,sceau_executeur:1,coeur_fer:1,couronne_souverain:1})');
+ assert.equal(run('CANAAN_ARTEFACTS.equipFor(ally,"pierre_colosse")'),true);assert.equal(run('CANAAN_ARTEFACTS.equipFor(ally,"pierre_colosse")'),false,'jamais deux fois');
+ assert.equal(run('CANAAN_ARTEFACTS.equipFor(ally,"voile_neant")'),false,'artéfact non possédé');
+ assert.equal(run('characterStats(ally).maxHp'),Math.round(run('hp0')*1.25));assert.equal(run('ally.player.mhp'),run('characterStats(ally).maxHp'),'PV max recalculés');
+ assert.equal(run('characterStats().maxHp'),run('hostHp0'));assert.equal(run('CANAAN_ARTEFACTS.equipped().includes("pierre_colosse")'),false);assert.equal(run('CANAAN_ARTEFACTS.equipped(ally).includes("pierre_colosse")'),true);
+ // Coups et dégâts reçus de l'allié : ses artéfacts (Sceau de l'Exécuteur +40 % sous 35 % des PV, Cœur de Fer −15 %) et ses talents.
+ run('CANAAN_ARTEFACTS.equipFor(ally,"sceau_executeur");CANAAN_ARTEFACTS.equipFor(ally,"coeur_fer");CANAAN_ARTEFACTS.equipFor(ally,"couronne_souverain")');
+ run('globalThis.wolf={t:"Loup",x:ally.player.x+50,y:ally.player.y,hp:3e5,mhp:1e6,r:14,cd:1e9,g:0};game.world.monsters.push(wolf)');
+ assert.ok(Math.abs(run('CANAAN_ARTEFACTS.attackBefore(wolf,100,{},ally)')-140)<1e-9);assert.equal(run('CANAAN_ARTEFACTS.attackBefore(wolf,100,{})'),100);
+ assert.ok(Math.abs(run('CANAAN_ARTEFACTS.defense(wolf,100,{},ally)')-85)<1e-9);assert.equal(run('CANAAN_ARTEFACTS.defense(wolf,100,{})'),100);
+ // L'allié frappe par le moteur de combat : le Sceau compte dans ses dégâts réels.
  run('Math.random=()=>0.99;ally.player.basicLock=0;ally.intent.aimX=wolf.x;ally.intent.aimY=wolf.y;canaanHeroBasicAttack(ally,false)');
- const withPact=run('1e6-wolf.hp');
- // En combat, un Rubis ne se change pas ; sept secondes plus tard, si.
- assert.equal(run('CANAAN_RUBIS.unequipFor(ally,ally.rubis.equipped.indexOf("pacte"))'),false,'pas en combat');
- run('time+=420;wolf.hp=1e6');assert.equal(run('CANAAN_RUBIS.unequipFor(ally,ally.rubis.equipped.indexOf("pacte"))'),true);
+ const withSeal=run('3e5-wolf.hp');
+ // En combat, un artéfact ne se change pas ; sept secondes plus tard, si.
+ assert.equal(run('CANAAN_ARTEFACTS.unequipFor(ally,ally.artefacts.equipped.indexOf("sceau_executeur"))'),false,'pas en combat');
+ run('time+=420;wolf.hp=3e5');assert.equal(run('CANAAN_ARTEFACTS.unequipFor(ally,ally.artefacts.equipped.indexOf("sceau_executeur"))'),true);
  run('ally.player.basicLock=0;canaanHeroBasicAttack(ally,false)');
- const without=run('1e6-wolf.hp');
- assert.ok(withPact>without*1.1,'Pacte appliqué aux coups de l’allié : '+withPact+' / '+without);
- // Second souffle : l'allié survit une fois à un coup fatal, à 10 % de ses PV.
+ const without=run('3e5-wolf.hp');
+ assert.ok(withSeal>without*1.3,'Sceau appliqué aux coups de l’allié : '+withSeal+' / '+without);
+ // Couronne du Souverain : l'allié survit à un coup fatal, à 20 % de ses PV, puis pas avant 90 s.
  run('ally.player.hp=5');run('CANAAN_COMBAT.hurt(1e6,wolf,ally)');
- assert.equal(run('ally.player.dead'),false);assert.equal(run('ally.player.hp'),Math.max(1,Math.round(run('ally.player.mhp')*0.1)));
- run('CANAAN_COMBAT.hurt(1e6,wolf,ally)');assert.equal(run('ally.player.dead'),true,'une seule fois par combat');
+ assert.equal(run('ally.player.dead'),false);assert.equal(run('ally.player.hp'),Math.max(1,Math.round(run('ally.player.mhp')*0.2)));
+ run('CANAAN_COMBAT.hurt(1e6,wolf,ally)');assert.equal(run('ally.player.dead'),true,'une fois toutes les 90 s');
  run('ally.player.dead=false;ally.player.hp=ally.player.mhp');
  // État des effets propre à chaque héros : la Foi inébranlable du Paladin allié ne profite pas à l'hôte.
  run('CANAAN_CLASS.setClasse(ally,{id:"paladin",talents:[2,6]})');
@@ -240,12 +240,13 @@ test('Classes et Rubis pour tous les héros : chaque allié a sa classe, ses tal
  assert.equal(run('P.hp'),1+Math.round(30*run('hb')),'Lumière sacrée');
  assert.equal(run('characterStats().guard'),5,'Aura protectrice de l’allié');
  run('CANAAN_CLASS_STATE.import({id:"paladin",talents:[7]})');assert.equal(run('characterStats().guard'),5,'non cumulable');
- // Sauvegarde : classe et Rubis de l'invité gardés et vérifiés au chargement (talent en double et Rubis non possédé retirés).
+ // Sauvegarde : classe et artéfacts de l'invité gardés et vérifiés au chargement (talent en double et artéfact non
+ // possédé retirés).
  run('ally.id="local-test";ally.local=true;game.guests[ally.id]=ally');
  const saved=run('JSON.stringify(CANAAN_GROUP.exportGuests(h=>h.player))');const data=JSON.parse(saved);
- data['local-test'].rubis.equipped[5]='phenix';data['local-test'].classe.talents.push(7,99);
+ data['local-test'].artefacts.equipped[1]='voile_neant';data['local-test'].classe.talents.push(7,99);
  run('CANAAN_GROUP.importGuests('+JSON.stringify(data)+')');
  assert.deepEqual(run('JSON.stringify(game.guests["local-test"].classe)'),JSON.stringify({id:'paladin',talents:[7]}));
- assert.equal(run('game.guests["local-test"].rubis.equipped.includes("phenix")'),false);assert.equal(run('game.guests["local-test"].rubis.equipped.includes("colosse")'),true);
+ assert.equal(run('game.guests["local-test"].artefacts.equipped.includes("voile_neant")'),false);assert.equal(run('game.guests["local-test"].artefacts.equipped.includes("pierre_colosse")'),true);
  assert.equal(errors.length,0,errors.join('\n'));
 });

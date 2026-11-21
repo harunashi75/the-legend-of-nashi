@@ -133,7 +133,7 @@ window.CANAAN_PERSISTENCE = {
       if (started) this.save();
     }, delay);
   },
-  // Héros de l'hôte au format de sauvegarde (les talents, Rubis et records ne gèrent encore que l'hôte).
+  // Héros de l'hôte au format de sauvegarde (les talents, artéfacts et records ne gèrent encore que l'hôte).
   heroSnapshot(position, hero = game.hero) {
     const p = hero.player;
     return {
@@ -162,7 +162,7 @@ window.CANAAN_PERSISTENCE = {
       ...(CANAAN_SALVAGE.of(hero).length ? { sacoche: CANAAN_SALVAGE.export(hero) } : {}),
       bagLevel: window.CANAAN_BAG_STATE.export(),
       classe: window.CANAAN_CLASS_STATE.export(),
-      rubis: window.CANAAN_RUBIS_STATE.export(),
+      artefacts: window.CANAAN_ARTEFACTS_STATE.export(),
       arena: window.CANAAN_ARENA_STATE.export(),
       prof: CANAAN_PROF.sanitize(hero.prof),
       // Succès et bestiaire.
@@ -396,7 +396,7 @@ window.CANAAN_PERSISTENCE = {
       typeof it === 'object' &&
       !Array.isArray(it) &&
       Object.hasOwn(gearSlots, it.slot) &&
-      it.slot !== 'weapon2' &&
+      !SECOND_SLOT_OF[it.slot] &&
       Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
       Number(it.level ?? it.ilvl ?? 1) > 0;
     game.hero.inventory = Array.isArray(h.inventory) ? h.inventory.filter(validItem) : [];
@@ -405,7 +405,7 @@ window.CANAAN_PERSISTENCE = {
     game.hero.equipment = Object.fromEntries(
       Object.keys(gearSlots).map(slot => {
         const it = h.equipment?.[slot];
-        return [slot, validItem(it) && it.slot === (slot === 'weapon2' ? 'weapon' : slot) ? it : null];
+        return [slot, validItem(it) && it.slot === itemSlotOf(slot) ? it : null];
       })
     );
     game.world.openedChests = Array.isArray(monde.openedChests)
@@ -415,6 +415,18 @@ window.CANAAN_PERSISTENCE = {
     if (monde.worldBossTimers && typeof monde.worldBossTimers === 'object') {
       for (const [id, expiry] of Object.entries(monde.worldBossTimers))
         if (Number.isFinite(expiry)) game.world.worldBossTimers[id] = expiry;
+    }
+    // Runes et anciens objets artéfact (remplacés par les artéfacts de l'Arène) : rendus en or, une seule fois (la
+    // sauvegarde suivante ne les contient plus). Calculé avant le tri du sac, qui écarte ces objets.
+    const retired = CANAAN_ARTEFACTS.legacyRefund(h);
+    if (retired.gold) {
+      P.gold += retired.gold;
+      chat(
+        'Système',
+        'Les Runes et les anciens artéfacts laissent place aux artéfacts de l’Arène : ' +
+          retired.gold +
+          ' or remboursés.'
+      );
     }
     // Anciens matériaux de forge (supprimés avec l'artisanat) : rendus en or, une seule fois (la sauvegarde
     // suivante ne les contient plus).
@@ -446,7 +458,7 @@ window.CANAAN_PERSISTENCE = {
     window.CANAAN_CLASS_STATE.import(h.classe);
     if (h.ways && !h.classe)
       chat('Système', 'Les voies sont remplacées par les classes : choisis ta classe et tes talents (T).');
-    window.CANAAN_RUBIS_STATE.import(CANAAN_BANK.withBankedRubis(h.bank, h.rubis));
+    window.CANAAN_ARTEFACTS_STATE.import(h.artefacts);
     window.CANAAN_ARENA_STATE.import(h.arena);
     CANAAN_GROUP.importGuests(d.heros.invites);
     P.dead = false;

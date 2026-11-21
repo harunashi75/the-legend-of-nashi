@@ -96,27 +96,28 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.ok(guest.run('__toasts.some(t=>t.includes("se relève"))'));
   // Ce que l'hôte ne sait pas encore faire pour un invité est refusé chez lui (aucune copie locale modifiée).
   assert.equal(guest.run('CANAAN_GUEST_BLOCKED.has("enterInstance")&&CANAAN_GUEST_BLOCKED.has("enterArena")'),true);
-  assert.equal(guest.run('CANAAN_GUEST_BLOCKED.has("equipTalent")||CANAAN_GUEST_BLOCKED.has("chooseClass")||CANAAN_GUEST_BLOCKED.has("equipRubis")'),false,'classe, talents et Rubis : demandés à l’hôte');
+  assert.equal(guest.run('CANAAN_GUEST_BLOCKED.has("equipTalent")||CANAAN_GUEST_BLOCKED.has("chooseClass")||CANAAN_GUEST_BLOCKED.has("toggleArtefact")'),false,'classe, talents et artéfacts : demandés à l’hôte');
   assert.equal(guest.run('sellInventoryCell(0,"x")'),false);
-  // Classe, talents et Rubis de l'invité : il les gère depuis son écran, l'hôte vérifie, les applique à son héros et les renvoie.
-  host.run(G+'.level=20;'+G+'.rubis.owned.colosse=1;time+=600');await step(8);
-  assert.equal(guest.run('game.hero.rubis.owned.colosse'),1,'collection de l’invité visible chez lui');
+  // Classe, talents et artéfacts de l'invité : il les gère depuis son écran, l'hôte vérifie, les applique à son héros et
+  // les renvoie.
+  host.run(G+'.level=20;'+G+'.artefacts.ranks.pierre_colosse=2;time+=600');await step(8);
+  assert.equal(guest.run('game.hero.artefacts.ranks.pierre_colosse'),2,'collection de l’invité visible chez lui');
   const speedBefore=guest.run('CANAAN_NET.debug.speed'),hpBefore=host.run(G+'.player.mhp');
-  guest.run('chooseClass("assassin")');await step(6);guest.run('equipTalent(1)');guest.run('equipRubis("colosse")');
+  guest.run('chooseClass("assassin")');await step(6);guest.run('equipTalent(1)');guest.run('equipArtefact("pierre_colosse")');
   guest.run('CANAAN_NET.requestAction({op:"talent-equip",talent:12})');guest.run('CANAAN_NET.requestAction({op:"class-choose",cls:"inconnue"})');
-  guest.run('CANAAN_NET.requestAction({op:"rubis-equip",rubis:"phenix"})');
+  guest.run('CANAAN_NET.requestAction({op:"artefact-equip",artefact:"voile_neant"})');
   await step(10);
   assert.deepEqual(host.run('JSON.stringify('+G+'.classe)'),JSON.stringify({id:'assassin',talents:[1]}),'classe et talent choisis chez l’hôte, rien d’autre');
-  assert.equal(host.run(G+'.rubis.equipped.filter(Boolean).join()'),'colosse','Rubis possédé équipé, Rubis inconnu refusé');
+  assert.equal(host.run(G+'.artefacts.equipped.filter(Boolean).join()'),'pierre_colosse','artéfact possédé équipé, artéfact non possédé refusé');
   assert.deepEqual(guest.run('JSON.stringify(game.hero.classe)'),JSON.stringify({id:'assassin',talents:[1]}),'l’invité voit sa classe');
   assert.ok(guest.run('!!document.getElementById("specialSkill")'),'sort spécial sur la barre de l’invité');
-  assert.equal(guest.run('game.hero.rubis.equipped.includes("colosse")'),true,'l’invité voit son Rubis');
+  assert.equal(guest.run('game.hero.artefacts.equipped.includes("pierre_colosse")'),true,'l’invité voit son artéfact');
   const hostSpeed=host.run('Math.round(CANAAN_PLAYER_SPEED*(1+(characterStats('+G+').speed||0)/100)*CANAAN_PROF.speedMult('+G+')*1000)/1000');
   assert.ok(guest.run('CANAAN_NET.debug.speed')>speedBefore,'Assassin : +5 % de vitesse');
   assert.ok(Math.abs(guest.run('CANAAN_NET.debug.speed')-hostSpeed)<1e-6,'même vitesse chez l’hôte et chez lui');
   assert.equal(host.run('characterStats('+G+').critPower'),60,'passif de l’Assassin : +10 % de dégâts critiques');
-  assert.ok(host.run(G+'.player.mhp')>hpBefore*1.05,'Colosse : PV max de l’invité augmentés chez l’hôte');
-  assert.equal(host.run('(game.hero.classe.id?1:0)+game.hero.rubis.equipped.filter(Boolean).length'),0,'rien ne change pour l’hôte');
+  assert.ok(host.run(G+'.player.mhp')>hpBefore*1.05,'Pierre du Colosse : PV max de l’invité augmentés chez l’hôte');
+  assert.equal(host.run('(game.hero.classe.id?1:0)+game.hero.artefacts.equipped.filter(Boolean).length'),0,'rien ne change pour l’hôte');
   // Sort spécial (F) de l'invité : lancé par l'hôte, vu chez l'invité (Voile d'ombre) avec sa recharge.
   host.run(G+'.player.mp='+G+'.player.mmp');guest.run('canaanUseSpecial()');await step(8);
   assert.equal(host.run(G+'.player.veiled'),true,'voile chez l’hôte');assert.equal(guest.run('P.veiled'),true,'voile vu par l’invité');

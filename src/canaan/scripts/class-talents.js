@@ -170,7 +170,7 @@
   const now = () => time / 60;
   const TILES = n => n * TS;
   const notice = text => (me() === game.hero ? toast(text) : canaanLootNotice(me(), text));
-  const inCombat = (hero = me()) => CANAAN_RUBIS.inCombat(hero);
+  const inCombat = (hero = me()) => CANAAN_ARTEFACTS.inCombat(hero);
   const feral = (hero = me()) => isClass('druide', hero) && hero.player.form === 'feral';
   const near = (a, b, tiles) => Math.hypot(a.x - b.x, a.y - b.y) < TILES(tiles);
   const alive = m => m && m.hp > 0;
@@ -197,7 +197,7 @@
   };
 
   // ---------------------------------------------------------------- Statistiques
-  // Talents, passif et sort spécial qui changent les statistiques (après l'équipement et l'artéfact).
+  // Talents, passif et sort spécial qui changent les statistiques (après l'équipement).
   // Les réductions de dégâts s'ajoutent à la Garde (guard, en %) : elles comptent aussi contre les dégâts sur la durée.
   window.CANAAN_CLASS_STATS = forHero(function (s) {
     const t = now(),
@@ -237,12 +237,11 @@
   }, 1);
 
   // ---------------------------------------------------------------- Soins
-  // Bonus de soins effectués d'un héros : Soin (secondaire), artéfact, talents ; la forme féline les réduit.
+  // Bonus de soins effectués d'un héros : Soin (secondaire), talents ; la forme féline les réduit.
   function healingDone(hero) {
     const st = characterStats(hero);
     return (
       (1 + Math.max(0, st.healingBonus || 0) / 100) *
-      (1 + Math.max(0, st.artifactHealingBonus || 0)) *
       (on('druide', 'touch', hero) ? 1.15 : 1) *
       (on('paladin', 'light', hero) ? 1.12 : 1) *
       (isClass('barde', hero) ? 1.1 : 1) *
@@ -265,8 +264,8 @@
   function applyHeal(n, periodic, target, healer, splash) {
     const p = target.player;
     if (!(n > 0) || p.dead || target.away) return 0;
-    // Rubis (Guérisseur, Source vitale) et malédiction des soins de l'Arène.
-    const outside = CANAAN_RUBIS.healFactor(periodic, target) * CANAAN_ARENA.healFactor(target),
+    // Artéfacts (Fiole des Brumes) et malédiction des soins de l'Arène.
+    const outside = CANAAN_ARTEFACTS.healFactor(periodic, target) * CANAAN_ARENA.healFactor(target),
       amount = periodic
         ? n * outside
         : Math.round(n * healingDone(healer) * healingReceived(target) * outside);
@@ -278,8 +277,6 @@
     if (periodic) return gained;
     // Barde : le soin en trop devient un bouclier (Ritournelle) ; le soin donne de l'élan (Mélodie vivifiante).
     const overflow = Math.max(0, amount - gained);
-    // Rune Bénédiction : le soin en trop devient un bouclier.
-    CANAAN_RUBIS.onOverheal(overflow, target);
     if (overflow > 0 && on('barde', 'refrain', healer)) {
       const r = runtime(target),
         t = now(),

@@ -3,10 +3,6 @@ function rarityRoll(level) {
   return rollRarity(rnd);
 }
 
-function artifactPower(item) {
-  return Math.max(1, Math.round(ARTIFACT_BUFFS[item.artifactVariant].percent * (1 + itemLevel(item) / 57)));
-}
-
 let playerStun = 0,
   bossStunImmunity = 0;
 
@@ -14,4 +10,8 @@ let playerStun = 0,
 gearSlots.weapon = '⟦slot_weapon⟧ Arme 1 · active';
 gearSlots.weapon2 = '⟦w_dualsword⟧ Arme 2 · réserve';
 itemIcon.weapon2 = '⟦w_dualsword⟧';
+// Deux bagues : la seconde reçoit aussi un objet d'emplacement « ring » et compte comme la première.
+gearSlots.ring = '⟦slot_ring⟧ Bague 1';
+gearSlots.ring2 = '⟦slot_ring⟧ Bague 2';
+itemIcon.ring2 = '⟦slot_ring⟧';
 if (!Object.prototype.hasOwnProperty.call(game.hero.equipment, 'weapon2')) game.hero.equipment.weapon2 = null;

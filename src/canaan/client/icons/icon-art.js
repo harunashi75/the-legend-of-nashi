@@ -1,7 +1,7 @@
 // Icônes illustrées du jeu (32 × 32), dessinées en code pour ce qu'elles représentent : emplacements d'équipement,
-// familles d'armes, statistiques, les 48 Runes et leurs familles, classes et éléments, passifs d'artéfact,
-// difficultés, poissons, viandes, métiers et boutons des menus. Les données y renvoient par un repère ⟦nom⟧
-// (par exemple ⟦rubis_phenix⟧), que canaan-icons remplace par l'icône à l'affichage (interface et canevas).
+// familles d'armes, statistiques, les 12 artéfacts de l'Arène, classes et éléments, difficultés, poissons, viandes,
+// métiers et boutons des menus. Les données y renvoient par un repère ⟦nom⟧
+// (par exemple ⟦artefact_coeur_fer⟧), que canaan-icons remplace par l'icône à l'affichage (interface et canevas).
 // Style commun : formes pleines en deux ou trois tons, contour sombre, reflets clairs.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
 import { svgPen } from './svg-pen.js';
@@ -124,27 +124,7 @@ const gemCut = (col, dark, x = 16, y = 16, k = 1) =>
       hi('M10 9 L13 9')
   );
 
-// Pierre runique dressée : pierre grise, mousse au pied, glyphe gravé qui luit (couleur du glyphe et de sa lueur).
-const RUNE_STONE = 'M8.5 29 L6.5 13 C6.5 6.5 10.5 2.5 16 2.5 C21.5 2.5 25.5 6.5 25.5 13 L23.5 29 Z';
-const glyph = (d, col, glow, w = 1.7) =>
-  l(d, glow, w + 2.6).replace('/>', ' opacity=".45"/>') + l(d, INK, w + 1.2) + l(d, col, w);
-const runeStone = (d, col, glow, stone = '#8e95a2', shade = '#666d7a') =>
-  p(RUNE_STONE, stone) +
-  s('M16 2.5 C21.5 2.5 25.5 6.5 25.5 13 L23.5 29 L16 29 Z', shade) +
-  l('M9 18 L11 19.5 M21.5 8 L23 9.5 M20.5 24 L22.5 23', '#4e5460', 1) +
-  hi('M8.6 12 C8.8 8.5 10.6 5.8 13.2 4.7') +
-  s(
-    'M7.8 27 C10 25.6 12 26.4 13.5 27.4 C15.5 26 18.5 26 20 27.2 C21.5 26.2 23 26.4 24 27.2 L23.5 29 L8.5 29 Z',
-    '#5f9a4a'
-  ) +
-  glyph(d, col, glow);
-// Glyphes gravés (inspirés des runes anciennes, simplifiés pour 32 × 32).
-const GLYPH_R = 'M13 8 L13 23 M13 8 L19 11 L13 14.5 L19.5 23';
-const GLYPH_ALGIZ = 'M16 9 L16 23 M16 14 L11.5 9.5 M16 14 L20.5 9.5';
-
 const A = {
-  // ---------------------------------------------------------------- Pierre runique (les Runes du héros)
-  rune: runeStone(GLYPH_R, '#e8fbff', '#5ad0ff'),
   // ---------------------------------------------------------------- Emplacements d'équipement
   slot_weapon: g('translate(16 16) scale(1.22) translate(-16 -16)', blade('rotate(40 16 16)')),
   slot_armor:
@@ -197,14 +177,6 @@ const A = {
     '" stroke-width="3.4"/>' +
     l('M9.5 15 C10.5 13.5 12 12.5 13.5 12', '#fff4c0', 1.2) +
     gemCut('#7fd8ff', '#3a8ac8', 16, 9, 0.48),
-  slot_artifact:
-    p('M8 27 L24 27 L22 30 L10 30 Z', GOD) +
-    p('M11 27 L13 22 L19 22 L21 27 Z', GOM) +
-    c(16, 13, 9, '#b38aff') +
-    s('M16 4 C21 4 25 8 25 13 C25 18 21 22 16 22 C19 18 20 9 16 4 Z', '#7a50c8') +
-    l('M10 13 L22 13 M16 7 L16 19', '#e8d8ff', 1).replace('/>', ' opacity=".6"/>') +
-    p(star(4, 3.6, 1.2, 16, 13), '#fff6d0') +
-    hi('M10 10 C11 7.5 13 6 15 5.6', 1.6),
   // ---------------------------------------------------------------- Familles d'armes
   w_sword: g('translate(16 16) scale(1.22) translate(-16 -16)', blade('rotate(40 16 16)')),
   w_dualsword: g(
@@ -378,110 +350,8 @@ const A = {
       '#e8fffb',
       1.8
     ),
-  // ---------------------------------------------------------------- Familles de Runes
-  fam_offense:
-    g(
-      'translate(16 16) scale(1.08) translate(-16 -16)',
-      blade('rotate(42 16 16)', 18, '#ffd0c8') + blade('rotate(-42 16 16)', 18, '#ffd0c8')
-    ) + c(16, 16, 3.2, RE),
-  fam_defense:
-    p(shieldShape, BL) +
-    s('M16 3 C20 5 24 5 27 5.5 C27 17 23 24.5 16 29 Z', BLD) +
-    glyph(GLYPH_ALGIZ, '#e8f4ff', '#8ac8ff') +
-    hi('M8 7.5 C10 7.2 12 6.6 14 5.8'),
-  fam_support:
-    p(heartShape, GR) +
-    s('M16 11 C17.5 9 20.5 7.5 23.5 9.5 C28 13 26 20 16 27 Z', GRD) +
-    p(
-      'M14.5 12 L17.5 12 L17.5 15 L20.5 15 L20.5 18 L17.5 18 L17.5 21 L14.5 21 L14.5 18 L11.5 18 L11.5 15 L14.5 15 Z',
-      '#f4fff0'
-    ),
-  fam_weapon:
-    p(
-      'M4 12 L24 12 C27 12 28.5 13.5 28.5 15 C25 15 22.5 16.5 21 19 L21 23 L25 27 L7 27 L11 23 L11 19 C8 18 5.5 16 4 15 Z',
-      '#5a6474'
-    ) +
-    s('M4 12 L24 12 C27 12 28.5 13.5 28.5 15 L4 15 Z', '#7a8494') +
-    p(star(4, 6, 1.6, 21, 6), '#ffd060') +
-    l('M10 7 L13 9 M16 4 L16 7', '#ffb030', 1.4),
-  fam_utility:
-    c(16, 16, 12.5, '#f2e8d0') +
-    '<circle cx="16" cy="16" r="9.5" fill="none" stroke="' +
-    GOD +
-    '" stroke-width="1"/>' +
-    p('M16 6 L19 16 L16 26 L13 16 Z', '#e8e8ee') +
-    p('M16 6 L19 16 L13 16 Z', TE) +
-    c(16, 16, 1.8, GO) +
-    l('M16 2.5 L16 4.5 M29.5 16 L27.5 16 M16 29.5 L16 27.5 M2.5 16 L4.5 16', INK, 1.6),
-  fam_special:
-    runeStone(GLYPH_R, '#f4e8ff', '#c890ff', '#9a8ab0', '#6e6088') +
-    p(star(4, 4, 1, 27, 5), '#fff6d0') +
-    p(star(4, 3, 0.8, 4.5, 21), '#fff6d0'),
-  // ---------------------------------------------------------------- Rubis offensifs
-  rubis_berserker:
-    p('M6 18 C6 10 10.5 6 16 6 C21.5 6 26 10 26 18 L26 22 L21 26 L11 26 L6 22 Z', STM) +
-    s('M16 6 C21.5 6 26 10 26 18 L26 22 L21 26 L16 26 Z', STD) +
-    p('M7 12 C4 10 2.5 6 3.5 2.5 C6 5 8 7 10 8 Z', BO) +
-    p('M25 12 C28 10 29.5 6 28.5 2.5 C26 5 24 7 22 8 Z', BO) +
-    p('M9 15 L14.5 17 L14 19 L9 18 Z', RE) +
-    p('M23 15 L17.5 17 L18 19 L23 18 Z', RE) +
-    l('M12 22.5 L20 22.5', INK, 1.6),
-  rubis_duelliste:
-    L('M25 4 L9 22', ST, 1.4) +
-    l('M25 4 L9 22', '#ffffff', 0.6) +
-    L('M6 18 C8 22 10 24 14 26', GO, 1.8) +
-    c(8, 23, 2.6, GO) +
-    L('M8.5 22.5 L4 27', LE, 2) +
-    c(3.5, 27.5, 1.6, GO),
-  rubis_chasseur:
-    L('M8 3 C21 7 21 25 8 29', WO, 2.6) +
-    l('M8 3 L8 29', '#f4f0e0', 1) +
-    L('M4 16 L22 16', '#c8a070', 1.4) +
-    p('M26 16 L21 13 L21 19 Z', ST) +
-    c(25, 25, 4.5, '#f6f0e2') +
-    c(25, 25, 2.6, RE) +
-    c(25, 25, 1, '#f6f0e2'),
-  rubis_briseur:
-    g(
-      'rotate(-35 18 14)',
-      r(16.5, 12, 3, 17, WO, 1) + r(9, 4, 18, 8, STM, 1.5) + s('M9 8 L27 8 L27 12 L9 12 Z', STD)
-    ) +
-    p('M3 18 L10 18 L10 28 C7 27 4.5 25 3 22 Z', BL) +
-    l('M6 18 L8 22 L5.5 24 L8 28', INK, 1.4),
-  rubis_carnage:
-    g(
-      'rotate(-25 16 16)',
-      r(14.6, 6, 3, 24, WO, 1) +
-        p('M17.5 7 C25 6 29 12 28 19 C24 16 21 15.5 17.5 16 Z', ST) +
-        s('M17.5 12 C22 12 25 14.5 28 19 C24 16 21 15.5 17.5 16 Z', STM) +
-        p('M24 10 C25.5 12 25.5 14 24 15 C22.5 14 22.5 12 24 10 Z', RED)
-    ) + p('M5 26 C5 28.5 9 28.5 9 26 C9 24 7 22 7 21 C7 22 5 24 5 26 Z', RE),
-  rubis_precision:
-    c(16, 16, 11, 'none').replace('fill="none"', 'fill="#20283a"') +
-    '<circle cx="16" cy="16" r="7" fill="none" stroke="' +
-    RE +
-    '" stroke-width="1.8"/>' +
-    l('M16 2 L16 10 M16 22 L16 30 M2 16 L10 16 M22 16 L30 16', RE, 1.8) +
-    c(16, 16, 2, '#ffe07a'),
-  rubis_acharnement:
-    [0, 1, 2]
-      .map(k => L('M' + (6 + k * 7) + ' 5 L' + (12 + k * 7) + ' 27', k === 2 ? '#ffffff' : '#ffb0a8', 1.8))
-      .join('') +
-    L('M22 22 C26 24 28 21 27 17', OR, 1.6) +
-    p('M24.5 14.5 L28.5 16.5 L25.5 19 Z', OR),
-  rubis_dernier_souffle:
-    p(
-      'M7 15 C7 8 11 4.5 16 4.5 C21 4.5 25 8 25 15 C25 18 23 20 21.5 20.5 L21.5 25 L10.5 25 L10.5 20.5 C9 20 7 18 7 15 Z',
-      BO
-    ) +
-    s('M16 4.5 C21 4.5 25 8 25 15 C25 18 23 20 21.5 20.5 L21.5 25 L16 25 Z', '#d0c8b8') +
-    c(12.3, 14.5, 2.6, INK) +
-    c(19.7, 14.5, 2.6, INK) +
-    p('M16 17.5 L17.3 20 L14.7 20 Z', INK) +
-    l('M13 25 L13 22.5 M16 25 L16 22.5 M19 25 L19 22.5', INK, 1.2) +
-    l('M22 7 C26 5 28 8 26 10 C24.5 11.5 26 13.5 28.5 12.5', '#b8f0ff', 1.6),
-  // ---------------------------------------------------------------- Rubis défensifs
-  rubis_colosse:
+  // ---------------------------------------------------------------- Artéfacts de l'Arène (un par boss)
+  artefact_coeur_fer:
     p('M5 28 L5 15 C5 8 9.5 4 16 4 C22.5 4 27 8 27 15 L27 28 Z', STONE()) +
     s('M16 4 C22.5 4 27 8 27 15 L27 28 L16 28 Z', '#7a808c') +
     p('M8 14 L14 15.5 L13.5 18 L8 17 Z', '#ffcc40') +
@@ -490,25 +360,16 @@ const A = {
     r(10, 21, 12, 3.5, '#5a606a', 1) +
     l('M7 7 L9 9.5 M25 26 L22 23 M20 6 L19 8.5', '#5a606a', 1.3) +
     l('M2 28 L30 28', INK, 1.8),
-  rubis_gardien:
-    p('M8 3 L24 3 L26 6 L26 18 C26 23 21.5 27 16 29.5 C10.5 27 6 23 6 18 L6 6 Z', STM) +
-    s('M16 3 L24 3 L26 6 L26 18 C26 23 21.5 27 16 29.5 Z', STD) +
-    p('M16 8 L19.5 11 L19.5 17 C19.5 20 18 22 16 23.5 C14 22 12.5 20 12.5 17 L12.5 11 Z', GO) +
-    l('M6 9 L26 9', INK, 1.2) +
-    hi('M9 6 L9 17'),
-  rubis_rempart:
+  artefact_croc_ombres:
+    p('M6 3 L24 3 C25 5 24 7.5 22 7.5 L9 7.5 C7 7.5 5.5 5 6 3 Z', PU) +
+    p('M9.5 7.5 L21.5 7.5 C21.5 15 19 22 14 29 C13 21 11.5 14 9.5 7.5 Z', BO) +
+    s('M21.5 7.5 C21.5 15 19 22 14 29 C15.5 21 16.5 14 16.5 7.5 Z', '#cfc6b4') +
+    hi('M12 10 C13 15 13.6 19 14 23') +
     p(
-      'M3 13 L3 7 L7 7 L7 10 L10 10 L10 7 L14 7 L14 10 L18 10 L18 7 L22 7 L22 10 L25 10 L25 7 L29 7 L29 13 Z',
-      STONE()
-    ) +
-    r(3, 13, 26, 15, STONE(), 0.5) +
-    l(
-      'M3 18 L29 18 M3 23 L29 23 M9 13 L9 18 M17 13 L17 18 M25 13 L25 18 M6 18 L6 23 M13 18 L13 23 M21 18 L21 23',
-      '#6a707a',
-      1.2
-    ) +
-    p('M13 28 L13 23.5 C13 21.5 19 21.5 19 23.5 L19 28 Z', LED),
-  rubis_peau_de_pierre:
+      'M24 18 C26 21.5 26.5 23 26.5 24.2 C26.5 25.8 25.4 26.8 24 26.8 C22.6 26.8 21.5 25.8 21.5 24.2 C21.5 23 22 21.5 24 18 Z',
+      RE
+    ),
+  artefact_pierre_colosse:
     p(
       'M7 29 L7 17 C7 15 9 15 9 17 L9 11 C9 9 11.6 9 11.6 11 L11.6 9 C11.6 7 14.2 7 14.2 9 L14.2 10 C14.2 8 16.8 8 16.8 10 L16.8 12 C16.8 10 19.4 10 19.4 12 L19.4 21 C19.4 25 21.5 24 23 21 C24 19 26.5 20 25.5 22.5 C23.5 27 21 29 19 30 Z',
       STONE()
@@ -520,301 +381,57 @@ const A = {
     l('M9 20 L12 22 L11 25 M14.5 16 L17 18 L15.5 21 M17 25 L19 27', '#5a606a', 1.3) +
     p(star(4, 3.4, 1, 26, 8), '#e8eef8') +
     l('M23 13 L25 14.5 M29 11 L27 12', '#e8eef8', 1.2),
-  rubis_volonte:
-    p(shieldShape, STM) +
-    s('M16 3 C20 5 24 5 27 5.5 C27 17 23 24.5 16 29 Z', STD) +
-    [6, 12, 18, 24]
-      .map((x, k) =>
-        g(
-          'rotate(-30 ' + (x + 1) + ' ' + (21 - k * 3.5) + ')',
-          link(x - 2.5, 19 - k * 3.5, k % 2 ? '#c8d0dc' : '#8a96a6')
-        )
-      )
-      .join(''),
-  rubis_forteresse:
+  artefact_fiole_brumes:
+    r(13, 3.5, 6, 9, '#d6eef4', 1) +
+    r(12, 2, 8, 3.2, WO, 1) +
+    c(16, 20, 9.5, '#d6eef4') +
+    p('M6.8 20.5 C9 18 23 18 25.2 20.5 C25 25.5 21 29.5 16 29.5 C11 29.5 7 25.5 6.8 20.5 Z', GR) +
+    s('M16 18.6 C20 18.7 23.6 19.4 25.2 20.5 C25 25.5 21 29.5 16 29.5 Z', GRD) +
+    c(12.5, 23.5, 1.3, '#c8ffd0') +
+    c(18, 25.5, 1, '#c8ffd0') +
+    hi('M10 15.5 C9 17 8.8 18.5 9 20') +
+    l('M20 10 C23 9 25 6.5 24 4.5 M23 13 C26.5 13 28.5 10.5 28 8', '#c8f0d8', 1.4),
+  artefact_ecu_dechu:
+    p('M8 3 L24 3 L26 6 L26 18 C26 23 21.5 27 16 29.5 C10.5 27 6 23 6 18 L6 6 Z', STM) +
+    s('M16 3 L24 3 L26 6 L26 18 C26 23 21.5 27 16 29.5 Z', STD) +
+    p('M16 8 L19.5 11 L19.5 17 C19.5 20 18 22 16 23.5 C14 22 12.5 20 12.5 17 L12.5 11 Z', GO) +
+    l('M6 9 L26 9', INK, 1.2) +
+    hi('M9 6 L9 17'),
+  artefact_ecaille_ecarlate:
     p(
-      'M9 29 L9 10 L7 10 L7 4 L10 4 L10 6 L13 6 L13 4 L19 4 L19 6 L22 6 L22 4 L25 4 L25 10 L23 10 L23 29 Z',
-      STONE()
+      'M16 3.5 C23 3.5 27.5 8.5 27.5 15 C27.5 22 22 27 16 29.5 C10 27 4.5 22 4.5 15 C4.5 8.5 9 3.5 16 3.5 Z',
+      RE
     ) +
-    s('M16 4 L19 4 L19 6 L22 6 L22 4 L25 4 L25 10 L23 10 L23 29 L16 29 Z', '#7a808c') +
-    r(14, 13, 4, 5, '#ffe79a', 0.5) +
-    p('M13 29 L13 24 C13 21.5 19 21.5 19 24 L19 29 Z', LED) +
-    p('M16 4 L16 -0.5 L21 1.5 L16 3', RE),
-  rubis_resilience:
-    p('M3 29 L6 20 L12 17 L20 18 L27 22 L29 29 Z', STONE()) +
-    l('M16 17.5 L15 22 L17 25', '#5a606a', 1.2) +
-    L('M16 21 L16 9', GRD, 1.8) +
-    p('M16 12 C16 6 11 4 6 5.5 C6.5 10.5 10.5 13 16 12 Z', GR) +
-    p('M16 10 C16 5 19.5 2 25.5 2.5 C25.5 7.5 22 10.5 16 10 Z', '#8ae07a'),
-  rubis_second_souffle:
-    p(heartShape, '#ff8aa8') +
-    s('M16 11 C17.5 9 20.5 7.5 23.5 9.5 C28 13 26 20 16 27 Z', '#e05a80') +
-    L('M2 12 L13 12 C16 12 16 8 13.5 8 M3 18 L18 18 C21 18 21 22.5 18 22.5', '#d8f4ff', 1.6),
-  // ---------------------------------------------------------------- Rubis de soutien
-  rubis_guerisseur:
-    p('M4 18 C5.5 15.5 9 15.5 11 17.5 L16 21.5 L21 17.5 C23 15.5 26.5 15.5 28 18 L23 26 L9 26 Z', SK) +
-    r(6, 25.5, 20, 4, PU, 1.2) +
-    p('M14 3 L18 3 L18 7 L22 7 L22 11 L18 11 L18 15 L14 15 L14 11 L10 11 L10 7 L14 7 Z', GR) +
-    l('M2 9 L5 10 M30 9 L27 10 M6 3 L8 5 M26 3 L24 5', '#bfffcf', 1.4),
-  rubis_regeneration:
-    L('M25 9 A10 10 0 1 0 26.5 18', '#58d08a', 2.2) +
-    p('M27.5 3.5 L27.5 11 L20 11 Z', '#58d08a') +
-    p('M10 22 C10 15.5 14 12 20.5 11.5 C20.5 18 16.5 22 10 22 Z', GR) +
-    l('M11 21 C14 18 16.5 15.5 19 13', GRD, 1.2),
-  rubis_arcane:
-    '<circle cx="16" cy="16" r="12.5" fill="#24183e" ' +
-    O +
-    '/>' +
-    '<circle cx="16" cy="16" r="9.5" fill="none" stroke="' +
-    PU +
-    '" stroke-width="1.4"/>' +
-    p(star(6, 9, 4.5), 'none').replace(
-      'fill="none" ' + O,
-      'fill="none" stroke="#d8b8ff" stroke-width="1.3"'
-    ) +
-    c(16, 16, 2.6, '#f0e0ff') +
-    [0, 90, 180, 270]
-      .map(a => g('rotate(' + a + ' 16 16)', '<circle cx="16" cy="4.8" r="1.3" fill="#d8b8ff"/>'))
-      .join(''),
-  rubis_faucheur:
-    L('M23 3 L11 29', WO, 2) +
-    p('M21.5 5 C14 3 6 6 3 12 C9 9.5 15 9.5 20.5 11 Z', ST) +
-    s('M3 12 C9 9.5 15 9.5 20.5 11 L20 9.5 C15 8 9 8.5 3 12 Z', STM) +
-    hi('M8 7 C11 5.5 15 5 18 5.6'),
-  rubis_meditation:
-    [-60, -30, 0, 30, 60]
-      .map(a =>
-        g(
-          'rotate(' + a + ' 16 24)',
-          p('M16 24 C12.5 18 13 12 16 9 C19 12 19.5 18 16 24 Z', a ? '#f8a8c8' : '#ffc8dc')
-        )
-      )
-      .join('') + e(16, 25, 11, 3, '#58c08a'),
-  rubis_benediction:
-    e(16, 7, 8.5, 3, 'none').replace(
-      'fill="none" ' + O,
-      'fill="none" stroke="' + INK + '" stroke-width="4.4"'
-    ) +
-    e(16, 7, 8.5, 3, 'none').replace(
-      'fill="none" ' + O,
-      'fill="none" stroke="' + GO + '" stroke-width="2.2"'
-    ) +
-    [-50, -25, 0, 25, 50]
-      .map(a =>
-        g('rotate(' + a + ' 16 12)', l('M16 14 L16 29', '#ffe9a0', 2).replace('/>', ' opacity=".75"/>'))
-      )
-      .join('') +
-    p(star(4, 4.5, 1.4, 16, 18), '#fff8d8'),
-  rubis_source_vitale:
-    r(4, 23, 24, 6, STONE(), 1.5) +
-    r(13.5, 13, 5, 10.5, STONE(), 0.8) +
-    L('M16 12 C16 6 9 6 8 13 M16 12 C16 6 23 6 24 13', WA, 1.8) +
-    l('M7 23 L7 19 M25 23 L25 19', WA, 1.6) +
-    g('translate(9 -4) scale(.45)', p(heartShape, '#ff7aa0')),
-  rubis_communion:
-    p('M2 20 L9 16 L16 20 L23 16 L30 20 L30 25 L23 29 L19 29 L16 27 L13 29 L9 29 L2 25 Z', SK) +
-    l('M10 23 L14 26 M13 21.5 L17 24.5 M16 20 L20 23', '#c08a60', 1.2) +
-    c(16, 9, 5, '#ffe9a0') +
-    Array.from({ length: 8 }, (_, k) =>
-      g('rotate(' + k * 45 + ' 16 9)', l('M16 1.5 L16 2.8', '#ffe9a0', 1.4))
-    ).join(''),
-  // ---------------------------------------------------------------- Rubis d'armes
-  rubis_tempete:
+    s('M16 3.5 C23 3.5 27.5 8.5 27.5 15 C27.5 22 22 27 16 29.5 Z', RED) +
+    l('M8.5 12 C12 15.5 20 15.5 23.5 12', '#7a1418', 1.5) +
+    l('M9.5 18.5 C13 22 19 22 22.5 18.5', '#7a1418', 1.5) +
+    l('M16 6 L16 26', '#ff9c86', 1) +
+    hi('M8.5 10 C9.5 7.5 11.5 6.3 14 5.8'),
+  artefact_oeil_tempetes:
     p('M7 16 C3 16 3 10 7.5 10 C8 5 15 3 18 8 C22 6.5 27 9 25.5 13.5 C28.5 14 28 16 25.5 16 Z', '#8a96b0') +
     s('M7 16 L25.5 16 C28 16 28.5 14 25.5 13.5 C20 15 12 15 7 16 Z', '#6a7690') +
     p('M17 15 L11 23 L15 23 L12 30 L21 20 L17 20 L19 15 Z', '#ffe05a'),
-  rubis_echo:
-    blade('rotate(0 16 16) translate(-6 0) scale(.85)', 18) +
-    [0, 1, 2]
-      .map(k =>
-        l(
-          'M' +
-            (17 + k * 4) +
-            ' ' +
-            (9 - k) +
-            ' C' +
-            (21 + k * 4) +
-            ' 13 ' +
-            (21 + k * 4) +
-            ' 19 ' +
-            (17 + k * 4) +
-            ' ' +
-            (23 + k),
-          '#9fdcff',
-          2 - k * 0.4
-        )
-      )
-      .join(''),
-  rubis_vampire:
+  artefact_sceau_executeur:
     p(
-      'M16 6 C17 4 19 4 19.5 6.5 C23 3 28 3.5 30 6 C27 7 26 9 26.5 12 C24 11 21.5 12 20 14.5 C19 13 17 13 16 15 C15 13 13 13 12 14.5 C10.5 12 8 11 5.5 12 C6 9 5 7 2 6 C4 3.5 9 3 12.5 6.5 C13 4 15 4 16 6 Z',
-      '#4a3a6a'
+      'M7 15 C7 8 11 4.5 16 4.5 C21 4.5 25 8 25 15 C25 18 23 20 21.5 20.5 L21.5 25 L10.5 25 L10.5 20.5 C9 20 7 18 7 15 Z',
+      BO
     ) +
-    p('M11 18 L21 18 L19.5 21 L17.5 21 L16 27 L14.5 21 L12.5 21 Z', '#f6f0e2') +
-    p('M16 24 C17.5 26.5 18.5 28 18 29.5 C17.5 31 14.5 31 14 29.5 C13.5 28 14.5 26.5 16 24 Z', RE),
-  rubis_onde:
-    '<circle cx="16" cy="16" r="12" fill="none" stroke="' +
-    OR +
-    '" stroke-width="2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#ffc080" stroke-width="1.6"/>' +
-    p(star(8, 6, 2.6), '#ffe07a') +
-    l('M3 3 L6 6 M29 3 L26 6 M3 29 L6 26 M29 29 L26 26', OR, 1.6),
-  rubis_lame_ardente:
-    blade('rotate(35 16 16)', 18, '#ffd8b0') +
-    g(
-      'rotate(35 16 16)',
-      p('M16 3 C19 7 20 10 19 14 C18.5 17 17.5 19 16 21 C14.5 19 13.5 17 13 14 C12 10 13 7 16 3 Z', OR) +
-        s('M16 9 C17.5 12 17.5 15 16 18 C14.5 15 14.5 12 16 9 Z', '#ffe07a')
-    ),
-  rubis_gel:
-    p('M16 2 L20 12 L16 30 L12 12 Z', '#bfeaff') +
-    s('M16 2 L20 12 L16 30 Z', '#7ac8f0') +
-    l('M16 2 L16 30', '#ffffff', 0.8) +
-    [0, 60, 120]
-      .map(a =>
-        g(
-          'rotate(' + a + ' 16 16)',
-          l('M16 6 L16 26 M13.5 8.5 L16 11 L18.5 8.5 M13.5 23.5 L16 21 L18.5 23.5', '#e8f8ff', 1).replace(
-            '/>',
-            ' opacity=".6"/>'
-          )
-        )
-      )
-      .join(''),
-  rubis_acceleration:
-    c(17, 17, 11, '#f2e8d0') +
-    l('M17 9 L17 17 L22.5 20', INK, 2) +
-    c(17, 17, 1.4, INK) +
-    L('M2 9 L7 9 M1 15 L6 15 M2 21 L6 21', '#9fdcff', 1.4) +
-    p('M24 3 L30 6 L24 9 Z', OR),
-  rubis_resonance:
-    p(
-      'M16 4 C21.5 4 23.5 9 23.5 14 C23.5 18 25 20.5 27.5 22.5 L4.5 22.5 C7 20.5 8.5 18 8.5 14 C8.5 9 10.5 4 16 4 Z',
-      GO
-    ) +
-    s('M16 4 C21.5 4 23.5 9 23.5 14 C23.5 18 25 20.5 27.5 22.5 L16 22.5 Z', GOM) +
-    c(16, 25.5, 2.6, GOD) +
-    l('M2 10 C0.5 13 0.5 17 2 20 M30 10 C31.5 13 31.5 17 30 20', '#ffe9a0', 1.4) +
-    hi('M11.5 10 C12 8 13 6.8 14.5 6.3'),
-  // ---------------------------------------------------------------- Rubis utilitaires
-  rubis_voyageur:
-    c(16, 16, 12.5, '#f2e8d0') +
-    '<circle cx="16" cy="16" r="9.5" fill="none" stroke="' +
-    GOD +
-    '" stroke-width="1"/>' +
-    p('M16 6 L19.5 16 L16 26 L12.5 16 Z', '#e8e8ee') +
-    p('M16 6 L19.5 16 L12.5 16 Z', RE) +
-    c(16, 16, 1.8, GO) +
-    l('M16 2.5 L16 4.5 M29.5 16 L27.5 16', INK, 1.6),
-  rubis_sprinteur:
-    p(
-      'M6 10 L15 10 L15 20 L26 23 C28 23.5 28.5 25 28.5 26.5 L28.5 28 L5 28 L5 22 C6 19 6 15 6 10 Z',
-      '#e5484d'
-    ) +
-    r(5, 25.5, 23.5, 3, '#f6f0e2', 1) +
-    p('M15 12 C19 7 25 6 30 8 C26 9 23 11 21 14 C24 13 27 13.5 29 15 C25 16 21 17 15 16 Z', '#f6f6ff') +
-    l('M18 11.5 L24 9.5 M18 14 L25 13', '#b8c4d8', 1),
-  rubis_endurance:
-    c(19, 6, 3.4, SK) +
-    L('M18 10 L14.5 18 L8.5 19.5 M14.5 18 L19 22 L17.5 29 M17.5 11.5 L11 14 M17.5 11.5 L23.5 16', BL, 2.2) +
-    l('M2 22 L7 22 M3 27 L9 27', '#9fdcff', 1.6),
-  rubis_recuperation:
-    r(7, 3, 14, 3, WO, 1) +
-    r(7, 26, 14, 3, WO, 1) +
-    p(
-      'M9 6 L19 6 C19 11 15 13.5 15 16 C15 18.5 19 21 19 26 L9 26 C9 21 13 18.5 13 16 C13 13.5 9 11 9 6 Z',
-      '#dff2ff'
-    ) +
-    s('M11 24 C11 21.5 14 19.5 14 18 C14 19.5 17 21.5 17 24 Z', GO) +
-    p(
-      'M21.5 14 L26 14 L26 18.5 L30.5 18.5 L30.5 23 L26 23 L26 27.5 L21.5 27.5 L21.5 23 L17 23 L17 18.5 L21.5 18.5 Z',
-      GR
-    ),
-  rubis_prospecteur:
-    gemCut('#7fd8ff', '#3a8ac8', 11, 12, 0.55) +
-    L('M20 20 L28 28', WO, 2.6) +
-    '<circle cx="16" cy="16" r="7.5" fill="#bfe4ff" fill-opacity=".35" ' +
-    O +
-    '/>' +
-    hi('M11.5 13 C12 11.5 13 10.5 14.5 10', 1.4),
-  rubis_tresorier:
-    e(16, 25, 10, 3.5, GOM) +
-    e(16, 21.5, 10, 3.5, GO) +
-    e(16, 18, 10, 3.5, GOM) +
-    e(16, 14.5, 10, 3.5, GO) +
-    coin(23, 8, 5.5) +
-    l('M23 6 L23 10', GOD, 1.2),
-  rubis_explorateur:
-    p('M4 8 L11 5 L21 8.5 L28 5.5 L28 24 L21 27 L11 23.5 L4 26.5 Z', '#f2e2b8') +
-    s('M11 5 L21 8.5 L21 27 L11 23.5 Z', '#e2cc98') +
-    l('M7 20 C10 17 12 18 14 15 C16 12.5 18.5 14 20 12', RE, 1.4).replace('/>', ' stroke-dasharray="2 2"/>') +
-    l('M21 9 L25 13 M25 9 L21 13', RE, 2),
-  rubis_elan:
-    L(
-      'M3 11 L18 11 C22 11 22 5.5 18.5 5.5 C16.5 5.5 16 7 16 8 M3 17 L23 17 C27 17 27 22.5 23 22.5 C21 22.5 20.5 21 20.5 20 M3 23 L13 23',
-      '#cdeeff',
-      1.8
-    ) + p('M25 9 L30 11.5 L25 14 Z', '#9fdcff'),
-  // ---------------------------------------------------------------- Rubis spéciaux
-  rubis_phenix:
-    p('M16 10 C12 13 11 18 13 24 L16 30 L19 24 C21 18 20 13 16 10 Z', OR) +
-    p('M16 13 C11 9 6 9 2 12 C5 13 7 15 8 18 C10 15 13 14 15.5 15.5 Z', '#ff5a3a') +
-    p('M16 13 C21 9 26 9 30 12 C27 13 25 15 24 18 C22 15 19 14 16.5 15.5 Z', '#ff5a3a') +
-    s(
-      'M5 12.5 C8 12 11 12.5 14 14.5 C11 14 8.5 14.5 7.5 16 Z M27 12.5 C24 12 21 12.5 18 14.5 C21 14 23.5 14.5 24.5 16 Z',
-      '#ffb03a'
-    ) +
-    p(
-      'M16 4 C18 4 19 5.5 19 7 L21.5 7.5 L19 8.5 C18.5 10 17.5 11 16 11 C14.5 11 13 9.5 13 7.5 C13 5.5 14.5 4 16 4 Z',
-      '#ffc040'
-    ) +
-    '<circle cx="17" cy="6.8" r=".9" fill="' +
-    INK +
-    '"/>' +
-    p('M14 2 C14.5 3 15 3.5 15.5 4 M16.5 1 L16.5 4 M19 2 C18.5 3 18 3.5 17.5 4', 'none').replace(
-      'fill="none" ' + O,
-      'fill="none" stroke="#ffe07a" stroke-width="1.4" stroke-linecap="round"'
-    ) +
-    s('M14.5 24 L16 29 L17.5 24 C17 25 15 25 14.5 24 Z', '#ffe07a') +
-    l('M10 27 C11 25 12 24 13 23.5 M22 27 C21 25 20 24 19 23.5', '#ffb03a', 1.4),
-  rubis_pacte:
-    g(
-      'rotate(30 16 16)',
-      p('M16 2 L18.6 6 L18.6 18 L13.4 18 L13.4 6 Z', ST) +
-        s('M16 3 L18.6 6 L18.6 18 L16 18 Z', STM) +
-        p('M14 8 C15 11 15 13 14 16 L13.4 16 L13.4 6 Z', RE) +
-        r(10.5, 17.5, 11, 2.8, '#3a2030', 1) +
-        r(14.6, 20.3, 2.8, 6, LED, 0.8)
-    ) + p('M8 22 C10 25.5 11 27.5 10.3 29.3 C9.6 31 6.4 31 5.7 29.3 C5 27.5 6 25.5 8 22 Z', RE),
-  rubis_miroir:
-    p(
-      'M16 2.5 C22 2.5 25.5 7.5 25.5 13 C25.5 18.5 21.5 22.5 16 22.5 C10.5 22.5 6.5 18.5 6.5 13 C6.5 7.5 10 2.5 16 2.5 Z',
-      GO
-    ) +
-    e(16, 12.8, 6.8, 7.5, '#bfe4ff') +
-    hi('M12.5 10.5 L15.5 7.5 M13 14 L18 9', 1.4) +
-    r(14.5, 22, 3, 7, GOD, 1) +
-    p('M11 29 L21 29 L19.5 31 L12.5 31 Z', GOD) +
-    c(16, 2.5, 1.4, RE),
-  rubis_eclipse:
-    Array.from({ length: 12 }, (_, k) =>
-      g('rotate(' + k * 30 + ' 16 16)', l('M16 1.5 L16 5', '#ffd24a', 1.8))
-    ).join('') +
-    c(16, 16, 10, '#ffd24a') +
-    c(17.5, 15, 9.2, '#241a3e') +
-    l('M10.5 21 C9 19 8.5 17 8.5 15', '#fff4c0', 1).replace('/>', ' opacity=".8"/>'),
-  rubis_ame_liee:
-    p('M9 22 C4 22 3 16 6 13 C7 9 11 8 12.5 11 C14 8.5 18 10 16.5 14 C18.5 17 15 22 9 22 Z', '#a8d8ff') +
-    c(8.5, 15.5, 0.9, INK) +
-    c(11.5, 15.5, 0.9, INK) +
-    p(
-      'M23 22 C18 22 16 17 17.5 14 C17 10 21 8.5 22 11.5 C24 8.5 28 10 27 14 C30 17 28 22 23 22 Z',
-      '#ffc0e0'
-    ) +
-    c(21.5, 15.5, 0.9, INK) +
-    c(24.5, 15.5, 0.9, INK) +
-    L('M10 25 C13 28.5 19 28.5 22 25', GO, 1.6) +
-    c(16, 27.5, 1.6, GO),
-  rubis_chaos:
+    s('M16 4.5 C21 4.5 25 8 25 15 C25 18 23 20 21.5 20.5 L21.5 25 L16 25 Z', '#d0c8b8') +
+    c(12.3, 14.5, 2.6, INK) +
+    c(19.7, 14.5, 2.6, INK) +
+    p('M16 17.5 L17.3 20 L14.7 20 Z', INK) +
+    l('M13 25 L13 22.5 M16 25 L16 22.5 M19 25 L19 22.5', INK, 1.2) +
+    l('M22 7 C26 5 28 8 26 10 C24.5 11.5 26 13.5 28.5 12.5', '#b8f0ff', 1.6),
+  artefact_prisme_cristal:
+    p('M16 2 L23.5 9 L23.5 23 L16 30 L8.5 23 L8.5 9 Z', '#e0c0ff') +
+    s('M16 2 L23.5 9 L23.5 23 L16 30 Z', '#a874e0') +
+    l('M8.5 9 L16 13.5 L23.5 9 M16 13.5 L16 30', '#7a4ab8', 1.2) +
+    hi('M11 11 L11 21.5') +
+    p(star(4, 3.2, 0.8, 27, 5), '#fff6d0') +
+    p(star(4, 2.4, 0.6, 4.5, 26), '#fff6d0'),
+  artefact_coeur_cendres:
+    flame('#ff7a2a', '#ffe07a') + g('translate(10 13) scale(.38)', p(heartShape, '#fff0e0')),
+  artefact_voile_neant:
     L(
       'M16 16 C16 13.5 19 13.5 19 16 C19 20 13 20 13 16 C13 10 22.5 10 22.5 16 C22.5 23.5 9.5 23.5 9.5 16 C9.5 7 26 6.5 26.5 16',
       '#d080ff',
@@ -823,20 +440,17 @@ const A = {
     p(star(4, 3.4, 1, 5, 6), '#ffe07a') +
     p(star(4, 3, 0.9, 27, 26), '#ff7a7a') +
     p(star(4, 2.6, 0.8, 6, 26), '#7affd0'),
-  rubis_symbiose:
-    c(16, 16, 12.5, '#f4fff0') +
-    p(
-      'M16 3.5 C23 3.5 28.5 9 28.5 16 C28.5 23 23 28.5 16 28.5 C12.5 28.5 9.8 25.8 9.8 22.3 C9.8 18.8 12.5 16 16 16 C19.5 16 22.2 13.2 22.2 9.7 C22.2 6.2 19.5 3.5 16 3.5 Z',
-      GRD
-    ) +
-    p('M16 7.5 C17.8 8.5 18 11 16 12 C14 11 14.2 8.5 16 7.5 Z', '#bfffcf') +
-    p('M16 20 C17.8 21 18 23.5 16 24.5 C14 23.5 14.2 21 16 20 Z', GRD),
-  rubis_transcendance:
-    p('M16 22 C10 21 4 17 2 10 C6 12 9 12.5 12 12 C9 15 12 19 16 19 Z', '#e8f0ff') +
-    p('M16 22 C22 21 28 17 30 10 C26 12 23 12.5 20 12 C23 15 20 19 16 19 Z', '#e8f0ff') +
-    p(star(5, 9, 3.8, 16, 12), '#ffe07a') +
-    c(16, 12, 2, '#fff') +
-    l('M16 24 L16 30 M12 26 L13.5 29 M20 26 L18.5 29', '#ffe9a0', 1.4),
+  artefact_couronne_souverain:
+    p('M4 23 L5.5 9.5 L11 15.5 L16 5.5 L21 15.5 L26.5 9.5 L28 23 Z', GO) +
+    s('M16 5.5 L21 15.5 L26.5 9.5 L28 23 L16 23 Z', GOM) +
+    r(3.5, 22, 25, 6, GOM, 1.2) +
+    c(16, 25, 1.8, RE) +
+    c(9.5, 25, 1.4, BL) +
+    c(22.5, 25, 1.4, BL) +
+    c(5.5, 9.5, 1.7, '#fff0b0') +
+    c(16, 5.5, 1.9, '#fff0b0') +
+    c(26.5, 9.5, 1.7, '#fff0b0') +
+    hi('M7.5 20.5 L8.5 13.5'),
   // ---------------------------------------------------------------- Classes et éléments
   cls_druide:
     p('M16 29 L16 14', 'none').replace(
@@ -951,18 +565,7 @@ const A = {
       .join('') + c(16, 16, 2.4, '#e8f8ff'),
   el_lightning:
     p('M19 2 L7 18 L14.5 18 L11.5 30 L25 13 L17.5 13 Z', '#f4e05a') + s('M19 2 L7 18 L11 18 Z', '#fff6b0'),
-  // ---------------------------------------------------------------- Passifs d'artéfact et difficultés
-  art_ardeur: flame('#ff7a2a', '#ffe07a') + g('translate(10 13) scale(.38)', p(heartShape, '#fff0e0')),
-  art_bastion:
-    p('M5 13 L5 7 L9 7 L9 10 L12 10 L12 7 L20 7 L20 10 L23 10 L23 7 L27 7 L27 13 Z', STONE()) +
-    p('M5 13 L27 13 C27 21 23 26 16 29.5 C9 26 5 21 5 13 Z', BL) +
-    s('M16 13 L27 13 C27 21 23 26 16 29.5 Z', BLD) +
-    l('M16 15 L16 26 M11 19 L21 19', GO, 2),
-  art_instinct:
-    p('M2 16 C7 8 25 8 30 16 C25 24 7 24 2 16 Z', '#f6f0e2') +
-    c(16, 16, 6, '#e8a030') +
-    p('M16 10.5 C17.5 13 17.5 19 16 21.5 C14.5 19 14.5 13 16 10.5 Z', INK) +
-    hi('M13 13.5 C13.5 12.5 14.3 11.8 15.2 11.5'),
+  // ---------------------------------------------------------------- Difficultés
   mode_normal: g(
     'translate(16 16) scale(1.12) translate(-16 -16)',
     blade('rotate(42 16 16)') + blade('rotate(-42 16 16)')

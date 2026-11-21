@@ -38,7 +38,6 @@ const gearSlots = {
   boots: '⟦slot_boots⟧ Bottes',
   neck: '⟦slot_neck⟧ Collier',
   ring: '⟦slot_ring⟧ Bague',
-  artifact: '⟦slot_artifact⟧ Artefact',
   weapon: '⟦slot_weapon⟧ Arme'
 };
 
@@ -55,7 +54,7 @@ function recomputeStats() {
   P.mp = Math.min(P.mp + Math.max(0, P.mmp - oldMp), P.mmp);
 }
 
-// PV et mana maximum d'un héros après un changement (équipement, talents, Rubis) : l'hôte via recomputeStats.
+// PV et mana maximum d'un héros après un changement (équipement, talents, artéfacts) : l'hôte via recomputeStats.
 function recomputeHeroStats(hero = game.hero) {
   if (hero === game.hero) return recomputeStats();
   const p = hero.player,
@@ -71,9 +70,7 @@ function recomputeHeroStats(hero = game.hero) {
 function recordKill(m, hero = game.hero) {
   canaanAchieve(hero, 'kill', m);
   if (m.worldBoss) onWorldBossKilled(m, hero);
-  // Rubis de fin de combat de l'hôte (Carnage, Faucheur, Récupération).
-  CANAAN_RUBIS.onKill(m, hero);
-  // Arène : un Rubis par boss vaincu ; les clones ne donnent rien.
+  // Arène : un artéfact par boss vaincu ; les clones ne donnent rien.
   if (game.world.instance?.arena) {
     if (m.arenaBoss) {
       CANAAN_ARENA.onBossDown(m);
@@ -112,7 +109,7 @@ function safeGearText(v) {
 // Fabrique de l'objet brut. giveGear, installée par canaan-gear-engine, le normalise puis le dépose.
 // forcedSlot : pièce choisie (armurerie de la cité elfique), sinon au hasard.
 function createRawGear(level, source = 'normal', guaranteed = null, forcedSlot = null) {
-  const slots = Object.keys(gearSlots).filter(k => k !== 'weapon2'),
+  const slots = Object.keys(gearSlots).filter(k => !SECOND_SLOT_OF[k]),
     slot = slots.includes(forcedSlot) ? forcedSlot : slots[Math.floor(rnd() * slots.length)];
   const rarity = guaranteed
     ? GEAR_RARITIES.find(r => r.name === guaranteed) || rarityRoll(level)
@@ -126,8 +123,7 @@ function createRawGear(level, source = 'normal', guaranteed = null, forcedSlot =
       shoulders: 'Épaulières',
       gloves: 'Gants',
       neck: 'Collier',
-      ring: 'Anneau',
-      artifact: 'Artefact'
+      ring: 'Anneau'
     }[slot] || 'Équipement') +
     ' ' +
     (source === 'raid'
@@ -292,8 +288,9 @@ function sellAllCommon() {
   else renderInventory();
   saveGame();
 }
-function equipBagIndex(index) {
-  if (game.hero.inventory[index]) equipItem(game.hero.inventory[index].id);
+// slot : emplacement choisi pour une bague (ring ou ring2) ; sinon le premier libre (equipSlotFor).
+function equipBagIndex(index, slot = null) {
+  if (game.hero.inventory[index]) equipItem(game.hero.inventory[index].id, game.hero, slot);
 }
 
 // Difficulté de l'instance en cours : null pour une instance à difficulté unique.
@@ -897,8 +894,7 @@ function spawnRewardChest() {
 // Coffre de fin d'instance : une bourse d'or (400–600 en donjon, 1 000–1 500 en raid, ×1,5 en héroïque) et la grosse récompense d'XP pour
 // chaque héros du groupe ; l'équipement vient des boss (30 % de chance chacun, dungeons.js).
 // Coffre secret de l'île ou des Tréfonds : il faut une clé des secrets (boss cachés des donjons) ; seul celui qui
-// l'ouvre est récompensé : un équipement Épique au niveau de la zone, 200 à 400 or, et 25 % de chance d'un Rubis.
-const SECRET_CHEST_RUBIS = 0.25;
+// l'ouvre est récompensé : un équipement Épique au niveau de la zone, et 200 à 400 or.
 // Coffre encore fermé à moins de 2 cases d'une position (coffre secret du monde ou coffre de fin d'instance).
 function nearbyChest(p) {
   const list = game.world.instance
@@ -947,12 +943,7 @@ function openNearbyChest(hero = game.hero) {
       level = c.layer === 'under' ? clampLevel(hero.level) : Math.round((lo + hi) / 2);
     // Sac plein : sacoche de butin (ou poudres), jamais perdu.
     grantSourceReward('secretChest', hero, level);
-    let extra = '';
-    if (Math.random() < SECRET_CHEST_RUBIS) {
-      const got = CANAAN_RUBIS.grant(null, hero);
-      extra = ' + Rune ' + got.rubis.name + (got.fresh ? ' (nouvelle !)' : '');
-    }
-    canaanLootNotice(hero, '🗝️ Coffre secret ouvert : équipement Épique + ' + gold + ' or' + extra + ' !');
+    canaanLootNotice(hero, '🗝️ Coffre secret ouvert : équipement Épique + ' + gold + ' or !');
     CANAAN_WARDROBE.drop('secretChest', hero);
   }
   saveGame();

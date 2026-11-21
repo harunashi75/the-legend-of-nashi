@@ -31,10 +31,10 @@ function linkGameState(g) {
   for (const [part, fields] of Object.entries(links))
     for (const [field, name] of Object.entries(fields))
       Object.defineProperty(g.game[part], field, {get: () => g[name], set: value => {g[name] = value}, enumerable: true});
-  // États sauvegardés du héros (classe, Rubis, records de l'Arène), comme dans canaan-game-state.
+  // États sauvegardés du héros (classe, artéfacts, records de l'Arène), comme dans canaan-game-state.
   Object.assign(g.game.hero, {intent: {dx: 0, dy: 0, attack: null, aimX: 0, aimY: 0}, classe: {id: null, talents: []},
-    rubis: {owned: {}, equipped: [null, null, null, null, null, null]},
-    arena: {best: 0, attempts: 0, completed: false, lastBoss: '', pendingChoice: false}});
+    artefacts: {ranks: {}, equipped: [null, null, null, null]},
+    arena: {best: 0, attempts: 0, completed: false, lastBoss: ''}});
   return g;
 }
 function element() {
@@ -51,7 +51,6 @@ function game() {
     monsters: [], drops: [], kills: 0, recorded: 0,
     WEAPON_TYPES: {}, WEAPON_SPELLS: {}, CRAFT_WEAPONS: [],
     // Doubles explicites des modules non chargés dans les tests unitaires.
-    CANAAN_ARTIFACT_STATS: s => s, CANAAN_ARTIFACT_PASSIVE: () => null,
     CANAAN_SOUND: {floatText() {}, effect() {}, cue() {}},
     // Succès (achievements.js, testé à part) : événements ignorés.
     canaanAchieve() {}, CANAAN_ACHIEVEMENTS: {draw() {}},
@@ -91,7 +90,7 @@ function game() {
   vm.runInContext(script('canaan-class-talents'), g);
   vm.runInContext(script('canaan-summons'), g);g.refreshWeaponBar();
   vm.runInContext(script('canaan-combat'), g);
-  vm.runInContext(script('canaan-rubis'), g);
+  vm.runInContext(script('canaan-artefacts'), g);
   vm.runInContext(script('canaan-arena'), g);
   vm.runInContext(script('canaan-pipeline'), g);
   g.attackBonus = () => g.characterStats().attack - 18;
@@ -103,11 +102,10 @@ function game() {
   g.setClass = (id,talents=[]) => {g.game.hero.level=60;g.equipment.weapon.sec={crit:1,power:1};g.CANAAN_CLASS_STATE.import({id,talents})};
   return g;
 }
-function modifiers(g, recovery = 0, healing = 0, artifact = 0) {
+function modifiers(g, recovery = 0, healing = 0) {
   const base = g.characterStats;
   g.characterStats = () => {
-    const st = base(); st.cooldownReduction = recovery; st.healingBonus = healing;
-    st.artifactHealingBonus = artifact; return st;
+    const st = base(); st.cooldownReduction = recovery; st.healingBonus = healing; return st;
   };
 }
 function storageGame() {
@@ -117,11 +115,10 @@ function storageGame() {
     overworld:[[1]],overdecor:[[null]],world:[[1]],decor:[[null]],chests:[],
     openedChests:[],worldBossTimers:{},
     CANAAN_BASE_MANA:300,CANAAN_SPAWN:{x:3480,y:11400},
-    gearSlots:Object.fromEntries(['weapon','weapon2','helm','shoulders','armor','gloves','boots','neck','ring','artifact'].map(k=>[k,k])),
+    gearSlots:Object.fromEntries(['weapon','weapon2','helm','shoulders','armor','gloves','boots','neck','ring','ring2'].map(k=>[k,k])),
     localStorage:{getItem:k=>db.get(k)??null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)},
     setTimeout:fn=>{scheduled.set(++nextTimer,fn);return nextTimer},clearTimeout:id=>scheduled.delete(id),
     console:{error(){},warn(){}},
-    ensureArtifact(){},
   });
   g.recoveryNodes=new Map();g.reloadCount=0;
   g.document.getElementById=id=>{if(!g.recoveryNodes.has(id))g.recoveryNodes.set(id,element());return g.recoveryNodes.get(id)};
@@ -136,7 +133,7 @@ function storageGame() {
   // Monde des quêtes : conservé tel quel (le vrai module est testé à part).
   g.CANAAN_QUESTS={exportWorld:()=>g.savedQuests||{flags:{},solved:{}},importWorld:d=>{g.savedQuests=d}};
   // Banque : conservée telle quelle (le vrai module est testé à part).
-  g.CANAAN_BANK={export:h=>h.bank||{items:[],stacks:{}},withBankedRubis:(b,r)=>r,sanitize:b=>b&&Array.isArray(b.items)?b:{items:[],stacks:{}}};
+  g.CANAAN_BANK={export:h=>h.bank||{items:[],stacks:{}},sanitize:b=>b&&Array.isArray(b.items)?b:{items:[],stacks:{}}};
   // Sacoche de butin : conservée telle quelle (le vrai module est testé à part).
   g.CANAAN_SALVAGE={of:h=>h.satchel||[],export:h=>(h.satchel||[]).slice(),sanitize:v=>Array.isArray(v)?v:[]};
   // Succès : carnet conservé tel quel (le vrai module est testé à part).

@@ -10,7 +10,7 @@
   const combat = {
     version: window.CANAAN_VERSION,
     // La primitive des statistiques gère Puissance, écart de niveau, critique, mort et butin.
-    // hero : le héros qui frappe (l'hôte par défaut), avec ses statistiques, ses talents de classe et ses Rubis.
+    // hero : le héros qui frappe (l'hôte par défaut), avec ses statistiques, ses talents de classe et ses artéfacts.
     rawAttack(target, amount, hero = game.hero) {
       return window.CANAAN_STATS_ATTACK(target, amount, hero);
     },
@@ -24,16 +24,14 @@
         damage *= 1.3;
         target.v1746_mark = 0;
       }
-      const artifact = window.CANAAN_ARTIFACT_PASSIVE(hero);
-      if (artifact?.variant === 0) damage *= 1 + artifact.amount / 100;
       // Maîtrise : bonus des compétences offensives (pas des attaques de base).
       if (!options.basic) damage *= 1 + Math.max(0, characterStats(hero).mastery || 0) / 100;
-      // Rubis équipés : bonus conditionnels avant la frappe, déclencheurs après.
       // Repas de cuisine : bonus de dégâts en cours.
       damage *= CANAAN_PROF.damageMult(hero);
       // Bénédiction du Grand Arbre de la cité elfique : +10 % pendant 30 minutes.
       damage *= CANAAN_CITY.blessMult(hero);
-      damage = CANAAN_RUBIS.attackBefore(target, damage, options, hero);
+      // Artéfacts de l'Arène équipés : bonus conditionnels avant la frappe, déclencheurs après.
+      damage = CANAAN_ARTEFACTS.attackBefore(target, damage, options, hero);
       // Talents de classe : multiplicateurs avant, déclencheurs après (avec les dégâts réellement infligés).
       const talents = window.CANAAN_CLASS_ATTACK;
       const context = talents.before(target, damage, options, hero);
@@ -41,12 +39,12 @@
       const result = this.rawAttack(target, damage, hero);
       context.dealt = result || 0;
       talents.after(target, context, hero);
-      CANAAN_RUBIS.attackAfter(target, result || 0, options, hero);
+      CANAAN_ARTEFACTS.attackAfter(target, result || 0, options, hero);
       return result;
     },
     // raw : dégâts bruts d'une attaque précise (mécaniques de l'Arène) ; sinon calculés par Ratings52.
-    // options.magic : dégâts magiques (sorts et sols de l'Arène), transmis aux Runes du héros touché.
-    // hero : le héros touché (l'hôte par défaut), avec sa roulade, ses postures, ses talents et ses Rubis.
+    // options.magic : dégâts magiques (sorts et sols de l'Arène), transmis aux artéfacts du héros touché.
+    // hero : le héros touché (l'hôte par défaut), avec sa roulade, ses postures, ses talents et ses artéfacts.
     incoming(source, raw = null, options = {}, hero = game.hero) {
       if (!source || hero.away) return 0;
       const p = hero.player;
@@ -58,28 +56,26 @@
       // Esquive totale (petite chance de base), puis déviation indépendante si le coup touche.
       if (Math.random() < (characterStats(hero).dodge || 0) / 100) {
         float(p.x, p.y - 35, 'ESQUIVE !', '#87f8f4');
-        CANAAN_RUBIS.onDodge(hero);
+        CANAAN_ARTEFACTS.onDodge(hero);
         window.CANAAN_CLASS_ON_DODGE(hero);
         return 0;
       }
       let damage = window.CANAAN_STATS_INCOMING(source, raw, hero);
       damage = window.CANAAN_WEAPON_DEFENSE(source, damage, hero);
-      const artifact = window.CANAAN_ARTIFACT_PASSIVE(hero);
-      if (artifact?.variant === 1) damage = Math.max(1, Math.round(damage * (1 - artifact.amount / 100)));
       damage = window.CANAAN_CLASS_DEFENSE(source, damage, hero);
-      damage = CANAAN_RUBIS.defense(source, damage, options, hero);
+      damage = CANAAN_ARTEFACTS.defense(source, damage, options, hero);
       // Repas de cuisine : protection en cours.
       damage *= CANAAN_PROF.armorMult(hero);
       return Math.max(0, Math.round(damage));
     },
-    // Seule porte des dégâts subis par un héros : survie aux coups fatals (Rubis), nombres flottants, secousse
+    // Seule porte des dégâts subis par un héros : survie aux coups fatals (artéfacts), nombres flottants, secousse
     // pour l'hôte ; un allié note l'heure du coup et tombe à 0 PV.
     hurt(amount, source = null, hero = game.hero) {
       const p = hero.player;
       let n = Math.max(0, Math.round(Number(amount) || 0));
       // Un invité déconnecté (place réservée) est protégé.
       if (!n || p.dead || hero.away) return 0;
-      n = CANAAN_RUBIS.beforeHurt(n, source, hero);
+      n = CANAAN_ARTEFACTS.beforeHurt(n, source, hero);
       // Coup fatal : Intervention divine du Paladin.
       if (n) n = window.CANAAN_CLASS_FATAL(n, hero);
       if (!n) return 0;
@@ -128,8 +124,8 @@
       }
       const len = Math.hypot(dx, dy) || 1;
       roll = { dx: dx / len, dy: dy / len, left: DODGE.duration };
-      dodgeReady = t + DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor();
-      CANAAN_RUBIS.onDodge();
+      dodgeReady = t + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor();
+      CANAAN_ARTEFACTS.onDodge();
       window.CANAAN_CLASS_ON_DODGE();
       CANAAN_SOUND.cue('dodge');
       canaanAchieve(game.hero, 'dodge');
@@ -152,8 +148,8 @@
       }
       const len = Math.hypot(dx, dy) || 1;
       p.roll = { dx: dx / len, dy: dy / len, left: DODGE.duration };
-      p.dodgeReady = clock() + DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor(hero);
-      CANAAN_RUBIS.onDodge(hero);
+      p.dodgeReady = clock() + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero);
+      CANAAN_ARTEFACTS.onDodge(hero);
       window.CANAAN_CLASS_ON_DODGE(hero);
       canaanAchieve(hero, 'dodge');
       return true;
@@ -164,12 +160,12 @@
         return {
           rolling: !!hero.player.roll,
           ready: Math.max(0, (hero.player.dodgeReady || 0) - t),
-          cooldown: DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor(hero)
+          cooldown: DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero)
         };
       return {
         rolling: !!roll,
         ready: Math.max(0, dodgeReady - t),
-        cooldown: DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor()
+        cooldown: DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor()
       };
     },
     heal(amount, kind = 'direct', hero = game.hero) {
@@ -236,7 +232,7 @@
     if (!started || P.dead) return;
     const t = clock(),
       left = dodgeReady - t,
-      total = DODGE.cooldown * CANAAN_RUBIS.dodgeCooldownFactor();
+      total = DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor();
     if (left <= 0 && !roll) return;
     ctx.save();
     ctx.translate(Math.round(-camX), Math.round(-camY));

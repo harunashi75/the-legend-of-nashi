@@ -196,7 +196,7 @@
       action +
       '</div></div>';
     return (
-      '<div class="rpg-paper rubis-paper wardrobe-tab"><div class="rubis-head"><h3>👗 Garde-robe</h3><span>' +
+      '<div class="rpg-paper tab-paper wardrobe-tab"><div class="tab-head"><h3>👗 Garde-robe</h3><span>' +
       owned.length +
       ' / ' +
       SKINS.length +

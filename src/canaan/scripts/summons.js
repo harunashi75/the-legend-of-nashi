@@ -2,7 +2,7 @@
 // Les quatre compétences du Grimoire lèvent des créatures temporaires qui combattent pour leur maître : squelettes
 // (sans limite), nuée de corbeaux nécrosés qui volent par-dessus les obstacles, totem de peste immobile d'où sortent
 // des rats qui éclatent, et abomination. Chaque coup passe par le moteur
-// de combat comme une compétence offensive de son maître (Peste noire, talents, Rubis, Maîtrise).
+// de combat comme une compétence offensive de son maître (Peste noire, talents, artéfacts, Maîtrise).
 // Simulation chez l'hôte ; un invité reçoit leur position dans l'instantané (view / applyView) et les dessine.
 // Rien n'est sauvegardé : une invocation disparaît au bout de sa durée, à la mort de son maître, quand il change de
 // classe ou s'éloigne trop (changement de carte).

@@ -1026,7 +1026,6 @@
           c.stroke();
         }
       }
-      for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
       if (v.mini)
         for (const m of game.world.monsters)
           if (m.hp > 0) put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
@@ -1065,7 +1064,6 @@
       for (const mk of CANAAN_EXT.markers()) put(mk.kind, mk.x, mk.y, mk.extra || {}, mk.name);
       if (window.CANAAN_CITY_PLAN)
         put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
-      for (const chest of CANAAN_RUBIS.revealedChests()) put('chest', chest.x, chest.y, {}, null);
       // Personnages des quêtes : « ! » quête à prendre, « ? » quête à rendre.
       for (const npc of Object.values(CANAAN_QUESTS.npcs())) {
         const mode = CANAAN_QUESTS.npcMode(game.hero, npc),

@@ -5,7 +5,7 @@
 // Chaque conversion ajoute ici son module ; le pont disparaîtra quand plus aucun ancien script n'en dépendra.
 import * as equipment from './shared/data/equipment.js';
 import * as itemNames from './shared/data/item-names.js';
-import * as rubis from './shared/data/rubis.js';
+import * as arenaArtefacts from './shared/data/arena-artefacts.js';
 import * as arena from './shared/data/arena.js';
 import * as world from './shared/data/world.js';
 import * as economy from './shared/data/economy.js';
@@ -48,7 +48,7 @@ Object.assign(
   globalThis,
   equipment,
   itemNames,
-  rubis,
+  arenaArtefacts,
   arena,
   world,
   economy,

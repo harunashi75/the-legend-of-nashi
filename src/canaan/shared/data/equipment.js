@@ -527,6 +527,7 @@ export const CRAFT_WEAPONS = Object.entries(WEAPON_DEFINITIONS)
 export const MAGIC_WEAPONS = Object.freeze(['staff', 'lute', 'grimoire']);
 
 // Emplacements actifs : l'arme de réserve (weapon2) est équipée mais ne compte ni dans l'iLvl moyen ni dans les statistiques.
+// Deux bagues : la seconde (ring2) porte un objet d'emplacement « ring » et compte comme la première.
 export const ACTIVE_GEAR_SLOTS = Object.freeze([
   'helm',
   'shoulders',
@@ -535,16 +536,20 @@ export const ACTIVE_GEAR_SLOTS = Object.freeze([
   'boots',
   'neck',
   'ring',
-  'artifact',
+  'ring2',
   'weapon'
 ]);
-// Bijoux et artéfact : icône affichée à la place de celle d'une arme.
-export const JEWEL_SLOTS = Object.freeze(['neck', 'ring', 'artifact']);
+// Emplacement d'objet que reçoit chaque emplacement porté : l'arme de réserve prend une arme, la seconde bague une bague.
+/** @type {Readonly<Record<string, string>>} */
+export const SECOND_SLOT_OF = Object.freeze({ weapon2: 'weapon', ring2: 'ring' });
+/** @param {string} slot emplacement porté @returns {string} emplacement des objets qu'il reçoit */
+export const itemSlotOf = slot => SECOND_SLOT_OF[slot] || slot;
+// Bijoux : icône affichée à la place de celle d'une arme.
+export const JEWEL_SLOTS = Object.freeze(['neck', 'ring']);
 /** @type {Readonly<Record<string, string>>} */
 export const JEWEL_ICON = Object.freeze({
   neck: '⟦slot_neck⟧',
-  ring: '⟦slot_ring⟧',
-  artifact: '⟦slot_artifact⟧'
+  ring: '⟦slot_ring⟧'
 });
 // Chances de chaque qualité au tirage libre, en pourcentage, de Commun à Mythique. Légendaire et Mythique ne se
 // tirent jamais au hasard : ils ne viennent que du dernier raid (mode héroïque) et du dernier boss de l'Arène.

@@ -539,7 +539,6 @@ body {
 #window .island-section,
 #window .class-box,
 #window .talent-slot,
-#window .artifact56-compare,
 #window .preview,
 #saveRecovery {
   background: linear-gradient(180deg, rgba(48, 34, 22, 0.88), rgba(20, 13, 8, 0.92));
@@ -555,7 +554,6 @@ body {
 #window .talent-row,
 #window .raid-mode,
 #window .rpg-tabs button,
-#gearHoverTooltip .artifact56,
 .action {
   background: linear-gradient(180deg, #33251a, #1a120c);
   border-color: #6a4e2a;

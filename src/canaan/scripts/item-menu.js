@@ -4,7 +4,7 @@
 //   gear    (data-index)   pièce du sac (hero.inventory)
 //   satchel (data-id)      pièce de la sacoche de butin
 //   stack   (data-token)   pile du sac (repas, matériaux, enchantements…)
-//   rune    (data-rubis)   Rune de la collection (onglet Runes de la fiche C)
+//   artefact (data-artefact) artéfact de l'Arène (emplacements et collection de la fiche C)
 // Chaque entrée appelle les mêmes fonctions que les clics : l'invité en ligne passe par l'hôte comme avant.
 (() => {
   'use strict';
@@ -30,13 +30,20 @@
       // Le sac a pu changer entre l'ouverture du menu et le choix : on retrouve la pièce par son identifiant.
       at = () => game.hero.inventory.findIndex(it => String(it.id) === id),
       weapon = item.slot === 'weapon',
+      ring = item.slot === 'ring',
       list = [
         {
           icon: '⚔️',
-          label: weapon ? 'Équiper (Arme 1)' : 'Équiper',
-          run: () => at() >= 0 && equipBagIndex(at())
+          label: weapon ? 'Équiper (Arme 1)' : ring ? 'Équiper (Bague 1)' : 'Équiper',
+          run: () => at() >= 0 && equipBagIndex(at(), ring ? 'ring' : null)
         }
       ];
+    if (ring)
+      list.push({
+        icon: '⟦slot_ring⟧',
+        label: 'Équiper en Bague 2',
+        run: () => at() >= 0 && equipBagIndex(at(), 'ring2')
+      });
     if (weapon)
       list.push({
         icon: '⟦w_dualsword⟧',
@@ -76,8 +83,7 @@
   const USE_LABEL = {
     meal: ['⟦prof_cooking⟧', 'Manger'],
     ench: ['✨', 'Enchanter une pièce'],
-    dust: ['⟦prof_enchanting⟧', 'Ouvrir l’enchanteur'],
-    rubis: ['⟦rune⟧', 'Équiper']
+    dust: ['⟦prof_enchanting⟧', 'Ouvrir l’enchanteur']
   };
   function stackMenu(el) {
     const token = el.dataset.token,
@@ -98,22 +104,22 @@
     if (!list.length) return null;
     return { title: info.name, color: info.color, list };
   }
-  function runeMenu(el) {
-    const id = el.dataset.rubis,
-      r = RUBIS_CATALOG.find(x => x.id === id);
-    if (!r) return null;
-    const worn = (game.hero.rubis?.equipped || []).includes(id);
+  function artefactMenu(el) {
+    const id = el.dataset.artefact,
+      a = CANAAN_ARTEFACTS.get(id);
+    if (!a || !CANAAN_ARTEFACTS.rank(id)) return null;
+    const worn = CANAAN_ARTEFACTS.equipped().includes(id);
     return {
-      title: r.name,
-      color: RUBIS_FAMILIES[r.family].light,
+      title: a.name,
+      color: a.light,
       list: [
         worn
-          ? { icon: '✖', label: 'Retirer', run: () => toggleRubis(id) }
-          : { icon: '⟦rune⟧', label: 'Équiper', run: () => equipRubis(id) }
+          ? { icon: '✖', label: 'Retirer', run: () => toggleArtefact(id) }
+          : { icon: '🔮', label: 'Équiper', run: () => equipArtefact(id) }
       ]
     };
   }
-  const MENUS = { gear: gearMenu, satchel: satchelMenu, stack: stackMenu, rune: runeMenu };
+  const MENUS = { gear: gearMenu, satchel: satchelMenu, stack: stackMenu, artefact: artefactMenu };
 
   // ---------------------------------------------------------------- Fenêtre
   function open(el, x, y) {

@@ -20,33 +20,25 @@
     prepare(it);
     return itemStats(it);
   }
-  // Statistiques d'un héros (l'hôte par défaut) : son niveau et ses pièces actives, puis le passif d'artéfact,
-  // ses talents de classe et ses Rubis.
+  // Statistiques d'un héros (l'hôte par défaut) : son niveau et ses pièces actives (les deux bagues comprises), puis
+  // ses talents de classe et ses artéfacts de l'Arène.
   function characterStats(hero = game.hero) {
     const gear = hero.equipment,
-      pieces = Object.values(gear).filter(item => item && item.slot !== 'artifact' && item !== gear.weapon2);
+      pieces = Object.values(gear).filter(item => item && item !== gear.weapon2);
     for (const item of pieces) prepare(item);
     const result = heroStats(heroLevel(hero), pieces, CANAAN_BASE_MANA);
-    window.CANAAN_ARTIFACT_STATS(result, hero);
     window.CANAAN_CLASS_STATS(result, hero);
-    CANAAN_RUBIS.stats(result, hero);
+    CANAAN_ARTEFACTS.stats(result, hero);
     // Cœurs d'Aurore (gardiens vaincus, coquillages chantants) : PV max (shared/rules/quests.js).
     if (hero.quetes?.flags) result.maxHp = Math.round(result.maxHp * (1 + heartBonus(hero.quetes)));
     return result;
   }
-  // Coup d'un héros (l'hôte par défaut) : Puissance, écart de niveau, critique ; Rubis Briseur et Précision.
+  // Coup d'un héros (l'hôte par défaut) : Puissance, écart de niveau, critique.
   function heroStrike(m, d, hero = game.hero) {
     if (!m || m.hp <= 0) return;
     canaanMobLevel(m);
     const st = characterStats(hero),
-      blow = resolveOutgoing(
-        d,
-        st,
-        m,
-        Math.random,
-        CANAAN_RUBIS.armorFactor(hero),
-        CANAAN_RUBIS.critFactor(hero)
-      );
+      blow = resolveOutgoing(d, st, m, Math.random);
     m._lastCrit = blow.crit;
     canaanAchieve(hero, 'hit', m, blow.damage, blow.crit);
     if (blow.crit) float(m.x, m.y - 44, 'CRITIQUE !', '#ffdf77');
@@ -74,9 +66,7 @@
       hero.kills++;
       chat('Système', m.t + ' vaincu ! Ramasse le butin.');
       burst(m.x, m.y, '#ffd54a', 24);
-      const goldFactor = CANAAN_RUBIS.goldFactor(hero);
-      if (m.g > 0)
-        game.world.drops.push({ x: m.x, y: m.y, t: 'or', v: Math.round(m.g * goldFactor), life: 600 });
+      if (m.g > 0) game.world.drops.push({ x: m.x, y: m.y, t: 'or', v: Math.round(m.g), life: 600 });
       const idx = game.world.monsters.indexOf(m);
       if (idx >= 0) game.world.monsters.splice(idx, 1);
     }
@@ -171,7 +161,6 @@
   const lines = st => [...Object.entries(st.primary), ...Object.entries(st.secondary)];
   function gearStat(item) {
     if (!item) return 'Aucun bonus';
-    if (item.slot === 'artifact') return window.CANAAN_ARTIFACT_UI.stat(item);
     return (
       lines(itemStatsOf(item))
         .map(([key, value]) => label(key) + ' +' + value)
@@ -182,7 +171,6 @@
   // un peu plus.
   function gearScore(item) {
     if (!item) return 0;
-    if (item.slot === 'artifact') return itemLevel(item) * 3;
     const st = itemStatsOf(item);
     return (
       Object.values(st.primary).reduce((n, v) => n + v, 0) +
@@ -191,7 +179,6 @@
   }
   function gearComparison(item, worn) {
     if (!item) return '';
-    if (item.slot === 'artifact') return window.CANAAN_ARTIFACT_UI.compare(item, worn);
     const next = itemStatsOf(item),
       current = worn ? itemStatsOf(worn) : { primary: {}, secondary: {} },
       value = (st, key) => st.primary[key] || st.secondary[key] || 0;
@@ -231,7 +218,6 @@
   }
   function tooltip(item) {
     if (!item) return '';
-    if (item.slot === 'artifact') return window.CANAAN_ARTIFACT_UI.tooltip(item) + requirement(item);
     const rarity = rarityInfo(item),
       st = itemStatsOf(item);
     let html =

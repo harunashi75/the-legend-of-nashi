@@ -140,7 +140,7 @@ const finite = (v, fallback = 0) => (Number.isFinite(Number(v)) ? Number(v) : fa
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Intention d'un invité, vérifiée par l'hôte : direction (-1, 0 ou 1), attaque de base, compétence 0 à 3, point visé,
 // roulade (direction en -1..1) et numéro de séquence (pour que l'invité corrige sa position prédite).
-// L'invité n'envoie jamais de statistiques, d'or, d'objets ni de Rubis : seulement ce qu'il veut faire.
+// L'invité n'envoie jamais de statistiques, d'or, d'objets ni d'artéfacts : seulement ce qu'il veut faire.
 /**
  * @param {any} raw intention reçue d'un invité (non fiable : chaque champ est vérifié)
  */
@@ -158,11 +158,10 @@ export function sanitizeIntent(raw) {
     seq: Number.isInteger(r.seq) && r.seq >= 0 && r.seq < 2 ** 31 ? r.seq : null
   };
 }
-// Action demandée par un invité (équipement, classe et talents, Rubis) : l'hôte vérifie ensuite qu'elle est permise à son héros.
+// Action demandée par un invité (équipement, classe et talents, artéfacts) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
-export const STACK_TOKEN =
-  /^(rubis|fish|meat|meal|ore|herb|ench|key|treasure|dust):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+export const STACK_TOKEN = /^(fish|meat|meal|ore|herb|ench|key|treasure|dust):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 /**
  * @param {any} raw action reçue d'un invité (non fiable : chaque champ est vérifié)
  * @returns {Record<string, any> | null} action mise en forme, ou null si elle est invalide
@@ -170,11 +169,14 @@ export const STACK_TOKEN =
 export function sanitizeAction(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const id = typeof r.id === 'string' && r.id.length <= 96 ? r.id : null;
+  // Équiper : une bague peut viser la première ou la seconde bague (ring, ring2).
+  if (r.op === 'equip' && id && (r.slot === 'ring' || r.slot === 'ring2'))
+    return { op: r.op, id, slot: r.slot };
   if (r.op === 'equip' || r.op === 'reserve') return id ? { op: r.op, id } : null;
   if (r.op === 'unequip')
     return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
   if (r.op === 'switch') return { op: 'switch' };
-  // Classe, talents et Rubis : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
+  // Classe, talents et artéfacts : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
   const word = /** @param {unknown} v */ v =>
     typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null;
   if (r.op === 'class-choose') return word(r.cls) ? { op: r.op, cls: r.cls } : null;
@@ -203,7 +205,7 @@ export function sanitizeAction(raw) {
       /^[a-z0-9_]{1,24}$/.test(r.obj)
       ? { op: r.op, site: r.site, obj: r.obj }
       : null;
-  if (r.op === 'rubis-equip') return word(r.rubis) ? { op: r.op, rubis: r.rubis } : null;
+  if (r.op === 'artefact-equip') return word(r.artefact) ? { op: r.op, artefact: r.artefact } : null;
   // Marchand : l'hôte vérifie la présence d'un marchand, l'or et l'objet.
   if (r.op === 'sell') return id ? { op: r.op, id } : null;
   // Démanteler une pièce du sac ou de la sacoche, reprendre une pièce de la sacoche (l'hôte vérifie qu'elle y est).
@@ -218,7 +220,7 @@ export function sanitizeAction(raw) {
       : null;
   if (r.op === 'shop-buy')
     return Number.isInteger(r.index) && r.index >= 0 && r.index < 64 ? { op: r.op, index: r.index } : null;
-  // Pile du sac (poissons, viandes, repas, Rubis) : « genre:id:qualité*nombre ».
+  // Pile du sac (poissons, viandes, repas…) : « genre:id:qualité*nombre ».
   if (r.op === 'sell-stack')
     return typeof r.token === 'string' && STACK_TOKEN.test(r.token) ? { op: r.op, token: r.token } : null;
   // Donjon : E devant un mur fissuré, un brasero, un levier, une stèle ou une porte scellée (l'hôte vérifie).
@@ -246,8 +248,8 @@ export function sanitizeAction(raw) {
   // Salon de coiffure : la nouvelle apparence en forme compacte (vérifiée par decodeLook chez l'hôte).
   if (r.op === 'barber-look')
     return typeof r.look === 'string' && r.look.length <= 120 ? { op: r.op, look: r.look } : null;
-  if (r.op === 'rubis-unequip')
-    return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 5 ? { op: r.op, slot: r.slot } : null;
+  if (r.op === 'artefact-unequip')
+    return Number.isInteger(r.slot) && r.slot >= 0 && r.slot <= 3 ? { op: r.op, slot: r.slot } : null;
   // Métiers : pêcher (lancer, ferrer, remonter), cuisiner, manger ; l'hôte vérifie le banc, le feu et les stocks.
   // Bâtiments : passer une porte (l'hôte vérifie qu'elle est à portée).
   if (r.op === 'house-door') return { op: 'house-door' };

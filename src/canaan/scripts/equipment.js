@@ -44,19 +44,28 @@
     canaanLootNotice(hero, '📕 ' + gearDisplayName(pact) + ' est lié à ton âme : aucune autre arme.');
     return true;
   }
-  function equipItem(id, hero = game.hero) {
-    if (hero === game.hero && remote({ op: 'equip', id: String(id) })) return true;
+  // Emplacement où va un objet : le sien ; une bague va dans la bague demandée (ring ou ring2), sinon dans la
+  // première libre, sinon à la place de la première.
+  function equipSlotFor(item, hero = game.hero, wanted = null) {
+    if (item?.slot !== 'ring') return item?.slot;
+    if (wanted === 'ring' || wanted === 'ring2') return wanted;
+    return hero.equipment.ring && !hero.equipment.ring2 ? 'ring2' : 'ring';
+  }
+  function equipItem(id, hero = game.hero, wanted = null) {
+    if (hero === game.hero && remote({ op: 'equip', id: String(id), ...(wanted ? { slot: wanted } : {}) }))
+      return true;
     if (locked(hero)) return false;
     const index = hero.inventory.findIndex(item => item.id === id);
     if (index < 0) return false;
     const item = hero.inventory[index],
+      slot = equipSlotFor(item, hero, wanted),
       mana = hero.player.mp,
-      previous = hero.equipment[item.slot];
+      previous = hero.equipment[slot];
     window.CANAAN_GEAR.normalize(item);
     if (boundLock(hero, item.slot) || tooHigh(item, hero)) return false;
     hero.inventory.splice(index, 1);
     if (previous) hero.inventory.splice(index, 0, previous);
-    hero.equipment[item.slot] = item;
+    hero.equipment[slot] = item;
     finishChange(hero, mana, item.slot === 'weapon');
     return true;
   }
@@ -126,7 +135,7 @@
     if (!hero || !action) return false;
     if (action.op === 'equip') {
       const item = hero.inventory.find(it => String(it.id) === action.id);
-      return !!item && equipItem(item.id, hero);
+      return !!item && equipItem(item.id, hero, action.slot || null);
     }
     if (action.op === 'unequip')
       return Object.hasOwn(hero.equipment, action.slot) && unequip(action.slot, hero);
@@ -179,11 +188,15 @@
   };
   window.CANAAN_EQUIPMENT = Object.freeze({
     equip: equipItem,
+    slotFor: equipSlotFor,
     unequip,
     reserve: equipReserveWeapon,
     switchWeapon: switchWeapon,
     switchHero: switchHeroWeapon,
     heroAction
   });
-  Object.assign(window, { equipItem, unequip, equipReserveWeapon, switchWeapon });
+  // Pièce portée à laquelle comparer un objet (info-bulles) : celle qu'il remplacerait.
+  const wornAgainst = (item, hero = game.hero) =>
+    item ? hero.equipment[equipSlotFor(item, hero)] || null : null;
+  Object.assign(window, { equipItem, unequip, equipReserveWeapon, switchWeapon, wornAgainst });
 })();

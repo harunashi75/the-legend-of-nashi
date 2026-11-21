@@ -210,10 +210,10 @@
       '</span></div>'
     );
   }
-  // Onglet de la fiche (C) : 'gear' (le personnage et son équipement), 'rubis' (ses six emplacements de Rubis
-  // et sa collection) ou 'titles' (le titre affiché au-dessus du héros, achievements.js). Ce que le héros collectionne (garde-robe, bestiaire…) est dans les Collections (V).
+  // Onglet de la fiche (C) : 'gear' (le personnage, son équipement et, sous lui, ses quatre artéfacts de l'Arène)
+  // ou 'titles' (le titre affiché au-dessus du héros, achievements.js). Ce que le héros collectionne (garde-robe, bestiaire…) est dans les Collections (V).
   // L'onglet choisi est gardé d'une ouverture à l'autre.
-  const CHAR_TABS = ['gear', 'rubis', 'titles'];
+  const CHAR_TABS = ['gear', 'titles'];
   let charTab = 'gear';
   function characterSection(tab) {
     if (CHAR_TABS.includes(tab)) charTab = tab;
@@ -225,15 +225,12 @@
     hideGearTooltip();
     const st = characterStats(),
       count = Object.values(game.hero.equipment).filter(Boolean).length,
-      rubis = charTab === 'rubis',
-      worn = window.CANAAN_RUBIS.equipped().filter(Boolean).length,
       need = xpToNext(st.level);
     const tabs = canaanTabs(
       'characterSection',
       charTab,
       [
         ['gear', '⚔️ Équipement', count + ' / 10'],
-        ['rubis', '⟦rune⟧ Runes', worn + ' / ' + window.CANAAN_RUBIS.slots],
         ['titles', '👑 Titres', CANAAN_ACHIEVEMENTS.titlesCount(game.hero)]
       ],
       'char-tabs'
@@ -247,8 +244,10 @@
       count +
       '/10 équipés</p></div>' +
       '<div class="doll-column">' +
-      ['neck', 'ring', 'artifact', 'weapon', 'weapon2'].map(charSlot).join('') +
-      '</div></div></div></div>' +
+      ['neck', 'ring', 'ring2', 'weapon', 'weapon2'].map(charSlot).join('') +
+      '</div></div></div>' +
+      CANAAN_ARTEFACTS.section() +
+      '</div>' +
       '<div class="rpg-paper"><div class="char-stats">' +
       '<div class="char-level"><b>Niveau ' +
       st.level +
@@ -269,11 +268,9 @@
         '<div class="char-body panel-scroll" data-panel-size="char" data-keep-scroll="char-' +
         charTab +
         '">' +
-        (rubis
-          ? window.CANAAN_RUBIS.section()
-          : charTab === 'titles'
-            ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
-            : gear) +
+        (charTab === 'titles'
+          ? '<div class="rpg-paper titles-tab">' + CANAAN_ACHIEVEMENTS.titles(game.hero) + '</div>'
+          : gear) +
         '</div>'
     );
     drawCharacterPreview();
@@ -287,7 +284,7 @@
     }
     gearTooltip.innerHTML =
       window.CANAAN_STATS_VIEW.tooltip(item) +
-      (game.hero.equipment[item.slot] ? gearComparison(item, game.hero.equipment[item.slot]) : '');
+      (wornAgainst(item) ? gearComparison(item, wornAgainst(item)) : '');
     gearTooltip.style.display = 'block';
     moveGearTooltip(event);
   }
