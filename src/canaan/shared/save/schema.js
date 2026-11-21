@@ -161,6 +161,8 @@ export function summarizeSave(raw, slot) {
     classe: knownClass(data.resume?.classe),
     // Nom du héros de l'hôte (absent des aventures d'avant les noms).
     heros: typeof data.heros.hote.name === 'string' ? cleanHeroName(data.heros.hote.name) : '',
+    // Apparence du héros de l'hôte, pour l'aperçu de l'écran de sélection.
+    look: sanitizeLook(data.heros.hote.look),
     invites: guests.map(guest => cleanAdventureName(guest?.pseudo, '?'))
   };
 }

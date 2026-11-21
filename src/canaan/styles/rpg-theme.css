@@ -457,14 +457,23 @@ body {
 }
 
 /* Écran titre et menu pause. */
+/* Nuit de pleine lune : la lune et son halo, un ciel profond, une lueur chaude au niveau de la scène. */
 #title {
   background:
-    radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%),
-    radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
+    radial-gradient(
+      circle at 91% 9%,
+      #f4ecd8 0 3.2vmin,
+      rgba(244, 236, 216, 0.35) 3.4vmin,
+      transparent 4.4vmin
+    ),
+    radial-gradient(circle at 91% 9%, rgba(190, 200, 230, 0.22), transparent 26vmin),
+    radial-gradient(ellipse at 42% 70%, rgba(255, 170, 80, 0.14), transparent 50%),
+    linear-gradient(180deg, #0c1124 0%, #1a1630 45%, #22140f 100%);
 }
 #title h1 {
+  margin: 0;
   font-family: var(--rpg-serif);
-  font-size: calc(68px * var(--font-scale));
+  font-size: calc(clamp(30px, 4.4vw, 52px) * var(--font-scale));
   letter-spacing: 10px;
   background: linear-gradient(180deg, #fff2c0 0%, #e8b850 45%, #8a5a1e 100%);
   -webkit-background-clip: text;
@@ -474,6 +483,7 @@ body {
   filter: drop-shadow(0 3px 0 #2a1608) drop-shadow(0 0 22px rgba(240, 170, 70, 0.4));
 }
 #title p {
+  margin: 2px 0 0;
   font-family: var(--rpg-serif);
   color: var(--rpg-muted);
   letter-spacing: 7px;

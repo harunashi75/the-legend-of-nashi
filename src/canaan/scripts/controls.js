@@ -29,6 +29,7 @@
     pauseToTitle: () => pauseToTitle(),
     startGame: () => startGame(),
     playSlot: element => CANAAN_SLOT_MENU.play(actionInteger(element, 'slot')),
+    selectSlot: element => CANAAN_SLOT_MENU.select(actionInteger(element, 'slot')),
     newSlot: element => CANAAN_SLOT_MENU.newSlot(actionInteger(element, 'slot')),
     createSlot: element => CANAAN_SLOT_MENU.create(actionInteger(element, 'slot')),
     askDeleteSlot: element => CANAAN_SLOT_MENU.askDelete(actionInteger(element, 'slot')),

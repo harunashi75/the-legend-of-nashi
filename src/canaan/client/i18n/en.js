@@ -298,6 +298,23 @@ export default {
   'Créer l’aventure': 'Create the adventure',
   'Enregistrer mon héros': 'Save my hero',
   'Classe': 'Class',
+  'Créer un héros': 'Create a hero',
+  'Aucun héros pour l’instant.': 'No hero yet.',
+  'Choisis un emplacement libre pour créer ton premier personnage.':
+    'Pick an empty slot to create your first character.',
+  'Entrer dans le monde': 'Enter the world',
+  'Apparence': 'Appearance',
+  'Worgen': 'Worgen',
+  'Bâtisseurs tenaces des plaines de Canaan, les humains s’adaptent à toutes les voies.':
+    'Steadfast builders of the plains of Canaan, humans adapt to every path.',
+  'Fiers guerriers des terres arides, les orcs vivent pour l’honneur et pour leur clan.':
+    'Proud warriors of the arid lands, orcs live for honor and for their clan.',
+  'Gardiens anciens des forêts, les elfes sont liés à la magie et aux étoiles.':
+    'Ancient guardians of the forests, elves are bound to magic and the stars.',
+  'Colosses des hauts plateaux, les minotaures sont aussi calmes que redoutables.':
+    'Giants of the high plateaus, minotaurs are as calm as they are fearsome.',
+  'Frappés par une malédiction lunaire, les worgens ont appris à dompter la bête qui sommeille en eux.':
+    'Struck by a lunar curse, the worgen have learned to tame the beast that slumbers within them.',
 
   // ------------------------------------------------------------ Salon de coiffure du camp
   'Salon de coiffure': 'Barber shop',

@@ -245,7 +245,8 @@ test('Création du héros : sexe, race, peau, coiffure, couleurs et tenue, sauve
  const html=()=>nodes.get('slotMenu').innerHTML;
  run('CANAAN_SLOT_MENU.newSlot(1)');
  assert.match(html(),/class="look-creator"/);assert.match(html(),/id="lookPreview"/);
- for(const word of ['Femme','Homme','Humain','Orc','Elfe','Minotaure','Coiffure','Cheveux','Yeux','Tenue'])assert.match(html(),new RegExp(word));
+ for(const word of ['Femme','Homme','Humain','Orc','Elfe','Minotaure','Worgen','Coiffure','Cheveux','Yeux','Tenue'])assert.match(html(),new RegExp(word));
+ assert.equal(run('CANAAN_SLOT_MENU.lookSet("race",4)'),true);assert.match(html(),/Pelage/);assert.match(html(),/malédiction lunaire/);assert.equal(run('lookRace("worgen").fur'),true);
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("race",3)'),true);assert.match(html(),/Pelage/);
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("sex",0)'),true);assert.equal(run('CANAAN_SLOT_MENU.lookSet("hairStyle",2)'),true);
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("outfit",4)'),true);assert.equal(run('CANAAN_SLOT_MENU.lookSet("skin",2)'),true);
@@ -253,7 +254,7 @@ test('Création du héros : sexe, race, peau, coiffure, couleurs et tenue, sauve
  assert.match(html(),/look-choice on" data-action="lookSet" data-key="race" data-index="3"/);
  run('CANAAN_SLOT_MENU.lookTurn(1)');assert.equal(run('CANAAN_SLOT_MENU.state().face'),1);run('CANAAN_SLOT_MENU.lookTurn(-1)');run('CANAAN_SLOT_MENU.lookTurn(-1)');assert.equal(run('CANAAN_SLOT_MENU.state().face'),3);
  const chosen=run('JSON.stringify(CANAAN_SLOT_MENU.state().look)');
- nodes.get('slotName').value='Terres du Minotaure';
+ g.document.getElementById('slotName').value='Terres du Minotaure';
  // Changer de choix garde le nom tapé.
  run('CANAAN_SLOT_MENU.lookTurn(1)');assert.match(html(),/value="Terres du Minotaure"/);
  g.location.reload=()=>{};

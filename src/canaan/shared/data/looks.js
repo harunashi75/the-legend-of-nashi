@@ -10,16 +10,56 @@ export const LOOK_SEXES = Object.freeze([
   { id: 'm', name: 'Homme' }
 ]);
 // Chaque race a ses teintes de peau (ou de pelage) ; la première est celle par défaut.
+// fur : la teinte est un pelage ; scale : taille du héros dessiné (1 : taille normale) ; lore : présentation à la création.
 export const LOOK_RACES = Object.freeze([
-  { id: 'humain', name: 'Humain', skins: ['#f0c7a0', '#e8b48a', '#c98e62', '#a86c45', '#7a4a2e', '#4e2f1e'] },
-  { id: 'orc', name: 'Orc', skins: ['#6f9a4a', '#58803a', '#86a85a', '#7b8a4e', '#5f7a64', '#8a6f4a'] },
-  { id: 'elfe', name: 'Elfe', skins: ['#f6dcc8', '#e9c9a8', '#c9a0d8', '#a8b8e0', '#8a7aa8', '#5a5070'] },
+  {
+    id: 'humain',
+    name: 'Humain',
+    skins: ['#f0c7a0', '#e8b48a', '#c98e62', '#a86c45', '#7a4a2e', '#4e2f1e'],
+    fur: false,
+    scale: 1,
+    lore: 'Bâtisseurs tenaces des plaines de Canaan, les humains s’adaptent à toutes les voies.'
+  },
+  {
+    id: 'orc',
+    name: 'Orc',
+    skins: ['#6f9a4a', '#58803a', '#86a85a', '#7b8a4e', '#5f7a64', '#8a6f4a'],
+    fur: false,
+    scale: 1,
+    lore: 'Fiers guerriers des terres arides, les orcs vivent pour l’honneur et pour leur clan.'
+  },
+  {
+    id: 'elfe',
+    name: 'Elfe',
+    skins: ['#f6dcc8', '#e9c9a8', '#c9a0d8', '#a8b8e0', '#8a7aa8', '#5a5070'],
+    fur: false,
+    scale: 1,
+    lore: 'Gardiens anciens des forêts, les elfes sont liés à la magie et aux étoiles.'
+  },
   {
     id: 'minotaure',
     name: 'Minotaure',
-    skins: ['#8a5a3a', '#6a4028', '#b07a4a', '#3a2a24', '#d8c8b0', '#9a8a7a']
+    skins: ['#8a5a3a', '#6a4028', '#b07a4a', '#3a2a24', '#d8c8b0', '#9a8a7a'],
+    fur: true,
+    scale: 1.1,
+    lore: 'Colosses des hauts plateaux, les minotaures sont aussi calmes que redoutables.'
+  },
+  {
+    id: 'worgen',
+    name: 'Worgen',
+    skins: ['#7a7470', '#3e3a38', '#6a4a32', '#a8885a', '#d8d2c8', '#8a4a2a'],
+    fur: true,
+    scale: 1.08,
+    lore: 'Frappés par une malédiction lunaire, les worgens ont appris à dompter la bête qui sommeille en eux.'
   }
 ]);
+// Race d'un identifiant (inconnue : la première).
+/**
+ * @param {unknown} id
+ */
+export function lookRace(id) {
+  return LOOK_RACES.find(r => r.id === id) || LOOK_RACES[0];
+}
 export const LOOK_HAIR_STYLES = Object.freeze([
   { id: 'court', name: 'Court' },
   { id: 'long', name: 'Long' },
@@ -135,7 +175,7 @@ export function defaultLook() {
 export function sanitizeLook(raw) {
   const base = defaultLook();
   if (!raw || typeof raw !== 'object') return base;
-  const race = LOOK_RACES.find(r => r.id === raw.race) || LOOK_RACES[0];
+  const race = lookRace(raw.race);
   return {
     sex: pick(ids(LOOK_SEXES), raw.sex, base.sex),
     race: race.id,

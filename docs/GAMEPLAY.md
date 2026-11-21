@@ -112,7 +112,9 @@ Arbres, buissons, fleurs et roseaux ploient au passage de rafales qui traversent
 
 ## Création du héros
 
-« Nouvelle aventure » ouvre l'écran de création : sexe, race (Humain, Orc, Elfe, Minotaure), teinte de peau ou de pelage (palette propre à chaque race), coiffure (court, long, queue de cheval, tresses, crête, rasé), couleur des cheveux et des yeux, et tenue (huit couleurs d'armure et de cape). L'aperçu marche sur place ; ⟲ ⟳ le font tourner, 🎲 tire une apparence au hasard. L'apparence est purement visuelle.
+L'écran titre est un écran de sélection : le héros de l'aventure choisie se tient au centre sur un socle lumineux (nom, niveau, classe, monde ; ⟲ ⟳ le font tourner), la liste des trois aventures est à droite (portrait, nom du héros, niveau, classe), et « Entrer dans le monde » lance l'aventure choisie. Un emplacement libre affiche « Créer un héros ».
+
+« Créer un héros » ouvre l'écran de création, en trois colonnes : à gauche le sexe et la race (un portrait par race et la présentation de la race choisie), au centre l'aperçu qui marche sur place (⟲ ⟳ le font tourner, 🎲 tire une apparence au hasard), à droite la classe puis l'apparence : teinte de peau ou de pelage (palette propre à chaque race), coiffure (court, long, queue de cheval, tresses, crête, rasé), couleur des cheveux et des yeux, et tenue (huit couleurs d'armure et de cape). Les noms du héros et de l'aventure sont en bas. Races : Humain, Orc, Elfe, Minotaure et Worgen (tête de loup aux oreilles pointues, museau et crocs, pattes griffues et queue touffue ; six pelages). Le minotaure et le worgen sont dessinés un peu plus grands (`LOOK_RACES[].scale`). L'apparence est purement visuelle.
 
 - Données et vérification : `shared/data/looks.js` (`sanitizeLook`, `randomLook`, `encodeLook`/`decodeLook`). Toute valeur inconnue redevient celle par défaut ; une aventure créée avant cette version garde le héros d'origine (humain, acier et pourpre).
 - Sauvegarde : `heros.hote.look`, et `heros.invites[id].look` pour les invités.

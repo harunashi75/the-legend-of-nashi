@@ -31,7 +31,7 @@
     ['hair', 'Cheveux', () => LOOK_HAIR_COLORS, true],
     ['eyes', 'Yeux', () => LOOK_EYE_COLORS, true]
   ];
-  const raceOf = look => LOOK_RACES.find(r => r.id === look.race) || LOOK_RACES[0];
+  const raceOf = look => lookRace(look.race);
   const valueOf = item => (typeof item === 'string' ? item : item.id);
 
   // ---------------------------------------------------------------- Règles
@@ -84,7 +84,7 @@
       current = look[key];
     return (
       '<div class="barber-row"><span class="barber-title">' +
-      (key === 'skin' && look.race === 'minotaure' ? 'Pelage' : title) +
+      (key === 'skin' && lookRace(look.race).fur ? 'Pelage' : title) +
       '</span><div class="barber-options">' +
       items
         .map((item, i) => {
@@ -153,7 +153,7 @@
     c.ellipse(canvas.width / 2, canvas.height - 22, 46, 10, 0, 0, Math.PI * 2);
     c.fill();
     const sprite = canaanHeroSprite({ ...ui.draft, wear: '' }, ui.face, ui.frame % 4, { tool: 'none' }),
-      scale = ui.draft.race === 'minotaure' ? 3.2 : 2.9,
+      scale = 2.9 * lookRace(ui.draft.race).scale,
       w = 52 * scale,
       h = 64 * scale;
     c.drawImage(

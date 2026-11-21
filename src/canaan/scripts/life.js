@@ -1491,7 +1491,7 @@
       const moving = Math.hypot(v.vx, v.vy) > 0.05,
         frame = moving ? Math.floor(v.step / 7) % 4 : 0,
         spr = canaanHeroSprite(v.look, v.face, frame, { tool: v.role.tool }),
-        s = (v.role.scale || 1) * (v.look.race === 'minotaure' ? 1.1 : 1);
+        s = (v.role.scale || 1) * lookRace(v.look.race).scale;
       c.globalAlpha = 0.3;
       c.fillStyle = '#0a1418';
       c.beginPath();

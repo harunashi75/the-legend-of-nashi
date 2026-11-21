@@ -231,11 +231,11 @@ test('Menu des aventures : trois cartes, création, confirmation de suppression 
  assert.equal(run('started'),false);assert.equal((html().match(/class="slot-card/g)||[]).length,3);
  assert.match(html(),/data-action="newSlot" data-slot="1"/);assert.doesNotMatch(html(),/openSaveFolder/);
  run('CANAAN_SLOT_MENU.newSlot(2)');assert.match(html(),/id="slotName"[^>]*value="Aventure 2"/);
- nodes.get('slotName').value='<img src=x onerror=alert(1)>';
+ g.document.getElementById('slotName').value='<img src=x onerror=alert(1)>';
  let reloads=0;g.location.reload=()=>reloads++;
  const session=new Map();g.sessionStorage={setItem:(a,b)=>session.set(a,b),getItem:a=>session.get(a)??null,removeItem:a=>session.delete(a)};
  assert.equal(run('CANAAN_SLOT_MENU.create(2)'),true);assert.equal(reloads,1);assert.equal(session.get('canaan_pending_slot'),'2');
- run('CANAAN_SLOT_MENU.render()');assert.match(html(),/data-action="playSlot" data-slot="2"/);assert.doesNotMatch(html(),/<img/);
+ run('CANAAN_SLOT_MENU.render()');assert.match(html(),/data-action="playSlot" data-slot="2"/);assert.match(html(),/slot-card selected" data-action="selectSlot" data-slot="2"/);assert.match(html(),/id="selectPreview"/);assert.doesNotMatch(html(),/<img/);
  // Confirmation : les pseudos des invités dont le héros sera perdu sont listés.
  const data=JSON.parse(g.localStorage.getItem('canaan_slot_2'));data.heros.invites={x:{pseudo:'Lina'}};g.localStorage.setItem('canaan_slot_2',JSON.stringify(data));
  run('CANAAN_SLOT_MENU.askDelete(2)');assert.match(html(),/Lina/);assert.match(html(),/confirmDeleteSlot/);
@@ -245,10 +245,10 @@ test('Menu des aventures : trois cartes, création, confirmation de suppression 
  // Chaque bouton du menu passe par la table des contrôles : un clic valide ses arguments, puis appelle le menu.
  run('globalThis.__menu=CANAAN_SLOT_MENU;globalThis.__calls=[];CANAAN_SLOT_MENU=Object.fromEntries(Object.keys(__menu).map(k=>[k,typeof __menu[k]==="function"?(...a)=>{__calls.push([k,...a])}:__menu[k]]))');
  try{
-  for(const [action,data] of [['playSlot',{slot:'1'}],['newSlot',{slot:'2'}],['createSlot',{slot:'3'}],['askDeleteSlot',{slot:'1'}],['confirmDeleteSlot',{slot:'2'}],['cancelSlotMenu'],['openSaveFolder']])click(action,data);
-  assert.deepEqual(JSON.parse(run('JSON.stringify(__calls)')),[['play',1],['newSlot',2],['create',3],['askDelete',1],['remove',2],['cancel'],['openFolder']]);
+  for(const [action,data] of [['playSlot',{slot:'1'}],['newSlot',{slot:'2'}],['createSlot',{slot:'3'}],['askDeleteSlot',{slot:'1'}],['confirmDeleteSlot',{slot:'2'}],['cancelSlotMenu'],['openSaveFolder'],['selectSlot',{slot:'3'}]])click(action,data);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(__calls)')),[['play',1],['newSlot',2],['create',3],['askDelete',1],['remove',2],['cancel'],['openFolder'],['select',3]]);
   // Un argument invalide est refusé avant tout effet.
-  assert.throws(()=>click('confirmDeleteSlot',{slot:'2;x'}),/Argument d’action invalide/);assert.equal(run('__calls.length'),7);
+  assert.throws(()=>click('confirmDeleteSlot',{slot:'2;x'}),/Argument d’action invalide/);assert.equal(run('__calls.length'),8);
  }finally{run('CANAAN_SLOT_MENU=__menu')}
  assert.equal(errors.length,0,errors.join('\n'));
 });
@@ -285,7 +285,7 @@ test('Format partagé des sauvegardes : schéma 10, aventure neuve, résumé, im
  assert.equal(s.isValidSave({schema:10,heros:{}}),false);assert.equal(s.isValidSave({...fresh,schema:9}),false);
  assert.deepEqual(s.summarizeSave(null,1),{slot:1,state:'vide'});assert.equal(s.summarizeSave('{x',1).state,'illisible');
  const sum=s.summarizeSave(JSON.stringify({...fresh,resume:{level:37.4,gold:12.9},heros:{...fresh.heros,invites:{a:{pseudo:'Lina'}}}}),2);
- assert.deepEqual({...sum},{slot:2,state:'aventure',nom:'Mon monde',updated:5,level:37,gold:12,classe:null,heros:'Héros',invites:['Lina']});
+ assert.deepEqual({...sum},{slot:2,state:'aventure',nom:'Mon monde',updated:5,level:37,gold:12,classe:null,heros:'Héros',look:{sex:'m',race:'humain',skin:'#f0c7a0',hairStyle:'court',hair:'#7d5140',eyes:'#202938',outfit:'acier'},invites:['Lina']});
  // Classe choisie à la création : dans le héros et le résumé ; une classe inconnue est ignorée.
  const druid=s.freshSave({nom:'D',slot:1,version:'1.9.0',now:5,spawn:{x:1,y:2},baseMana:300,classe:'druide'});
  assert.deepEqual(druid.heros.hote.classe,{id:'druide',talents:[]});assert.equal(s.summarizeSave(JSON.stringify(druid),1).classe,'druide');

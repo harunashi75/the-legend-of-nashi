@@ -947,7 +947,11 @@
       orc = race === 'orc',
       elf = race === 'elfe',
       bull = race === 'minotaure',
-      broad = orc || bull;
+      wolf = race === 'worgen',
+      broad = orc || bull || wolf,
+      claw = '#ece4d4',
+      fang = '#f4f0dc',
+      nose = '#1a1414';
     const R = (x, y, w, h, col) => {
       c.fillStyle = col;
       c.fillRect(x, y, w, h);
@@ -970,10 +974,17 @@
     R(5, 27, 15, 2, '#0a182055');
     R(8, 21 + walk, 4, 6, tint(armorD, 0.7));
     R(14, 21 - walk, 4, 6, tint(armorD, 0.7));
-    R(7, 25 + walk, 6, 3, bull ? '#2a2420' : '#24202d');
-    R(13, 25 - walk, 6, 3, bull ? '#2a2420' : '#24202d');
+    R(7, 25 + walk, 6, 3, bull ? '#2a2420' : wolf ? skinD : '#24202d');
+    R(13, 25 - walk, 6, 3, bull ? '#2a2420' : wolf ? skinD : '#24202d');
     R(7, 24 + walk, 5, 1, armorL);
     R(14, 24 - walk, 4, 1, armorL);
+    // Pattes du worgen : griffes au bout des pieds nus.
+    if (wolf && !back) {
+      R(side && !right ? 7 : 10, 27 + walk, 1, 1, claw);
+      R(side && !right ? 9 : 12, 27 + walk, 1, 1, claw);
+      R(side && !right ? 13 : 16, 27 - walk, 1, 1, claw);
+      R(side && !right ? 15 : 18, 27 - walk, 1, 1, claw);
+    }
     // Cape longue, plis et bord (une apparence a sa propre cape, ou n'en a pas).
     const capeKind = sk ? sk.back : 'cape';
     if (capeKind === 'scarf') {
@@ -1005,7 +1016,17 @@
       if (capeKind === 'leafcape')
         for (let x = 6; x < 19; x += 2) R(x, 26 + (x % 4 ? 1 : 0), 2, 2, x % 4 ? capeL : sk.trim);
     }
-    // Torse : plus fin pour une héroïne, plus large pour un orc ou un minotaure.
+    // Queue touffue du worgen : de dos, sur la cape ; de profil, à l'opposé du regard (le torse la recouvre en partie).
+    if (wolf && back) {
+      R(11, 20, 4, 6, skin);
+      R(12, 21, 2, 5, skinL);
+      R(12, 26, 2, 1, skinD);
+    } else if (wolf && side) {
+      R(right ? 3 : 19, 21, 4, 3, skin);
+      R(right ? 1 : 22, 22, 3, 2, skinD);
+      R(right ? 3 : 19, 21, 4, 1, skinL);
+    }
+    // Torse : plus fin pour une héroïne, plus large pour un orc, un minotaure ou un worgen.
     tx = female ? 8 : broad ? 6 : 7;
     tw = female ? 9 : broad ? 13 : 11;
     R(tx, 12, tw, 9, armorM);
@@ -1028,6 +1049,12 @@
     R(bx, 19 - walk / 2, 4, 3, skinD);
     R(ax + 1, 19 + walk / 2, 2, 2, skin);
     R(bx + 1, 19 - walk / 2, 2, 2, skin);
+    if (wolf) {
+      R(ax, 22 + walk / 2, 1, 1, claw);
+      R(ax + 2, 22 + walk / 2, 1, 1, claw);
+      R(bx + 1, 22 - walk / 2, 1, 1, claw);
+      R(bx + 3, 22 - walk / 2, 1, 1, claw);
+    }
     R(ax, 13 + walk / 2, 2, 2, tint(armorL, 1.3));
     R(bx + 2, 13 - walk / 2, 2, 2, tint(armorL, 1.3));
     // Corps et épaulières d'une apparence (robe, salopette, kimono, armure…).
@@ -1063,14 +1090,32 @@
       R(23, 1, 1, 1, '#8a7a60');
     }
     // Tête : crâne et visage.
-    const hx = bull ? 8 : 9,
-      hw = bull ? 11 : 9;
+    const hx = bull || wolf ? 8 : 9,
+      hw = bull || wolf ? 11 : 9;
     R(hx, 5, hw, 8, skinD);
     if (back) {
       R(hx, 6, hw, 7, skinD);
     } else {
       R(bull ? 9 : 10, 7, bull ? 9 : 7, 6, skin);
       R(bull ? 10 : 11, 8, bull ? 7 : 5, 4, skinL);
+      if (wolf) {
+        // Touffes de joues ; de face, museau clair, truffe et crocs ; de profil, le museau dépasse du visage.
+        R(7, 10, 1, 3, skinD);
+        R(19, 10, 1, 3, skinD);
+        if (side) {
+          const sx0 = right ? 18 : 5;
+          R(sx0, 9, 4, 3, skin);
+          R(sx0, 11, 4, 1, tint(skin, 1.3));
+          R(right ? sx0 + 3 : sx0, 9, 1, 1, nose);
+          R(right ? sx0 : sx0 + 3, 12, 1, 1, fang);
+        } else {
+          R(12, 10, 4, 3, tint(skin, 1.3));
+          R(13, 10, 2, 1, nose);
+          R(13, 12, 2, 1, tint(skin, 0.55));
+          R(12, 12, 1, 1, fang);
+          R(15, 12, 1, 1, fang);
+        }
+      }
       if (bull) {
         // Mufle clair, naseaux et anneau.
         const mx = side ? (right ? 14 : 9) : 11;
@@ -1085,11 +1130,11 @@
         if (female) {
           R(10, 9, 2, 1, hairD);
           R(16, 9, 2, 1, hairD);
-        } else if (orc || bull) {
+        } else if (broad) {
           R(10, 9, 3, 1, skinD);
           R(15, 9, 3, 1, skinD);
         }
-        if (!bull) R(13, 12, 2, 1, female ? '#c0505a' : tint(skin, 0.7));
+        if (!bull && !wolf) R(13, 12, 2, 1, female ? '#c0505a' : tint(skin, 0.7));
         if (orc) {
           R(11, 12, 1, 2, '#f4f0dc');
           R(16, 12, 1, 2, '#f4f0dc');
@@ -1159,6 +1204,22 @@
           braid(8, 8);
           braid(17, 8);
         }
+      }
+    }
+    // Oreilles pointues du worgen, par-dessus la crinière (visibles sous tous les angles).
+    if (wolf) {
+      const ear = (x, inner) => {
+        R(x, 2, 2, 4, skinD);
+        R(x + (inner ? 1 : 0), 1, 1, 1, skinD);
+        if (!back) R(x + (inner ? 1 : 0), 3, 1, 2, tint(skin, 0.6));
+      };
+      if (side) {
+        // De profil : l'oreille du fond, sombre, puis celle de devant.
+        R(right ? 13 : 12, 2, 2, 3, tint(skin, 0.65));
+        ear(right ? 10 : 15, right);
+      } else {
+        ear(9, false);
+        ear(16, true);
       }
     }
     // Coiffe d'une apparence, puis ailes par-dessus quand le héros tourne le dos.
@@ -1373,8 +1434,8 @@
     const lift = mount ? mount.lift : 0;
     const bob = mount ? mount.bob : moving ? Math.round(Math.sin(phase * 0.6 * Math.PI) * 1.5) : 0;
     const shown = mount ? canaanHeroSprite(look, face, 0, hero ? { tool: 'none' } : {}) : spr;
-    // Le minotaure est un peu plus grand.
-    const scale = !feral && look?.race === 'minotaure' ? 1.1 : 1.0;
+    // Le minotaure et le worgen sont un peu plus grands.
+    const scale = feral ? 1.0 : lookRace(look?.race).scale;
     c.save();
     if (body.veiled) c.globalAlpha *= 0.3;
     if (mount) mount.under(c, x, y);
