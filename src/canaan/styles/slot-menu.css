@@ -62,6 +62,11 @@
 #title.painted::after {
   display: none;
 }
+/* Le héros se tient sur le sol peint : plus de socle lumineux dans le vide. */
+#title.painted #slotMenu .cs-stage,
+#title.painted #slotMenu .look-stage {
+  background: none;
+}
 #title.creating > p {
   display: none;
 }
@@ -1080,4 +1085,18 @@
 #slotMenu .look-step-value small {
   font-size: 0.75em;
   color: var(--rpg-muted, #b8a483);
+}
+
+/* Petits textes posés sur le décor peint : ombre portée et fond sombre pour rester lisibles sur un sol clair. */
+#title #slotMenu p.look-summary,
+#title #slotMenu p.cs-meta,
+#title #slotMenu .slot-label {
+  text-shadow:
+    0 1px 2px #000,
+    0 0 6px #000;
+}
+#slotMenu .cc-names {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(10, 6, 4, 0.62);
 }
