@@ -1222,6 +1222,8 @@ function draw() {
     CANAAN_UNDER.drawSurface(ctx);
   }
   drawWorldFeatures(ctx);
+  // Grands arbres plantés devant un portail, un bâtiment ou un sol posé : repeints par-dessus (world-look.js).
+  drawCanaanDecorFront(ctx);
   // drops
   game.world.drops.forEach(d => {
     ctx.fillStyle = '#ffd54a';

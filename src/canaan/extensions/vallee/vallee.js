@@ -126,6 +126,27 @@
     const clear = (x0, y0, w, h, t = 50) => {
       for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) set(x, y, t);
     };
+    // Clairière autour d'un lieu : le rectangle reçoit son sol, et une bordure irrégulière d'herbe dorée l'entoure
+    // (le blé et les rochers voisins ne sont pas tranchés en ligne droite). Un rocher entamé disparaît en entier.
+    const glade = (x0, y0, w, h, t = 50) => {
+      const x1 = x0 + w - 1,
+        y1 = y0 + h - 1,
+        rocks = [];
+      for (let y = y0 - 4; y <= y1 + 4; y++)
+        for (let x = x0 - 4; x <= x1 + 4; x++) {
+          if (!mine(x, y)) continue;
+          const d = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1));
+          if (!d) set(x, y, t);
+          else if (T[y][x] === 4 && d < 3) rocks.push([x, y]);
+          else if (T[y][x] === 51 && d < 1.2 + hash(x, y, 93) * 1.8) set(x, y, 50);
+        }
+      while (rocks.length) {
+        const [x, y] = rocks.pop();
+        if (!mine(x, y) || T[y][x] !== 4) continue;
+        set(x, y, 50);
+        rocks.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+      }
+    };
     // Ruisseaux Dorés et étang : eau peu profonde (on y marche), l'étang au milieu est profond (on y pêche).
     const pond = spot(52, 361, 5, 5);
     const pc = { x: pond.x + 2.5, y: pond.y + 2.5 };
@@ -168,8 +189,10 @@
       alley = { x0: 47, x1: 76, y: 346 },
       arenaAt = spot(34, 316, 1, 1),
       mills = [spot(36, 371, 2, 2), spot(64, 377, 2, 2)];
-    clear(stable.x - 1, stable.y - 1, 9, 8);
-    clear(paddock.x - 1, paddock.y - 1, paddock.w + 2, paddock.h + 2, 1);
+    glade(stable.x - 1, stable.y - 1, 9, 8);
+    // Pré de l'enclos : herbe verte seulement entre les clôtures, qui en cachent le bord.
+    glade(paddock.x - 1, paddock.y - 1, paddock.w + 2, paddock.h + 2);
+    clear(paddock.x, paddock.y, paddock.w, paddock.h, 1);
     for (const m of mills) clear(m.x - 1, m.y - 1, 4, 4, 51);
     // Arène de Valérion : cercle de dalles (sol de route sous les dalles), quatre statues en diagonale.
     const R = BOSS().R;
@@ -208,7 +231,14 @@
     pave([
       [E.x, E.y],
       [(E.x + door.x) / 2, door.y + 1],
-      [door.x, door.y],
+      [door.x, door.y]
+    ]);
+    // Vers l'Allée des Légendes : le chemin quitte celui du col et contourne l'écurie par le nord (il ne passe plus
+    // sous la grange).
+    pave([
+      [E.x - 1, E.y + 2],
+      [stable.x + 5, stable.y - 2.5],
+      [stable.x + 1, stable.y - 3],
       [alley.x1 + 2, alley.y + 3],
       [alley.x1 + 1, alley.y]
     ]);
@@ -752,6 +782,15 @@
     if (!inView()) return [];
     return things().filter(t => visible((t.x0 + t.x1) / 2, t.base, 200));
   }
+  // Sol de l'arène, peint par-dessus le décor : les arbres qui débordent dessus sont repeints devant (world-look.js).
+  function covers() {
+    if (!inView()) return [];
+    const ar = plan.arena,
+      half = (BOSS().R + 0.5) * TS,
+      cx = (ar.x + 0.5) * TS,
+      cy = (ar.y + 0.5) * TS;
+    return visible(cx, cy, half) ? [[cx - half, cy - half, cx + half, cy + half]] : [];
+  }
   function draw(c, layer) {
     if (!plan) return;
     if (layer === 'ground') drawGround(c);
@@ -818,6 +857,7 @@
     },
     draw,
     occluders,
+    covers,
     blocked,
     interact,
     guestUse,

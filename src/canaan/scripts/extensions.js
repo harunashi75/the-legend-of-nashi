@@ -72,6 +72,8 @@ function canaanLockedAt(px, py) {
 //   draw(c, layer)            dessin dans le monde : 'ground' (sur le sol), 'world' (bâtiments, personnages),
 //                             'air' (au-dessus de tout, avant la lumière)
 //   occluders()               grands objets redessinés devant un personnage passé derrière (world-look.js)
+//   covers()                  sols posés par-dessus le décor (dalles d'une arène) : [[x0, y0, x1, y1]] en pixels ;
+//                             les grands arbres qui les chevauchent sont repeints devant (world-look.js)
 //   blocked(px, py)           collisions propres (statues, bâtiments, enclos)
 //   interact(hero)            E chez l'hôte (pour lui ou un invité) : true si l'extension a répondu
 //   guestUse()                E chez un invité : true si l'extension a répondu
@@ -119,6 +121,7 @@ const CANAAN_EXT = (() => {
       if (!game.world.instance && game.world.layer !== 'under') each('draw', c, layer);
     },
     occluders: () => (here() && game.world.layer !== 'under' ? list.flatMap(e => e.occluders?.() || []) : []),
+    covers: () => (here() && game.world.layer !== 'under' ? list.flatMap(e => e.covers?.() || []) : []),
     blocked: (px, py) =>
       canaanLockedAt(px, py) ||
       (!game.world.instance && game.world.layer !== 'under' && list.some(e => e.blocked?.(px, py))),

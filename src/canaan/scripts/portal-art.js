@@ -1607,7 +1607,15 @@
       if (P.under !== under) continue;
       if (P.right < camX - 40 || P.left > camX + W + 40 || P.top > camY + H + 40 || P.base < camY - 40)
         continue;
-      out.push({ x0: P.left, x1: P.right, y0: P.top, base: P.base - 8, draw: g => layers(g, P, false) });
+      out.push({
+        x0: P.left,
+        x1: P.right,
+        y0: P.top,
+        base: P.base - 8,
+        // Tout le dessin de l'entrée (torches, sol) : les arbres plantés devant y sont repeints (world-look.js).
+        box: [P.x0, P.y0, P.x0 + AW * U, P.y0 + AH * U],
+        draw: g => layers(g, P, false)
+      });
     }
     return out;
   }

@@ -1156,18 +1156,78 @@
           draw: g => paintDecor(g, x, y, X, Y, d)
         });
       }
-    list.push(
-      ...CANAAN_HOUSE.occluders(),
-      ...canaanCampLife.occluders(),
-      ...CANAAN_PORTAL_ART.occluders(),
-      ...CANAAN_CITY.occluders(),
-      ...CANAAN_EXT.occluders()
-    );
+    list.push(...structures());
     // Les objets redessinés n'allument pas une seconde fois leurs lumières.
     const light = window.canaanLight;
     window.canaanLight = () => {};
     try {
       drawOccluders(c, list, ents);
+    } finally {
+      window.canaanLight = light;
+    }
+  }
+  // Bâtiments, portails et grands objets posés sur l'île : calculés une fois par image (deux passes s'en servent).
+  let structFrame = -1,
+    structList = [];
+  function structures() {
+    if (structFrame === time) return structList;
+    structFrame = time;
+    structList = [
+      ...CANAAN_HOUSE.occluders(),
+      ...canaanCampLife.occluders(),
+      ...CANAAN_PORTAL_ART.occluders(),
+      ...CANAAN_CITY.occluders(),
+      ...CANAAN_EXT.occluders()
+    ];
+    return structList;
+  }
+  // Arbres devant les bâtiments : les portails, bâtiments et sols posés (l'arène de Valérion) sont peints après le
+  // décor ; un grand arbre planté devant eux (pied plus bas que le leur) ou dont le feuillage déborde sur un sol posé
+  // en serait coupé. Il est repeint par-dessus, seulement là où il les chevauche, au-dessus de son pied (son ombre au
+  // sol n'est pas peinte deux fois).
+  function drawCanaanDecorFront(c) {
+    if (game.world.instance || canaanUnder() || canaanInHouse(P.x / TS, P.y / TS)) return;
+    const covers = [
+      ...structures().map(o => ({ base: o.base, box: o.box || [o.x0, o.y0, o.x1, o.base + 16] })),
+      ...CANAAN_EXT.covers().map(box => ({ base: -Infinity, box }))
+    ];
+    if (!covers.length) return;
+    const x0 = Math.max(0, Math.floor(camX / TS) - 3),
+      x1 = Math.min(MAPW, Math.ceil((camX + W) / TS) + 3),
+      y0 = Math.max(0, Math.floor(camY / TS) - 1),
+      y1 = Math.min(MAPH, Math.ceil((camY + H) / TS) + 4),
+      deco = game.world.decor,
+      light = window.canaanLight;
+    window.canaanLight = () => {};
+    try {
+      for (let y = y0; y < y1; y++)
+        for (let x = x0; x < x1; x++) {
+          const d = deco[y][x],
+            sprite = d && TALL.has(d) && PIXEL_DECOR[d];
+          if (!sprite) continue;
+          const X = x * TS,
+            Y = y * TS,
+            foot = Y + 42,
+            // Marge pour le balancement des cimes dans le vent.
+            l = X + 24 - sprite.width / 2 - 12,
+            r = X + 24 + sprite.width / 2 + 12,
+            t = Y + 52 - sprite.height,
+            b = Y + 40,
+            hits = covers.filter(
+              o => foot > o.base && r > o.box[0] && l < o.box[2] && b > o.box[1] && t < o.box[3]
+            );
+          if (!hits.length) continue;
+          c.save();
+          c.beginPath();
+          for (const o of hits) {
+            const cl = Math.max(l, o.box[0]),
+              ct = Math.max(t, o.box[1]);
+            c.rect(cl, ct, Math.min(r, o.box[2]) - cl, Math.min(b, o.box[3]) - ct);
+          }
+          c.clip();
+          paintDecor(c, x, y, X, Y, d);
+          c.restore();
+        }
     } finally {
       window.canaanLight = light;
     }
@@ -1198,6 +1258,7 @@
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, {
     drawCanaanOcclusion,
+    drawCanaanDecorFront,
     drawWorldTile,
     drawWorldGround,
     forgetWorldGround,
