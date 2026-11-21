@@ -134,7 +134,7 @@
     );
   }
   // ---------------------------------------------------------------- Création du héros (apparence)
-  const lookRow = (title, key, items, current, swatch) =>
+  const lookRow = (title, key, items, current, swatch, caption = '') =>
     '<div class="look-row"><span class="look-title">' +
     title +
     '</span><div class="look-options' +
@@ -179,7 +179,42 @@
         );
       })
       .join('') +
-    '</div></div>';
+    '</div>' +
+    (caption ? '<span class="look-caption">' + esc(caption) + '</span>' : '') +
+    '</div>';
+  // Choix parmi une liste nommée, une valeur à la fois : ◀ nom (2/6) ▶.
+  function lookStep(title, key, items, current) {
+    const n = items.length,
+      i = Math.max(
+        0,
+        items.findIndex(x => x.id === current)
+      ),
+      arrow = (to, label, sign) =>
+        '<button type="button" class="look-step" data-action="lookSet" data-key="' +
+        key +
+        '" data-index="' +
+        to +
+        '" aria-label="' +
+        label +
+        '">' +
+        sign +
+        '</button>';
+    return (
+      '<div class="look-row"><span class="look-title">' +
+      title +
+      '</span><div class="look-stepper">' +
+      arrow((i + n - 1) % n, 'Précédent', '◀') +
+      '<span class="look-step-value">' +
+      esc(items[i].name) +
+      ' <small>' +
+      (i + 1) +
+      '/' +
+      n +
+      '</small></span>' +
+      arrow((i + 1) % n, 'Suivant', '▶') +
+      '</div></div>'
+    );
+  }
   // Races : un portrait par race (dessiné après l'affichage), le nom, puis la présentation de la race choisie.
   function raceList(look) {
     return (
@@ -229,12 +264,15 @@
       // Colonne droite : classe et apparence.
       '<aside class="cc-col cc-right look-fields">' +
       (forSlot ? '<h4 class="cc-title">Classe</h4>' + classRow() : '') +
-      '<h4 class="cc-title">Apparence</h4>' +
+      '<h4 class="cc-title">Apparence</h4><div class="look-group">' +
       lookRow(race.fur ? 'Pelage' : 'Peau', 'skin', race.skins, look.skin, true) +
-      lookRow('Coiffure', 'hairStyle', LOOK_HAIR_STYLES, look.hairStyle) +
-      lookRow('Cheveux', 'hair', LOOK_HAIR_COLORS, look.hair, true) +
       lookRow('Yeux', 'eyes', LOOK_EYE_COLORS, look.eyes, true) +
-      lookRow('Tenue', 'outfit', LOOK_OUTFITS, look.outfit, true) +
+      '</div><div class="look-group">' +
+      lookStep('Coiffure', 'hairStyle', LOOK_HAIR_STYLES, look.hairStyle) +
+      lookRow('Cheveux', 'hair', LOOK_HAIR_COLORS, look.hair, true) +
+      '</div><div class="look-group">' +
+      lookRow('Tenue', 'outfit', LOOK_OUTFITS, look.outfit, true, outfit.name) +
+      '</div>' +
       '<p class="look-note">L’apparence est purement visuelle : aucune race n’est plus forte qu’une autre.</p>' +
       '</aside></div>' +
       // Pied : retour, noms, validation.
@@ -395,6 +433,7 @@
   function setScene(race) {
     const title = document.getElementById('title');
     if (title?.dataset) title.dataset.scene = race ? lookRace(race).id : '';
+    if (typeof CANAAN_TITLE_SCENE !== 'undefined') CANAAN_TITLE_SCENE.set(race ? lookRace(race).id : 'nuit');
   }
   function render() {
     const menu = document.getElementById('slotMenu');

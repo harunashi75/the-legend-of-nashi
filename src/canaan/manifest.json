@@ -429,6 +429,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-title-scenes",
+      "file": "scripts/title-scenes.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-slot-menu",
       "file": "scripts/slot-menu.js"
     },

@@ -247,6 +247,9 @@ test('Création du héros : sexe, race, peau, coiffure, couleurs et tenue, sauve
  assert.match(html(),/class="look-creator"/);assert.match(html(),/id="lookPreview"/);
  for(const word of ['Femme','Homme','Humain','Orc','Elfe','Minotaure','Vargar','Coiffure','Cheveux','Yeux','Tenue'])assert.match(html(),new RegExp(word));
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("race",4)'),true);assert.match(html(),/Pelage/);assert.match(html(),/malédiction lunaire/);assert.equal(run('lookRace("vargar").fur'),true);assert.equal(run('sanitizeLook({race:"worgen"}).race'),'vargar','ancien nom gardé');
+ // Décor peint : la scène suit la race choisie ; une scène inconnue redevient la nuit de pleine lune.
+ assert.equal(run('CANAAN_TITLE_SCENE.current()'),'vargar');run('CANAAN_SLOT_MENU.lookSet("race",1)');assert.equal(run('CANAAN_TITLE_SCENE.current()'),'orc');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_TITLE_SCENE.names)')).sort(),['elfe','humain','minotaure','nuit','orc','vargar']);run('CANAAN_TITLE_SCENE.set("x")');assert.equal(run('CANAAN_TITLE_SCENE.current()'),'nuit');run('CANAAN_SLOT_MENU.lookSet("race",4)');
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("race",3)'),true);assert.match(html(),/Pelage/);
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("sex",0)'),true);assert.equal(run('CANAAN_SLOT_MENU.lookSet("hairStyle",2)'),true);
  assert.equal(run('CANAAN_SLOT_MENU.lookSet("outfit",4)'),true);assert.equal(run('CANAAN_SLOT_MENU.lookSet("skin",2)'),true);

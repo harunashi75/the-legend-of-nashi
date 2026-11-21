@@ -304,6 +304,8 @@ export default {
     'Pick an empty slot to create your first character.',
   'Entrer dans le monde': 'Enter the world',
   'Apparence': 'Appearance',
+  'Précédent': 'Previous',
+  'Suivant': 'Next',
   'Vargar': 'Vargar',
   'Bâtisseurs tenaces des plaines de Canaan, les humains s’adaptent à toutes les voies.':
     'Steadfast builders of the plains of Canaan, humans adapt to every path.',
