@@ -180,7 +180,7 @@
 /* Cases de la poupée poussées vers les rebords du cadre. */
 #window[data-size='char'] .character-left > .rpg-paper:first-child,
 #window[data-size='duo'] .duo-char .character-left > .rpg-paper:first-child {
-  padding-inline: 4px;
+  padding-inline: 10px;
 }
 #window#window[data-size='char'] .doll-center,
 #window#window[data-size='duo'] .duo-char .doll-center {
