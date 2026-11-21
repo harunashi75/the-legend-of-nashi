@@ -300,10 +300,10 @@
     if (hero !== game.hero) recomputeHeroStats(hero);
     return true;
   }
+  // Après un changement : statistiques, puis la fiche ou le sac ouvert (l'artéfact passe de l'un à l'autre).
   function refreshPanel() {
     recomputeStats();
-    const panel = document.getElementById('window')?.dataset.canaanPanel;
-    if (modalOpen() && panel === 'character') renderCharacter();
+    refreshGearPanel();
     saveGame();
   }
   // Interface : un invité en ligne demande le changement à l'hôte, qui renvoie ses emplacements.
@@ -331,12 +331,11 @@
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
     );
   const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
-  const pips = rank =>
-    '<i class="art-pips">' + '◆'.repeat(rank) + '<s>' + '◇'.repeat(MAX - rank) + '</s></i>';
   // Les quatre emplacements, sous le héros : l'artéfact porté (clic : le retirer) ou un socle vide.
   function slotHtml(k) {
     const a = BY_ID.get(state().equipped[k]);
-    if (!a) return '<div class="art-slot empty" title="Emplacement d’artéfact libre"><span>＋</span></div>';
+    if (!a)
+      return '<button type="button" class="art-slot empty" data-action="toggleInventory" title="Emplacement d’artéfact libre : équipe un artéfact depuis le sac (I)"><span>＋</span></button>';
     const rank = rankOf(a.id);
     return (
       '<button type="button" class="art-slot" style="--art:' +
@@ -358,62 +357,50 @@
       '</em></button>'
     );
   }
-  // Un artéfact de la collection : possédé (clic : équiper ou retirer) ou encore inconnu.
-  function cellHtml(a) {
-    const rank = rankOf(a.id);
-    if (!rank)
-      return (
-        '<span class="art-cell unknown" data-tooltip-artefact="' +
-        a.id +
-        '"><b>?</b><em>' +
-        a.wave +
-        '</em></span>'
+  // Artéfacts possédés et non équipés : des objets du sac (touche I), dans leur rubrique. Liés au héros, ils ne
+  // prennent pas de place ; un clic les équipe, le clic droit propose les mêmes choix.
+  function bagCells(hero = game.hero) {
+    const eq = state(hero).equipped;
+    return owned(hero)
+      .filter(a => !eq.includes(a.id))
+      .map(
+        a =>
+          '<button type="button" class="bag-cell art-bag-cell" style="border-color:' +
+          a.light +
+          ';--rarity:' +
+          a.color +
+          '" data-action="toggleArtefact" data-artefact="' +
+          a.id +
+          '" data-menu="artefact" data-tooltip-artefact="' +
+          a.id +
+          '" aria-label="' +
+          esc(a.name) +
+          '"><span class="bag-icon">' +
+          a.icon +
+          '</span><span class="bag-name">' +
+          esc(a.name) +
+          '</span><span class="bag-ilvl">' +
+          ROMAN[rankOf(a.id, hero)] +
+          '</span></button>'
       );
-    return (
-      '<button type="button" class="art-cell' +
-      (state().equipped.includes(a.id) ? ' worn' : '') +
-      '" style="--art:' +
-      a.color +
-      ';--art-l:' +
-      a.light +
-      '" data-action="toggleArtefact" data-artefact="' +
-      a.id +
-      '" data-menu="artefact" data-tooltip-artefact="' +
-      a.id +
-      '" aria-label="' +
-      esc(a.name) +
-      '"><b>' +
-      a.icon +
-      '</b>' +
-      pips(rank) +
-      '</button>'
-    );
   }
-  // Bloc de la fiche, sous le héros : les quatre emplacements puis, juste dessous, la collection des douze (un seul
-  // en-tête, pour tenir sous la poupée sans défiler).
+  // Bloc de la fiche, sous le héros : les quatre emplacements. Les artéfacts à équiper sont dans le sac.
   function section() {
-    const s = state(),
-      worn = s.equipped.filter(Boolean).length,
+    const worn = state().equipped.filter(Boolean).length,
       lock = canChange();
     return (
       '<div class="rpg-paper art-paper"><div class="art-head"><h3>🔮 Artéfacts</h3><span>' +
       worn +
       ' / ' +
       SLOTS +
-      ' équipés · ' +
-      owned().length +
-      ' / ' +
-      LIST.length +
-      ' trouvés</span></div><div class="art-slots">' +
+      '</span></div><div class="art-slots">' +
       Array.from({ length: SLOTS }, (_, k) => slotHtml(k)).join('') +
-      '</div><div class="art-grid">' +
-      LIST.map(cellHtml).join('') +
       '</div>' +
       (!lock.ok
         ? '<p class="art-note">🔒 ' + esc(lock.why) + '</p>'
         : !owned().length
           ? '<p class="art-note">⚔️ Chaque boss de l’Arène des Épreuves donne son artéfact.</p>'
-          : '') +
+          : '<p class="art-note">Tes artéfacts sont dans le sac (I) : clic pour les équiper.</p>') +
       '</div>'
     );
   }
@@ -545,6 +532,7 @@
     auras,
     canChange,
     section,
+    bagCells,
     tooltip: tooltipHtml,
     legacyRefund,
     equipFor,

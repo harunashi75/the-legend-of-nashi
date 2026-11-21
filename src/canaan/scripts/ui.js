@@ -112,6 +112,7 @@
         ) +
         '</div>',
       gear = game.hero.inventory.map((item, i) => bagCell(item, i)),
+      artefacts = CANAAN_ARTEFACTS.bagCells(),
       util = CANAAN_BAG.tiles(game.hero, null, 'util').map(stackCell),
       other = CANAAN_BAG.tiles(game.hero, null, 'other').map(stackCell),
       mats = CANAAN_BAG.tiles(game.hero, null, 'mat').map(stackCell),
@@ -132,6 +133,10 @@
         '</p>' +
         '<div class="modern-body bag-panel panel-scroll" data-panel-size="bag">' +
         bagGroup('⚔️', 'Équipement', gear.length, gear) +
+        // Artéfacts de l'Arène (non équipés) : liés au héros, sans place prise ; un clic les équipe.
+        (artefacts.length
+          ? bagGroup('🔮', 'Artéfacts', artefacts.length, artefacts, 'sans place prise')
+          : '') +
         bagGroup('🗝️', 'Utilitaire', util.length, util, 'clés, repas, enchantements') +
         bagGroup('💎', 'Autre', other.length, other, 'trésors déterrés') +
         (free

@@ -40,15 +40,22 @@ test('Artéfacts de l’Arène : douze artéfacts, un par boss, rangs 1 à 5, qu
  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.artefacts)')),{ranks:{coeur_fer:5},equipped:['coeur_fer',null,null,null]});
  run("CANAAN_ARTEFACTS_STATE.import({ranks:Object.fromEntries(CANAAN_ARTEFACTS.list.map(a=>[a.id,3])),equipped:['coeur_fer','croc_ombres',null,null]})");
  // Fiche du personnage : plus d'onglet Runes ; la seconde bague à la place de l'artéfact ; sous le héros, les quatre
- // emplacements d'artéfacts puis la collection des douze.
+ // emplacements d'artéfacts, sans collection : les artéfacts à équiper sont des objets du sac.
  run('renderCharacter()');let html=g.document.getElementById('window').innerHTML;
  assert.doesNotMatch(html,/data-tab="rubis"/);assert.doesNotMatch(html,/data-tooltip-slot="artifact"/);
  assert.match(html,/data-tooltip-slot="ring"[\s\S]*data-tooltip-slot="ring2"/);
  assert.match(html,/character-doll[\s\S]*class="rpg-paper art-paper"/);
  assert.equal((html.match(/class="art-slot[ "]/g)||[]).length,4);
- assert.equal((html.match(/class="art-cell[ "]/g)||[]).length,12);
+ assert.doesNotMatch(html,/class="art-grid|class="art-cell/);assert.match(html,/class="art-slot empty" data-action="toggleInventory"/);
  assert.match(html,/data-action="unequipArtefact" data-slot="0" data-menu="artefact" data-artefact="coeur_fer"/);
- assert.match(html,/data-action="toggleArtefact" data-artefact="pierre_colosse"/);
+ // Sac (I) : les dix artéfacts non équipés dans leur rubrique, avec leur rang, sans prendre de place ; un clic équipe.
+ const used0=run('canaanBagUsed(game.hero)');run('renderInventory()');html=g.document.getElementById('window').innerHTML;
+ assert.equal((html.match(/class="bag-cell art-bag-cell"/g)||[]).length,10);assert.match(html,/Artéfacts <small>10/);
+ assert.match(html,/data-action="toggleArtefact" data-artefact="pierre_colosse" data-menu="artefact"[^>]*>[\s\S]*?Pierre du Colosse<\/span><span class="bag-ilvl">III</);
+ assert.doesNotMatch(html,/data-artefact="coeur_fer"/,'un artéfact équipé quitte le sac');assert.equal(run('canaanBagUsed(game.hero)'),used0);
+ run("toggleArtefact('pierre_colosse')");html=g.document.getElementById('window').innerHTML;
+ assert.equal((html.match(/class="bag-cell art-bag-cell"/g)||[]).length,9,'le sac ouvert se met à jour');
+ assert.equal(run("CANAAN_ARTEFACTS.equipped().includes('pierre_colosse')"),true);run("unequipArtefact(2)");run('renderCharacter()');
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"artefact",artefact:"coeur_fer"}}))')),['Retirer']);
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"artefact",artefact:"pierre_colosse"}}))')),['Équiper']);
  // Info-bulle : effet au rang actuel et au rang suivant.

@@ -150,7 +150,7 @@ test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus
  run('closePanels();started=true;paused=false;toggleCollections()');assert.equal(run('CANAAN_COLLECTIONS.current()'),'digging');
  run('toggleCollections()');assert.equal(run('modalOpen()'),false);
  // Fiche (C) : sous le héros, ses quatre artéfacts de l'Arène et leur collection ; plus d'onglet Runes.
- run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/character-doll[^]*art-slots[^]*art-grid/);
+ run('canaanCharacterSection("rubis")');assert.match(run('document.getElementById("window").innerHTML'),/character-doll[^]*art-slots/);
  run('closePanels()');
  // Le sprite d'une tenue a de la place pour les ailes ; sans tenue, rien ne change.
  assert.equal(run('canaanHeroSprite({...game.hero.look,wear:"dragon"},0,0).padX'),12);assert.equal(run('canaanHeroSprite(defaultLook(),0,0).padX'),0);

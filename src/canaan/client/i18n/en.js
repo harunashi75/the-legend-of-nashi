@@ -613,14 +613,13 @@ export default {
     'Attack, Defense and maximum HP +{n}%; once every 90 s, a fatal blow leaves you at 20% of your HP.',
   // Fiche du personnage (C), info-bulles et effets en combat (scripts/arena-artefacts.js).
   'Artéfacts': 'Artifacts',
-  '{n} / {m} équipés': '{n} / {m} equipped',
-  '{n} / {m} trouvés': '{n} / {m} found',
-  'Emplacement d’artéfact libre': 'Free artifact slot',
+  'sans place prise': 'take no space',
+  'Tes artéfacts sont dans le sac (I) : clic pour les équiper.':
+    'Your artifacts are in the bag (I): click to equip them.',
+  'Emplacement d’artéfact libre : équipe un artéfact depuis le sac (I)':
+    'Free artifact slot: equip an artifact from the bag (I)',
   'Chaque boss de l’Arène des Épreuves donne son artéfact.':
     'Each boss of the Arena of Trials gives its artifact.',
-  'un doublon fait monter le rang': 'a duplicate raises its rank',
-  'Clic : équiper ou retirer · un doublon fait monter le rang':
-    'Click: equip or remove · a duplicate raises its rank',
   'Artéfact inconnu': 'Unknown artifact',
   'Vaincs ce boss de l’Arène des Épreuves pour l’obtenir.':
     'Defeat this boss of the Arena of Trials to get it.',
