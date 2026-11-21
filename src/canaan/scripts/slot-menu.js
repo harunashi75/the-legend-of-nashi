@@ -108,7 +108,7 @@
       classLabel(info.classe) +
       '</p><p class="cs-world">' +
       esc(info.nom) +
-      '</p></div><canvas id="selectPreview" width="240" height="300" aria-label="Aperçu du héros"></canvas>' +
+      '</p></div><canvas id="selectPreview" width="320" height="320" aria-label="Aperçu du héros"></canvas>' +
       '<div class="look-turn"><button type="button" class="slot-secondary cs-turn" data-action="lookTurn" data-dir="-1" aria-label="Tourner à gauche">⟲</button>' +
       '<button type="button" class="slot-secondary cs-turn" data-action="lookTurn" data-dir="1" aria-label="Tourner à droite">⟳</button></div>' +
       '<p class="cs-meta"><span>' +
@@ -219,7 +219,7 @@
       esc(race.lore) +
       '</p></div></aside>' +
       // Centre : aperçu animé.
-      '<div class="look-stage"><canvas id="lookPreview" width="240" height="300" aria-label="Aperçu du héros"></canvas>' +
+      '<div class="look-stage"><canvas id="lookPreview" width="320" height="320" aria-label="Aperçu du héros"></canvas>' +
       '<div class="look-turn"><button type="button" class="slot-secondary" data-action="lookTurn" data-dir="-1" aria-label="Tourner à gauche">⟲</button>' +
       '<button type="button" class="slot-secondary" data-action="lookRandom">🎲 Au hasard</button>' +
       '<button type="button" class="slot-secondary" data-action="lookTurn" data-dir="1" aria-label="Tourner à droite">⟳</button></div>' +
@@ -302,7 +302,12 @@
     c.ellipse(canvas.width / 2, canvas.height - 26, 62, 13, 0, 0, Math.PI * 2);
     c.fill();
     const sprite = canaanHeroSprite(look, ui.face, frame, { tool: 'none' }),
-      scale = 4 * lookRace(look.race).scale,
+      // Une apparence portée (ailes, capes, chapeaux) élargit le sprite : l'échelle le garde entier dans le cadre.
+      scale = Math.min(
+        4 * lookRace(look.race).scale,
+        (canvas.width - 8) / sprite.width,
+        (canvas.height - 26) / sprite.height
+      ),
       w = sprite.width * scale,
       h = sprite.height * scale;
     c.drawImage(

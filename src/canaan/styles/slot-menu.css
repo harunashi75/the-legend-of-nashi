@@ -59,7 +59,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1400px;
   min-height: 0;
   margin-top: 6px;
 }
@@ -68,7 +67,7 @@
 #slotMenu .cs-screen {
   display: grid;
   /* Colonnes de côté de même largeur : le héros est au milieu de l'écran, sous le titre. */
-  grid-template-columns: minmax(200px, 360px) minmax(0, 1fr) minmax(300px, 360px);
+  grid-template-columns: minmax(340px, 1fr) minmax(0, 640px) minmax(340px, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-areas:
     '. stage roster'
@@ -162,10 +161,10 @@
 }
 #slotMenu #selectPreview,
 #slotMenu #lookPreview {
-  height: clamp(180px, 44vh, 380px);
+  height: clamp(180px, 40vh, 380px);
   width: auto;
   max-width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1;
   image-rendering: pixelated;
 }
 #title #slotMenu button.cs-turn {
@@ -175,6 +174,8 @@
 
 /* Liste des aventures, à droite. */
 #slotMenu .cs-roster {
+  justify-self: end;
+  width: min(100%, 380px);
   backdrop-filter: blur(3px);
   grid-area: roster;
   display: flex;
@@ -307,10 +308,10 @@
 #slotMenu .cs-enter {
   grid-area: enter;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 8px;
   min-height: 56px;
 }
 #title #slotMenu button.cs-enter-button {
@@ -452,11 +453,13 @@
 }
 #slotMenu .look-body {
   display: grid;
-  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr) minmax(280px, 380px);
+  /* Colonnes de côté égales, panneaux contre les bords : l'aperçu reste au milieu, avec de l'air autour. */
+  grid-template-columns: minmax(365px, 1fr) minmax(0, 580px) minmax(365px, 1fr);
   gap: 18px;
   min-height: 0;
 }
 #slotMenu .cc-col {
+  width: min(100%, 400px);
   backdrop-filter: blur(3px);
   display: flex;
   flex-direction: column;
@@ -653,6 +656,13 @@
     0 0 0 2px #0c0805,
     inset 0 1px 0 rgba(255, 220, 190, 0.45),
     0 0 24px rgba(220, 80, 50, 0.4);
+}
+
+#slotMenu .cc-left {
+  justify-self: start;
+}
+#slotMenu .cc-right {
+  justify-self: end;
 }
 
 /* ---------------------------------------------------------------- Décor de chaque race
@@ -961,6 +971,11 @@
   }
   #slotMenu .look-body {
     grid-template-columns: 1fr;
+  }
+  #slotMenu .cs-roster,
+  #slotMenu .cc-col {
+    justify-self: stretch;
+    width: auto;
   }
   #slotMenu .cc-foot {
     flex-wrap: wrap;
