@@ -156,7 +156,12 @@
 }
 /* #window#window : plus fort que les règles de la poupée du thème. */
 #window#window[data-size='char'] .character-doll {
-  column-gap: 12px;
+  column-gap: 16px;
+  justify-content: space-between;
+}
+/* Cases de la poupée poussées vers les rebords du cadre. */
+#window[data-size='char'] .character-left > .rpg-paper:first-child {
+  padding-inline: 4px;
 }
 #window#window[data-size='char'] .doll-center {
   width: 140px;
