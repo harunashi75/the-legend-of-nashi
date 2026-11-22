@@ -184,15 +184,16 @@ export function heroStats(level, pieces, baseMana) {
   };
 }
 // ---------------------------------------------------------------- Monstres
-// Niveau d'un monstre de la zone index (0 à 5) : tiré dans la plage de la zone.
+// Niveau d'un monstre de la zone index (0 à 6) : celui du héros, borné à la plage de la zone (Plaines 1–10 : un
+// héros niv. 4 y croise des niv. 4, un héros niv. 25 des niv. 10 ; dans la zone 10–20, un héros niv. 4 croise des niv. 10).
 /**
- * @param {number} index zone 0 à 5
- * @param {Rng} rng
+ * @param {number} index zone 0 à 6
+ * @param {number} heroLevel
  * @returns {number}
  */
-export function zoneLevel(index, rng) {
+export function zoneLevel(index, heroLevel) {
   const [lo, hi] = ZONE_LEVELS[Math.max(0, Math.min(ZONE_LEVELS.length - 1, index | 0))];
-  return lo + Math.floor(rng() * (hi - lo + 1));
+  return Math.max(lo, Math.min(hi, Math.floor(Number(heroLevel)) || 1));
 }
 // PV d'un monstre ordinaire selon son niveau ; typeHp (PV de base de l'espèce) le rend un peu plus ou moins robuste.
 /**

@@ -540,7 +540,7 @@
     if (canaanInHouse(P.x / TS, P.y / TS)) return 'maison';
     const x = P.x / TS,
       y = P.y / TS;
-    if (villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 3)) return 'village';
+    if (canaanInCamp(x, y, 1)) return 'village';
     return BIOME_THEMES[canaanSurfaceZoneAt(x, y)];
   }
 

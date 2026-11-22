@@ -170,7 +170,17 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
   run('game.world.monsters=[];P.x=(ZONES['+i+'].x+0.5)*TS;P.y=(ZONES['+i+'].y+0.5)*TS;spawnMonsters(40)');
   assert.equal(run('game.world.monsters.filter(m=>!m.worldBoss&&!regionAt(m.x/TS,m.y/TS).mobs.includes(m.t)).length'),0,'région '+i);
  }
- run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;game.world.monsters=[]');
+ // Niveau des monstres : celui du héros, borné à la plage de la zone ; un monstre intact suit le héros qui progresse.
+ const levels=hero=>{run('game.hero.level='+hero+';game.world.monsters=[];P.x=(ZONES[1].x+0.5)*TS;P.y=(ZONES[1].y+0.5)*TS;spawnMonsters(30)');
+  return JSON.parse(run('JSON.stringify([...new Set(game.world.monsters.filter(m=>m.zoneMob).map(m=>canaanZoneIndexAt(m.x/TS,m.y/TS)+":"+m.level))].sort())'));};
+ for(const [hero,want] of [[1,'1:10'],[14,'1:14'],[35,'1:20']])assert.ok(levels(hero).every(k=>k.split(':')[0]!=='1'||k===want),hero+' → '+levels(hero));
+ run('game.hero.level=1;game.world.monsters=[];P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y+30*TS;spawnMonsters(30)');
+ assert.ok(run('game.world.monsters.filter(m=>m.zoneMob&&canaanZoneIndexAt(m.x/TS,m.y/TS)===0).every(m=>m.level===1)'),'héros niv. 1 : monstres niv. 1 dans les Plaines');
+ run('game.hero.level=7;started=true;paused=false;for(let i=0;i<60;i++)CanaanStages.mobScaling.after()');
+ assert.ok(run('game.world.monsters.filter(m=>m.zoneMob&&canaanZoneIndexAt(m.x/TS,m.y/TS)===0).every(m=>m.level===7&&m.hp===m.mhp)'),'ils suivent le héros niv. 7');
+ run('game.hero.level=40;for(let i=0;i<60;i++)CanaanStages.mobScaling.after()');
+ assert.ok(run('game.world.monsters.filter(m=>m.zoneMob&&canaanZoneIndexAt(m.x/TS,m.y/TS)===0).every(m=>m.level===10)'),'plafond des Plaines : niv. 10');
+ run('game.hero.level=1;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;game.world.monsters=[]');
  // Coffres cachés et coffre de boss : sprites dédiés, dessinés sans erreur.
  run('drawCanaanChest(ctx,100,100,false,1);drawCanaanChest(ctx,200,100,true,2);drawChests()');
 });
@@ -255,6 +265,11 @@ test('Vie du camp : ferme, enclos, champs, verger, jardin, fontaine, ruisseau so
  // Aucun monstre n'apparaît dans la ferme, le verger ni le jardin.
  run('game.world.monsters=[];spawnMonsters(200)');
  assert.equal(run('game.world.monsters.filter(m=>canaanCampLife.farm(Math.floor(m.x/TS),Math.floor(m.y/TS))).length'),0);
+ // La zone sûre couvre tout le camp : chaque case de chaque objet (jardin, ferme, champs, verger, quai, navire) et
+ // chaque bâtiment qui l'entoure ; aucun monstre n'y apparaît.
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_CAMP_LIFE.items().filter(it=>{for(let y=it.y;y<it.y+(it.h||1);y++)for(let x=it.x;x<it.x+(it.w||1);x++)if(!isSafe(x+.5,y+.5))return true;return false}).map(it=>it.kind))')),[]);
+ assert.ok(run('CANAAN_HOUSE.buildings().filter(b=>Math.hypot(b.x-CANAAN_CAMP.x,b.y-CANAAN_CAMP.y)<30).every(b=>isSafe(b.x,b.y)&&isSafe(b.x+b.w-.5,b.y+b.h-.5))'));
+ assert.equal(run('game.world.monsters.filter(m=>isSafe(m.x/TS,m.y/TS)).length'),0);
  // Le dessin du sol, des objets et des ponts tourne sans erreur au camp.
  run('P.x=(CANAAN_CAMP.x+.5)*TS;P.y=(CANAAN_CAMP.y+3.5)*TS;camX=P.x-W/2;camY=P.y-H/2;canaanCampLife.drawGround(ctx);canaanCampLife.draw(ctx);drawPixelRoads(ctx)');
  // Une île régénérée retrouve exactement la même ferme et le même ruisseau.

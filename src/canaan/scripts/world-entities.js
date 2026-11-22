@@ -3,13 +3,23 @@
 const villages = [{ name: CANAAN_CAMP.name, x: CANAAN_CAMP.x, y: CANAAN_CAMP.y, r: CANAAN_CAMP.r }];
 // Donjons et raids : biome d'accueil ; la position est fixée par la génération de l'île.
 const instances = createInstances();
+// Dans l'enceinte du Camp de l'Aurore (case ou position en cases) : son emprise ou le cercle autour du feu.
+function canaanInCamp(x, y, margin = 0) {
+  const c = CANAAN_CAMP,
+    dx = Math.floor(x) - c.x,
+    dy = Math.floor(y) - c.y;
+  return (
+    Math.hypot(x - c.x, y - c.y) < c.r + 2 + margin ||
+    c.area.some(
+      ([x0, y0, x1, y1]) => dx >= x0 - margin && dx <= x1 + margin && dy >= y0 - margin && dy <= y1 + margin
+    )
+  );
+}
 function isSafe(x, y) {
   // Tréfonds : la Forteresse naine de Durgrim est le seul lieu sûr.
   if (canaanUnder()) return CANAAN_UNDER.safe(x, y);
   // La cité elfique de Sylvaëlle (dans sa palissade) est sûre elle aussi.
-  return (
-    villages.some(v => Math.hypot(x - v.x, y - v.y) < v.r + 2) || canaanInHouse(x, y) || canaanInCity(x, y)
-  );
+  return canaanInCamp(x, y) || canaanInHouse(x, y) || canaanInCity(x, y);
 }
 // Chaque instance a son portail ; canaan-world-generation le place sur l'île.
 for (let i = 0; i < instances.length; i++) {

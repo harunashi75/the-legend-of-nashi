@@ -32,7 +32,16 @@ function visualRnd() {
   return Math.random();
 }
 // Camp de l'Aurore : seule zone sûre de l'île, au cœur des Plaines verdoyantes (coordonnées en tuiles).
-const CANAAN_CAMP = Object.freeze({ name: 'Camp de l’Aurore', x: 72, y: 234, r: 10 });
+// area : emprise du camp, en rectangles [x0, y0, x1, y1] (cases depuis le feu, bornes comprises), qui couvre tout ce
+// que camp-life.js et house.js y posent : le cœur (demeures, jardin, ferme, champs, ruisseau, verger) et le port
+// (quai et navire, à l'ouest). La zone sûre (isSafe) est ce rectangle, plus le cercle de rayon r + 2 autour du feu.
+const CANAAN_CAMP = Object.freeze({
+  name: 'Camp de l’Aurore',
+  x: 72,
+  y: 234,
+  r: 10,
+  area: Object.freeze([Object.freeze([-31, -21, 10, 21]), Object.freeze([-47, -2, -31, 9])])
+});
 // Intérieurs des bâtiments où l'on entre (house.js) : chaque pièce est posée dans un coin d'océan de la carte
 // (cases, murs compris), assez loin des autres pour qu'on n'en voie qu'une à la fois. La première est la maison
 // du joueur ; viennent ensuite l'échoppe, la cuisine et les demeures du camp, puis l'intérieur de chaque refuge.

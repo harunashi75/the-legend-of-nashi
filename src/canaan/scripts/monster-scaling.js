@@ -1,10 +1,25 @@
-// Niveau des monstres : chaque créature a un niveau fixe, celui de sa zone (Plaines verdoyantes 1–10 … Forêt
-// enchantée 50–60), de son instance ou de son boss. Ses PV et ses dégâts en découlent (shared/rules/stats.js) ;
-// rien ne s'adapte plus à l'équipement du héros.
+// Niveau des monstres : dehors, celui du héros borné à la plage de sa zone (Plaines verdoyantes 1–10 … Forêt
+// enchantée 50–60) ; en instance, celui de l'instance ; pour un boss, le sien. Ses PV et ses dégâts en découlent
+// (shared/rules/stats.js) ; rien ne s'adapte à l'équipement du héros.
 (() => {
   // Zone (0 à 5) d'une case de l'île.
   function zoneIndexAt(tx, ty) {
     return Math.max(0, ZONES.indexOf(regionAt(tx, ty)));
+  }
+  // Niveau d'un monstre de l'île à la case (tx, ty) : celui de l'hôte, borné à la plage de la zone.
+  function zoneMobLevel(tx, ty) {
+    return clampLevel(zoneLevel(zoneIndexAt(tx, ty), game.hero?.level));
+  }
+  // Un monstre de l'île encore intact suit le niveau du héros quand celui-ci progresse (jusqu'au plafond de la zone) ;
+  // un monstre blessé garde le sien jusqu'à la fin du combat. L'hôte décide, les invités reçoivent son état.
+  function followHeroLevel(m) {
+    if (!m.zoneMob || m.hp <= 0 || m.hp < m.mhp) return;
+    const level = zoneMobLevel(m.x / TS, m.y / TS);
+    if (level === m.level) return;
+    const type = canaanMobTypes().find(t => t.name === m.t);
+    m.level = level;
+    m.mhp = m.hp = mobHealth(level, !!m.elite, type?.hp || 100);
+    m.g = mobGold(level, !!m.elite);
   }
   // Instance en cours : niveau de ses ennemis (et de ses boss, un peu plus haut).
   function instanceLevel(boss = false) {
@@ -23,7 +38,7 @@
     if (!Number.isFinite(m.level)) {
       if (m.worldBoss) m.level = WORLD_BOSSES.find(b => b.id === m.worldBossId)?.level || m.bossLevel || 1;
       else if (game.world.instance) m.level = instanceLevel(!!m.boss);
-      else m.level = zoneLevel(zoneIndexAt(m.x / TS, m.y / TS), Math.random);
+      else m.level = zoneMobLevel(m.x / TS, m.y / TS);
     }
     return clampLevel(m.level);
   }
@@ -74,9 +89,12 @@
       if (++hpClock % 45 === 0) for (const m of game.world.monsters) scaleBossHp(m);
     }
   };
+  let levelClock = 0;
   window.CanaanStages.mobScaling = {
     after() {
       for (const m of game.world.monsters) if (!m._levelHp) setupMob(m);
+      if (game.mode !== 'guest' && !game.world.instance && ++levelClock % 60 === 0)
+        for (const m of game.world.monsters) followHeroLevel(m);
     }
   };
   // Noms publics du module ; tout le reste est privé.
@@ -85,6 +103,7 @@
     scaleBossHp,
     canaanMobLevel: mobLevel,
     canaanSetupMob: setupMob,
-    canaanZoneIndexAt: zoneIndexAt
+    canaanZoneIndexAt: zoneIndexAt,
+    canaanZoneMobLevel: zoneMobLevel
   });
 })();

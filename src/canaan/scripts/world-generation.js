@@ -189,8 +189,7 @@
     if (room) return room.name;
     if (canaanUnder()) return CANAAN_UNDER.zoneName(x, y);
     if (inCity(Math.floor(x), Math.floor(y))) return 'Sylvaëlle, la Cité des Elfes';
-    const v = villages.find(v => Math.hypot(x - v.x, y - v.y) < v.r + 3);
-    return v ? v.name : regionAt(x, y).name;
+    return canaanInCamp(x, y, 1) ? CANAAN_CAMP.name : regionAt(x, y).name;
   }
   // Titre de région affiché en haut de l'écran lors des changements de zone.
   const regionBanner = document.createElement('div');
@@ -1144,10 +1143,10 @@
         tries < 80
       );
       if (tries >= 80) continue;
-      // Niveau tiré dans la plage de la zone ; PV et or en découlent.
+      // Niveau du héros, borné à la plage de la zone (canaanZoneMobLevel) ; PV et or en découlent.
       let type = worldMobAt(x, y),
         elite = rnd() < 0.07,
-        level = zoneLevel(canaanZoneIndexAt(x, y), rnd),
+        level = canaanZoneMobLevel(x, y),
         hp = mobHealth(level, elite, type.hp);
       game.world.monsters.push({
         x: (x + 0.5) * TS,
@@ -1161,6 +1160,7 @@
         g: mobGold(level, elite),
         mobColor: type.color,
         elite,
+        zoneMob: true,
         _levelHp: true
       });
     }
@@ -1168,8 +1168,12 @@
   function updateWorld() {
     game.world.clock++;
     if (game.world.clock % 420 === 0 && !game.world.instance) {
+      // Les monstres trop loin disparaissent, et ceux qui traînent dans une zone sûre (Camp de l'Aurore) aussi.
       game.world.monsters = game.world.monsters.filter(
-        m => m.worldBoss || Math.hypot(m.x - P.x, m.y - P.y) < TS * 34
+        m =>
+          m.worldBoss ||
+          (Math.hypot(m.x - P.x, m.y - P.y) < TS * 34 &&
+            !(m.zoneMob && m.hp >= m.mhp && isSafe(m.x / TS, m.y / TS)))
       );
       let nearby = game.world.monsters.filter(
         m => !m.worldBoss && Math.hypot(m.x - P.x, m.y - P.y) < TS * 25

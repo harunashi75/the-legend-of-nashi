@@ -2,6 +2,14 @@
 
 Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ; la version unique est `CANAAN_VERSION` dans `src/canaan/scripts/runtime-config.js`. Le détail du contenu est dans [docs/GAMEPLAY.md](docs/GAMEPLAY.md).
 
+## [Non publié]
+
+### Modifié
+- **Niveau des monstres au niveau du héros** : dehors, les monstres et les élites ont le niveau du héros, borné à la plage de leur zone. On commence niv. 1 face à des niv. 1 dans les Plaines verdoyantes (au lieu de niv. 1 à 9 au hasard) ; à partir du niv. 10, les Plaines restent au niv. 10 pour toujours, tandis que la Forêt ancienne suit le héros du niv. 10 au niv. 20, et ainsi de suite. Un monstre encore intact monte avec le héros ; un monstre blessé garde son niveau jusqu’à la fin du combat. En ligne, c’est le niveau de l’hôte qui compte.
+
+### Corrigé
+- **Monstres dans le Camp de l’Aurore** : la zone sûre était restée un cercle autour du feu alors que le camp avait grandi (jardin, ferme, champs, verger, quai). Elle couvre maintenant tout le camp et son port ; aucun monstre n’y apparaît, et ceux qui s’y attardaient disparaissent.
+
 ## [0.11.0] — 2026-11-19
 
 ### Corrigé
