@@ -1275,20 +1275,12 @@ function draw() {
   if (!game.world.instance) drawWaterRipples(ctx);
   // Arène : zones annoncées et dangers au sol, sous les combattants.
   if (game.world.instance?.arena) CANAAN_ARENA.drawGround(ctx);
+  // Monstres ; leurs plaques sont dessinées plus bas, au-dessus des personnages et du décor.
+  const plates = [];
   game.world.monsters.forEach(m => {
     if (Math.abs(m.x - P.x) > W || Math.abs(m.y - P.y) > H || m.hidden) return;
     drawPixelMob(m);
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillStyle = m.worldBoss ? '#ffe49c' : '#fff';
-    // Les boss ont leur barre en haut de l'écran ; les autres, au-dessus de leur sprite.
-    if (m.boss || m.worldBoss) return;
-    const top = m.y - (m.elite ? 88 : 64);
-    if (m.elite) ctx.fillText(mobTitle(m), m.x, top - 6);
-    ctx.fillStyle = '#261d2b';
-    ctx.fillRect(m.x - 22, top, 44, 5);
-    ctx.fillStyle = '#f36b74';
-    ctx.fillRect(m.x - 22, top, 44 * Math.max(0, m.hp / m.mhp), 5);
+    if (!m.boss && !m.worldBoss) plates.push(m);
   });
   // projectiles
   game.world.projectiles.forEach(p => canaanDrawProjectile(ctx, p));
@@ -1310,6 +1302,11 @@ function draw() {
   drawCanaanOcclusion(ctx);
   // Extensions : ce qui passe au-dessus des personnages (rayons, oiseaux, pétales).
   CANAAN_EXT.draw(ctx, 'air');
+  // Plaques des monstres (sprite-kit.js) par-dessus tout le monde, celle du monstre visé en dernier ; les boss ont
+  // leur barre en haut de l'écran.
+  const aimed = canaanAimedMob();
+  plates.sort((a, b) => (a === aimed) - (b === aimed) || a.y - b.y);
+  for (const m of plates) drawCanaanMobPlate(ctx, m, (m._headY ?? m.y - 40) - 10, m === aimed);
   // Invitations « [E] Entrer » des bâtiments, au-dessus des façades et des personnages.
   CANAAN_HOUSE.drawPrompts(ctx);
   CANAAN_CITY.drawPrompts(ctx);

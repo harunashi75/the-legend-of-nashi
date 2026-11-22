@@ -32,6 +32,8 @@ test('Protocole du coopératif : codes de salon, intentions vérifiées, pseudos
  assert.deepEqual([snap.x,snap.y,snap.vx,snap.hp,snap.mp,snap.gold],[11,2,1.2,10,3,5]);
  const m=n.monsterSnapshot({netId:4,t:'Loup',x:1.4,y:2.6,hp:3.1,mhp:9,r:14,cd:0.66,boss:true,look:'beast',secret:'x'});
  assert.deepEqual(m,{k:4,t:'Loup',x:1,y:3,hp:4,mhp:9,r:14,cd:0.7,boss:true,look:'beast'});
+ // Le niveau décidé par l'hôte part avec le monstre (plaque des invités).
+ assert.equal(n.monsterSnapshot({netId:5,t:'Slime',x:0,y:0,hp:1,mhp:1,r:16,cd:0,level:7}).level,7);
 });
 
 test('Relais : salon et code, routage hôte ↔ invités, identité imposée, salon complet et fermeture',async()=>{

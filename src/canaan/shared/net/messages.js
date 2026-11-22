@@ -386,6 +386,8 @@ export function monsterSnapshot(m) {
     cd: Math.round(finite(m.cd) * 10) / 10
   };
   for (const key of ['boss', 'worldBoss', 'elite', 'arenaBoss', 'hidden']) if (m[key]) out[key] = true;
+  // Niveau décidé par l'hôte (plaque des monstres des invités).
+  if (Number.isFinite(m.level)) out.level = round(m.level);
   for (const key of MONSTER_LOOK) if (m[key] !== undefined) out[key] = m[key];
   if (Number.isFinite(m.facingAngle)) out.facingAngle = Math.round(m.facingAngle * 100) / 100;
   // Rang du boss dans l'instance et boss caché (barre de boss des invités).

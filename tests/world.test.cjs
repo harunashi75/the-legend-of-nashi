@@ -180,6 +180,10 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
  assert.ok(run('game.world.monsters.filter(m=>m.zoneMob&&canaanZoneIndexAt(m.x/TS,m.y/TS)===0).every(m=>m.level===7&&m.hp===m.mhp)'),'ils suivent le héros niv. 7');
  run('game.hero.level=40;for(let i=0;i<60;i++)CanaanStages.mobScaling.after()');
  assert.ok(run('game.world.monsters.filter(m=>m.zoneMob&&canaanZoneIndexAt(m.x/TS,m.y/TS)===0).every(m=>m.level===10)'),'plafond des Plaines : niv. 10');
+ // Plaque des monstres : posée sur la tête du sprite, dessinée sans erreur (normal, élite, visé, blessé, crâne).
+ run('game.hero.level=3;game.world.monsters.slice(0,4).forEach((m,i)=>{m.elite=i===1;m.level=i===3?20:3;m.hp=Math.round(m.mhp*(i?0.4:1));m.x=P.x+(i-1.5)*90;m.y=P.y-80});mouseWorldX=game.world.monsters[2].x;mouseWorldY=game.world.monsters[2].y-10;camX=P.x-W/2;camY=P.y-H/2;draw()');
+ assert.ok(run('game.world.monsters.slice(0,4).every(m=>Number.isFinite(m._headY)&&m._headY<m.y&&m._headY>m.y-100&&m._plateTrail>=0)'));
+ assert.equal(run('canaanAimedMob()===game.world.monsters[2]'),true);
  run('game.hero.level=1;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;game.world.monsters=[]');
  // Coffres cachés et coffre de boss : sprites dédiés, dessinés sans erreur.
  run('drawCanaanChest(ctx,100,100,false,1);drawCanaanChest(ctx,200,100,true,2);drawChests()');

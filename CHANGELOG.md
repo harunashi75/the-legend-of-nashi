@@ -7,6 +7,8 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 ### Modifié
 - **Niveau des monstres au niveau du héros** : dehors, les monstres et les élites ont le niveau du héros, borné à la plage de leur zone. On commence niv. 1 face à des niv. 1 dans les Plaines verdoyantes (au lieu de niv. 1 à 9 au hasard) ; à partir du niv. 10, les Plaines restent au niv. 10 pour toujours, tandis que la Forêt ancienne suit le héros du niv. 10 au niv. 20, et ainsi de suite. Un monstre encore intact monte avec le héros ; un monstre blessé garde son niveau jusqu’à la fin du combat. En ligne, c’est le niveau de l’hôte qui compte.
 
+- **Barre de vie des monstres redessinée** ❤️ : chaque monstre a maintenant une plaque façon MMO, posée juste au-dessus de sa tête : son nom, une barre rouge à reflet graduée par quarts, et une traînée claire qui fond après chaque coup pour voir ce qu’on vient d’enlever. À gauche, une pastille donne **son niveau**, colorée selon l’écart avec le héros : gris (sans danger), vert, jaune (de ton niveau), orange, rouge, et un crâne pour un monstre d’au moins dix niveaux de plus. Les élites ont une plaque plus large, un cadre et des ailes dorés. Le monstre sous le curseur est mis en avant (liseré blanc et chevrons) et sa plaque passe devant les autres. Les plaques restent au-dessus des personnages et des arbres. En ligne, les invités voient le niveau décidé par l’hôte.
+
 ### Corrigé
 - **Monstres dans le Camp de l’Aurore** : la zone sûre était restée un cercle autour du feu alors que le camp avait grandi (jardin, ferme, champs, verger, quai). Elle couvre maintenant tout le camp et son port ; aucun monstre n’y apparaît, et ceux qui s’y attardaient disparaissent.
 

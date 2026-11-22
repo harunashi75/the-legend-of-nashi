@@ -50,6 +50,28 @@
     resolveLook(m);
     return actor(m);
   }
+  // Première ligne dessinée d'un sprite (34 × 42), en fraction de sa hauteur : la tête de la créature, où se pose sa
+  // plaque (un slime est bien plus bas qu'un ours). Mesurée une fois par sprite.
+  const HEAD = new WeakMap();
+  function headFraction(spr) {
+    if (HEAD.has(spr)) return HEAD.get(spr);
+    let top = 0;
+    try {
+      const d = spr.getContext('2d').getImageData(0, 0, spr.width, spr.height).data;
+      top = spr.height;
+      for (let i = 3; i < d.length; i += 4)
+        if (d[i] > 120) {
+          top = Math.floor((i - 3) / 4 / spr.width);
+          break;
+        }
+      if (top >= spr.height) top = 0;
+    } catch {
+      top = 0;
+    }
+    const f = top / (spr.height || 1);
+    HEAD.set(spr, f);
+    return f;
+  }
   // Dessine n'importe quel monstre : normal, élite, boss mondial ou boss d'instance.
   function drawCanaanActor(c, m) {
     resolveLook(m);
@@ -61,6 +83,8 @@
       bob = floats ? Math.sin(time * 0.08 + m.x) * (big ? 6 : 3) : 0,
       w = 34 * scale,
       h = 42 * scale;
+    // Haut de la tête (pour la plaque), sans le rebond de la marche pour qu'elle ne tressaute pas.
+    m._headY = m.y - h * 0.9 + headFraction(spr) * h + bob;
     c.save();
     if (big) {
       const aura = m.bossColor || m.mobColor || m.pal[3];
@@ -500,10 +524,212 @@
   const drawCanaanPrompt = (c, text, x, y, color = '#f6dc98') => worldText(c, text, x, y, 13, color);
   // Nom d'un PNJ ou d'un lieu.
   const drawCanaanName = (c, text, x, y, color = '#f6e2b1') => worldText(c, text, x, y, 12, color);
+  // ---------------------------------------------------------------- Plaque des monstres
+  // Au-dessus de chaque monstre (hors boss, qui ont leur cadre en haut de l'écran), à la façon des barres de vie des
+  // MMO : nom en serif cerné d'encre, barre rouge à reflet graduée par quarts, traînée claire qui fond après un coup,
+  // pastille du niveau colorée selon l'écart avec le héros (gris : sans danger … rouge : bien plus fort, crâne à +10).
+  // Élite : plaque plus large, cadre et ailes dorés. Monstre visé (le plus proche du curseur) : liseré et chevrons.
+  const PLATE_INK = '#0c0806';
+  function levelColor(gap) {
+    if (gap >= 5) return '#ff4a3a';
+    if (gap >= 3) return '#ff9a3a';
+    if (gap >= -2) return '#ffd84a';
+    if (gap >= -7) return '#5ee05a';
+    return '#a8a8a8';
+  }
+  // Petit crâne en pixels (monstre d'au moins dix niveaux au-dessus du héros).
+  function plateSkull(c, x, y) {
+    const R = (dx, dy, w, h, col) => {
+      c.fillStyle = col;
+      c.fillRect(x + dx, y + dy, w, h);
+    };
+    R(-3, -4, 6, 5, '#ff4a3a');
+    R(-2, 1, 4, 2, '#ff4a3a');
+    R(-2, -2, 1, 2, PLATE_INK);
+    R(1, -2, 1, 2, PLATE_INK);
+    R(-1, 2, 1, 1, PLATE_INK);
+    R(0, 2, 1, 1, '#ff4a3a');
+  }
+  // Monstre visé : le plus proche du curseur, à moins de 46 px (null sinon).
+  function aimedMob() {
+    let aimed = null;
+    const ax = mouseWorldX,
+      ay = mouseWorldY;
+    if (!Number.isFinite(ax) || !Number.isFinite(ay)) return null;
+    let best = 46;
+    for (const m of game.world.monsters) {
+      if (m.hp <= 0 || m.hidden || m.boss || m.worldBoss) continue;
+      const d = Math.hypot(m.x - ax, ((m._headY ?? m.y - 30) + m.y) / 2 - ay);
+      if (d < best) [best, aimed] = [d, m];
+    }
+    return aimed;
+  }
+  function drawCanaanMobPlate(c, m, top, target = false) {
+    const elite = !!m.elite,
+      w = elite ? 64 : 54,
+      h = 7,
+      x = Math.round(m.x - w / 2 + 7),
+      y = Math.round(top),
+      ratio = m.mhp > 0 ? Math.max(0, Math.min(1, m.hp / m.mhp)) : 0;
+    // Traînée : la part perdue reste claire un instant, puis fond jusqu'aux PV restants.
+    if (!(m._plateTrail >= ratio) || m._plateTrail > 1) [m._plateTrail, m._plateHold] = [ratio, 0];
+    else if (m._plateTrail > ratio) {
+      if (m._plateLast > ratio) m._plateHold = 24;
+      if (m._plateHold > 0) m._plateHold--;
+      else m._plateTrail = Math.max(ratio, m._plateTrail - 0.012);
+    }
+    m._plateLast = ratio;
+    c.save();
+    c.imageSmoothingEnabled = false;
+    // Nom.
+    const name = mobTitle(m);
+    worldText(
+      c,
+      name,
+      Math.round(m.x),
+      y - 4,
+      elite ? 12 : 11,
+      elite ? '#ffd98a' : target ? '#ffffff' : '#f0e2c8'
+    );
+    // Cadre : encre, liseré (doré pour une élite, blanc pour le monstre visé), fond sombre.
+    c.fillStyle = PLATE_INK;
+    c.fillRect(x - 2, y - 2, w + 4, h + 4);
+    c.fillStyle = target ? '#f4f0e8' : elite ? '#d8a840' : '#4a3a2c';
+    c.fillRect(x - 1, y - 1, w + 2, h + 2);
+    c.fillStyle = '#2a1014';
+    c.fillRect(x, y, w, h);
+    // PV perdus à l'instant, puis PV restants : rouge vif, reflet en haut, ombre en bas.
+    const fill = Math.round(w * ratio),
+      trail = Math.round(w * m._plateTrail);
+    if (trail > fill) {
+      c.fillStyle = '#ffe2a8';
+      c.fillRect(x + fill, y, trail - fill, h);
+    }
+    if (fill > 0) {
+      c.fillStyle = '#d8323a';
+      c.fillRect(x, y, fill, h);
+      c.fillStyle = '#f2646a';
+      c.fillRect(x, y, fill, 2);
+      c.fillStyle = 'rgba(255,255,255,.35)';
+      c.fillRect(x, y, fill, 1);
+      c.fillStyle = '#8c1820';
+      c.fillRect(x, y + h - 1, fill, 1);
+    }
+    // Graduations par quarts.
+    c.fillStyle = 'rgba(12,8,6,.55)';
+    for (const q of [0.25, 0.5, 0.75]) c.fillRect(x + Math.round(w * q), y + 1, 1, h - 2);
+    // Pastille du niveau, à gauche de la barre ; ailes dorées pour une élite.
+    const level = canaanMobLevel(m),
+      gap = level - (game.hero?.level || 1),
+      bx = x - 15,
+      by = y + h / 2 - 7;
+    if (elite) {
+      // Aile dorée à trois plumes, cernée d'encre, déployée derrière la pastille.
+      const wing = (pts, col) => {
+        c.fillStyle = col;
+        c.beginPath();
+        c.moveTo(bx + pts[0][0], by + pts[0][1]);
+        for (const [px, py] of pts.slice(1)) c.lineTo(bx + px, by + py);
+        c.fill();
+      };
+      wing(
+        [
+          [3, -2],
+          [-6, -6],
+          [-12, -3],
+          [-8, 1],
+          [-14, 4],
+          [-9, 8],
+          [-13, 12],
+          [-6, 13],
+          [3, 16]
+        ],
+        PLATE_INK
+      );
+      wing(
+        [
+          [3, -1],
+          [-6, -4],
+          [-10, -2],
+          [-6, 2],
+          [-12, 4],
+          [-7, 8],
+          [-11, 11],
+          [-5, 12],
+          [3, 15]
+        ],
+        '#e8b848'
+      );
+      wing(
+        [
+          [3, -1],
+          [-6, -4],
+          [-10, -2],
+          [-4, 1]
+        ],
+        '#fff0b0'
+      );
+      wing(
+        [
+          [3, 12],
+          [-5, 12],
+          [-11, 11],
+          [-4, 9],
+          [3, 9]
+        ],
+        '#a8782a'
+      );
+    }
+    c.fillStyle = PLATE_INK;
+    c.fillRect(bx - 1, by - 1, 16, 16);
+    c.fillStyle = target ? '#f4f0e8' : elite ? '#e8b848' : '#6a5638';
+    c.fillRect(bx, by, 14, 14);
+    c.fillStyle = '#1a120c';
+    c.fillRect(bx + 1, by + 1, 12, 12);
+    c.fillStyle = 'rgba(255,255,255,.08)';
+    c.fillRect(bx + 1, by + 1, 12, 5);
+    if (gap >= 10) plateSkull(c, bx + 7, by + 7);
+    else {
+      c.font = 'bold ' + (level >= 10 ? 9 : 10) + 'px ' + WORLD_FONT;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.lineWidth = 2;
+      c.lineJoin = 'round';
+      c.strokeStyle = PLATE_INK;
+      c.strokeText(String(level), bx + 7, by + 7.5);
+      c.fillStyle = levelColor(gap);
+      c.fillText(String(level), bx + 7, by + 7.5);
+    }
+    // Monstre visé : chevrons blancs de part et d'autre.
+    if (target) {
+      const bob = Math.round(Math.sin(time * 0.15) * 1.5);
+      c.fillStyle = PLATE_INK;
+      for (const [sx, dir] of [
+        [bx - (elite ? 20 : 5) - bob, 1],
+        [x + w + 5 + bob, -1]
+      ]) {
+        c.fillStyle = PLATE_INK;
+        c.beginPath();
+        c.moveTo(sx - dir * 1, y + h / 2 - 6);
+        c.lineTo(sx + dir * 6, y + h / 2);
+        c.lineTo(sx - dir * 1, y + h / 2 + 6);
+        c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.moveTo(sx, y + h / 2 - 4);
+        c.lineTo(sx + dir * 4, y + h / 2);
+        c.lineTo(sx, y + h / 2 + 4);
+        c.fill();
+      }
+    }
+    c.restore();
+  }
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, {
     drawCanaanPrompt,
     drawCanaanName,
+    drawCanaanMobPlate,
+    canaanAimedMob: aimedMob,
     canaanOutline,
     canaanPolish,
     canaanActorSprite: actor,
