@@ -1738,19 +1738,6 @@ export default {
   'Statue elfique': 'Elven statue',
   'Pilier de pierre runique': 'Runestone pillar',
   'étoile': 'star',
-  'La paix': 'Peace',
-  'Les anciens chantent autour du Cœur de l’Aurore.': 'The ancients sing around the Heart of Dawn.',
-  'La menace': 'The threat',
-  'Une ombre immense monte de la mer.': 'A vast shadow rises from the sea.',
-  'Le sacrifice': 'The sacrifice',
-  'Le Cœur se brise en six étoiles.': 'The Heart shatters into six stars.',
-  'L’espoir': 'Hope',
-  'Six sanctuaires s’allument sur l’île.': 'Six sanctuaries light up across the island.',
-  'La fuite': 'The flight',
-  'Les anciens s’enfuient et abandonnent l’île.': 'The ancients flee and abandon the island.',
-  'Printemps': 'Spring',
-  'Été': 'Summer',
-  'Automne': 'Autumn',
   'Hiver': 'Winter',
   // ------------------------------------------------------------ Métiers : poissons, gibier, recettes, minerais, herbes
   'Poisson doré': 'Golden fish',
@@ -3404,10 +3391,7 @@ export default {
   'Trois voyageurs': 'Three travelers',
   'Érable': 'Maple',
   'La lumière tombée du ciel': 'The light that fell from the sky',
-  'Cette nuit, une lumière est tombée près du Camp de l’Aurore. Liora l’a vue filer derrière les collines.':
-    'Last night, a light fell near the Dawn Camp. Liora saw it streak behind the hills.',
   'Suivre les traces lumineuses depuis le camp': 'Follow the glowing trail from the camp',
-  'Résoudre l’énigme des quatre pierres': 'Solve the riddle of the four stones',
   'Lumi devient ta compagne de voyage': 'Lumi becomes your traveling companion',
   'Tu l’as vue, toi aussi ? Une étoile est tombée cette nuit, juste derrière le camp !':
     'You saw it too? A star fell last night, just behind the camp!',
@@ -3419,39 +3403,12 @@ export default {
     'Oh! She… she’s following you? It’s a little creature of light! Her name is Lumi? What a pretty name.',
   'Lumi brille un peu plus chaque jour. Orven, aux Ruines de la Couronne, voudra sûrement la voir.':
     'Lumi shines a little brighter every day. Orven, at the Ruins of the Crown, will surely want to see her.',
-  'Gravé sur la stèle : « Le soleil se lève, la pluie le suit ; le vent chasse les nuages, et la lune ferme la nuit. »':
-    'Carved on the stele: “The sun rises, the rain follows; the wind chases the clouds, and the moon closes the night.”',
   'La carte aux six étoiles': 'The map of six stars',
-  'Orven, le vieil érudit des ruines, possède une carte usée où brillent six étoiles. Elle réagit à la présence de Lumi.':
-    'Orven, the old scholar of the ruins, owns a worn map where six stars shine. It reacts to Lumi’s presence.',
-  'Retrouver les trois symboles cachés dans les ruines': 'Find the three symbols hidden in the ruins',
-  'Reconstituer la disposition des symboles sur les socles':
-    'Recreate the arrangement of the symbols on the pedestals',
   'Carte des sanctuaires dans le journal': 'Map of the sanctuaries in the journal',
-  'Par ma barbe… cette lueur ! Elle a fait briller ma vieille carte. Regarde : six étoiles, six sanctuaires.':
-    'By my beard… that glow! It made my old map shine. Look: six stars, six sanctuaries.',
-  'Trois symboles sont cachés dans ces ruines. Retrouve-les, puis pose-les sur les socles comme sur la carte : l’étoile au nord, la lune à l’ouest, la flamme à l’est.':
-    'Three symbols are hidden in these ruins. Find them, then place them on the pedestals as on the map: the star to the north, the moon to the west, the flame to the east.',
-  'L’étoile au nord, la lune à l’ouest, la flamme à l’est. Les symboles brillent quand on s’en approche.':
-    'The star to the north, the moon to the west, the flame to the east. The symbols glow when you get close.',
-  'La carte s’éclaire ! Six sanctuaires… le premier dort dans la Forêt ancienne. Garde-la, elle sera mieux dans ton journal.':
-    'The map lights up! Six sanctuaries… the first sleeps in the Ancient Forest. Keep it, it will be better off in your journal.',
   'Le Cœur de l’Aurore… on n’en parlait que dans les berceuses. Va voir Sylva, dans la Forêt ancienne.':
     'The Heart of Dawn… we only spoke of it in lullabies. Go see Sylva, in the Ancient Forest.',
   'Le mouton aux grandes ambitions': 'The sheep with great ambitions',
-  'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Mais les barrières l’envoient toujours ailleurs.':
-    'Pompom, Milo’s sheep, dreams of seeing the world from the top of the hill. But the gates always send him elsewhere.',
-  'Ouvrir et fermer les barrières pour guider Pompon jusqu’au sommet':
-    'Open and close the gates to guide Pompom to the top',
   'Équipement Rare de ton niveau': 'Rare gear of your level',
-  'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Mais il suit toujours le chemin ouvert…':
-    'Pompom wants to climb to the top of the hill. He dreams of it, I swear! But he always follows the open path…',
-  'Ouvre et ferme les barrières (E), puis siffle-le avec le sifflet près de l’enclos. À toi de jouer, berger !':
-    'Open and close the gates (E), then whistle for him with the whistle by the pen. Your turn, shepherd!',
-  'Pompon va toujours tout droit tant qu’on ne lui ferme pas le chemin. Têtu comme un mouton.':
-    'Pompom always goes straight ahead until the way is closed. Stubborn as a sheep.',
-  'IL EST EN HAUT ! Regarde-le, il est si fier ! Tiens, ma sœur a sculpté ce petit mouton : il est pour toi.':
-    'HE’S AT THE TOP! Look at him, he’s so proud! Here, my sister carved this little sheep: it’s for you.',
   'Depuis, Pompon regarde le coucher de soleil tous les soirs. Il a l’air d’un philosophe.':
     'Since then, Pompom watches the sunset every evening. He looks like a philosopher.',
   'Le trésor qui n’existe pas': 'The treasure that doesn’t exist',
@@ -3462,8 +3419,6 @@ export default {
   'Le coffre secret (équipement Rare de ton niveau)': 'The secret chest (Rare gear of your level)',
   'Ils disent que mon trésor n’existe pas. Pfff. La vieille chanson dit : « Là où trois ombres se tiennent la main, dort le coffre du marin. »':
     'They say my treasure doesn’t exist. Pfff. The old song goes: “Where three shadows hold hands, the sailor’s chest lies in the sands.”',
-  'Les trois vieux chênes sont là. Suis leurs ombres, et creuse où elles se croisent !':
-    'The three old oaks are there. Follow their shadows, and dig where they cross!',
   'Regarde bien les ombres des chênes : elles pointent toutes vers le même endroit.':
     'Look closely at the oaks’ shadows: they all point to the same spot.',
   'Ils ne rient plus du tout, au camp. Je cherche déjà la suite de la chanson…':
@@ -3475,27 +3430,17 @@ export default {
     'Watch the ripples on the pond and catch the golden fish (E at the right ripple)',
   'Expérience de pêche, recette « Poisson doré en croûte de sel »':
     'Fishing experience, recipe “Salt-crusted golden fish”',
-  'Tu vois ces remous ? Quatre sont des carpes. Le cinquième… c’est lui. Le poisson doré.':
-    'See those ripples? Four are carp. The fifth… that’s him. The golden fish.',
-  'Quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !':
-    'When a ripple shines gold, he’s underneath. Go up to that ripple and strike (E) while it shines!',
-  'Patience. Regarde les remous jusqu’à ce que l’un d’eux se mette à briller d’or.':
-    'Patience. Watch the ripples until one of them starts to shine gold.',
   'Quarante ans… et tu l’as eu du premier coup. Tiens, la recette de ma grand-mère. Elle disait qu’il porte bonheur.':
     'Forty years… and you got him on the first try. Here, my grandmother’s recipe. She said he brings good luck.',
   'Je reviens chaque matin, juste pour regarder l’étang. Il est plus beau maintenant que je sais.':
     'I come back every morning, just to look at the pond. It’s more beautiful now that I know.',
   'La mélodie des anciens': 'The melody of the ancients',
-  'Sylva, la gardienne des chants, entend la forêt fredonner depuis l’arrivée de Lumi. Un passage secret attend une mélodie.':
-    'Sylva, keeper of the songs, has heard the forest humming since Lumi arrived. A secret passage awaits a melody.',
   'Retrouver les quatre pierres musicales dans la forêt': 'Find the four musical stones in the forest',
   'Jouer la mélodie des anciens sur le cercle de pierres':
     'Play the melody of the ancients on the stone circle',
   'Accès au Sanctuaire des Murmures': 'Access to the Sanctuary of Whispers',
   'La forêt chante, ce matin. Elle ne l’avait pas fait depuis des siècles. C’est ta petite lumière qui la réveille.':
     'The forest is singing this morning. It hadn’t in centuries. It’s your little light that wakes it.',
-  'Quatre pierres musicales sont perdues dans les sous-bois. Rapporte leur son au cercle, puis joue la mélodie : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.':
-    'Four musical stones are lost in the undergrowth. Bring their sound back to the circle, then play the melody: the lowest, the highest, then the two in the middle, from lowest to highest.',
   'Grave, aiguë, puis les deux du milieu de la plus grave à la plus aiguë. Écoute bien chaque pierre.':
     'Low, high, then the two in the middle from lowest to highest. Listen closely to each stone.',
   'Le passage s’ouvre… Le Sanctuaire des Murmures ! Personne n’y est entré depuis l’époque des anciens.':
@@ -3503,25 +3448,13 @@ export default {
   'Les arbres murmurent un nom : Aelor. Il veille sur le vieil arbre aux racines d’or.':
     'The trees whisper a name: Aelor. He watches over the old tree with golden roots.',
   'Le gardien aux racines d’or': 'The guardian with golden roots',
-  'L’arbre gardien de la forêt dort depuis des siècles. Aelor pense qu’un rayon de soleil pourrait le réveiller.':
-    'The forest’s guardian tree has slept for centuries. Aelor thinks a ray of sunlight could wake it.',
-  'Orienter les miroirs pour diriger la lumière du soleil vers l’arbre gardien':
-    'Turn the mirrors to direct the sunlight toward the guardian tree',
   'Écouter l’arbre gardien': 'Listen to the guardian tree',
   'Bénédiction des racines d’or (cosmétique) et première étoile':
     'Blessing of the golden roots (cosmetic) and the first star',
-  'L’arbre gardien dort. Ses racines d’or brillaient jadis comme le soleil… Il lui faut la lumière.':
-    'The guardian tree sleeps. Its golden roots once shone like the sun… It needs light.',
-  'Les anciens ont laissé trois miroirs. Tourne-les (E) pour conduire le rayon de la pierre solaire jusqu’à l’arbre.':
-    'The ancients left three mirrors. Turn them (E) to lead the ray from the sunstone to the tree.',
-  'Chaque miroir renvoie la lumière d’un quart de tour. Suis le rayon des yeux.':
-    'Each mirror turns the light a quarter turn. Follow the ray with your eyes.',
   'Il t’a parlé… Le Cœur de l’Aurore. Et cette étoile qui flotte près de Lumi : la première des six. Que la forêt te bénisse.':
     'It spoke to you… The Heart of Dawn. And that star floating near Lumi: the first of the six. May the forest bless you.',
   'L’arbre gardien chante doucement chaque nuit. Va vers le marais : Maëline cherche de l’aide pour ses lanternes.':
     'The guardian tree sings softly every night. Head to the marsh: Maëline is looking for help with her lanterns.',
-  'L’arbre gardien : « Petite étincelle, te voilà revenue. Le Cœur de l’Aurore attend. Six étoiles, six sanctuaires… Rassemble-les. »':
-    'The guardian tree: “Little spark, you have returned. The Heart of Dawn awaits. Six stars, six sanctuaries… Gather them.”',
   'Le chemin des lucioles': 'The path of the fireflies',
   'Les panneaux du bosquet mentent, dit Nima. Seules les lucioles connaissent le vrai chemin.':
     'The grove’s signposts lie, says Nima. Only the fireflies know the true path.',
@@ -3531,8 +3464,6 @@ export default {
     'Forest shortcut: a waystone to the Dawn Camp',
   'Ce bosquet est un labyrinthe. Les panneaux ? Une farce des fées : ils mentent tous.':
     'This grove is a maze. The signposts? A fairy prank: they all lie.',
-  'Suis les lucioles. Elles connaissent le chemin vers la vieille pierre de passage, de l’autre côté.':
-    'Follow the fireflies. They know the way to the old waystone, on the other side.',
   'Ne lis pas les panneaux. Regarde les lucioles.': 'Don’t read the signposts. Watch the fireflies.',
   'Tu as réveillé la pierre de passage ! Elle te ramènera au camp, et du camp jusqu’ici (E).':
     'You awakened the waystone! It will take you back to camp, and from camp back here (E).',
@@ -3543,7 +3474,6 @@ export default {
     'Every night, Brin’s supplies vanish. No footprints… or almost none.',
   'Suivre les petites empreintes (elles n’apparaissent que de près)':
     'Follow the small footprints (they only appear up close)',
-  'Démasquer le voleur camouflé (E)': 'Unmask the camouflaged thief (E)',
   'Or et équipement Rare de ton niveau': 'Gold and Rare gear of your level',
   'On me vole mes provisions ! Des pommes, du fromage, même mes biscuits au miel.':
     'Someone is stealing my supplies! Apples, cheese, even my honey biscuits.',
@@ -3551,19 +3481,13 @@ export default {
     'I never see anyone. But there are tiny little footprints… Would you investigate?',
   'Les empreintes partent de mon sac. Regarde par terre, de près.':
     'The footprints start at my bag. Look at the ground, up close.',
-  'Un… caméléon-renard ? Il avait juste faim ? Bon. Je lui laisserai un biscuit. Prends ceci pour ta peine !':
-    'A… chameleon-fox? He was just hungry? Fine. I’ll leave him a biscuit. Take this for your trouble!',
   'Le petit voleur vient manger dans ma main maintenant. On est amis.':
     'The little thief eats out of my hand now. We’re friends.',
   'Le peintre des ombres': 'The painter of shadows',
-  'Théon veut peindre l’ombre d’un arbre qui prend la forme d’un oiseau, mais il ne retrouve plus l’endroit d’où il l’avait vue.':
-    'Théon wants to paint a tree’s shadow that takes the shape of a bird, but he can’t find the spot he saw it from.',
   'Trouver le point d’observation où l’ombre de l’arbre devient un oiseau (E)':
     'Find the viewpoint where the tree’s shadow becomes a bird (E)',
   'Un jour, d’un endroit précis, l’ombre de ce vieil arbre est devenue un oiseau. Un oiseau parfait !':
     'One day, from one precise spot, this old tree’s shadow became a bird. A perfect bird!',
-  'Je me souviens seulement : « au nord de l’arbre, un pas à l’ouest ». Trouve l’endroit et appelle-moi (E).':
-    'All I remember is: “north of the tree, one step west”. Find the spot and call me (E).',
   'Au nord de l’arbre, un pas à l’ouest… L’ombre change quand on se déplace.':
     'North of the tree, one step west… The shadow changes as you move.',
   'Le voilà ! Mon oiseau d’ombre ! Tiens, prends ceci : tu l’as bien mérité.':
@@ -3571,51 +3495,13 @@ export default {
   'Je peins maintenant toutes les ombres de la forêt. Elles ont toutes une histoire.':
     'Now I paint every shadow in the forest. They all have a story.',
   'Les lanternes perdues': 'The lost lanterns',
-  'Le réseau de lanternes qui guidait les voyageurs dans le marais s’est éteint. Maëline n’a plus que des vannes rouillées.':
-    'The network of lanterns that guided travelers through the marsh has gone out. Maëline has nothing left but rusty valves.',
-  'Manipuler les vannes pour rallumer les quatre lanternes du marais':
-    'Work the valves to relight the four lanterns of the marsh',
   'Passage vers le Sanctuaire des Reflets': 'Passage to the Sanctuary of Reflections',
-  'Les lanternes du marais brûlent au gaz des tourbières, guidé par trois vannes. Plus aucune ne s’allume.':
-    'The marsh lanterns burn bog gas, guided by three valves. None of them light anymore.',
-  'Chaque vanne a trois positions. Trouve le bon réglage pour que les quatre lanternes brillent en même temps !':
-    'Each valve has three positions. Find the right setting so all four lanterns shine at once!',
-  'Une lanterne allumée peut s’éteindre si tu changes la mauvaise vanne. Observe lesquelles réagissent.':
-    'A lit lantern can go out if you change the wrong valve. Watch which ones react.',
-  'Elles brillent toutes ! Et regarde… les lanternes éclairent un chemin vers le Sanctuaire des Reflets.':
-    'They’re all shining! And look… the lanterns light a path to the Sanctuary of Reflections.',
   'Les voyageurs ne se perdent plus. Néris t’attend près des vieux miroirs, au nord.':
     'Travelers no longer get lost. Néris is waiting for you by the old mirrors, to the north.',
   'Le miroir des souvenirs': 'The mirror of memories',
-  'Dans la salle des reflets, les miroirs montrent le passé… dans le désordre. Néris pense qu’ils cachent la vérité sur le Cœur.':
-    'In the hall of reflections, the mirrors show the past… out of order. Néris thinks they hide the truth about the Heart.',
-  'Remettre les quatre reflets dans l’ordre de l’histoire':
-    'Put the four reflections back in the order of the story',
   'Deuxième étoile et un souvenir dans le journal': 'The second star and a memory in the journal',
-  'Ces miroirs se souviennent. Mais ils mélangent tout : certains reflets mentent sur l’ordre des choses.':
-    'These mirrors remember. But they mix everything up: some reflections lie about the order of things.',
-  'Tourne chaque miroir (E) pour choisir son reflet, de gauche à droite : du plus ancien au plus récent.':
-    'Turn each mirror (E) to choose its reflection, from left to right: from oldest to most recent.',
-  'D’abord la paix, puis la menace, puis le sacrifice, et enfin l’espoir.':
-    'First peace, then the threat, then the sacrifice, and finally hope.',
-  'Alors c’était ça… Ils n’ont pas perdu le Cœur. Ils l’ont caché, pour le protéger. Et voici la deuxième étoile.':
-    'So that was it… They didn’t lose the Heart. They hid it, to protect it. And here is the second star.',
-  'L’Ombre approchait, et les anciens ont choisi de disperser la lumière. Je comprends enfin leurs chants.':
-    'The Shadow was approaching, and the ancients chose to scatter the light. At last I understand their songs.',
-  'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore. Une ombre est venue de la mer. Plutôt que de laisser le Cœur tomber, ils l’ont brisé en six étoiles, confiées aux six sanctuaires. Les lumières se sont éteintes… mais pas pour toujours.':
-    'The mirror of memories: the ancients lived in peace around the Heart of Dawn. A shadow came from the sea. Rather than let the Heart fall, they shattered it into six stars, entrusted to the six sanctuaries. The lights went out… but not forever.',
   'Le pont qui ne tient jamais': 'The bridge that never holds',
-  'Le pont de Goran s’effondre dès qu’on pose le pied dessus. Il manque surtout un bon plan.':
-    'Goran’s bridge collapses as soon as you set foot on it. Mostly, it lacks a good plan.',
-  'Poser les planches de la bonne longueur à chaque emplacement du pont':
-    'Lay planks of the right length in each spot on the bridge',
   'Le pont restauré pour toujours': 'The bridge restored for good',
-  'Mon pont ? Une catastrophe. J’ai des planches courtes, moyennes et longues, et je les mets toujours au mauvais endroit.':
-    'My bridge? A disaster. I have short, medium and long planks, and I always put them in the wrong place.',
-  'Les poteaux te disent l’écart : poteaux bas, planche courte ; poteaux hauts, planche longue. Change les planches (E).':
-    'The posts tell you the gap: low posts, short plank; tall posts, long plank. Change the planks (E).',
-  'Regarde la hauteur des poteaux de chaque côté de l’emplacement.':
-    'Look at the height of the posts on each side of the spot.',
   'Il tient ! Il tient vraiment ! Je vais l’appeler… le Pont qui Tient. Merci, l’ami !':
     'It holds! It really holds! I’ll call it… the Bridge that Holds. Thanks, friend!',
   'Le Pont qui Tient tient toujours. Je traverse dix fois par jour, juste pour le plaisir.':
@@ -3640,36 +3526,20 @@ export default {
   'Barnabé le pêcheur': 'Barnabé the fisherman',
   'Silas le chapelier': 'Silas the hatter',
   'La traversée des nénuphars': 'The water-lily crossing',
-  'Pipo a vu un coffre sur l’îlot de l’étang. Le seul chemin : des nénuphars qui coulent quand on s’y attarde.':
-    'Pipo saw a chest on the islet in the pond. The only way: water lilies that sink if you linger on them.',
   'Traverser l’étang sur les nénuphars sans t’arrêter et ouvrir le coffre de l’îlot':
     'Cross the pond on the water lilies without stopping and open the islet’s chest',
   'Le coffre caché (équipement Épique de ton niveau)': 'The hidden chest (Epic gear of your level)',
-  'Il y a un coffre sur l’îlot ! Mais les nénuphars coulent si on reste dessus. Moi je suis trop petit pour sauter.':
-    'There’s a chest on the islet! But the lilies sink if you stay on them. I’m too small to jump.',
-  'Saute de l’un à l’autre sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !':
-    'Jump from one to the next without stopping. If you fall, the water brings you back to shore. I promise I won’t laugh!',
   'Ne reste pas plus de deux secondes sur un nénuphar !': 'Don’t stay more than two seconds on a lily!',
-  'Tu l’as fait ! Hi hi, tu étais tout mouillé la première fois. Le trésor est à toi !':
-    'You did it! Hee hee, you got soaked the first time. The treasure is yours!',
   'Je m’entraîne à sauter. Un jour, j’y arriverai aussi.':
     'I’m practicing my jumps. One day, I’ll make it too.',
   // ------------------------------------------------------------ Histoire « Les Échos de l’Aurore » (2) : quêtes des chapitres IV à VI, épreuves et indices
   'Le village des feuilles dorées': 'The village of golden leaves',
-  'Les ruines d’un village oublié dorment sous les feuilles d’automne. Érable dit que les feuilles dorées gardent ses souvenirs.':
-    'The ruins of a forgotten village sleep beneath the autumn leaves. Maple says the golden leaves keep its memories.',
   'Toucher les quatre feuilles dorées pour voir les souvenirs du village':
     'Touch the four golden leaves to see the village’s memories',
-  'Replacer les quatre objets dans leurs maisons d’origine (porter : E)':
-    'Return the four objects to their original houses (carry: E)',
   'Troisième étoile et accès à la Bibliothèque des Saisons':
     'The third star and access to the Library of the Seasons',
   'Ici vivait un village, avant. Ses maisons sont tombées, mais les feuilles dorées se souviennent de tout.':
     'A village lived here once. Its houses have fallen, but the golden leaves remember everything.',
-  'Touche-les, regarde leurs souvenirs, puis rends à chaque maison ce qui lui appartient. Prends un objet (E) et pose-le devant sa maison (E).':
-    'Touch them, watch their memories, then give each house back what belongs to it. Pick up an object (E) and set it down in front of its house (E).',
-  'Chaque feuille montre une maison et ce qu’on y faisait. Écoute-les bien.':
-    'Each leaf shows a house and what was done there. Listen closely.',
   'Le village se souvient de lui-même… Et regarde : une étoile se lève des feuilles. La Bibliothèque des Saisons s’ouvre !':
     'The village remembers itself… And look: a star rises from the leaves. The Library of the Seasons opens!',
   'Solenne garde les fresques des quatre saisons, près des grands érables à l’ouest.':
@@ -3677,51 +3547,19 @@ export default {
   'Les feuilles dorées : un village heureux, une forge, un four, une cloche et une harpe. Quand l’ombre vint, les villageois partirent vers les sanctuaires… en laissant tout derrière eux.':
     'The golden leaves: a happy village, a forge, an oven, a bell and a harp. When the shadow came, the villagers left for the sanctuaries… leaving everything behind.',
   'Le secret des quatre saisons': 'The secret of the four seasons',
-  'Une fresque brisée raconte pourquoi les anciens ont endormi le Cœur. Ses quatre fragments sont dispersés.':
-    'A broken fresco tells why the ancients put the Heart to sleep. Its four fragments are scattered.',
   'Retrouver les quatre fragments de la fresque': 'Find the four fragments of the fresco',
-  'Régler le mécanisme des saisons (chaque pilier sur la saison que montre son fragment)':
-    'Set the seasons mechanism (each pillar to the season its fragment shows)',
   'Accès aux archives anciennes (un souvenir dans le journal)':
     'Access to the ancient archives (a memory in the journal)',
-  'La fresque des saisons est en morceaux. Chaque fragment montre une saison et le pilier qui lui revient.':
-    'The fresco of the seasons is in pieces. Each fragment shows a season and the pillar it belongs to.',
-  'Rassemble-les, puis tourne les piliers (E) comme le montrent les fragments. Le mécanisme ouvrira les archives.':
-    'Gather them, then turn the pillars (E) as the fragments show. The mechanism will open the archives.',
-  'Lis bien chaque fragment : il dit quel pilier porte quelle saison.':
-    'Read each fragment carefully: it says which pillar bears which season.',
-  'Les archives… « Le Cœur fut endormi pour qu’il ne soit pas dévoré. Il rêve, et attend. » Tout prend sens.':
-    'The archives… “The Heart was put to sleep so that it would not be devoured. It dreams, and waits.” It all makes sense.',
   'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller.':
     'The archives of the seasons: the Shadow fed on light. To starve it, the ancients put the Heart to sleep and hid its six stars. When the Shadow vanished, no one remembered how to wake it.',
   'Le concours des feuilles': 'The leaf contest',
-  'Flavio organise un concours : attraper la feuille dorée que le vent fait tourbillonner sans jamais la laisser tomber.':
-    'Flavio is holding a contest: catch the golden leaf the wind keeps swirling without ever letting it fall.',
   'Attraper la feuille dorée dans le vent (E quand elle est sur toi)':
     'Catch the golden leaf in the wind (E when it is over you)',
-  'Le grand concours d’automne ! Une feuille dorée danse dans le vent. Qui l’attrape gagne.':
-    'The great autumn contest! A golden leaf dances in the wind. Whoever catches it wins.',
-  'Ne la poursuis pas : regarde la girouette, devine où le vent va l’emporter, et attends-la. E quand elle passe sur toi !':
-    'Don’t chase it: watch the weathervane, guess where the wind will carry it, and wait for it. E when it passes over you!',
-  'La girouette montre le vent. La feuille tourne toujours dans le même sens.':
-    'The weathervane shows the wind. The leaf always turns the same way.',
   'Tu l’as eue ! Elle ne fanera jamais, tu sais. Garde-la, c’est le prix du champion.':
     'You got it! It will never wither, you know. Keep it, it’s the champion’s prize.',
   'L’an prochain, je te bats. Je m’entraîne déjà.': 'Next year, I’ll beat you. I’m already training.',
   'Le moulin qui tournait à l’envers': 'The mill that turned backward',
-  'Le moulin d’Odel tourne à l’envers et moud la farine… en grain. Trois engrenages ont été mal remontés.':
-    'Odel’s mill turns backward and grinds flour… back into grain. Three gears were put back wrong.',
-  'Repositionner les trois engrenages (la taille dépend de l’écart entre les axes)':
-    'Reposition the three gears (the size depends on the gap between the axles)',
   'Or et le coffre du grenier (équipement Épique)': 'Gold and the attic chest (Epic gear)',
-  'Mon moulin tourne à l’envers depuis que mon neveu l’a « réparé ». Trois engrenages, trois erreurs.':
-    'My mill has turned backward ever since my nephew “fixed” it. Three gears, three mistakes.',
-  'Grand écart entre les axes, grand engrenage ; petit écart, petit. Change-les (E), et que la roue tourne dans le bon sens !':
-    'Big gap between the axles, big gear; small gap, small one. Change them (E), and may the wheel turn the right way!',
-  'Regarde l’écart entre les axes avant de choisir un engrenage.':
-    'Look at the gap between the axles before choosing a gear.',
-  'Elle tourne dans le bon sens ! Monte au grenier, ce qu’il y a dans le coffre est pour toi.':
-    'It turns the right way! Go up to the attic, what’s in the chest is yours.',
   'Ma farine n’a jamais été aussi fine. Reviens goûter mon pain.':
     'My flour has never been so fine. Come back and taste my bread.',
   'Le renard et les trois voyageurs': 'The fox and the three travelers',
@@ -3741,33 +3579,13 @@ export default {
   'Le renard vient nous voir le soir. On l’a appelé Malice.':
     'The fox comes to see us in the evenings. We named him Mischief.',
   'La cité sous les sables': 'The city beneath the sands',
-  'Trois obélisques veillent sur le désert. Alignés sur les étoiles, ils révéleraient une cité enfouie.':
-    'Three obelisks watch over the desert. Aligned with the stars, they would reveal a buried city.',
-  'Retrouver les trois obélisques ensevelis (E pour les dégager)':
-    'Find the three buried obelisks (E to uncover them)',
-  'Tourner les obélisques pour que leurs faisceaux se rejoignent sur l’étoile du centre':
-    'Turn the obelisks so their beams meet on the central star',
   'La nuit, trois obélisques chantent sous le sable. Mon grand-père disait qu’ils montrent l’entrée de la cité des étoiles.':
     'At night, three obelisks sing beneath the sand. My grandfather said they show the entrance to the city of stars.',
-  'Dégage-les, puis tourne-les (E) : leurs faisceaux doivent se croiser sur l’étoile gravée au centre.':
-    'Uncover them, then turn them (E): their beams must cross on the star carved in the center.',
-  'Chaque obélisque projette un faisceau. Ils doivent tous viser l’étoile du centre.':
-    'Each obelisk casts a beam. They must all aim at the central star.',
   'Astéria étudie la vieille machine, sous la cité. Elle a besoin de toi.':
     'Astéria is studying the old machine beneath the city. She needs you.',
   'La machine de l’Aurore': 'The Dawn machine',
-  'Une machine des anciens dort sous le désert : trois anneaux qui représentent les sanctuaires.':
-    'A machine of the ancients sleeps beneath the desert: three rings that represent the sanctuaries.',
-  'Synchroniser les trois anneaux (tourner un anneau entraîne le suivant)':
-    'Synchronize the three rings (turning one ring turns the next)',
   'Cinquième étoile et la salle du trésor (équipement Épique)':
     'The fifth star and the treasure room (Epic gear)',
-  'Trois anneaux, six symboles chacun. Quand ils sont alignés, la machine montre comment réveiller le Cœur.':
-    'Three rings, six symbols each. When they are aligned, the machine shows how to wake the Heart.',
-  'Mais attention : tourner un anneau (E) entraîne le suivant d’un cran. Commence par le bon bout !':
-    'But careful: turning a ring (E) turns the next one by one notch. Start from the right end!',
-  'Le dernier anneau ne bouge que seul. Le premier entraîne le deuxième, le deuxième entraîne le troisième.':
-    'The last ring only moves on its own. The first turns the second, the second turns the third.',
   'La machine s’illumine : « Six étoiles réunies, une étincelle du Cœur, et le chant des anciens. » Une étincelle… Lumi ?':
     'The machine lights up: “Six stars united, a spark of the Heart, and the song of the ancients.” A spark… Lumi?',
   'Lumi t’attend dans la Forêt enchantée. Elle sait où se trouve le sanctuaire central.':
@@ -3775,20 +3593,6 @@ export default {
   'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles.':
     'The Dawn machine: to wake the Heart, the six stars must be united in the central sanctuary, then a spark of the Heart itself must sing with them.',
   'Le marchand qui vendait du vent': 'The merchant who sold wind',
-  'Zafir vend du vent en bouteille. Pour le prouver, il faut faire glisser son bateau miniature jusqu’au quai.':
-    'Zafir sells bottled wind. To prove it, you have to sail his model boat to the dock.',
-  'Souffler avec les bonnes bouteilles pour amener le bateau au quai':
-    'Blow with the right bottles to bring the boat to the dock',
-  'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde mon bassin.':
-    'North wind, south wind, east wind, west wind! You don’t believe me? Look at my pool.',
-  'Débouche une bouteille (E) et le bateau file jusqu’au premier obstacle. Amène-le au quai.':
-    'Uncork a bottle (E) and the boat sails to the first obstacle. Bring it to the dock.',
-  'Le bateau ne s’arrête que contre un rocher ou un bord. Réfléchis avant de souffler.':
-    'The boat only stops against a rock or an edge. Think before you blow.',
-  'Au quai ! Tu vois bien que je vends du vrai vent. Tiens, un cadeau de la maison.':
-    'At the dock! You see, I sell real wind. Here, a gift from the house.',
-  'Les affaires marchent. Le vent d’est se vend très bien en ce moment.':
-    'Business is good. East wind is selling very well right now.',
   'Le temple des miroirs': 'The temple of mirrors',
   'La porte d’un petit temple ne s’ouvre qu’à la lumière du soleil. Des miroirs anciens sont encore là.':
     'The door of a small temple only opens to sunlight. Ancient mirrors are still there.',
@@ -3801,71 +3605,30 @@ export default {
     'Four mirrors, one ray. Turn them (E), and follow the light to the sun carved on the door.',
   'Certains miroirs ne servent à rien. Suis le rayon depuis la pierre solaire.':
     'Some mirrors are useless. Follow the ray from the sunstone.',
-  'La porte s’ouvre ! Le coffre est à toi, voyageur de lumière.':
-    'The door opens! The chest is yours, traveler of light.',
   'Je viens prier ici chaque matin. Le rayon touche toujours la porte.':
     'I come to pray here every morning. The ray always touches the door.',
   'Le secret de l’oasis': 'The secret of the oasis',
-  'L’oasis d’Amira s’assèche. Le vieil aqueduc a trois portes, et l’eau part toujours dans le sable.':
-    'Amira’s oasis is drying up. The old aqueduct has three gates, and the water always runs into the sand.',
-  'Ouvrir et fermer les portes de l’aqueduc pour remplir le bassin (sans inonder le sable)':
-    'Open and close the aqueduct gates to fill the basin (without flooding the sand)',
   'Recette « Tajine de l’oasis » et oasis restaurée': 'Recipe “Oasis tagine” and the oasis restored',
-  'L’eau coule dans l’aqueduc, mais elle finit dans le sable. Le bassin de l’oasis reste vide.':
-    'Water flows through the aqueduct, but it ends up in the sand. The oasis basin stays empty.',
-  'Trois portes (E) dirigent l’eau. Elle doit aller au bassin, et nulle part ailleurs.':
-    'Three gates (E) direct the water. It must go to the basin, and nowhere else.',
-  'Une porte ouverte laisse passer l’eau vers sa branche. Suis le courant des yeux.':
-    'An open gate lets water through to its branch. Follow the current with your eyes.',
   'L’eau chante dans le bassin ! L’oasis va refleurir. Tiens, la recette de ma mère : elle demande une eau pure.':
     'The water sings in the basin! The oasis will bloom again. Here, my mother’s recipe: it calls for pure water.',
   'Les palmiers ont déjà de nouvelles palmes. Merci, l’ami de l’eau.':
     'The palm trees already have new fronds. Thank you, friend of the water.',
   'Le sanctuaire des six lumières': 'The sanctuary of the six lights',
-  'Lumi te guide jusqu’au sanctuaire central. Quatre épreuves attendent, faites de tout ce que tu as appris.':
-    'Lumi guides you to the central sanctuary. Four trials await, made of everything you have learned.',
-  'Réussir les quatre épreuves du savoir (E sur chaque stèle)':
-    'Pass the four trials of knowledge (E on each stele)',
   'Placer les étoiles sur l’autel (E)': 'Place the stars on the altar (E)',
   'Accès à la Chambre de l’Aurore': 'Access to the Chamber of Dawn',
   'Tu entends ? C’est ici. Le sanctuaire des six lumières… je m’en souviens, je crois.':
     'Do you hear it? It’s here. The sanctuary of the six lights… I remember it, I think.',
-  'Quatre stèles vont te poser des questions sur notre voyage. Puis pose les étoiles sur l’autel. Je reste près de toi.':
-    'Four steles will ask you questions about our journey. Then place the stars on the altar. I’ll stay close to you.',
-  'Souviens-toi de tout : les ruines, la forêt, le marais… les réponses sont dans ton journal.':
-    'Remember everything: the ruins, the forest, the marsh… the answers are in your journal.',
-  'Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis nous attend.':
-    'The stars shine together! The Chamber of Dawn is open. Auralis is waiting for us.',
   'Je me sens… plus chaude. Comme si je rentrais chez moi.': 'I feel… warmer. As if I were coming home.',
-  'Sur la carte d’Orven, quel symbole était au nord ?': 'On Orven’s map, which symbol was to the north?',
-  'La lune': 'The moon',
-  'L’étoile': 'The star',
-  'La flamme': 'The flame',
-  'Quelle note ouvrait la mélodie des anciens ?': 'Which note opened the melody of the ancients?',
-  'La plus aiguë': 'The highest',
-  'La plus grave': 'The lowest',
-  'Celle du milieu': 'The middle one',
-  'Pourquoi les anciens ont-ils dispersé le Cœur ?': 'Why did the ancients scatter the Heart?',
-  'Pour le protéger de l’Ombre': 'To protect it from the Shadow',
-  'Pour le vendre': 'To sell it',
-  'Par erreur': 'By mistake',
-  'Combien d’étoiles composent le Cœur ?': 'How many stars make up the Heart?',
   'Quatre': 'Four',
   'Cinq': 'Five',
   'Six': 'Six',
   'Le Cœur de l’Aurore': 'The Heart of Dawn',
-  'Auralis, le dernier gardien, attend dans la Chambre de l’Aurore. L’Ombre a laissé des échos qui ne veulent pas que le Cœur se réveille.':
-    'Auralis, the last guardian, waits in the Chamber of Dawn. The Shadow left echoes that do not want the Heart to wake.',
   'Lire la fresque du gardien (E)': 'Read the guardian’s fresco (E)',
-  'Protéger les six cristaux contre les manifestations (E sur l’autel pour commencer)':
-    'Protect the six crystals from the manifestations (E on the altar to begin)',
   'Réunir la lumière des six cristaux': 'Unite the light of the six crystals',
   'Titre « Gardien de l’Aurore », aura lumineuse, sixième étoile et la Chambre de l’Aurore pour toujours':
     'Title “Guardian of the Dawn”, a glowing aura, the sixth star and the Chamber of Dawn forever',
   'Je suis Auralis. J’étais le gardien du Cœur… et je suis resté, même quand tout le monde est parti.':
     'I am Auralis. I was the guardian of the Heart… and I stayed, even when everyone else left.',
-  'Les échos de l’Ombre rôdent encore. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille.':
-    'The echoes of the Shadow still prowl. Read my fresco, then defend the six crystals while the Heart awakens.',
   'Tiens bon. Tant qu’il reste des cristaux, le Cœur peut se réveiller.':
     'Hold on. As long as crystals remain, the Heart can wake.',
   'L’île respire à nouveau. Les six sanctuaires brillent. Merci, Gardien.':
@@ -3875,46 +3638,26 @@ export default {
   'Le monde à l’envers': 'The upside-down world',
   'Deux clairières se reflètent l’une l’autre. Ce qu’on change dans la première change la seconde… à l’envers.':
     'Two glades mirror each other. What you change in the first changes the second… in reverse.',
-  'Actionner les leviers de la première clairière pour ouvrir un passage dans la seconde':
-    'Pull the levers in the first glade to open a path in the second',
   'Le coffre enchanté (équipement Légendaire)': 'The enchanted chest (Legendary gear)',
   'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite.':
     'Look: two twin glades. But the mirror is fickle: left becomes right.',
-  'Abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.':
-    'Pull the levers (E) here, and the rocks in the other glade will move. Clear yourself a path to the chest.',
   'Deux leviers abaissés, un seul levé. Regarde quels rochers bougent de l’autre côté du miroir.':
     'Two levers down, only one up. Watch which rocks move on the other side of the mirror.',
   'Tu as traversé le miroir ! Le coffre enchanté est à toi.':
     'You crossed the mirror! The enchanted chest is yours.',
   'Parfois, je me demande quelle clairière est la vraie.': 'Sometimes I wonder which glade is the real one.',
   'Le dragon qui avait peur de voler': 'The dragon who was afraid to fly',
-  'Pyria élève un jeune dragon qui n’ose pas voler. Il lui faut un parcours d’entraînement, marche après marche.':
-    'Pyria is raising a young dragon who doesn’t dare to fly. He needs a training course, step by step.',
-  'Construire le parcours : chaque perchoir un cran plus haut que le précédent, puis appeler le dragon':
-    'Build the course: each perch one notch higher than the last, then call the dragon',
   'Équipement Épique de ton niveau et Pyria s’installe dans la forêt':
     'Epic gear of your level, and Pyria settles in the forest',
-  'Braise a peur du vide. Il ne sautera que si chaque perchoir est juste un peu plus haut que le précédent.':
-    'Ember is afraid of heights. He will only jump if each perch is just a little higher than the last.',
-  'Règle les quatre perchoirs (E), du plus bas au plus haut, une marche à la fois. Puis appelle-le avec le cor.':
-    'Set the four perches (E), from lowest to highest, one step at a time. Then call him with the horn.',
-  'Pas deux perchoirs à la même hauteur, et jamais deux marches d’un coup.':
-    'No two perches at the same height, and never two steps at once.',
-  'IL VOLE ! Braise vole ! On va rester dans la forêt, il adore les cristaux. Tiens, une petite statue de lui.':
-    'HE’S FLYING! Ember is flying! We’ll stay in the forest, he loves the crystals. Here, a little statue of him.',
   'Braise fait des loopings maintenant. Il est insupportable. Je l’adore.':
     'Ember does loop-the-loops now. He’s unbearable. I adore him.',
   'Le lac aux mille étoiles': 'The lake of a thousand stars',
-  'Le lac reflète une constellation. Élya dit qu’il faut marcher sur ses étoiles, dans l’ordre où elles s’allument.':
-    'The lake reflects a constellation. Élya says you must walk on its stars, in the order they light up.',
   'Marcher sur les pierres du lac dans l’ordre de la constellation reflétée':
     'Walk on the lake’s stones in the order of the reflected constellation',
   'Un bijou Légendaire avec des statistiques secondaires aléatoires':
     'A Legendary piece of jewelry with random secondary stats',
   'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre.':
     'Look at the reflection: a constellation, the Snow Stag. Its stars light up one after another.',
-  'Marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.':
-    'Walk on the lake’s stones in the same order. One mistake, and the reflection fades: you’ll have to start over.',
   'Regarde le reflet : l’étoile qui s’allume en premier, puis la suivante…':
     'Look at the reflection: the star that lights up first, then the next…',
   'Le lac t’a reconnu. Ce bijou a été taillé dans une étoile tombée. Il est à toi.':
@@ -3943,25 +3686,879 @@ export default {
     'Mila: “He hates water. He never goes near the stream.”',
   'Gaspard : « Moi je l’ai vu sous le pont du ruisseau ! Enfin… je crois. »':
     'Gaspard: “I saw him under the bridge by the stream! Well… I think.”',
+  // ------------------------------------------------------------ Histoire (3) : objectifs de terrain, Vesper et la Ballade
+  'Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île. Un jour, les anciens ont dispersé son énergie pour la sauver. Des siècles plus tard, une petite lumière tombe près du Camp de l’Aurore… et une femme voilée se met en route pour l’éteindre.':
+    'Long ago, six sanctuaries bound to the Heart of Dawn protected the island. One day, the ancients scattered its energy to save it. Centuries later, a small light falls near the Dawn Camp… and a veiled woman sets out to put it out.',
+  'Une étoile tombe, une carte se déchire, et quelqu’un siffle les loups dans la nuit.':
+    'A star falls, a map is torn apart, and someone whistles for the wolves in the night.',
+  'La forêt se remet à chanter. On la saigne pour la faire taire.':
+    'The forest starts singing again. Someone bleeds it to keep it quiet.',
+  'Les lumières s’éteignent une à une, et les miroirs brisés livrent un nom : Vesper.':
+    'The lights go out one by one, and the broken mirrors give up a name: Vesper.',
+  'La Confrérie du Voile pille les souvenirs. Les saisons, elles, n’ont rien oublié.':
+    'The Brotherhood of the Veil plunders memories. The seasons, though, have forgotten nothing.',
+  'Sous le sable, une machine attend. Derrière un pilier, une femme écoute.':
+    'Beneath the sand, a machine waits. Behind a pillar, a woman listens.',
+  'Un frère garde le Cœur, une sœur vient l’éteindre. Lumi se souvient enfin.':
+    'A brother guards the Heart, a sister comes to put it out. Lumi finally remembers.',
+  'Interlude': 'Interlude',
+  'Les Voix d’en bas': 'The Voices Below',
+  'Sous l’île, la pierre chante depuis que l’étoile est tombée. Durgrim ne dort plus.':
+    'Beneath the island, the stone has been singing since the star fell. Durgrim no longer sleeps.',
+  'Garde Dwalin': 'Guard Dwalin',
+  'Éclaireuse Dísa': 'Scout Dísa',
+  'Éclaireuse Thyra': 'Scout Thyra',
+  'Petit Fili': 'Little Fili',
+  'Garde Balin': 'Guard Balin',
+  'Perrin l’Égaré': 'Perrin the Lost',
+  'Orsik le Sonneur': 'Orsik the Bell-Ringer',
+  'Sœur Runa': 'Sister Runa',
+  'Grand-père Nog': 'Grandpa Nog',
+  'Cette nuit, une lumière est tombée près du Camp de l’Aurore. Liora l’a vue filer derrière les collines, et elle n’était pas la seule à la regarder.':
+    'Last night, a light fell near the Dawn Camp. Liora saw it streak behind the hills, and she wasn’t the only one watching.',
+  'Éclat d’étoile': 'Star shard',
+  'Ramasser l’éclat': 'Pick up the shard',
+  'Ramasser les éclats tombés autour du cristal': 'Gather the shards fallen around the crystal',
+  'le cristal': 'the crystal',
+  'Rendre ses éclats au cristal': 'Give the crystal its shards back',
+  'Protéger le cristal des slimes attirés par sa lumière':
+    'Protect the crystal from the slimes drawn to its light',
+  'Orven, le vieil érudit des ruines, possédait une carte où brillaient six étoiles. Des loups l’ont mise en pièces, et quelqu’un les y a poussés.':
+    'Orven, the old scholar of the ruins, owned a map on which six stars shone. Wolves tore it to pieces, and someone set them on it.',
+  'Fragment de carte': 'Map fragment',
+  'Reprendre les fragments de carte aux loups et aux sangliers':
+    'Take the map fragments back from the wolves and boars',
+  'Sceau d’ombre': 'Shadow seal',
+  'Arracher le sceau': 'Tear out the seal',
+  'Arracher les trois sceaux d’ombre plantés dans les ruines':
+    'Tear out the three shadow seals driven into the ruins',
+  'Par ma barbe… cette lueur ! Ma vieille carte l’aurait reconnue : six étoiles, six sanctuaires.':
+    'By my beard… that glow! My old map would have known it: six stars, six sanctuaries.',
+  'Mais une femme voilée est passée hier soir. Elle a sifflé, et les loups ont tout déchiré. Retrouve les morceaux, et arrache les clous noirs qu’elle a plantés dans mes ruines !':
+    'But a veiled woman came by last night. She whistled, and the wolves tore everything up. Find the pieces, and pull out the black nails she drove into my ruins!',
+  'Les loups et les sangliers des plaines ont emporté les morceaux. Les sceaux, eux, sont ici, dans les ruines.':
+    'The wolves and boars of the plains carried the pieces off. The seals are right here, in the ruins.',
+  'La carte est entière ! Et ce monstre gardait un couplet gravé dans la pierre… Le premier sanctuaire dort dans la Forêt ancienne. Garde la carte, elle sera mieux dans ton journal.':
+    'The map is whole! And that monster was guarding a verse carved in stone… The first sanctuary sleeps in the Ancient Forest. Keep the map, it will be better off in your journal.',
+  'Le Cœur de l’Aurore… on n’en parlait que dans les berceuses. Va voir Sylva, dans la Forêt ancienne. Et méfie-toi de la femme voilée.':
+    'The Heart of Dawn… we only spoke of it in lullabies. Go and see Sylva, in the Ancient Forest. And beware of the veiled woman.',
+  'Une étincelle tombe où nul ne l’attend, et la plaine se souvient du premier chant.':
+    'A spark falls where no one waits for it, and the plain remembers the very first song.',
+  'Sur le dernier sceau, un nom gravé à l’envers : Vesper. Orven a pâli en le lisant, et n’a rien voulu en dire.':
+    'On the last seal, a name carved backwards: Vesper. Orven turned pale when he read it, and would say nothing more.',
+  'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Il s’est encore échappé, et les loups rôdent.':
+    'Pompom, Milo’s sheep, dreams of seeing the world from the top of the hill. He has run off again, and wolves are prowling.',
+  'Attraper Pompon': 'Catch Pompom',
+  'Rattraper Pompon, qui court dans tous les sens': 'Catch Pompom, who is running every which way',
+  'Loup vaincu': 'Wolf defeated',
+  'Éloigner les loups de la colline': 'Drive the wolves away from the hill',
+  'Emmener Pompon': 'Lead Pompom',
+  'Accompagner Pompon jusqu’au drapeau du sommet': 'Escort Pompom to the flag at the top',
+  'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Alors il saute la barrière toutes les nuits.':
+    'Pompom wants to climb to the top of the hill. He dreams of it, I swear! So he jumps the fence every night.',
+  'Rattrape-le, chasse les loups, puis monte là-haut avec lui. Juste une fois. Pour qu’il voie.':
+    'Catch him, chase off the wolves, then go up there with him. Just once. So he can see.',
+  'Pompon court vite, mais il se fatigue. Coupe-lui la route ! Têtu comme un mouton.':
+    'Pompom runs fast, but he gets tired. Cut him off! Stubborn as a sheep.',
+  'IL EST EN HAUT ! Regarde-le, il est si fier ! Tiens, prends ça : c’était à mon grand-père, il courait aussi après ses moutons.':
+    'HE’S UP THERE! Look at him, he’s so proud! Here, take this: it was my grandfather’s, he ran after his sheep too.',
+  'Bastian jure qu’un trésor est enterré « là où les ombres de trois arbres se rejoignent ». Tout le camp se moque de lui. Surtout depuis qu’un sanglier a mangé sa preuve.':
+    'Bastian swears a treasure is buried “where the shadows of three trees meet”. The whole camp laughs at him. Especially since a boar ate his proof.',
+  'Page de chanson mâchonnée': 'Chewed-up song page',
+  'Reprendre aux sangliers les pages de la chanson': 'Take the pages of the song back from the boars',
+  'Dent-de-Cale, le gardien du coffre': 'Holdtusk, the guardian of the chest',
+  'Vaincre le vieux sanglier qui dormait sur le coffre': 'Defeat the old boar that was sleeping on the chest',
+  'La preuve ? Un sanglier l’a mangée. Enfin, presque toute. Retrouve les pages, suis l’ombre des trois chênes, et creuse !':
+    'Proof? A boar ate it. Well, most of it. Find the pages, follow the shadow of the three oaks, and dig!',
+  'UN COFFRE ! Je le savais ! Garde ce qu’il contient, moi je veux juste voir leur tête au camp.':
+    'A CHEST! I knew it! Keep what’s inside, I just want to see their faces back at camp.',
+  'Pêcher trois poissons pour l’appât, dans n’importe quelle eau': 'Catch three fish for bait, in any water',
+  'Le poisson doré ne mord pas au ver. Il lui faut du poisson frais. Trois prises, pêchées de ta main.':
+    'The golden fish won’t bite on a worm. It wants fresh fish. Three of them, caught by your own hand.',
+  'Ensuite, regarde mon étang : quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !':
+    'Then watch my pond: when a ripple shines gold, it’s underneath. Get close to that ripple and strike (E) while it shines!',
+  'L’appât d’abord. Ensuite, patience : regarde les remous jusqu’à ce que l’un d’eux brille d’or.':
+    'Bait first. Then patience: watch the ripples until one of them shines gold.',
+  'Sylva, la gardienne des chants, entend la forêt fredonner depuis l’arrivée de Lumi. Mais les araignées étouffent la mélodie sous leurs toiles.':
+    'Sylva, the keeper of songs, has heard the forest humming ever since Lumi arrived. But the spiders are smothering the melody under their webs.',
+  'Araignée vaincue': 'Spider defeated',
+  'Chasser les araignées de la forêt': 'Drive the spiders out of the forest',
+  'Cocon déchiré': 'Cocoon torn open',
+  'Déchirer le cocon': 'Tear the cocoon open',
+  'Libérer les oiseaux chanteurs pris dans les cocons': 'Free the songbirds caught in the cocoons',
+  'Mais les araignées tissent partout, comme si quelqu’un le leur avait demandé. Libère les oiseaux, retrouve les pierres musicales, puis joue au cercle : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.':
+    'But the spiders are spinning everywhere, as if someone had asked them to. Free the birds, find the musical stones, then play at the circle: the lowest, the highest, then the two in the middle, from lowest to highest.',
+  'L’arbre gardien se meurt : des gobelins le saignent la nuit et vendent sa sève d’or à une femme voilée.':
+    'The guardian tree is dying: goblins bleed it at night and sell its golden sap to a veiled woman.',
+  'Fiole de sève d’or': 'Vial of golden sap',
+  'Reprendre la sève d’or aux gobelins': 'Take the golden sap back from the goblins',
+  'l’arbre gardien': 'the guardian tree',
+  'Verser la sève aux racines': 'Pour the sap on the roots',
+  'Défendre l’arbre gardien pendant qu’il boit sa sève': 'Defend the guardian tree while it drinks its sap',
+  'L’arbre gardien dort, et on profite de son sommeil. Les gobelins percent son écorce et remplissent des fioles.':
+    'The guardian tree is asleep, and someone is taking advantage of it. Goblins pierce its bark and fill their vials.',
+  'Reprends-leur la sève et verse-la aux racines. Ils viendront la rechercher : tiens bon, le temps qu’il la boive.':
+    'Take the sap back and pour it on the roots. They will come looking for it: hold on until the tree has drunk it all.',
+  'Les gobelins rôdent partout dans la Forêt ancienne. La sève brille dans leurs fioles, tu ne peux pas la manquer.':
+    'Goblins prowl all over the Ancient Forest. The sap glows in their vials, you can’t miss it.',
+  'La racine écoute, la feuille répond, l’or coule en silence sous les troncs profonds.':
+    'The root listens, the leaf replies, gold flows in silence where the deep trunk lies.',
+  'L’arbre gardien : « Petite étincelle, te voilà revenue. Une autre est venue avant toi, la voilée. Elle chantait, jadis. Maintenant elle cherche les étoiles pour les éteindre. Trouve-les avant elle. »':
+    'The guardian tree: “Little spark, you have come back. Another came before you, the veiled one. She used to sing. Now she seeks the stars to put them out. Find them before she does.”',
+  'Luciole farceuse': 'Prankster firefly',
+  'Attraper la luciole': 'Catch the firefly',
+  'Attraper trois lucioles farceuses devant le bosquet': 'Catch three prankster fireflies outside the grove',
+  'Attrape trois lucioles et elles t’aideront. Suis-les jusqu’à la vieille pierre de passage, de l’autre côté.':
+    'Catch three fireflies and they’ll help you. Follow them to the old waystone, on the other side.',
+  'Le voleur': 'The thief',
+  'Attraper le voleur': 'Catch the thief',
+  'Rattraper le voleur avant qu’il ne disparaisse': 'Catch the thief before it disappears',
+  'Décider du sort du petit voleur': 'Decide the fate of the little thief',
+  'Un… caméléon-renard ? Avec les joues pleines de mon miel ? Dis-moi, toi qui l’as attrapé : j’en fais quoi ?':
+    'A… chameleon-fox? With its cheeks full of my honey? Tell me, since you caught it: what do I do with it?',
+  'Bon. C’est décidé, alors. Prends ceci pour ta peine !':
+    'Right. That’s settled, then. Take this for your trouble!',
+  'Il travaille pour payer ses dettes : il garde mon sac. Je n’ai jamais eu de meilleur gardien.':
+    'It’s working off its debts: it guards my sack. I’ve never had a better guard.',
+  'Lui laisser un biscuit chaque soir': 'Leave it a biscuit every night',
+  'L’engager comme gardien du sac': 'Hire it to guard the sack',
+  'Théon veut peindre l’ombre d’un arbre qui prend la forme d’un oiseau. Il n’a plus ni pigments, ni pinceaux, ni le bon endroit.':
+    'Théon wants to paint the shadow of a tree that takes the shape of a bird. He has run out of pigments, of brushes, and of the right spot.',
+  'Cueillir trois herbes pour les pigments': 'Pick three herbs for the pigments',
+  'Touffe de poils fins': 'Tuft of fine hair',
+  'Prendre des poils de chauve-souris pour les pinceaux': 'Take bat hair for the brushes',
+  'Il me faut des herbes pour les couleurs, des poils de chauve-souris pour les pinceaux. Et l’endroit : « au nord de l’arbre, un pas à l’ouest ». Appelle-moi (E) quand tu y es.':
+    'I need herbs for the colors, bat hair for the brushes. And the spot: “north of the tree, one step west”. Call me (E) when you’re there.',
+  'Le réseau de lanternes qui guidait les voyageurs dans le marais s’est éteint en une nuit. Les feux follets, eux, brillent plus fort que jamais.':
+    'The network of lanterns that guided travelers through the marsh went dark in a single night. The will-o’-the-wisps, meanwhile, shine brighter than ever.',
+  'Flamme volée': 'Stolen flame',
+  'Reprendre les flammes volées par les feux follets': 'Take back the flames stolen by the wisps',
+  'Lanterne rallumée': 'Lantern relit',
+  'Rallumer la lanterne': 'Relight the lantern',
+  'Rallumer les quatre lanternes': 'Relight the four lanterns',
+  'les lanternes': 'the lanterns',
+  'Lever la grande lanterne': 'Raise the great lantern',
+  'Défendre les lanternes jusqu’à l’aube': 'Defend the lanterns until dawn',
+  'Mes lanternes se sont toutes éteintes la même nuit. Depuis, trois voyageurs ne sont pas rentrés.':
+    'My lanterns all went out on the same night. Since then, three travelers haven’t come home.',
+  'Les feux follets ont avalé leurs flammes. Reprends-les, rallume tout, et tiens jusqu’à l’aube : le marais n’aime pas la lumière.':
+    'The wisps swallowed their flames. Take them back, relight everything, and hold on until dawn: the marsh doesn’t like the light.',
+  'Une flamme avalée par un feu follet ne s’éteint pas. Il faut seulement la lui reprendre.':
+    'A flame swallowed by a wisp doesn’t go out. You just have to take it back.',
+  'Elles brillent toutes ! J’ai vu des silhouettes fuir, des hommes au visage voilé. Et regarde… les lanternes éclairent un chemin vers le Sanctuaire des Reflets.':
+    'They’re all shining! I saw figures running away, men with veiled faces. And look… the lanterns light a path to the Sanctuary of Reflections.',
+  'Dans la boue, une broche en forme de voile. Vesper n’est plus seule : des gens la suivent et se font appeler la Confrérie du Voile.':
+    'In the mud, a brooch shaped like a veil. Vesper is no longer alone: people follow her, and they call themselves the Brotherhood of the Veil.',
+  'Quelqu’un a brisé les miroirs qui montraient le passé. Néris pense qu’ils cachaient la vérité sur le Cœur, et sur celle qui veut l’éteindre.':
+    'Someone has smashed the mirrors that showed the past. Néris thinks they hid the truth about the Heart, and about the one who wants to put it out.',
+  'Éclat de miroir': 'Mirror shard',
+  'Retrouver les éclats des miroirs brisés': 'Find the shards of the broken mirrors',
+  'Miroir réparé': 'Mirror mended',
+  'Réparer le miroir': 'Mend the mirror',
+  'Le premier miroir : les anciens chantent autour du Cœur de l’Aurore. Deux voix mènent le chœur, un frère et une sœur. Auralis et Vesper.':
+    'The first mirror: the ancients sing around the Heart of Dawn. Two voices lead the choir, a brother and a sister. Auralis and Vesper.',
+  'Le deuxième miroir : une ombre immense monte de la mer. Elle se nourrit de lumière. Vesper est la seule à ne pas reculer : elle écoute.':
+    'The second mirror: a vast shadow rises from the sea. It feeds on light. Vesper is the only one who doesn’t step back: she listens.',
+  'Le troisième miroir : le Cœur se brise en six étoiles pour échapper à l’Ombre. Vesper hurle. On ne l’a pas prévenue.':
+    'The third mirror: the Heart shatters into six stars to escape the Shadow. Vesper screams. No one had warned her.',
+  'Le dernier miroir : six sanctuaires s’allument sur l’île. Vesper est restée du mauvais côté de la mer, seule avec l’Ombre.':
+    'The last mirror: six sanctuaries light up across the island. Vesper is left on the wrong side of the sea, alone with the Shadow.',
+  'Remettre les éclats dans leurs cadres et regarder': 'Put the shards back in their frames and look',
+  'Le Reflet menteur': 'The Lying Reflection',
+  'Regarder ton reflet': 'Look at your reflection',
+  'Affronter le reflet qui ne te ressemble pas': 'Face the reflection that looks nothing like you',
+  'Ces miroirs se souvenaient de tout. Une nuit, des hommes voilés les ont brisés, un par un, en pleurant presque.':
+    'These mirrors remembered everything. One night, veiled men smashed them, one by one, almost weeping.',
+  'Retrouve les éclats et remets-les dans leurs cadres. On ne casse pas un miroir pour rien : il a montré quelque chose à quelqu’un.':
+    'Find the shards and put them back in their frames. No one breaks a mirror for nothing: it showed somebody something.',
+  'Les basilics adorent ce qui brille. Méfie-toi quand tu ramasses un éclat.':
+    'Basilisks love anything shiny. Be careful when you pick up a shard.',
+  'Alors c’était ça… Vesper était des leurs. Ils ont sauvé le Cœur, et ils l’ont oubliée, elle. Voici la deuxième étoile.':
+    'So that was it… Vesper was one of them. They saved the Heart, and they forgot her. Here is the second star.',
+  'L’Ombre approchait, et les anciens ont choisi de disperser la lumière. Personne n’a choisi Vesper.':
+    'The Shadow was coming, and the ancients chose to scatter the light. Nobody chose Vesper.',
+  'L’eau garde un visage que l’eau n’a pas pris ; qui regarde longtemps s’y trouve, et sourit.':
+    'Water keeps a face that water never took; who looks long enough finds it there, and smiles back.',
+  'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore, guidés par deux chanteurs, Auralis et sa sœur Vesper. Une ombre est venue de la mer. Ils ont brisé le Cœur en six étoiles pour le sauver. Vesper, restée au large, a entendu le silence tomber. Elle n’a jamais su que c’était un sacrifice. Elle a cru à une trahison.':
+    'The mirror of memories: the ancients lived in peace around the Heart of Dawn, led by two singers, Auralis and his sister Vesper. A shadow came from the sea. They shattered the Heart into six stars to save it. Vesper, left at sea, heard the silence fall. She never knew it was a sacrifice. She thought it was a betrayal.',
+  'Le pont de Goran s’effondre dès qu’on pose le pied dessus. Et quand il le répare, les bêtes du marais le mangent.':
+    'Goran’s bridge collapses the moment anyone sets foot on it. And when he repairs it, the beasts of the marsh eat it.',
+  'Planche solide': 'Sturdy plank',
+  'Ramasser la planche': 'Pick up the plank',
+  'Ramasser des planches échouées autour de l’étang': 'Gather planks washed up around the pond',
+  'Tendon de mante': 'Mantis tendon',
+  'Prendre des tendons de mante pour les cordes': 'Take mantis tendons for the ropes',
+  'le pont': 'the bridge',
+  'Commencer les travaux': 'Start the work',
+  'Défendre le pont pendant que Goran cloue': 'Defend the bridge while Goran hammers',
+  'Mon pont ? Une catastrophe. Onze fois que je le reconstruis. Onze fois !':
+    'My bridge? A disaster. Eleven times I’ve rebuilt it. Eleven!',
+  'Cette fois, on fait ça bien : de vraies planches, de vraies cordes. Et toi, avec ton arme, entre les bêtes et moi pendant que je cloue.':
+    'This time we do it right: real planks, real ropes. And you, with your weapon, between the beasts and me while I hammer.',
+  'Des planches bien droites, hein ! Pas celles qui ont déjà servi de radeau à une mante.':
+    'Nice straight planks, mind you! Not the ones a mantis already used as a raft.',
+  'Accompagner Ilian': 'Walk with Ilian',
+  'Accompagner Ilian pour sa dernière tournée': 'Walk with Ilian on his last round',
+  'Ilian le lanternier. Oui. C’était moi. J’ai pu faire ma tournée une dernière fois. Prends ceci : que ma lumière guide ta route.':
+    'Ilian the lamplighter. Yes. That was me. I got to make my round one last time. Take this: may my light guide your way.',
+  'Pipo a vu un coffre sur l’îlot de l’étang. Le basilic du coin a avalé la clé, et le seul chemin est fait de nénuphars qui coulent.':
+    'Pipo saw a chest on the islet in the pond. The local basilisk swallowed the key, and the only way across is made of sinking water lilies.',
+  'Basilic vaincu': 'Basilisk defeated',
+  'Attirer le vieux basilic en chassant les siens': 'Draw out the old basilisk by hunting its kin',
+  'Gobe-Tout, le basilic glouton': 'Gulp, the greedy basilisk',
+  'Appeler Gobe-Tout': 'Call Gulp',
+  'Vaincre Gobe-Tout et récupérer la clé': 'Defeat Gulp and get the key back',
+  'Il y a un coffre sur l’îlot ! J’avais la clé, mais Gobe-Tout l’a gobée. Il gobe tout. C’est pour ça qu’il s’appelle comme ça.':
+    'There’s a chest on the islet! I had the key, but Gulp gulped it. He gulps everything. That’s why he’s called that.',
+  'Après, saute de nénuphar en nénuphar sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !':
+    'After that, jump from lily to lily without stopping. If you fall, the water brings you back to shore. I promise I won’t laugh!',
+  'Tu l’as fait ! Hi hi, tu sens le basilic. Le trésor est à toi !':
+    'You did it! Hee hee, you smell like basilisk. The treasure is yours!',
+  'Les ruines d’un village oublié dorment sous les feuilles d’automne. La Confrérie du Voile les pille, maison par maison.':
+    'The ruins of a forgotten village sleep beneath the autumn leaves. The Brotherhood of the Veil is plundering them, house by house.',
+  'Voilé mis en fuite': 'Veiled one driven off',
+  'Chasser les pilleurs et les bandits de la Confrérie':
+    'Drive off the raiders and bandits of the Brotherhood',
+  'Objet du village': 'Village keepsake',
+  'Reprendre ce qu’ils ont volé au village': 'Take back what they stole from the village',
+  'Maison rendue à elle-même': 'House made whole again',
+  'Rendre l’objet à la maison': 'Give the house its keepsake back',
+  'Rendre à chaque maison ce qui lui appartient': 'Give each house back what belongs to it',
+  'Les Voilés fouillent les ruines et emportent les souvenirs. Touche les feuilles, reprends ce qu’ils ont pris, et rends-le à chaque maison.':
+    'The Veiled are searching the ruins and carrying off the memories. Touch the leaves, take back what they took, and return it to each house.',
+  'Ils rôdent dans toute la Forêt automnale. Ils croient chercher une étoile : elle est ici, sous leurs pieds.':
+    'They roam all over the Autumn Forest. They think they’re looking for a star: it’s right here, under their feet.',
+  'Une fresque brisée raconte pourquoi les anciens ont endormi le Cœur. Les esprits des saisons la gardent, et ils ne reconnaissent plus personne.':
+    'A broken fresco tells why the ancients put the Heart to sleep. The spirits of the seasons guard it, and they no longer recognize anyone.',
+  'la fresque': 'the fresco',
+  'Assembler la fresque': 'Piece the fresco together',
+  'Tenir tête aux quatre saisons, l’une après l’autre': 'Stand up to the four seasons, one after another',
+  'La fresque des saisons est en morceaux. Rassemble-les, et repose-les au centre du cercle.':
+    'The fresco of the seasons is in pieces. Gather them, and set them back at the center of the circle.',
+  'Prépare-toi : le printemps, l’été, l’automne et l’hiver viendront voir qui ose. Ils ne sont pas méchants. Ils ont peur.':
+    'Get ready: spring, summer, autumn and winter will come to see who dares. They aren’t wicked. They’re afraid.',
+  'Les fragments sont au nord, à l’est, au sud et à l’ouest. Comme les saisons.':
+    'The fragments lie to the north, east, south and west. Like the seasons.',
+  'Les archives… « Le Cœur fut endormi pour qu’il ne soit pas dévoré. Il rêve, et attend. » Et cette rature, là : le nom de Vesper, effacé du chœur.':
+    'The archives… “The Heart was put to sleep so that it would not be devoured. It dreams, and waits.” And that crossed-out word, there: Vesper’s name, struck from the choir.',
+  'Le désert garde la Cité des Étoiles. Sahir connaît les obélisques.':
+    'The desert keeps the City of Stars. Sahir knows the obelisks.',
+  'Quatre saisons tournent autour d’un seul nom ; la feuille qui tombe est encore une chanson.':
+    'Four seasons turn around a single name; the falling leaf is still a song, the same.',
+  'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller. Dans la marge, une autre main a écrit : « Moi, je m’en souviens. »':
+    'The archives of the seasons: the Shadow fed on light. To starve it, the ancients put the Heart to sleep and hid its six stars. When the Shadow vanished, no one remembered how to wake it. In the margin, another hand has written: “I remember.”',
+  'Flavio organise le grand concours d’automne : une course à travers les érables, puis la feuille dorée à attraper au vol.':
+    'Flavio is holding the great autumn contest: a race through the maples, then the golden leaf to catch in midair.',
+  'Courir la boucle du concours avant la fin du temps': 'Run the contest loop before time runs out',
+  'Le grand concours d’automne ! Première épreuve : la boucle des érables. Six fanions, et le temps file.':
+    'The great autumn contest! First trial: the maple loop. Six pennants, and the clock is ticking.',
+  'Deuxième épreuve : une feuille dorée danse dans le vent. Ne la poursuis pas, devine où elle va. E quand elle passe sur toi !':
+    'Second trial: a golden leaf dances in the wind. Don’t chase it, guess where it’s going. E when it passes over you!',
+  'Touche les fanions dans l’ordre. Pour la feuille, regarde la girouette : elle tourne toujours dans le même sens.':
+    'Touch the pennants in order. As for the leaf, watch the weathervane: it always turns the same way.',
+  'Des trolls ont volé les engrenages du moulin d’Odel pour s’en faire des colliers. Depuis, il tourne à l’envers et moud la farine… en grain.':
+    'Trolls have stolen the gears from Odel’s mill to make necklaces. Ever since, it turns backwards and grinds flour… into grain.',
+  'Engrenage': 'Gear',
+  'Reprendre les engrenages aux trolls': 'Take the gears back from the trolls',
+  'Engrenage remonté': 'Gear refitted',
+  'Remonter l’engrenage': 'Refit the gear',
+  'Remonter les engrenages du moulin': 'Refit the gears of the mill',
+  'Scrr-Scrr, la terreur du grenier': 'Scrr-Scrr, the terror of the attic',
+  'Ouvrir le grenier': 'Open the attic',
+  'Déloger ce qui fait « scrr-scrr » dans le grenier': 'Flush out whatever goes “scrr-scrr” in the attic',
+  'Les trolls m’ont pris trois engrenages. Des colliers ! Ils en font des colliers ! Et mon moulin tourne à l’envers.':
+    'The trolls took three of my gears. Necklaces! They make necklaces out of them! And my mill turns backwards.',
+  'Reprends-les, remonte-les. Et tant que tu y es… quelque chose fait « scrr-scrr » dans mon grenier. Je préfère ne pas savoir.':
+    'Take them back, refit them. And while you’re at it… something goes “scrr-scrr” in my attic. I’d rather not know.',
+  'Un troll au cou qui brille, c’est un troll qui porte mon moulin.':
+    'A troll with a shiny neck is a troll wearing my mill.',
+  'Elle tourne dans le bon sens ! Et le grenier est silencieux… Ce qu’il y a dans le coffre est pour toi.':
+    'It turns the right way! And the attic is quiet… What’s in the chest is for you.',
+  'Attraper le renard': 'Catch the fox',
+  'Rattraper le renard magique': 'Catch the magic fox',
+  'Trois obélisques veillent sur le désert. Les morts de l’ancienne cité se sont relevés pour empêcher quiconque d’y descendre.':
+    'Three obelisks watch over the desert. The dead of the ancient city have risen to keep anyone from going down there.',
+  'Veilleur renvoyé au sable': 'Watcher returned to the sand',
+  'Renvoyer au sable les veilleurs de la cité': 'Return the watchers of the city to the sand',
+  'Obélisque dégagé': 'Obelisk uncovered',
+  'Dégager les trois obélisques ensevelis': 'Uncover the three buried obelisks',
+  'Rakhem, le gardien sans visage': 'Rakhem, the faceless guardian',
+  'Poser la main sur l’étoile gravée': 'Lay your hand on the carved star',
+  'Vaincre le gardien qui barre l’escalier': 'Defeat the guardian barring the stairway',
+  'Mais les morts marchent depuis le passage de la Confrérie. Ouvre-nous la route, dégage les pierres, et réveille le gardien.':
+    'But the dead have been walking since the Brotherhood came through. Clear the way, uncover the stones, and wake the guardian.',
+  'Les squelettes ne sont pas cruels. Ils obéissent à un ordre vieux de mille ans : « Ne laissez entrer personne. »':
+    'The skeletons aren’t cruel. They obey a thousand-year-old order: “Let no one in.”',
+  'Le sable s’effondre… un escalier ! La Cité des Étoiles. Et cette lumière… une quatrième étoile !':
+    'The sand gives way… a staircase! The City of Stars. And that light… a fourth star!',
+  'Quatrième étoile et accès à la Cité des Étoiles': 'The fourth star and access to the City of Stars',
+  'Une machine des anciens dort sous le désert. Pour la réveiller, il faut du feu, du verre, et quelqu’un pour la défendre.':
+    'A machine of the ancients sleeps beneath the desert. To wake it, you need fire, glass, and someone to defend it.',
+  'Écaille de verre solaire': 'Sun-glass scale',
+  'Prendre des écailles de verre aux drakes des dunes': 'Take glass scales from the dune drakes',
+  'Anneau lancé': 'Ring set spinning',
+  'Lancer l’anneau': 'Set the ring spinning',
+  'Lancer les trois anneaux de la machine': 'Set the machine’s three rings spinning',
+  'la machine': 'the machine',
+  'Allumer la machine': 'Switch on the machine',
+  'Défendre la machine pendant qu’elle chauffe': 'Defend the machine while it heats up',
+  'Trois anneaux, six symboles chacun. Quand ils tournent ensemble, la machine montre comment réveiller le Cœur.':
+    'Three rings, six symbols each. When they spin together, the machine shows how to wake the Heart.',
+  'Il lui faut du verre solaire, et les drakes le portent sur le dos. Une fois lancée, elle fera du bruit. Beaucoup de bruit. On viendra.':
+    'It needs sun-glass, and the drakes carry it on their backs. Once it’s running, it will make noise. A lot of noise. They will come.',
+  'Les drakes des dunes muent souvent. Ceux qui muent sont de mauvaise humeur.':
+    'Dune drakes molt often. The ones that are molting are in a bad mood.',
+  'Lumi t’attend dans la Forêt enchantée. Elle sait où se trouve le sanctuaire central. Vesper aussi, maintenant.':
+    'Lumi is waiting for you in the Enchanted Forest. She knows where the central sanctuary is. So does Vesper, now.',
+  'Le sable a tout bu, sauf l’étoile et le soir ; marche, voyageur, la nuit n’est pas le noir.':
+    'The sand drank it all, but the star and the light; walk on, traveler, dark is not the night.',
+  'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles. Derrière un pilier, une femme voilée écoutait. Elle est partie sans se battre.':
+    'The Dawn machine: to wake the Heart, the six stars must be gathered in the central sanctuary, then a spark of the Heart itself must sing with them. Behind a pillar, a veiled woman was listening. She left without a fight.',
+  'Zafir vend du vent en bouteille. Ses plus belles cuvées se sont échappées et tourbillonnent autour de son étal.':
+    'Zafir sells bottled wind. His finest vintages have escaped and are whirling around his stall.',
+  'Mettre en bouteille': 'Bottle it',
+  'Remettre quatre tourbillons en bouteille': 'Put four whirlwinds back in their bottles',
+  'Drake mis en fuite': 'Drake driven off',
+  'Éloigner les drakes qui respirent la marchandise': 'Drive off the drakes that are breathing in the goods',
+  'Une bouteille de brise, de la part de Zafir ? Il me doit de l’argent depuis trois ans, et il m’envoie du vent.':
+    'A bottle of breeze, from Zafir? He has owed me money for three years, and he sends me wind.',
+  'Oh… mais c’est du vrai. Il sent la mer. Dis-lui que nous sommes quittes. Et que… non, rien. Dis-lui juste merci.':
+    'Oh… but it’s the real thing. It smells of the sea. Tell him we’re even. And that… no, nothing. Just tell him thank you.',
+  'Livrer une bouteille de brise à Amira, à l’oasis': 'Deliver a bottle of breeze to Amira, at the oasis',
+  'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde-le courir, il s’est échappé !':
+    'North wind, south wind, east, west! You don’t believe me? Look at it run, it got away!',
+  'Rattrape mes tourbillons, éloigne les drakes qui les respirent, et porte une bouteille à Amira. Discrètement. C’est un cadeau.':
+    'Catch my whirlwinds, drive off the drakes breathing them in, and take a bottle to Amira. Discreetly. It’s a gift.',
+  'Un tourbillon file toujours loin de toi. Accule-le contre une dune !':
+    'A whirlwind always runs away from you. Corner it against a dune!',
+  'Elle a souri ? Elle a SOURI ? Tiens, un cadeau de la maison. Non, deux. Non, un.':
+    'She smiled? She SMILED? Here, a gift on the house. No, two. No, one.',
+  'Les affaires marchent. Et Amira passe tous les jours. Pour le vent, dit-elle.':
+    'Business is good. And Amira comes by every day. For the wind, she says.',
+  'La porte d’un petit temple ne s’ouvre qu’à la lumière du soleil. Des miroirs anciens sont encore là. Leur gardienne aussi.':
+    'The door of a small temple opens only to sunlight. Ancient mirrors are still there. So is their keeper.',
+  'Néfer, la gardienne du rayon': 'Néfer, the keeper of the ray',
+  'Franchir la porte': 'Step through the door',
+  'Vaincre la gardienne du temple': 'Defeat the keeper of the temple',
+  'Quatre miroirs, un rayon. Tourne-les (E), et suis la lumière jusqu’au soleil gravé sur la porte. Puis salue Néfer. Elle déteste être réveillée.':
+    'Four mirrors, one ray. Turn them (E), and follow the light to the sun carved on the door. Then greet Néfer. She hates being woken.',
+  'Néfer dort de nouveau, et la porte est ouverte. Le coffre est à toi, voyageur de lumière.':
+    'Néfer is asleep again, and the door is open. The chest is yours, traveler of light.',
+  'L’oasis d’Amira s’assèche. Des scorpions ont bâti leurs nids dans l’aqueduc, et plus personne n’ose porter l’eau.':
+    'Amira’s oasis is drying up. Scorpions have built their nests in the aqueduct, and no one dares carry water anymore.',
+  'Scorpion vaincu': 'Scorpion defeated',
+  'Chasser les scorpions de l’oasis': 'Drive the scorpions out of the oasis',
+  'Nid détruit': 'Nest destroyed',
+  'Détruire le nid': 'Destroy the nest',
+  'Détruire les nids qui bouchent l’aqueduc': 'Destroy the nests clogging the aqueduct',
+  'Porteur d’eau': 'Water bearer',
+  'Accompagner le porteur': 'Walk with the bearer',
+  'Escorter le porteur d’eau jusqu’au bassin': 'Escort the water bearer to the basin',
+  'L’eau n’arrive plus. Les scorpions ont fait leurs nids dans les conduits, et mes porteurs refusent de sortir.':
+    'The water no longer comes. Scorpions have nested in the channels, and my bearers refuse to go out.',
+  'Nettoie l’aqueduc, puis accompagne le dernier porteur courageux jusqu’au bassin. Une seule jarre suffira : l’eau appelle l’eau.':
+    'Clean out the aqueduct, then walk the last brave bearer to the basin. A single jar will do: water calls to water.',
+  'Un nid détruit, c’est une colère réveillée. Garde ton arme en main.':
+    'A nest destroyed is a temper woken. Keep your weapon in hand.',
+  'Lumi te guide jusqu’au sanctuaire central. Trois épreuves attendent : celle du souffle, celle du courage, celle de la lumière.':
+    'Lumi guides you to the central sanctuary. Three trials await: breath, courage, and light.',
+  'Épreuve du souffle : courir avec la lumière avant qu’elle s’éteigne':
+    'Trial of breath: run with the light before it goes out',
+  'la flamme du sanctuaire': 'the sanctuary flame',
+  'Allumer la flamme': 'Light the flame',
+  'Épreuve du courage : garder la flamme du sanctuaire': 'Trial of courage: guard the sanctuary flame',
+  'Lumière retrouvée': 'Light recovered',
+  'Recueillir la lumière': 'Gather the light',
+  'Épreuve de la lumière : recueillir les six lumières égarées':
+    'Trial of light: gather the six stray lights',
+  'Trois épreuves. Les anciens voulaient des gens qui courent, qui tiennent et qui regardent. Puis pose les étoiles sur l’autel. Je reste près de toi.':
+    'Three trials. The ancients wanted people who run, who hold, and who look. Then place the stars on the altar. I’ll stay close to you.',
+  'Je brille plus fort quand tu es près de moi. Tu l’avais remarqué ?':
+    'I shine brighter when you’re near me. Had you noticed?',
+  'Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis nous attend… et quelqu’un d’autre.':
+    'The stars shine together! The Chamber of Dawn is open. Auralis is waiting for us… and someone else.',
+  'Auralis, le dernier gardien, attend dans la Chambre de l’Aurore. Vesper, sa sœur, y arrive en même temps que toi. Et elle n’est pas venue seule.':
+    'Auralis, the last guardian, waits in the Chamber of Dawn. Vesper, his sister, arrives at the same time as you. And she hasn’t come alone.',
+  'Décider du sort de Vesper': 'Decide Vesper’s fate',
+  'Je suis Auralis. J’étais le gardien du Cœur… et je suis resté, même quand tout le monde est parti. Même quand ma sœur a cessé de chanter.':
+    'I am Auralis. I was the guardian of the Heart… and I stayed, even when everyone left. Even when my sister stopped singing.',
+  'Elle arrive, et l’Ombre avec elle. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille.':
+    'She is coming, and the Shadow with her. Read my fresco, then defend the six crystals while the Heart awakens.',
+  'L’Ombre m’a tenu compagnie quand vous m’avez laissée. Elle n’était pas mauvaise, au début. Elle avait faim, et moi aussi. Je suis fatiguée, gardien. Que fais-tu de moi ?':
+    'The Shadow kept me company when you all left me. It wasn’t wicked, at first. It was hungry, and so was I. I’m tired, guardian. What will you do with me?',
+  'Le Cœur s’éveille… Et Lumi… regarde-la. Elle était une étincelle du Cœur depuis le début. Elle pouvait rentrer. Elle a choisi de rester avec toi. Gardien de l’Aurore.':
+    'The Heart awakens… And Lumi… look at her. She was a spark of the Heart from the very start. She could have gone home. She chose to stay with you. Guardian of Dawn.',
+  'Ma sœur a repris sa place dans le chœur. Elle chante faux. C’est le plus beau son que j’aie entendu depuis mille ans.':
+    'My sister has taken her place in the choir again. She sings off-key. It’s the most beautiful sound I’ve heard in a thousand years.',
+  'Ma sœur a repris la mer. Elle écrira, dit-elle. Je lui ai laissé une étoile allumée, au cas où.':
+    'My sister has gone back to sea. She’ll write, she says. I left a star lit for her, just in case.',
+  'Reviens chanter avec nous': 'Come back and sing with us',
+  'Pars en paix, et ne reviens pas': 'Go in peace, and do not return',
+  'Cœur, réveille-toi : nous chantons à nouveau, l’aube a gardé ta place au bord de l’eau.':
+    'Heart, awaken: we are singing once more, dawn has kept your place by the water’s shore.',
+  'Le Cœur de l’Aurore se réveille. Les six sanctuaires retrouvent leur lumière, et Lumi révèle la vérité : elle était une étincelle du Cœur, tombée du ciel pour trouver quelqu’un capable de le réveiller. Ce quelqu’un, c’était toi. Quant à Vesper, elle a entendu son nom dans la Ballade. Personne ne l’avait effacé de la musique.':
+    'The Heart of Dawn awakens. The six sanctuaries regain their light, and Lumi reveals the truth: she was a spark of the Heart, fallen from the sky to find someone able to wake it. That someone was you. As for Vesper, she heard her name in the Ballad. No one had erased it from the music.',
+  'Fée calmée': 'Fairy soothed',
+  'Calmer les fées qui brouillent le reflet': 'Soothe the fairies that blur the reflection',
+  'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite. Et les fées s’amusent à le rider.':
+    'Look: two twin glades. But the mirror is fickle: left becomes right. And the fairies love to ripple it.',
+  'Calme-les, puis abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.':
+    'Soothe them, then lower the levers (E) here, and the rocks in the other glade will move. Open a path to the chest.',
+  'Pyria élève un jeune dragon qui n’ose pas voler. Il lui faut du sucre, du courage, et quelqu’un qui coure devant lui.':
+    'Pyria is raising a young dragon who doesn’t dare to fly. He needs sugar, courage, and someone to run ahead of him.',
+  'Pêche étoilée': 'Star peach',
+  'Cueillir la pêche': 'Pick the peach',
+  'Cueillir des pêches étoilées pour Braise': 'Pick star peaches for Ember',
+  'Braise': 'Ember',
+  'Protéger Braise des drakes qui se moquent de lui': 'Protect Ember from the drakes that mock him',
+  'Courir devant Braise pour lui montrer comment prendre son élan':
+    'Run ahead of Ember to show him how to take off',
+  'Braise a peur du vide. Les grands drakes le savent, et ils viennent rire de lui tous les soirs.':
+    'Ember is afraid of heights. The big drakes know it, and they come to laugh at him every evening.',
+  'Donne-lui des pêches, fais taire les moqueurs, puis cours devant lui. Aussi vite que tu peux. Il te suivra, j’en suis sûre.':
+    'Give him peaches, shut the mockers up, then run ahead of him. As fast as you can. He’ll follow you, I’m sure of it.',
+  'Il aime les pêches bien mûres. Et il aime bien tes bottes, mais ne le laisse pas les manger.':
+    'He likes his peaches nice and ripe. He likes your boots too, but don’t let him eat them.',
+  'IL VOLE ! Braise vole ! On va rester dans la forêt, il adore les cristaux. Tiens, il a choisi ça pour toi dans mes affaires.':
+    'HE’S FLYING! Ember is flying! We’re going to stay in the forest, he loves the crystals. Here, he picked this for you out of my things.',
+  'Le lac reflète une constellation, mais des ents malades lui font de l’ombre. Élya dit qu’il faut marcher sur ses étoiles, dans l’ordre où elles s’allument.':
+    'The lake reflects a constellation, but sick ents cast their shade on it. Élya says you must walk on its stars, in the order in which they light up.',
+  'Ent apaisé': 'Ent soothed',
+  'Apaiser les ents corrompus autour du lac': 'Soothe the corrupted ents around the lake',
+  'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre. Enfin, quand les ents ne lui cachent pas le ciel.':
+    'Look at the reflection: a constellation, the Snow Stag. Its stars light up one after another. When the ents aren’t hiding the sky from it, that is.',
+  'Apaise-les, puis marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.':
+    'Soothe them, then walk on the stones of the lake in the same order. One mistake, and the reflection fades: you’ll have to start over.',
+  // ------------------------------------------------------------ Interlude des Tréfonds « Les Voix d’en bas »
+  'La pierre qui chante': 'The singing stone',
+  'Depuis la nuit où l’étoile est tombée, les pierres de Durgrim chantent. Le roi Thrain n’a pas dormi. La dernière fois que la pierre s’est réveillée, Khaz-Ombral s’est vidée en une nuit.':
+    'Since the night the star fell, the stones of Durgrim have been singing. King Thrain hasn’t slept. The last time the stone woke, Khaz-Ombral emptied in a single night.',
+  'Le roi t’envoie me demander si j’ai peur ? Non. J’ai déjà entendu ce chant. Ma grand-mère le fredonnait en tressant mes cheveux.':
+    'The king sent you to ask if I’m afraid? No. I’ve heard that song before. My grandmother hummed it while braiding my hair.',
+  'Quatre pierres-voix gardent les portes de nos quatre royaumes. Pose ton oreille contre chacune. Si elles chantent la même chose, c’est un cri. Si elles se répondent… c’est une chanson.':
+    'Four voice-stones guard the gates of our four realms. Put your ear to each one. If they all sing the same thing, it’s a scream. If they answer each other… it’s a song.',
+  'Demander à l’Ancienne Brunhild ce qu’elle entend': 'Ask Elder Brunhild what she hears',
+  'Pierre-voix écoutée': 'Voice-stone heard',
+  'Écouter la pierre-voix': 'Listen to the voice-stone',
+  'La pierre des Galeries gronde : trois notes lourdes, comme des coups de pioche. Puis elle attend.':
+    'The stone of the Tunnels rumbles: three heavy notes, like blows of a pickaxe. Then it waits.',
+  'La pierre de Khaz-Ombral répond, de l’autre côté de la forteresse : trois notes claires, comme un marteau sur une cloche.':
+    'The stone of Khaz-Ombral answers, from the far side of the fortress: three clear notes, like a hammer on a bell.',
+  'La pierre de la Nécropole murmure sans jamais finir sa phrase. On dirait une liste de noms.':
+    'The stone of the Necropolis murmurs and never finishes its sentence. It sounds like a list of names.',
+  'La pierre de Fangeval ronronne. Elle est la seule à chanter juste, et elle a l’air de s’amuser.':
+    'The stone of Fangeval purrs. It’s the only one that sings in tune, and it seems to be enjoying itself.',
+  'Écouter les quatre pierres-voix, aux portes des quatre royaumes':
+    'Listen to the four voice-stones, at the gates of the four realms',
+  'Créature repoussée': 'Creature driven back',
+  'Repousser les créatures que le chant rend folles': 'Drive back the creatures the song has maddened',
+  'Approche, voyageur. Pose la main sur ce pilier. Tu la sens, cette vibration ? Voilà trois semaines que mes murs fredonnent.':
+    'Come closer, traveler. Lay your hand on this pillar. Do you feel that tremor? For three weeks now, my walls have been humming.',
+  'Il y a mille ans, la pierre a chanté. Le lendemain, Khaz-Ombral était vide, et les bols de soupe encore tièdes. Je ne perdrai pas Durgrim. Va voir Brunhild : elle sait écouter.':
+    'A thousand years ago, the stone sang. The next day, Khaz-Ombral was empty, and the bowls of soup were still warm. I will not lose Durgrim. Go and see Brunhild: she knows how to listen.',
+  'Aux quatre portes, il y a quatre pierres. Mon père m’interdisait de les toucher. Toi, tu n’es pas mon fils.':
+    'At the four gates, there are four stones. My father forbade me to touch them. But you’re not my son.',
+  'Elles se répondent ? Ce n’est donc pas un cri… Alors quelqu’un, en bas, essaie de nous parler. Mes éclaireurs sont postés dans les quatre royaumes : Nori, Dísa, Óin, Thyra. Trouve qui chante.':
+    'They answer each other? Then it isn’t a scream… Someone down there is trying to speak to us. My scouts are posted in the four realms: Nori, Dísa, Óin, Thyra. Find out who is singing.',
+  'Quatre royaumes, quatre voix. Va dans l’ordre que tu veux : la pierre, elle, n’est pas pressée.':
+    'Four realms, four voices. Go in whatever order you like: the stone is in no hurry.',
+  'Durgrim : la pierre ne crie pas, elle chante. Quatre voix se répondent sous l’île, et aucune ne connaît la fin de la chanson.':
+    'Durgrim: the stone isn’t screaming, it’s singing. Four voices answer each other beneath the island, and none of them knows how the song ends.',
+  'Le chant des profondeurs dans le journal': 'The song of the deep in your journal',
+  'La voix de l’argile': 'The voice of clay',
+  'Dans les Galeries d’Argile, une équipe de mineurs a disparu en suivant le chant. Les gobelins des mines les ont trouvés avant Nori.':
+    'In the Clay Tunnels, a team of miners vanished while following the song. The mine goblins found them before Nori did.',
+  'Ennemi des Galeries vaincu': 'Foe of the Tunnels defeated',
+  'Ouvrir la route : gobelins des mines et scarabées foreurs':
+    'Clear the road: mine goblins and borer beetles',
+  'Mineur libéré': 'Miner freed',
+  'Libérer le mineur': 'Free the miner',
+  'Libérer les quatre mineurs enchaînés': 'Free the four chained miners',
+  'Grik, le contremaître': 'Grik, the foreman',
+  'Briser les chaînes de Grik': 'Break Grik’s chains',
+  'Vaincre Grik, le contremaître': 'Defeat Grik, the foreman',
+  'Chut… Tu entends les pioches ? Ce ne sont pas les nôtres. Mes mineurs creusent, mais pour quelqu’un d’autre.':
+    'Shh… Do you hear the pickaxes? They aren’t ours. My miners are digging, but for someone else.',
+  'Ils ont suivi le chant jusqu’au vieux village. Les gobelins les y attendaient. Ramène-les-moi, et fais taire leur contremaître.':
+    'They followed the song to the old village. The goblins were waiting for them. Bring them back to me, and silence their foreman.',
+  'Grik compte ses prisonniers toutes les heures. Il ne sait compter que jusqu’à quatre.':
+    'Grik counts his prisoners every hour. He can only count to four.',
+  'Ils sont tous là ! Et ils disent que c’est la paroi qui chantait, au fond : trois notes lourdes, comme un cœur. La première voix, c’est l’argile elle-même.':
+    'They’re all here! And they say it was the rock face that was singing, at the far end: three heavy notes, like a heart. The first voice is the clay itself.',
+  'Les mineurs sifflent le chant en travaillant, maintenant. Ça creuse plus droit.':
+    'The miners whistle the song while they work, now. The digging comes out straighter.',
+  'La voix de l’argile : « Je porte. Je porte l’île, et les racines, et vos maisons. Personne ne me l’a jamais demandé. Personne ne m’a jamais remerciée. »':
+    'The voice of clay: “I carry. I carry the island, and the roots, and your houses. No one ever asked me to. No one ever thanked me.”',
+  'La voix de l’argile et un équipement Rare de ton niveau': 'The voice of clay and Rare gear of your level',
+  'La voix du fer': 'The voice of iron',
+  'À Khaz-Ombral, les sentinelles de pierre montent toujours la garde. Dísa veut savoir ce qu’elles gardent, et contre qui.':
+    'In Khaz-Ombral, the stone sentinels still stand guard. Dísa wants to know what they’re guarding, and against whom.',
+  'Rune royale': 'Royal rune',
+  'Reprendre les runes royales aux morts de la cité': 'Take the royal runes back from the dead of the city',
+  'Pilier runique éveillé': 'Runic pillar awakened',
+  'Poser la rune': 'Set the rune',
+  'Éveiller les trois piliers runiques': 'Awaken the three runic pillars',
+  'Le Veilleur aveugle': 'The Blind Watcher',
+  'Défier le Veilleur': 'Challenge the Watcher',
+  'Vaincre le Veilleur aveugle, capitaine des sentinelles':
+    'Defeat the Blind Watcher, captain of the sentinels',
+  'Regarde-les marcher. Toujours le même tour, depuis mille ans. Une patrouille protège quelque chose, ou empêche quelque chose de sortir.':
+    'Look at them march. Always the same round, for a thousand years. A patrol protects something, or keeps something from getting out.',
+  'Les runes royales leur parlaient, autrefois. Les morts les portent encore. Rends-les aux piliers, et demande au capitaine ce qu’il garde.':
+    'The royal runes used to speak to them. The dead still carry them. Give them back to the pillars, and ask the captain what he’s guarding.',
+  'Ne frappe pas les statues qui ne bougent pas. Les autres non plus, si tu peux éviter. Mais tu ne pourras pas.':
+    'Don’t strike the statues that don’t move. Nor the others, if you can avoid it. But you won’t be able to.',
+  'Le Veilleur a parlé en tombant ? « La porte était fermée de l’intérieur. » Alors ceux de Khaz-Ombral n’ont pas fui… Ils se sont enfermés. Avec quoi ?':
+    'The Watcher spoke as he fell? “The gate was locked from the inside.” Then the people of Khaz-Ombral didn’t flee… They shut themselves in. With what?',
+  'Les sentinelles s’arrêtent quand je passe. L’une d’elles a hoché la tête, je crois.':
+    'The sentinels stop when I walk past. One of them nodded, I think.',
+  'La voix du fer : « L’Ombre est venue de la mer et elle a cherché un chemin par en bas. Le roi Ombral a fermé la cité sur elle, et sur les siens. Ils l’ont tenue avec leurs mains. Là-haut, on ne l’a jamais su. »':
+    'The voice of iron: “The Shadow came from the sea and looked for a way in from below. King Ombral shut the city on it, and on his own people. They held it with their bare hands. Up there, no one ever knew.”',
+  'La voix du fer et un équipement Rare de ton niveau': 'The voice of iron and Rare gear of your level',
+  'La voix des oubliés': 'The voice of the forgotten',
+  'Dans la Nécropole, les tombes n’ont plus de noms : ils ont été grattés, un par un. Les âmes tournent en rond, incapables de se reposer.':
+    'In the Necropolis, the graves no longer have names: they were scratched off, one by one. The souls wander in circles, unable to rest.',
+  'Nom retrouvé': 'Name recovered',
+  'Lire la tombe du bout des doigts': 'Read the grave with your fingertips',
+  'Lire du bout des doigts les noms effacés': 'Read the erased names with your fingertips',
+  'Profanateur chassé': 'Desecrator driven off',
+  'Chasser les goules et les corbeaux qui rongent les noms':
+    'Drive off the ghouls and ravens gnawing at the names',
+  'la bougie des noms': 'the candle of names',
+  'Allumer la bougie des noms': 'Light the candle of names',
+  'Veiller la bougie pendant qu’Óin dit les noms': 'Watch over the candle while Óin speaks the names',
+  'Quelqu’un a gratté les noms. Tous. À la main, avec les ongles. Ça a dû prendre des siècles.':
+    'Someone scratched the names off. All of them. By hand, with their nails. It must have taken centuries.',
+  'Un mort sans nom ne dort pas. Retrouve-m’en six, du bout des doigts, et chasse ce qui les ronge. Ensuite on allumera une bougie, et je les dirai à voix haute. Ça va attirer du monde.':
+    'The nameless dead don’t sleep. Find me six, with your fingertips, and drive off whatever is gnawing at them. Then we’ll light a candle, and I’ll speak them aloud. That will draw a crowd.',
+  'Ferme les yeux pour lire. Sur une tombe grattée, les doigts voient mieux.':
+    'Close your eyes to read. On a scratched grave, fingers see better.',
+  'Je les ai tous dits, et la bougie ne s’est pas éteinte. Tu as entendu, à la fin ? Elles ont répondu. Pas des plaintes : elles chantaient leur nom.':
+    'I spoke every one of them, and the candle never went out. Did you hear, at the end? They answered. Not wailing: they were singing their names.',
+  'J’en dis dix chaque soir. Il m’en reste pour deux cents ans. J’ai de la bougie.':
+    'I speak ten every evening. I’ve got two hundred years’ worth left. And plenty of candles.',
+  'La voix des oubliés : « Nous avons tenu la porte. Quand nos bras sont tombés, nos noms l’ont tenue. Quand on a effacé nos noms, le chagrin l’a tenue à notre place. Et le chagrin a pris une forme. »':
+    'The voice of the forgotten: “We held the gate. When our arms fell, our names held it. When our names were erased, grief held it in our stead. And grief took a shape.”',
+  'La voix des oubliés et un équipement Rare de ton niveau':
+    'The voice of the forgotten and Rare gear of your level',
+  'La voix de la mousse': 'The voice of moss',
+  'À Fangeval, les champignons dansent. Thyra a suivi l’un d’eux, tout petit, qui veut rejoindre le Grand Cercle et que tout le marais essaie de manger.':
+    'In Fangeval, the mushrooms dance. Thyra has been following one of them, a tiny one, who wants to join the Great Circle and whom the whole marsh is trying to eat.',
+  'Dévoreur vaincu': 'Devourer defeated',
+  'Éclaircir les mille-pattes et les moustiques des fanges': 'Thin out the centipedes and mire mosquitoes',
+  'Spore luisante': 'Glowing spore',
+  'Cueillir la spore': 'Pick the spore',
+  'Cueillir des spores luisantes pour éclairer la route': 'Pick glowing spores to light the way',
+  'Accompagner Mousseron': 'Walk with Mousseron',
+  'Escorter Mousseron jusqu’au Grand Cercle': 'Escort Mousseron to the Great Circle',
+  'Regarde, là, derrière ma botte. Il s’appelle Mousseron. Il a trois jours. Il veut aller danser.':
+    'Look, there, behind my boot. His name is Mousseron. He’s three days old. He wants to go dancing.',
+  'Le Grand Cercle est au bout de la caverne. Pour lui, c’est le bout du monde. Nettoie le chemin, éclaire-le, et marche à son pas. Il a de toutes petites jambes.':
+    'The Great Circle is at the far end of the cavern. For him, it’s the end of the world. Clear the path, light it, and walk at his pace. He has very short legs.',
+  'S’il s’arrête, c’est qu’il t’attend. Ou qu’il a vu un joli caillou.':
+    'If he stops, he’s waiting for you. Or he’s seen a pretty pebble.',
+  'Il danse ! Ils dansent tous, et le sol chante sous eux… C’est ça, la quatrième voix. La seule qui n’a jamais cessé d’être heureuse.':
+    'He’s dancing! They’re all dancing, and the ground sings beneath them… That’s it, the fourth voice. The only one that never stopped being happy.',
+  'Mousseron a grandi d’un doigt. Il me fait signe de loin, maintenant. Comme un grand.':
+    'Mousseron has grown by a finger. He waves at me from afar, now. Like a grown-up.',
+  'La voix de la mousse : « Rien ne finit. On pourrit un peu, on repousse beaucoup. Dis-le à celui qui pleure au fond de la faille : il n’a pas besoin de tenir la porte tout seul. »':
+    'The voice of moss: “Nothing ends. You rot a little, you grow back a lot. Tell that to the one weeping at the bottom of the rift: he doesn’t have to hold the gate all alone.”',
+  'La voix de la mousse et un équipement Rare de ton niveau': 'The voice of moss and Rare gear of your level',
+  'Le chœur des profondeurs': 'The choir of the deep',
+  'Quatre voix, et une cinquième qui pleure au fond de la faille, sous la Nécropole. Brunhild veut y descendre elle-même. Elle a quelque chose à lui chanter.':
+    'Four voices, and a fifth weeping at the bottom of the rift, beneath the Necropolis. Brunhild wants to go down there herself. She has something to sing to it.',
+  'Donner le bras à Brunhild': 'Give Brunhild your arm',
+  'Accompagner Brunhild au bord de la faille': 'Escort Brunhild to the edge of the rift',
+  'le chant de Brunhild': 'Brunhild’s song',
+  'Commencer le chant': 'Begin the song',
+  'Protéger Brunhild pendant qu’elle appelle les quatre voix':
+    'Protect Brunhild while she calls the four voices',
+  'Vaincre Karn-Duram, l’écho du deuil (E sur le sceau)':
+    'Defeat Karn-Duram, the echo of grief (E on the seal)',
+  'Choisir le nom à graver sur le vingt-et-unième pilier':
+    'Choose the name to carve on the twenty-first pillar',
+  'Tu as les quatre voix. Alors tu sais qui pleure. Le chagrin de Khaz-Ombral a tenu la porte si longtemps qu’il a oublié qu’il pouvait la lâcher.':
+    'You have the four voices. Then you know who is weeping. The grief of Khaz-Ombral has held the gate so long that it forgot it could let go.',
+  'Mon aïeule était de là-bas. Je vais lui chanter la fin, et tu me donneras le bras jusqu’à la faille. Ne discute pas. J’ai deux cent quarante ans, je fais ce que je veux.':
+    'My foremother was from there. I’m going to sing it the ending, and you’ll give me your arm to the rift. Don’t argue. I’m two hundred and forty years old, I do as I please.',
+  'La faille est au fond de la Nécropole. Je t’y attends, je marche plus vite qu’on ne croit.':
+    'The rift is at the far end of the Necropolis. I’ll meet you there, I walk faster than people think.',
+  'Il s’est endormi. Enfin. Il reste un pilier sans nom dans la salle du roi, le vingt-et-unième. Thrain le gardait pour lui. Il m’a dit ce matin : « Que le voyageur choisisse. »':
+    'It’s asleep. At last. There’s one nameless pillar left in the king’s hall, the twenty-first. Thrain was saving it for himself. He told me this morning: “Let the traveler choose.”',
+  'C’est gravé. Écoute… la pierre ne chante plus. Elle fredonne. Et quelqu’un là-haut, au bord de la mer, vient de lever la tête.':
+    'It’s carved. Listen… the stone isn’t singing anymore. It’s humming. And someone up there, at the edge of the sea, has just looked up.',
+  'Je dors bien, maintenant. À mon âge, c’est un trésor plus rare que le mithril.':
+    'I sleep well, now. At my age, that’s a treasure rarer than mithril.',
+  'Sur le pilier, Thrain a gravé tous les noms qu’Óin retrouve. Il a fallu réduire la taille des lettres.':
+    'On the pillar, Thrain had every name Óin recovers carved. They had to make the letters smaller.',
+  'Sur le pilier, il y a écrit « Ombral ». Dessous, une main d’enfant a ajouté « merci ». Fili jure que ce n’est pas lui.':
+    'On the pillar, it says “Ombral”. Underneath, a child’s hand added “thank you”. Fili swears it wasn’t him.',
+  'Les noms de tous les oubliés': 'The names of all the forgotten',
+  'Celui du roi Ombral, qui a fermé la porte': 'That of King Ombral, who shut the gate',
+  'Et sous nos pas, très bas, la pierre tient la note que le ciel a perdue et que la nuit nous porte.':
+    'And far beneath our steps, the stone holds the note that the sky has lost and the dark keeps afloat.',
+  'Le chœur des profondeurs : l’Ombre avait deux chemins vers le Cœur. Là-haut, on a brisé la lumière pour la sauver. En bas, un roi a fermé sa cité. Les deux sacrifices se sont ignorés pendant mille ans. Maintenant, ils chantent la même chanson.':
+    'The choir of the deep: the Shadow had two roads to the Heart. Above, the light was shattered to save it. Below, a king shut his city. For a thousand years, the two sacrifices knew nothing of each other. Now they sing the same song.',
+  'Équipement Légendaire de ton niveau, Écho (une lueur d’ambre qui t’accompagne) et le dernier couplet de la Ballade':
+    'Legendary gear of your level, Echo (an amber glow that follows you) and the last verse of the Ballad',
+  'La lanterne de Gloin': 'Gloin’s lantern',
+  'Gloin veut offrir à sa femme la plus belle lanterne de Durgrim. Il lui manque du minerai, des carapaces brillantes, et du courage.':
+    'Gloin wants to give his wife the finest lantern in Durgrim. He’s short on ore, shiny shells, and courage.',
+  'Extraire cinq minerais, en bas ou à la surface': 'Mine five ores, below or on the surface',
+  'Carapace brillante': 'Shiny shell',
+  'Prendre des carapaces aux scarabées foreurs': 'Take shells from the borer beetles',
+  'Dis… Ylva dit toujours : « Mon mari rentre quand la lanterne s’éteint. » J’aimerais qu’un soir, elle ne s’éteigne pas. Que je rentre avant.':
+    'Say… Ylva always says: “My husband comes home when the lantern goes out.” I’d like it not to go out, one evening. I’d like to get home before it does.',
+  'Alors je fabrique une lanterne si belle que le contremaître me laissera partir juste pour la voir allumée. Du minerai, des carapaces. Tu m’aides ?':
+    'So I’m making a lantern so beautiful that the foreman will let me leave just to see it lit. Ore, shells. Will you help me?',
+  'Les scarabées foreurs des Galeries ont les plus belles carapaces. On dirait du ciel, paraît-il.':
+    'The borer beetles of the Tunnels have the finest shells. Like the sky, I’m told.',
+  'Elle est… oh. Elle est magnifique. Tu crois qu’elle va pleurer ? Moi, je pleure déjà. Tiens, prends ça.':
+    'It’s… oh. It’s magnificent. Do you think she’ll cry? I’m crying already. Here, take this.',
+  'Je suis rentré à l’heure. Elle a cru que j’étais malade.': 'I got home on time. She thought I was ill.',
+  'Un morceau de ciel': 'A piece of sky',
+  'Petit Fili n’a jamais vu le ciel. Il voudrait que tu lui en rapportes un morceau. Pas un gros.':
+    'Little Fili has never seen the sky. He’d like you to bring him back a piece of it. Not a big one.',
+  'Remonter à la surface et remplir la fiole de ciel': 'Go back up to the surface and fill the vial with sky',
+  'Cueillir deux herbes qui sentent le soleil': 'Pick two herbs that smell of sunshine',
+  'Tu viens de là-haut, hein ? Papa dit que le plafond est bleu et qu’il n’y a rien pour le tenir. Il tombe jamais ?':
+    'You’re from up there, right? Dad says the ceiling is blue and there’s nothing holding it up. Doesn’t it ever fall?',
+  'J’ai vidé cette fiole exprès. Tu peux la remplir de ciel ? Et me rapporter quelque chose qui sent dehors. Je donne mon plus beau caillou !':
+    'I emptied this vial specially. Can you fill it with sky? And bring me something that smells of outside. I’ll give you my best pebble!',
+  'N’oublie pas de bien refermer le bouchon. Le ciel, ça doit s’échapper.':
+    'Don’t forget to put the stopper back in properly. Sky must leak.',
+  'Elle est vide ! … Non. Attends. Elle est pleine de bleu très clair. Je la mettrai près de mon lit. Tiens, mon caillou. Il est tombé d’en haut, une nuit, il y a trois semaines. Il chantait.':
+    'It’s empty! … No. Wait. It’s full of very light blue. I’ll put it by my bed. Here, my pebble. It fell from above one night, three weeks ago. It was singing.',
+  'La nuit, je débouche un tout petit peu la fiole. Ça sent l’herbe.':
+    'At night, I open the vial just a tiny bit. It smells of grass.',
+  'Le caillou de Fili : un éclat de la même étoile que Lumi. Elle n’est pas tombée à côté du Camp par hasard : une moitié est allée vers l’île, l’autre vers ce qu’il y a dessous.':
+    'Fili’s pebble: a shard of the same star as Lumi. She didn’t fall near the Camp by chance: one half went to the island, the other to what lies beneath it.',
+  'Équipement Peu commun de ton niveau et le secret de Fili': 'Uncommon gear of your level and Fili’s secret',
+  'Les pioches de la Mine Effondrée': 'The pickaxes of the Collapsed Mine',
+  'Le frère de Balin est mort dans la Mine Effondrée. Quelque chose y tient encore sa pioche.':
+    'Balin’s brother died in the Collapsed Mine. Something in there still holds his pickaxe.',
+  'Bête des Galeries vaincue': 'Beast of the Tunnels defeated',
+  'Dégager la route de la mine : taupes-garous et vers des boues':
+    'Clear the road to the mine: weremoles and mud worms',
+  'Terminer la Mine Effondrée de Durgrim': 'Complete the Collapsed Mine of Durgrim',
+  'Mon frère Frerin descendait tous les matins à la Mine Effondrée. Elle ne s’appelait pas comme ça, à l’époque.':
+    'My brother Frerin went down to the Collapsed Mine every morning. It wasn’t called that, back then.',
+  'Grumbar hante encore les galeries avec les outils des nôtres. Je garde cette porte depuis vingt ans pour ne pas avoir à y aller. Vas-y à ma place.':
+    'Grumbar still haunts the tunnels with our people’s tools. I’ve been guarding this gate for twenty years so I wouldn’t have to go. Go in my place.',
+  'La mine est au bout de la route des Galeries, à l’ouest. Entre à plusieurs si tu peux.':
+    'The mine is at the end of the Tunnels road, to the west. Go in with friends if you can.',
+  'Sa pioche… Il y avait gravé nos deux noms. Je croyais l’avoir rêvé. Prends mon arme de parade, je n’en ai plus besoin.':
+    'His pickaxe… He’d carved both our names on it. I thought I’d dreamed it. Take my parade weapon, I don’t need it anymore.',
+  'J’ai demandé un tour de garde de moins par semaine. Pour aller lui porter de la bière.':
+    'I asked for one less watch a week. To go and bring him some beer.',
+  'La bière qui voit double': 'The double-vision brew',
+  'Dorn le Tavernier a perdu un pari contre Helga : il doit servir une bière de champignon que même Dwalin trouvera forte.':
+    'Dorn the Innkeeper lost a bet against Helga: he has to serve a mushroom beer that even Dwalin will find strong.',
+  'Chapeau de myconide': 'Myconid cap',
+  'Récolter des chapeaux de myconide': 'Gather myconid caps',
+  'Bave pétillante': 'Fizzy slime',
+  'Récolter de la bave de limace, pour les bulles': 'Gather slug slime, for the bubbles',
+  'De la part de Dorn ? Sa bière, on dirait de l’eau de vaisselle. Donne. … … …':
+    'From Dorn? His beer tastes like dishwater. Give it here. … … …',
+  'Pourquoi êtes-vous deux ? Non. Trois. Dis à Dorn… dis aux Dorn… qu’ils ont gagné. Et aide-moi à tenir ce mur, il tangue.':
+    'Why are there two of you? No. Three. Tell Dorn… tell the Dorns… they’ve won. And help me hold this wall up, it’s swaying.',
+  'Faire goûter la bière au Garde Dwalin': 'Have Guard Dwalin taste the beer',
+  'Helga prétend que ma bière est « tendre ». TENDRE ! J’ai parié ma taverne que je ferais tomber Dwalin en une chope.':
+    'Helga claims my beer is “gentle”. GENTLE! I bet my tavern I’d put Dwalin on the floor with a single mug.',
+  'Il me faut des chapeaux de myconide bien mûrs, et de la bave de limace pour les bulles. Ne fais pas cette tête, on en met dans tout.':
+    'I need some nice ripe myconid caps, and slug slime for the bubbles. Don’t make that face, we put it in everything.',
+  'Fangeval, au sud de la forteresse. Ça sent déjà ma bière, tu ne peux pas te tromper.':
+    'Fangeval, south of the fortress. It already smells like my beer, you can’t go wrong.',
+  'Il a dit « les Dorn » ? Au pluriel ? HELGA ! VIENS PAR ICI ! Tiens, l’ami, ta part du pari.':
+    'He said “the Dorns”? Plural? HELGA! COME HERE! There you go, friend, your share of the bet.',
+  'On l’a appelée la Voit-Double. Dwalin en commande une par semaine, assis.':
+    'We named it the Double-Vision. Dwalin orders one a week, sitting down.',
+  'Le colporteur égaré': 'The lost peddler',
+  'Perrin vendait des rubans à la surface. Il s’est assis sur une trappe pour manger un sandwich. Depuis, il vend des rubans à personne.':
+    'Perrin used to sell ribbons on the surface. He sat down on a trapdoor to eat a sandwich. He’s been selling ribbons to no one ever since.',
+  'Rouleau de rubans': 'Roll of ribbons',
+  'Ramasser les rubans': 'Pick up the ribbons',
+  'Retrouver sa marchandise éparpillée': 'Find his scattered wares',
+  'Sandwich à peine mordu': 'Barely bitten sandwich',
+  'Reprendre le sandwich de Perrin': 'Get Perrin’s sandwich back',
+  'Accompagner Perrin': 'Walk with Perrin',
+  'Escorter Perrin vers la route de Durgrim': 'Escort Perrin toward the Durgrim road',
+  'Un visage ! Un visage sans barbe ! Pardon. Je me présente : Perrin, rubans, dentelles, articles de mode. Je suis tombé.':
+    'A face! A face without a beard! Sorry. Allow me to introduce myself: Perrin, ribbons, lace, fashion items. I fell.',
+  'Tout est tombé avec moi, jusqu’à mon sandwich, et une bête me l’a pris. Si tu retrouves tout ça et que tu m’emmènes jusqu’à une route… je te fais un prix.':
+    'Everything fell with me, even my sandwich, and some beast took it. If you find it all and walk me to a road… I’ll give you a discount.',
+  'Les rubans jaunes sont les plus chers. Le sandwich, c’est sentimental.':
+    'The yellow ribbons are the priciest. The sandwich has sentimental value.',
+  'Une route ! Des gens ! Petits, mais des gens ! Tiens, prends ceci, c’était dans le lot invendu.':
+    'A road! People! Small ones, but people! Here, take this, it was with the unsold stock.',
+  'Les naines adorent mes rubans pour leurs tresses. Je crois que je vais rester un peu.':
+    'The dwarf women love my ribbons for their braids. I think I’ll stay a while.',
+  'La cloche engloutie': 'The sunken bell',
+  'Orsik sonnait la cloche de Khaz-Ombral. Le dernier soir, il n’a pas eu le temps. Mille ans plus tard, ça le tracasse encore.':
+    'Orsik rang the bell of Khaz-Ombral. On the last evening, he didn’t have time. A thousand years later, it still bothers him.',
+  'Éclat de bronze': 'Shard of bronze',
+  'Ramasser le bronze': 'Pick up the bronze',
+  'Retrouver les éclats de la cloche': 'Find the shards of the bell',
+  'la cloche': 'the bell',
+  'Sonner la cloche': 'Ring the bell',
+  'Défendre la cloche pendant qu’elle sonne': 'Defend the bell while it rings',
+  'Terminer les Halls Engloutis de Khaz-Ombral': 'Complete the Sunken Halls of Khaz-Ombral',
+  'Le soir de la Grande Fermeture, j’avais la corde en main. Le roi a dit : « Pas un bruit. » Alors je n’ai pas sonné.':
+    'On the evening of the Great Closing, I had the rope in my hand. The king said: “Not a sound.” So I didn’t ring it.',
+  'Personne n’a su que c’était la fin. On dit au revoir, d’habitude. Aide-moi à la sonner une fois, et va dire au roi Ombral que son sonneur a fini son service.':
+    'No one knew it was the end. Usually, people say goodbye. Help me ring it once, and go and tell King Ombral that his bell-ringer has finished his shift.',
+  'Les gargouilles détestent les cloches. C’est une vieille histoire de pigeons.':
+    'Gargoyles hate bells. It’s an old story about pigeons.',
+  'Tu l’as entendue ? Elle était un peu fausse. Elle l’a toujours été. Merci. J’ai fini mon service.':
+    'Did you hear it? It was a little off-key. It always was. Thank you. My shift is over.',
+  'Dong… Pardon. L’habitude.': 'Dong… Sorry. Force of habit.',
+  'Les clés de la Crypte': 'The keys of the Crypt',
+  'Sœur Runa a juré de refermer la Crypte des Mille Tombes. Pour l’instant, elle en compte mille douze.':
+    'Sister Runa has sworn to close the Crypt of a Thousand Tombs. So far, she counts a thousand and twelve.',
+  'Clé d’os': 'Bone key',
+  'Reprendre les clés d’os aux chevaliers et aux goules':
+    'Take the bone keys back from the knights and ghouls',
+  'Terminer la Crypte des Mille Tombes': 'Complete the Crypt of a Thousand Tombs',
+  'Choisir ce que Runa fera des clés': 'Choose what Runa will do with the keys',
+  'Mille tombes, voilà ce que dit le registre. J’ai recompté : mille douze. Le Fossoyeur Éternel creuse plus vite que je n’écris.':
+    'A thousand tombs, says the register. I recounted: a thousand and twelve. The Eternal Gravedigger digs faster than I can write.',
+  'Les chevaliers portent les clés de la crypte. Reprends-les, descends, et arrête ce zélé. On ne creuse pas la tombe des gens avant qu’ils soient morts. C’est une question de politesse.':
+    'The knights carry the keys to the crypt. Take them back, go down, and stop that zealot. You don’t dig people’s graves before they’re dead. It’s a matter of manners.',
+  'Si tu vois une tombe à ton nom, ne t’allonge pas dedans pour vérifier la taille.':
+    'If you see a grave with your name on it, don’t lie down in it to check the size.',
+  'C’est fini. Voilà les quatre clés. Dis-moi, toi qui en reviens : on ferme la crypte pour de bon, ou on laisse une porte aux familles ?':
+    'It’s over. Here are the four keys. Tell me, you who came back from there: do we close the crypt for good, or leave a door for the families?',
+  'Ce sera fait comme tu l’as dit. Prends ceci dans le tronc des offrandes, les morts n’en ont pas l’usage.':
+    'It will be done as you said. Take this from the offering box, the dead have no use for it.',
+  'Le registre dit mille, et j’en compte mille. Je dors mieux.':
+    'The register says a thousand, and I count a thousand. I sleep better.',
+  'La crypte est fermée. J’ai jeté les clés dans le lac. Elles ont fait un joli bruit.':
+    'The crypt is closed. I threw the keys into the lake. They made a lovely sound.',
+  'Les familles viennent le soir, avec des bougies. Ce n’est plus une crypte. C’est presque un salon.':
+    'The families come in the evening, with candles. It’s not a crypt anymore. It’s almost a parlor.',
+  'Ferme-la pour toujours': 'Close it forever',
+  'Laisse une porte aux familles': 'Leave a door for the families',
+  'La reine qui ne dansait plus': 'The queen who no longer danced',
+  'Girolle est une myconide, et elle est polie. Sa reine, au fond des Tréfonds Fongiques, ne l’est plus du tout.':
+    'Girolle is a myconid, and she is polite. Her queen, deep in the Fungal Depths, no longer is at all.',
+  'Parasite vaincu': 'Parasite defeated',
+  'Chasser les limaces et les mille-pattes qui rongent la colonie':
+    'Drive off the slugs and centipedes gnawing at the colony',
+  'Ponte détruite': 'Clutch destroyed',
+  'Écraser la ponte': 'Crush the clutch',
+  'Détruire les pontes de limaces': 'Destroy the slug clutches',
+  'Terminer les Tréfonds Fongiques': 'Complete the Fungal Depths',
+  'Bonjour-bonjour. Toi pas-mousse, mais toi gentil-pas. Girolle parler bien la langue des pieds, oui ?':
+    'Hello-hello. You not-moss, but you nice-foot. Girolle speak foot-language well, yes?',
+  'La reine danse plus. La reine mange ceux qui dansent. Limaces ont pondu dans ses rêves. Toi nettoyer dehors, puis nettoyer dedans. Doucement-fort.':
+    'The queen dance no more. The queen eat those who dance. Slugs laid eggs in her dreams. You clean outside, then clean inside. Softly-hard.',
+  'Pontes rondes, pontes gluantes. Écraser avec le talon, pas avec la pointe. Pointe glisse.':
+    'Round clutches, sticky clutches. Crush with the heel, not with the toe. Toe slips.',
+  'La reine est dé-réveillée ! Nouvelle reine petite-petite pousse déjà. Elle danse mal. C’est très beau. Cadeau !':
+    'The queen is un-awake! New queen already growing, tiny-tiny. She dance badly. It’s very beautiful. Gift!',
+  'Girolle apprend la valse des pieds. Un-deux-trois-mousse, un-deux-trois-mousse.':
+    'Girolle learning the foot-waltz. One-two-three-moss, one-two-three-moss.',
+  'Le dentier du grand-père': 'Grandpa’s dentures',
+  'Une taupe a volé le dentier en or de Grand-père Nog. Elle s’en sert, et c’est ça le pire.':
+    'A mole has stolen Grandpa Nog’s golden dentures. It uses them, and that’s the worst part.',
+  'La taupe au dentier': 'The mole with the dentures',
+  'Attraper la taupe': 'Catch the mole',
+  'Rattraper la taupe au sourire doré': 'Catch the mole with the golden smile',
+  'Asticot de qualité': 'Quality grub',
+  'Trouver des asticots pour consoler la taupe': 'Find grubs to comfort the mole',
+  'Fa m’a folé mon dentier ! La taupe ! Elle me regarde, elle fourit, et elle f’en fa ! AFec MES dents !':
+    'It ftole my denturef! The mole! It lookf at me, it fmilef, and off it goef! With MY teeth!',
+  'Rattrape-la. Et fois gentil aFec, elle est Fieille auffi. Trouve-lui de quoi manger mou.':
+    'Catch it. And be nife to it, it’f old too. Find it fomething foft to eat.',
+  'Elle creufe Fite mais elle court comme moi. F’est dire.':
+    'It digf faft but it runf like me. That’f faying fomething.',
+  'Clac. Ah. Beaucoup mieux. Elle les a nettoyées, la brave bête. Elles n’ont jamais autant brillé. Tiens, pour toi.':
+    'Clack. Ah. Much better. She cleaned them, the dear thing. They’ve never shone so bright. Here, for you.',
+  'On déjeune ensemble le dimanche, elle et moi. Elle mange plus proprement.':
+    'We have lunch together on Sundays, she and I. Her table manners are better than mine.',
+  'La course des spores': 'The spore race',
+  'Bolet organise la grande course des spores. Il est le seul inscrit depuis quarante ans, et il finit toujours deuxième.':
+    'Bolet is holding the great spore race. He has been the only entrant for forty years, and he always comes second.',
+  'Courir la course des spores avant qu’elles retombent': 'Run the spore race before they settle',
+  'Spore fugueuse': 'Runaway spore',
+  'Attraper la spore': 'Catch the spore',
+  'Rattraper trois spores fugueuses': 'Catch three runaway spores',
+  'Courir la revanche, plus longue et plus rapide': 'Run the rematch, longer and faster',
+  'Toi ! Toi courir ! Bolet gagner course chaque année, sauf que le vent gagne avant. Le vent triche.':
+    'You! You run! Bolet win race every year, except wind wins first. Wind cheats.',
+  'Suis les fanions. Les spores retombent vite : si elles touchent le sol, perdu. Après, revanche. Toujours revanche.':
+    'Follow the pennants. Spores fall fast: if they touch the ground, lost. Then, rematch. Always rematch.',
+  'Les jambes, c’est comme les racines mais ça va moins profond et plus loin.':
+    'Legs are like roots, but they go less deep and farther.',
+  'Premier ! Bolet encore deuxième ! Mais deuxième derrière un pas-mousse, c’est une première. Cadeau !':
+    'First! Bolet second again! But second behind a not-moss, that’s a first. Gift!',
+  'L’an prochain, Bolet invite la reine. Elle finira troisième. Enfin un podium.':
+    'Next year, Bolet invites the queen. She’ll come third. A podium at last.',
+  'l’écho du deuil': 'the echo of grief',
+  'La faille gémit. Le chagrin de Khaz-Ombral se lève, plus grand qu’une tour !':
+    'The rift moans. The grief of Khaz-Ombral rises, taller than a tower!',
+  'Karn-Duram pose un genou à terre, lâche la porte qu’il tenait depuis mille ans, et s’endort.':
+    'Karn-Duram drops to one knee, lets go of the gate it held for a thousand years, and falls asleep.',
   // ------------------------------------------------------------ Quêtes : énigmes, actions, journal et suivi
+  'À ton niveau': 'At your level',
+  'Vieille Odette : « Il allumait les lanternes chaque soir, en sifflant. Un garçon gentil. »':
+    'Old Odette: “He lit the lanterns every evening, whistling. A kind boy.”',
+  'Pêcheur Tom : « Son prénom commençait comme une île… I-quelque chose. Ilian ? »':
+    'Fisherman Tom: “His name started like an island… I-something. Ilian?”',
+  'Protéger les six cristaux (E sur l’autel pour commencer)':
+    'Protect the six crystals (E on the altar to begin)',
+  'Actionner les leviers pour ouvrir un passage dans l’autre clairière':
+    'Pull the levers to open a way through in the other glade',
+  'Karn-Duram, l’écho du deuil': 'Karn-Duram, the echo of grief',
+  'Les Tréfonds': 'The Depths',
+  'Les Tréfonds, à ton niveau': 'The Depths, at your level',
+  'Butin': 'Loot',
+  'Collecte': 'Collecting',
+  'Escorte': 'Escort',
+  'Poursuite': 'Chase',
+  'Course': 'Race',
+  'Champion': 'Champion',
+  'Messager': 'Messenger',
+  'Métier': 'Trade',
+  'Exploration': 'Exploration',
+  'Enquête': 'Investigation',
+  'Choix': 'Choice',
+  'Adresse': 'Skill',
+  'Énigme': 'Riddle',
+  'La Ballade de l’Aurore': 'The Ballad of Dawn',
+  'Par ici': 'Around here',
+  'Descendre dans les Tréfonds': 'Descend into the Depths',
+  'Remonter à la surface': 'Go back up to the surface',
+  'Prendre le départ': 'Start the race',
+  'Embuscade !': 'Ambush!',
+  'Partez !': 'Go!',
+  'Défends {chose} !': 'Defend {chose}!',
+  '{nom} te suit. Reste à ses côtés !': '{nom} is following you. Stay close!',
+  'Plus personne pour défendre le lieu… Recommence quand tu veux.':
+    'No one left to defend the place… Try again whenever you like.',
+  'La défense a cédé. Reprends ton souffle et recommence.':
+    'The defense has fallen. Catch your breath and try again.',
+  'Vague {n} / {m}': 'Wave {n} / {m}',
+  'Tu as semé la personne que tu accompagnais. Elle t’attend au départ.':
+    'You lost the one you were escorting. They are waiting for you at the start.',
+  'Trop de coups : il faut repartir du départ.': 'Too many hits: back to the start.',
+  'Ton adversaire a disparu. Il reviendra si tu l’appelles.':
+    'Your opponent has vanished. It will return if you call it.',
+  'Trop tard ! Reprends le départ.': 'Too late! Start over.',
+  'Une bibliothèque scellée par les esprits des saisons.': 'A library sealed by the spirits of the seasons.',
+  'Une petite lumière tremble dans le cristal. Il lui manque des éclats.':
+    'A small light trembles in the crystal. It is missing some shards.',
+  'Chaque gardien vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.':
+    'Each guardian defeated leaves one behind, and Madame Nacre keeps two for great collectors.',
   'Grosse citrouille près du ruisseau': 'Big pumpkin by the stream',
   'Grosse citrouille sous le chêne roux': 'Big pumpkin under the russet oak',
   'Sous le pont du ruisseau': 'Under the bridge over the stream',
   'Tas de feuilles': 'Pile of leaves',
-  'Un obélisque à moitié enseveli. Il faut d’abord le dégager.':
-    'A half-buried obelisk. You need to uncover it first.',
-  'Les trois faisceaux se rejoignent : le sable s’effondre sur un escalier !':
-    'The three beams meet: the sand collapses onto a staircase!',
   'Souvenir': 'Memory',
-  'Obélisque dégagé ({n} / 3)': 'Obelisk uncovered ({n} / 3)',
   'Souvenir des feuilles': 'Memory of the leaves',
   'Fragment de la fresque': 'Fresco fragment',
-  'Touche d’abord les feuilles dorées : elles savent à qui sont ces objets.':
-    'Touch the golden leaves first: they know whom these objects belong to.',
-  'Tu portes : {objet}': 'You are carrying: {objet}',
   'enclume': 'anvil',
   'cloche': 'bell',
-  'berceau': 'cradle',
   'harpe': 'harp',
   'puits': 'well',
   'four': 'oven',
@@ -3969,43 +4566,21 @@ export default {
   'tour': 'tower',
   'lune': 'moon',
   'flamme': 'flame',
-  'La maison du {lieu}. Il manque quelque chose devant sa porte.':
-    'The {lieu} house. Something is missing in front of its door.',
-  'Chaque maison a retrouvé son objet. Les feuilles dorées s’envolent…':
-    'Every house has its object back. The golden leaves fly away…',
-  'Il manque les fragments de la fresque pour savoir où va chaque saison.':
-    'The fresco fragments are missing to know where each season goes.',
-  'Le mécanisme tourne : les archives anciennes s’ouvrent.':
-    'The mechanism turns: the ancient archives open.',
   'Archives anciennes': 'Ancient archives',
-  'Une bibliothèque scellée par le mécanisme des saisons.': 'A library sealed by the seasons mechanism.',
   'La girouette tourne : le vent fait tournoyer la feuille dans le sens des aiguilles d’une montre.':
     'The weathervane turns: the wind spins the leaf clockwise.',
   'Raté ! Elle était trop haute. Attends qu’elle redescende.':
     'Missed! It was too high. Wait for it to come back down.',
   'Tu attrapes la feuille dorée au vol !': 'You catch the golden leaf in midair!',
-  'La roue entraîne le moulin… dans le bon sens !': 'The wheel drives the mill… the right way!',
   'Rien ici…': 'Nothing here…',
   'Le renard magique jaillit de sa cachette, des provisions plein les pattes !':
     'The magic fox leaps out of its hiding place, paws full of supplies!',
-  'Les trois anneaux s’alignent : la machine de l’Aurore s’illumine !':
-    'The three rings align: the Dawn machine lights up!',
   'La salle du trésor est ouverte.': 'The treasure room is open.',
   'Une porte ronde, scellée par la machine.': 'A round door, sealed by the machine.',
-  'Le bateau accoste au quai !': 'The boat docks at the quay!',
-  'Le bateau revient au départ.': 'The boat returns to the start.',
-  'La lumière atteint l’arbre gardien ! Ses racines s’illuminent d’or.':
-    'The light reaches the guardian tree! Its roots glow gold.',
   'Le rayon frappe le soleil de la porte : le temple s’ouvre !':
     'The ray strikes the sun on the door: the temple opens!',
   'La porte du temple est ouverte.': 'The temple door is open.',
   'Un soleil gravé attend la lumière.': 'A carved sun awaits the light.',
-  'L’eau coule jusqu’au bassin : l’oasis revit !': 'The water flows to the basin: the oasis lives again!',
-  'L’épreuve est réussie.': 'The trial is passed.',
-  'Une stèle : « {question} »': 'A stele: “{question}”',
-  'Cette épreuve est réussie.': 'This trial is passed.',
-  'La stèle s’éteint… Ce n’est pas la bonne réponse.': 'The stele goes dark… That is not the right answer.',
-  'Épreuve réussie ({n} / 4)': 'Trial passed ({n} / 4)',
   'Les étoiles brillent sur l’autel.': 'The stars shine on the altar.',
   'Six alvéoles vides attendent leurs étoiles.': 'Six empty hollows await their stars.',
   'Il te manque des étoiles du Cœur.': 'You are missing some of the Heart’s stars.',
@@ -4023,26 +4598,17 @@ export default {
   'Le coffre enchanté est vide.': 'The enchanted chest is empty.',
   'Un coffre enchanté.': 'An enchanted chest.',
   'Tu as traversé le miroir !': 'You crossed the mirror!',
-  'Braise se cache sous son aile…': 'Ember hides under his wing…',
-  'Braise refuse : un perchoir n’est pas à la bonne hauteur.':
-    'Ember refuses: a perch is not at the right height.',
-  'Tuuuuut !': 'Toooooot!',
   'Le reflet montre le Cerf des neiges. Ses étoiles s’allument l’une après l’autre.':
     'The reflection shows the Snow Stag. Its stars light up one after another.',
-  'Épreuve {n}': 'Trial {n}',
-  'Réfléchir encore': 'Think again',
   'Les échos de l’Ombre arrivent ! Protège les cristaux.':
     'The echoes of the Shadow are coming! Protect the crystals.',
   'Les échos se dissipent. Les cristaux brillent de toute leur lumière !':
     'The echoes fade. The crystals shine with all their light!',
   'Les cristaux se sont éteints… Le Cœur se rendort. Réessaie depuis l’autel.':
     'The crystals have gone out… The Heart falls back asleep. Try again from the altar.',
-  'Vague {n} / 3': 'Wave {n} / 3',
   'Le lac s’illumine : la constellation est complète !': 'The lake lights up: the constellation is complete!',
   'Le reflet s’efface… Recommence depuis la première étoile.':
     'The reflection fades… Start again from the first star.',
-  'Braise s’envole et fait un looping au-dessus de la forêt !':
-    'Ember takes off and does a loop over the forest!',
   '{quete} : retourne voir {nom}.': '{quete}: go back to {nom}.',
   'Objectif accompli : {objectif}': 'Objective complete: {objectif}',
   'Nouvelle quête : {quete}': 'New quest: {quete}',
@@ -4052,15 +4618,7 @@ export default {
   'Collier des mille étoiles': 'Necklace of a thousand stars',
   '{objet} (Légendaire) !': '{objet} (Legendary)!',
   'Le mécanisme est déjà réglé.': 'The mechanism is already set.',
-  'Stèle ancienne': 'Ancient stele',
   'Il ne reste que des éclats de lumière.': 'Only shards of light remain.',
-  'Une petite lumière tremble dans le cristal. Les pierres l’entourent…':
-    'A small light trembles in the crystal. The stones surround it…',
-  'Les pierres s’éteignent… L’ordre n’est pas le bon.': 'The stones go dark… The order is wrong.',
-  'Le cristal se brise ! Une petite lumière s’en échappe…': 'The crystal shatters! A small light escapes…',
-  'Symbole trouvé : {symbole} ({n} / 3)': 'Symbol found: {symbole} ({n} / 3)',
-  'Un socle vide. Il manque les symboles.': 'An empty pedestal. The symbols are missing.',
-  'Fiiiiiiou !': 'Wheeeeew!',
   'Le trou est vide : tu as déjà trouvé le trésor.': 'The hole is empty: you already found the treasure.',
   'Le poisson doré mord ! Tu le remontes, scintillant.': 'The golden fish bites! You reel it in, glittering.',
   'Juste une carpe… Attends le remous doré.': 'Just a carp… Wait for the golden ripple.',
@@ -4074,15 +4632,8 @@ export default {
   'La mélodie se brise. Recommence.': 'The melody breaks. Start again.',
   'La pierre roule sur le côté : le Sanctuaire des Murmures s’ouvre !':
     'The stone rolls aside: the Sanctuary of Whispers opens!',
-  'Le voleur apparaît : un petit caméléon-renard, les joues pleines de miel !':
-    'The thief appears: a little chameleon-fox, cheeks full of honey!',
   'L’ombre de l’arbre déploie ses ailes : un oiseau parfait. Théon accourt avec ses pinceaux !':
     'The tree’s shadow spreads its wings: a perfect bird. Théon rushes over with his brushes!',
-  'Les quatre lanternes brillent ! Un chemin de lumière mène au Sanctuaire des Reflets.':
-    'The four lanterns shine! A path of light leads to the Sanctuary of Reflections.',
-  'Les reflets s’unissent : une scène du passé apparaît…':
-    'The reflections merge: a scene from the past appears…',
-  'Le pont tient ! Il est restauré pour toujours.': 'The bridge holds! It is restored for good.',
   'Indice': 'Clue',
   'Une lourde porte de pierre. Elle ne bougera pas toute seule.':
     'A heavy stone door. It won’t move on its own.',
@@ -4097,62 +4648,37 @@ export default {
   'L’autel est éteint, il attend son étoile.': 'The altar is dark, it awaits its star.',
   'L’arbre gardien parle : « Petite étincelle… Le Cœur de l’Aurore attend. Rassemble les six étoiles. »':
     'The guardian tree speaks: “Little spark… The Heart of Dawn awaits. Gather the six stars.”',
-  'Pompon est au sommet ! Il bêle de bonheur.': 'Pompom is at the top! He bleats with joy.',
-  'Bêêê ?': 'Baaa?',
   'Plouf !': 'Splash!',
   'Parler à {nom}': 'Talk to {nom}',
   'Lire la stèle': 'Read the stele',
-  'Regarder le cristal': 'Look at the crystal',
-  'Toucher la pierre': 'Touch the stone',
-  'Prendre le symbole': 'Take the symbol',
-  'Tourner le socle': 'Turn the pedestal',
-  'Fermer la barrière': 'Close the gate',
-  'Ouvrir la barrière': 'Open the gate',
-  'Siffler Pompon': 'Whistle for Pompom',
   'Creuser': 'Dig',
   'Ferrer': 'Strike',
   'Écouter la pierre': 'Listen to the stone',
   'Jouer la pierre': 'Play the stone',
   'Tourner le miroir': 'Turn the mirror',
   'Pierre de passage': 'Waystone',
-  'Démasquer le voleur': 'Unmask the thief',
   'Appeler Théon': 'Call Théon',
-  'Tourner la vanne': 'Turn the valve',
-  'Changer la planche': 'Change the plank',
   'Examiner': 'Examine',
   'Interroger': 'Question',
   'Prier à l’autel': 'Pray at the altar',
   'Pousser la porte': 'Push the door',
   'Toucher la feuille': 'Touch the leaf',
-  'Prendre l’objet': 'Take the object',
-  'Poser ici': 'Set it down here',
-  'Regarder la maison': 'Look at the house',
   'Prendre le fragment': 'Take the fragment',
-  'Tourner le pilier': 'Turn the pillar',
   'Lire les archives': 'Read the archives',
   'Regarder la girouette': 'Look at the weathervane',
   'Attraper la feuille': 'Catch the leaf',
-  'Changer l’engrenage': 'Change the gear',
   'Écouter': 'Listen',
   'Écouter {nom}': 'Listen to {nom}',
   'Fouiller : {lieu}': 'Search: {lieu}',
   'Dégager l’obélisque': 'Uncover the obelisk',
-  'Tourner l’obélisque': 'Turn the obelisk',
-  'Tourner l’anneau': 'Turn the ring',
   'Porte du trésor': 'Treasure door',
-  'Déboucher la bouteille': 'Uncork the bottle',
-  'Sonner (bateau au départ)': 'Ring (boat back to start)',
   'Porte du temple': 'Temple door',
-  'Fermer la porte': 'Close the door',
-  'Ouvrir la porte': 'Open the door',
-  'Répondre à l’épreuve': 'Answer the trial',
   'Poser les étoiles': 'Place the stars',
   'Lire la fresque': 'Read the fresco',
   'Éveiller le Cœur': 'Awaken the Heart',
   'Réunir la lumière': 'Unite the light',
   'Actionner le levier': 'Pull the lever',
   'Ouvrir le coffre': 'Open the chest',
-  'Régler le perchoir': 'Adjust the perch',
   'Sonner le cor': 'Sound the horn',
   'Agir': 'Act',
   'Non… ce n’est pas ça. Je crois que non.': 'No… that’s not it. I don’t think so.',
@@ -4179,7 +4705,6 @@ export default {
   '(ouvert)': '(open)',
   'Chapitre {n}': 'Chapter {n}',
   'niveaux {n} à {m}': 'levels {n} to {m}',
-  'Ce chapitre s’écrira bientôt…': 'This chapter will be written soon…',
   'À découvrir : parle à {nom} ({lieu})': 'To discover: talk to {nom} ({lieu})',
   'Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.':
     'No side quests in progress. The island’s inhabitants offer them: look for golden “!” above their heads.',
@@ -4279,7 +4804,6 @@ export default {
   'Le sceau attend ton retour.': 'The seal awaits your return.',
   'Briser le sceau de l’Ombre': 'Break the Shadow seal',
   'Ramasser le coquillage': 'Pick up the shell',
-  'Gardien de l’Ombre': 'Shadow guardian',
   'Tu as obtenu': 'You got',
   'Cœur d’Aurore': 'Heart of Dawn',
   'Cœurs d’Aurore': 'Hearts of Dawn',
@@ -4287,8 +4811,6 @@ export default {
   'Étoile du Cœur': 'Star of the Heart',
   'Une petite lumière tombée du ciel devient ta compagne de voyage.':
     'A little light fallen from the sky becomes your travel companion.',
-  'Chaque gardien de l’Ombre vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.':
-    'Each Shadow guardian you defeat leaves one behind, and Madam Nacre keeps two for great collectors.',
   'Un Cœur d’Aurore (+3 % de PV max)': 'A Heart of Dawn (+3% max HP)',
   'Équipement Légendaire de ton niveau': 'Legendary gear of your level',
   'Trésors': 'Treasures',

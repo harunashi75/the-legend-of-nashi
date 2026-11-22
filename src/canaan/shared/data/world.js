@@ -432,10 +432,11 @@ export const MOB_TYPES = deepFreeze([
 ]);
 // Nom affiché d'un monstre : celui de son espèce, ou de son élite.
 /**
- * @param {{ t?: string, elite?: boolean }} m
+ * @param {{ t?: string, elite?: boolean, title?: string }} m champion de quête : son propre nom (title)
  * @returns {string}
  */
 export function mobTitle(m) {
+  if (m.title) return m.title;
   const name = m.t || '';
   if (!m.elite) return name;
   return MOB_TYPES.find(t => t.name === name)?.elite || name;

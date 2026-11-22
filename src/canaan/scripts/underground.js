@@ -631,6 +631,23 @@
     }
     // Pièces des bâtiments de la forteresse (house.js), creusées dans la roche du nord de la carte.
     if (window.CANAAN_HOUSE) CANAAN_HOUSE.stampUnder();
+    // Lieux des quêtes de l'Interlude, une fois tout le reste en place.
+    CANAAN_QUESTS.placeUnder({
+      center: C,
+      cavern: (b, kind) => P[b][kind],
+      open: (x, y) =>
+        OPEN(at(x, y)) &&
+        !bridges.has(y * MAPW + x) &&
+        !SOLID_DECOR.has(deco()[y]?.[x]) &&
+        !structureAt(x, y, 1) &&
+        !nodes.some(n => Math.abs(n.tx - x) < 1.5 && Math.abs(n.ty - y) < 1.5) &&
+        !portals.some(({ d }) => Math.hypot(d.x - x, d.y - y) < 4) &&
+        !lairs.some(l => Math.hypot(l.x - x, l.y - y) < 9),
+      clear: (x, y) => {
+        if (OPEN(at(x, y))) deco()[y][x] = null;
+      },
+      dwarf: name => dwarves.find(v => v.name === name)
+    });
   }
   // Un point du sol d'un biome, tiré dans l'une de ses salles (n : numéro du tirage, salt : famille de tirages).
   function pick(bi, n, salt, kinds) {
@@ -655,7 +672,7 @@
           reach[y * MAPW + x] === 1 &&
           !isSafe(x, y) &&
           !canaanRoomAt(x, y) &&
-          canaanQuestWalk((x + 0.5) * TS, (y + 0.5) * TS) === null &&
+          canaanQuestWalk((x + 0.5) * TS, (y + 0.5) * TS, false) === null &&
           game.world.overworld[y][x] !== 2 &&
           !taken.some(([tx, ty]) => Math.hypot(tx - x, ty - y) < 7) &&
           !game.world.npcs.some(n => Math.hypot(n.x / TS - x, n.y / TS - y) < 6);
@@ -1596,6 +1613,30 @@
     const out = canaanOutline(cv, 2);
     DWARF_SPRITES.set(key, out);
     return out;
+  }
+  // Un nain isolé (prisonnier, escorte, personnage de quête), pieds à (x, y + 18).
+  function dwarfArt(c, v, x, y, face = 1) {
+    const spr = dwarfSprite({ skin: '#e8b48a', ...v }, 0),
+      s = (v.scale || 1) * 0.9;
+    const a = c.globalAlpha;
+    c.globalAlpha = 0.32 * a;
+    c.fillStyle = '#0a0806';
+    c.beginPath();
+    c.ellipse(x, y + 16, 16 * s, 5 * s, 0, 0, Math.PI * 2);
+    c.fill();
+    c.globalAlpha = a;
+    c.save();
+    c.translate(Math.round(x), Math.round(y + 18));
+    if (face < 0 || face === 3) c.scale(-1, 1);
+    c.drawImage(
+      spr,
+      Math.round((-spr.width * s) / 2),
+      Math.round(-spr.height * s),
+      Math.round(spr.width * s),
+      Math.round(spr.height * s)
+    );
+    c.restore();
+    if (v.tool === 'lantern') canaanLight(x - 18, y - 4, 120, '#ffd36d');
   }
   function drawDwarves(c) {
     c.save();
@@ -2986,6 +3027,9 @@
     spots: () => spots,
     fauna: () => fauna,
     dwarves: () => dwarves,
+    dwarfArt,
+    // Carrefour d'un biome, en pixels.
+    hub: b => ({ x: (hubs[b].x + 0.5) * TS, y: (hubs[b].y + 0.5) * TS }),
     structures: () => structures,
     lairs: () => lairs,
     drawGround,

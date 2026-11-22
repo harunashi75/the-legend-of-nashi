@@ -487,8 +487,8 @@ function interact() {
     // Portail de retour : c'est l'hôte qui le prend, pour tout le groupe.
     if (game.world.instance && CANAAN_DUNGEON_EXPLORE.takeExit()) return;
     if (game.world.instance) return;
-    // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte) ; bâtiments : portes (île seulement).
-    if (!canaanUnder() && CANAAN_QUESTS.interact()) return;
+    // Quêtes : PNJ de l'histoire, énigmes et objets (demandés à l'hôte) ; bâtiments : portes.
+    if (CANAAN_QUESTS.interact()) return;
     if (CANAAN_HOUSE.interact()) return;
     // Pêche : lancer, ferrer ou remonter la ligne près d'un banc de poissons.
     if (CANAAN_PROF.interact()) return;
@@ -511,7 +511,7 @@ function interact() {
   if (!game.world.instance && !canaanUnder() && CANAAN_CITY.interact()) return;
   if (CANAAN_BARBER.interact()) return;
   if (!canaanUnder() && CANAAN_EXT.interact(game.hero)) return;
-  if (!game.world.instance && !canaanUnder() && CANAAN_QUESTS.interact()) return;
+  if (!game.world.instance && CANAAN_QUESTS.interact()) return;
   if (!game.world.instance && CANAAN_HOUSE.interact()) return;
   if (!game.world.instance && CANAAN_PROF.interact()) return;
   if (game.world.instance?.arena) {
@@ -792,7 +792,7 @@ function canWalk(x, y, wade = false) {
     [-r, r],
     [r, r]
   ].every(([a, b]) => {
-    // Tréfonds : la roche et les bâtiments souterrains bloquent ; rien de la surface (quêtes, maisons) ne compte.
+    // Tréfonds : la roche et les bâtiments souterrains bloquent ; rien de la surface (maisons, arbres) ne compte.
     if (canaanUnder())
       return (
         !SOLID.includes(tileAt(Math.floor((x + a) / TS), Math.floor((y + b) / TS))) &&
@@ -1000,7 +1000,8 @@ function update() {
       return;
     }
     const T = target.player,
-      exposed = !isSafe(T.x / TS, T.y / TS) || game.world.instance;
+      // Les ennemis d'une épreuve de quête frappent aussi aux abords du camp (quest-field.js).
+      exposed = !isSafe(T.x / TS, T.y / TS) || game.world.instance || !!m.questRun;
     let d = Math.hypot(T.x - m.x, T.y - m.y);
     if (d < (m.worldBoss ? 430 : 260) && d > 28 && exposed) {
       // Steering fluide: pas de micro-corrections sur les deux axes ni de tremblement au contact.
@@ -1200,6 +1201,8 @@ function draw() {
     // Tréfonds : gisements et bancs de poissons, décor, bâtiments, portails, entrées, nains et faune.
     CANAAN_PROF.drawSpots(ctx);
     CANAAN_UNDER.draw(ctx);
+    // Lieux et personnages de l'Interlude.
+    CANAAN_QUESTS.drawWorld(ctx);
     // Pièces de la forteresse naine (house.js) : intérieur meublé de celle où l'on est.
     CANAAN_HOUSE.draw(ctx);
     CANAAN_LIFE.update();

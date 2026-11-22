@@ -37,6 +37,7 @@ En cas d’échec, le démarrage est bloqué et l’écran d’accueil affiche l
 | `canaan-inventory-capacity` | `updateCapacity` |
 | `canaan-ui` | `renderInventory`, `renderCharacter`, `charSlot`, `showGearTooltip`, `showEquippedTooltip` |
 | `canaan-class-talents` | `renderTalents` |
+| `canaan-quest-field` | `canaanQuestField` |
 | `canaan-quests` | `toggleJournal` |
 
 Ces fonctions ne figurent plus dans `CANAAN_REQUIRED_BINDINGS` : leur module est contrôlé par ses exports dans `CANAAN_REQUIRED_MODULES` (par exemple `CANAAN_UI`, `CANAAN_EQUIPMENT`, `CANAAN_COMBAT`) et par les tests, qui vérifient une seule définition par fonction. Un module chargé avant le propriétaire ne doit pas lire ces noms pendant son chargement ; s’il doit en exposer un dans un objet d’export, il le lit sur `window` pour que le bootstrap signale l’absence au lieu d’un plantage (voir `CANAAN_UI.gearStat`).
@@ -58,7 +59,7 @@ Chaque étape de mise à jour est un objet de `CanaanStages` qui peut définir `
 | `dodge` | `canaan-combat` | Déplacement de la roulade d'esquive |
 | `artefacts` | `canaan-artefacts` | Bouclier, régénération, brûlures et saignements des artéfacts de l’Arène équipés |
 | `arena` | `canaan-arena` | Vagues, intelligence des boss de l'Arène, annonces, projectiles et sols dangereux |
-| `quests` | `canaan-quests` | Traces et points à atteindre, poisson doré, mouton de Milo, nénuphars qui coulent |
+| `quests` | `canaan-quests` | Objectifs de terrain (vagues, escortes, fuyards, courses, champions), traces et points à atteindre, poisson doré, nénuphars qui coulent |
 
 Les `before()` s'exécutent de la dernière étape à la première, puis `update()` du cœur, puis les `after()` de la première à la dernière. Aucune étape ne tourne hors partie, en pause ou pendant la mort du héros. Le rendu appelle `draw()` du cœur puis les étapes de `CANAAN_PIPELINE.draw` : effets des armes (`drawWeaponEffects`), zones, boucliers et forme féline des classes (`drawClassEffects`), Lumi, bénédiction et suivi de quête (`drawQuests`), recharge de la roulade (`drawDodge`) et interface de l'Arène (`drawArenaHud`).
 

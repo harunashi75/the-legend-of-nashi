@@ -1227,6 +1227,7 @@
   // Point d'entrée des événements (hôte ou partie solo ; un invité ne compte rien lui-même).
   function event(hero, type, a, b, c) {
     if (guest() || !hero || !hero.player) return;
+    CANAAN_QUESTS.event(hero, type, a);
     const st = stateOf(hero);
     switch (type) {
       case 'kill':

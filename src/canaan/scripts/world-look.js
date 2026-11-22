@@ -1126,7 +1126,7 @@
     for (const a of CANAAN_LIFE.animals()) if (!a.dead && canaanHere(a)) out.push({ x: a.x, foot: a.y });
     for (const v of CANAAN_LIFE.villagers()) out.push({ x: v.x, foot: v.y + 12 });
     for (const n of Object.values(CANAAN_QUESTS.npcs()))
-      if (Number.isFinite(n.x)) out.push({ x: n.x, foot: n.y + 12 });
+      if (Number.isFinite(n.x) && !n.under) out.push({ x: n.x, foot: n.y + 12 });
     return out.filter(
       e => Math.abs(e.x - camX - W / 2) < W / 2 + 100 && Math.abs(e.foot - camY - H / 2) < H / 2 + 150
     );

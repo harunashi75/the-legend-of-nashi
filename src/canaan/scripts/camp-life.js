@@ -248,7 +248,7 @@
       cy = CANAAN_CAMP.y;
     origin = { x: cx, y: cy };
     const houses = CANAAN_HOUSE.buildings(),
-      sites = Object.values(CANAAN_QUESTS.sites()),
+      sites = Object.values(CANAAN_QUESTS.sites()).filter(s => !s.under),
       taken = tools.taken();
     // Une case libre : sur l'île, ni roche ni eau, hors des bâtiments, des lieux de quête et des coffres.
     // Cases gardées libres sans bloquer : le tapis du salon de coiffure, où se tient la coiffeuse.
@@ -257,7 +257,7 @@
       houses.some(b => x >= b.x - 1 && x <= b.x + b.w && y >= b.y - 1 && y <= b.y + b.h);
     const quest = (x, y) =>
       sites.some(s => Math.hypot(s.x - x, s.y - y) <= s.r + 1.5) ||
-      canaanQuestWalk((x + 0.5) * T, (y + 0.5) * T) !== null;
+      canaanQuestWalk((x + 0.5) * T, (y + 0.5) * T, false) !== null;
     const spot = (x, y) => taken.some(([a, b]) => Math.abs(a - x) <= 1 && Math.abs(b - y) <= 1);
     const land = (x, y) =>
       tools.valid(x, y) && !SOLID.includes(tiles[y][x]) && tiles[y][x] !== 15 && !BRIDGE_TILES.has(key(x, y));

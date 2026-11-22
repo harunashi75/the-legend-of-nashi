@@ -1,390 +1,327 @@
 const { test } = require('node:test');
 const { assert, source } = require('./helpers/context.cjs');
 
-test('Quêtes : les 15 quêtes des chapitres I à III se jouent de bout en bout (énigmes, récompenses, monde changé, sauvegarde)', () => {
-  const { g, run, errors } = require('./helpers/canaan-runtime.cjs')(source);
-  assert.equal(errors.length, 0, errors.join('\n'));
-  const check = id => {
-    assert.equal(run('give(' + id + ')'), true, 'turn in ' + id);
-    assert.equal(run('step(' + id + ')'), 'done');
-  };
-  run(`started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__t=[];toast=m=>__t.push(m);game.view.notify=m=>__t.push(m);
+// Joueur automatique : prend une quête, joue chaque étape comme un joueur (objets, combats, escortes, courses…) et la
+// rend. PUZZLES : les étapes propres à un lieu.
+const PLAYER = `started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__t=[];toast=m=>__t.push(m);game.view.notify=m=>__t.push(m);
  globalThis.Q=CANAAN_QUESTS;globalThis.HR=game.hero;globalThis.S=id=>Q.sites()[id];
  globalThis.tp=(site,dx,dy)=>{const s=S(site);P.x=(s.x+dx+0.5)*TS;P.y=(s.y+dy+0.5)*TS};
- globalThis.toNpc=id=>{const n=Q.npcs()[id];P.x=n.x+30;P.y=n.y};
+ globalThis.toNpc=id=>{const n=Q.npcs()[id];layer(!!n.under);P.x=n.x+30;P.y=n.y};
+ globalThis.layer=u=>{if(u!==canaanUnder())CANAAN_UNDER.setLayer(u?'under':'surface')};
  globalThis.act=(site,obj,n=1)=>{for(let i=0;i<n;i++)Q.act(HR,site,obj)};
  globalThis.tick=n=>{for(let i=0;i<n;i++){time++;CanaanStages.quests.after()}};
  globalThis.st=()=>Q.state(HR);globalThis.step=id=>st().active[id]?st().active[id].step:(st().done[id]?'done':'none');
- globalThis.take=id=>{toNpc(Q.npcs()[Object.keys(Q.npcs()).find(k=>Q.npcs()[k].quest?.id===id)].id);return Q.accept(HR,id)};
- globalThis.give=id=>{toNpc(Object.keys(Q.npcs()).find(k=>Q.npcs()[k].quest?.id===id));return Q.turnIn(HR,id)};
- globalThis.slay=site=>{tp(site,0,1);Q.act(HR,site,'gseal');const m=game.world.monsters.find(m=>m.questGuardian===site);if(!m)return false;m.hp=0;tick(1);return true};`);
-  // Q2 locked before Q1
-  assert.equal(run('take(2)'), false, 'Q2 locked');
-  // Q1
-  assert.equal(run('take(1)'), true);
-  run('tp("q1",1,1);tick(20)');
-  assert.equal(run('step(1)'), 1, 'trail');
-  run('act("q1","p_lune")');
-  assert.equal(run('step(1)'), 1);
-  run('for(const s of ["soleil","pluie","vent","lune"])act("q1","p_"+s)');
-  assert.equal(run('step(1)'), 2);
-  check(1);
-  assert.equal(run('st().flags.lumi'), true);
-  // Q2
-  run('take(2);for(const s of ["etoile","lune","flamme"])act("q2","sym_"+s)');
-  assert.equal(run('step(2)'), 1);
-  run('act("q2","ped0",2);act("q2","ped1",2);act("q2","ped2",2)');
-  assert.equal(run('step(2)'), 2);
-  assert.equal(run('slay("q2")'), true, 'gardien des ruines');
-  assert.equal(run('step(2)'), 3);
-  assert.ok(run('st().flags.heart_q2'), 'Cœur d’Aurore');
-  check(2);
-  // Q3
-  const inv3 = run('HR.inventory.length');
-  run('take(3);act("q3","gate0");act("q3","gate1");act("q3","gate2");act("q3","whistle");tick(400)');
-  assert.equal(run('step(3)'), 1, 'sheep');
-  check(3);
-  assert.equal(run('HR.inventory.length'), inv3 + 1, 'équipement Rare au lieu d’une décoration');
-  assert.equal(run('HR.inventory.at(-1).rarity'), 'Rare');
-  assert.equal(run('"deco" in st()'), false);
-  // Q4
-  const inv0 = run('HR.inventory.length');
-  run('take(4);act("q4","dig")');
-  assert.equal(run('step(4)'), 1);
-  check(4);
-  assert.equal(run('HR.inventory.length'), inv0 + 1);
-  // Q5
-  run('take(5);Q.puzzles().q5.gold=2;Q.puzzles().q5.until=time+60;act("q5","ripple1")');
-  assert.equal(run('step(5)'), 0, 'pas doré');
-  run('Q.puzzles().q5.gold=2;Q.puzzles().q5.until=time+60;act("q5","ripple2")');
-  assert.equal(run('step(5)'), 1);
-  check(5);
-  assert.equal(run('HR.prof.fish["dore:3"]'), 2);
-  // Q6
-  run('take(6);for(let i=1;i<=4;i++)act("q6","mstone"+i)');
-  assert.equal(run('step(6)'), 1);
-  const door = run('(o=>canWalk(o.x,o.y))(S("q6").objs.find(o=>o.kind==="door"))');
-  assert.equal(door, false);
-  run('for(const c of ["chime1","chime2","chime3","chime0"])act("q6",c)');
-  assert.equal(run('step(6)'), 2);
-  assert.equal(run('(o=>canWalk(o.x,o.y))(S("q6").objs.find(o=>o.kind==="door"))'), true, 'porte ouverte');
-  check(6);
-  const inv1 = run('HR.inventory.length');
-  run('act("q6","shrine")');
-  assert.equal(run('HR.inventory.length'), inv1 + 1);
-  assert.ok(run('st().flags.visit_murmures'));
-  // Q7
-  run('take(7);act("q7","mirror0",2);act("q7","mirror1",2)');
-  assert.equal(run('Q.beam().lit'), true);
-  assert.equal(run('step(7)'), 1);
-  run('slay("q7")');
-  assert.equal(run('step(7)'), 2);
-  run('tp("q7",2,-1);time=Math.ceil(time/10)*10-1;tick(2)');
-  assert.equal(run('step(7)'), 3);
-  check(7);
-  assert.ok(run('st().flags.star1&&st().flags.blessing'));
-  // Q8
-  run('take(8);tp("q8",0,-8);tick(20)');
-  assert.equal(run('step(8)'), 1);
-  check(8);
+ globalThis.npcOf=id=>QUESTS.find(q=>q.id===id).npc;
+ globalThis.take=id=>{toNpc(npcOf(id));return Q.accept(HR,id)};
+ globalThis.give=id=>{toNpc(npcOf(id));return Q.turnIn(HR,id)};
+ globalThis.alive=f=>game.world.monsters.filter(f);
+ globalThis.slay=f=>{alive(f).forEach(m=>{m.hp=0});game.world.monsters=game.world.monsters.filter(m=>m.hp>0||m.questGuardian||m.title)};
+ globalThis.PUZZLES={
+  1:{0:()=>{tp('q1',1,1);tick(20)}},
+  4:{1:()=>act('q4','dig')},
+  5:{1:()=>{Q.puzzles().q5.gold=2;Q.puzzles().q5.until=time+60;act('q5','ripple1');if(step(5)!==1)throw 'pas doré';Q.puzzles().q5.gold=2;Q.puzzles().q5.until=time+60;act('q5','ripple2')}},
+  6:{2:()=>{for(let i=1;i<=4;i++)act('q6','mstone'+i)},3:()=>{for(const c of ['chime1','chime2','chime3','chime0'])act('q6',c)}},
+  7:{3:()=>{tp('q7',2,-1);time=Math.ceil(time/10)*10-1;tick(2)}},
+  8:{1:()=>{tp('q8',0,-8);tick(20)}},
+  9:{0:()=>{const e=S('q9').trail.at(-1);P.x=e[0];P.y=e[1];tick(20)}},
+  10:{2:()=>act('q10','view')},
+  14:{0:()=>{for(const c of ['lanterne','barque','vieille','pecheur'])act('q14','clue_'+c)}},
+  15:{2:()=>{tp('q15',4,0);time=Math.ceil(time/10)*10-1;tick(2)}},
+  16:{0:()=>{for(const f of ['f1','f2','f3','f4'])act('q16',f)}},
+  17:{0:()=>{for(const f of ['fr1','fr2','fr3','fr4'])act('q17',f)}},
+  18:{1:()=>{for(let k=0;k<400&&step(18)===1;k++){const s=S('q18'),t=Q.puzzles().q18.t;P.x=(s.x+0.5)*TS+Math.cos(t*0.011)*3.2*TS+Math.sin(t*0.031)*0.6*TS;P.y=(s.y+0.5)*TS+Math.sin(t*0.017)*2.4*TS;if((Math.sin(t*0.045)+1)/2<0.3)act('q18','leaf18');else tick(1)}}},
+  20:{0:()=>{for(const t of ['t1','t2','t3'])act('q20',t)},1:()=>{act('q20','hide0');if(step(20)!==1)throw 'mauvaise cachette';act('q20','hide1')}},
+  24:{0:()=>{for(let i=0;i<3;i++)act('q24','mirror'+i,2)}},
+  26:{3:()=>act('q26','altar')},
+  27:{0:()=>act('q27','fresco27'),1:()=>{act('q27','altar27');for(let k=0;k<20&&step(27)===1;k++){tp('q27',0,2);tick(130);slay(m=>m.questEcho)}},4:()=>{for(let i=0;i<6;i++)act('q27','cc'+i)}},
+  28:{1:()=>{act('q28','lever1');act('q28','lever2');tp('q28',5,0);tick(5)}},
+  30:{1:()=>{for(const [x,y] of [[-2,-1],[0,-2],[1,0],[0,1],[2,1]]){tp('q30',x,y);tick(1)}}}
+ };
+ globalThis.playStep=id=>{
+  const q=QUESTS.find(q=>q.id===id),i=step(id),s=q.steps[i],site=S(s.site||q.site);
+  layer(!!site.under);game.world.monsters=game.world.monsters.filter(m=>m.hp>0);
+  if(PUZZLES[id]?.[i])return PUZZLES[id][i]();
+  const objs=site.objs.filter(o=>o.kind==='field'&&o.quest.id===id&&o.step===i),o=objs[0],key=id+'_'+i,runs=Q.field().runs();
+  const at=v=>{P.x=v.x;P.y=v.y};
+  P.hp=P.mhp;P.dead=false;
+  switch(s.k){
+   case 'kill':case 'loot':for(let k=0;k<200&&step(id)===i;k++)canaanAchieve(HR,'kill',{t:s.mobs[k%s.mobs.length],x:P.x,y:P.y,hp:0});return;
+   case 'pick':for(const v of objs){at(v);if(Q.act(HR,site.id,v.id)===false)throw 'objet '+v.id}return;
+   case 'wave':at(o);act(site.id,o.id);for(let k=0;k<30&&step(id)===i;k++){P.hp=P.mhp;tick(130);slay(m=>m.questRun===key)}return;
+   case 'escort':{at(o);act(site.id,o.id);for(let k=0;k<6000&&step(id)===i;k++){const r=runs.get(key);if(!r)throw 'escorte perdue '+__t.at(-1);P.x=r.x+20;P.y=r.y;tick(1);slay(m=>m.questRun===key)}return}
+   case 'hunt':{at(o);act(site.id,o.id);const m=alive(m=>m.title===s.title)[0];if(!m)throw 'champion absent';if(!m.elite||mobTitle(m)!==s.title)throw 'champion';m.hp=0;tick(1);return}
+   case 'chase':for(let k=0;k<(s.n||1);k++){at(o);tick(2);at(o);act(site.id,o.id)}return;
+   case 'race':{const go=objs.find(v=>v.race==='go');at(go);act(site.id,go.id);for(let k=0;k<s.n;k++){at(objs.find(v=>v.race===k));tick(1)}return}
+   case 'talk':toNpc(s.npc);Q.handle(HR,{op:'quest-talk',q:id});return;
+   case 'choice':toNpc(s.npc||q.npc);Q.handle(HR,{op:'quest-choice',q:id,choice:q.answer??1});return;
+   case 'work':for(let k=0;k<s.n;k++)s.job==='fish'?canaanAchieve(HR,'fish','gardon',1):canaanAchieve(HR,'gather',s.job,'x',1);return;
+   case 'clear':canaanAchieve(HR,'clear',s.instance);return;
+   case 'sky':layer(false);time=Math.ceil(time/30)*30-1;tick(2);return;
+   case 'guardian':{const seal=site.objs.find(v=>v.kind==='gseal');tp(site.id,0,1);Q.act(HR,site.id,'gseal');const m=alive(m=>m.questGuardian===site.id)[0];if(!m)throw 'gardien absent';m.hp=0;tick(1);return}
+  }
+  throw 'étape inconnue '+s.k};
+ globalThis.play=id=>{
+  if(!take(id))return 'refusée';
+  const q=QUESTS.find(q=>q.id===id);
+  for(let i=0;i<q.steps.length;i++){playStep(id);if(step(id)!==i+1)return 'étape '+i+' ('+q.steps[i].k+') : '+step(id)+' · '+__t.slice(-2).join(' | ')}
+  return give(id)&&step(id)==='done'?'ok':'non rendue'};`;
+
+test('Quêtes : les 30 quêtes de la surface se jouent de bout en bout (chasse, escortes, défenses, champions, gardiens, choix), jusqu’au réveil du Cœur', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  run(PLAYER + ';game.hero.level=60;HR.inventory.length=0;HR.bagLimit=100;');
+  assert.equal(run('take(2)'), false, 'la 2 après la 1');
+  for (let id = 1; id <= 30; id++) {
+    run('HR.inventory.length=0');
+    assert.equal(run('play(' + id + ')'), 'ok', 'quête ' + id);
+  }
+  assert.equal(run('Object.keys(st().done).length'), 30);
+  // Récompenses, gardiens, sanctuaires, monde changé.
+  assert.ok(run('st().flags.lumi&&st().flags.blessing&&st().flags.title&&st().flags.aurora'));
+  assert.equal(run('[1,2,3,4,5,6].filter(n=>st().flags["star"+n]).length'), 6);
+  assert.equal(run('[2,7,12,17,22,27].every(n=>st().flags["heart_q"+n])'), true);
+  assert.ok(
+    run(
+      '["sommet","goldtree","lanterns","bridge","archives","grenier","cite","machine","oasis","pyria","sanct_murmures","sanct_reflets","sanct_saisons","sanct_etoiles","sanct_lumieres","sanct_aurore"].every(f=>Q.world().flags[f])'
+    ),
+    run('JSON.stringify(Q.world().flags)')
+  );
+  assert.equal(run('HR.prof.fish["dore:3"]'), 2, 'poissons dorés');
+  assert.equal(run('HR.inventory.length'), 1, 'bijou du lac');
+  assert.equal(run('HR.inventory[0].rarity'), 'Légendaire');
+  assert.equal(run('CANAAN_QUESTS.questLook(HR)'), 7, 'Lumi, bénédiction et aura');
+  // Le pont porte ; un sanctuaire ouvert reçoit son visiteur.
+  assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'), true);
+  run('HR.inventory.length=0;act("q6","shrine")');
+  assert.equal(run('HR.inventory.length'), 1);
+  // Choix moral : la réplique de fin en dépend.
+  assert.equal(run('st().choices[27]'), 1);
+  run('globalThis.__p=[];modernPanel=h=>__p.push(h);toNpc("auralis");Q.interact()');
+  assert.match(run('__p.at(-1)'), /a repris la mer/);
+  // Raccourci forestier.
   run('tp("q8",0,-8);act("q8","waystone")');
   assert.ok(run('Math.hypot(P.x-(CANAAN_CAMP.x*TS),P.y-(CANAAN_CAMP.y*TS))') < 14 * 48, 'pierre de passage');
-  // Q9
-  run('take(9);(e=>{P.x=e[0];P.y=e[1]})(S("q9").trail.at(-1));tick(20)');
-  assert.equal(run('step(9)'), 1);
-  run('act("q9","thief")');
-  assert.equal(run('step(9)'), 2);
-  check(9);
-  // Q10
-  run('take(10);act("q10","view")');
-  check(10);
-  // Q11
-  run('take(11);act("q11","valve0",2);act("q11","valve2",1)');
-  assert.equal(run('step(11)'), 1);
-  assert.ok(run('Q.world().flags.lanterns&&Q.world().flags.sanct_reflets'));
-  check(11);
-  // Q12
-  run('take(12);act("q12","frame0",2);act("q12","frame1",2);act("q12","frame2",2);act("q12","frame3",1)');
-  assert.equal(run('step(12)'), 1);
-  run('slay("q12")');
-  assert.equal(run('step(12)'), 2);
-  check(12);
-  assert.ok(run('st().flags.star2'));
-  // Q13
-  const plank = run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))');
-  assert.equal(plank, false);
-  run('take(13);act("q13","plank0",2);act("q13","plank1",1);act("q13","plank2",3);act("q13","plank3",2)');
-  assert.equal(run('step(13)'), 1);
-  assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'), true, 'pont praticable');
-  check(13);
-  // Q14
-  run('take(14);for(const c of ["lanterne","barque","vieille","pecheur"])act("q14","clue_"+c)');
-  assert.equal(run('step(14)'), 1);
-  run('toNpc("esprit")');
-  assert.equal(run('CANAAN_QUESTS.handle(HR,{op:"quest-choice",q:14,choice:0})'), true);
-  assert.equal(run('step(14)'), 1);
-  run('CANAAN_QUESTS.handle(HR,{op:"quest-choice",q:14,choice:1})');
-  assert.equal(run('step(14)'), 2);
-  check(14);
-  // Q15 : nénuphar qui coule et chute, puis l'îlot.
-  run('take(15);tp("q15",-3,0);tick(130)');
-  const s15 = run('[Math.floor(P.x/TS)-S("q15").x,Math.floor(P.y/TS)-S("q15").y]');
-  assert.equal(JSON.stringify(s15), '[-4,0]', 'plouf');
-  run('tp("q15",4,0);time=Math.ceil(time/10)*10-1;tick(2)');
-  assert.equal(run('step(15)'), 1);
-  check(15);
-  // Bilan, sauvegarde et rechargement.
-  assert.equal(run('Object.keys(st().done).length'), 15);
+  // Sauvegarde et rechargement.
   const snap = JSON.parse(run('JSON.stringify(CANAAN_PERSISTENCE.snapshot())'));
-  assert.equal(Object.keys(snap.heros.hote.quetes.done).length, 15);
+  assert.equal(Object.keys(snap.heros.hote.quetes.done).length, 30);
   assert.ok(snap.monde.quetes.flags.bridge);
-  run('Q.importWorld({});');
+  run('Q.importWorld({})');
   assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'), false);
   run('Q.importWorld(' + JSON.stringify(snap.monde.quetes) + ')');
   assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'), true);
-
-  // Journal (trois onglets) et dialogues.
-  run(
-    'globalThis.__p=[];modernPanel=h=>__p.push(h);CANAAN_QUESTS.render("main");CANAAN_QUESTS.render("side");CANAAN_QUESTS.render("done")'
-  );
-  assert.match(run('__p[0]'), /Étoiles du Cœur : ★★☆☆☆☆/);
-  assert.match(run('__p[0]'), /Carte des sanctuaires/);
-  assert.match(run('__p[2]'), /Souvenir/);
-  assert.equal(run('typeof CANAAN_QUESTS.hasDeco'), 'undefined');
-  assert.equal(run('CANAAN_PROF.RECIPES.dore.quest'), 5);
+  // Monde d'une ancienne aventure : une énigme résolue garde son changement.
+  run('Q.importWorld({solved:{q13:true,q22:true}})');
+  assert.equal(run('Q.world().flags.bridge&&Q.world().flags.machine'), true);
+  // Journal.
+  run('__p.length=0;for(const t of ["main","side","treasure","done"])Q.render(t)');
+  assert.match(run('__p[0]'), /★★★★★★/);
+  assert.match(run('__p[0]'), /La Ballade de l’Aurore · 6 \/ 7/);
+  assert.match(run('__p[0]'), /Interlude — Les Voix d’en bas/);
+  assert.match(run('__p[3]'), /Souvenir/);
+  // Énigmes : le genre n'est plus qu'une étape sur dix.
+  assert.ok(run('QUESTS.filter(q=>q.steps.some(s=>s.k==="puzzle")).length') <= 4);
+  assert.ok(run('QUESTS.filter(q=>q.id<=30).every(q=>q.steps.some(s=>s.k!=="puzzle"))'));
   assert.equal(errors.length, 0, errors.join('\n'));
 });
 
-test('Quêtes à plusieurs : chacun sa progression, une énigme résolue ensemble compte pour chacun, demandes d’invité vérifiées', () => {
-  const { g, run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+test('Interlude des Tréfonds : 16 quêtes à tout niveau, quatre voix dans l’ordre qu’on veut, la faille et le dernier couplet', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
   assert.equal(errors.length, 0, errors.join('\n'));
-  run(
-    'started=true;paused=false;game.world.instance=null;game.world.monsters=[];globalThis.Q=CANAAN_QUESTS;globalThis.n=Q.npcs().liora;P.x=n.x+30;P.y=n.y'
-  );
-  run('globalThis.ally=canaanCreateHero({name:"Lina",x:n.x+40,y:n.y});game.heroes.push(ally)');
+  run(PLAYER + ';game.hero.level=7;HR.bagLimit=100;recomputeStats();');
+  // Lieux et personnages : tous posés, sur un sol praticable, atteignables depuis la forteresse.
+  assert.equal(run('Object.values(Q.sites()).filter(s=>s.under).length'), 16);
+  const bad = run(`layer(true);JSON.stringify((()=>{const U=CANAAN_UNDER.spawnPoint(),sx=Math.floor(U.x/TS),sy=Math.floor(U.y/TS),seen=new Set([sy*MAPW+sx]),q=[[sx,sy]];
+   for(let h=0;h<q.length;h++){const [x,y]=q[h];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=(y+dy)*MAPW+x+dx;if(!seen.has(k)&&!SOLID.includes(tileAt(x+dx,y+dy))){seen.add(k);q.push([x+dx,y+dy])}}}
+   const ok=o=>seen.has(Math.floor(o.y/TS)*MAPW+Math.floor(o.x/TS));
+   return [...Object.values(Q.sites()).filter(s=>s.under).flatMap(s=>s.objs).filter(o=>!ok(o)).map(o=>o.id),...Object.values(Q.npcs()).filter(n=>n.under&&!ok(n)).map(n=>n.id)]})())`);
+  assert.equal(bad, '[]', 'lieux atteignables');
+  // La surface n'a pas bougé : 30 coquillages, aucun dans les Tréfonds.
+  assert.equal(run('SHELLS.length'), 30);
+  // Rien d'autre que la descente n'est requis ; les voix attendent le roi, le chœur attend les quatre voix.
+  assert.equal(run('take(32)'), false);
+  const gold0 = run('P.gold');
+  assert.equal(run('play(31)'), 'ok');
+  assert.equal(run('P.gold-' + gold0), 50 + 9 * 7, 'or au niveau du héros');
+  assert.equal(run('questXp(questById(31),7)'), Math.round(run('xpToNext(7)') * 0.8));
+  assert.ok(run('questXp(questById(31),50)>questXp(questById(31),7)'));
+  assert.equal(run('take(36)'), false, 'le chœur attend les voix');
+  for (const id of [35, 33, 34, 32]) assert.equal(run('play(' + id + ')'), 'ok', 'voix ' + id);
+  assert.equal(run('VOICES.every(v=>st().flags[v.flag])'), true);
+  // Les ennemis d'une épreuve sont au niveau du héros.
+  run('take(36);playStep(36)');
+  assert.equal(run('step(36)'), 1);
+  run('{const s=S("q36"),o=s.objs.find(o=>o.k==="wave");P.x=o.x;P.y=o.y;act("q36",o.id);tick(130)}');
+  assert.equal(run('alive(m=>m.questRun==="36_1").length>0&&alive(m=>m.questRun==="36_1").every(m=>m.level===game.hero.level)'), true);
+  // Plus personne debout à côté : la défense est abandonnée, et se retente.
+  run('P.x+=40*TS;tick(2)');
+  assert.equal(run('Q.field().runs().size'), 0);
+  assert.equal(run('alive(m=>m.questRun).length'), 0);
+  run('for(let i=1;i<4;i++)playStep(36)');
+  assert.equal(run('step(36)'), 4, run('__t.slice(-3).join(" | ")'));
+  assert.ok(run('st().flags.heart_q36'));
+  assert.equal(run('give(36)'), true);
+  assert.equal(run('Q.questLook(HR)&8'), 8, 'Écho');
+  for (let id = 37; id <= 46; id++) {
+    run('HR.inventory.length=0');
+    assert.equal(run('play(' + id + ')'), 'ok', 'quête ' + id);
+  }
+  assert.equal(run('Object.keys(st().done).length'), 16);
+  // Un nain sans quête à donner retrouve ses répliques ; le journal a son chapitre Interlude.
+  run('globalThis.__p=[];modernPanel=h=>__p.push(h);Q.render("main")');
+  assert.match(run('__p[0]'), /Interlude — Les Voix d’en bas/);
+  assert.match(run('__p[0]'), /La voix de la mousse/);
+  assert.match(run('__p[0]'), /dernier couplet|que le ciel a perdue/);
+  // Suivi : une quête des Tréfonds suivie depuis l'île mène à l'entrée la plus proche.
+  run('layer(false);P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;delete st().done[39];st().active[39]={step:0,got:[],n:0};st().track=39');
+  assert.equal(run('Q.target(HR).text'), 'Descendre dans les Tréfonds');
+  // Champ libre : les vrais monstres des Tréfonds comptent, un allié proche aussi.
+  run('layer(true);const h=CANAAN_UNDER.hub(0);P.x=h.x;P.y=h.y;globalThis.ally=canaanCreateHero({name:"Lina",x:h.x+40,y:h.y});game.heroes.push(ally);Q.state(ally).active[39]={step:0,got:[],n:0};recordKill({t:"Taupe-garou",x:h.x,y:h.y,hp:0,mhp:10,level:7,r:16},HR)');
+  assert.equal(run('st().active[39].n+Q.state(ally).active[39].n'), 2);
+  assert.equal(run('Q.target(HR).count.join("/")'), '1/6');
+  assert.equal(errors.length, 0, errors.join('\n'));
+});
+
+test('Quêtes à plusieurs : chacun sa progression, une épreuve gagnée ensemble compte pour chacun, demandes d’invité vérifiées', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  run(PLAYER + ';globalThis.n=Q.npcs().liora;P.x=n.x+30;P.y=n.y;globalThis.ally=canaanCreateHero({name:"Lina",x:n.x+40,y:n.y});game.heroes.push(ally)');
   // L'invité demande à l'hôte : quête acceptée seulement près du PNJ, objet seulement à portée.
   assert.equal(run('Q.handle(ally,{op:"quest-accept",q:1})'), true);
   assert.equal(run('Q.handle(ally,{op:"quest-accept",q:1})'), false, 'déjà en cours');
   assert.equal(run('Q.handle(ally,{op:"quest-accept",q:2})'), false, 'quête 2 : la 1 d’abord');
   assert.equal(run('Q.accept(game.hero,1)'), true);
-  assert.equal(run('Q.handle(ally,{op:"quest-act",site:"q1",obj:"p_soleil"})'), false, 'trop loin');
-  // Les deux suivent les traces ; l'allié touche les pierres, l'énigme compte pour les deux.
-  run(
-    'const s=Q.sites().q1;P.x=ally.player.x=(s.x+1.5)*TS;P.y=ally.player.y=(s.y+1.5)*TS;for(let i=0;i<20;i++){time++;CanaanStages.quests.after()}'
-  );
-  assert.equal(run('Q.state(ally).active[1].step+Q.state(game.hero).active[1].step'), 2);
-  for (const s of ['soleil', 'pluie', 'vent', 'lune']) {
-    run('(o=>{ally.player.x=o.x+40;ally.player.y=o.y})(Q.sites().q1.objs.find(o=>o.id==="p_' + s + '"))');
-    assert.equal(run('Q.handle(ally,{op:"quest-act",site:"q1",obj:"p_' + s + '"})'), true, s);
+  run('tp("q1",1,1);ally.player.x=P.x;ally.player.y=P.y;tick(20)');
+  assert.equal(run('Q.state(ally).active[1].step+step(1)'), 2, 'les deux suivent les traces');
+  // Objets personnels : chacun les siens.
+  const ids = JSON.parse(run('JSON.stringify(S("q1").objs.filter(o=>o.k==="pick").map(o=>o.id))'));
+  assert.equal(ids.length, 4);
+  assert.equal(run('ally.player.x+=30*TS,Q.handle(ally,{op:"quest-act",site:"q1",obj:"' + ids[0] + '"})'), false, 'trop loin');
+  for (const id of ids) {
+    run('{const o=S("q1").objs.find(o=>o.id==="' + id + '");P.x=ally.player.x=o.x;P.y=ally.player.y=o.y}');
+    assert.equal(run('Q.handle(ally,{op:"quest-act",site:"q1",obj:"' + id + '"})'), true, id);
+    assert.equal(run('Q.handle(ally,{op:"quest-act",site:"q1",obj:"' + id + '"})'), false, 'une seule fois');
   }
   assert.equal(run('Q.state(ally).active[1].step'), 2);
-  assert.equal(run('Q.state(game.hero).active[1].step'), 2, 'l’hôte, à côté, est crédité');
+  assert.equal(run('step(1)'), 1, 'l’hôte ramasse les siens');
+  run('playStep(1)');
+  // La défense, lancée par l'invité, compte pour les deux ; l'invité en voit l'état.
+  run('{const o=S("q1").objs.find(o=>o.k==="wave");P.x=ally.player.x=o.x;P.y=ally.player.y=o.y}');
+  assert.equal(run('Q.handle(ally,{op:"quest-act",site:"q1",obj:S("q1").objs.find(o=>o.k==="wave").id})'), true);
+  run('tick(110)');
+  assert.ok(run('alive(m=>m.questRun==="1_2").length>=3'), 'un ennemi de plus par allié');
+  const view = run('JSON.stringify(Q.netView())');
+  assert.match(view, /"1_2","wave"/);
+  run('for(let k=0;k<20&&step(1)===2;k++){P.hp=P.mhp;ally.player.hp=ally.player.mhp;tick(130);slay(m=>m.questRun==="1_2")}');
+  assert.equal(run('Q.state(ally).active[1].step+step(1)'), 6, 'gagnée ensemble');
   // Rendue par l'allié seulement : sa récompense et sa Lumi, pas celles de l'hôte.
   run('ally.player.x=n.x+30;ally.player.y=n.y');
   assert.equal(run('Q.handle(ally,{op:"quest-turnin",q:1})'), true);
-  assert.equal(run('!!Q.state(ally).flags.lumi&&!Q.state(game.hero).flags.lumi'), true);
+  assert.equal(run('!!Q.state(ally).flags.lumi&&!st().flags.lumi'), true);
   assert.equal(run('Q.questLook(ally)'), 1);
   // Messages réseau : seules les demandes bien formées passent.
   assert.equal(
-    run('JSON.stringify(sanitizeAction({op:"quest-act",site:"q12",obj:"frame0"}))'),
-    '{"op":"quest-act","site":"q12","obj":"frame0"}'
+    run('JSON.stringify(sanitizeAction({op:"quest-act",site:"q12",obj:"f12_0_3"}))'),
+    '{"op":"quest-act","site":"q12","obj":"f12_0_3"}'
   );
   assert.equal(run('sanitizeAction({op:"quest-act",site:"<x>",obj:"a"})'), null);
-  assert.equal(run('sanitizeAction({op:"quest-accept",q:99})'), null);
+  assert.equal(run('sanitizeAction({op:"quest-accept",q:100})'), null);
+  assert.equal(run('JSON.stringify(sanitizeAction({op:"quest-talk",q:31,x:1}))'), '{"op":"quest-talk","q":31}');
   assert.equal(run('sanitizeAction({op:"quest-choice",q:14,choice:9})'), null);
-  // État des lieux envoyé aux invités, appliqué tel quel.
-  run('Q.puzzles().q7.m=[1,2,3]');
-  const view = run('JSON.stringify(Q.netView())');
-  run('Q.puzzles().q7.m=[0,0,0];Q.applyRemote(' + view + ')');
-  assert.equal(run('Q.puzzles().q7.m.join()'), '1,2,3');
-  // Progression sauvegardée vérifiée : quête inconnue, étape hors limite et drapeau inventé retirés.
+  assert.equal(run('Q.handle(ally,{op:"quest-talk",q:31})'), false, 'pas à cette étape');
+  assert.equal(run('Q.handle(ally,{op:"quest-choice",q:9,choice:1})'), false, 'pas à cette étape');
+  // Vue appliquée chez un invité : épreuve dessinée, vue abîmée ignorée.
+  run('Q.puzzles().q24.m=[1,2,3,0];globalThis.v=JSON.parse(' + JSON.stringify(view) + ');v.s.q24=[1,2,3,0];Q.puzzles().q24.m=[0,0,0,0];Q.applyRemote(v)');
+  assert.equal(run('Q.puzzles().q24.m.join()'), '1,2,3,0');
+  assert.equal(run('Q.field().runs().get("1_2").k'), 'wave');
+  run('Q.applyRemote({s:{f:[["1_2"],[1,2,3],"x",["9_9","wave",1,2,3,4,5,6]]}})');
+  assert.equal(run('Q.field().runs().size'), 0);
+  // Progression sauvegardée vérifiée : quête inconnue, étape hors limite et drapeau inventé retirés ; une quête en cours
+  // d'avant la refonte reprend à sa première étape.
   assert.equal(
     run(
-      'JSON.stringify(sanitizeQuests({active:{1:{step:99},77:{step:0}},done:{2:5},flags:{lumi:1,triche:1},deco:["mouton","x"]}))'
+      'JSON.stringify(sanitizeQuests({v:2,active:{1:{step:99,n:7},77:{step:0}},done:{2:5},flags:{lumi:1,triche:1},deco:["mouton","x"]}))'
     ),
     JSON.stringify({
-      active: { 1: { step: 2, got: [] } },
+      active: { 1: { step: 3, got: [], n: 7 } },
       done: { 2: 5 },
       flags: { lumi: true },
       choices: {},
       track: null,
       troc: 0,
       shells: [],
-      paid: 0
-    }),
-    'les anciennes décorations disparaissent'
+      paid: 0,
+      v: 2
+    })
+  );
+  assert.equal(
+    run('JSON.stringify(sanitizeQuests({active:{7:{step:2,got:["a"]}},done:{6:1}}).active)'),
+    '{"7":{"step":0,"got":[],"n":0}}',
+    'ancienne aventure'
   );
   assert.equal(
     run(
-      'JSON.stringify(sanitizeQuests({troc:99,shells:["c_q1","c_q1","x"],paid:-3,flags:{heart_q2:1,heart_q99:1}}))'
+      'JSON.stringify(sanitizeQuests({v:2,troc:99,shells:["c_q1","c_q1","x"],paid:-3,flags:{heart_q2:1,heart_q36:1,heart_q99:1}}))'
     ),
     JSON.stringify({
       active: {},
       done: {},
-      flags: { heart_q2: true },
+      flags: { heart_q2: true, heart_q36: true },
       choices: {},
       track: null,
       troc: 13,
       shells: ['c_q1'],
-      paid: 0
+      paid: 0,
+      v: 2
     }),
     'troc, coquillages et cœurs vérifiés'
   );
   assert.equal(errors.length, 0, errors.join('\n'));
 });
 
-test('Quêtes : les chapitres IV à VI (quêtes 16 à 30) se jouent de bout en bout, jusqu’au réveil du Cœur', () => {
-  const { g, run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+test('Objectifs de terrain : course au chronomètre, fuyard qui court, escorte perdue, butin de quête, dessin sans erreur', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
   assert.equal(errors.length, 0, errors.join('\n'));
-  run(`started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__t=[];toast=m=>__t.push(m);game.view.notify=m=>__t.push(m);
- globalThis.Q=CANAAN_QUESTS;globalThis.HR=game.hero;globalThis.S=id=>Q.sites()[id];game.hero.level=60;
- for(let i=1;i<=15;i++)Q.state(HR).done[i]=1;Object.assign(Q.state(HR).flags,{star1:true,star2:true,lumi:true});
- globalThis.tp=(site,dx,dy)=>{const s=S(site);P.x=(s.x+dx+0.5)*TS;P.y=(s.y+dy+0.5)*TS};
- globalThis.toNpc=id=>{const n=Q.npcs()[id];P.x=n.x+30;P.y=n.y};
- globalThis.act=(site,obj,n=1)=>{for(let i=0;i<n;i++)Q.act(HR,site,obj)};
- globalThis.tick=n=>{for(let i=0;i<n;i++){time++;CanaanStages.quests.after()}};
- globalThis.st=()=>Q.state(HR);globalThis.step=id=>st().active[id]?st().active[id].step:(st().done[id]?'done':'none');
- globalThis.npcOf=id=>Object.keys(Q.npcs()).find(k=>Q.npcs()[k].quest?.id===id);
- globalThis.slay=site=>{tp(site,0,1);Q.act(HR,site,'gseal');const m=game.world.monsters.find(m=>m.questGuardian===site);if(!m)return false;m.hp=0;tick(1);return true};
- globalThis.take=id=>{toNpc(npcOf(id));return Q.accept(HR,id)};
- globalThis.give=id=>{toNpc(npcOf(id));return Q.turnIn(HR,id)};`);
-  const check = id => {
-    assert.equal(run('give(' + id + ')'), true, 'turn in ' + id);
-    assert.equal(run('step(' + id + ')'), 'done');
+  run(PLAYER + ';game.hero.level=40;recomputeStats();');
+  const jump = (id, k) => {
+    run('st().done={};st().active={};for(let i=1;i<=46;i++)if(i!==' + id + ')st().done[i]=1;take(' + id + ')');
+    run('st().active[' + id + '].step=QUESTS.find(q=>q.id===' + id + ').steps.findIndex(s=>s.k==="' + k + '")');
   };
-  // 16 : feuilles puis objets dans leurs maisons.
-  run('take(16);for(const f of ["f1","f2","f3","f4"])act("q16",f)');
-  assert.equal(run('step(16)'), 1);
-  run('for(let i=0;i<4;i++){act("q16","vobj"+i);act("q16","house"+i)}');
-  assert.equal(run('step(16)'), 2);
-  check(16);
-  assert.ok(run('Q.world().flags.sanct_saisons&&st().flags.star3'));
-  // 17
-  run(
-    'take(17);for(const f of ["fr1","fr2","fr3","fr4"])act("q17",f);act("q17","pillar0",3);act("q17","pillar2",1);act("q17","pillar3",2)'
-  );
-  assert.equal(run('step(17)'), 2);
-  run('slay("q17")');
-  assert.equal(run('step(17)'), 3);
-  check(17);
-  // 18 : la feuille doit être basse et sur le héros.
-  run('take(18)');
-  run(
-    'globalThis.leafPos=()=>{const s=S("q18");const t=Q.puzzles().q18.t;return {x:(s.x+0.5)*TS+Math.cos(t*0.011)*3.2*TS+Math.sin(t*0.031)*0.6*TS,y:(s.y+0.5)*TS+Math.sin(t*0.017)*2.4*TS,h:(Math.sin(t*0.045)+1)/2}}'
-  );
-  for (let k = 0; k < 400; k++) {
-    const h = run('(l=>{P.x=l.x;P.y=l.y;return l.h})(leafPos())');
-    if (h < 0.3) {
-      run('act("q18","leaf18")');
-      break;
-    }
-    run('tick(1)');
-  }
-  assert.equal(run('step(18)'), 1, 'feuille attrapée');
-  check(18);
-  // 19
-  run('take(19);act("q19","gear0",2);act("q19","gear1",1);act("q19","gear2",2)');
-  assert.equal(run('step(19)'), 1);
-  check(19);
-  // 20
-  run('take(20);for(const t of ["t1","t2","t3"])act("q20",t);act("q20","hide0")');
-  assert.equal(run('step(20)'), 1, 'mauvaise cachette');
-  run('act("q20","hide1")');
-  assert.equal(run('step(20)'), 2);
-  check(20);
-  // 21 : obélisques dégagés puis tournés (initial [2,0,1] → [1,3,0]).
-  run('take(21);for(let i=0;i<3;i++)act("q21","obelisk"+i)');
-  assert.equal(run('step(21)'), 1);
-  run('act("q21","obelisk0",3);act("q21","obelisk1",3);act("q21","obelisk2",3)');
-  assert.equal(run('step(21)'), 2);
-  check(21);
-  // 22 : anneaux [3,1,4] ; ring2 seul, ring0 entraîne ring1, ring1 entraîne ring2.
-  run('take(22)');
-  run(
-    '(()=>{const r=Q.puzzles().q22.r;let a=(6-r[0])%6;act("q22","ring0",a);let b=(6-Q.puzzles().q22.r[1])%6;act("q22","ring1",b);let c=(6-Q.puzzles().q22.r[2])%6;act("q22","ring2",c)})()'
-  );
-  assert.equal(run('step(22)'), 1);
-  run('slay("q22")');
-  assert.equal(run('step(22)'), 2);
-  check(22);
-  // 23 : E, S, E, S.
-  run('take(23);act("q23","fanW");act("q23","fanN");act("q23","fanW");act("q23","fanN")');
-  assert.equal(run('step(23)'), 1);
-  check(23);
-  // 24 : [2,2,2,1] → [0,0,0,*].
-  run('take(24);act("q24","mirror0",2);act("q24","mirror1",2);act("q24","mirror2",2)');
-  assert.equal(run('step(24)'), 1);
-  check(24);
-  // 25
-  run('take(25);act("q25","agate0");act("q25","agate2")');
-  assert.equal(run('step(25)'), 1);
-  check(25);
-  // 26 : épreuves puis autel.
-  run(
-    'take(26);for(const [i,a] of [[0,1],[1,1],[2,0],[3,2]]){const o=S("q26").objs.find(o=>o.id==="trial"+i);P.x=o.x+40;P.y=o.y;Q.handle(HR,{op:"quest-act",site:"q26",obj:"trial"+i+"_a"+a})}'
-  );
-  assert.equal(run('step(26)'), 1);
-  run('act("q26","altar")');
-  assert.equal(run('step(26)'), 2);
-  check(26);
-  // 27 : fresque, défense (on tue les échos), lumières.
-  run('take(27);act("q27","fresco27");act("q27","altar27")');
-  assert.equal(run('step(27)'), 1);
-  for (let k = 0; k < 20 && run('step(27)') === 1; k++) {
-    run(
-      'tp("q27",0,2);tick(130);game.world.monsters.filter(m=>m.questEcho).forEach(m=>{m.hp=0});game.world.monsters=game.world.monsters.filter(m=>m.hp>0)'
-    );
-  }
-  assert.equal(run('step(27)'), 2, 'défense réussie');
-  run('slay("q27")');
-  assert.equal(run('step(27)'), 3, 'l’Ombre vaincue');
-  run('for(let i=0;i<6;i++)act("q27","cc"+i)');
-  assert.equal(run('step(27)'), 4);
-  check(27);
-  assert.ok(run('st().flags.title&&st().flags.aurora&&st().flags.star6'));
-  // 28 : leviers 1 et 2, puis marcher jusqu'au coffre.
-  run('take(28);act("q28","lever1");act("q28","lever2")');
-  assert.equal(
-    run('(s=>canWalk((s.x+5.5)*TS,(s.y+0.5)*TS))(S("q28"))'),
-    true,
-    'passage ouvert de l’autre côté du miroir'
-  );
-  run('tp("q28",5,0);tick(5)');
-  assert.equal(run('step(28)'), 1);
-  check(28);
-  // 29
-  run('take(29);act("q29","horn")');
-  assert.equal(run('step(29)'), 0);
-  run(
-    'act("q29","perch0",2);act("q29","perch1",1);act("q29","perch2",3);act("q29","perch3",2);act("q29","horn");tick(300)'
-  );
-  assert.equal(run('step(29)'), 1);
-  check(29);
-  // 30 : marcher sur les pierres dans l'ordre.
-  run('take(30)');
-  for (const [x, y] of [
-    [-2, -1],
-    [0, -2],
-    [1, 0],
-    [0, 1],
-    [2, 1]
-  ]) {
-    run(`tp("q30",${x},${y});tick(1)`);
-  }
-  assert.equal(run('step(30)'), 1);
-  run('HR.inventory.length=0');
-  const inv = run('HR.inventory.length');
-  check(30);
-  assert.equal(run('HR.inventory.length'), inv + 1);
-  assert.equal(run('Object.keys(st().done).length'), 30);
-
-  // Titre, aura visible par les autres, sanctuaires ouverts pour tout le monde, journal complet.
-  assert.equal(run('CANAAN_QUESTS.questLook(HR)'), 5, 'Lumi et l’aura du Gardien');
-  assert.ok(
-    run('["sanct_saisons","sanct_etoiles","sanct_lumieres","sanct_aurore"].every(f=>Q.world().flags[f])')
-  );
-  run('globalThis.__p=[];modernPanel=h=>__p.push(h);CANAAN_QUESTS.render("main")');
-  assert.match(run('__p[0]'), /★★★★★★/);
+  // Course : hors temps, elle repart du départ.
+  jump(18, 'race');
+  run('{const go=S("q18").objs.find(o=>o.race==="go");P.x=go.x;P.y=go.y;act("q18",go.id)}');
+  assert.ok(run('st().active[18].n') > 5);
+  run('{const o=S("q18").objs.find(o=>o.race===0);P.x=o.x;P.y=o.y;tick(1)}');
+  assert.equal(run('st().active[18].got.length'), 1);
+  run('tick(60*60)');
+  assert.equal(run('st().active[18].got.length+st().active[18].n'), 0, 'temps écoulé');
+  // Fuyard : il s'éloigne du héros, plus lentement que lui, et reste dans son domaine.
+  jump(3, 'chase');
+  run('globalThis.sheep=S("q3").objs.find(o=>o.k==="chase");P.x=sheep.x-60;P.y=sheep.y;tick(1);globalThis.x0=sheep.x;globalThis.d0=Math.hypot(sheep.x-P.x,sheep.y-P.y);tick(30)');
+  assert.ok(run('Math.hypot(sheep.x-P.x,sheep.y-P.y)>d0'), 'il fuit');
+  assert.ok(run('Math.hypot(sheep.x-P.x,sheep.y-P.y)-d0') < 30 * run('CANAAN_PLAYER_SPEED'), 'moins vite que le héros');
+  run('for(let i=0;i<900;i++){P.x+=(sheep.x-P.x)*0.02;P.y+=(sheep.y-P.y)*0.02;tick(1)}');
+  assert.ok(run('Math.hypot(sheep.x-S("q3").x*TS,sheep.y-S("q3").y*TS)<13*TS'), 'il ne quitte pas la colline');
+  // Escorte : abandonnée, elle se retente ; l'embuscade attend le milieu du chemin.
+  jump(25, 'escort');
+  run('{const o=S("q25").objs.find(o=>o.k==="escort");P.x=o.x;P.y=o.y;act("q25",o.id);tick(1)}');
+  assert.equal(run('Q.field().runs().size'), 1);
+  run('P.x+=60*TS;tick(2)');
+  assert.equal(run('Q.field().runs().size'), 0);
+  assert.equal(run('step(25)'), 2);
+  // Butin : seulement les bonnes créatures, jamais plus de quelques coups sans rien.
+  jump(7, 'loot');
+  run('for(let i=0;i<30;i++)canaanAchieve(HR,"kill",{t:"Slime",x:P.x,y:P.y,hp:0})');
+  assert.equal(run('st().active[7].n'), 0);
+  run('for(let i=0;i<24;i++)canaanAchieve(HR,"kill",{t:"Gobelin",x:P.x,y:P.y,hp:0})');
+  assert.equal(run('step(7)'), 1, 'six fioles en 24 gobelins au plus');
+  // Chaque lieu se dessine à chaque étape, sur sa couche, sans erreur.
+  run(`for(const q of QUESTS)for(let i=0;i<=q.steps.length;i++){st().active={[q.id]:{step:i,got:[],n:1}};st().track=q.id;const s=S(q.steps[i]?.site||q.site);layer(!!s.under);
+   for(const o of s.objs.filter(o=>o.kind==='field'&&o.step===i&&o.quest===q)){P.x=o.x;P.y=o.y;camX=P.x-W/2;camY=P.y-H/2;CANAAN_QUESTS.drawWorld(ctx)}
+   P.x=(s.x+.5)*TS;P.y=(s.y+.5)*TS;camX=P.x-W/2;camY=P.y-H/2;time++;CANAAN_QUESTS.drawWorld(ctx);CANAAN_QUESTS.drawBubbles(ctx);CanaanStages.drawQuests();const t=Q.target(HR);if(!t||!Number.isFinite(t.x)||!t.text)throw new Error('objectif '+q.id+' étape '+i)}`);
+  // Les personnages parlent tous, à chaque moment de leur quête.
+  run(`globalThis.__p=[];modernPanel=h=>__p.push(h);for(const n of Object.values(Q.npcs())){if(!n.quest||n.def.when)continue;const q=n.quest;
+   for(const s of [{},{active:{[q.id]:{step:0,got:[],n:0}}},{active:{[q.id]:{step:q.steps.length,got:[],n:0}}},{done:{[q.id]:1}}]){Object.assign(st(),{active:{},done:{}},s);toNpc(n.id);Q.interact()}}`);
+  assert.doesNotMatch(run('__p.join()'), /undefined|null|NaN/);
   assert.equal(errors.length, 0, errors.join('\n'));
 });
 
@@ -413,7 +350,7 @@ test('Aventure : grand troc, coquillages chantants, gardiens de l’Ombre et Cœ
   // Coquillages : un par lieu, chacun pour soi ; un deuxième ramassage ne compte pas.
   assert.equal(run('Object.values(Q.sites()).filter(s=>s.objs.some(o=>o.kind==="shell")).length'), 30);
   run(
-    'for(const s of Object.values(Q.sites())){const o=s.objs.find(o=>o.kind==="shell");P.x=o.x;P.y=o.y;Q.act(HR,s.id,"shell")}'
+    'for(const s of Object.values(Q.sites())){const o=s.objs.find(o=>o.kind==="shell");if(!o)continue;P.x=o.x;P.y=o.y;Q.act(HR,s.id,"shell")}'
   );
   assert.equal(run('st().shells.length'), 30);
   run('Q.act(HR,"q1","shell")');
@@ -479,18 +416,11 @@ test('Règles partagées des énigmes : chaque état résolu mène à la solutio
   const path = require('node:path'),
     { pathToFileURL } = require('node:url');
   const shared = f => import(pathToFileURL(path.join(__dirname, '..', 'src', 'canaan', 'shared', f)).href);
-  const D = await shared('data/puzzles.js'),
-    R = await shared('rules/puzzles.js');
+  const R = await shared('rules/puzzles.js');
   const fresh = R.puzzleFreshStates(),
     solved = id => R.puzzleSolvedState(id);
-  assert.notEqual(fresh.q23.b, D.PUZZLE_BASIN.start, 'état de départ copié, pas partagé');
+  assert.notEqual(fresh.q24.m, R.puzzleFreshStates().q24.m, 'état de départ copié, pas partagé');
   assert.equal(R.puzzleSolvedState('inconnu'), null);
-  // Aqueduc : la réponse remplit le bassin, l'état de départ fuit.
-  assert.equal(R.puzzleAqueduct(D.PUZZLE_ANSWER.q25).at(-1), 'basin');
-  assert.notEqual(R.puzzleAqueduct(fresh.q25.g).at(-1), 'basin');
-  // Lanternes : toutes allumées une fois résolu.
-  assert.ok(R.puzzleLanterns(solved('q11').v).every(Boolean));
-  assert.ok(!R.puzzleLanterns(fresh.q11.v).every(Boolean));
   // Rayon : la cible est atteinte avec les miroirs résolus (positions réelles des miroirs ci-dessous non requises : le moteur est générique).
   const mirrors = [
     { dx: -1, dy: -2, i: 0 },
@@ -507,39 +437,9 @@ test('Règles partagées des énigmes : chaque état résolu mène à la solutio
     true,
     'rayon droit'
   );
-  // Bassin : le bateau glisse jusqu'au bord ou au rocher, jamais à travers.
-  const [x0, y0] = D.PUZZLE_BASIN.start,
-    end = R.puzzleBasinSlide([x0, y0], [1, 0]);
-  assert.ok(
-    end[0] > x0 &&
-      end[0] <= D.PUZZLE_BASIN.x1 &&
-      !D.PUZZLE_BASIN.rocks.some(([rx, ry]) => rx === end[0] && ry === end[1])
-  );
-  // Le quai est atteignable depuis le départ (recherche en largeur sur les glissements).
-  const seen = new Set([String(D.PUZZLE_BASIN.start)]),
-    queue = [D.PUZZLE_BASIN.start];
-  while (queue.length) {
-    const p = queue.shift();
-    for (const d of [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1]
-    ]) {
-      const q = R.puzzleBasinSlide(p, d);
-      if (!seen.has(String(q))) {
-        seen.add(String(q));
-        queue.push(q);
-      }
-    }
-  }
-  assert.ok(seen.has(String(D.PUZZLE_BASIN.dock)), 'quai atteignable');
   // Monde à l'envers : les leviers résolus changent les rochers ; aucun levier : tous les rochers.
   assert.equal(R.puzzleMirrorRocks([0, 0, 0]).size, R.PUZZLE_MIRROR_ROCKS.length);
   assert.notDeepEqual([...R.puzzleMirrorRocks(solved('q28').l)], [...R.puzzleMirrorRocks([0, 0, 0])]);
-  // Mouton : un seul chemin mène au sommet.
-  const tops = [0, 1].flatMap(a => [0, 1].flatMap(b => [0, 1].map(c => R.puzzleSheepPath([a, b, c]).top)));
-  assert.equal(tops.filter(Boolean).length, 1);
   // Générateur à graine : reproductible, dans [0, 1[.
   const a = R.seededRandom(4242),
     b = R.seededRandom(4242);

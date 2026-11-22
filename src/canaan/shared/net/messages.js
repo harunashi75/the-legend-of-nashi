@@ -187,8 +187,8 @@ export function sanitizeAction(raw) {
   if (r.op === 'class-special') return { op: r.op };
   // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
   const questId = /** @param {unknown} v */ v =>
-    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 30 ? v : null;
-  if (r.op === 'quest-accept' || r.op === 'quest-turnin' || r.op === 'quest-track')
+    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 99 ? v : null;
+  if (['quest-accept', 'quest-turnin', 'quest-track', 'quest-talk'].includes(r.op))
     return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
   if (r.op === 'quest-choice')
     return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7
@@ -368,7 +368,7 @@ export function heroSnapshot(id, hero) {
     shield: p.shielded ? 1 : 0
   };
 }
-const MONSTER_LOOK = ['look', 'pal', 'scale', 'mobColor', 'lookOpts'];
+const MONSTER_LOOK = ['look', 'pal', 'scale', 'mobColor', 'lookOpts', 'title'];
 /**
  * @param {any} m monstre du jeu (game.world.monsters)
  * @returns {Record<string, any>}

@@ -1,10 +1,9 @@
 // @ts-check
-// Règles des énigmes des quêtes : état de départ et état résolu de chaque énigme, rochers du monde à l'envers,
-// glissement du bateau dans le bassin, chemin de l'eau de l'aqueduc, lanternes du marais, trajet du mouton, rayon
-// des miroirs et générateur aléatoire à graine (placement fixe des lieux).
+// Règles des énigmes des quêtes : état de départ et état résolu de chaque énigme, rochers du monde à l'envers, rayon des
+// miroirs et générateur aléatoire à graine (placement fixe des lieux).
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches. L'hôte
 // s'en sert pour vérifier les actions des invités ; scripts/quests.js garde les lieux, les objets et le dessin.
-import { PUZZLE_ANSWER, PUZZLE_BASIN, PUZZLE_CONSTELLATION, PUZZLE_MIRROR_LEVERS } from '../data/puzzles.js';
+import { PUZZLE_CONSTELLATION, PUZZLE_MIRROR_LEVERS } from '../data/puzzles.js';
 
 /** @typedef {[number, number]} Cell case relative au lieu de la quête */
 
@@ -14,55 +13,26 @@ import { PUZZLE_ANSWER, PUZZLE_BASIN, PUZZLE_CONSTELLATION, PUZZLE_MIRROR_LEVERS
  */
 export function puzzleFreshStates() {
   return {
-    q1: { seq: [] },
-    q2: { p: [1, 2, 0] },
-    q3: { g: [1, 1, 0], run: null, top: false },
     q5: { gold: -1, until: 0, next: 0 },
     q6: { seq: [] },
-    q7: { m: [0, 0, 0] },
-    q11: { v: [0, 0, 0] },
-    q12: { f: [3, 4, 0, 2] },
-    q13: { pl: [3, 3, 3, 3] },
     q15: { pads: [] },
-    q16: { pos: [-1, -1, -1, -1], hold: {} },
-    q17: { p: [0, 0, 0, 0] },
     q18: { t: 0 },
-    q19: { g: [0, 0, 0] },
-    q21: { o: [2, 0, 1] },
-    q22: { r: [3, 1, 4] },
-    q23: { b: [...PUZZLE_BASIN.start] },
     q24: { m: [2, 2, 2, 1] },
-    q25: { g: [0, 0, 0] },
     q27: { on: false, wave: 0, hp: [100, 100, 100, 100, 100, 100], next: 0 },
     q28: { l: [0, 0, 0] },
-    q29: { h: [2, 0, 3, 1], fly: null },
     q30: { seq: 0, last: {} }
   };
 }
 
 /** @type {Record<string, () => Record<string, any>>} */
 const SOLVED = {
-  q2: () => ({ p: [0, 1, 2] }),
-  q3: () => ({ g: [0, 0, 1], run: null, top: true }),
-  q7: () => ({ m: [2, 2, 0] }),
-  q11: () => ({ v: [2, 0, 1] }),
-  q12: () => ({ f: [0, 1, 2, 3] }),
-  q13: () => ({ pl: [1, 0, 2, 1] }),
-  q16: () => ({ pos: [0, 1, 2, 3], hold: {} }),
-  q17: () => ({ p: [...PUZZLE_ANSWER.q17] }),
-  q19: () => ({ g: [...PUZZLE_ANSWER.q19] }),
-  q21: () => ({ o: [...PUZZLE_ANSWER.q21] }),
-  q22: () => ({ r: [0, 0, 0] }),
-  q23: () => ({ b: [...PUZZLE_BASIN.dock] }),
   q24: () => ({ m: [0, 0, 0, 1] }),
-  q25: () => ({ g: [...PUZZLE_ANSWER.q25] }),
   q28: () => ({ l: [0, 1, 1] }),
-  q29: () => ({ h: [...PUZZLE_ANSWER.q29], fly: null }),
   q30: () => ({ seq: PUZZLE_CONSTELLATION.length })
 };
 /**
  * État d'une énigme résolue (un lieu déjà résolu dans le monde se montre ainsi), ou null si elle n'en a pas.
- * @param {string} id lieu de quête (q2, q7…)
+ * @param {string} id lieu de quête (q24, q28…)
  * @returns {Record<string, any> | null}
  */
 export function puzzleSolvedState(id) {
@@ -104,77 +74,7 @@ export function puzzleMirrorRocks(levers) {
 }
 
 /**
- * Bateau poussé dans le bassin (quête 23) : il glisse jusqu'à un bord ou un rocher.
- * @param {readonly number[]} pos position [x, y]
- * @param {readonly number[]} dir direction [dx, dy]
- * @returns {Cell}
- */
-export function puzzleBasinSlide(pos, dir) {
-  let [x, y] = pos;
-  const [dx, dy] = dir;
-  for (let n = 0; n < 8; n++) {
-    const nx = x + dx,
-      ny = y + dy;
-    if (
-      nx < PUZZLE_BASIN.x0 ||
-      nx > PUZZLE_BASIN.x1 ||
-      ny < PUZZLE_BASIN.y0 ||
-      ny > PUZZLE_BASIN.y1 ||
-      PUZZLE_BASIN.rocks.some(([rx, ry]) => rx === nx && ry === ny)
-    )
-      break;
-    x = nx;
-    y = ny;
-  }
-  return [x, y];
-}
-
-/**
- * Chemin de l'eau de l'aqueduc (quête 25) selon les trois portes : il finit dans le bassin ou par une fuite.
- * @param {ReadonlyArray<unknown>} gates
- * @returns {string[]} étapes (src, a, b, c, puis basin ou leakA / leakB / leakC)
- */
-export function puzzleAqueduct(gates) {
-  const path = ['src', 'a'];
-  if (!gates[0]) return [...path, 'leakA'];
-  path.push('b');
-  if (gates[1]) return [...path, 'leakB'];
-  path.push('c');
-  return gates[2] ? [...path, 'basin'] : [...path, 'leakC'];
-}
-
-/**
- * Lanternes du marais (quête 11) allumées selon les trois vannes (0 à 2).
- * @param {readonly number[]} valves
- * @returns {boolean[]}
- */
-export function puzzleLanterns(valves) {
-  return [
-    valves[0] === 2,
-    (valves[0] + valves[1]) % 3 === 2,
-    (valves[1] + valves[2]) % 3 === 1,
-    (valves[2] * 2 + valves[0]) % 3 === 1
-  ];
-}
-
-/**
- * Trajet du mouton de Milo (quête 3) : il suit le chemin ouvert à chaque carrefour.
- * @param {ReadonlyArray<unknown>} gates
- * @returns {{ nodes: string[], top: boolean }} carrefours traversés, et s'il atteint le sommet
- */
-export function puzzleSheepPath(gates) {
-  const nodes = ['pen', 'j1'];
-  if (gates[0]) nodes.push('d1');
-  else {
-    nodes.push('j2');
-    if (gates[1]) nodes.push('d2');
-    else if (gates[2]) nodes.push('t1', 'top');
-  }
-  return { nodes, top: nodes.at(-1) === 'top' };
-}
-
-/**
- * Rayon de lumière renvoyé par les miroirs (quêtes 7 et 24) : il part de la pierre solaire et tourne sur chaque
+ * Rayon de lumière renvoyé par les miroirs (quête 24) : il part de la pierre solaire et tourne sur chaque
  * miroir selon son orientation (0 et 2 : renvoi ; 1 et 3 : bloqué) jusqu'à la cible ou au bord.
  * @param {{ sun: readonly number[], dir: readonly number[], target: readonly number[], bound: readonly number[] }} cfg
  * @param {ReadonlyArray<{ dx: number, dy: number, i: number }>} mirrors miroirs du lieu

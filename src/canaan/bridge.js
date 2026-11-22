@@ -16,6 +16,7 @@ import * as itemRules from './shared/rules/items.js';
 import * as economyRules from './shared/rules/economy.js';
 import * as classRules from './shared/rules/classes.js';
 import * as quests from './shared/data/quests.js';
+import * as interlude from './shared/data/quests-interlude.js';
 import * as questRules from './shared/rules/quests.js';
 import * as saveSchema from './shared/save/schema.js';
 import * as combatRules from './shared/rules/combat.js';
@@ -59,6 +60,7 @@ Object.assign(
   economyRules,
   classRules,
   quests,
+  interlude,
   questRules,
   saveSchema,
   combatRules,

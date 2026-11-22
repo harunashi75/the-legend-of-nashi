@@ -311,7 +311,7 @@ test('Les Tréfonds : monde souterrain sous l’île, quatre biomes, forteresse 
  run('{const n=game.world.npcs.find(n=>n.type==="shop"&&n.dwarf);P.x=n.x;P.y=n.y+40}');assert.equal(run('nearMerchant()'),true);
  run('{const n=game.world.npcs.find(n=>n.type==="bank"&&n.dwarf);P.x=n.x;P.y=n.y+40}');assert.equal(run('CANAAN_BANK.nearBanker()'),true);
  run('{const f=CANAAN_GATHER.forgeSpot();P.x=f.x;P.y=f.y}');assert.equal(run('CANAAN_GATHER.nearForge(game.hero)'),true);
- run('{const d=game.world.npcs.find(n=>n.type==="dwarf"&&n.dwarf.role==="roi");P.x=d.x;P.y=d.y+40;closePanels();interact();globalThis.__king=d}');assert.match(run('__king.dwarf.bubble.text'),/Durgrim/);
+ run('{const d=game.world.npcs.find(n=>n.type==="dwarf"&&n.dwarf.role==="roi");P.x=d.x;P.y=d.y+40;closePanels();globalThis.__king=d;globalThis.__q=[];const mp=modernPanel;modernPanel=h=>__q.push(h);interact();modernPanel=mp;game.hero.quetes.done[31]=1;interact()}');assert.match(run('__q[0]'),/La pierre qui chante/,'le roi a une quête');assert.match(run('__king.dwarf.bubble.text'),/Durgrim/);
  // Gisement des Tréfonds : minerai rare, qui se vend plus cher.
  const node=run('CANAAN_GATHER.nodes().findIndex(n=>n.layer==="under"&&n.kind==="ore"&&CANAAN_GATHER.ORES[n.id].rare)');assert.ok(node>=0);
  run('{const n=CANAAN_GATHER.nodes()['+node+'];P.x=n.x;P.y=n.y+30;game.hero.inventory=[];CANAAN_GATHER.gather(game.hero,'+node+')}');

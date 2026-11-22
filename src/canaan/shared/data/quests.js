@@ -1,19 +1,64 @@
 // @ts-check
-// Histoire « Les Échos de l'Aurore » : six chapitres (un par zone), 30 quêtes (12 principales, 18 secondaires).
+// Histoire « Les Échos de l'Aurore » : six chapitres (un par zone), 30 quêtes (12 principales, 18 secondaires), puis
+// l'Interlude des Tréfonds (quests-interlude.js, 16 quêtes à tout niveau).
 // Chaque quête : PNJ, lieu (site), objectifs (chacun avec sa mécanique), dialogues évolutifs et récompense.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
+import { INTERLUDE_NPCS, INTERLUDE_QUESTS, INTERLUDE_SITES } from './quests-interlude.js';
 
 export const STORY_TITLE = 'Les Échos de l’Aurore';
 export const STORY_INTRO =
-  'Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île. Un jour, les anciens ont dispersé son énergie pour la sauver. Des siècles plus tard, une petite lumière tombe près du Camp de l’Aurore…';
+  'Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île. Un jour, les anciens ont dispersé son énergie pour la sauver. Des siècles plus tard, une petite lumière tombe près du Camp de l’Aurore… et une femme voilée se met en route pour l’éteindre.';
+// under : chapitre des Tréfonds, à côté de l'histoire de la surface, au niveau du héros. intro : en tête du journal.
 export const CHAPTERS = deepFreeze([
-  { n: 'I', title: 'La Première Étincelle', zone: 0, levels: [1, 10] },
-  { n: 'II', title: 'La Forêt qui chante', zone: 1, levels: [10, 20] },
-  { n: 'III', title: 'Les Lanternes du Marais', zone: 2, levels: [20, 30] },
-  { n: 'IV', title: 'Les Couleurs du Passé', zone: 3, levels: [30, 40] },
-  { n: 'V', title: 'La Cité des Étoiles', zone: 4, levels: [40, 50] },
-  { n: 'VI', title: 'Le Réveil de l’Aurore', zone: 5, levels: [50, 60] }
+  {
+    n: 'I',
+    title: 'La Première Étincelle',
+    zone: 0,
+    levels: [1, 10],
+    intro: 'Une étoile tombe, une carte se déchire, et quelqu’un siffle les loups dans la nuit.'
+  },
+  {
+    n: 'II',
+    title: 'La Forêt qui chante',
+    zone: 1,
+    levels: [10, 20],
+    intro: 'La forêt se remet à chanter. On la saigne pour la faire taire.'
+  },
+  {
+    n: 'III',
+    title: 'Les Lanternes du Marais',
+    zone: 2,
+    levels: [20, 30],
+    intro: 'Les lumières s’éteignent une à une, et les miroirs brisés livrent un nom : Vesper.'
+  },
+  {
+    n: 'IV',
+    title: 'Les Couleurs du Passé',
+    zone: 3,
+    levels: [30, 40],
+    intro: 'La Confrérie du Voile pille les souvenirs. Les saisons, elles, n’ont rien oublié.'
+  },
+  {
+    n: 'V',
+    title: 'La Cité des Étoiles',
+    zone: 4,
+    levels: [40, 50],
+    intro: 'Sous le sable, une machine attend. Derrière un pilier, une femme écoute.'
+  },
+  {
+    n: 'VI',
+    title: 'Le Réveil de l’Aurore',
+    zone: 5,
+    levels: [50, 60],
+    intro: 'Un frère garde le Cœur, une sœur vient l’éteindre. Lumi se souvient enfin.'
+  },
+  {
+    n: 'Interlude',
+    title: 'Les Voix d’en bas',
+    under: true,
+    intro: 'Sous l’île, la pierre chante depuis que l’étoile est tombée. Durgrim ne dort plus.'
+  }
 ]);
 // Les six sanctuaires de la carte d'Orven ; ils se rallument au fil de l'histoire (étoiles retrouvées).
 export const SANCTUARIES = deepFreeze([
@@ -97,7 +142,8 @@ export const QUEST_SITES = deepFreeze({
   q27: { zone: 5, polar: [112, 122], r: 7 },
   q28: { zone: 5, polar: [88, 112], r: 7 },
   q29: { zone: 5, polar: [124, 136], r: 6 },
-  q30: { zone: 5, polar: [96, 86], r: 6 }
+  q30: { zone: 5, polar: [96, 86], r: 6 },
+  ...INTERLUDE_SITES
 });
 // PNJ des quêtes : nom, lieu, position par rapport au lieu (en cases), apparence (looks.js) et répliques libres.
 export const QUEST_NPCS = deepFreeze({
@@ -282,6 +328,19 @@ export const QUEST_NPCS = deepFreeze({
     at: [-5, 3],
     look: { sex: 'f', race: 'elfe', hair: '#c8e0ff', outfit: 'glace' }
   },
+  // Sœur d'Auralis : visible seulement quand on décide de son sort (quête 27).
+  vesper: {
+    name: 'Vesper',
+    site: 'q27',
+    at: [3, 5],
+    when: { quest: 27, step: 3 },
+    ghost: true,
+    look: { sex: 'f', race: 'elfe', hair: '#2a1a3e', outfit: 'nuit' },
+    tool: 'staff'
+  },
+  // Garde de Durgrim, sans quête : il goûte la bière de Dorn (quête 40).
+  dwalin: { name: 'Garde Dwalin', site: 'q40', dwarfName: 'Garde Dwalin' },
+  ...INTERLUDE_NPCS,
   // Collectionneuse des coquillages chantants (sans quête) : au camp, elle récompense chaque palier.
   nacre: {
     name: 'Madame Nacre',
@@ -292,10 +351,17 @@ export const QUEST_NPCS = deepFreeze({
     tool: 'basket'
   }
 });
-// Objectifs : k = mécanique (trail : suivre des traces ; puzzle : énigme partagée du lieu ; collect : objets cachés ;
-// spot : point précis puis E ; timing : E au bon moment ; reach : atteindre un point ; clues : indices à réunir ;
-// choice : réponse à donner ; guardian : vaincre le gardien du lieu, voir GUARDIANS). Les énigmes « puzzle » se résolvent à plusieurs ; chacun garde sa progression.
+// Objectifs : k = mécanique. Terrain (scripts/quest-field.js) : kill (vaincre n créatures), loot (n objets lâchés par
+// des créatures), pick (n objets du lieu : ramasser, allumer, libérer ; ambush : des ennemis surgissent), wave (défendre
+// un point), escort (accompagner quelqu'un), chase (rattraper n fuyards), race (course chronométrée), hunt (champion
+// nommé), talk (parler à quelqu'un), work (n récoltes d'un métier), clear (terminer un donjon), sky (revoir le ciel).
+// Propres à un lieu (scripts/quests.js) : trail (suivre des traces), collect (objets cachés), spot (point précis), timing
+// (E au bon moment), reach (atteindre un point), clues (indices), choice (réponse ou choix moral), search (bonne cachette),
+// catch (feuille au vent), defense (les six cristaux), puzzle (énigme partagée) et guardian (gardien, voir GUARDIANS).
+// world : changements du monde quand l'étape est finie. Chacun garde sa progression ; les combats comptent pour tout le
+// groupe proche.
 export const QUESTS = deepFreeze([
+  // ---------------------------------------------------------------- Chapitre I
   {
     id: 1,
     chapter: 0,
@@ -305,10 +371,28 @@ export const QUESTS = deepFreeze([
     site: 'q1',
     level: 2,
     summary:
-      'Cette nuit, une lumière est tombée près du Camp de l’Aurore. Liora l’a vue filer derrière les collines.',
+      'Cette nuit, une lumière est tombée près du Camp de l’Aurore. Liora l’a vue filer derrière les collines, et elle n’était pas la seule à la regarder.',
     steps: [
       { k: 'trail', text: 'Suivre les traces lumineuses depuis le camp' },
-      { k: 'puzzle', text: 'Résoudre l’énigme des quatre pierres' }
+      {
+        k: 'pick',
+        n: 4,
+        spread: [2, 5],
+        icon: '✨',
+        item: 'Éclat d’étoile',
+        label: 'Ramasser l’éclat',
+        text: 'Ramasser les éclats tombés autour du cristal'
+      },
+      {
+        k: 'wave',
+        waves: [2, 3],
+        mobs: ['Slime'],
+        what: 'le cristal',
+        art: 'crystal',
+        at: [0, 1],
+        label: 'Rendre ses éclats au cristal',
+        text: 'Protéger le cristal des slimes attirés par sa lumière'
+      }
     ],
     reward: { gold: 60, flags: ['lumi'], text: 'Lumi devient ta compagne de voyage' },
     talk: {
@@ -320,8 +404,7 @@ export const QUESTS = deepFreeze([
       ready:
         'Oh ! Elle… elle te suit ? C’est une petite créature de lumière ! Elle s’appelle Lumi ? Quel joli nom.',
       after: 'Lumi brille un peu plus chaque jour. Orven, aux Ruines de la Couronne, voudra sûrement la voir.'
-    },
-    hint: 'Gravé sur la stèle : « Le soleil se lève, la pluie le suit ; le vent chasse les nuages, et la lune ferme la nuit. »'
+    }
   },
   {
     id: 2,
@@ -333,25 +416,48 @@ export const QUESTS = deepFreeze([
     requires: 1,
     level: 5,
     summary:
-      'Orven, le vieil érudit des ruines, possède une carte usée où brillent six étoiles. Elle réagit à la présence de Lumi.',
+      'Orven, le vieil érudit des ruines, possédait une carte où brillaient six étoiles. Des loups l’ont mise en pièces, et quelqu’un les y a poussés.',
     steps: [
-      { k: 'collect', n: 3, text: 'Retrouver les trois symboles cachés dans les ruines' },
-      { k: 'puzzle', text: 'Reconstituer la disposition des symboles sur les socles' },
+      {
+        k: 'loot',
+        n: 5,
+        mobs: ['Loup', 'Sanglier'],
+        icon: '🗺️',
+        item: 'Fragment de carte',
+        text: 'Reprendre les fragments de carte aux loups et aux sangliers'
+      },
+      {
+        k: 'pick',
+        n: 3,
+        at: [
+          [-4, -3],
+          [4, -2],
+          [1, 4]
+        ],
+        icon: '✦',
+        item: 'Sceau d’ombre',
+        label: 'Arracher le sceau',
+        ambush: ['Loup', 2],
+        text: 'Arracher les trois sceaux d’ombre plantés dans les ruines'
+      },
       { k: 'guardian', text: 'Vaincre Ronce-Moussue, l’écho des ruines (E sur le sceau)' }
     ],
     reward: { gold: 90, flags: ['starmap'], text: 'Carte des sanctuaires dans le journal' },
     talk: {
       offer: [
-        'Par ma barbe… cette lueur ! Elle a fait briller ma vieille carte. Regarde : six étoiles, six sanctuaires.',
-        'Trois symboles sont cachés dans ces ruines. Retrouve-les, puis pose-les sur les socles comme sur la carte : l’étoile au nord, la lune à l’ouest, la flamme à l’est.'
+        'Par ma barbe… cette lueur ! Ma vieille carte l’aurait reconnue : six étoiles, six sanctuaires.',
+        'Mais une femme voilée est passée hier soir. Elle a sifflé, et les loups ont tout déchiré. Retrouve les morceaux, et arrache les clous noirs qu’elle a plantés dans mes ruines !'
       ],
       active:
-        'L’étoile au nord, la lune à l’ouest, la flamme à l’est. Les symboles brillent quand on s’en approche.',
+        'Les loups et les sangliers des plaines ont emporté les morceaux. Les sceaux, eux, sont ici, dans les ruines.',
       ready:
-        'La carte s’éclaire ! Six sanctuaires… le premier dort dans la Forêt ancienne. Garde-la, elle sera mieux dans ton journal.',
+        'La carte est entière ! Et ce monstre gardait un couplet gravé dans la pierre… Le premier sanctuaire dort dans la Forêt ancienne. Garde la carte, elle sera mieux dans ton journal.',
       after:
-        'Le Cœur de l’Aurore… on n’en parlait que dans les berceuses. Va voir Sylva, dans la Forêt ancienne.'
-    }
+        'Le Cœur de l’Aurore… on n’en parlait que dans les berceuses. Va voir Sylva, dans la Forêt ancienne. Et méfie-toi de la femme voilée.'
+    },
+    verse: 'Une étincelle tombe où nul ne l’attend, et la plaine se souvient du premier chant.',
+    memory:
+      'Sur le dernier sceau, un nom gravé à l’envers : Vesper. Orven a pâli en le lisant, et n’a rien voulu en dire.'
   },
   {
     id: 3,
@@ -362,17 +468,38 @@ export const QUESTS = deepFreeze([
     site: 'q3',
     level: 4,
     summary:
-      'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Mais les barrières l’envoient toujours ailleurs.',
-    steps: [{ k: 'puzzle', text: 'Ouvrir et fermer les barrières pour guider Pompon jusqu’au sommet' }],
+      'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Il s’est encore échappé, et les loups rôdent.',
+    steps: [
+      {
+        k: 'chase',
+        n: 1,
+        art: 'sheep',
+        who: 'Pompon',
+        label: 'Attraper Pompon',
+        text: 'Rattraper Pompon, qui court dans tous les sens'
+      },
+      { k: 'kill', n: 6, mobs: ['Loup'], what: 'Loup vaincu', text: 'Éloigner les loups de la colline' },
+      {
+        k: 'escort',
+        art: 'sheep',
+        who: 'Pompon',
+        from: [-4, 3],
+        to: [3, -4],
+        ambush: [['Loup', 2]],
+        label: 'Emmener Pompon',
+        text: 'Accompagner Pompon jusqu’au drapeau du sommet',
+        world: ['sommet']
+      }
+    ],
     reward: { gold: 70, item: 'Rare', text: 'Équipement Rare de ton niveau' },
     talk: {
       offer: [
-        'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Mais il suit toujours le chemin ouvert…',
-        'Ouvre et ferme les barrières (E), puis siffle-le avec le sifflet près de l’enclos. À toi de jouer, berger !'
+        'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Alors il saute la barrière toutes les nuits.',
+        'Rattrape-le, chasse les loups, puis monte là-haut avec lui. Juste une fois. Pour qu’il voie.'
       ],
-      active: 'Pompon va toujours tout droit tant qu’on ne lui ferme pas le chemin. Têtu comme un mouton.',
+      active: 'Pompon court vite, mais il se fatigue. Coupe-lui la route ! Têtu comme un mouton.',
       ready:
-        'IL EST EN HAUT ! Regarde-le, il est si fier ! Tiens, ma sœur a sculpté ce petit mouton : il est pour toi.',
+        'IL EST EN HAUT ! Regarde-le, il est si fier ! Tiens, prends ça : c’était à mon grand-père, il courait aussi après ses moutons.',
       after: 'Depuis, Pompon regarde le coucher de soleil tous les soirs. Il a l’air d’un philosophe.'
     }
   },
@@ -385,15 +512,32 @@ export const QUESTS = deepFreeze([
     site: 'q4',
     level: 6,
     summary:
-      'Bastian jure qu’un trésor est enterré « là où les ombres de trois arbres se rejoignent ». Tout le camp se moque de lui.',
+      'Bastian jure qu’un trésor est enterré « là où les ombres de trois arbres se rejoignent ». Tout le camp se moque de lui. Surtout depuis qu’un sanglier a mangé sa preuve.',
     steps: [
-      { k: 'spot', at: [2, 1], text: 'Trouver où se croisent les ombres des trois arbres et creuser (E)' }
+      {
+        k: 'loot',
+        n: 4,
+        mobs: ['Sanglier'],
+        icon: '📜',
+        item: 'Page de chanson mâchonnée',
+        text: 'Reprendre aux sangliers les pages de la chanson'
+      },
+      { k: 'spot', at: [2, 1], text: 'Trouver où se croisent les ombres des trois arbres et creuser (E)' },
+      {
+        k: 'hunt',
+        mob: 'Sanglier',
+        title: 'Dent-de-Cale, le gardien du coffre',
+        at: [2, 2],
+        icon: '🐗',
+        label: 'Ouvrir le coffre',
+        text: 'Vaincre le vieux sanglier qui dormait sur le coffre'
+      }
     ],
     reward: { gold: 40, item: 'Rare', text: 'Le coffre secret (équipement Rare de ton niveau)' },
     talk: {
       offer: [
         'Ils disent que mon trésor n’existe pas. Pfff. La vieille chanson dit : « Là où trois ombres se tiennent la main, dort le coffre du marin. »',
-        'Les trois vieux chênes sont là. Suis leurs ombres, et creuse où elles se croisent !'
+        'La preuve ? Un sanglier l’a mangée. Enfin, presque toute. Retrouve les pages, suis l’ombre des trois chênes, et creuse !'
       ],
       active: 'Regarde bien les ombres des chênes : elles pointent toutes vers le même endroit.',
       ready: 'UN COFFRE ! Je le savais ! Garde ce qu’il contient, moi je veux juste voir leur tête au camp.',
@@ -411,6 +555,7 @@ export const QUESTS = deepFreeze([
     summary:
       'Depuis quarante ans, Éloi poursuit un poisson doré qui ne se montre qu’à ceux qui savent lire l’eau.',
     steps: [
+      { k: 'work', job: 'fish', n: 3, text: 'Pêcher trois poissons pour l’appât, dans n’importe quelle eau' },
       { k: 'timing', text: 'Observer les ondulations de l’étang et pêcher le poisson doré (E au bon remous)' }
     ],
     reward: {
@@ -422,15 +567,17 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Tu vois ces remous ? Quatre sont des carpes. Le cinquième… c’est lui. Le poisson doré.',
-        'Quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !'
+        'Le poisson doré ne mord pas au ver. Il lui faut du poisson frais. Trois prises, pêchées de ta main.',
+        'Ensuite, regarde mon étang : quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !'
       ],
-      active: 'Patience. Regarde les remous jusqu’à ce que l’un d’eux se mette à briller d’or.',
+      active:
+        'L’appât d’abord. Ensuite, patience : regarde les remous jusqu’à ce que l’un d’eux brille d’or.',
       ready:
         'Quarante ans… et tu l’as eu du premier coup. Tiens, la recette de ma grand-mère. Elle disait qu’il porte bonheur.',
       after: 'Je reviens chaque matin, juste pour regarder l’étang. Il est plus beau maintenant que je sais.'
     }
   },
+  // ---------------------------------------------------------------- Chapitre II
   {
     id: 6,
     chapter: 1,
@@ -441,8 +588,26 @@ export const QUESTS = deepFreeze([
     requires: 2,
     level: 12,
     summary:
-      'Sylva, la gardienne des chants, entend la forêt fredonner depuis l’arrivée de Lumi. Un passage secret attend une mélodie.',
+      'Sylva, la gardienne des chants, entend la forêt fredonner depuis l’arrivée de Lumi. Mais les araignées étouffent la mélodie sous leurs toiles.',
     steps: [
+      {
+        k: 'kill',
+        n: 8,
+        mobs: ['Araignée'],
+        what: 'Araignée vaincue',
+        text: 'Chasser les araignées de la forêt'
+      },
+      {
+        k: 'pick',
+        n: 4,
+        spread: [4, 9],
+        art: 'cocoon',
+        icon: '🕸️',
+        item: 'Cocon déchiré',
+        label: 'Déchirer le cocon',
+        ambush: ['Araignée', 1],
+        text: 'Libérer les oiseaux chanteurs pris dans les cocons'
+      },
       { k: 'collect', n: 4, text: 'Retrouver les quatre pierres musicales dans la forêt' },
       { k: 'puzzle', text: 'Jouer la mélodie des anciens sur le cercle de pierres' }
     ],
@@ -450,7 +615,7 @@ export const QUESTS = deepFreeze([
     talk: {
       offer: [
         'La forêt chante, ce matin. Elle ne l’avait pas fait depuis des siècles. C’est ta petite lumière qui la réveille.',
-        'Quatre pierres musicales sont perdues dans les sous-bois. Rapporte leur son au cercle, puis joue la mélodie : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.'
+        'Mais les araignées tissent partout, comme si quelqu’un le leur avait demandé. Libère les oiseaux, retrouve les pierres musicales, puis joue au cercle : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.'
       ],
       active:
         'Grave, aiguë, puis les deux du milieu de la plus grave à la plus aiguë. Écoute bien chaque pierre.',
@@ -469,9 +634,28 @@ export const QUESTS = deepFreeze([
     requires: 6,
     level: 16,
     summary:
-      'L’arbre gardien de la forêt dort depuis des siècles. Aelor pense qu’un rayon de soleil pourrait le réveiller.',
+      'L’arbre gardien se meurt : des gobelins le saignent la nuit et vendent sa sève d’or à une femme voilée.',
     steps: [
-      { k: 'puzzle', text: 'Orienter les miroirs pour diriger la lumière du soleil vers l’arbre gardien' },
+      {
+        k: 'loot',
+        n: 6,
+        mobs: ['Gobelin'],
+        icon: '🏺',
+        item: 'Fiole de sève d’or',
+        text: 'Reprendre la sève d’or aux gobelins'
+      },
+      {
+        k: 'wave',
+        waves: [3, 4, 5],
+        mobs: ['Gobelin', 'Ours'],
+        what: 'l’arbre gardien',
+        icon: '🌳',
+        art: 'roots',
+        at: [2, 0],
+        label: 'Verser la sève aux racines',
+        text: 'Défendre l’arbre gardien pendant qu’il boit sa sève',
+        world: ['goldtree']
+      },
       { k: 'guardian', text: 'Vaincre Sylvenoir, l’écho de la forêt (E sur le sceau)' },
       { k: 'reach', at: [2, -1], text: 'Écouter l’arbre gardien' }
     ],
@@ -482,17 +666,19 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'L’arbre gardien dort. Ses racines d’or brillaient jadis comme le soleil… Il lui faut la lumière.',
-        'Les anciens ont laissé trois miroirs. Tourne-les (E) pour conduire le rayon de la pierre solaire jusqu’à l’arbre.'
+        'L’arbre gardien dort, et on profite de son sommeil. Les gobelins percent son écorce et remplissent des fioles.',
+        'Reprends-leur la sève et verse-la aux racines. Ils viendront la rechercher : tiens bon, le temps qu’il la boive.'
       ],
-      active: 'Chaque miroir renvoie la lumière d’un quart de tour. Suis le rayon des yeux.',
+      active:
+        'Les gobelins rôdent partout dans la Forêt ancienne. La sève brille dans leurs fioles, tu ne peux pas la manquer.',
       ready:
         'Il t’a parlé… Le Cœur de l’Aurore. Et cette étoile qui flotte près de Lumi : la première des six. Que la forêt te bénisse.',
       after:
         'L’arbre gardien chante doucement chaque nuit. Va vers le marais : Maëline cherche de l’aide pour ses lanternes.'
     },
+    verse: 'La racine écoute, la feuille répond, l’or coule en silence sous les troncs profonds.',
     memory:
-      'L’arbre gardien : « Petite étincelle, te voilà revenue. Le Cœur de l’Aurore attend. Six étoiles, six sanctuaires… Rassemble-les. »'
+      'L’arbre gardien : « Petite étincelle, te voilà revenue. Une autre est venue avant toi, la voilée. Elle chantait, jadis. Maintenant elle cherche les étoiles pour les éteindre. Trouve-les avant elle. »'
   },
   {
     id: 8,
@@ -504,6 +690,15 @@ export const QUESTS = deepFreeze([
     level: 13,
     summary: 'Les panneaux du bosquet mentent, dit Nima. Seules les lucioles connaissent le vrai chemin.',
     steps: [
+      {
+        k: 'chase',
+        n: 3,
+        art: 'firefly',
+        who: 'Luciole farceuse',
+        label: 'Attraper la luciole',
+        at: [0, 10],
+        text: 'Attraper trois lucioles farceuses devant le bosquet'
+      },
       { k: 'reach', at: [0, -8], text: 'Traverser le labyrinthe en suivant les lucioles (pas les panneaux)' }
     ],
     reward: {
@@ -514,7 +709,7 @@ export const QUESTS = deepFreeze([
     talk: {
       offer: [
         'Ce bosquet est un labyrinthe. Les panneaux ? Une farce des fées : ils mentent tous.',
-        'Suis les lucioles. Elles connaissent le chemin vers la vieille pierre de passage, de l’autre côté.'
+        'Attrape trois lucioles et elles t’aideront. Suis-les jusqu’à la vieille pierre de passage, de l’autre côté.'
       ],
       active: 'Ne lis pas les panneaux. Regarde les lucioles.',
       ready: 'Tu as réveillé la pierre de passage ! Elle te ramènera au camp, et du camp jusqu’ici (E).',
@@ -532,7 +727,16 @@ export const QUESTS = deepFreeze([
     summary: 'Chaque nuit, les provisions de Brin disparaissent. Pas de trace de pas… ou presque.',
     steps: [
       { k: 'trail', text: 'Suivre les petites empreintes (elles n’apparaissent que de près)' },
-      { k: 'spot', at: [5, -4], text: 'Démasquer le voleur camouflé (E)' }
+      {
+        k: 'chase',
+        n: 1,
+        art: 'thief',
+        who: 'Le voleur',
+        label: 'Attraper le voleur',
+        at: [5, -4],
+        text: 'Rattraper le voleur avant qu’il ne disparaisse'
+      },
+      { k: 'choice', text: 'Décider du sort du petit voleur' }
     ],
     reward: { gold: 110, item: 'Rare', text: 'Or et équipement Rare de ton niveau' },
     talk: {
@@ -541,10 +745,15 @@ export const QUESTS = deepFreeze([
         'Je ne vois jamais personne. Mais il y a de toutes petites empreintes… Tu veux bien enquêter ?'
       ],
       active: 'Les empreintes partent de mon sac. Regarde par terre, de près.',
-      ready:
-        'Un… caméléon-renard ? Il avait juste faim ? Bon. Je lui laisserai un biscuit. Prends ceci pour ta peine !',
-      after: 'Le petit voleur vient manger dans ma main maintenant. On est amis.'
-    }
+      ask: 'Un… caméléon-renard ? Avec les joues pleines de mon miel ? Dis-moi, toi qui l’as attrapé : j’en fais quoi ?',
+      ready: 'Bon. C’est décidé, alors. Prends ceci pour ta peine !',
+      after: 'Le petit voleur vient manger dans ma main maintenant. On est amis.',
+      afterChoice: [
+        'Le petit voleur vient manger dans ma main maintenant. On est amis.',
+        'Il travaille pour payer ses dettes : il garde mon sac. Je n’ai jamais eu de meilleur gardien.'
+      ]
+    },
+    choices: ['Lui laisser un biscuit chaque soir', 'L’engager comme gardien du sac']
   },
   {
     id: 10,
@@ -555,8 +764,17 @@ export const QUESTS = deepFreeze([
     site: 'q10',
     level: 17,
     summary:
-      'Théon veut peindre l’ombre d’un arbre qui prend la forme d’un oiseau, mais il ne retrouve plus l’endroit d’où il l’avait vue.',
+      'Théon veut peindre l’ombre d’un arbre qui prend la forme d’un oiseau. Il n’a plus ni pigments, ni pinceaux, ni le bon endroit.',
     steps: [
+      { k: 'work', job: 'herb', n: 3, text: 'Cueillir trois herbes pour les pigments' },
+      {
+        k: 'loot',
+        n: 5,
+        mobs: ['Chauve-souris'],
+        icon: '🖌️',
+        item: 'Touffe de poils fins',
+        text: 'Prendre des poils de chauve-souris pour les pinceaux'
+      },
       {
         k: 'spot',
         at: [-1, -3],
@@ -567,13 +785,14 @@ export const QUESTS = deepFreeze([
     talk: {
       offer: [
         'Un jour, d’un endroit précis, l’ombre de ce vieil arbre est devenue un oiseau. Un oiseau parfait !',
-        'Je me souviens seulement : « au nord de l’arbre, un pas à l’ouest ». Trouve l’endroit et appelle-moi (E).'
+        'Il me faut des herbes pour les couleurs, des poils de chauve-souris pour les pinceaux. Et l’endroit : « au nord de l’arbre, un pas à l’ouest ». Appelle-moi (E) quand tu y es.'
       ],
       active: 'Au nord de l’arbre, un pas à l’ouest… L’ombre change quand on se déplace.',
       ready: 'Le voilà ! Mon oiseau d’ombre ! Tiens, prends ceci : tu l’as bien mérité.',
       after: 'Je peins maintenant toutes les ombres de la forêt. Elles ont toutes une histoire.'
     }
   },
+  // ---------------------------------------------------------------- Chapitre III
   {
     id: 11,
     chapter: 2,
@@ -584,20 +803,59 @@ export const QUESTS = deepFreeze([
     requires: 7,
     level: 22,
     summary:
-      'Le réseau de lanternes qui guidait les voyageurs dans le marais s’est éteint. Maëline n’a plus que des vannes rouillées.',
-    steps: [{ k: 'puzzle', text: 'Manipuler les vannes pour rallumer les quatre lanternes du marais' }],
+      'Le réseau de lanternes qui guidait les voyageurs dans le marais s’est éteint en une nuit. Les feux follets, eux, brillent plus fort que jamais.',
+    steps: [
+      {
+        k: 'loot',
+        n: 6,
+        mobs: ['Wisp'],
+        icon: '🔥',
+        item: 'Flamme volée',
+        text: 'Reprendre les flammes volées par les feux follets'
+      },
+      {
+        k: 'pick',
+        n: 4,
+        at: [
+          [-3, -2],
+          [-1, -3],
+          [1, -3],
+          [3, -2]
+        ],
+        art: 'lantern',
+        keep: true,
+        icon: '🏮',
+        item: 'Lanterne rallumée',
+        label: 'Rallumer la lanterne',
+        ambush: ['Wisp', 1],
+        text: 'Rallumer les quatre lanternes'
+      },
+      {
+        k: 'wave',
+        waves: [3, 4, 5],
+        mobs: ['Wisp', 'Mante des roseaux', 'Araignée venimeuse'],
+        what: 'les lanternes',
+        icon: '🏮',
+        art: 'lantern',
+        at: [0, 1],
+        label: 'Lever la grande lanterne',
+        text: 'Défendre les lanternes jusqu’à l’aube',
+        world: ['lanterns', 'sanct_reflets']
+      }
+    ],
     reward: { gold: 200, flags: ['sanct_reflets'], text: 'Passage vers le Sanctuaire des Reflets' },
     talk: {
       offer: [
-        'Les lanternes du marais brûlent au gaz des tourbières, guidé par trois vannes. Plus aucune ne s’allume.',
-        'Chaque vanne a trois positions. Trouve le bon réglage pour que les quatre lanternes brillent en même temps !'
+        'Mes lanternes se sont toutes éteintes la même nuit. Depuis, trois voyageurs ne sont pas rentrés.',
+        'Les feux follets ont avalé leurs flammes. Reprends-les, rallume tout, et tiens jusqu’à l’aube : le marais n’aime pas la lumière.'
       ],
-      active:
-        'Une lanterne allumée peut s’éteindre si tu changes la mauvaise vanne. Observe lesquelles réagissent.',
+      active: 'Une flamme avalée par un feu follet ne s’éteint pas. Il faut seulement la lui reprendre.',
       ready:
-        'Elles brillent toutes ! Et regarde… les lanternes éclairent un chemin vers le Sanctuaire des Reflets.',
+        'Elles brillent toutes ! J’ai vu des silhouettes fuir, des hommes au visage voilé. Et regarde… les lanternes éclairent un chemin vers le Sanctuaire des Reflets.',
       after: 'Les voyageurs ne se perdent plus. Néris t’attend près des vieux miroirs, au nord.'
-    }
+    },
+    memory:
+      'Dans la boue, une broche en forme de voile. Vesper n’est plus seule : des gens la suivent et se font appeler la Confrérie du Voile.'
   },
   {
     id: 12,
@@ -609,25 +867,66 @@ export const QUESTS = deepFreeze([
     requires: 11,
     level: 26,
     summary:
-      'Dans la salle des reflets, les miroirs montrent le passé… dans le désordre. Néris pense qu’ils cachent la vérité sur le Cœur.',
+      'Quelqu’un a brisé les miroirs qui montraient le passé. Néris pense qu’ils cachaient la vérité sur le Cœur, et sur celle qui veut l’éteindre.',
     steps: [
-      { k: 'puzzle', text: 'Remettre les quatre reflets dans l’ordre de l’histoire' },
+      {
+        k: 'pick',
+        n: 4,
+        spread: [4, 9],
+        icon: '🪞',
+        item: 'Éclat de miroir',
+        label: 'Ramasser l’éclat',
+        ambush: ['Basilic', 1],
+        text: 'Retrouver les éclats des miroirs brisés'
+      },
+      {
+        k: 'pick',
+        n: 4,
+        at: [
+          [-3, -1],
+          [-1, -1],
+          [1, -1],
+          [3, -1]
+        ],
+        art: 'frame',
+        keep: true,
+        icon: '🪞',
+        item: 'Miroir réparé',
+        label: 'Réparer le miroir',
+        panels: [
+          'Le premier miroir : les anciens chantent autour du Cœur de l’Aurore. Deux voix mènent le chœur, un frère et une sœur. Auralis et Vesper.',
+          'Le deuxième miroir : une ombre immense monte de la mer. Elle se nourrit de lumière. Vesper est la seule à ne pas reculer : elle écoute.',
+          'Le troisième miroir : le Cœur se brise en six étoiles pour échapper à l’Ombre. Vesper hurle. On ne l’a pas prévenue.',
+          'Le dernier miroir : six sanctuaires s’allument sur l’île. Vesper est restée du mauvais côté de la mer, seule avec l’Ombre.'
+        ],
+        text: 'Remettre les éclats dans leurs cadres et regarder'
+      },
+      {
+        k: 'hunt',
+        mob: 'Spectre',
+        title: 'Le Reflet menteur',
+        at: [0, 2],
+        icon: '🪞',
+        label: 'Regarder ton reflet',
+        text: 'Affronter le reflet qui ne te ressemble pas'
+      },
       { k: 'guardian', text: 'Vaincre Miroitombe, l’écho des reflets (E sur le sceau)' }
     ],
     reward: { gold: 240, flags: ['star2'], text: 'Deuxième étoile et un souvenir dans le journal' },
     talk: {
       offer: [
-        'Ces miroirs se souviennent. Mais ils mélangent tout : certains reflets mentent sur l’ordre des choses.',
-        'Tourne chaque miroir (E) pour choisir son reflet, de gauche à droite : du plus ancien au plus récent.'
+        'Ces miroirs se souvenaient de tout. Une nuit, des hommes voilés les ont brisés, un par un, en pleurant presque.',
+        'Retrouve les éclats et remets-les dans leurs cadres. On ne casse pas un miroir pour rien : il a montré quelque chose à quelqu’un.'
       ],
-      active: 'D’abord la paix, puis la menace, puis le sacrifice, et enfin l’espoir.',
+      active: 'Les basilics adorent ce qui brille. Méfie-toi quand tu ramasses un éclat.',
       ready:
-        'Alors c’était ça… Ils n’ont pas perdu le Cœur. Ils l’ont caché, pour le protéger. Et voici la deuxième étoile.',
+        'Alors c’était ça… Vesper était des leurs. Ils ont sauvé le Cœur, et ils l’ont oubliée, elle. Voici la deuxième étoile.',
       after:
-        'L’Ombre approchait, et les anciens ont choisi de disperser la lumière. Je comprends enfin leurs chants.'
+        'L’Ombre approchait, et les anciens ont choisi de disperser la lumière. Personne n’a choisi Vesper.'
     },
+    verse: 'L’eau garde un visage que l’eau n’a pas pris ; qui regarde longtemps s’y trouve, et sourit.',
     memory:
-      'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore. Une ombre est venue de la mer. Plutôt que de laisser le Cœur tomber, ils l’ont brisé en six étoiles, confiées aux six sanctuaires. Les lumières se sont éteintes… mais pas pour toujours.'
+      'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore, guidés par deux chanteurs, Auralis et sa sœur Vesper. Une ombre est venue de la mer. Ils ont brisé le Cœur en six étoiles pour le sauver. Vesper, restée au large, a entendu le silence tomber. Elle n’a jamais su que c’était un sacrifice. Elle a cru à une trahison.'
   },
   {
     id: 13,
@@ -637,15 +936,47 @@ export const QUESTS = deepFreeze([
     npc: 'goran',
     site: 'q13',
     level: 23,
-    summary: 'Le pont de Goran s’effondre dès qu’on pose le pied dessus. Il manque surtout un bon plan.',
-    steps: [{ k: 'puzzle', text: 'Poser les planches de la bonne longueur à chaque emplacement du pont' }],
+    summary:
+      'Le pont de Goran s’effondre dès qu’on pose le pied dessus. Et quand il le répare, les bêtes du marais le mangent.',
+    steps: [
+      {
+        k: 'pick',
+        n: 6,
+        spread: [6, 11],
+        art: 'plank',
+        icon: '🪵',
+        item: 'Planche solide',
+        label: 'Ramasser la planche',
+        text: 'Ramasser des planches échouées autour de l’étang'
+      },
+      {
+        k: 'loot',
+        n: 5,
+        mobs: ['Mante des roseaux'],
+        icon: '🧵',
+        item: 'Tendon de mante',
+        text: 'Prendre des tendons de mante pour les cordes'
+      },
+      {
+        k: 'wave',
+        waves: [3, 4],
+        mobs: ['Mante des roseaux', 'Basilic'],
+        what: 'le pont',
+        icon: '🔨',
+        art: 'barrel',
+        at: [-4, 1],
+        label: 'Commencer les travaux',
+        text: 'Défendre le pont pendant que Goran cloue',
+        world: ['bridge']
+      }
+    ],
     reward: { gold: 160, flags: ['bridge'], text: 'Le pont restauré pour toujours' },
     talk: {
       offer: [
-        'Mon pont ? Une catastrophe. J’ai des planches courtes, moyennes et longues, et je les mets toujours au mauvais endroit.',
-        'Les poteaux te disent l’écart : poteaux bas, planche courte ; poteaux hauts, planche longue. Change les planches (E).'
+        'Mon pont ? Une catastrophe. Onze fois que je le reconstruis. Onze fois !',
+        'Cette fois, on fait ça bien : de vraies planches, de vraies cordes. Et toi, avec ton arme, entre les bêtes et moi pendant que je cloue.'
       ],
-      active: 'Regarde la hauteur des poteaux de chaque côté de l’emplacement.',
+      active: 'Des planches bien droites, hein ! Pas celles qui ont déjà servi de radeau à une mante.',
       ready: 'Il tient ! Il tient vraiment ! Je vais l’appeler… le Pont qui Tient. Merci, l’ami !',
       after: 'Le Pont qui Tient tient toujours. Je traverse dix fois par jour, juste pour le plaisir.'
     }
@@ -662,7 +993,20 @@ export const QUESTS = deepFreeze([
       'Un esprit amical erre dans le marais. Il a oublié son nom, et sans nom, il ne peut pas partir en paix.',
     steps: [
       { k: 'clues', n: 4, text: 'Interroger les habitants et examiner les objets du marais (4 indices)' },
-      { k: 'choice', text: 'Rendre son nom à l’esprit' }
+      { k: 'choice', text: 'Rendre son nom à l’esprit' },
+      {
+        k: 'escort',
+        art: 'ghost',
+        who: 'Ilian',
+        from: [0, -2],
+        to: [0, 12],
+        ambush: [
+          ['Wisp', 2],
+          ['Wisp', 3]
+        ],
+        label: 'Accompagner Ilian',
+        text: 'Accompagner Ilian pour sa dernière tournée'
+      }
     ],
     reward: { gold: 150, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
@@ -672,8 +1016,9 @@ export const QUESTS = deepFreeze([
       ],
       active:
         'Une lanterne, une barque, un vieux chapeau… et les habitants. Quelqu’un se souvient forcément.',
+      ask: 'Alors… tu sais qui j’étais ?',
       ready:
-        'Ilian… Ilian le lanternier. Oui. C’était moi. Merci. Prends ceci : que ma lumière guide ta route.',
+        'Ilian le lanternier. Oui. C’était moi. J’ai pu faire ma tournée une dernière fois. Prends ceci : que ma lumière guide ta route.',
       after: 'Une douce lumière flotte parfois sur l’eau, là où Ilian allumait ses lanternes.'
     },
     choices: ['Orrin le passeur', 'Ilian le lanternier', 'Barnabé le pêcheur', 'Silas le chapelier'],
@@ -688,8 +1033,24 @@ export const QUESTS = deepFreeze([
     site: 'q15',
     level: 27,
     summary:
-      'Pipo a vu un coffre sur l’îlot de l’étang. Le seul chemin : des nénuphars qui coulent quand on s’y attarde.',
+      'Pipo a vu un coffre sur l’îlot de l’étang. Le basilic du coin a avalé la clé, et le seul chemin est fait de nénuphars qui coulent.',
     steps: [
+      {
+        k: 'kill',
+        n: 6,
+        mobs: ['Basilic'],
+        what: 'Basilic vaincu',
+        text: 'Attirer le vieux basilic en chassant les siens'
+      },
+      {
+        k: 'hunt',
+        mob: 'Basilic',
+        title: 'Gobe-Tout, le basilic glouton',
+        at: [-5, -2],
+        icon: '🗝️',
+        label: 'Appeler Gobe-Tout',
+        text: 'Vaincre Gobe-Tout et récupérer la clé'
+      },
       {
         k: 'reach',
         at: [4, 0],
@@ -699,14 +1060,15 @@ export const QUESTS = deepFreeze([
     reward: { gold: 120, item: 'Épique', text: 'Le coffre caché (équipement Épique de ton niveau)' },
     talk: {
       offer: [
-        'Il y a un coffre sur l’îlot ! Mais les nénuphars coulent si on reste dessus. Moi je suis trop petit pour sauter.',
-        'Saute de l’un à l’autre sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !'
+        'Il y a un coffre sur l’îlot ! J’avais la clé, mais Gobe-Tout l’a gobée. Il gobe tout. C’est pour ça qu’il s’appelle comme ça.',
+        'Après, saute de nénuphar en nénuphar sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !'
       ],
       active: 'Ne reste pas plus de deux secondes sur un nénuphar !',
-      ready: 'Tu l’as fait ! Hi hi, tu étais tout mouillé la première fois. Le trésor est à toi !',
+      ready: 'Tu l’as fait ! Hi hi, tu sens le basilic. Le trésor est à toi !',
       after: 'Je m’entraîne à sauter. Un jour, j’y arriverai aussi.'
     }
   },
+  // ---------------------------------------------------------------- Chapitre IV
   {
     id: 16,
     chapter: 3,
@@ -717,10 +1079,41 @@ export const QUESTS = deepFreeze([
     requires: 12,
     level: 32,
     summary:
-      'Les ruines d’un village oublié dorment sous les feuilles d’automne. Érable dit que les feuilles dorées gardent ses souvenirs.',
+      'Les ruines d’un village oublié dorment sous les feuilles d’automne. La Confrérie du Voile les pille, maison par maison.',
     steps: [
       { k: 'collect', n: 4, text: 'Toucher les quatre feuilles dorées pour voir les souvenirs du village' },
-      { k: 'puzzle', text: 'Replacer les quatre objets dans leurs maisons d’origine (porter : E)' }
+      {
+        k: 'kill',
+        n: 8,
+        mobs: ['Pilleur', 'Bandit'],
+        what: 'Voilé mis en fuite',
+        text: 'Chasser les pilleurs et les bandits de la Confrérie'
+      },
+      {
+        k: 'loot',
+        n: 4,
+        mobs: ['Pilleur', 'Bandit'],
+        icon: '🎒',
+        item: 'Objet du village',
+        text: 'Reprendre ce qu’ils ont volé au village'
+      },
+      {
+        k: 'pick',
+        n: 4,
+        at: [
+          [-4, -2],
+          [4, -2],
+          [-4, 2],
+          [4, 2]
+        ],
+        art: 'house',
+        keep: true,
+        icon: '🏚️',
+        item: 'Maison rendue à elle-même',
+        label: 'Rendre l’objet à la maison',
+        text: 'Rendre à chaque maison ce qui lui appartient',
+        world: ['sanct_saisons']
+      }
     ],
     reward: {
       gold: 280,
@@ -730,9 +1123,10 @@ export const QUESTS = deepFreeze([
     talk: {
       offer: [
         'Ici vivait un village, avant. Ses maisons sont tombées, mais les feuilles dorées se souviennent de tout.',
-        'Touche-les, regarde leurs souvenirs, puis rends à chaque maison ce qui lui appartient. Prends un objet (E) et pose-le devant sa maison (E).'
+        'Les Voilés fouillent les ruines et emportent les souvenirs. Touche les feuilles, reprends ce qu’ils ont pris, et rends-le à chaque maison.'
       ],
-      active: 'Chaque feuille montre une maison et ce qu’on y faisait. Écoute-les bien.',
+      active:
+        'Ils rôdent dans toute la Forêt automnale. Ils croient chercher une étoile : elle est ici, sous leurs pieds.',
       ready:
         'Le village se souvient de lui-même… Et regarde : une étoile se lève des feuilles. La Bibliothèque des Saisons s’ouvre !',
       after: 'Solenne garde les fresques des quatre saisons, près des grands érables à l’ouest.'
@@ -750,12 +1144,21 @@ export const QUESTS = deepFreeze([
     requires: 16,
     level: 36,
     summary:
-      'Une fresque brisée raconte pourquoi les anciens ont endormi le Cœur. Ses quatre fragments sont dispersés.',
+      'Une fresque brisée raconte pourquoi les anciens ont endormi le Cœur. Les esprits des saisons la gardent, et ils ne reconnaissent plus personne.',
     steps: [
       { k: 'collect', n: 4, text: 'Retrouver les quatre fragments de la fresque' },
       {
-        k: 'puzzle',
-        text: 'Régler le mécanisme des saisons (chaque pilier sur la saison que montre son fragment)'
+        k: 'wave',
+        waves: [3, 3, 4, 4],
+        seasons: ['Fée sauvage', 'Élémentaire', 'Corbeau spectral', 'Serpent des glaces'],
+        mobs: ['Corbeau spectral'],
+        what: 'la fresque',
+        icon: '🍂',
+        art: 'pillar',
+        at: [0, 0],
+        label: 'Assembler la fresque',
+        text: 'Tenir tête aux quatre saisons, l’une après l’autre',
+        world: ['archives']
       },
       { k: 'guardian', text: 'Vaincre Fanegrise, l’écho de l’automne (E sur le sceau)' }
     ],
@@ -766,16 +1169,17 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'La fresque des saisons est en morceaux. Chaque fragment montre une saison et le pilier qui lui revient.',
-        'Rassemble-les, puis tourne les piliers (E) comme le montrent les fragments. Le mécanisme ouvrira les archives.'
+        'La fresque des saisons est en morceaux. Rassemble-les, et repose-les au centre du cercle.',
+        'Prépare-toi : le printemps, l’été, l’automne et l’hiver viendront voir qui ose. Ils ne sont pas méchants. Ils ont peur.'
       ],
-      active: 'Lis bien chaque fragment : il dit quel pilier porte quelle saison.',
+      active: 'Les fragments sont au nord, à l’est, au sud et à l’ouest. Comme les saisons.',
       ready:
-        'Les archives… « Le Cœur fut endormi pour qu’il ne soit pas dévoré. Il rêve, et attend. » Tout prend sens.',
+        'Les archives… « Le Cœur fut endormi pour qu’il ne soit pas dévoré. Il rêve, et attend. » Et cette rature, là : le nom de Vesper, effacé du chœur.',
       after: 'Le désert garde la Cité des Étoiles. Sahir connaît les obélisques.'
     },
+    verse: 'Quatre saisons tournent autour d’un seul nom ; la feuille qui tombe est encore une chanson.',
     memory:
-      'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller.'
+      'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller. Dans la marge, une autre main a écrit : « Moi, je m’en souviens. »'
   },
   {
     id: 18,
@@ -786,15 +1190,19 @@ export const QUESTS = deepFreeze([
     site: 'q18',
     level: 33,
     summary:
-      'Flavio organise un concours : attraper la feuille dorée que le vent fait tourbillonner sans jamais la laisser tomber.',
-    steps: [{ k: 'catch', text: 'Attraper la feuille dorée dans le vent (E quand elle est sur toi)' }],
+      'Flavio organise le grand concours d’automne : une course à travers les érables, puis la feuille dorée à attraper au vol.',
+    steps: [
+      { k: 'race', n: 6, spread: [6, 11], text: 'Courir la boucle du concours avant la fin du temps' },
+      { k: 'catch', text: 'Attraper la feuille dorée dans le vent (E quand elle est sur toi)' }
+    ],
     reward: { gold: 220, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
       offer: [
-        'Le grand concours d’automne ! Une feuille dorée danse dans le vent. Qui l’attrape gagne.',
-        'Ne la poursuis pas : regarde la girouette, devine où le vent va l’emporter, et attends-la. E quand elle passe sur toi !'
+        'Le grand concours d’automne ! Première épreuve : la boucle des érables. Six fanions, et le temps file.',
+        'Deuxième épreuve : une feuille dorée danse dans le vent. Ne la poursuis pas, devine où elle va. E quand elle passe sur toi !'
       ],
-      active: 'La girouette montre le vent. La feuille tourne toujours dans le même sens.',
+      active:
+        'Touche les fanions dans l’ordre. Pour la feuille, regarde la girouette : elle tourne toujours dans le même sens.',
       ready: 'Tu l’as eue ! Elle ne fanera jamais, tu sais. Garde-la, c’est le prix du champion.',
       after: 'L’an prochain, je te bats. Je m’entraîne déjà.'
     }
@@ -808,9 +1216,42 @@ export const QUESTS = deepFreeze([
     site: 'q19',
     level: 35,
     summary:
-      'Le moulin d’Odel tourne à l’envers et moud la farine… en grain. Trois engrenages ont été mal remontés.',
+      'Des trolls ont volé les engrenages du moulin d’Odel pour s’en faire des colliers. Depuis, il tourne à l’envers et moud la farine… en grain.',
     steps: [
-      { k: 'puzzle', text: 'Repositionner les trois engrenages (la taille dépend de l’écart entre les axes)' }
+      {
+        k: 'loot',
+        n: 3,
+        chance: 0.5,
+        mobs: ['Troll'],
+        icon: '⚙️',
+        item: 'Engrenage',
+        text: 'Reprendre les engrenages aux trolls'
+      },
+      {
+        k: 'pick',
+        n: 3,
+        at: [
+          [-2, 0],
+          [0, 0],
+          [2, 0]
+        ],
+        art: 'gear',
+        keep: true,
+        icon: '⚙️',
+        item: 'Engrenage remonté',
+        label: 'Remonter l’engrenage',
+        text: 'Remonter les engrenages du moulin',
+        world: ['grenier']
+      },
+      {
+        k: 'hunt',
+        mob: 'Corbeau spectral',
+        title: 'Scrr-Scrr, la terreur du grenier',
+        at: [4, 2],
+        icon: '🪶',
+        label: 'Ouvrir le grenier',
+        text: 'Déloger ce qui fait « scrr-scrr » dans le grenier'
+      }
     ],
     reward: {
       gold: 300,
@@ -820,11 +1261,12 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Mon moulin tourne à l’envers depuis que mon neveu l’a « réparé ». Trois engrenages, trois erreurs.',
-        'Grand écart entre les axes, grand engrenage ; petit écart, petit. Change-les (E), et que la roue tourne dans le bon sens !'
+        'Les trolls m’ont pris trois engrenages. Des colliers ! Ils en font des colliers ! Et mon moulin tourne à l’envers.',
+        'Reprends-les, remonte-les. Et tant que tu y es… quelque chose fait « scrr-scrr » dans mon grenier. Je préfère ne pas savoir.'
       ],
-      active: 'Regarde l’écart entre les axes avant de choisir un engrenage.',
-      ready: 'Elle tourne dans le bon sens ! Monte au grenier, ce qu’il y a dans le coffre est pour toi.',
+      active: 'Un troll au cou qui brille, c’est un troll qui porte mon moulin.',
+      ready:
+        'Elle tourne dans le bon sens ! Et le grenier est silencieux… Ce qu’il y a dans le coffre est pour toi.',
       after: 'Ma farine n’a jamais été aussi fine. Reviens goûter mon pain.'
     }
   },
@@ -839,7 +1281,16 @@ export const QUESTS = deepFreeze([
     summary: 'Trois voyageurs ont vu un renard magique, mais ne sont d’accord sur rien. Lequel dit vrai ?',
     steps: [
       { k: 'clues', n: 3, text: 'Écouter les trois témoignages' },
-      { k: 'search', text: 'Fouiller la bonne cachette (E)' }
+      { k: 'search', text: 'Fouiller la bonne cachette (E)' },
+      {
+        k: 'chase',
+        n: 1,
+        art: 'fox',
+        who: 'Malice',
+        label: 'Attraper le renard',
+        at: [-4, -2],
+        text: 'Rattraper le renard magique'
+      }
     ],
     reward: { gold: 260, item: 'Épique', text: 'La cachette secrète du renard (équipement Épique)' },
     talk: {
@@ -854,6 +1305,7 @@ export const QUESTS = deepFreeze([
     },
     witnesses: true
   },
+  // ---------------------------------------------------------------- Chapitre V
   {
     id: 21,
     chapter: 4,
@@ -864,12 +1316,40 @@ export const QUESTS = deepFreeze([
     requires: 17,
     level: 42,
     summary:
-      'Trois obélisques veillent sur le désert. Alignés sur les étoiles, ils révéleraient une cité enfouie.',
+      'Trois obélisques veillent sur le désert. Les morts de l’ancienne cité se sont relevés pour empêcher quiconque d’y descendre.',
     steps: [
-      { k: 'collect', n: 3, text: 'Retrouver les trois obélisques ensevelis (E pour les dégager)' },
       {
-        k: 'puzzle',
-        text: 'Tourner les obélisques pour que leurs faisceaux se rejoignent sur l’étoile du centre'
+        k: 'kill',
+        n: 10,
+        mobs: ['Squelette'],
+        what: 'Veilleur renvoyé au sable',
+        text: 'Renvoyer au sable les veilleurs de la cité'
+      },
+      {
+        k: 'pick',
+        n: 3,
+        at: [
+          [-5, 0],
+          [5, 0],
+          [0, 5]
+        ],
+        art: 'obelisk',
+        keep: true,
+        icon: '🗿',
+        item: 'Obélisque dégagé',
+        label: 'Dégager l’obélisque',
+        ambush: ['Squelette', 2],
+        text: 'Dégager les trois obélisques ensevelis'
+      },
+      {
+        k: 'hunt',
+        mob: 'Chevalier déchu',
+        title: 'Rakhem, le gardien sans visage',
+        at: [0, 1],
+        icon: '✦',
+        label: 'Poser la main sur l’étoile gravée',
+        text: 'Vaincre le gardien qui barre l’escalier',
+        world: ['cite', 'sanct_etoiles']
       }
     ],
     reward: {
@@ -880,9 +1360,10 @@ export const QUESTS = deepFreeze([
     talk: {
       offer: [
         'La nuit, trois obélisques chantent sous le sable. Mon grand-père disait qu’ils montrent l’entrée de la cité des étoiles.',
-        'Dégage-les, puis tourne-les (E) : leurs faisceaux doivent se croiser sur l’étoile gravée au centre.'
+        'Mais les morts marchent depuis le passage de la Confrérie. Ouvre-nous la route, dégage les pierres, et réveille le gardien.'
       ],
-      active: 'Chaque obélisque projette un faisceau. Ils doivent tous viser l’étoile du centre.',
+      active:
+        'Les squelettes ne sont pas cruels. Ils obéissent à un ordre vieux de mille ans : « Ne laissez entrer personne. »',
       ready:
         'Le sable s’effondre… un escalier ! La Cité des Étoiles. Et cette lumière… une quatrième étoile !',
       after: 'Astéria étudie la vieille machine, sous la cité. Elle a besoin de toi.'
@@ -897,9 +1378,45 @@ export const QUESTS = deepFreeze([
     site: 'q22',
     requires: 21,
     level: 47,
-    summary: 'Une machine des anciens dort sous le désert : trois anneaux qui représentent les sanctuaires.',
+    summary:
+      'Une machine des anciens dort sous le désert. Pour la réveiller, il faut du feu, du verre, et quelqu’un pour la défendre.',
     steps: [
-      { k: 'puzzle', text: 'Synchroniser les trois anneaux (tourner un anneau entraîne le suivant)' },
+      {
+        k: 'loot',
+        n: 4,
+        mobs: ['Drake des dunes'],
+        icon: '🔶',
+        item: 'Écaille de verre solaire',
+        text: 'Prendre des écailles de verre aux drakes des dunes'
+      },
+      {
+        k: 'pick',
+        n: 3,
+        at: [
+          [-2, 3],
+          [0, 3],
+          [2, 3]
+        ],
+        art: 'lever',
+        keep: true,
+        icon: '⚙️',
+        item: 'Anneau lancé',
+        label: 'Lancer l’anneau',
+        ambush: ['Scorpion', 2],
+        text: 'Lancer les trois anneaux de la machine'
+      },
+      {
+        k: 'wave',
+        waves: [3, 4, 5],
+        mobs: ['Scorpion', 'Squelette', 'Minotaure'],
+        what: 'la machine',
+        icon: '⚙️',
+        art: 'barrel',
+        at: [0, 4],
+        label: 'Allumer la machine',
+        text: 'Défendre la machine pendant qu’elle chauffe',
+        world: ['machine']
+      },
       { k: 'guardian', text: 'Vaincre Sablamort, l’écho des dunes (E sur le sceau)' }
     ],
     reward: {
@@ -910,17 +1427,18 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Trois anneaux, six symboles chacun. Quand ils sont alignés, la machine montre comment réveiller le Cœur.',
-        'Mais attention : tourner un anneau (E) entraîne le suivant d’un cran. Commence par le bon bout !'
+        'Trois anneaux, six symboles chacun. Quand ils tournent ensemble, la machine montre comment réveiller le Cœur.',
+        'Il lui faut du verre solaire, et les drakes le portent sur le dos. Une fois lancée, elle fera du bruit. Beaucoup de bruit. On viendra.'
       ],
-      active:
-        'Le dernier anneau ne bouge que seul. Le premier entraîne le deuxième, le deuxième entraîne le troisième.',
+      active: 'Les drakes des dunes muent souvent. Ceux qui muent sont de mauvaise humeur.',
       ready:
         'La machine s’illumine : « Six étoiles réunies, une étincelle du Cœur, et le chant des anciens. » Une étincelle… Lumi ?',
-      after: 'Lumi t’attend dans la Forêt enchantée. Elle sait où se trouve le sanctuaire central.'
+      after:
+        'Lumi t’attend dans la Forêt enchantée. Elle sait où se trouve le sanctuaire central. Vesper aussi, maintenant.'
     },
+    verse: 'Le sable a tout bu, sauf l’étoile et le soir ; marche, voyageur, la nuit n’est pas le noir.',
     memory:
-      'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles.'
+      'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles. Derrière un pilier, une femme voilée écoutait. Elle est partie sans se battre.'
   },
   {
     id: 23,
@@ -931,17 +1449,42 @@ export const QUESTS = deepFreeze([
     site: 'q23',
     level: 43,
     summary:
-      'Zafir vend du vent en bouteille. Pour le prouver, il faut faire glisser son bateau miniature jusqu’au quai.',
-    steps: [{ k: 'puzzle', text: 'Souffler avec les bonnes bouteilles pour amener le bateau au quai' }],
+      'Zafir vend du vent en bouteille. Ses plus belles cuvées se sont échappées et tourbillonnent autour de son étal.',
+    steps: [
+      {
+        k: 'chase',
+        n: 4,
+        art: 'whirl',
+        who: 'Tourbillon',
+        label: 'Mettre en bouteille',
+        text: 'Remettre quatre tourbillons en bouteille'
+      },
+      {
+        k: 'kill',
+        n: 6,
+        mobs: ['Drake des dunes'],
+        what: 'Drake mis en fuite',
+        text: 'Éloigner les drakes qui respirent la marchandise'
+      },
+      {
+        k: 'talk',
+        npc: 'amira',
+        lines: [
+          'Une bouteille de brise, de la part de Zafir ? Il me doit de l’argent depuis trois ans, et il m’envoie du vent.',
+          'Oh… mais c’est du vrai. Il sent la mer. Dis-lui que nous sommes quittes. Et que… non, rien. Dis-lui juste merci.'
+        ],
+        text: 'Livrer une bouteille de brise à Amira, à l’oasis'
+      }
+    ],
     reward: { gold: 330, item: 'Épique', text: 'Équipement Épique de ton niveau' },
     talk: {
       offer: [
-        'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde mon bassin.',
-        'Débouche une bouteille (E) et le bateau file jusqu’au premier obstacle. Amène-le au quai.'
+        'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde-le courir, il s’est échappé !',
+        'Rattrape mes tourbillons, éloigne les drakes qui les respirent, et porte une bouteille à Amira. Discrètement. C’est un cadeau.'
       ],
-      active: 'Le bateau ne s’arrête que contre un rocher ou un bord. Réfléchis avant de souffler.',
-      ready: 'Au quai ! Tu vois bien que je vends du vrai vent. Tiens, un cadeau de la maison.',
-      after: 'Les affaires marchent. Le vent d’est se vend très bien en ce moment.'
+      active: 'Un tourbillon file toujours loin de toi. Accule-le contre une dune !',
+      ready: 'Elle a souri ? Elle a SOURI ? Tiens, un cadeau de la maison. Non, deux. Non, un.',
+      after: 'Les affaires marchent. Et Amira passe tous les jours. Pour le vent, dit-elle.'
     }
   },
   {
@@ -953,16 +1496,27 @@ export const QUESTS = deepFreeze([
     site: 'q24',
     level: 46,
     summary:
-      'La porte d’un petit temple ne s’ouvre qu’à la lumière du soleil. Des miroirs anciens sont encore là.',
-    steps: [{ k: 'puzzle', text: 'Orienter les miroirs pour diriger le rayon solaire sur la porte' }],
+      'La porte d’un petit temple ne s’ouvre qu’à la lumière du soleil. Des miroirs anciens sont encore là. Leur gardienne aussi.',
+    steps: [
+      { k: 'puzzle', text: 'Orienter les miroirs pour diriger le rayon solaire sur la porte' },
+      {
+        k: 'hunt',
+        mob: 'Squelette',
+        title: 'Néfer, la gardienne du rayon',
+        at: [2, -2],
+        icon: '☀️',
+        label: 'Franchir la porte',
+        text: 'Vaincre la gardienne du temple'
+      }
+    ],
     reward: { gold: 360, item: 'Épique', text: 'Le coffre du temple (équipement Épique)' },
     talk: {
       offer: [
         'Ce temple garde un coffre depuis mille ans. Sa porte attend un rayon de soleil.',
-        'Quatre miroirs, un rayon. Tourne-les (E), et suis la lumière jusqu’au soleil gravé sur la porte.'
+        'Quatre miroirs, un rayon. Tourne-les (E), et suis la lumière jusqu’au soleil gravé sur la porte. Puis salue Néfer. Elle déteste être réveillée.'
       ],
       active: 'Certains miroirs ne servent à rien. Suis le rayon depuis la pierre solaire.',
-      ready: 'La porte s’ouvre ! Le coffre est à toi, voyageur de lumière.',
+      ready: 'Néfer dort de nouveau, et la porte est ouverte. Le coffre est à toi, voyageur de lumière.',
       after: 'Je viens prier ici chaque matin. Le rayon touche toujours la porte.'
     }
   },
@@ -975,25 +1529,55 @@ export const QUESTS = deepFreeze([
     site: 'q25',
     level: 48,
     summary:
-      'L’oasis d’Amira s’assèche. Le vieil aqueduc a trois portes, et l’eau part toujours dans le sable.',
+      'L’oasis d’Amira s’assèche. Des scorpions ont bâti leurs nids dans l’aqueduc, et plus personne n’ose porter l’eau.',
     steps: [
       {
-        k: 'puzzle',
-        text: 'Ouvrir et fermer les portes de l’aqueduc pour remplir le bassin (sans inonder le sable)'
+        k: 'kill',
+        n: 10,
+        mobs: ['Scorpion'],
+        what: 'Scorpion vaincu',
+        text: 'Chasser les scorpions de l’oasis'
+      },
+      {
+        k: 'pick',
+        n: 4,
+        spread: [4, 8],
+        art: 'nest',
+        icon: '🦂',
+        item: 'Nid détruit',
+        label: 'Détruire le nid',
+        ambush: ['Scorpion', 2],
+        text: 'Détruire les nids qui bouchent l’aqueduc'
+      },
+      {
+        k: 'escort',
+        art: 'person',
+        look: { sex: 'm', race: 'humain', skin: '#a8724a', hair: '#1a1418', outfit: 'or' },
+        who: 'Porteur d’eau',
+        from: [-5, -3],
+        to: [2, 1],
+        ambush: [
+          ['Scorpion', 2],
+          ['Drake des dunes', 1]
+        ],
+        label: 'Accompagner le porteur',
+        text: 'Escorter le porteur d’eau jusqu’au bassin',
+        world: ['oasis']
       }
     ],
     reward: { gold: 380, recipe: 'tajine', text: 'Recette « Tajine de l’oasis » et oasis restaurée' },
     talk: {
       offer: [
-        'L’eau coule dans l’aqueduc, mais elle finit dans le sable. Le bassin de l’oasis reste vide.',
-        'Trois portes (E) dirigent l’eau. Elle doit aller au bassin, et nulle part ailleurs.'
+        'L’eau n’arrive plus. Les scorpions ont fait leurs nids dans les conduits, et mes porteurs refusent de sortir.',
+        'Nettoie l’aqueduc, puis accompagne le dernier porteur courageux jusqu’au bassin. Une seule jarre suffira : l’eau appelle l’eau.'
       ],
-      active: 'Une porte ouverte laisse passer l’eau vers sa branche. Suis le courant des yeux.',
+      active: 'Un nid détruit, c’est une colère réveillée. Garde ton arme en main.',
       ready:
         'L’eau chante dans le bassin ! L’oasis va refleurir. Tiens, la recette de ma mère : elle demande une eau pure.',
       after: 'Les palmiers ont déjà de nouvelles palmes. Merci, l’ami de l’eau.'
     }
   },
+  // ---------------------------------------------------------------- Chapitre VI
   {
     id: 26,
     chapter: 5,
@@ -1004,40 +1588,48 @@ export const QUESTS = deepFreeze([
     requires: 22,
     level: 52,
     summary:
-      'Lumi te guide jusqu’au sanctuaire central. Quatre épreuves attendent, faites de tout ce que tu as appris.',
+      'Lumi te guide jusqu’au sanctuaire central. Trois épreuves attendent : celle du souffle, celle du courage, celle de la lumière.',
     steps: [
-      { k: 'trials', n: 4, text: 'Réussir les quatre épreuves du savoir (E sur chaque stèle)' },
+      {
+        k: 'race',
+        n: 6,
+        spread: [5, 10],
+        text: 'Épreuve du souffle : courir avec la lumière avant qu’elle s’éteigne'
+      },
+      {
+        k: 'wave',
+        waves: [4, 5, 5],
+        mobs: ['Gardien astral', 'Fée sauvage'],
+        what: 'la flamme du sanctuaire',
+        icon: '🔥',
+        art: 'crystal',
+        at: [0, 1],
+        label: 'Allumer la flamme',
+        text: 'Épreuve du courage : garder la flamme du sanctuaire'
+      },
+      {
+        k: 'pick',
+        n: 6,
+        spread: [4, 9],
+        art: 'crystal',
+        icon: '✨',
+        item: 'Lumière retrouvée',
+        label: 'Recueillir la lumière',
+        text: 'Épreuve de la lumière : recueillir les six lumières égarées'
+      },
       { k: 'spot', at: [0, -1], text: 'Placer les étoiles sur l’autel (E)' }
     ],
     reward: { gold: 520, flags: ['sanct_lumieres'], text: 'Accès à la Chambre de l’Aurore' },
     talk: {
       offer: [
         '✨ Tu entends ? C’est ici. Le sanctuaire des six lumières… je m’en souviens, je crois.',
-        '✨ Quatre stèles vont te poser des questions sur notre voyage. Puis pose les étoiles sur l’autel. Je reste près de toi.'
+        '✨ Trois épreuves. Les anciens voulaient des gens qui courent, qui tiennent et qui regardent. Puis pose les étoiles sur l’autel. Je reste près de toi.'
       ],
-      active:
-        '✨ Souviens-toi de tout : les ruines, la forêt, le marais… les réponses sont dans ton journal.',
-      ready: '✨ Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis nous attend.',
+      active: '✨ Je brille plus fort quand tu es près de moi. Tu l’avais remarqué ?',
+      ready:
+        '✨ Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis nous attend… et quelqu’un d’autre.',
       after: '✨ Je me sens… plus chaude. Comme si je rentrais chez moi.'
-    },
-    trials: [
-      {
-        q: 'Sur la carte d’Orven, quel symbole était au nord ?',
-        a: ['La lune', 'L’étoile', 'La flamme'],
-        ok: 1
-      },
-      {
-        q: 'Quelle note ouvrait la mélodie des anciens ?',
-        a: ['La plus aiguë', 'La plus grave', 'Celle du milieu'],
-        ok: 1
-      },
-      {
-        q: 'Pourquoi les anciens ont-ils dispersé le Cœur ?',
-        a: ['Pour le protéger de l’Ombre', 'Pour le vendre', 'Par erreur'],
-        ok: 0
-      },
-      { q: 'Combien d’étoiles composent le Cœur ?', a: ['Quatre', 'Cinq', 'Six'], ok: 2 }
-    ]
+    }
   },
   {
     id: 27,
@@ -1049,14 +1641,15 @@ export const QUESTS = deepFreeze([
     requires: 26,
     level: 58,
     summary:
-      'Auralis, le dernier gardien, attend dans la Chambre de l’Aurore. L’Ombre a laissé des échos qui ne veulent pas que le Cœur se réveille.',
+      'Auralis, le dernier gardien, attend dans la Chambre de l’Aurore. Vesper, sa sœur, y arrive en même temps que toi. Et elle n’est pas venue seule.',
     steps: [
       { k: 'spot', at: [-4, 0], text: 'Lire la fresque du gardien (E)' },
       {
         k: 'defense',
-        text: 'Protéger les six cristaux contre les manifestations (E sur l’autel pour commencer)'
+        text: 'Protéger les six cristaux (E sur l’autel pour commencer)'
       },
       { k: 'guardian', text: 'Vaincre l’Ombre, le cœur des échos (E sur le sceau)' },
+      { k: 'choice', npc: 'vesper', text: 'Décider du sort de Vesper' },
       { k: 'collect', n: 6, text: 'Réunir la lumière des six cristaux' }
     ],
     reward: {
@@ -1066,16 +1659,23 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Je suis Auralis. J’étais le gardien du Cœur… et je suis resté, même quand tout le monde est parti.',
-        'Les échos de l’Ombre rôdent encore. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille.'
+        'Je suis Auralis. J’étais le gardien du Cœur… et je suis resté, même quand tout le monde est parti. Même quand ma sœur a cessé de chanter.',
+        'Elle arrive, et l’Ombre avec elle. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille.'
       ],
       active: 'Tiens bon. Tant qu’il reste des cristaux, le Cœur peut se réveiller.',
+      ask: 'L’Ombre m’a tenu compagnie quand vous m’avez laissée. Elle n’était pas mauvaise, au début. Elle avait faim, et moi aussi. Je suis fatiguée, gardien. Que fais-tu de moi ?',
       ready:
-        'Le Cœur s’éveille… Et Lumi… regarde-la. Elle était une étincelle du Cœur depuis le début. Elle t’a choisi. Gardien de l’Aurore.',
-      after: 'L’île respire à nouveau. Les six sanctuaires brillent. Merci, Gardien.'
+        'Le Cœur s’éveille… Et Lumi… regarde-la. Elle était une étincelle du Cœur depuis le début. Elle pouvait rentrer. Elle a choisi de rester avec toi. Gardien de l’Aurore.',
+      after: 'L’île respire à nouveau. Les six sanctuaires brillent. Merci, Gardien.',
+      afterChoice: [
+        'Ma sœur a repris sa place dans le chœur. Elle chante faux. C’est le plus beau son que j’aie entendu depuis mille ans.',
+        'Ma sœur a repris la mer. Elle écrira, dit-elle. Je lui ai laissé une étoile allumée, au cas où.'
+      ]
     },
+    choices: ['Reviens chanter avec nous', 'Pars en paix, et ne reviens pas'],
+    verse: 'Cœur, réveille-toi : nous chantons à nouveau, l’aube a gardé ta place au bord de l’eau.',
     memory:
-      'Le Cœur de l’Aurore se réveille. Les six sanctuaires retrouvent leur lumière, et Lumi révèle la vérité : elle était une étincelle du Cœur, tombée du ciel pour trouver quelqu’un capable de le réveiller. Ce quelqu’un, c’était toi.'
+      'Le Cœur de l’Aurore se réveille. Les six sanctuaires retrouvent leur lumière, et Lumi révèle la vérité : elle était une étincelle du Cœur, tombée du ciel pour trouver quelqu’un capable de le réveiller. Ce quelqu’un, c’était toi. Quant à Vesper, elle a entendu son nom dans la Ballade. Personne ne l’avait effacé de la musique.'
   },
   {
     id: 28,
@@ -1089,15 +1689,22 @@ export const QUESTS = deepFreeze([
       'Deux clairières se reflètent l’une l’autre. Ce qu’on change dans la première change la seconde… à l’envers.',
     steps: [
       {
+        k: 'kill',
+        n: 6,
+        mobs: ['Fée sauvage'],
+        what: 'Fée calmée',
+        text: 'Calmer les fées qui brouillent le reflet'
+      },
+      {
         k: 'puzzle',
-        text: 'Actionner les leviers de la première clairière pour ouvrir un passage dans la seconde'
+        text: 'Actionner les leviers pour ouvrir un passage dans l’autre clairière'
       }
     ],
     reward: { gold: 500, item: 'Légendaire', text: 'Le coffre enchanté (équipement Légendaire)' },
     talk: {
       offer: [
-        'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite.',
-        'Abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.'
+        'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite. Et les fées s’amusent à le rider.',
+        'Calme-les, puis abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.'
       ],
       active: 'Deux leviers abaissés, un seul levé. Regarde quels rochers bougent de l’autre côté du miroir.',
       ready: 'Tu as traversé le miroir ! Le coffre enchanté est à toi.',
@@ -1113,11 +1720,34 @@ export const QUESTS = deepFreeze([
     site: 'q29',
     level: 55,
     summary:
-      'Pyria élève un jeune dragon qui n’ose pas voler. Il lui faut un parcours d’entraînement, marche après marche.',
+      'Pyria élève un jeune dragon qui n’ose pas voler. Il lui faut du sucre, du courage, et quelqu’un qui coure devant lui.',
     steps: [
       {
-        k: 'puzzle',
-        text: 'Construire le parcours : chaque perchoir un cran plus haut que le précédent, puis appeler le dragon'
+        k: 'pick',
+        n: 5,
+        spread: [5, 10],
+        icon: '🍑',
+        item: 'Pêche étoilée',
+        label: 'Cueillir la pêche',
+        text: 'Cueillir des pêches étoilées pour Braise'
+      },
+      {
+        k: 'wave',
+        waves: [2, 3],
+        mobs: ['Drake astral'],
+        what: 'Braise',
+        icon: '🐉',
+        art: 'horn',
+        at: [-3, 1],
+        label: 'Sonner le cor',
+        text: 'Protéger Braise des drakes qui se moquent de lui'
+      },
+      {
+        k: 'race',
+        n: 6,
+        spread: [5, 10],
+        text: 'Courir devant Braise pour lui montrer comment prendre son élan',
+        world: ['pyria']
       }
     ],
     reward: {
@@ -1128,12 +1758,12 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Braise a peur du vide. Il ne sautera que si chaque perchoir est juste un peu plus haut que le précédent.',
-        'Règle les quatre perchoirs (E), du plus bas au plus haut, une marche à la fois. Puis appelle-le avec le cor.'
+        'Braise a peur du vide. Les grands drakes le savent, et ils viennent rire de lui tous les soirs.',
+        'Donne-lui des pêches, fais taire les moqueurs, puis cours devant lui. Aussi vite que tu peux. Il te suivra, j’en suis sûre.'
       ],
-      active: 'Pas deux perchoirs à la même hauteur, et jamais deux marches d’un coup.',
+      active: 'Il aime les pêches bien mûres. Et il aime bien tes bottes, mais ne le laisse pas les manger.',
       ready:
-        'IL VOLE ! Braise vole ! On va rester dans la forêt, il adore les cristaux. Tiens, une petite statue de lui.',
+        'IL VOLE ! Braise vole ! On va rester dans la forêt, il adore les cristaux. Tiens, il a choisi ça pour toi dans mes affaires.',
       after: 'Braise fait des loopings maintenant. Il est insupportable. Je l’adore.'
     }
   },
@@ -1146,8 +1776,15 @@ export const QUESTS = deepFreeze([
     site: 'q30',
     level: 57,
     summary:
-      'Le lac reflète une constellation. Élya dit qu’il faut marcher sur ses étoiles, dans l’ordre où elles s’allument.',
+      'Le lac reflète une constellation, mais des ents malades lui font de l’ombre. Élya dit qu’il faut marcher sur ses étoiles, dans l’ordre où elles s’allument.',
     steps: [
+      {
+        k: 'kill',
+        n: 6,
+        mobs: ['Ent corrompu'],
+        what: 'Ent apaisé',
+        text: 'Apaiser les ents corrompus autour du lac'
+      },
       { k: 'puzzle', text: 'Marcher sur les pierres du lac dans l’ordre de la constellation reflétée' }
     ],
     reward: {
@@ -1157,14 +1794,42 @@ export const QUESTS = deepFreeze([
     },
     talk: {
       offer: [
-        'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre.',
-        'Marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.'
+        'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre. Enfin, quand les ents ne lui cachent pas le ciel.',
+        'Apaise-les, puis marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.'
       ],
       active: 'Regarde le reflet : l’étoile qui s’allume en premier, puis la suivante…',
       ready: 'Le lac t’a reconnu. Ce bijou a été taillé dans une étoile tombée. Il est à toi.',
       after: 'Les nuits claires, le lac brille encore pour toi.'
     }
-  }
+  },
+  ...INTERLUDE_QUESTS
+]);
+// Changements du monde visibles par tous (monde.quetes.flags), et ceux des anciennes énigmes résolues.
+export const WORLD_FLAGS = Object.freeze([
+  ...new Set([
+    ...SANCTUARIES.map(s => 'sanct_' + s.id),
+    'shortcut',
+    ...QUESTS.flatMap(q => /** @type {any[]} */ ([...q.steps]).flatMap(s => s.world || []))
+  ])
+]);
+export const LEGACY_SOLVED = deepFreeze({
+  q3: 'sommet',
+  q7: 'goldtree',
+  q11: 'lanterns',
+  q13: 'bridge',
+  q17: 'archives',
+  q19: 'grenier',
+  q21: 'cite',
+  q22: 'machine',
+  q25: 'oasis',
+  q29: 'pyria'
+});
+// Les quatre voix de l'Interlude (drapeaux, dans l'ordre des biomes).
+export const VOICES = deepFreeze([
+  { flag: 'voice1', name: 'La voix de l’argile' },
+  { flag: 'voice2', name: 'La voix du fer' },
+  { flag: 'voice3', name: 'La voix des oubliés' },
+  { flag: 'voice4', name: 'La voix de la mousse' }
 ]);
 export const QUEST_IDS = Object.freeze(QUESTS.map(q => q.id));
 // Indices de l'esprit (quête 14) : où les trouver (relatif au lieu) et ce qu'ils apprennent.
@@ -1245,7 +1910,7 @@ export const TRAVELERS = deepFreeze([
 ]);
 
 // ---------------------------------------------------------------- Au fil de l'aventure (hors des quêtes)
-// Gardiens de l'Ombre : un par chapitre, au bout de sa quête principale. Le sceau du lieu (E) les appelle ; vaincus,
+// Gardiens : un par chapitre, Interlude compris, au bout de sa quête principale. Le sceau du lieu (E) les appelle ; vaincus,
 // ils laissent un Cœur d'Aurore (PV max). Un héros qui a fini la quête sans les avoir vaincus peut les défier.
 // moves : slam (cercle sous un héros), rain (un cercle sur chaque héros proche), nova (onde autour du gardien),
 // blink (disparaît et réapparaît ailleurs dans le lieu) ; adds : renforts à 66 % et 33 % de PV.
@@ -1327,11 +1992,28 @@ export const GUARDIANS = deepFreeze({
     adds: 'Spectre',
     intro: 'Toute la lumière de la chambre vacille. L’Ombre elle-même vient reprendre le Cœur !',
     defeat: 'L’Ombre se déchire comme un rideau de nuit. Derrière elle, l’aube se lève.'
+  },
+  36: {
+    name: 'Karn-Duram',
+    title: 'l’écho du deuil',
+    look: 'golem',
+    pal: ['#5a626c', '#2a3038', '#8a949e', '#7ac8ff', '#e0f4ff'],
+    opts: { style: 'statue', crown: true },
+    color: '#7ac8ff',
+    scale: 3.1,
+    moves: ['slam', 'rain', 'nova'],
+    adds: 'Squelette nain',
+    intro: 'La faille gémit. Le chagrin de Khaz-Ombral se lève, plus grand qu’une tour !',
+    defeat: 'Karn-Duram pose un genou à terre, lâche la porte qu’il tenait depuis mille ans, et s’endort.'
   }
 });
-// Coquillages chantants : un caché près de chaque lieu de quête (30). Les voir demande d'être tout près ; la Loupe
+// Coquillages chantants : un caché près de chaque lieu de quête de la surface (30). Les voir demande d'être tout près ; la Loupe
 // d'Orven (fin du troc) les fait briller de loin. Madame Nacre récompense chaque palier.
-export const SHELLS = deepFreeze(Object.keys(QUEST_SITES).map(site => ({ id: 'c_' + site, site })));
+export const SHELLS = deepFreeze(
+  Object.keys(QUEST_SITES)
+    .filter(site => !Object.hasOwn(INTERLUDE_SITES, site))
+    .map(site => ({ id: 'c_' + site, site }))
+);
 export const SHELL_LORE =
   'Quand le Cœur de l’Aurore s’est brisé, son chant s’est caché dans des coquillages, partout sur l’île. Pose-les contre ton oreille : ils fredonnent encore.';
 export const SHELL_REWARDS = deepFreeze([
@@ -1342,7 +2024,7 @@ export const SHELL_REWARDS = deepFreeze([
   { n: 25, gold: 800, heart: 'heart_s25', text: 'Un Cœur d’Aurore (+3 % de PV max)' },
   { n: 30, gold: 1200, item: 'Légendaire', text: 'Équipement Légendaire de ton niveau' }
 ]);
-// Cœurs d'Aurore : six gardiens et deux paliers de coquillages ; chacun donne HEART_BONUS de PV max.
+// Cœurs d'Aurore : sept gardiens et deux paliers de coquillages ; chacun donne HEART_BONUS de PV max.
 export const HEART_FLAGS = Object.freeze([
   ...Object.keys(GUARDIANS).map(id => 'heart_q' + id),
   ...SHELL_REWARDS.filter(r => r.heart).map(r => /** @type {string} */ (r.heart))

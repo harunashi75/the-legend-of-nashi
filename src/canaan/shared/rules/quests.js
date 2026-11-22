@@ -12,11 +12,19 @@ import {
 } from '../data/quests.js';
 import { clampLevel, xpToNext } from './stats.js';
 
-/** @typedef {typeof QUESTS[number]} Quest */
+/**
+ * Une étape : sa mécanique (k), son texte et les réglages propres à cette mécanique (voir shared/data/quests.js).
+ * @typedef {{ k: string, text: string, n?: number, world?: readonly string[], [key: string]: any }} QuestStep
+ * @typedef {{ gold?: number, item?: string, flags?: readonly string[], text: string, [key: string]: any }} QuestReward
+ * @typedef {{ id: number, chapter: number, main: boolean, scaled?: boolean, title: string, npc: string, site: string,
+ *   level: number, requires?: number | readonly number[], steps: readonly QuestStep[], reward: QuestReward,
+ *   [key: string]: any }} Quest
+ */
 /**
  * État des quêtes d'un héros (sauvegardé dans heros.*.quetes).
  * @typedef {object} QuestState
- * @property {Record<number, { step: number, got: string[] }>} active quêtes en cours : étape et objets trouvés
+ * @property {Record<number, { step: number, got: string[], n: number }>} active quêtes en cours : étape, objets trouvés
+ *   et compte de l'étape (créatures vaincues, objets lâchés…)
  * @property {Record<number, number>} done quêtes terminées
  * @property {Record<string, boolean>} flags drapeaux d'histoire
  * @property {Record<number, number>} choices choix narratifs
@@ -24,23 +32,39 @@ import { clampLevel, xpToNext } from './stats.js';
  * @property {number} troc échanges du grand troc déjà faits (0 à TRADE_CHAIN.length)
  * @property {string[]} shells coquillages chantants trouvés
  * @property {number} paid paliers de coquillages déjà récompensés
+ * @property {number} v version des étapes (QUEST_VERSION)
  */
 
+// Version des étapes : une quête en cours d'une version plus ancienne reprend à sa première étape (les quêtes finies et
+// leurs récompenses ne changent pas).
+export const QUEST_VERSION = 2;
+/** @type {readonly Quest[]} */
+const ALL = /** @type {any} */ (QUESTS);
 /** @type {(id: number) => Quest | null} */
-export const questById = id => QUESTS.find(q => q.id === id) || null;
-// XP d'une quête : une part du niveau recommandé (80 % pour une principale, 45 % pour une secondaire).
+export const questById = id => ALL.find(q => q.id === id) || null;
+// Niveau d'une quête pour un héros : le sien pour une quête à tout niveau (Interlude), sinon le niveau conseillé.
+/** @type {(quest: Quest | null | undefined, heroLevel?: number) => number} */
+export const questLevel = (quest, heroLevel = 1) => clampLevel(quest?.scaled ? heroLevel : quest?.level);
+// XP d'une quête : une part de son niveau (80 % pour une principale, 45 % pour une secondaire).
 // Un bon coup de pouce, jamais nécessaire pour monter jusqu'au niveau 60.
 /**
  * @param {Quest | null | undefined} quest
+ * @param {number} [heroLevel] niveau du héros (quêtes à tout niveau)
  * @returns {number}
  */
-export function questXp(quest) {
-  const level = Math.min(59, clampLevel(quest?.level));
+export function questXp(quest, heroLevel = 1) {
+  const level = Math.min(59, questLevel(quest, heroLevel));
   return Math.round(xpToNext(level) * (quest?.main ? 0.8 : 0.45));
 }
+// Or d'une quête : celui de sa récompense ; à tout niveau, il suit le héros comme celui des quêtes de la surface.
+/** @type {(quest: Quest | null | undefined, heroLevel?: number) => number} */
+export const questGold = (quest, heroLevel = 1) =>
+  quest?.scaled
+    ? Math.round((quest.main ? 50 : 35) + (quest.main ? 9 : 7) * questLevel(quest, heroLevel))
+    : quest?.reward.gold || 0;
 // Drapeaux d'histoire connus (récompenses et lieux débloqués).
 const FLAGS = new Set([
-  ...QUESTS.flatMap(q => q.reward.flags || []),
+  ...ALL.flatMap(q => q.reward.flags || []),
   ...SANCTUARIES.map(s => 'visit_' + s.id),
   ...HEART_FLAGS
 ]);
@@ -61,7 +85,8 @@ export function sanitizeQuests(raw) {
       track: null,
       troc: 0,
       shells: [],
-      paid: 0
+      paid: 0,
+      v: QUEST_VERSION
     };
   if (r.done && typeof r.done === 'object')
     for (const [k, v] of Object.entries(r.done))
@@ -70,13 +95,18 @@ export function sanitizeQuests(raw) {
     for (const [k, v] of Object.entries(r.active)) {
       const q = questById(Number(k));
       if (!q || out.done[q.id] || !v || typeof v !== 'object') continue;
-      const step = Math.max(0, Math.min(q.steps.length, Math.floor(Number(v.step) || 0))),
-        got = Array.isArray(v.got)
-          ? [
-              ...new Set(v.got.filter(/** @param {unknown} x */ x => typeof x === 'string' && x.length <= 24))
-            ].slice(0, 12)
-          : [];
-      out.active[q.id] = { step, got };
+      const step =
+          r.v === QUEST_VERSION ? Math.max(0, Math.min(q.steps.length, Math.floor(Number(v.step) || 0))) : 0,
+        n = r.v === QUEST_VERSION ? Math.max(0, Math.min(99, Math.floor(Number(v.n) || 0))) : 0,
+        got =
+          r.v === QUEST_VERSION && Array.isArray(v.got)
+            ? [
+                ...new Set(
+                  v.got.filter(/** @param {unknown} x */ x => typeof x === 'string' && x.length <= 24)
+                )
+              ].slice(0, 12)
+            : [];
+      out.active[q.id] = { step, got, n };
     }
   if (r.flags && typeof r.flags === 'object')
     for (const k of Object.keys(r.flags)) if (FLAGS.has(k) && r.flags[k]) out.flags[k] = true;
@@ -100,7 +130,14 @@ export function sanitizeQuests(raw) {
  */
 export function canStart(state, quest) {
   if (!quest || state.active[quest.id] || state.done[quest.id]) return false;
-  return !quest.requires || !!state.done[quest.requires];
+  return !missingQuest(state, quest);
+}
+// Quête à finir avant celle-ci (la première qui manque), ou null.
+/** @type {(state: QuestState, quest: Quest | null | undefined) => Quest | null} */
+export function missingQuest(state, quest) {
+  const need = quest?.requires === undefined ? [] : [quest.requires].flat();
+  const id = need.find(id => !state.done[/** @type {number} */ (id)]);
+  return id === undefined ? null : questById(/** @type {number} */ (id));
 }
 // Toutes les étapes faites : il reste à revenir voir le PNJ.
 /** @type {(state: QuestState, quest: Quest) => boolean} */

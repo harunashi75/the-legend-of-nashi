@@ -116,6 +116,7 @@
     questAccept: element => questAccept(actionInteger(element, 'quest')),
     questTurnIn: element => questTurnIn(actionInteger(element, 'quest')),
     questChoice: element => questChoice(actionInteger(element, 'quest'), actionInteger(element, 'choice')),
+    questHear: element => questHear(actionInteger(element, 'quest')),
     questTrade: element => questTrade(actionText(element, 'npc')),
     questShells: () => questShells(),
     toggleInventory: () => toggleInventory(),

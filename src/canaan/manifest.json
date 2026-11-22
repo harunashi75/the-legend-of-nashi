@@ -309,6 +309,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-quest-field",
+      "file": "scripts/quest-field.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-quests",
       "file": "scripts/quests.js"
     },

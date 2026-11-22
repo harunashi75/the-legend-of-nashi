@@ -72,6 +72,31 @@
   color: #c9b48a;
   font-size: calc(12px * var(--font-scale));
 }
+#window .quest-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 5px 0;
+}
+#window .quest-kinds i {
+  padding: 0 7px;
+  border: 1px solid #6a4e2a;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #d8c090;
+  font-size: calc(11px * var(--font-scale));
+  font-style: normal;
+}
+#window .quest-count,
+#questTracker .quest-count {
+  color: #ffd76a;
+  font-style: normal;
+}
+#window .quest-ballad p {
+  margin: 3px 0;
+  font-style: italic;
+  color: #bfe8ff;
+}
 #window .quest-card ul {
   margin: 6px 0 0;
   padding-left: 4px;

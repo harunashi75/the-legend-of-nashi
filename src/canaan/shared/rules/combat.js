@@ -85,13 +85,13 @@ export function heroMagicPower(attack, intellect = 0) {
 }
 // Corps touchable d'un monstre : un axe vertical des pieds (m.x, m.y) jusqu'à la tête, épaissi d'un rayon. Les
 // coups du héros visent la silhouette entière, pas seulement les pieds. L'échelle suit le dessin (sprite-kit.js).
-/** @typedef {{ x: number, y: number, r?: number, boss?: boolean, worldBoss?: boolean, elite?: boolean, scale?: number }} BodyMob */
+/** @typedef {{ x: number, y: number, r?: number, boss?: boolean, worldBoss?: boolean, elite?: boolean, scale?: number, title?: string }} BodyMob */
 /**
  * @param {BodyMob} m
  * @returns {number}
  */
 export function canaanMobScale(m) {
-  return m.boss ? m.scale || 3.3 : m.worldBoss ? 3.6 : m.elite ? 1.95 : 1.5;
+  return m.boss ? m.scale || 3.3 : m.worldBoss ? 3.6 : m.elite ? (m.title ? 2.35 : 1.95) : 1.5;
 }
 /**
  * @param {BodyMob} m

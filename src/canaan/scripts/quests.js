@@ -1,5 +1,8 @@
-// Histoire « Les Échos de l'Aurore » et quêtes (shared/data/quests.js, shared/rules/quests.js).
-// - Lieux : posés sur l'île après sa génération (mêmes cases chez chacun), avec leurs énigmes, PNJ et objets.
+// Histoire « Les Échos de l'Aurore » et quêtes (shared/data/quests.js, shared/rules/quests.js) : lieux, personnages,
+// progression, dialogues, journal, gardiens, troc et coquillages. Les objectifs de terrain (chasse, escorte, défense,
+// poursuite, course, champion…) sont dans quest-field.js.
+// - Lieux : posés sur l'île après sa génération (mêmes cases chez chacun), et ceux de l'Interlude dans les Tréfonds
+//   (placeUnder, appelé par underground.js), avec leurs énigmes, PNJ et objets.
 // - Progression personnelle (hero.quetes, sauvegardée) : quêtes actives et étapes, terminées, drapeaux,
 //   choix ; l'état des énigmes et les changements du monde (pont, lanternes, sanctuaires) sont partagés
 //   (monde.quetes, sauvegardé par l'hôte). Une énigme résolue à plusieurs compte pour chaque héros qui l'a en cours.
@@ -13,6 +16,8 @@
   const NPCS = {};
   // Passage dans les lieux : case → fonction (vrai : praticable, faux : bloqué).
   const WALK = new Map();
+  // Même chose dans les Tréfonds (lieux de l'Interlude).
+  const WALK_UNDER = new Map();
   const tileKey = (tx, ty) => ty * MAPW + tx;
   const now = () => time;
   const guest = () => game.mode === 'guest';
@@ -29,13 +34,15 @@
     track: null,
     troc: 0,
     shells: [],
-    paid: 0
+    paid: 0,
+    v: QUEST_VERSION
   });
   const stateOf = hero => {
     const st = (hero.quetes ??= fresh());
     st.troc ??= 0;
     st.shells ??= [];
     st.paid ??= 0;
+    st.v ??= QUEST_VERSION;
     return st;
   };
   // État du monde : drapeaux (pont, lanternes, sanctuaires ouverts…) et énigmes résolues.
@@ -65,7 +72,7 @@
     if (setTile(site.x + dx, site.y + dy, t, deco)) solid(site, dx, dy);
   }
   function solid(site, dx, dy, fn = () => false) {
-    WALK.set(tileKey(site.x + dx, site.y + dy), fn);
+    (site.under ? WALK_UNDER : WALK).set(tileKey(site.x + dx, site.y + dy), fn);
   }
   function addObj(site, id, kind, dx, dy, extra = {}) {
     const o = { id, kind, dx, dy, x: px(site, dx), y: py(site, dy), ...extra };
@@ -116,6 +123,8 @@
       reach = tools.reachableFrom(camp.x, camp.y),
       taken = tools.taken();
     for (const [id, def] of Object.entries(QUEST_SITES)) {
+      // Les lieux des Tréfonds sont posés après leur génération (placeUnder).
+      if (def.under) continue;
       let target,
         free = true;
       if (def.camp) target = { x: camp.x + def.camp[0], y: camp.y + def.camp[1] };
@@ -143,10 +152,11 @@
       SITES[id] = site;
       taken.push([site.x, site.y]);
       clearSite(site, def.r + (id === 'q8' ? 1 : 0), tools);
-      BUILD[id](site, tools);
+      BUILD[id]?.(site, tools);
     }
     for (const [id, def] of Object.entries(QUEST_NPCS)) {
       const site = SITES[def.site];
+      if (QUEST_SITES[def.site].under || def.dwarfName) continue;
       let at = def.at || [0, 0];
       if (def.camp) at = [camp.x + def.camp[0] - site.x, camp.y + def.camp[1] - site.y];
       const [dx, dy] = walkableNear(site, at[0], at[1], tools);
@@ -160,10 +170,112 @@
         site
       };
     }
+    for (const site of surfaceSites())
+      FIELD.build(site, {
+        ok: (x, y) =>
+          tools.valid(x, y) &&
+          tools.walkableLand(x, y) &&
+          reach[y * MAPW + x] === 1 &&
+          !isSafe(x, y) &&
+          !WALK.has(tileKey(x, y)) &&
+          !Object.values(NPCS).some(n => Math.hypot(n.x / T - x - 0.5, n.y / T - y - 0.5) < 1.2)
+      });
     placeAdventure(tools, reach);
     // Pierre de passage du camp (raccourci de la quête 8), au bord de la clairière.
     const w = tools.nearestSpot(camp.x - 4, camp.y - 9, 0, (x, y) => tools.walkableLand(x, y));
     WAYSTONE.camp = { x: (w.x + 0.5) * T, y: (w.y + 0.5) * T };
+  }
+  const surfaceSites = () => Object.values(SITES).filter(s => !s.under);
+  // Même couche que le groupe : l'île, ou les Tréfonds.
+  const here = v => !!(v.under ?? v.site?.under) === canaanUnder();
+  // Lieux et personnages de l'Interlude, posés par underground.js une fois les Tréfonds générés, dans la forteresse ou au
+  // plus près du centre d'une caverne, sans toucher à la roche. tools : cavern(biome, kind), open(x, y) (sol libre),
+  // clear(x, y) (retire un décor), center (forteresse), dwarf(nom) (nain du jeu).
+  function placeUnder(tools) {
+    for (const s of Object.values(SITES)) if (s.under) delete SITES[s.id];
+    for (const n of Object.values(NPCS)) if (n.under) delete NPCS[n.id];
+    WALK_UNDER.clear();
+    const taken = [],
+      roomyUnder = (x, y, r) => {
+        let ok = 0,
+          all = 0;
+        for (let yy = y - r; yy <= y + r; yy++)
+          for (let xx = x - r; xx <= x + r; xx++) {
+            if (Math.hypot(xx - x, yy - y) > r) continue;
+            all++;
+            if (tools.open(xx, yy)) ok++;
+          }
+        return ok / all;
+      };
+    for (const [id, def] of Object.entries(QUEST_SITES)) {
+      if (!def.under) continue;
+      let best;
+      if (def.fort) best = { x: tools.center.x + def.fort[0], y: tools.center.y + def.fort[1] };
+      else {
+        const c = tools.cavern(def.biome, def.cavern),
+          R0 = Math.ceil(c.r);
+        let score = -1e9;
+        for (let y = Math.round(c.y) - R0; y <= c.y + R0; y++)
+          for (let x = Math.round(c.x) - R0; x <= c.x + R0; x++) {
+            if (!tools.open(x, y) || taken.some(([a, b]) => Math.hypot(a - x, b - y) < 9)) continue;
+            const v = roomyUnder(x, y, 4) * 40 - Math.hypot(x - c.x, y - c.y);
+            if (v > score) [best, score] = [{ x, y }, v];
+          }
+        best ??= { x: Math.round(c.x), y: Math.round(c.y) };
+      }
+      const site = {
+        id,
+        x: best.x,
+        y: best.y,
+        zone: 0,
+        under: true,
+        biome: def.biome ?? 4,
+        r: def.r,
+        objs: [],
+        quest: QUESTS.find(q => q.site === id)
+      };
+      SITES[id] = site;
+      taken.push([site.x, site.y]);
+      if (!def.fort)
+        for (let y = -4; y <= 4; y++)
+          for (let x = -4; x <= 4; x++) if (Math.hypot(x, y) < 4.3) tools.clear(site.x + x, site.y + y);
+    }
+    for (const [id, def] of Object.entries(QUEST_NPCS)) {
+      const site = SITES[def.site];
+      if (!site?.under) continue;
+      const dwarf = def.dwarfName ? tools.dwarf(def.dwarfName) : null;
+      let x = px(site, def.at?.[0] || 0),
+        y = py(site, def.at?.[1] || 0);
+      // Un nain du jeu : sa place habituelle (il ne s'en éloigne guère), la même chez l'hôte et chez l'invité.
+      if (dwarf) {
+        [x, y] = [dwarf.hx, dwarf.hy];
+        dwarf.roam = Math.min(dwarf.roam || 0.6, 0.6);
+      } else {
+        const [tx, ty] = nearOpen(tools, site.x + (def.at?.[0] || 0), site.y + (def.at?.[1] || 0));
+        [x, y] = [(tx + 0.5) * T, (ty + 0.5) * T];
+      }
+      NPCS[id] = { id, def, x, y, face: 0, quest: QUESTS.find(q => q.npc === id), site, under: true, dwarf };
+    }
+    const ok = (x, y) =>
+      tools.open(x, y) &&
+      !Object.values(NPCS).some(n => n.under && Math.hypot(n.x / T - x - 0.5, n.y / T - y - 0.5) < 1.2);
+    for (const site of Object.values(SITES)) {
+      if (!site.under) continue;
+      FIELD.build(site, { ok, cavern: tools.cavern });
+      // Sceau du gardien de l'Interlude.
+      if (site.quest && GUARDIANS[site.quest.id]) {
+        const [x, y] = nearOpen(tools, site.x + 3, site.y - 3);
+        addObj(site, 'gseal', 'gseal', x - site.x, y - site.y, { range: 1.4 });
+      }
+    }
+  }
+  function nearOpen(tools, x, y) {
+    for (let r = 0; r <= 8; r++)
+      for (let dy = -r; dy <= r; dy++)
+        for (let dx = -r; dx <= r; dx++)
+          if (Math.max(Math.abs(dx), Math.abs(dy)) === r && tools.open(x + dx, y + dy))
+            return [x + dx, y + dy];
+    return [x, y];
   }
   const WAYSTONE = { camp: null, forest: null };
   // Sceaux des gardiens (au bord de leur clairière, loin des objets et des PNJ) et coquillages chantants (cachés
@@ -175,7 +287,7 @@
     for (const id of Object.keys(GUARDIANS)) {
       const q = questById(Number(id)),
         site = q && SITES[q.site];
-      if (!site) continue;
+      if (!site || site.under) continue;
       let spot = null;
       for (let k = 0; k < 24 && !spot; k++) {
         const a = ((90 + k * 37) * Math.PI) / 180,
@@ -219,63 +331,12 @@
   }
 
   // ---------------------------------------------------------------- Lieux et énigmes
-  const ORDER_Q1 = PUZZLE_ORDER_Q1;
-  const SYMBOLS_Q2 = PUZZLE_SYMBOLS_Q2;
-  const SCENES_Q12 = PUZZLE_SCENES_Q12;
-
   ST = puzzleFreshStates();
   const BUILD = {
     q1(site) {
-      [
-        ['lune', 0, -2],
-        ['soleil', 2, 0],
-        ['pluie', 0, 2],
-        ['vent', -2, 0]
-      ].forEach(([sym, dx, dy]) => addObj(site, 'p_' + sym, 'stone', dx, dy, { sym, solid: true }));
-      addObj(site, 'stele', 'stele', -3, -2, { solid: true });
       addObj(site, 'crystal', 'crystal', 0, 0, { solid: true });
     },
-    q2(site) {
-      [
-        ['etoile', -4, -3],
-        ['lune', 4, -2],
-        ['flamme', 1, 4]
-      ].forEach(([s, dx, dy], i) => addObj(site, 'sym_' + s, 'relic', dx, dy, { sym: i }));
-      [
-        [0, -2],
-        [-2, 0],
-        [2, 0]
-      ].forEach(([dx, dy], i) => addObj(site, 'ped' + i, 'pedestal', dx, dy, { i, solid: true }));
-    },
     q3(site) {
-      const N = {
-        pen: [-4, 3],
-        j1: [-1, 3],
-        d1: [3, 3],
-        j2: [-1, 0],
-        d2: [-1, -4],
-        t1: [3, 0],
-        top: [3, -4]
-      };
-      site.nodes = N;
-      const line = (a, b) => {
-        const [x0, y0] = N[a],
-          [x1, y1] = N[b];
-        for (let k = 0; k <= Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); k++)
-          setTile(site.x + x0 + Math.sign(x1 - x0) * k, site.y + y0 + Math.sign(y1 - y0) * k, 2);
-      };
-      [
-        ['pen', 'j1'],
-        ['j1', 'd1'],
-        ['j1', 'j2'],
-        ['j2', 'd2'],
-        ['j2', 't1'],
-        ['t1', 'top']
-      ].forEach(([a, b]) => line(a, b));
-      addObj(site, 'gate0', 'gate', 1, 3, { i: 0, horiz: false });
-      addObj(site, 'gate1', 'gate', -1, -2, { i: 1, horiz: true });
-      addObj(site, 'gate2', 'gate', 1, 0, { i: 2, horiz: false });
-      addObj(site, 'whistle', 'whistle', -4, 1, { solid: true });
       addObj(site, 'flag', 'hilltop', 4, -5, { solid: true });
     },
     q4(site) {
@@ -322,12 +383,6 @@
       shrine(site, 'murmures');
     },
     q7(site) {
-      addObj(site, 'sun', 'sun', -4, -2, { solid: true });
-      [
-        [-1, -2],
-        [-1, 1],
-        [2, 1]
-      ].forEach(([dx, dy], i) => addObj(site, 'mirror' + i, 'mirror', dx, dy, { i, solid: true }));
       wall(site, 2, -2, ZONES[1].t, 'bigtree');
       site.objs.push({ id: 'gtree', kind: 'gtree', dx: 2, dy: -2, x: px(site, 2), y: py(site, -2) });
     },
@@ -411,7 +466,6 @@
     },
     q9(site) {
       addObj(site, 'sack', 'sack', -4, 4, { solid: true });
-      addObj(site, 'thief', 'thief', 5, -4);
       const pts = [];
       for (let k = 0; k <= 26; k++) {
         const t = k / 26;
@@ -425,28 +479,16 @@
       addObj(site, 'easel', 'easel', -2, 3, { solid: true });
     },
     q11(site) {
-      [
-        [-3, 2],
-        [0, 2],
-        [3, 2]
-      ].forEach(([dx, dy], i) => addObj(site, 'valve' + i, 'valve', dx, dy, { i, solid: true }));
-      [
-        [-3, -2],
-        [-1, -3],
-        [1, -3],
-        [3, -2]
-      ].forEach(([dx, dy], i) => addObj(site, 'lantern' + i, 'lantern', dx, dy, { i, solid: true }));
       shrine(site, 'reflets');
     },
     q12(site) {
       for (let y = -2; y <= 1; y++) for (let x = -4; x <= 4; x++) setTile(site.x + x, site.y + y, 2);
-      [-3, -1, 1, 3].forEach((dx, i) => addObj(site, 'frame' + i, 'frame', dx, -1, { i, solid: true }));
     },
     q13(site) {
       for (let y = -6; y <= 6; y++)
         for (let x = -2; x <= 1; x++) if (Math.hypot(x, y) < 6.4) setTile(site.x + x, site.y + y, 0);
-      [-2, -1, 0, 1].forEach((dx, i) => {
-        addObj(site, 'plank' + i, 'plank', dx, 0, { i, range: 2.4 });
+      [-2, -1, 0, 1].forEach(dx => {
+        addObj(site, 'plank' + (dx + 2), 'plank', dx, 0, { range: 0 });
         solid(site, dx, 0, () => !!qworld.flags.bridge);
       });
     },
@@ -496,56 +538,28 @@
     addObj(site, 'shrine', 'shrine', 0, -6, { solid: true, sanct: id, name: s.name });
   }
 
-  canaanQuestWalk = (x, y) => {
+  // under : couche à interroger (celle du groupe par défaut).
+  canaanQuestWalk = (x, y, under = canaanUnder()) => {
     if (game.world.instance) return null;
-    const f = WALK.get(tileKey(Math.floor(x / T), Math.floor(y / T)));
+    const f = (under ? WALK_UNDER : WALK).get(tileKey(Math.floor(x / T), Math.floor(y / T)));
     return f ? f() : null;
   };
 
   // ---------------------------------------------------------------- Chapitres IV à VI : lieux et énigmes
-  const VILLAGE_OBJS = PUZZLE_VILLAGE_OBJS;
-  const HOUSES = PUZZLE_HOUSES;
-  const SEASONS = PUZZLE_SEASONS;
-  const GEARS = PUZZLE_GEARS;
-  // Héros d'un objet porté (quête 16) : l'hôte, ou l'identifiant d'un invité.
+  // Clé d'un héros dans l'état partagé d'une énigme : l'hôte, ou l'identifiant d'un invité.
   const keyOf = h => (h === game.hero ? (guest() ? CANAAN_NET.state().heroId : 'host') : h.id || 'host');
-  const heroOfKey = k => game.heroes.find(h => keyOf(h) === k) || null;
-  // Lieux de la fin de l'histoire : la clé de leur solution.
-  const ANSWER = PUZZLE_ANSWER;
   // Constellation du lac (quête 30) : pierres dans l'ordre où leurs étoiles s'allument.
   const CONSTELLATION = PUZZLE_CONSTELLATION;
 
-  // Bassin du bateau (quête 23) : x de -3 à 2, y de -2 à 1 ; rochers ; quai en bas à droite.
-  const BASIN = PUZZLE_BASIN;
-
-  const AQ = PUZZLE_AQUEDUCT;
-  // Rayon des miroirs : quête 7 (pierre solaire → arbre gardien) et quête 24 (→ porte du temple).
+  // Rayon des miroirs (quête 24).
   const BEAMS = PUZZLE_BEAMS;
 
   Object.assign(BUILD, {
     q16(site) {
-      [
-        [-4, -2],
-        [4, -2],
-        [-4, 2],
-        [4, 2]
-      ].forEach(([dx, dy], i) => addObj(site, 'house' + i, 'house', dx, dy, { i, solid: true }));
-      [
-        [-1, 0],
-        [1, 0],
-        [0, -1],
-        [0, 1]
-      ].forEach(([dx, dy], i) => addObj(site, 'vobj' + i, 'vobj', dx, dy, { i }));
       for (const m of VILLAGE_MEMORIES) addObj(site, m.id, 'leaf', m.at[0], m.at[1], { what: m.what });
       shrine(site, 'saisons');
     },
     q17(site, tools) {
-      [
-        [0, -2],
-        [2, 0],
-        [0, 2],
-        [-2, 0]
-      ].forEach(([dx, dy], i) => addObj(site, 'pillar' + i, 'pillar', dx, dy, { i, solid: true }));
       for (const f of FRESCO) {
         const [x, y] = walkableNear(site, f.at[0], f.at[1], tools);
         addObj(site, f.id, 'fresco', x, y, { what: f.what });
@@ -561,7 +575,6 @@
       addObj(site, 'wheel', 'waterwheel', -4, 0, { solid: true });
       addObj(site, 'mill', 'mill', 4, -1, { solid: true });
       solid(site, 4, 0);
-      [-2, 0, 2].forEach((dx, i) => addObj(site, 'gear' + i, 'gear', dx, 0, { i, solid: true }));
     },
     q20(site) {
       for (let y = -6; y <= 6; y++)
@@ -579,17 +592,11 @@
         addObj(site, 'hide' + i, 'hide', dx, dy, { i, name, look, solid: look === 'pumpkin' })
       );
     },
-    q21(site, tools) {
-      [
-        [-5, 0],
-        [5, 0],
-        [0, 5]
-      ].forEach(([dx, dy], i) => addObj(site, 'obelisk' + i, 'obelisk', dx, dy, { i, solid: true }));
+    q21(site) {
       addObj(site, 'plate', 'starplate', 0, 0);
       shrine(site, 'etoiles');
     },
     q22(site) {
-      [-2, 0, 2].forEach((dx, i) => addObj(site, 'ring' + i, 'ringlever', dx, 3, { i, solid: true }));
       for (const [dx, dy] of [
         [-1, -1],
         [0, -1],
@@ -604,18 +611,6 @@
         solid(site, dx, dy);
       site.objs.push({ id: 'machine', kind: 'machine', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
       addObj(site, 'treasure', 'treasure', 0, -3, { solid: true });
-    },
-    q23(site) {
-      for (let y = BASIN.y0; y <= BASIN.y1; y++)
-        for (let x = BASIN.x0; x <= BASIN.x1; x++) setTile(site.x + x, site.y + y, 0);
-      site.objs.push({ id: 'basin', kind: 'basin', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
-      [
-        ['fanW', -5, -1, [1, 0]],
-        ['fanE', 4, -1, [-1, 0]],
-        ['fanN', 0, -4, [0, 1]],
-        ['fanS', 0, 3, [0, -1]]
-      ].forEach(([id, dx, dy, push]) => addObj(site, id, 'fan', dx, dy, { push, solid: true }));
-      addObj(site, 'bell', 'bell', -5, 2, { solid: true });
     },
     q24(site) {
       addObj(site, 'sun', 'sun', -4, 2, { solid: true });
@@ -644,20 +639,9 @@
         [2, 4]
       ])
         setTile(site.x + dx, site.y + dy, ZONES[4].t, 'palm');
-      site.objs.push({ id: 'aqueduct', kind: 'aqueduct', dx: 0, dy: 0, x: px(site, 0), y: py(site, 0) });
-      [
-        ['a', -3, -2],
-        ['b', 0, -2],
-        ['c', 1, 0]
-      ].forEach(([n, dx, dy], i) => addObj(site, 'agate' + i, 'agate', dx, dy, { i, solid: true }));
+      site.objs.push({ id: 'oasis', kind: 'oasis', dx: 3, dy: 2, x: px(site, 3), y: py(site, 2) });
     },
     q26(site) {
-      [
-        [-3, 1],
-        [3, 1],
-        [-4, -2],
-        [4, -2]
-      ].forEach(([dx, dy], i) => addObj(site, 'trial' + i, 'trial', dx, dy, { i, solid: true }));
       addObj(site, 'altar', 'altar', 0, -2, { solid: true });
       shrine(site, 'lumieres');
     },
@@ -701,10 +685,6 @@
       setTile(site.x, site.y + 4, 2);
       WALK.delete(tileKey(site.x, site.y + 4));
     },
-    q29(site) {
-      [-3, -1, 1, 3].forEach((dx, i) => addObj(site, 'perch' + i, 'perch', dx, 0, { i, solid: true }));
-      addObj(site, 'horn', 'horn', -5, 1, { solid: true });
-    },
     q30(site) {
       for (let y = -2; y <= 2; y++)
         for (let x = -3; x <= 3; x++) {
@@ -736,83 +716,22 @@
       st = stateOf(hero);
     switch (o.kind) {
       case 'leaf':
-      case 'fresco':
-      case 'obelisk': {
+      case 'fresco': {
         const c = at(hero, q, 'collect');
-        if (o.kind === 'obelisk' && !c) {
-          if (qworld.solved.q21) return creditSolved(hero, site);
-          if (stepOf(hero, q) < 1 && !st.done[21])
-            return tell(hero, '🗿 Un obélisque à moitié enseveli. Il faut d’abord le dégager.');
-          S.o[o.i] = (S.o[o.i] + 1) % 4;
-          cue(hero, 'note' + (S.o[o.i] + 1));
-          if (S.o.every((v, i) => v === ANSWER.q21[i])) {
-            qworld.flags.sanct_etoiles = true;
-            tell(hero, '✨ Les trois faisceaux se rejoignent : le sable s’effondre sur un escalier !');
-            solve(site);
-          }
-          return changed();
-        }
-        if (!c || c.got.includes(o.id)) return o.what ? panel(hero, '🍂 Souvenir', o.what) : false;
+        if (!c || c.got.includes(o.id)) return false;
         c.got.push(o.id);
         cue(hero, 'note' + c.got.length);
-        if (o.kind === 'obelisk') tell(hero, '🗿 Obélisque dégagé (' + c.got.length + ' / 3)');
         if (c.got.length >= q.steps[c.step].n) advance(hero, q);
-        return o.what
-          ? panel(hero, o.kind === 'leaf' ? '🍂 Souvenir des feuilles' : '🧩 Fragment de la fresque', o.what)
-          : true;
+        return panel(
+          hero,
+          o.kind === 'leaf' ? '🍂 Souvenir des feuilles' : '🧩 Fragment de la fresque',
+          o.what
+        );
       }
-      case 'vobj':
-      case 'house': {
-        if (qworld.solved.q16) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1 && !st.done[16])
-          return tell(hero, '🍂 Touche d’abord les feuilles dorées : elles savent à qui sont ces objets.');
-        const k = keyOf(hero),
-          held = S.hold[k];
-        if (o.kind === 'vobj') {
-          if (held !== undefined || S.pos[o.i] === -2) return false;
-          S.pos[o.i] = -2;
-          S.hold[k] = o.i;
-          tell(hero, '🤲 Tu portes : ' + VILLAGE_OBJS[o.i][0]);
-          return changed();
-        }
-        const there = S.pos.indexOf(o.i);
-        if (held === undefined) {
-          if (there < 0)
-            return tell(
-              hero,
-              '🏚️ La maison du ' + HOUSES[o.i] + '. Il manque quelque chose devant sa porte.'
-            );
-          S.pos[there] = -2;
-          S.hold[k] = there;
-          return changed();
-        }
-        if (there >= 0) S.pos[there] = -1;
-        S.pos[held] = o.i;
-        delete S.hold[k];
-        cue(hero, 'note' + (o.i + 1));
-        if (S.pos.every((v, i) => v === i)) {
-          qworld.flags.sanct_saisons = true;
-          tell(hero, '🍂 Chaque maison a retrouvé son objet. Les feuilles dorées s’envolent…');
-          solve(site);
-        }
-        return changed();
-      }
-      case 'pillar':
-        if (qworld.solved.q17) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1 && !st.done[17])
-          return tell(hero, '🧩 Il manque les fragments de la fresque pour savoir où va chaque saison.');
-        S.p[o.i] = (S.p[o.i] + 1) % 4;
-        cue(hero, 'note' + (S.p[o.i] + 1));
-        if (S.p.every((v, i) => v === ANSWER.q17[i])) {
-          qworld.flags.archives = true;
-          tell(hero, '📚 Le mécanisme tourne : les archives anciennes s’ouvrent.');
-          solve(site);
-        }
-        return changed();
       case 'archive':
-        return qworld.solved.q17
+        return qworld.flags.archives
           ? panel(hero, '📚 Archives anciennes', questById(17).memory)
-          : tell(hero, '📚 Une bibliothèque scellée par le mécanisme des saisons.');
+          : tell(hero, '📚 Une bibliothèque scellée par les esprits des saisons.');
       case 'vane':
         return tell(
           hero,
@@ -829,15 +748,6 @@
         tell(hero, '🍂 Tu attrapes la feuille dorée au vol !');
         return advance(hero, q);
       }
-      case 'gear':
-        if (qworld.solved.q19) return creditSolved(hero, site);
-        S.g[o.i] = (S.g[o.i] + 1) % 3;
-        if (S.g.every((v, i) => v === ANSWER.q19[i])) {
-          qworld.flags.grenier = true;
-          tell(hero, '⚙️ La roue entraîne le moulin… dans le bon sens !');
-          solve(site);
-        }
-        return changed();
       case 'traveler': {
         const c = at(hero, q, 'clues');
         if (c && !c.got.includes(o.id)) {
@@ -856,48 +766,18 @@
         tell(hero, '🦊 Le renard magique jaillit de sa cachette, des provisions plein les pattes !');
         return advance(hero, q);
       }
-      case 'ringlever':
-        if (qworld.solved.q22) return creditSolved(hero, site);
-        S.r[o.i] = (S.r[o.i] + 1) % 6;
-        if (o.i < 2) S.r[o.i + 1] = (S.r[o.i + 1] + 1) % 6;
-        cue(hero, 'note' + (o.i + 1));
-        if (S.r.every(v => v === 0)) {
-          tell(hero, '⚙️ Les trois anneaux s’alignent : la machine de l’Aurore s’illumine !');
-          solve(site);
-        }
-        return changed();
       case 'treasure':
         return tell(
           hero,
-          qworld.solved.q22
+          qworld.flags.machine
             ? '💰 La salle du trésor est ouverte.'
             : '🔒 Une porte ronde, scellée par la machine.'
         );
-      case 'fan': {
-        if (qworld.solved.q23) return creditSolved(hero, site);
-        S.b = puzzleBasinSlide(S.b, o.push);
-        float(o.x, o.y - 40, '💨', '#dff4ff');
-        if (S.b[0] === BASIN.dock[0] && S.b[1] === BASIN.dock[1]) {
-          tell(hero, '⛵ Le bateau accoste au quai !');
-          solve(site);
-        }
-        return changed();
-      }
-      case 'bell':
-        if (qworld.solved.q23) return false;
-        S.b = [...BASIN.start];
-        tell(hero, '🔔 Le bateau revient au départ.');
-        return changed();
       case 'mirror':
         if (qworld.solved[site.id]) return creditSolved(hero, site);
         S.m[o.i] = (S.m[o.i] + 1) % 4;
         if (beamOf(site).lit) {
-          tell(
-            hero,
-            site.id === 'q7'
-              ? '☀️ La lumière atteint l’arbre gardien ! Ses racines s’illuminent d’or.'
-              : '☀️ Le rayon frappe le soleil de la porte : le temple s’ouvre !'
-          );
+          tell(hero, '☀️ Le rayon frappe le soleil de la porte : le temple s’ouvre !');
           solve(site);
         }
         return changed();
@@ -906,34 +786,6 @@
           hero,
           qworld.solved.q24 ? '🚪 La porte du temple est ouverte.' : '☀️ Un soleil gravé attend la lumière.'
         );
-      case 'agate':
-        if (qworld.solved.q25) return creditSolved(hero, site);
-        S.g[o.i] = S.g[o.i] ? 0 : 1;
-        if (puzzleAqueduct(S.g).at(-1) === 'basin') {
-          qworld.flags.oasis = true;
-          tell(hero, '💧 L’eau coule jusqu’au bassin : l’oasis revit !');
-          solve(site);
-        }
-        return changed();
-      case 'trial': {
-        const t = q.trials[o.i],
-          c = at(hero, q, 'trials');
-        if (!c)
-          return tell(
-            hero,
-            c === null && st.done[26] ? '✨ L’épreuve est réussie.' : '✨ Une stèle : « ' + t.q + ' »'
-          );
-        if (c.got.includes('trial' + o.i)) return tell(hero, '✨ Cette épreuve est réussie.');
-        if (o.answer === undefined) return hero === game.hero ? trialPanel(o.i, t) : false;
-        if (o.answer !== t.ok) {
-          cue(hero, 'wrong');
-          return tell(hero, '✨ La stèle s’éteint… Ce n’est pas la bonne réponse.');
-        }
-        c.got.push('trial' + o.i);
-        tell(hero, '✨ Épreuve réussie (' + c.got.length + ' / 4)');
-        if (c.got.length >= 4) advance(hero, q);
-        return true;
-      }
       case 'altar':
         if (!at(hero, q, 'spot'))
           return tell(
@@ -991,21 +843,6 @@
         tell(hero, '📦 Tu as traversé le miroir !');
         solve(site);
         return true;
-      case 'perch':
-        if (qworld.solved.q29) return creditSolved(hero, site);
-        if (S.fly) return false;
-        S.h[o.i] = (S.h[o.i] + 1) % 4;
-        return changed();
-      case 'horn':
-        if (qworld.solved.q29) return creditSolved(hero, site);
-        if (S.fly) return false;
-        if (!S.h.every((v, i) => v === ANSWER.q29[i])) {
-          float(o.x, o.y - 50, '🐉 Braise se cache sous son aile…', '#ffb0a0');
-          return tell(hero, '🐉 Braise refuse : un perchoir n’est pas à la bonne hauteur.');
-        }
-        S.fly = { t: 0 };
-        float(o.x, o.y - 50, '📯 Tuuuuut !', '#ffffff');
-        return changed();
       case 'lake':
         return tell(
           hero,
@@ -1014,38 +851,6 @@
     }
     return false;
   }
-  // Épreuves du sanctuaire (quête 26) : la question et ses réponses, chez le joueur.
-  function trialPanel(i, t) {
-    modernPanel(
-      '<div class="quest-dialog"><h2>✨ Épreuve ' +
-        (i + 1) +
-        '</h2><p class="quest-text">« ' +
-        esc(t.q) +
-        ' »</p><div class="quest-buttons">' +
-        t.a
-          .map(
-            (a, k) =>
-              '<button data-action="questTrial" data-trial="' +
-              i +
-              '" data-choice="' +
-              k +
-              '">' +
-              esc(a) +
-              '</button>'
-          )
-          .join('') +
-        '<button data-action="closePanels">Réfléchir encore</button></div></div>'
-    );
-    return true;
-  }
-  window.questTrial = (i, a) => {
-    closePanels();
-    if (guest())
-      return CANAAN_NET.requestAction({ op: 'quest-act', site: 'q26', obj: 'trial' + i + '_a' + a });
-    const site = SITES.q26,
-      o = site.objs.find(o => o.id === 'trial' + i);
-    if (o) act(game.hero, site, { ...o, answer: a });
-  };
   // Défense des cristaux (quête 27) : trois vagues d'échos de l'Ombre qui s'en prennent aux cristaux.
   function startDefense(site) {
     const S = ST.q27;
@@ -1173,27 +978,17 @@
       leafSite = SITES.q18;
     if (
       leafSite &&
+      !canaanUnder() &&
       game.heroes.some(h => Math.hypot(h.player.x - px(leafSite, 0), h.player.y - py(leafSite, 0)) < 14 * T)
     ) {
       ST.q18.t++;
       if (t % 6 === 0) changed();
     }
-    if (SITES.q27) stepDefense(SITES.q27);
+    if (SITES.q27 && !canaanUnder()) stepDefense(SITES.q27);
     stepGuardians();
-    if (SITES.q30) stepLake(SITES.q30);
-    const fly = ST.q29.fly;
-    if (fly) {
-      fly.t += 1 / 60;
-      if (t % 6 === 0) changed();
-      if (fly.t >= 4) {
-        ST.q29.fly = null;
-        qworld.flags.pyria = true;
-        tell(game.hero, '🐉 Braise s’envole et fait un looping au-dessus de la forêt !');
-        solve(SITES.q29);
-      }
-    }
+    if (SITES.q30 && !canaanUnder()) stepLake(SITES.q30);
     // Le monde à l'envers : un héros qui atteint le coffre de l'autre clairière.
-    for (const h of game.heroes) {
+    for (const h of canaanUnder() ? [] : game.heroes) {
       const site = SITES.q28;
       if (
         site &&
@@ -1236,7 +1031,9 @@
     const cx = px(site, 0),
       cy = py(site, 0),
       // Au niveau de la quête, ou du héros le plus fort présent : le gardien reste un défi.
-      level = clampLevel(Math.max(q.level, ...heroesNear(cx, cy, 16 * T).map(h => clampLevel(h.level)))),
+      level = clampLevel(
+        Math.max(questLevel(q), ...heroesNear(cx, cy, 16 * T).map(h => clampLevel(h.level)))
+      ),
       m = {
         x: seal.x,
         y: seal.y - T,
@@ -1254,7 +1051,8 @@
         lookOpts: { ...g.opts },
         mobColor: g.color,
         bossColor: g.color,
-        scale: g.scale
+        scale: g.scale,
+        under: !!site.under
       };
     game.world.monsters.push(m);
     scaleBossHp(m);
@@ -1616,7 +1414,7 @@
       '<i>' +
       esc(f.icon) +
       '</i><small>' +
-      (f.kind === 'boss' ? 'Gardien de l’Ombre' : 'Tu as obtenu') +
+      (f.kind === 'boss' ? 'Gardien' : 'Tu as obtenu') +
       '</small><b>' +
       esc(f.title) +
       '</b><span>' +
@@ -1658,14 +1456,19 @@
   function advance(hero, q) {
     const st = stateOf(hero).active[q.id];
     if (!st || st.step >= q.steps.length) return false;
+    const ended = q.steps[st.step];
     st.step++;
     st.got = [];
+    st.n = 0;
+    // Le lieu change pour tout le monde.
+    for (const f of ended.world || []) qworld.flags[f] = true;
+    if (ended.world) changed();
     const npc = QUEST_NPCS[q.npc];
     tell(
       hero,
       st.step >= q.steps.length
         ? '📜 ' + q.title + ' : retourne voir ' + npc.name + '.'
-        : '📜 Objectif accompli : ' + q.steps[st.step - 1].text
+        : '📜 Objectif accompli : ' + ended.text
     );
     if (hero === game.hero) CANAAN_SOUND.cue('puzzle');
     window.CANAAN_PERSISTENCE.requestSave();
@@ -1677,7 +1480,7 @@
       npc = q && NPCS[q.npc];
     if (!q || !canStart(st, q) || !npc || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T)
       return false;
-    st.active[q.id] = { step: 0, got: [] };
+    st.active[q.id] = { step: 0, got: [], n: 0 };
     if (!st.track) st.track = q.id;
     tell(hero, '📜 Nouvelle quête : ' + q.title);
     window.CANAAN_PERSISTENCE.requestSave();
@@ -1704,7 +1507,9 @@
   function reward(hero, q) {
     const r = q.reward,
       st = stateOf(hero);
-    hero.player.gold += r.gold || 0;
+    const level = clampLevel(hero.level),
+      gold = questGold(q, level);
+    hero.player.gold += gold;
     for (const f of r.flags || []) {
       st.flags[f] = true;
       // Un sanctuaire ouvert l'est pour tout le monde.
@@ -1714,8 +1519,8 @@
     if (r.item) giveGear(clampLevel(hero.level), 'quest', r.item, hero);
     if (r.fishXp || r.goldenFish)
       CANAAN_PROF.questReward(hero, { fishXp: r.fishXp || 0, goldenFish: r.goldenFish || 0 });
-    canaanGrantXp(hero, questXp(q), hero.player);
-    tell(hero, '🏆 Quête terminée : ' + q.title + ' · +' + (r.gold || 0) + ' or · ' + r.text);
+    canaanGrantXp(hero, questXp(q, level), hero.player);
+    tell(hero, '🏆 Quête terminée : ' + q.title + ' · +' + gold + ' or · ' + r.text);
     if (hero === game.hero) {
       CANAAN_SOUND.cue('levelup');
       burst(hero.player.x, hero.player.y - 20, '#ffe08a', 30);
@@ -1764,60 +1569,19 @@
   function act(hero, site, o) {
     const q = site.quest,
       S = ST[site.id];
+    if (o.kind === 'field') return FIELD.act(hero, site, o);
     switch (o.kind) {
       case 'gseal':
         return summonGuardian(site, hero);
       case 'shell':
         return pickShell(hero, o);
-      case 'stele':
-        return panel(hero, '🪨 Stèle ancienne', q.hint);
       case 'crystal':
         return tell(
           hero,
           stateOf(hero).flags.lumi
             ? '✨ Il ne reste que des éclats de lumière.'
-            : '✨ Une petite lumière tremble dans le cristal. Les pierres l’entourent…'
+            : '✨ Une petite lumière tremble dans le cristal. Il lui manque des éclats.'
         );
-      case 'stone':
-        if (qworld.solved.q1) return creditSolved(hero, site);
-        S.seq.push(o.sym);
-        cue(hero, 'note' + (ORDER_Q1.indexOf(o.sym) + 1));
-        float(o.x, o.y - 40, { soleil: '☀️', pluie: '💧', vent: '🌬️', lune: '🌙' }[o.sym], '#ffe9a0');
-        if (S.seq.some((s, i) => s !== ORDER_Q1[i])) {
-          S.seq = [];
-          cue(hero, 'wrong');
-          tell(hero, '🪨 Les pierres s’éteignent… L’ordre n’est pas le bon.');
-        } else if (S.seq.length === 4) {
-          S.seq = [];
-          tell(hero, '✨ Le cristal se brise ! Une petite lumière s’en échappe…');
-          solve(site);
-        }
-        return changed();
-      case 'relic': {
-        const st = at(hero, q, 'collect');
-        if (!st || st.got.includes(o.id)) return false;
-        st.got.push(o.id);
-        tell(hero, '✦ Symbole trouvé : ' + SYMBOLS_Q2[o.sym] + ' (' + st.got.length + ' / 3)');
-        if (st.got.length >= 3) advance(hero, q);
-        return true;
-      }
-      case 'pedestal':
-        if (qworld.solved.q2) return creditSolved(hero, site);
-        if (stepOf(hero, q) < 1) return tell(hero, '🗿 Un socle vide. Il manque les symboles.');
-        S.p[o.i] = (S.p[o.i] + 1) % 3;
-        cue(hero, 'note' + (S.p[o.i] + 1));
-        if (S.p.every((v, i) => v === i)) solve(site);
-        return changed();
-      case 'gate':
-        if (S.run) return false;
-        S.g[o.i] = S.g[o.i] ? 0 : 1;
-        return changed();
-      case 'whistle':
-        if (qworld.solved.q3) return creditSolved(hero, site);
-        if (S.run) return false;
-        S.run = { path: sheepRoute(site, S.g), i: 0, back: 0 };
-        float(o.x, o.y - 40, '🎵 Fiiiiiiou !', '#ffffff');
-        return changed();
       case 'dig': {
         if (!at(hero, q, 'spot'))
           return stateOf(hero).done[q.id]
@@ -1875,10 +1639,6 @@
         return travel(hero, 'camp');
       case 'campstone':
         return travel(hero, 'forest');
-      case 'thief':
-        if (!at(hero, q, 'spot')) return false;
-        tell(hero, '🦊 Le voleur apparaît : un petit caméléon-renard, les joues pleines de miel !');
-        return advance(hero, q);
       case 'viewpoint':
         if (!at(hero, q, 'spot')) return false;
         tell(
@@ -1886,38 +1646,6 @@
           '🐦 L’ombre de l’arbre déploie ses ailes : un oiseau parfait. Théon accourt avec ses pinceaux !'
         );
         return advance(hero, q);
-      case 'valve': {
-        if (qworld.solved.q11) return creditSolved(hero, site);
-        S.v[o.i] = (S.v[o.i] + 1) % 3;
-        cue(hero, 'note' + (S.v[o.i] + 1));
-        if (puzzleLanterns(S.v).every(Boolean)) {
-          qworld.flags.lanterns = true;
-          qworld.flags.sanct_reflets = true;
-          tell(
-            hero,
-            '🏮 Les quatre lanternes brillent ! Un chemin de lumière mène au Sanctuaire des Reflets.'
-          );
-          solve(site);
-        }
-        return changed();
-      }
-      case 'frame':
-        if (qworld.solved.q12) return creditSolved(hero, site);
-        S.f[o.i] = (S.f[o.i] + 1) % SCENES_Q12.length;
-        if (S.f.every((v, i) => v === i)) {
-          tell(hero, '🪞 Les reflets s’unissent : une scène du passé apparaît…');
-          solve(site);
-        }
-        return changed();
-      case 'plank':
-        if (qworld.solved.q13) return creditSolved(hero, site);
-        S.pl[o.i] = (S.pl[o.i] + 1) % 4;
-        if (S.pl.every((v, i) => v === [1, 0, 2, 1][i])) {
-          qworld.flags.bridge = true;
-          tell(hero, '🌉 Le pont tient ! Il est restauré pour toujours.');
-          solve(site);
-        }
-        return changed();
       case 'clue':
       case 'witness': {
         const c = GHOST_CLUES.find(c => c.id === o.clue),
@@ -1926,7 +1654,7 @@
           st.got.push(c.id);
           if (st.got.length >= 4) advance(hero, q);
         }
-        return panel(hero, c.who ? '💬 ' + c.who : '🔎 Indice', c.what + (st ? '' : ''));
+        return panel(hero, c.who ? '💬 ' + c.who : '🔎 Indice', c.what);
       }
       case 'shrine':
         return visitShrine(hero, o);
@@ -1990,13 +1718,6 @@
         (lit ? ' L’autel brille : son étoile est revenue.' : ' L’autel est éteint, il attend son étoile.')
     );
   }
-  // Mouton de Milo : il suit le chemin ouvert à chaque carrefour.
-  function sheepRoute(site, g) {
-    const N = site.nodes,
-      { nodes, top } = puzzleSheepPath(g);
-    return nodes.map(n => [px(site, N[n][0]), py(site, N[n][1])]).concat([[top ? 1 : 0, 0]]);
-  }
-
   // ---------------------------------------------------------------- Étape de simulation (hôte)
   function stepTrails(hero) {
     for (const [id, st] of Object.entries(stateOf(hero).active)) {
@@ -2005,6 +1726,7 @@
       const step = q.steps[st.step],
         site = SITES[q.site],
         p = hero.player;
+      if (!here(site)) continue;
       if (step.k === 'trail') {
         const end = q.id === 1 ? [px(site, 0), py(site, 0)] : site.trail.at(-1);
         if (Math.hypot(p.x - end[0], p.y - end[1]) < 2.4 * T) advance(hero, q);
@@ -2012,7 +1734,6 @@
         step.k === 'reach' &&
         Math.hypot(p.x - px(site, step.at[0]), p.y - py(site, step.at[1])) < 1.2 * T
       ) {
-        if (q.id === 7 && !qworld.solved.q7) continue;
         if (q.id === 7)
           tell(
             hero,
@@ -2028,7 +1749,10 @@
       if (!started || paused || game.world.instance || guest()) return;
       const t = now();
       if (t % 10 === 0) for (const hero of game.heroes) if (!hero.player.dead && !hero.away) stepTrails(hero);
+      FIELD.step(SITES);
       stepMore();
+      // La suite ne concerne que l'île.
+      if (canaanUnder()) return;
       // Poisson doré : un remous brille d'or de temps en temps.
       const f = ST.q5;
       if (t >= f.next) {
@@ -2036,33 +1760,6 @@
         f.until = t + 110;
         f.next = t + 260 + Math.floor(Math.random() * 140);
         changed();
-      }
-      // Mouton de Milo.
-      const sheep = ST.q3;
-      if (sheep.run) {
-        const r = sheep.run,
-          path = r.path,
-          last = path.length - 2;
-        if (r.back) {
-          if (--r.back <= 0) {
-            sheep.run = null;
-            changed();
-          }
-        } else {
-          r.i = Math.min(last, r.i + 1 / 45);
-          if (r.i >= last) {
-            if (path.at(-1)[0] === 1) {
-              sheep.top = true;
-              sheep.run = null;
-              tell(game.hero, '🐑 Pompon est au sommet ! Il bêle de bonheur.');
-              solve(SITES.q3);
-            } else {
-              r.back = 120;
-              float(path[last][0], path[last][1] - 40, 'Bêêê ?', '#ffffff');
-            }
-          }
-          if (t % 6 === 0) changed();
-        }
       }
       // Nénuphars : ils coulent après deux secondes sous un héros et remontent trois secondes plus tard.
       const site = SITES.q15;
@@ -2112,18 +1809,18 @@
     let best = null,
       bd = 1e9;
     for (const npc of Object.values(NPCS)) {
+      if (!here(npc) || !present(hero, npc) || (npc.dwarf && !hasWords(hero, npc))) continue;
       const d = Math.hypot(p.x - npc.x, p.y - npc.y);
       if (d < 1.8 * T && d < bd) [best, bd] = [{ npc }, d];
     }
     for (const site of Object.values(SITES)) {
-      if (Math.abs(p.x - px(site, 0)) > 14 * T || Math.abs(p.y - py(site, 0)) > 14 * T) continue;
+      if (!here(site)) continue;
       for (const o of site.objs) {
-        if (!usable(hero, site, o)) continue;
         const d = Math.hypot(p.x - o.x, p.y - o.y);
-        if (d < (o.range || 1.6) * T && d < bd) [best, bd] = [{ site, o }, d];
+        if (d < (o.range ?? 1.6) * T && d < bd && usable(hero, site, o)) [best, bd] = [{ site, o }, d];
       }
     }
-    if (WAYSTONE.camp) {
+    if (WAYSTONE.camp && !canaanUnder()) {
       const d = Math.hypot(p.x - WAYSTONE.camp.x, p.y - WAYSTONE.camp.y);
       if (d < 1.6 * T && d < bd)
         best = { site: null, o: { id: 'campstone', kind: 'campstone', ...WAYSTONE.camp } };
@@ -2135,11 +1832,11 @@
     const q = site.quest,
       st = stateOf(hero);
     switch (o.kind) {
-      case 'relic':
+      case 'field':
+        return FIELD.usable(hero, site, o);
       case 'mstone':
         return !!at(hero, q, 'collect') && !at(hero, q, 'collect').got.includes(o.id);
       case 'dig':
-      case 'thief':
       case 'viewpoint':
         return !!at(hero, q, 'spot') && Math.hypot(hero.player.x - o.x, hero.player.y - o.y) < 0.9 * T;
       case 'ripple':
@@ -2151,12 +1848,11 @@
         return !!qworld.flags['sanct_' + o.sanct];
       case 'door':
         return !qworld.flags['sanct_' + o.sanct];
-      case 'gate':
-        return !qworld.solved.q3;
+      case 'crystal':
       case 'islechest':
-      case 'basin':
       case 'machine':
-      case 'aqueduct':
+      case 'plank':
+      case 'oasis':
         return false;
       case 'leaf':
       case 'fresco':
@@ -2164,12 +1860,8 @@
         return !!at(hero, q, 'collect') && !at(hero, q, 'collect').got.includes(o.id);
       case 'goldleaf':
         return !!at(hero, q, 'catch');
-      case 'vobj':
-        return ST.q16.pos[o.i] === -1 && !qworld.solved.q16;
       case 'echest':
         return !!at(hero, q, 'puzzle');
-      case 'trial':
-        return !!at(hero, q, 'trials');
       case 'altar':
         return !!at(hero, q, 'spot') || !!st.done[26];
       case 'fresco27':
@@ -2190,15 +1882,9 @@
   function label(hero, n) {
     if (n.npc) return 'Parler à ' + n.npc.def.name;
     const o = n.o;
+    if (o.kind === 'field') return FIELD.label(o);
     return (
       {
-        stele: 'Lire la stèle',
-        crystal: 'Regarder le cristal',
-        stone: 'Toucher la pierre',
-        relic: 'Prendre le symbole',
-        pedestal: 'Tourner le socle',
-        gate: ST.q3.g[o.i] ? 'Fermer la barrière' : 'Ouvrir la barrière',
-        whistle: 'Siffler Pompon',
         dig: 'Creuser',
         ripple: 'Ferrer',
         mstone: 'Écouter la pierre',
@@ -2206,45 +1892,26 @@
         mirror: 'Tourner le miroir',
         waystone: 'Pierre de passage',
         campstone: 'Pierre de passage',
-        thief: 'Démasquer le voleur',
         viewpoint: 'Appeler Théon',
-        valve: 'Tourner la vanne',
-        frame: 'Tourner le miroir',
-        plank: 'Changer la planche',
         clue: 'Examiner',
         witness: 'Interroger ' + (GHOST_CLUES.find(c => c.id === o.clue)?.who || ''),
         shrine: 'Prier à l’autel',
         door: 'Pousser la porte',
         leaf: 'Toucher la feuille',
-        vobj: 'Prendre l’objet',
-        house: ST.q16.hold[keyOf(hero)] !== undefined ? 'Poser ici' : 'Regarder la maison',
         fresco: 'Prendre le fragment',
-        pillar: 'Tourner le pilier',
         archive: 'Lire les archives',
         vane: 'Regarder la girouette',
         goldleaf: 'Attraper la feuille',
-        gear: 'Changer l’engrenage',
         traveler: 'Écouter ' + (o.who || ''),
         hide: 'Fouiller : ' + (o.name || ''),
-        obelisk:
-          o.kind === 'obelisk' && at(hero, n.site?.quest, 'collect')
-            ? 'Dégager l’obélisque'
-            : 'Tourner l’obélisque',
-        ringlever: 'Tourner l’anneau',
         treasure: 'Porte du trésor',
-        fan: 'Déboucher la bouteille',
-        bell: 'Sonner (bateau au départ)',
         templedoor: 'Porte du temple',
-        agate: ST.q25.g[o.i] ? 'Fermer la porte' : 'Ouvrir la porte',
-        trial: 'Répondre à l’épreuve',
         altar: 'Poser les étoiles',
         fresco27: 'Lire la fresque',
         altar27: 'Éveiller le Cœur',
         ccrystal: 'Réunir la lumière',
         lever: 'Actionner le levier',
         echest: 'Ouvrir le coffre',
-        perch: 'Régler le perchoir',
-        horn: 'Sonner le cor',
         gseal: 'Briser le sceau de l’Ombre',
         shell: 'Ramasser le coquillage'
       }[o.kind] || 'Agir'
@@ -2275,6 +1942,7 @@
       return true;
     }
     if (a.op === 'quest-choice') return choose(hero, a.q, a.choice);
+    if (a.op === 'quest-talk') return hear(hero, a.q);
     if (a.op === 'quest-trade') return trade(hero, a.npc);
     if (a.op === 'quest-shells') return claimShells(hero);
     if (a.op === 'quest-act') {
@@ -2285,15 +1953,11 @@
           travel(hero, 'forest')
         );
       const site = SITES[a.site],
-        trial = /^trial(\d)_a(\d)$/.exec(a.obj),
-        o = site?.objs.find(o => o.id === (trial ? 'trial' + trial[1] : a.obj));
-      if (trial && o) {
-        if (Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > 2.2 * T) return false;
-        return act(hero, site, { ...o, answer: Number(trial[2]) }) !== false;
-      }
+        o = site?.objs.find(o => o.id === a.obj);
       if (
         !o ||
-        Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > ((o.range || 1.6) + 0.6) * T ||
+        !here(site) ||
+        Math.hypot(hero.player.x - o.x, hero.player.y - o.y) > ((o.range ?? 1.6) + 0.6) * T ||
         !usable(hero, site, o)
       )
         return false;
@@ -2301,25 +1965,53 @@
     }
     return false;
   }
-  // Réponse à l'esprit (quête 14) : la bonne réponse termine l'étape, une mauvaise se retente.
+  // Réponse ou choix moral : à une question (answer), une mauvaise réponse se retente ; sinon, chaque choix compte.
   function choose(hero, id, choice) {
     const q = quest(id),
       st = q && at(hero, q, 'choice'),
-      npc = q && NPCS[q.npc];
+      npc = st && NPCS[q.steps[st.step].npc || q.npc];
     if (
       !st ||
       !npc ||
+      !here(npc) ||
       Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T ||
-      !Number.isInteger(choice)
+      !Number.isInteger(choice) ||
+      !q.choices[choice]
     )
       return false;
-    if (choice !== q.answer) {
+    if (q.answer !== undefined && choice !== q.answer) {
       tell(hero, '👻 « Non… ce n’est pas ça. Je crois que non. »');
       return true;
     }
     stateOf(hero).choices[q.id] = choice;
     return advance(hero, q);
   }
+  // Étape « parler à quelqu'un » : ses répliques sont lues.
+  function hear(hero, id) {
+    const q = quest(id),
+      st = q && at(hero, q, 'talk'),
+      npc = st && NPCS[q.steps[st.step].npc];
+    if (!npc || !here(npc) || Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T)
+      return false;
+    return advance(hero, q);
+  }
+  // Étape en cours qui se passe avec ce personnage (parler, choisir) : { q, step }, ou null.
+  function errand(hero, npc) {
+    for (const id of Object.keys(stateOf(hero).active)) {
+      const q = quest(Number(id)),
+        step = q?.steps[stateOf(hero).active[id].step];
+      if ((step?.k === 'talk' || step?.k === 'choice') && (step.npc || q.npc) === npc.id) return { q, step };
+    }
+    return null;
+  }
+  // Un nain de la forteresse garde ses répliques ordinaires quand il n'a rien à dire d'une quête.
+  const hasWords = (hero, npc) =>
+    !!errand(hero, npc) || ['offer', 'active', 'ready'].includes(npcState(hero, npc.quest));
+  // Personnage visible seulement à une étape précise (Vesper).
+  const present = (hero, npc) => {
+    const w = npc.def.when;
+    return !w || stateOf(hero).active[w.quest]?.step === w.step;
+  };
 
   // ---------------------------------------------------------------- Dialogues des PNJ
   function npcState(hero, q) {
@@ -2331,7 +2023,8 @@
     return canStart(st, q) ? 'offer' : 'locked';
   }
   function rewardLine(q) {
-    return '+' + questXp(q) + ' XP · +' + q.reward.gold + ' or · ' + q.reward.text;
+    const level = clampLevel(game.hero.level);
+    return '+' + questXp(q, level) + ' XP · +' + questGold(q, level) + ' or · ' + q.reward.text;
   }
   // Madame Nacre : la collection de coquillages chantants et ses paliers.
   function talkCollector(npc) {
@@ -2413,8 +2106,30 @@
         : '';
     let body = '',
       buttons = '';
-    if (mode === 'locked') {
-      const before = quest(q.requires);
+    const task = errand(hero, npc);
+    if (task) {
+      const { q: tq, step } = task;
+      if (step.k === 'talk') {
+        body = step.lines.map(t => '<p class="quest-text">« ' + esc(t) + ' »</p>').join('');
+        buttons = '<button data-action="questHear" data-quest="' + tq.id + '">Continuer</button>';
+      } else {
+        body = '<p class="quest-text">« ' + esc(tq.talk.ask) + ' »</p>';
+        buttons = tq.choices
+          .map(
+            (c, i) =>
+              '<button data-action="questChoice" data-quest="' +
+              tq.id +
+              '" data-choice="' +
+              i +
+              '">' +
+              esc(c) +
+              '</button>'
+          )
+          .join('');
+      }
+    } else if (!q) body = '<p class="quest-text">« Bonjour, voyageur. Le vent tourne, ces temps-ci… »</p>';
+    else if (mode === 'locked') {
+      const before = missingQuest(st, q);
       body =
         '<p class="quest-text">« Bonjour, voyageur. Le vent tourne, ces temps-ci… »</p><p class="quest-note">Cette partie de l’histoire commence plus tard : termine d’abord « ' +
         esc(before.title) +
@@ -2424,24 +2139,9 @@
     } else if (mode === 'offer') {
       body = q.talk.offer.map(t => '<p class="quest-text">« ' + esc(t) + ' »</p>').join('') + card(q, st);
       buttons = '<button data-action="questAccept" data-quest="' + q.id + '">Accepter la quête</button>';
-    } else if (mode === 'active') {
-      const step = q.steps[st.active[q.id].step];
-      if (step.k === 'choice') {
-        body = '<p class="quest-text">« Alors… tu sais qui j’étais ? »</p>';
-        buttons = q.choices
-          .map(
-            (c, i) =>
-              '<button data-action="questChoice" data-quest="' +
-              q.id +
-              '" data-choice="' +
-              i +
-              '">' +
-              esc(c) +
-              '</button>'
-          )
-          .join('');
-      } else body = '<p class="quest-text">« ' + esc(q.talk.active) + ' »</p>' + card(q, st);
-    } else if (mode === 'ready') {
+    } else if (mode === 'active')
+      body = '<p class="quest-text">« ' + esc(q.talk.active) + ' »</p>' + card(q, st);
+    else if (mode === 'ready') {
       body =
         '<p class="quest-text">« ' +
         esc(q.talk.ready) +
@@ -2449,7 +2149,9 @@
         esc(rewardLine(q)) +
         '</p>';
       buttons = '<button data-action="questTurnIn" data-quest="' + q.id + '">Terminer la quête</button>';
-    } else body = '<p class="quest-text">« ' + esc(q.talk.after) + ' »</p>';
+    } else
+      body =
+        '<p class="quest-text">« ' + esc(q.talk.afterChoice?.[st.choices[q.id]] || q.talk.after) + ' »</p>';
     const swap = tradeHtml(hero, npc);
     body += swap.body;
     buttons += swap.button;
@@ -2457,9 +2159,11 @@
     modernPanel(
       '<div class="quest-dialog"><h2>' +
         esc(npc.def.name) +
-        (mode === 'offer' || mode === 'active' || mode === 'ready'
-          ? ' <small>· ' + esc(q.title) + '</small>'
-          : '') +
+        (task
+          ? ' <small>· ' + esc(task.q.title) + '</small>'
+          : mode === 'offer' || mode === 'active' || mode === 'ready'
+            ? ' <small>· ' + esc(q.title) + '</small>'
+            : '') +
         '</h2>' +
         body +
         lumi +
@@ -2470,6 +2174,42 @@
         '</button></div></div>'
     );
   }
+  // Genres d'une quête, d'après ses étapes (dans l'ordre, sans répétition).
+  const KINDS = {
+    kill: 'Chasse',
+    loot: 'Butin',
+    pick: 'Collecte',
+    collect: 'Collecte',
+    wave: 'Défense',
+    defense: 'Défense',
+    escort: 'Escorte',
+    chase: 'Poursuite',
+    race: 'Course',
+    hunt: 'Champion',
+    guardian: 'Gardien',
+    talk: 'Messager',
+    work: 'Métier',
+    timing: 'Métier',
+    clear: 'Donjon',
+    sky: 'Exploration',
+    reach: 'Exploration',
+    trail: 'Exploration',
+    spot: 'Exploration',
+    clues: 'Enquête',
+    search: 'Enquête',
+    choice: 'Choix',
+    catch: 'Adresse',
+    puzzle: 'Énigme'
+  };
+  // Avancement d'une étape (« 3 / 8 »), dans son propre élément.
+  const countHtml = (s, a) => {
+    const p = FIELD.progress(s, a);
+    return p ? ' <em class="quest-count">' + p[0] + ' / ' + p[1] + '</em>' : '';
+  };
+  const kindsOf = q => [...new Set(q.steps.map(s => KINDS[s.k]).filter(Boolean))];
+  const chapterName = c => (c.under ? c.n : 'Chapitre ' + c.n);
+  const chapterPlace = c => (c.under ? 'Les Tréfonds' : ZONES[c.zone].name);
+  const placeOf = q => (SITES[q.site]?.under ? 'Les Tréfonds' : ZONES[SITES[q.site].zone].name);
   function card(q, st) {
     const a = st.active[q.id],
       chapter = CHAPTERS[q.chapter];
@@ -2477,13 +2217,17 @@
       '<div class="quest-card' +
       (q.main ? ' main' : '') +
       '"><b>' +
-      (q.main ? '📖 Histoire · Chapitre ' + chapter.n : '🍃 Quête secondaire') +
+      (q.main ? '📖 Histoire · ' + chapterName(chapter) : '🍃 Quête secondaire') +
       ' — ' +
       esc(q.title) +
       '</b>' +
-      '<span class="quest-level">Niveau conseillé ' +
-      q.level +
-      '</span><p>' +
+      '<span class="quest-level">' +
+      (q.scaled ? 'À ton niveau' : 'Niveau conseillé ' + q.level) +
+      '</span><div class="quest-kinds">' +
+      kindsOf(q)
+        .map(k => '<i>' + k + '</i>')
+        .join('') +
+      '</div><p>' +
       esc(q.summary) +
       '</p><ul>' +
       q.steps
@@ -2496,7 +2240,7 @@
             '">' +
             (done ? '✓ ' : cur ? '➤ ' : '◦ ') +
             esc(s.text) +
-            (cur && s.n ? ' (' + a.got.length + ' / ' + s.n + ')' : '') +
+            (cur ? countHtml(s, a) : '') +
             '</li>'
           );
         })
@@ -2525,6 +2269,10 @@
     closePanels();
     if (request('quest-choice', { q: id, choice }) === null) choose(game.hero, id, choice);
   };
+  window.questHear = id => {
+    closePanels();
+    if (request('quest-talk', { q: id }) === null) hear(game.hero, id);
+  };
   window.questTrade = npcId => {
     closePanels();
     if (request('quest-trade', { npc: npcId }) === null) trade(game.hero, npcId);
@@ -2548,6 +2296,12 @@
     if (modalOpen()) return closePanels();
     renderJournal(ui.tab);
   }
+  const discover = q =>
+    '<p class="quest-note">➤ À découvrir : parle à ' +
+    esc(QUEST_NPCS[q.npc].name) +
+    ' (' +
+    esc(placeOf(q)) +
+    ').</p>';
   function renderJournal(tab = 'main') {
     ui.tab = tab;
     const st = stateOf(game.hero),
@@ -2586,37 +2340,51 @@
               '<li>' +
               (lit ? '★' : open ? '◇' : '·') +
               ' ' +
+              '<span>' +
               esc(s.name) +
-              ' — ' +
+              '</span> — ' +
               esc(ZONES[s.zone].name) +
-              (open ? (st.flags['visit_' + s.id] ? ' (visité)' : ' (ouvert)') : '') +
+              (open ? ' <small>' + (st.flags['visit_' + s.id] ? '(visité)' : '(ouvert)') + '</small>' : '') +
               '</li>'
             );
           }).join('') +
           '</ul></div>';
+      // La Ballade : un couplet par gardien vaincu.
+      const verses = QUESTS.filter(q => q.verse),
+        sung = verses.filter(q => st.done[q.id]);
+      if (sung.length)
+        html +=
+          '<div class="quest-map quest-ballad"><b>🎵 La Ballade de l’Aurore · ' +
+          sung.length +
+          ' / ' +
+          verses.length +
+          '</b>' +
+          verses.map(q => '<p>' + (st.done[q.id] ? '« ' + esc(q.verse) + ' »' : '« … »') + '</p>').join('') +
+          '</div>';
       CHAPTERS.forEach((c, i) => {
         const qs = QUESTS.filter(q => q.main && q.chapter === i);
         html +=
-          '<h3 class="quest-chapter">Chapitre ' +
-          c.n +
+          '<h3 class="quest-chapter">' +
+          chapterName(c) +
           ' — ' +
           esc(c.title) +
           ' <small>· ' +
-          esc(ZONES[c.zone].name) +
-          ', niveaux ' +
-          c.levels.join(' à ') +
-          '</small></h3>';
-        if (!qs.length) html += '<p class="quest-note">Ce chapitre s’écrira bientôt…</p>';
+          (c.under
+            ? 'Les Tréfonds, à ton niveau'
+            : esc(ZONES[c.zone].name) + ', niveaux ' + c.levels.join(' à ')) +
+          '</small></h3><p class="quest-note">' +
+          esc(c.intro) +
+          '</p>';
+        // Interlude : les quatre voix retrouvées.
+        if (c.under && VOICES.some(v => st.flags[v.flag]))
+          html +=
+            '<p class="quest-stars">🗿 ' +
+            VOICES.map(v => (st.flags[v.flag] ? '◆ ' + esc(v.name) : '◇ …')).join(' · ') +
+            '</p>';
         for (const q of qs) {
           if (st.active[q.id]) html += list(q);
           else if (st.done[q.id]) html += '<p class="quest-done-line">✓ ' + esc(q.title) + '</p>';
-          else if (canStart(st, q))
-            html +=
-              '<p class="quest-note">➤ À découvrir : parle à ' +
-              esc(QUEST_NPCS[q.npc].name) +
-              ' (' +
-              esc(ZONES[SITES[q.site].zone].name) +
-              ').</p>';
+          else if (canStart(st, q)) html += discover(q);
         }
       });
     } else if (tab === 'side') {
@@ -2624,6 +2392,21 @@
       html += side.length
         ? side.map(list).join('')
         : '<p class="quest-note">Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.</p>';
+      // Par chapitre : celles que ce héros peut déjà prendre.
+      const level = clampLevel(game.hero.level);
+      CHAPTERS.forEach((c, i) => {
+        const open = QUESTS.filter(
+          q => !q.main && q.chapter === i && canStart(st, q) && (q.scaled || q.level <= level + 3)
+        );
+        if (open.length)
+          html +=
+            '<h3 class="quest-chapter">' +
+            chapterName(c) +
+            ' <small>· ' +
+            esc(chapterPlace(c)) +
+            '</small></h3>' +
+            open.map(discover).join('');
+      });
     } else if (tab === 'treasure') {
       // Grand troc : l'objet tenu et à qui le porter.
       const held = tradeItem(st),
@@ -2661,7 +2444,7 @@
         HEART_FLAGS.length +
         '</b><p>PV max +' +
         Math.round(heartBonus(st) * 100) +
-        ' %. Chaque gardien de l’Ombre vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.</p><ul>' +
+        ' %. Chaque gardien vaincu en laisse un, et Madame Nacre en garde deux pour les grands collectionneurs.</p><ul>' +
         Object.entries(GUARDIANS)
           .map(([id, g]) => {
             const q = quest(Number(id)),
@@ -2674,7 +2457,7 @@
               (won ? '✓ ' : '◦ ') +
               (known ? esc(g.name + ', ' + g.title) : '???') +
               ' — ' +
-              esc(ZONES[CHAPTERS[q.chapter].zone].name) +
+              esc(chapterPlace(CHAPTERS[q.chapter])) +
               '</li>'
             );
           })
@@ -2732,7 +2515,9 @@
                 '</p><p class="quest-reward">🏆 ' +
                 esc(rewardLine(q)) +
                 '</p>' +
-                (q.memory ? '<p class="quest-memory">📜 Souvenir : ' + esc(q.memory) + '</p>' : '') +
+                (q.memory
+                  ? '<p class="quest-memory"><b>📜 Souvenir</b> <span>' + esc(q.memory) + '</span></p>'
+                  : '') +
                 '</div>'
             )
             .join('')
@@ -2814,14 +2599,6 @@
   function torchFlame(c, x, y, s = 1) {
     CANAAN_TILE_KIT.flame(c, x, y, s, FLAME, x);
     canaanLight(x, y - 6, 120 * s, '#ffcf6a');
-  }
-  // Pierre dressée gravée d'un symbole (allumée : symbole lumineux et lueur).
-  function standing(c, x, y, p, sym, lit, col = '#ffe9a0') {
-    shadowAt(c, x, y + 14, 16, 5);
-    block(c, x - 12, y - 18, 24, 32, p);
-    R(c, x - 14, y + 10, 28, 6, p[2]);
-    if (lit) glow(c, x, y - 4, 34, col, 0.55);
-    rune(c, x, y + 2, sym, lit ? '#ffffff' : '#20262c');
   }
   // Socle bas avec un objet ou un symbole posé dessus.
   function pedestalArt(c, x, y, p, top) {
@@ -2905,6 +2682,7 @@
     R(c, x - 20, y, 9, 4, '#c83a2a');
   }
   function drawObj(c, site, o) {
+    if (o.kind === 'field') return FIELD.draw(c, site, o);
     const x = o.x,
       y = o.y,
       S = ST[site.id],
@@ -2916,20 +2694,6 @@
         return drawSeal(c, site, o);
       case 'shell':
         return drawShell(c, o);
-      case 'stone':
-        return standing(
-          c,
-          x,
-          y,
-          PAL.stone,
-          { soleil: '☀', pluie: '💧', vent: '🌬', lune: '☾' }[o.sym],
-          S.seq.includes(o.sym) || qworld.solved.q1
-        );
-      case 'stele':
-        shadowAt(c, x, y + 14, 14, 5);
-        block(c, x - 11, y - 30, 22, 44, PAL.stone);
-        for (let k = 0; k < 4; k++) R(c, x - 6, y - 22 + k * 7, 12, 2, '#4a4a46');
-        return;
       case 'crystal':
         if (st.flags.lumi) {
           for (let k = 0; k < 5; k++)
@@ -2937,40 +2701,8 @@
           return;
         }
         return crystalArt(c, x, y, '#cfefff');
-      case 'relic':
-        if (!usable(hero, site, o)) return;
-        glow(c, x, y, 26, '#ffe9a0', 0.4 + 0.3 * Math.sin(time * 0.15 + o.sym));
-        return rune(c, x, y + 5, ['✦', '☾', '🔥'][o.sym], '#fff6d0', 16);
-      case 'pedestal': {
-        const shown = qworld.solved.q2 || stepOf(hero, q) >= 1 || st.done[2];
-        pedestalArt(c, x, y, PAL.sand, shown ? ['✦', '☾', '🔥'][S.p[o.i]] : null);
-        c.font = 'bold 10px system-ui';
-        c.fillStyle = '#2a2014';
-        c.fillText(['N', 'O', 'E'][o.i], x, y + 9);
-        return;
-      }
-      case 'gate': {
-        const open = S.g[o.i];
-        if (o.horiz) {
-          block(c, x - 23, y - 8, 5, 22, PAL.wood);
-          block(c, x + 18, y - 8, 5, 22, PAL.wood);
-          if (!open) for (const yy of [-3, 5]) block(c, x - 18, y + yy, 36, 4, PAL.wood);
-          else block(c, x - 19, y - 24, 4, 18, PAL.wood);
-        } else {
-          block(c, x - 2, y - 26, 5, 8, PAL.wood);
-          block(c, x - 2, y + 16, 5, 8, PAL.wood);
-          if (!open) for (const xx of [-6, 3]) block(c, x + xx, y - 18, 4, 36, PAL.wood);
-          else block(c, x + 3, y - 20, 18, 4, PAL.wood);
-        }
-        return;
-      }
-      case 'whistle':
-        shadowAt(c, x, y + 12, 8, 3);
-        block(c, x - 3, y - 22, 6, 34, PAL.wood);
-        block(c, x - 8, y - 28, 16, 7, PAL.gold);
-        return;
       case 'hilltop':
-        return flagArt(c, x, y, qworld.solved.q3 ? '#ffd84a' : '#c84a4a');
+        return flagArt(c, x, y, qworld.flags.sommet ? '#ffd84a' : '#c84a4a');
       case 'shadowtree': {
         const dig = SITES.q4.objs.find(d => d.kind === 'dig');
         c.save();
@@ -3058,7 +2790,7 @@
         return;
       }
       case 'gtree':
-        if (qworld.solved.q7) glow(c, x, y - 10, 90, '#ffd84a', 0.35 + 0.1 * Math.sin(time * 0.05));
+        if (qworld.flags.goldtree) glow(c, x, y - 10, 90, '#ffd84a', 0.35 + 0.1 * Math.sin(time * 0.05));
         return;
       case 'waystone':
         shadowAt(c, x, y + 14, 16, 5);
@@ -3072,83 +2804,16 @@
         shadowAt(c, x, y + 12, 14, 4);
         block(c, x - 12, y - 10, 24, 22, ['#b89a6a', '#d8ba8a', '#8a6a3a']);
         return block(c, x - 6, y - 16, 12, 7, ['#9a7a4a', '#b89a6a', '#6a4a2a']);
-      case 'thief':
-        if (st.done[9] || (st.active[9] && st.active[9].step >= 2)) {
-          shadowAt(c, x, y + 10, 14, 4);
-          block(c, x - 12, y - 4, 22, 12, ['#8ac06a', '#aade8a', '#5a8a4a']);
-          block(c, x + 6, y - 12, 10, 10, ['#9ad07a', '#bae89a', '#6a9a5a']);
-          R(c, x + 12, y - 9, 2, 2, '#1a1418');
-          return block(c, x - 20, y - 6, 9, 4, ['#e08a3a', '#f0aa5a', '#a85a1a']);
-        }
-        c.globalAlpha = 0.12 + 0.08 * Math.sin(time * 0.2);
-        R(c, x - 12, y - 4, 22, 12, '#c8e0b0');
-        c.globalAlpha = 1;
-        return;
       case 'easel':
         shadowAt(c, x, y + 14, 14, 4);
         block(c, x - 2, y - 30, 4, 44, PAL.wood);
         block(c, x - 14, y - 28, 28, 22, ['#f0ece4', '#ffffff', '#c8c0b0']);
         return R(c, x - 10, y - 24, 20, 14, st.done[10] ? '#3a4a5a' : '#d8d0c4');
-      case 'valve': {
-        const v = S.v[o.i];
-        shadowAt(c, x, y + 14, 10, 3);
-        block(c, x - 5, y - 4, 10, 18, PAL.iron);
-        c.save();
-        c.translate(x, y - 10);
-        c.rotate((v * Math.PI * 2) / 3);
-        c.strokeStyle = OUT;
-        c.lineWidth = 6;
-        c.beginPath();
-        c.arc(0, 0, 11, 0, Math.PI * 2);
-        c.stroke();
-        c.strokeStyle = '#c84a3a';
-        c.lineWidth = 3;
-        c.beginPath();
-        c.arc(0, 0, 11, 0, Math.PI * 2);
-        c.moveTo(-11, 0);
-        c.lineTo(11, 0);
-        c.stroke();
-        c.restore();
+      case 'plank':
+        block(c, x - 23, y - 14, 6, 20, PAL.wood);
+        block(c, x + 17, y - 14, 6, 20, PAL.wood);
+        if (qworld.flags.bridge) block(c, x - 24, y - 6, 48, 12, ['#b98a58', '#d1a66c', '#8a5a34']);
         return;
-      }
-      case 'lantern': {
-        const lit = qworld.flags.lanterns || puzzleLanterns(ST.q11.v)[o.i];
-        shadowAt(c, x, y + 12, 10, 3);
-        block(c, x - 3, y - 36, 6, 48, PAL.iron);
-        block(c, x - 10, y - 50, 20, 16, lit ? ['#ffd890', '#fff0c0', '#c8a050'] : PAL.iron);
-        block(c, x - 12, y - 54, 24, 5, PAL.iron);
-        if (lit) torchFlame(c, x, y - 38, 0.7);
-        return;
-      }
-      case 'frame': {
-        const sc = SCENES_Q12[S.f[o.i]];
-        shadowAt(c, x, y + 12, 18, 4);
-        block(c, x - 20, y - 42, 40, 52, PAL.gold);
-        block(
-          c,
-          x - 15,
-          y - 37,
-          30,
-          42,
-          qworld.solved.q12 ? ['#e8f4ff', '#ffffff', '#b8c8d8'] : ['#b8c8d8', '#d8e4f0', '#8a9aac']
-        );
-        rune(c, x, y - 12, sc[0], '#1a2430', 18);
-        c.font = 'bold 9px system-ui';
-        c.fillStyle = '#1a2430';
-        c.fillText(sc[1], x, y + 2);
-        return;
-      }
-      case 'plank': {
-        const v = S.pl[o.i],
-          need = [1, 0, 2, 1][o.i];
-        block(c, x - 23, y - 12 - need * 8, 6, 18 + need * 8, PAL.wood);
-        block(c, x + 17, y - 12 - need * 8, 6, 18 + need * 8, PAL.wood);
-        if (v < 3) {
-          const w = [26, 36, 46][v];
-          block(c, x - w / 2, y - 5, w, 10, ['#b98a58', '#d1a66c', '#8a5a34']);
-        }
-        return;
-      }
       case 'clue':
         shadowAt(c, x, y + 10, 16, 4);
         if (o.clue === 'lanterne') {
@@ -3175,35 +2840,12 @@
       case 'islechest':
         return chestArt(c, x, y, st.done[15] || (st.active[15] && st.active[15].step >= 1), '#ffe9a0');
       // Chapitres IV à VI.
-      case 'house': {
-        const p = PAL.stone,
-          there = S.pos.indexOf(o.i);
-        shadowAt(c, x, y + 16, 26, 6);
-        block(c, x - 24, y - 6, 8, 22, p);
-        block(c, x + 16, y - 6, 8, 22, p);
-        block(c, x - 24, y - 12, 48, 8, p);
-        rune(c, x, y + 4, ['🪣', '🔥', '🌷', '🗼'][o.i], '#ffffff', 16);
-        if (there >= 0) rune(c, x, y - 18, VILLAGE_OBJS[there][1], '#ffffff', 18);
-        return;
-      }
-      case 'vobj':
-        if (S.pos[o.i] !== -1) return;
-        shadowAt(c, x, y + 8, 12, 4);
-        return rune(c, x, y + 4, VILLAGE_OBJS[o.i][1], '#ffffff', 22);
       case 'leaf':
       case 'fresco':
         if (!usable(hero, site, o)) return;
         glow(c, x, y, 24, o.kind === 'leaf' ? '#ffd84a' : '#d8c8a8', 0.45 + 0.25 * Math.sin(time * 0.12 + x));
         if (o.kind === 'leaf') return rune(c, x, y + 6, '🍂', '#ffffff', 18);
         return block(c, x - 9, y - 7, 18, 14, ['#b8a080', '#d8c8a8', '#8a7050']);
-      case 'pillar': {
-        const shown = qworld.solved.q17 || stepOf(hero, q) >= 1 || st.done[17];
-        shadowAt(c, x, y + 14, 16, 5);
-        block(c, x - 12, y - 30, 24, 44, PAL.stone);
-        block(c, x - 15, y - 34, 30, 6, PAL.stone);
-        if (shown) rune(c, x, y - 6, SEASONS[S.p[o.i]][0], '#ffffff', 18);
-        return;
-      }
       case 'archive':
         shadowAt(c, x, y + 14, 24, 5);
         block(c, x - 22, y - 34, 44, 48, PAL.wood);
@@ -3215,7 +2857,7 @@
               y - 30 + k * 14,
               5,
               11,
-              qworld.solved.q17 ? ['#a83a2a', '#3a6aa8', '#c8a040', '#4a8a4a'][(b + k) % 4] : '#3a2a1a'
+              qworld.flags.archives ? ['#a83a2a', '#3a6aa8', '#c8a040', '#4a8a4a'][(b + k) % 4] : '#3a2a1a'
             );
         return;
       case 'vane': {
@@ -3248,7 +2890,7 @@
         shadowAt(c, x, y + 20, 26, 6);
         c.save();
         c.translate(x, y - 6);
-        c.rotate(qworld.solved.q19 ? time * 0.04 : time * -0.01);
+        c.rotate(qworld.flags.grenier ? time * 0.04 : time * -0.01);
         for (let k = 0; k < 8; k++) {
           c.rotate(Math.PI / 4);
           block(c, -3, -26, 6, 22, PAL.wood);
@@ -3262,38 +2904,13 @@
         block(c, x - 30, y - 34, 60, 16, ['#a8603a', '#c8804a', '#6a3a1a']);
         c.save();
         c.translate(x, y - 32);
-        c.rotate(qworld.solved.q19 ? time * 0.05 : time * -0.02);
+        c.rotate(qworld.flags.grenier ? time * 0.05 : time * -0.02);
         for (let k = 0; k < 4; k++) {
           c.rotate(Math.PI / 2);
           block(c, -4, -46, 8, 40, ['#e8e0d0', '#ffffff', '#b8b0a0']);
         }
         c.restore();
         return;
-      case 'gear': {
-        const v = S.g[o.i],
-          gap = ANSWER.q19[o.i];
-        block(c, x - 3 - gap * 6, y + 8, 4, 10, PAL.iron);
-        block(c, x + gap * 6, y + 8, 4, 10, PAL.iron);
-        if (!v) return;
-        const r = v === 2 ? 18 : 10;
-        c.save();
-        c.translate(x, y);
-        c.rotate((qworld.solved.q19 ? time * 0.06 : 0) * (o.i % 2 ? -1 : 1));
-        c.fillStyle = OUT;
-        c.beginPath();
-        c.arc(0, 0, r + 4, 0, Math.PI * 2);
-        c.fill();
-        for (let k = 0; k < 8; k++) {
-          c.rotate(Math.PI / 4);
-          R(c, -3, -r - 4, 6, 6, PAL.iron[1]);
-        }
-        c.fillStyle = PAL.iron[0];
-        c.beginPath();
-        c.arc(0, 0, r, 0, Math.PI * 2);
-        c.fill();
-        c.restore();
-        return;
-      }
       case 'traveler':
         personArt(
           c,
@@ -3326,36 +2943,16 @@
           return;
         }
         return block(c, x - 22, y - 6, 44, 10, PAL.wood);
-      case 'obelisk': {
-        const c2 = at(hero, q, 'collect'),
-          found = !c2 || c2.got.includes(o.id),
-          dir = S.o[o.i];
-        shadowAt(c, x, y + 14, 14, 5);
-        if (!found) {
-          block(c, x - 8, y - 8, 16, 20, PAL.sand);
-          R(c, x - 14, y + 6, 28, 8, '#d8b880');
-          return;
-        }
-        block(c, x - 9, y - 48, 18, 62, PAL.sand);
-        block(c, x - 12, y + 6, 24, 8, PAL.sand);
-        rune(c, x, y - 30, ['▲', '▶', '▼', '◀'][dir], '#6a4a1a', 14);
-        return;
-      }
       case 'starplate':
         R(c, x - 22, y - 14, 44, 28, '#a8885a');
         block(c, x - 18, y - 11, 36, 22, PAL.sand);
-        if (qworld.solved.q21) glow(c, x, y, 50, '#fff0a0', 0.5);
-        return rune(c, x, y + 6, '✦', qworld.solved.q21 ? '#ffffff' : '#6a4a1a', 18);
-      case 'ringlever':
-        shadowAt(c, x, y + 12, 10, 3);
-        block(c, x - 8, y - 2, 16, 14, PAL.iron);
-        block(c, x - 2, y - 22, 4, 20, PAL.wood);
-        return block(c, x - 5, y - 26, 10, 6, ['#c84a3a', '#e86a5a', '#8a2a1a']);
+        if (qworld.flags.cite) glow(c, x, y, 50, '#fff0a0', 0.5);
+        return rune(c, x, y + 6, '✦', qworld.flags.cite ? '#ffffff' : '#6a4a1a', 18);
       case 'machine': {
         shadowAt(c, x, y + 50, 70, 14);
         for (let k = 0; k < 3; k++) {
           const r = 22 + k * 20,
-            rot = (S.r[k] * Math.PI) / 3;
+            rot = qworld.flags.machine ? time * 0.012 * (k % 2 ? -1 : 1) : k * 0.9;
           c.strokeStyle = OUT;
           c.lineWidth = 12;
           c.beginPath();
@@ -3372,36 +2969,11 @@
           }
         }
         R(c, x - 2, y - 88, 4, 14, '#ffffff');
-        if (qworld.solved.q22) glow(c, x, y, 90, '#fff0a0', 0.4);
+        if (qworld.flags.machine) glow(c, x, y, 90, '#fff0a0', 0.4);
         return;
       }
       case 'treasure':
-        return chestArt(c, x, y, qworld.solved.q22, '#ffd84a');
-      case 'basin': {
-        const S2 = ST.q23;
-        for (const [rx, ry] of BASIN.rocks) block(c, px(site, rx) - 14, py(site, ry) - 12, 28, 24, PAL.stone);
-        const [dx, dy] = BASIN.dock;
-        block(c, px(site, dx) + 14, py(site, dy) - 10, 16, 20, PAL.wood);
-        const bx = px(site, S2.b[0]),
-          by = py(site, S2.b[1]);
-        block(c, bx - 14, by - 4, 28, 10, PAL.wood);
-        block(c, bx - 1, by - 24, 3, 20, PAL.wood);
-        c.fillStyle = '#f0ece4';
-        c.beginPath();
-        c.moveTo(bx + 2, by - 24);
-        c.lineTo(bx + 14, by - 8);
-        c.lineTo(bx + 2, by - 8);
-        c.fill();
-        return;
-      }
-      case 'fan':
-        shadowAt(c, x, y + 10, 10, 3);
-        block(c, x - 7, y - 14, 14, 24, ['#5a9ac8', '#9ad0f0', '#2a5a8a']);
-        return block(c, x - 4, y - 20, 8, 6, PAL.wood);
-      case 'bell':
-        shadowAt(c, x, y + 12, 10, 3);
-        block(c, x - 2, y - 30, 4, 42, PAL.wood);
-        return block(c, x - 8, y - 36, 16, 12, PAL.gold);
+        return chestArt(c, x, y, qworld.flags.machine, '#ffd84a');
       case 'templedoor':
         shadowAt(c, x, y + 18, 26, 6);
         if (qworld.solved.q24) {
@@ -3410,63 +2982,21 @@
         }
         block(c, x - 22, y - 34, 44, 52, PAL.sand);
         return rune(c, x, y - 4, '☀', '#8a6418', 22);
-      case 'aqueduct': {
-        const path = puzzleAqueduct(S.g),
-          wet = qworld.solved.q25 ? puzzleAqueduct(ANSWER.q25) : path;
-        const edges = [
-          ['src', 'a'],
-          ['a', 'leakA'],
-          ['a', 'b'],
-          ['b', 'leakB'],
-          ['b', 'c'],
-          ['c', 'leakC'],
-          ['c', 'basin']
-        ];
-        for (const [a, b] of edges) {
-          const [x0, y0] = AQ[a],
-            [x1, y1] = AQ[b],
-            on = wet.includes(a) && wet.includes(b) && wet.indexOf(b) === wet.indexOf(a) + 1;
-          c.strokeStyle = OUT;
-          c.lineWidth = 14;
-          c.beginPath();
-          c.moveTo(px(site, x0), py(site, y0));
-          c.lineTo(px(site, x1), py(site, y1));
-          c.stroke();
-          c.strokeStyle = on ? '#5ab0e8' : PAL.sand[0];
-          c.lineWidth = 10;
-          c.stroke();
-        }
-        const end = wet.at(-1);
-        if (end !== 'basin') glow(c, px(site, AQ[end][0]), py(site, AQ[end][1]), 30, '#8ab0c0', 0.5);
-        const full = qworld.flags.oasis;
-        block(
+      case 'oasis':
+        return block(
           c,
-          px(site, 3) - 22,
-          py(site, 2) - 22,
+          x - 22,
+          y - 22,
           92,
           92,
-          full ? ['#3a8ac8', '#7ac0f0', '#1a5a8a'] : PAL.sand
+          qworld.flags.oasis ? ['#3a8ac8', '#7ac0f0', '#1a5a8a'] : PAL.sand
         );
-        return block(c, px(site, -5) - 14, py(site, -3) - 18, 28, 30, PAL.stone);
-      }
-      case 'agate': {
-        const open = S.g[o.i];
-        shadowAt(c, x, y + 12, 12, 4);
-        block(c, x - 14, y - 4, 4, 18, PAL.iron);
-        block(c, x + 10, y - 4, 4, 18, PAL.iron);
-        return block(c, x - 10, open ? y - 18 : y, 20, 12, PAL.wood);
-      }
-      case 'trial': {
-        const done =
-          st.done[26] || (at(hero, q, 'trials') && at(hero, q, 'trials').got.includes('trial' + o.i));
-        return standing(c, x, y, PAL.lilac, ['✦', '♪', '☾', '6'][o.i], done, '#e8d8ff');
-      }
       case 'altar': {
         shadowAt(c, x, y + 14, 26, 6);
         block(c, x - 24, y - 8, 48, 22, PAL.lilac);
-        const stars = st.done[26] || stepOf(hero, q) >= 2 ? 6 : starCount(st);
+        const stars = st.done[26] || stepOf(hero, q) >= 4 ? 6 : starCount(st);
         for (let k = 0; k < 6; k++) {
-          const lit = (st.done[26] || stepOf(hero, q) >= 2) && k < stars;
+          const lit = (st.done[26] || stepOf(hero, q) >= 4) && k < stars;
           rune(c, x - 20 + k * 8, y + 4, lit ? '★' : '☆', lit ? '#fff0a0' : '#3a2a58', 10);
         }
         if (st.done[26]) glow(c, x, y - 10, 60, '#fff0a0', 0.4);
@@ -3510,16 +3040,6 @@
         return block(c, x - 18, y - 16, 36, 30, PAL.lilac);
       case 'echest':
         return chestArt(c, x, y, st.done[28], '#c8b8f0');
-      case 'perch': {
-        const h = ST.q29.h[o.i];
-        shadowAt(c, x, y + 12, 12, 4);
-        block(c, x - 3, y - 10 - h * 14, 6, 22 + h * 14, PAL.wood);
-        return block(c, x - 12, y - 16 - h * 14, 24, 6, PAL.wood);
-      }
-      case 'horn':
-        shadowAt(c, x, y + 12, 10, 3);
-        block(c, x - 2, y - 24, 4, 36, PAL.wood);
-        return block(c, x - 10, y - 30, 20, 8, PAL.gold);
       case 'lake': {
         const S2 = ST.q30;
         for (const [dx, dy] of site.stones) {
@@ -3552,38 +3072,7 @@
   }
   // Ce que le héros voit d'un lieu des chapitres IV à VI en plus des objets : objet porté, rayons, dragon.
   function drawMoreExtras(c, site) {
-    if (site.id === 'q16') {
-      for (const [k, i] of Object.entries(ST.q16.hold)) {
-        const h = heroOfKey(k);
-        if (h) rune(c, h.player.x, h.player.y - 56, VILLAGE_OBJS[i][1], '#ffffff', 20);
-      }
-    }
-    if (
-      site.id === 'q21' &&
-      (qworld.solved.q21 || stepOf(game.hero, site.quest) >= 1 || stateOf(game.hero).done[21])
-    ) {
-      const S = ST.q21;
-      for (const o of site.objs.filter(o => o.kind === 'obelisk')) {
-        const [dx, dy] = [
-          [0, -1],
-          [1, 0],
-          [0, 1],
-          [-1, 0]
-        ][S.o[o.i]];
-        c.save();
-        c.globalAlpha = 0.6;
-        c.strokeStyle = '#fff0a0';
-        c.lineWidth = 4;
-        c.shadowColor = '#ffd84a';
-        c.shadowBlur = 12;
-        c.beginPath();
-        c.moveTo(o.x, o.y - 30);
-        c.lineTo(o.x + dx * 5 * T, o.y - 30 + dy * 5 * T);
-        c.stroke();
-        c.restore();
-      }
-    }
-    if (site.id === 'q24' || site.id === 'q7') {
+    if (site.id === 'q24') {
       const b = beamOf(site);
       c.save();
       c.strokeStyle = '#ffe890';
@@ -3599,21 +3088,11 @@
       c.restore();
     }
     if (site.id === 'q29') {
-      const S = ST.q29,
-        perches = site.objs.filter(o => o.kind === 'perch');
+      // Braise : posé près de Pyria, puis en vol au-dessus de la clairière.
       let x = px(site, -5),
         y = py(site, -1),
         flap = time * 0.1;
-      if (S.fly) {
-        const k = Math.min(3.99, S.fly.t),
-          i = Math.floor(k),
-          f = k - i,
-          a = perches[i],
-          b = perches[Math.min(3, i + 1)];
-        x = a.x + (b.x - a.x) * f;
-        y = a.y - 30 - S.h[i] * 14 + (b.y - a.y) * f - 30 * Math.sin(f * Math.PI);
-        flap = time * 0.4;
-      } else if (qworld.solved.q29 || qworld.flags.pyria) {
+      if (qworld.flags.pyria) {
         x = px(site, 0) + Math.cos(time * 0.02) * 4 * T;
         y = py(site, -2) + Math.sin(time * 0.04) * 1.5 * T - 30;
         flap = time * 0.4;
@@ -3636,21 +3115,10 @@
         glow(c, x, y, 14, '#bfe8ff', 0.35 + 0.25 * Math.sin(time * 0.1 - k * 0.6));
       }
     }
-    if (site.id === 'q3') {
-      const S = ST.q3,
-        sprite = CANAAN_LIFE.icon('mouton');
-      let x = px(site, site.nodes.pen[0]),
-        y = py(site, site.nodes.pen[1]);
-      if (S.top) [x, y] = [px(site, 3), py(site, -4)];
-      else if (S.run) {
-        const path = S.run.path,
-          i = Math.floor(S.run.i),
-          f = S.run.i - i,
-          a = path[i],
-          b = path[Math.min(i + 1, path.length - 2)];
-        x = a[0] + (b[0] - a[0]) * f;
-        y = a[1] + (b[1] - a[1]) * f;
-      }
+    if (site.id === 'q3' && qworld.flags.sommet) {
+      const sprite = CANAAN_LIFE.icon('mouton'),
+        x = px(site, 3),
+        y = py(site, -4);
       if (sprite) c.drawImage(sprite, Math.round(x - sprite.width / 2), Math.round(y - sprite.height + 8));
     }
     if (site.id === 'q8') {
@@ -3731,22 +3199,31 @@
     c.save();
     c.imageSmoothingEnabled = false;
     for (const site of Object.values(SITES)) {
-      if (!visible(px(site, 0), py(site, 0), (site.r + 7) * T)) continue;
-      drawSiteExtras(c, site);
+      if (!here(site)) continue;
+      if (!site.under && visible(px(site, 0), py(site, 0), (site.r + 7) * T)) drawSiteExtras(c, site);
       for (const o of site.objs) if (visible(o.x, o.y)) drawObj(c, site, o);
     }
-    if (WAYSTONE.camp && visible(WAYSTONE.camp.x, WAYSTONE.camp.y))
+    if (WAYSTONE.camp && !canaanUnder() && visible(WAYSTONE.camp.x, WAYSTONE.camp.y))
       drawObj(c, SITES.q8, { kind: 'waystone', x: WAYSTONE.camp.x, y: WAYSTONE.camp.y });
     for (const npc of Object.values(NPCS)) {
-      if (!visible(npc.x, npc.y)) continue;
+      if (!here(npc) || !visible(npc.x, npc.y) || !present(game.hero, npc)) continue;
       const def = npc.def,
-        dx = P.x - npc.x,
-        dy = P.y - npc.y;
+        // Un nain du jeu se promène autour de sa place (dessiné par underground.js).
+        at0 = npc.dwarf || npc,
+        dx = P.x - at0.x,
+        dy = P.y - at0.y;
       if (Math.hypot(dx, dy) < 3 * T)
         npc.face = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy < 0 ? 2 : 0;
-      const s = def.child ? 0.8 : 1,
-        spr = canaanHeroSprite(sanitizeLook(def.look), npc.face, 0, { tool: def.tool || 'none' });
-      if (def.spirit) {
+      const s = def.child ? 0.8 : 1;
+      if (npc.dwarf) {
+        // Déjà dessiné.
+      } else if (def.mob) FIELD.mobArt(c, npc.id, def.mob, npc.x, npc.y, 1, def.pal);
+      else if (def.dwarf) {
+        c.globalAlpha = def.ghost ? 0.6 + 0.15 * Math.sin(time * 0.06) : 1;
+        if (def.ghost) glow(c, npc.x, npc.y - 16, 40, '#bfe8ff', 0.35);
+        CANAAN_UNDER.dwarfArt(c, { name: def.name, ...def.dwarf }, npc.x, npc.y, dx < 0 ? -1 : 1);
+        c.globalAlpha = 1;
+      } else if (def.spirit) {
         // Lumi elle-même : une petite lumière qui flotte.
         const yy = npc.y - 20 + Math.sin(time * 0.07) * 6;
         glow(c, npc.x, yy, 44, '#bfe8ff', 0.6);
@@ -3759,7 +3236,7 @@
         c.globalAlpha = def.ghost ? 0.55 + 0.15 * Math.sin(time * 0.06) : 1;
         if (def.ghost) glow(c, npc.x, npc.y - 20, 40, '#bfe8ff', 0.35);
         c.drawImage(
-          spr,
+          canaanHeroSprite(sanitizeLook(def.look), npc.face, 0, { tool: def.tool || 'none' }),
           Math.round(npc.x - 26 * s),
           Math.round(npc.y + 18 - 60 * s + (def.ghost ? Math.sin(time * 0.05) * 3 : 0)),
           Math.round(52 * s),
@@ -3772,29 +3249,40 @@
         gift =
           (Math.hypot(dx, dy) < 6 * T && tradeAt(game.hero, npc.id)) ||
           (def.collector && shellRewardsDue(stateOf(game.hero)).length),
-        mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : mode === 'active' ? '…' : '';
-      if (gift && !mark) rune(c, npc.x, npc.y - 58 * s + Math.sin(time * 0.08) * 3, '🎁', '#ffffff', 22);
+        // Une étape en cours l'attend (parler, choisir) : « ? », comme une quête à rendre.
+        mark = errand(game.hero, npc)
+          ? '?'
+          : mode === 'offer'
+            ? '!'
+            : mode === 'ready'
+              ? '?'
+              : mode === 'active'
+                ? '…'
+                : '';
+      if (gift && !mark) rune(c, at0.x, at0.y - 58 * s + Math.sin(time * 0.08) * 3, '🎁', '#ffffff', 22);
       if (mark) {
         c.font = 'bold 26px Georgia, serif';
         c.textAlign = 'center';
         c.lineWidth = 4;
         c.strokeStyle = '#2a1a08';
         c.fillStyle = mark === '…' ? '#c8c0b0' : npc.quest?.main ? '#ffd84a' : '#fff0a0';
-        const yy = npc.y - 58 * s + Math.sin(time * 0.08) * 3;
-        c.strokeText(mark, npc.x, yy);
-        c.fillText(mark, npc.x, yy);
+        // Au-dessus du nom et de l'invitation des nains.
+        const yy = at0.y - (npc.dwarf ? 78 : 58 * s) + Math.sin(time * 0.08) * 3;
+        c.strokeText(mark, at0.x, yy);
+        c.fillText(mark, at0.x, yy);
       }
-      if (Math.hypot(dx, dy) < 4 * T) nameTag(c, npc.x, npc.y - 46 * s, def.name);
+      if (!npc.dwarf && Math.hypot(dx, dy) < 4 * T) nameTag(c, npc.x, npc.y - 46 * s, def.name);
     }
     if (!guest()) drawZones(c);
     drawRaised(c);
+    FIELD.drawHero(c);
     // Lumi éclaire la nuit autour de chaque héros qu'elle accompagne.
     for (const hero of game.heroes) {
       const l = lumiAt.get(hero);
       if (l && !hero.player.dead) canaanLight(l.x, l.y, 90, '#bfe8ff');
     }
     const n = nearest();
-    if (n && !modalOpen()) {
+    if (n && !modalOpen() && !n.npc?.dwarf) {
       const x = n.npc ? n.npc.x : n.o.x,
         y = n.npc ? n.npc.y : n.o.y;
       prompt(c, x, y - (n.npc ? 74 : 44), label(game.hero, n));
@@ -3805,6 +3293,7 @@
   function drawBubbles(c) {
     if (game.world.instance) return;
     for (const npc of Object.values(NPCS)) {
+      if (!here(npc)) continue;
       const d = Math.hypot(P.x - npc.x, P.y - npc.y);
       if (!npc.quest || d > 4 * T || d < 1.6 * T || npcState(game.hero, npc.quest) !== 'offer') continue;
       // Traduite avant d'être coupée : un début de phrase seul ne serait pas reconnu.
@@ -3842,7 +3331,12 @@
         flags =
           hero === game.hero
             ? stateOf(hero).flags
-            : { lumi: hero.questLook & 1, blessing: hero.questLook & 2, aurora: hero.questLook & 4 };
+            : {
+                lumi: hero.questLook & 1,
+                blessing: hero.questLook & 2,
+                aurora: hero.questLook & 4,
+                echo: hero.questLook & 8
+              };
       if (p.dead) continue;
       // Aura du Gardien de l'Aurore : anneau de lumière dorée et rose sous les pieds.
       if (flags.aurora) {
@@ -3864,6 +3358,16 @@
           c: '#ffd84a',
           r: 2
         });
+      // Écho : une lueur d'ambre des profondeurs, qui tourne lentement autour du héros.
+      if (flags.echo) {
+        const a = time * 0.035,
+          ex = p.x + Math.cos(a) * 24,
+          ey = p.y - 30 + Math.sin(a * 2) * 5;
+        glow(ctx, ex, ey, 22, '#ffc65a', 0.55);
+        R(ctx, ex - 3, ey - 3, 6, 6, '#8a5a20');
+        R(ctx, ex - 2, ey - 2, 4, 4, '#ffe0a0');
+        canaanLight(ex, ey, 70, '#ffc65a');
+      }
       if (!flags.lumi) continue;
       const l = lumiAt.get(hero) || { x: p.x, y: p.y };
       const tx = p.x - 26 * (p.face || 1),
@@ -3889,17 +3393,40 @@
       q = quest(st.track);
     if (!q || !st.active[q.id]) return null;
     const a = st.active[q.id],
-      site = SITES[q.site];
-    if (a.step >= q.steps.length)
-      return { x: NPCS[q.npc].x, y: NPCS[q.npc].y, text: 'Retourne voir ' + QUEST_NPCS[q.npc].name, q };
-    const step = q.steps[a.step];
+      step = q.steps[a.step],
+      site = SITES[step?.site || q.site];
+    if (!site) return null;
+    // Personnage à voir : celui de la quête à rendre, ou celui de l'étape.
+    const who = !step ? q.npc : step.k === 'talk' || step.k === 'choice' ? step.npc || q.npc : null,
+      npc = who && NPCS[who],
+      text = step ? step.text : 'Retourne voir ' + QUEST_NPCS[q.npc].name,
+      count = step ? FIELD.progress(step, a) : null,
+      under = npc ? !!npc.under : !!site.under;
+    // L'objectif est sur l'autre couche : l'entrée des Tréfonds la plus proche.
+    if (step?.k !== 'sky' && step?.k !== 'work' && under !== canaanUnder()) {
+      const p = hero.player,
+        e = [...CANAAN_UNDER.ENTRANCES].sort(
+          (u, v) => Math.hypot(u.x * T - p.x, u.y * T - p.y) - Math.hypot(v.x * T - p.x, v.y * T - p.y)
+        )[0];
+      return {
+        x: (e.x + 0.5) * T,
+        y: (e.y + 0.5) * T,
+        text: under ? 'Descendre dans les Tréfonds' : 'Remonter à la surface',
+        q
+      };
+    }
+    if (npc) return { x: npc.x, y: npc.y, text, q };
+    const spot = FIELD.target(hero, site, q, step, a);
+    if (spot) return { ...spot, text, count, q };
+    if (step.k === 'guardian') {
+      const seal = site.objs.find(o => o.kind === 'gseal');
+      if (seal) return { x: seal.x, y: seal.y, text, q };
+    }
     if (step.k === 'collect') {
       const left = site.objs.find(
-        o =>
-          ['relic', 'mstone', 'leaf', 'fresco', 'obelisk', 'ccrystal'].includes(o.kind) &&
-          !a.got.includes(o.id)
+        o => ['mstone', 'leaf', 'fresco', 'ccrystal'].includes(o.kind) && !a.got.includes(o.id)
       );
-      if (left) return { x: left.x, y: left.y, text: step.text, q, vague: true };
+      if (left) return { x: left.x, y: left.y, text: step.text, count, q, vague: true };
     }
     if (step.at)
       return {
@@ -3914,7 +3441,7 @@
       const altar = site.objs.find(o => o.kind === 'altar27');
       return { x: altar.x, y: altar.y, text: step.text, q };
     }
-    if (step.k === 'search' || step.k === 'trials')
+    if (step.k === 'search' || step.k === 'clues')
       return { x: px(site, 0), y: py(site, 0), text: step.text, q, vague: true };
     return { x: px(site, 0), y: py(site, 0), text: step.text, q };
   }
@@ -3934,13 +3461,17 @@
         esc(tr.q.title) +
         '</b><span>' +
         esc(tr.text) +
-        '</span><em>' +
-        (d <= 2
-          ? 'Tu y es'
-          : '<i style="transform:rotate(' +
-            a.toFixed(2) +
-            'rad)">➤</i> ' +
-            (tr.vague && d < 8 ? 'tout près' : d + ' cases')) +
+        '</span>' +
+        (tr.count ? '<b class="quest-count">' + tr.count[0] + ' / ' + tr.count[1] + '</b>' : '') +
+        '<em>' +
+        (tr.area
+          ? 'Par ici'
+          : d <= 2
+            ? 'Tu y es'
+            : '<i style="transform:rotate(' +
+              a.toFixed(2) +
+              'rad)">➤</i> ' +
+              (tr.vague && d < 8 ? 'tout près' : d + ' cases')) +
         '</em>';
     if (trackerEl.innerHTML !== html) trackerEl.innerHTML = html;
   }
@@ -3951,26 +3482,14 @@
   }
   function importWorld(d) {
     qworld = { flags: {}, solved: {} };
-    const flags = [
-      'sanct_murmures',
-      'sanct_reflets',
-      'sanct_saisons',
-      'sanct_etoiles',
-      'sanct_lumieres',
-      'sanct_aurore',
-      'lanterns',
-      'bridge',
-      'shortcut',
-      'archives',
-      'grenier',
-      'oasis',
-      'pyria'
-    ];
     if (d && typeof d === 'object') {
-      for (const f of flags) if (d.flags?.[f]) qworld.flags[f] = true;
+      for (const f of WORLD_FLAGS) if (d.flags?.[f]) qworld.flags[f] = true;
       for (const id of Object.keys(SITES)) if (d.solved?.[id]) qworld.solved[id] = true;
+      // Anciennes énigmes résolues : le lieu garde son changement.
+      for (const [id, f] of Object.entries(LEGACY_SOLVED)) if (d.solved?.[id]) qworld.flags[f] = true;
     }
     ST = puzzleFreshStates();
+    FIELD.reset();
     if (SITES.q15) ST.q15.pads = SITES.q15.pads.map(() => ({ t: 0, sunk: 0 }));
     for (const id of Object.keys(qworld.solved)) {
       const solved = puzzleSolvedState(id);
@@ -3988,32 +3507,14 @@
     return {
       w: exportWorld(),
       s: {
-        q1: ST.q1.seq.length,
-        q2: ST.q2.p,
-        q3: [
-          ST.q3.g,
-          ST.q3.top ? 1 : 0,
-          ST.q3.run ? [ST.q3.run.path, Math.round(ST.q3.run.i * 100) / 100] : 0
-        ],
+        f: FIELD.netView(),
         q5: [ST.q5.gold, Math.max(0, ST.q5.until - time)],
         q6: ST.q6.seq.length,
-        q7: ST.q7.m,
-        q11: ST.q11.v,
-        q12: ST.q12.f,
-        q13: ST.q13.pl,
         q15: ST.q15.pads.map(p => [Math.round(p.t * 4) / 4, p.sunk ? 1 : 0]),
-        q16: [ST.q16.pos, ST.q16.hold],
-        q17: ST.q17.p,
         q18: ST.q18.t,
-        q19: ST.q19.g,
-        q21: ST.q21.o,
-        q22: ST.q22.r,
-        q23: ST.q23.b,
         q24: ST.q24.m,
-        q25: ST.q25.g,
         q27: [ST.q27.on ? 1 : 0, ST.q27.hp.map(Math.round)],
         q28: ST.q28.l,
-        q29: [ST.q29.h, ST.q29.fly ? Math.round(ST.q29.fly.t * 10) / 10 : -1],
         q30: ST.q30.seq
       }
     };
@@ -4037,57 +3538,20 @@
     }
     const s = v.s;
     if (!s) return;
-    ST.q2.p = ints(s.q2, 3, 2) || ST.q2.p;
-    ST.q7.m = ints(s.q7, 3, 3) || ST.q7.m;
-    ST.q11.v = ints(s.q11, 3, 2) || ST.q11.v;
-    ST.q12.f = ints(s.q12, 4, 4) || ST.q12.f;
-    ST.q13.pl = ints(s.q13, 4, 3) || ST.q13.pl;
-    if (Array.isArray(s.q3)) {
-      ST.q3.g = ints(s.q3[0], 3, 1) || ST.q3.g;
-      ST.q3.top = !!s.q3[1];
-      const run = s.q3[2];
-      ST.q3.run =
-        Array.isArray(run) &&
-        Array.isArray(run[0]) &&
-        run[0].every(p => Array.isArray(p) && p.every(Number.isFinite))
-          ? { path: run[0], i: Number(run[1]) || 0, back: 0 }
-          : null;
-    }
+    FIELD.applyRemote(s.f, SITES);
     if (Array.isArray(s.q5)) {
       ST.q5.gold = Number.isInteger(s.q5[0]) ? s.q5[0] : -1;
       ST.q5.until = time + (Number(s.q5[1]) || 0);
     }
-    if (Number.isInteger(s.q1)) ST.q1.seq = ORDER_Q1.slice(0, Math.min(4, s.q1));
     if (Number.isInteger(s.q6)) ST.q6.seq = [1, 4, 2, 3].slice(0, Math.min(4, s.q6));
-    ST.q17.p = ints(s.q17, 4, 3) || ST.q17.p;
-    ST.q19.g = ints(s.q19, 3, 2) || ST.q19.g;
-    ST.q21.o = ints(s.q21, 3, 3) || ST.q21.o;
-    ST.q22.r = ints(s.q22, 3, 5) || ST.q22.r;
     ST.q24.m = ints(s.q24, 4, 3) || ST.q24.m;
-    ST.q25.g = ints(s.q25, 3, 1) || ST.q25.g;
     ST.q28.l = ints(s.q28, 3, 1) || ST.q28.l;
-    if (Array.isArray(s.q23) && s.q23.length === 2 && s.q23.every(Number.isInteger)) ST.q23.b = [...s.q23];
     if (Number.isFinite(s.q18)) ST.q18.t = s.q18;
     if (Number.isInteger(s.q30)) ST.q30.seq = Math.max(0, Math.min(CONSTELLATION.length, s.q30));
-    if (
-      Array.isArray(s.q16) &&
-      Array.isArray(s.q16[0]) &&
-      s.q16[0].length === 4 &&
-      s.q16[0].every(v => Number.isInteger(v) && v >= -2 && v <= 3)
-    ) {
-      ST.q16.pos = [...s.q16[0]];
-      ST.q16.hold = {};
-      for (const [k, v] of Object.entries(s.q16[1] || {}))
-        if (Number.isInteger(v) && v >= 0 && v <= 3) ST.q16.hold[String(k).slice(0, 64)] = v;
-    }
     if (Array.isArray(s.q27)) {
       ST.q27.on = !!s.q27[0];
       if (Array.isArray(s.q27[1]) && s.q27[1].length === 6)
         ST.q27.hp = s.q27[1].map(v => Math.max(0, Math.min(100, Number(v) || 0)));
-    }
-    if (Array.isArray(s.q29)) {
-      ST.q29.h = ints(s.q29[0], 4, 3) || ST.q29.h;
-      ST.q29.fly = Number(s.q29[1]) >= 0 ? { t: Number(s.q29[1]) } : null;
     }
     if (Array.isArray(s.q15))
       s.q15.forEach(
@@ -4097,26 +3561,57 @@
           Object.assign(ST.q15.pads[i], { t: Number(p[0]) || 0, sunk: p[1] ? 1 : 0 })
       );
   }
-  // Apparence visible chez les autres : Lumi (1) et bénédiction des racines d'or (2).
+  // Apparence visible chez les autres : Lumi (1), bénédiction des racines d'or (2), aura (4) et Écho (8).
   const questLook = hero =>
     (stateOf(hero).flags.lumi ? 1 : 0) |
     (stateOf(hero).flags.blessing ? 2 : 0) |
-    (stateOf(hero).flags.aurora ? 4 : 0);
+    (stateOf(hero).flags.aurora ? 4 : 0) |
+    (stateOf(hero).flags.echo ? 8 : 0);
 
   // Lieux posés sur l'île ; une île régénérée (même graine) les reçoit à nouveau, à l'identique.
   function rebuild() {
-    for (const k of Object.keys(SITES)) delete SITES[k];
-    for (const k of Object.keys(NPCS)) delete NPCS[k];
+    for (const site of surfaceSites()) delete SITES[site.id];
+    for (const k of Object.keys(NPCS)) if (!NPCS[k].under) delete NPCS[k];
+    FIELD.reset();
     WALK.clear();
     place();
     if (SITES.q15) ST.q15.pads = SITES.q15.pads.map(() => ({ t: 0, sunk: 0 }));
   }
+  // Objectifs de terrain (quest-field.js), avec ce dont ils ont besoin d'ici.
+  const FIELD = canaanQuestField({
+    px,
+    py,
+    stateOf,
+    advance,
+    tell,
+    cue,
+    panel,
+    changed,
+    addObj,
+    heroesNear,
+    art: { R, glow, block, rune, shadowAt, crystalArt, flagArt, torchFlame, personArt, chestArt, PAL, OUT }
+  });
   place();
   canaanQuestWorld = rebuild;
   window.CANAAN_QUESTS = Object.freeze({
     sites: () => SITES,
+    placeUnder,
+    field: () => FIELD,
+    // Événement du jeu (victoire, pêche, récolte, donjon terminé), posé par canaanAchieve.
+    event: (hero, type, a) => FIELD.event(hero, type, a),
+    hear: (hero, id) => hear(hero, id),
+    errand: (hero, npc) => !!errand(hero, npc),
+    present,
     npcs: () => NPCS,
-    npcMode: (hero, npc) => (npc.quest ? npcState(hero, npc.quest) : 'none'),
+    // Personnage à montrer sur la carte : 'offer' (!), 'ready' (?), sur la couche du groupe.
+    npcMode: (hero, npc) =>
+      !here(npc) || !present(hero, npc)
+        ? 'none'
+        : errand(hero, npc)
+          ? 'ready'
+          : npc.quest
+            ? npcState(hero, npc.quest)
+            : 'none',
     waystones: () => Object.values(WAYSTONE).filter(Boolean),
     state: stateOf,
     world: () => qworld,
@@ -4132,8 +3627,7 @@
     handle,
     interact,
     nearest,
-    beam: () => beamOf(SITES.q7),
-    puzzleLanterns,
+    beam: () => beamOf(SITES.q24),
     exportWorld,
     importWorld,
     netView,

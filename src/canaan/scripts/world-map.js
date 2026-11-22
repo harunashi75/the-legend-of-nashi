@@ -1009,6 +1009,51 @@
       if (name && names) label(c, name, sx, sy + 20, 14);
       return [sx, sy];
     };
+    // Personnages des quêtes : « ! » quête à prendre, « ? » quête à rendre (sur la couche du groupe).
+    const questGivers = () => {
+      for (const npc of Object.values(CANAAN_QUESTS.npcs())) {
+        const mode = CANAAN_QUESTS.npcMode(game.hero, npc),
+          mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : '';
+        if (mark)
+          put(
+            'quest',
+            npc.x / TS,
+            npc.y / TS,
+            { mark, main: npc.quest?.main },
+            names && v.scale >= 6 ? npc.def.name : null
+          );
+      }
+    };
+    // Objectif de la quête suivie ; sur la mini-carte, une flèche au bord s'il est plus loin.
+    const questGoal = () => {
+      const tr = CANAAN_QUESTS.target(game.hero);
+      if (tr && !tr.area) {
+        const [sx, sy] = S(tr.x / TS, tr.y / TS);
+        if (seen(sx, sy, -6)) icon(c, 'target', sx, sy, k);
+        else if (v.mini) {
+          const cx = v.w / 2,
+            cy = v.h / 2,
+            a = Math.atan2(sy - cy, sx - cx),
+            r = (v.r || v.w / 2) - 10;
+          c.save();
+          c.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+          c.rotate(a);
+          c.fillStyle = '#22160e';
+          c.beginPath();
+          c.moveTo(9, 0);
+          c.lineTo(-6, -7);
+          c.lineTo(-6, 7);
+          c.fill();
+          c.fillStyle = '#ffd84a';
+          c.beginPath();
+          c.moveTo(6, 0);
+          c.lineTo(-4, -5);
+          c.lineTo(-4, 5);
+          c.fill();
+          c.restore();
+        }
+      }
+    };
     if (game.world.instance) {
       for (const m of game.world.monsters) {
         if (m.hp <= 0 || m.hidden || !CANAAN_DUNGEON_EXPLORE.known(m.x / TS, m.y / TS)) continue;
@@ -1026,6 +1071,7 @@
           c.stroke();
         }
       }
+      questGivers();
       if (v.mini)
         for (const m of game.world.monsters)
           if (m.hp > 0) put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
@@ -1064,54 +1110,15 @@
       for (const mk of CANAAN_EXT.markers()) put(mk.kind, mk.x, mk.y, mk.extra || {}, mk.name);
       if (window.CANAAN_CITY_PLAN)
         put('city', CANAAN_CITY_PLAN.center.x, CANAAN_CITY_PLAN.center.y, {}, CANAAN_CITY_PLAN.name);
-      // Personnages des quêtes : « ! » quête à prendre, « ? » quête à rendre.
-      for (const npc of Object.values(CANAAN_QUESTS.npcs())) {
-        const mode = CANAAN_QUESTS.npcMode(game.hero, npc),
-          mark = mode === 'offer' ? '!' : mode === 'ready' ? '?' : '';
-        if (mark)
-          put(
-            'quest',
-            npc.x / TS,
-            npc.y / TS,
-            { mark, main: npc.quest?.main },
-            names && v.scale >= 6 ? npc.def.name : null
-          );
-      }
+      questGivers();
       // Monstres proches, sur la mini-carte seulement.
       if (v.mini)
         for (const m of game.world.monsters) {
           if (m.hp <= 0) continue;
           put(m.worldBoss ? 'bossmob' : 'mob', m.x / TS, m.y / TS, { elite: m.elite }, null);
         }
-      // Objectif de la quête suivie ; sur la mini-carte, une flèche au bord s'il est plus loin.
-      const tr = CANAAN_QUESTS.target(game.hero);
-      if (tr) {
-        const [sx, sy] = S(tr.x / TS, tr.y / TS);
-        if (seen(sx, sy, -6)) icon(c, 'target', sx, sy, k);
-        else if (v.mini) {
-          const cx = v.w / 2,
-            cy = v.h / 2,
-            a = Math.atan2(sy - cy, sx - cx),
-            r = (v.r || v.w / 2) - 10;
-          c.save();
-          c.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-          c.rotate(a);
-          c.fillStyle = '#22160e';
-          c.beginPath();
-          c.moveTo(9, 0);
-          c.lineTo(-6, -7);
-          c.lineTo(-6, 7);
-          c.fill();
-          c.fillStyle = '#ffd84a';
-          c.beginPath();
-          c.moveTo(6, 0);
-          c.lineTo(-4, -5);
-          c.lineTo(-4, 5);
-          c.fill();
-          c.restore();
-        }
-      }
     }
+    if (!game.world.instance) questGoal();
     // Noms des biomes sur la vue d'ensemble de l'île, par-dessus les repères.
     if (!game.world.instance && game.world.layer !== 'under' && !v.mini && v.scale <= 3)
       for (const z of ZONES) {
