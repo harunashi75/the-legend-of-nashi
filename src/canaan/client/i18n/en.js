@@ -2144,6 +2144,32 @@ export default {
   'Immortel !': 'Undying!',
   'PV insuffisants': 'Not enough HP',
   'Sans mana': 'No mana',
+  // Ressources des classes (shared/data/classes.js, RESOURCES).
+  'Sans coût': 'No cost',
+  'PV': 'HP',
+  'Énergie': 'Energy',
+  'Ferveur': 'Fervor',
+  'Rythme': 'Rhythm',
+  'Énergie {n}': 'Energy {n}',
+  'Ferveur {n}': 'Fervor {n}',
+  'Rythme {n}': 'Rhythm {n}',
+  'Ressource · {nom}': 'Resource · {nom}',
+  'Énergie insuffisante': 'Not enough energy',
+  'Ferveur insuffisante': 'Not enough fervor',
+  'Rythme insuffisant': 'Not enough rhythm',
+  'Recharge {n} s · Énergie {m}': 'Cooldown {n} s · Energy {m}',
+  'Recharge {n} s · Ferveur {m}': 'Cooldown {n} s · Fervor {m}',
+  'Recharge {n} s · Rythme {m}': 'Cooldown {n} s · Rhythm {m}',
+  'Grandit avec ton niveau et se régénère tout seul, plus lentement en combat.':
+    'Grows with your level and regenerates on its own, more slowly in combat.',
+  '100 points qui se rechargent très vite, même en plein combat.':
+    '100 points that recharge very quickly, even in the middle of a fight.',
+  'Part de zéro : monte quand tu frappes, et surtout quand tu es frappé ; retombe hors combat.':
+    'Starts at zero: rises when you strike, and even more when you are struck; fades out of combat.',
+  'Part de zéro : chaque attaque de base qui touche est une note qui le fait monter ; retombe hors combat.':
+    'Starts at zero: every basic attack that hits is a note that raises it; fades out of combat.',
+  'Tes compétences coûtent des PV, de plus en plus cher avec ton niveau : pas de barre de mana.':
+    'Your skills cost HP, more and more as you level up: no mana bar.',
   'La Grande hache retourne au sang. Elle reviendra si tu redeviens Berserker.':
     'The Great axe returns to the blood. It will come back if you become a Berserker again.',
   'Ta Grande hache grandit :': 'Your Great axe grows:',

@@ -83,6 +83,16 @@ body {
 .mp i {
   background: linear-gradient(180deg, #4a8ae8, #1e4aa8 70%, #12306e);
 }
+/* Ressources des classes (shared/data/classes.js, RESOURCES) : Énergie (Assassin), Ferveur (Paladin), Rythme (Barde). */
+.mp.res-energy i {
+  background: linear-gradient(180deg, #f2d24a, #b8901a 70%, #7a5c0c);
+}
+.mp.res-fervor i {
+  background: linear-gradient(180deg, #ff9f3a, #c25a12 70%, #7e340a);
+}
+.mp.res-rhythm i {
+  background: linear-gradient(180deg, #ff7ac8, #b8338a 70%, #761c58);
+}
 .bar span {
   font-family: var(--rpg-serif);
   color: #fff6e0;

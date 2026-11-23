@@ -26,7 +26,12 @@
     const gear = hero.equipment,
       pieces = Object.values(gear).filter(item => item && item !== gear.weapon2);
     for (const item of pieces) prepare(item);
-    const result = heroStats(heroLevel(hero), pieces, CANAAN_BASE_MANA);
+    // Ressource de la classe (shared/rules/resources.js) : le mana grandit avec le niveau, le Berserker n'en a pas.
+    const result = heroStats(
+      heroLevel(hero),
+      pieces,
+      resourceMax(classResource(hero.classe?.id), heroLevel(hero))
+    );
     window.CANAAN_CLASS_STATS(result, hero);
     CANAAN_ARTEFACTS.stats(result, hero);
     // Cœurs d'Aurore (gardiens vaincus, coquillages chantants) : PV max (shared/rules/quests.js).

@@ -211,17 +211,17 @@ test('Version 1.9.0 : affichage à la fréquence de l’écran par interpolation
  const mult=run('CANAAN_PROF.speedMult(game.hero)');
  assert.ok(Math.abs(step(0)-4.1*mult)<1e-9,'vitesse de base '+step(0));
  assert.ok(Math.abs(step(50)-4.1*1.5*mult)<1e-9,'vitesse +50 % '+step(50));
- // Mana : 300 de base pour le héros, la fiche de statistiques et une nouvelle partie.
- run('paused=false;equipment={...equipment};recomputeStats()');assert.equal(run('CANAAN_BASE_MANA+","+characterStats().maxMp+","+P.mmp'),'300,300,300');
- assert.equal(run('CANAAN_PERSISTENCE.freshSnapshot().heros.hote.player.mp'),300);
- // Régénération hors combat : 6 mana et 2 PV + 1 % des PV max par seconde, soit 60 ticks.
+ // Mana : 250 au niveau 1 pour le héros, la fiche de statistiques et une nouvelle partie ; +5 par niveau.
+ run('paused=false;equipment={...equipment};game.hero.level=1;recomputeStats()');assert.equal(run('CANAAN_BASE_MANA+","+characterStats().maxMp+","+P.mmp'),'250,250,250');
+ assert.equal(run('CANAAN_PERSISTENCE.freshSnapshot().heros.hote.player.mp'),250);
+ // Régénération hors combat : 2 % du mana max (5) et 2 PV + 1 % des PV max par seconde, soit 60 ticks.
  run('P.dead=false;paused=false;started=true;P.mhp=1000;recomputeStats=()=>{};P.mp=0;P.hp=1;for(let i=0;i<60;i++)update()');
- assert.ok(Math.abs(run('P.mp')-6)<1e-9,String(run('P.mp')));assert.ok(Math.abs(run('P.hp')-13)<1e-9,String(run('P.hp')));
- // En combat : 3 mana et 25 % de la régénération de vie hors combat.
- assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(true))')),{mana:3,health:3});
- assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(false))')),{mana:6,health:12});
+ assert.ok(Math.abs(run('P.mp')-5)<1e-9,String(run('P.mp')));assert.ok(Math.abs(run('P.hp')-13)<1e-9,String(run('P.hp')));
+ // En combat : 1 % du mana max et 25 % de la régénération de vie hors combat.
+ assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(true))')),{mana:2.5,health:3});
+ assert.deepEqual(JSON.parse(run('JSON.stringify(canaanRegenRates(false))')),{mana:5,health:12});
  run('CANAAN_ARTEFACTS.attackBefore({x:0,y:0,hp:10,mhp:10},1);P.mp=0;P.hp=1;for(let i=0;i<60;i++)update()');
- assert.ok(Math.abs(run('P.mp')-3)<1e-9,String(run('P.mp')));assert.ok(Math.abs(run('P.hp')-4)<1e-9,String(run('P.hp')));
+ assert.ok(Math.abs(run('P.mp')-2.5)<1e-9,String(run('P.mp')));assert.ok(Math.abs(run('P.hp')-4)<1e-9,String(run('P.hp')));
  // Donjon 1 : niveau 7 requis.
  assert.equal(run('instances[0].level'),7);
  run('instanceState=null;game.hero.level=6;enterInstance(0)');assert.equal(run('instanceState'),null);

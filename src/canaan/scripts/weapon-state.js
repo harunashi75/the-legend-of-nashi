@@ -107,7 +107,9 @@ function canaanSkillTooltip(i) {
       esc(c.special.desc) +
       '</div>' +
       '<div class="skill-tip-meta">' +
-      (c.special.mana > 0 ? 'Mana ' + c.special.mana : 'Sans mana') +
+      (c.special.mana > 0
+        ? RESOURCES[CANAAN_CLASS.resource(game.hero)].name + ' ' + CANAAN_CLASS.specialPrice(game.hero)
+        : 'Sans coût') +
       ' · recharge ' +
       c.special.cooldown +
       ' s</div>'
@@ -158,14 +160,16 @@ function canaanSkillTooltip(i) {
       }) +
       '</div>';
   }
-  // Le Berserker paie en PV (Soif de sang) : le prix suit ses PV max.
-  const blood = CANAAN_CLASS.bloodCost(game.hero, mana);
+  // Coût dans la ressource de la classe (converti selon son niveau) ; le Berserker paie en PV (Soif de sang), selon
+  // ses PV max et son niveau.
+  const blood = CANAAN_CLASS.bloodCost(game.hero, mana),
+    kind = CANAAN_CLASS.resource(game.hero),
+    cost = Math.round(window.CANAAN_CLASS_MANA_COST(type, i, mana));
   lines +=
     '<div class="skill-tip-meta">' +
-    tt(blood !== null ? 'Recharge {n} s · {m} PV' : 'Recharge {n} s · Mana {m}', {
-      n: cd,
-      m: blood !== null ? blood : mana
-    }) +
+    (blood !== null
+      ? tt('Recharge {n} s · {m} PV', { n: cd, m: blood })
+      : tt('Recharge {n} s · ' + RESOURCES[kind].name + ' {m}', { n: cd, m: cost })) +
     '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
   if (rider) lines += '<div class="skill-tip-class">' + esc(rider) + '</div>';

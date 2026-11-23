@@ -266,7 +266,7 @@ test('Contagion (F) : 4 charges de Peste à 7 cases et invocations 30 % plus rap
   g.monsters = [near, far];
   g.P.mp = 100;
   assert.equal(g.CANAAN_CLASS.special(), true);
-  assert.equal(g.P.mp, 70);
+  assert.equal(g.P.mp, 52, '30 de mana, +59 % au niveau 60');
   same([g.CANAAN_CLASS.plagueStacks(near), g.CANAAN_CLASS.plagueStacks(far)], [4, 0]);
   assert.equal(g.CANAAN_CLASS.summonHaste(g.game.hero), 1.3);
   g.advance(8 * 60 + 1);

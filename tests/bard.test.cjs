@@ -72,7 +72,7 @@ test('Barde : Hymne de l’Aurore (F), soin immédiat, soin par seconde et dég�
   g.P.mhp = 1000;
   g.P.hp = 100;
   assert.equal(g.CANAAN_CLASS.special(), true);
-  assert.equal(g.P.mp, 70);
+  assert.equal(g.P.mp, 40, 'Rythme : le double du prix en mana (30)');
   assert.equal(g.P.hp, 265, '15 % des PV max, +10 %');
   assert.ok(near(g.CANAAN_CLASS_ATTACK.before(mob(100), 100, {}).damage, 110, 1e-9));
   g.advance(61);
@@ -125,7 +125,8 @@ test('Barde : Ballade, Crescendo, Dissonance, Inspiration et Mélodie vivifiante
     costs.push(h.CANAAN_CLASS_MANA_COST('lute', i % 4, 10));
     h.CANAAN_CLASS_CAST('lute', i % 4);
   }
-  same(costs, [10, 10, 10, 10, 0, 10, 10, 10, 10, 0]);
+  // Rythme : le double du prix en mana.
+  same(costs, [20, 20, 20, 20, 0, 20, 20, 20, 20, 0]);
 });
 
 test('Barde : Ritournelle (soin en trop en bouclier), Contre-chant, Note perçante et Grand final', () => {

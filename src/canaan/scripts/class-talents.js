@@ -456,11 +456,11 @@
   }
 
   // ---------------------------------------------------------------- Soif de sang (Berserker)
-  // Le Berserker paie ses compétences en PV : chaque point de mana vaut 0,25 % de ses PV max. Une compétence ne peut
-  // jamais le tuer (il lui faut garder au moins 1 PV) ; un compagnon garde 25 % de ses PV.
-  const BLOOD = Object.freeze({ perMana: 0.0025, boil: 0.25, companionFloor: 0.25 });
-  const bloodPrice = (hero, mana) =>
-    mana > 0 ? Math.max(1, Math.ceil(hero.player.mhp * mana * BLOOD.perMana)) : 0;
+  // Le Berserker paie ses compétences en PV : chaque point de mana vaut 0,6 % de ses PV max au niveau 1, jusqu'à 1 %
+  // au niveau 60 (shared/rules/resources.js). Une compétence ne peut jamais le tuer (il lui faut garder au moins
+  // 1 PV) ; un compagnon garde 25 % de ses PV.
+  const BLOOD = Object.freeze({ boil: 0.25, companionFloor: 0.25 });
+  const bloodPrice = (hero, mana) => resourceBloodCost(hero.player.mhp, mana, hero.level);
   function canBleed(price) {
     const floor = me() !== game.hero && me().local ? HP.mhp * BLOOD.companionFloor : 0;
     return HP.hp - price >= Math.max(1, floor);
@@ -475,8 +475,23 @@
       blast(HP.x, HP.y, 3, characterStats(me()).attack * 1.5, 'blood');
     }
   }
-  // Paiement d'une compétence (après les réductions de CANAAN_CLASS_MANA_COST) : en mana, ou en PV pour le
-  // Berserker. Renvoie false si le héros ne peut pas payer (rien n'est retiré).
+  // Ressource de la classe du héros (shared/rules/resources.js) : mana, Énergie, Ferveur, Rythme ou PV (Berserker).
+  const resource = (hero = me()) => classResource(classe(hero).id);
+  // Coût du sort spécial d'une classe dans sa ressource (prix en mana converti au niveau du héros).
+  const specialPrice = (c, hero = me()) =>
+    c?.special?.mana > 0 ? resourceCost(classResource(c.id), c.special.mana, hero?.level) : 0;
+  // Gain de Ferveur ou de Rythme sur un événement de combat ; une attaque de base de zone ne compte qu'une fois.
+  function gainResource(event, info) {
+    const amount = resourceGain(resource(), event, info);
+    if (!(amount > 0)) return;
+    if (event === 'basic') {
+      if (now() - (w.basicGainAt ?? -1) < RESOURCE_BASIC_GAP) return;
+      w.basicGainAt = now();
+    }
+    HP.mp = Math.min(HP.mmp, HP.mp + amount);
+  }
+  // Paiement d'une compétence (après les réductions de CANAAN_CLASS_MANA_COST) : dans la ressource de la classe, ou
+  // en PV pour le Berserker. Renvoie false si le héros ne peut pas payer (rien n'est retiré).
   window.CANAAN_CLASS_PAY = forHero(function (cost) {
     if (!isClass('berserker')) {
       if (HP.mp < cost) return false;
@@ -518,9 +533,10 @@
     m.spell_bleed > 0;
 
   // ---------------------------------------------------------------- Compétences
-  // Coût en mana d'une compétence : Concentration arcanique (chaque 3e offensive), Avatar élémentaire.
+  // Coût d'une compétence dans la ressource de la classe (base : son prix en mana, converti selon la ressource et le
+  // niveau), puis Concentration arcanique (chaque 3e offensive) et Avatar élémentaire.
   window.CANAAN_CLASS_MANA_COST = forHero(function (type, i, base) {
-    let cost = base;
+    let cost = resourceCost(resource(), base, me().level);
     if (on('elementaliste', 'arcane') && isOffensiveSkill(type, i) && (w.arcane + 1) % 3 === 0) cost *= 0.5;
     if (now() < w.elemAvatarUntil) cost *= 0.7;
     // Inspiration (Barde) : toutes les 4 compétences, la cinquième est gratuite.
@@ -727,6 +743,8 @@
       basic = !!options.basic,
       t = now(),
       roll = Math.random;
+    // Ferveur (Paladin) et Rythme (Barde) : une attaque de base qui touche les fait monter.
+    if (basic && dealt > 0) gainResource('basic');
     if (on('assassin', 'relentless')) {
       const r = w.relentless.get(m);
       w.relentless.set(m, { stacks: r && t - r.last <= 4 ? Math.min(5, r.stacks + 1) : 1, last: t });
@@ -855,6 +873,8 @@
       d *= 1 - Math.min(18, Math.floor(lost * 20 + 1e-9)) / 100;
     }
     if (on('berserker', 'scars') && damage > 0) addScars(1);
+    // Ferveur (Paladin) : chaque coup reçu la fait monter, d'autant plus qu'il fait mal.
+    if (damage > 0) gainResource('hurt', { damage, maxHp: HP.mhp });
     if (w.shield > 0 && now() < w.shieldUntil && d > 0) {
       const absorb = Math.min(w.shield, d);
       w.shield -= absorb;
@@ -926,11 +946,12 @@
       recompute();
       return true;
     }
-    if (HP.mp < s.mana) {
-      if (me() === game.hero) toast('Mana insuffisant');
+    const price = specialPrice(c, me());
+    if (HP.mp < price) {
+      if (me() === game.hero) toast(RESOURCES[resource()].lack);
       return false;
     }
-    HP.mp -= s.mana;
+    HP.mp -= price;
     w.specialReady = t + s.cooldown;
     CANAAN_SOUND.cue('levelup');
     if (s.id === 'feral') {
@@ -1356,9 +1377,9 @@
     ui.page = page;
     renderTalents();
   };
-  // Coût et recharge du sort spécial (le Berserker n'y met pas de mana).
-  const specialCost = c =>
-    (c.special.mana > 0 ? 'Mana ' + c.special.mana : 'Sans mana') +
+  // Coût et recharge du sort spécial, dans la ressource de la classe (le Berserker n'y met rien).
+  const specialCost = (c, hero = game.hero) =>
+    (c.special.mana > 0 ? RESOURCES[classResource(c.id)].name + ' ' + specialPrice(c, hero) : 'Sans coût') +
     (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '');
   const escape = s =>
     String(s).replace(
@@ -1389,6 +1410,12 @@
       escape(c.passive.name) +
       '</b>' +
       escape(c.passive.desc) +
+      '</p><p class="class-line"><b>' +
+      RESOURCES[classResource(c.id)].icon +
+      ' Ressource · ' +
+      escape(RESOURCES[classResource(c.id)].name) +
+      '</b>' +
+      escape(RESOURCES[classResource(c.id)].desc) +
       '</p><p class="class-line"><b>' +
       c.special.icon +
       ' Sort de classe (F) · ' +
@@ -1666,6 +1693,9 @@
     blast: (hero, x, y, tiles, amount, element) => within(hero, () => blast(x, y, tiles, amount, element)),
     // Berserker : prix en PV d'une compétence (null pour une classe qui paie en mana) et Rage écarlate en cours.
     bloodCost: (hero, mana) => (isClass('berserker', hero) ? bloodPrice(hero, mana) : null),
+    // Ressource de la classe (mana, energy, fervor, rhythm, blood) et coût du sort spécial dans celle-ci.
+    resource: (hero = game.hero) => resource(hero),
+    specialPrice: (hero = game.hero) => specialPrice(def(hero), hero),
     raging: (hero = game.hero) => raging(hero),
     specialCost,
     audit: (hero = game.hero) => ({

@@ -156,22 +156,21 @@ function tileAt(x, y) {
   return game.world.tiles[y][x];
 }
 // --- Player ---
-// Mana maximum de base du héros (300 depuis la 1.9.0), avant les bonus de talents.
-const CANAAN_BASE_MANA = 300;
+// Mana de départ d'un héros neuf ; le maximum réel suit sa classe et son niveau (shared/rules/resources.js).
+const CANAAN_BASE_MANA = 250;
 // Régénération par seconde, appliquée à chaque tick.
-// Hors combat : 6 mana, et 2 points de vie + 1 % des PV max.
-// En combat (5 s après le dernier coup donné ou reçu, ou tout combat d'Arène) : 3 mana, et 25 % de la régénération de vie.
+// Vie hors combat : 2 points + 1 % des PV max ; en combat (5 s après le dernier coup donné ou reçu, ou tout combat
+// d'Arène) : 25 % de cette régénération. La ressource de classe (mana, Énergie, Ferveur, Rythme) suit ses propres
+// règles (shared/rules/resources.js), négative quand la Ferveur ou le Rythme retombent hors combat.
 const CANAAN_REGEN = Object.freeze({
-  mana: 6,
-  manaCombat: 3,
   health: 2,
   healthPercent: 0.01,
   healthCombat: 0.25
 });
-function canaanRegenRates(fighting = CANAAN_ARTEFACTS.inCombat(), player = P) {
+function canaanRegenRates(fighting = CANAAN_ARTEFACTS.inCombat(), player = P, hero = game.hero) {
   const health = CANAAN_REGEN.health + player.mhp * CANAAN_REGEN.healthPercent;
   return {
-    mana: fighting ? CANAAN_REGEN.manaCombat : CANAAN_REGEN.mana,
+    mana: resourceRegen(classResource(hero?.classe?.id), player.mmp, fighting),
     health: fighting ? health * CANAAN_REGEN.healthCombat : health
   };
 }
@@ -915,8 +914,8 @@ function stepHero(hero) {
   if (canWalk(p.x, ny, true)) p.y = ny;
   // Régénération : un héros est en combat 5 s après son dernier coup donné ou reçu (artéfacts compris).
   const fighting = CANAAN_ARTEFACTS.inCombat(hero),
-    regen = canaanRegenRates(fighting, p);
-  p.mp = Math.min(p.mmp, p.mp + regen.mana / 60);
+    regen = canaanRegenRates(fighting, p, hero);
+  p.mp = Math.max(0, Math.min(p.mmp, p.mp + regen.mana / 60));
   p.hp = Math.min(p.mhp, p.hp + (regen.health / 60) * CANAAN_ARENA.healFactor(hero));
 }
 // Héros vivant le plus proche d'un monstre, ou null.
@@ -1151,8 +1150,17 @@ function updateView() {
   // HUD
   document.getElementById('hpb').style.width = (P.hp / P.mhp) * 100 + '%';
   document.getElementById('hpt').textContent = Math.ceil(P.hp) + ' / ' + P.mhp;
-  document.getElementById('mpb').style.width = (P.mp / P.mmp) * 100 + '%';
-  document.getElementById('mpt').textContent = Math.ceil(P.mp) + ' / ' + P.mmp;
+  // Ressource de la classe : couleur et nom selon la classe ; le Berserker (qui paie en PV) n'a pas de barre.
+  const resource = CANAAN_CLASS.resource(game.hero),
+    resourceBar = document.getElementById('mpb').parentElement;
+  if (resourceBar && resourceBar.dataset.res !== resource) {
+    resourceBar.dataset.res = resource;
+    resourceBar.className = 'bar mp res-' + resource;
+    resourceBar.style.display = resource === 'blood' ? 'none' : '';
+    resourceBar.title = tt(RESOURCES[resource].name);
+  }
+  document.getElementById('mpb').style.width = (P.mmp > 0 ? (P.mp / P.mmp) * 100 : 0) + '%';
+  document.getElementById('mpt').textContent = Math.floor(P.mp) + ' / ' + P.mmp;
 
   document.getElementById('pname').textContent =
     playerStun > 0

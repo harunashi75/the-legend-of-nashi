@@ -61,31 +61,38 @@ test('Berserker : Grande hache liée de qualité Relique, élément Sang, qui gr
   assert.equal(g.inventory.length, 0);
 });
 
-test('Soif de sang : les compétences coûtent des PV (0,25 % des PV max par point de mana), jamais mortelles', () => {
+test('Soif de sang : les compétences coûtent des PV (0,6 % des PV max par point de mana au niveau 1, 1 % au niveau 60), jamais mortelles', () => {
   const g = game();
   g.setClass('berserker', []);
   g.monsters = [];
   g.P.mhp = 1000;
   g.P.hp = 1000;
   g.P.mp = 0;
-  assert.equal(g.CANAAN_CLASS.bloodCost(g.game.hero, 10), 25);
-  // Fendoir (10 de mana) : 25 PV, pas de mana.
+  // Niveau 60 : 1 % des PV max par point de mana ; niveau 1 : 0,6 %.
+  assert.equal(g.CANAAN_CLASS.bloodCost(g.game.hero, 10), 100);
+  g.game.hero.level = 1;
+  assert.equal(g.CANAAN_CLASS.bloodCost(g.game.hero, 10), 60);
+  g.game.hero.level = 60;
+  // Pas de barre de mana.
+  assert.equal(g.characterStats().maxMp, 0);
+  assert.equal(g.CANAAN_CLASS.resource(), 'blood');
+  // Fendoir (10 de mana) : 100 PV, pas de mana.
   ready(g);
   g.useSkill(0);
-  assert.equal(g.P.hp, 975);
+  assert.equal(g.P.hp, 900);
   assert.equal(g.P.mp, 0);
   assert.ok(g.weaponCooldowns['greataxe:0'] > 0, 'la compétence est lancée');
-  // Châtiment du sang (24 de mana, 60 PV) avec 50 PV : refusé, rien n'est retiré.
-  g.P.hp = 50;
+  // Châtiment du sang (24 de mana, 240 PV) avec 200 PV : refusé, rien n'est retiré.
+  g.P.hp = 200;
   ready(g);
   g.useSkill(3);
-  assert.equal(g.P.hp, 50);
+  assert.equal(g.P.hp, 200);
   assert.ok(!g.weaponCooldowns['greataxe:3'], 'pas de recharge sans paiement');
   assert.equal(g.CANAAN_CLASS_CAN_PAY(24), false);
-  // Il faut garder au moins 1 PV : 61 PV suffisent, 60 non.
-  g.P.hp = 60;
+  // Il faut garder au moins 1 PV : 241 PV suffisent, 240 non.
+  g.P.hp = 240;
   assert.equal(g.CANAAN_CLASS_CAN_PAY(24), false);
-  g.P.hp = 61;
+  g.P.hp = 241;
   assert.equal(g.CANAAN_CLASS_PAY(24), true);
   assert.equal(g.P.hp, 1);
   // Les autres classes paient toujours en mana.
@@ -240,9 +247,9 @@ test('Berserker : Frénésie, Carnage, Sang bouillant, Cri de guerre et Immortel
   b.P.mhp = b.P.hp = 1000;
   const foe = mob(1e7);
   b.monsters = [foe];
-  b.CANAAN_CLASS_PAY(40);
+  b.CANAAN_CLASS_PAY(10);
   assert.equal(foe.hp, 1e7, '100 PV dépensés : pas encore');
-  b.CANAAN_CLASS_PAY(60);
+  b.CANAAN_CLASS_PAY(15);
   assert.ok(foe.hp < 1e7, '250 PV dépensés : explosion');
   // Cri de guerre : sous 50 % de PV en combat, +10 % de dégâts pendant 6 s ; recharge 30 s.
   const w = game();
@@ -316,8 +323,9 @@ test('Grande hache : Fendoir, Bond du boucher qui étourdit, Hurlement (Rage +25
     g.useSkill(3);
     return (1e9 - t.hp) / thirst(life);
   };
+  // Le Châtiment coûte 24 000 PV (1 % des PV max par point de mana) : 50 000 PV en laissent 26 000 (sous 30 %).
   const full = strike(100000),
-    low = strike(20000);
+    low = strike(50000);
   assert.ok(near(low / full, 7 / 4.5, 0.02));
 });
 
@@ -328,7 +336,7 @@ test('Berserker en jeu : choix de la classe, Grande hache en main, coûts en PV 
   run('renderTalents();classPageTo(6)');
   const page = run('__panels.at(-1)');
   assert.ok(
-    page.includes('Choisir Berserker') && page.includes('Grande hache') && page.includes('Sans mana')
+    page.includes('Choisir Berserker') && page.includes('Grande hache') && page.includes('Sans coût') && page.includes('Ressource · PV')
   );
   run('chooseClass("berserker")');
   same(
@@ -339,11 +347,11 @@ test('Berserker en jeu : choix de la classe, Grande hache en main, coûts en PV 
     ),
     ['berserker', 'greataxe', 20, 'Grande hache sanglante']
   );
-  // Info-bulles : prix en PV, empreinte de la classe, sort sans mana.
+  // Info-bulles : prix en PV, empreinte de la classe, sort sans coût.
   const tip = run('canaanSkillTooltip(0)');
   assert.match(tip, /Recharge 5 s · \d+ PV/);
   assert.ok(tip.includes('Berserker'));
-  assert.ok(run('canaanSkillTooltip("special")').includes('Sans mana · recharge 60 s'));
+  assert.ok(run('canaanSkillTooltip("special")').includes('Sans coût · recharge 60 s'));
   // Lancer une compétence retire des PV, pas de mana.
   run('P.hp=P.mhp;globalThis.__mp=P.mp;for(const k in weaponCooldowns)delete weaponCooldowns[k];useSkill(0)');
   assert.ok(run('P.hp<P.mhp'));

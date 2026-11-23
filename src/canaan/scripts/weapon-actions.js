@@ -693,9 +693,9 @@
       key = type + ':' + i;
     if (!s || (weaponCooldowns[key] || 0) > 0) return null;
     const cost = window.CANAAN_CLASS_MANA_COST(type, i, s.mp);
-    // Mana, ou PV pour le Berserker (Soif de sang).
+    // Ressource de la classe (mana, Énergie, Ferveur, Rythme), ou PV pour le Berserker (Soif de sang).
     if (!window.CANAAN_CLASS_PAY(cost)) {
-      toast(CANAAN_CLASS.bloodCost(game.hero, cost) !== null ? 'PV insuffisants' : 'Mana insuffisant');
+      toast(RESOURCES[CANAAN_CLASS.resource(game.hero)].lack);
       return null;
     }
     // La Célérité (et les talents) réduit le verrou réel, également utilisé par l'affichage et le changement d'arme.

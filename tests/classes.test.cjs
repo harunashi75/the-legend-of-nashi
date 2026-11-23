@@ -70,7 +70,7 @@ test('Druide : ronces, poison et racines non cumulables, Fureur sauvage, régén
 test('Druide : Forme féline (F), bonus, attaques de base plus rapides et soins réduits',()=>{
   const g=game();g.setClass('druide',[]);g.P.mp=100;g.P.hp=20;g.P.mhp=1000;
   const base=g.characterStats();
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,'feral');assert.equal(g.P.mp,85);
+  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,'feral');assert.equal(g.P.mp,76,'15 de mana, +1 % par niveau (niv. 60)');
   const feral=g.characterStats();assert.equal(feral.speed,base.speed+20);assert.equal(feral.crit,base.crit+8);
   assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),.8);
   assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(mob(100),100,{}).damage-115)<1e-9);
@@ -79,7 +79,7 @@ test('Druide : Forme féline (F), bonus, attaques de base plus rapides et soins 
   assert.equal(g.canaanApplyHeal(100),70);
   // Sortir est gratuit, après la petite recharge.
   assert.equal(g.CANAAN_CLASS.special(),false);g.advance(91);
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,null);assert.equal(g.P.mp,85);
+  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,null);assert.equal(g.P.mp,76);
   assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),1);
   // Basic lock réel de l'arme.
   g.advance(91);g.CANAAN_CLASS.special();g.canaanBasicAttack(false);
@@ -115,7 +115,7 @@ test('Paladin : Consécration après trois compétences offensives, Lumière div
   g.advance(400);const after=m.hp;g.advance(120);assert.equal(m.hp,after,'zone finie après 5 s');
   // Lumière divine : soin de 20 % des PV max et −20 % de dégâts pendant 6 s.
   g.P.mp=100;g.P.hp=10;g.P.mhp=100;const guard=g.characterStats().guard;
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.hp,30);assert.equal(g.P.mp,75);
+  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.hp,30);assert.equal(g.P.mp,50,'Ferveur : le double du prix en mana (25)');
   assert.equal(g.characterStats().guard,guard+20);g.advance(361);assert.equal(g.characterStats().guard,guard);
   assert.equal(g.CANAAN_CLASS.special(),false,'recharge de 45 s');
 });
@@ -153,7 +153,8 @@ test('Élémentaliste : glace, Gel profond, Concentration arcanique, Tempête, E
   g.advance(151);const y=m.x;g.advance(1);assert.equal(m.x-y,4);g.update=()=>{};
   // Concentration arcanique : chaque 3e compétence offensive coûte moitié prix.
   const costs=[];for(let i=0;i<6;i++){costs.push(g.CANAAN_CLASS_MANA_COST('staff',0,10));g.CANAAN_CLASS_CAST('staff',0)}
-  same(costs,[10,10,5,10,10,5]);assert.equal(g.CANAAN_CLASS_MANA_COST('staff',2,10),10);
+  // Coût en mana au niveau 60 : +59 % (10 → 16).
+  same(costs,[16,16,8,16,16,8]);assert.equal(g.CANAAN_CLASS_MANA_COST('staff',2,10),16);
   // Tempête élémentaire : la 5e compétence offensive explose (80 % de l'Attaque, 4 cases), puis 12 s de recharge.
   const n=game();n.setClass('elementaliste',[9]);n.TS=48;predictable(n,.99);const near=mob(1e6),far=mob(1e6);far.x=1000;n.monsters=[near,far];
   for(let i=0;i<4;i++)n.CANAAN_CLASS_CAST('staff',0);assert.equal(near.hp,1e6);
@@ -170,7 +171,7 @@ test('Élémentaliste : glace, Gel profond, Concentration arcanique, Tempête, E
   assert.equal(b.CANAAN_CLASS_DEFENSE(mob(1),10),5);b.advance(400);assert.equal(b.CANAAN_CLASS.audit().shield,0);
   // Avatar élémentaire (F) : +20 % de dégâts et −30 % de mana pendant 10 s.
   const a=game();a.setClass('elementaliste',[]);a.P.mp=100;assert.equal(a.CANAAN_CLASS.special(),true);
-  assert.ok(Math.abs(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120)<1e-9);assert.ok(Math.abs(a.CANAAN_CLASS_MANA_COST('staff',0,10)-7)<1e-9);
+  assert.ok(Math.abs(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120)<1e-9);assert.ok(Math.abs(a.CANAAN_CLASS_MANA_COST('staff',0,10)-16*0.7)<1e-9);
   a.advance(601);assert.equal(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage,100);
 });
 

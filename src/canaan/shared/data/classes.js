@@ -20,9 +20,51 @@ export const ELEMENTS = deepFreeze({
   harmony: { name: 'Harmonie', icon: '⟦el_harmony⟧', color: '#ff9ad5' },
   blood: { name: 'Sang', icon: '⟦el_blood⟧', color: '#e0404f' }
 });
+// Ressources des classes : ce que chaque classe dépense pour ses compétences (règles : shared/rules/resources.js).
+// Le mana grandit avec le niveau et se régénère ; l'Énergie (100) se recharge vite, même en combat ; la Ferveur et
+// le Rythme (100) partent de zéro, montent en combat et retombent ensuite ; le Berserker paie en PV (pas de barre).
+export const RESOURCES = deepFreeze({
+  mana: {
+    name: 'Mana',
+    icon: '💧',
+    color: '#4a8ae8',
+    lack: 'Mana insuffisant',
+    desc: 'Grandit avec ton niveau et se régénère tout seul, plus lentement en combat.'
+  },
+  energy: {
+    name: 'Énergie',
+    icon: '⚡',
+    color: '#f2d24a',
+    lack: 'Énergie insuffisante',
+    desc: '100 points qui se rechargent très vite, même en plein combat.'
+  },
+  fervor: {
+    name: 'Ferveur',
+    icon: '✨',
+    color: '#ff9f3a',
+    lack: 'Ferveur insuffisante',
+    desc: 'Part de zéro : monte quand tu frappes, et surtout quand tu es frappé ; retombe hors combat.'
+  },
+  rhythm: {
+    name: 'Rythme',
+    icon: '🎵',
+    color: '#ff7ac8',
+    lack: 'Rythme insuffisant',
+    desc: 'Part de zéro : chaque attaque de base qui touche est une note qui le fait monter ; retombe hors combat.'
+  },
+  blood: {
+    name: 'PV',
+    icon: '🩸',
+    color: '#e0404f',
+    lack: 'PV insuffisants',
+    desc: 'Tes compétences coûtent des PV, de plus en plus cher avec ton niveau : pas de barre de mana.'
+  }
+});
 export const CLASSES = deepFreeze([
   {
     id: 'druide',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'mana',
     icon: '⟦cls_druide⟧',
     name: 'Druide',
     style: 'Polyvalence, soins, poison et régénération',
@@ -78,6 +120,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'paladin',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'fervor',
     icon: '⟦cls_paladin⟧',
     name: 'Paladin',
     style: 'Défense, protection des alliés et dégâts sacrés',
@@ -129,6 +173,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'assassin',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'energy',
     icon: '⟦cls_assassin⟧',
     name: 'Assassin',
     style: 'Dégâts critiques, saignements et mobilité',
@@ -186,6 +232,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'elementaliste',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'mana',
     icon: '⟦cls_elementaliste⟧',
     name: 'Élémentaliste',
     style: 'Magie élémentaire, contrôle et dégâts de zone',
@@ -241,6 +289,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'invocateur',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'mana',
     icon: '⟦cls_invocateur⟧',
     name: 'Invocateur',
     style: 'Invocations, peste et nécromancie',
@@ -295,6 +345,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'barde',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'rhythm',
     icon: '⟦cls_barde⟧',
     name: 'Barde',
     style: 'Soins de groupe, chants de soutien et ondes sonores',
@@ -349,6 +401,8 @@ export const CLASSES = deepFreeze([
   },
   {
     id: 'berserker',
+    // Ressource qui paie ses compétences (RESOURCES).
+    resource: 'blood',
     icon: '⟦cls_berserker⟧',
     name: 'Berserker',
     style: 'Corps à corps sauvage, sang versé et vol de vie',

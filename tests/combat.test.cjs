@@ -33,7 +33,7 @@ test('Soin partagé : bonus appliqués une fois, plafond PV et mort respectés',
 
 test('Épée : riposte avec vol de vie sur une cible survivante', () => {
   const g=game();g.monsters.push({hp:1000,mhp:1000,x:50,y:0,g:1,r:14});
-  g.useSkill(3);assert.ok(g.P.hp>20);assert.equal(g.P.mp,978);
+  g.useSkill(3);assert.ok(g.P.hp>20);assert.equal(g.P.mp,976,'22 de mana, +9 % au niveau 10');
 });
 
 test('Bouclier : soin immédiat et soin périodique du sol consacré', () => {
@@ -56,7 +56,7 @@ test('Récupération : vrai verrou réduit, pas de double réduction, nouvelle u
   const mp=g.P.mp;g.useSkill(2);assert.equal(g.P.mp,mp);
   for(let i=0;i<505;i++)g.runUpdatePipeline();
   assert.equal(g.weaponCooldowns['sword:2'],0);
-  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-12);
+  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-13);
 });
 
 test('Recharge conservée après changement de famille d’arme et retour', () => {
@@ -153,7 +153,7 @@ test('Compétences : les 40 actions restent lançables par les dix familles',()=
       const g=game();g.equipment.weapon.weaponType=type;g.refreshWeaponBar();
       const cost=g.SKILLS[index].mp;
       assert.doesNotThrow(()=>g.useSkill(index),type+':'+index);
-      assert.equal(g.P.mp,1000-cost);assert.ok(g.weaponCooldowns[type+':'+index]>0);
+      assert.equal(g.P.mp,1000-g.resourceCost('mana',cost,g.game.hero.level));assert.ok(g.weaponCooldowns[type+':'+index]>0);
       assert.doesNotThrow(()=>g.advance(120),type+':'+index+' différé');
     }
   }
@@ -254,7 +254,7 @@ test('Compétences : attaques de base renforcées, info-bulles claires, charges 
  assert.equal(run('CANAAN_SKILLS.power(game.hero,true)'),run('CANAAN_SKILLS.power(game.hero,false)'));
  // Info-bulle : explication, dégâts estimés avec la puissance actuelle, recharge, mana, effet de classe.
  const tip=run('canaanSkillTooltip(0)'),power=run('CANAAN_SKILLS.power(game.hero,false)');
- assert.ok(tip.includes('Un coup puissant devant toi')&&tip.includes('≈ '+Math.round(power*2.6)+' dégâts')&&tip.includes('Recharge 4 s')&&tip.includes('Mana 8'),tip);
+ assert.ok(tip.includes('Un coup puissant devant toi')&&tip.includes('≈ '+Math.round(power*2.6)+' dégâts')&&tip.includes('Recharge 4 s')&&tip.includes('Mana 10'),tip);
  assert.ok(tip.includes('Sans classe'),'sans classe : invitation à en choisir une');
  for(const [id,word] of [['druide','empoisonne'],['paladin','bouclier'],['assassin','+12 %'],['elementaliste','brûle']]){
   run('game.hero.classe={id:"'+id+'",talents:[]}');assert.ok(run('canaanSkillTooltip(0)').includes(word),id);
