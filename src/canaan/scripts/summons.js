@@ -337,7 +337,21 @@
       }
     }
   };
-  // ---------------------------------------------------------------- Arme liée (le Grimoire)
+  // ---------------------------------------------------------------- Arme liée (le Grimoire, la Grande hache)
+  // Messages propres à chaque arme liée : icône, départ (en quittant la classe) et palier atteint.
+  const PACT_TEXT = Object.freeze({
+    grimoire: {
+      icon: '📕',
+      leave: 'Le Grimoire retourne aux ombres. Il reviendra si tu redeviens Invocateur.',
+      grow: 'Ton Grimoire grandit : '
+    },
+    greataxe: {
+      icon: '🪓',
+      leave: 'La Grande hache retourne au sang. Elle reviendra si tu redeviens Berserker.',
+      grow: 'Ta Grande hache grandit : '
+    }
+  });
+  const pactText = type => PACT_TEXT[type] || PACT_TEXT.grimoire;
   const bagRoom = hero =>
     typeof canaanBagUsed === 'function' ? canaanBagLimit(hero) - canaanBagUsed(hero) : Infinity;
   const notify = (hero, text) =>
@@ -380,9 +394,10 @@
       changed = true;
     }
     if (isBoundItem(eq.weapon) && eq.weapon.bound !== classId) {
+      const text = pactText(eq.weapon.weaponType);
       eq.weapon = null;
       changed = true;
-      notify(hero, '📕 Le Grimoire retourne aux ombres. Il reviendra si tu redeviens Invocateur.');
+      notify(hero, text.icon + ' ' + text.leave);
       equipBestWeapon(hero);
     }
     if (classId !== 'invocateur') dismiss(hero);
@@ -396,7 +411,13 @@
           }
         eq.weapon = fresh;
         changed = true;
-        notify(hero, '📕 ' + fresh.name + ' : ton arme liée, de qualité Relique. Elle grandira avec toi.');
+        notify(
+          hero,
+          pactText(type).icon +
+            ' ' +
+            fresh.name +
+            ' : ton arme liée, de qualité Relique. Elle grandira avec toi.'
+        );
       } else if (
         eq.weapon.level !== fresh.level ||
         eq.weapon.name !== fresh.name ||
@@ -412,7 +433,7 @@
           weaponType: type
         });
         changed = true;
-        if (renamed) notify(hero, '📕 Ton Grimoire grandit : ' + fresh.name + ' !');
+        if (renamed) notify(hero, pactText(type).icon + ' ' + pactText(type).grow + fresh.name + ' !');
       }
     }
     if (!changed) return false;

@@ -285,10 +285,10 @@ test('Arme liée en jeu : rien ne l’enlève ni ne la remplace, sac plein refus
   let html = run('__panels.at(-1)');
   assert.equal((html.match(/class="class-page"/g) || []).length, 1);
   assert.equal((html.match(/data-action="classPage"/g) || []).length, 2);
-  assert.equal((html.match(/data-action="classPageTo"/g) || []).length, 6);
-  assert.ok(html.includes('Druide') && html.includes('1 / 6'));
+  assert.equal((html.match(/data-action="classPageTo"/g) || []).length, 7);
+  assert.ok(html.includes('Druide') && html.includes('1 / 7'));
   run('classPage(-1)');
-  assert.ok(run('__panels.at(-1)').includes('Choisir Barde'), 'la flèche gauche boucle sur la dernière classe');
+  assert.ok(run('__panels.at(-1)').includes('Choisir Berserker'), 'la flèche gauche boucle sur la dernière classe');
   run('classPageTo(4)');
   html = run('__panels.at(-1)');
   assert.ok(html.includes('Choisir Invocateur') && html.includes('Arme liée') && html.includes('Relique'));

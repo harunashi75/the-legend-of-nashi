@@ -510,6 +510,52 @@ export const WEAPON_DEFINITIONS = {
         'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).'
       ]
     ]
+  },
+  // Arme liée du Berserker (bound) : jamais lâchée par un monstre ni vendue. Hache à deux mains ; ses coûts en mana
+  // sont payés en PV par le Berserker (0,25 % des PV max par point, voir class-talents.js).
+  greataxe: {
+    name: 'Grande hache',
+    icon: '⟦w_greataxe⟧',
+    role: 'Hache à deux mains : larges coups, bond écrasant et hurlement de rage, payés avec ton sang.',
+    bound: 'berserker',
+    sp: [
+      [
+        '🪓',
+        'Fendoir',
+        'Grand cône · 300 %',
+        5,
+        10,
+        3,
+        'Un coup de hache très large devant toi, qui fend le sol et touche tous les ennemis du cône.'
+      ],
+      [
+        '🩸',
+        'Bond du boucher',
+        'Bond vers la souris · 240 % autour de toi · étourdit 1 s',
+        11,
+        14,
+        2.4,
+        'Tu bondis jusqu’à la souris (4 cases au plus) et t’écrases au sol : 240 % aux ennemis autour du point d’arrivée, et les monstres (pas les boss) sont étourdis 1 s.'
+      ],
+      [
+        '💢',
+        'Hurlement sanguinaire',
+        'Rage 6 s : dégâts +25 % · affaiblit autour de toi',
+        16,
+        8,
+        0,
+        'Tu hurles : pendant 6 s, tes coups infligent 25 % de dégâts en plus, mais tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases sont affaiblis pendant 4 s.'
+      ],
+      [
+        '💀',
+        'Châtiment du sang',
+        'Cône · 450 %, ou 700 % sous 30 % de tes PV',
+        14,
+        24,
+        4.5,
+        'Un coup terrible devant toi. Si tes PV sont sous 30 % de leur maximum, il inflige 700 %.'
+      ]
+    ]
   }
 };
 

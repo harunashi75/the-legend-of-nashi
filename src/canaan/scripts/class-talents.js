@@ -1,10 +1,12 @@
-// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste, Invocateur, Barde.
+// Classes et talents (shared/data/classes.js) : Druide, Paladin, Assassin, Élémentaliste, Invocateur, Barde,
+// Berserker.
 // Chaque héros a une classe et jusqu'à 5 talents équipés parmi les 10 de sa classe (hero.classe, sauvegardé) ;
 // l'état de leurs effets (boucliers, minuteurs, compteurs) n'est pas sauvegardé. Les compétences d'armes prennent
 // l'élément de la classe ; la touche F lance le sort spécial (Forme féline, Lumière divine, Voile d'ombre,
-// Avatar élémentaire, Contagion, Hymne de l'Aurore). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ;
+// Avatar élémentaire, Contagion, Hymne de l'Aurore, Rage écarlate). Les fonctions agissent pour le héros courant choisi par within(hero, fn) ;
 // l'hôte par défaut. L'Invocateur pose la Peste (charges cumulables) ; ses invocations vivent dans summons.js.
 // Le Barde soigne en frappant (Écho mélodieux) et renforce son groupe (Hymne de l'Aurore).
+// Le Berserker paie ses compétences en PV (Soif de sang) : plus il est blessé, plus il frappe fort.
 (() => {
   'use strict';
   const runtimes = new WeakMap();
@@ -58,6 +60,17 @@
       inspire: 0,
       finale: 0,
       finaleReady: 0,
+      // Berserker : Rage écarlate (et sa perte de PV à la fin), Soif de sang doublée après une utilitaire,
+      // Cicatrices, Cri de guerre reçu, Immortel et PV dépensés (Sang bouillant).
+      rageUntil: 0,
+      ragePenalty: false,
+      thirst: false,
+      scars: 0,
+      scarsUntil: 0,
+      warcryUntil: 0,
+      warcryReady: 0,
+      undyingReady: 0,
+      spent: 0,
       relentless: new WeakMap(),
       // Recharges par allié : Bénédiction forestière et Gardien divin.
       blessing: new WeakMap(),
@@ -162,6 +175,18 @@
       inspiration: 7,
       refrain: 8,
       finale: 9
+    },
+    berserker: {
+      frenzy: 0,
+      scars: 1,
+      lastStand: 2,
+      ironSkin: 3,
+      bloodletting: 4,
+      hunger: 5,
+      boiling: 6,
+      warcry: 7,
+      carnage: 8,
+      undying: 9
     }
   });
   const on = (cls, key, hero = me()) => classe(hero).id === cls && classe(hero).talents.includes(T[cls][key]);
@@ -172,6 +197,8 @@
   const notice = text => (me() === game.hero ? toast(text) : canaanLootNotice(me(), text));
   const inCombat = (hero = me()) => CANAAN_ARTEFACTS.inCombat(hero);
   const feral = (hero = me()) => isClass('druide', hero) && hero.player.form === 'feral';
+  // Rage écarlate du Berserker en cours.
+  const raging = (hero = me()) => isClass('berserker', hero) && now() < runtime(hero).rageUntil;
   const near = (a, b, tiles) => Math.hypot(a.x - b.x, a.y - b.y) < TILES(tiles);
   const alive = m => m && m.hp > 0;
   const ELEMENTAL = ['fire', 'ice', 'lightning'];
@@ -184,7 +211,7 @@
   function setClasse(hero, raw) {
     hero.classe = sanitizeClasse(raw, clampLevel(hero.level));
   }
-  // Arme liée (Grimoire de l'Invocateur) : summons.js la donne, la retire et la fait grandir avec le héros.
+  // Arme liée (Grimoire de l'Invocateur, Grande hache du Berserker) : summons.js la donne, la retire et la fait grandir avec le héros.
   const pact = hero => CANAAN_SUMMONS.syncPact(hero);
   window.CANAAN_CLASS_STATE = {
     export: () => ({ id: classe(game.hero).id, talents: [...classe(game.hero).talents] }),
@@ -246,6 +273,7 @@
       (on('paladin', 'light', hero) ? 1.12 : 1) *
       (isClass('barde', hero) ? 1.1 : 1) *
       (on('barde', 'ballad', hero) ? 1.15 : 1) *
+      (raging(hero) ? 2 : 1) *
       (feral(hero) ? 0.7 : 1)
     );
   }
@@ -411,12 +439,83 @@
   }
   function onKill(m, burned) {
     spreadPlague(m);
+    // Berserker (une seule fois par ennemi) : Frénésie (recharges −2 s) et Carnage (4 % des PV max).
+    if (isClass('berserker') && !m._bloodKill) {
+      m._bloodKill = true;
+      if (on('berserker', 'frenzy')) CANAAN_SKILLS.hasten(me(), 2);
+      if (on('berserker', 'carnage')) {
+        const h = applyHeal(HP.mhp * 0.04, false, me(), me(), true);
+        if (h > 0) float(HP.x, HP.y - 40, '🩸 +' + Math.round(h) + ' PV', '#ff8a96');
+      }
+    }
     // Explosion ardente : un ennemi brûlé par l'Élémentaliste explose (une seule fois).
     if (burned && on('elementaliste', 'blaze') && !m._clsExploded) {
       m._clsExploded = true;
       blast(m.x, m.y, 3, characterStats(me()).attack * 0.5, 'fire', m);
     }
   }
+
+  // ---------------------------------------------------------------- Soif de sang (Berserker)
+  // Le Berserker paie ses compétences en PV : chaque point de mana vaut 0,25 % de ses PV max. Une compétence ne peut
+  // jamais le tuer (il lui faut garder au moins 1 PV) ; un compagnon garde 25 % de ses PV.
+  const BLOOD = Object.freeze({ perMana: 0.0025, boil: 0.25, companionFloor: 0.25 });
+  const bloodPrice = (hero, mana) =>
+    mana > 0 ? Math.max(1, Math.ceil(hero.player.mhp * mana * BLOOD.perMana)) : 0;
+  function canBleed(price) {
+    const floor = me() !== game.hero && me().local ? HP.mhp * BLOOD.companionFloor : 0;
+    return HP.hp - price >= Math.max(1, floor);
+  }
+  // Sang bouillant : tous les 25 % des PV max dépensés, une explosion de sang autour du Berserker.
+  function boil(price) {
+    if (!on('berserker', 'boiling')) return;
+    w.spent += price;
+    while (w.spent >= HP.mhp * BLOOD.boil) {
+      w.spent -= HP.mhp * BLOOD.boil;
+      float(HP.x, HP.y - 70, '🩸 SANG BOUILLANT', '#e0404f');
+      blast(HP.x, HP.y, 3, characterStats(me()).attack * 1.5, 'blood');
+    }
+  }
+  // Paiement d'une compétence (après les réductions de CANAAN_CLASS_MANA_COST) : en mana, ou en PV pour le
+  // Berserker. Renvoie false si le héros ne peut pas payer (rien n'est retiré).
+  window.CANAAN_CLASS_PAY = forHero(function (cost) {
+    if (!isClass('berserker')) {
+      if (HP.mp < cost) return false;
+      HP.mp -= cost;
+      return true;
+    }
+    const price = bloodPrice(me(), cost);
+    if (!canBleed(price)) return false;
+    if (price > 0) {
+      HP.hp -= price;
+      float(HP.x, HP.y - 30, '🩸 −' + price, '#e0404f');
+      boil(price);
+    }
+    return true;
+  }, 1);
+  window.CANAAN_CLASS_CAN_PAY = forHero(
+    cost => (isClass('berserker') ? canBleed(bloodPrice(me(), cost)) : HP.mp >= cost),
+    1
+  );
+  // Rage écarlate : ne pas descendre sous 1 PV, attaques de base plus rapides, soins doublés ; penalty : perte de
+  // 20 % des PV max à la fin (pas pour celle d'Immortel).
+  function startRage(seconds, penalty) {
+    w.rageUntil = now() + seconds;
+    w.ragePenalty = penalty;
+    CANAAN_SKILLS.fx('ring', HP.x, HP.y, 0, 90, 0, '#e0404f', 0.6);
+    burst(HP.x, HP.y, '#e0404f', 30);
+    burst(HP.x, HP.y, '#5a0a14', 12);
+    float(HP.x, HP.y - 62, '🩸 RAGE ÉCARLATE', '#e0404f');
+  }
+  function addScars(n) {
+    const t = now();
+    w.scars = Math.min(10, (t < w.scarsUntil ? w.scars : 0) + n);
+    w.scarsUntil = t + 6;
+  }
+  // Un ennemi qui saigne (saignement d'un héros, des dagues ou d'un sort).
+  const bleeding = m =>
+    (m._clsDots || []).some(d => d.kind === 'bleed' && d.until > now()) ||
+    m.v1746_bleed > 0 ||
+    m.spell_bleed > 0;
 
   // ---------------------------------------------------------------- Compétences
   // Coût en mana d'une compétence : Concentration arcanique (chaque 3e offensive), Avatar élémentaire.
@@ -445,6 +544,12 @@
       float(HP.x, HP.y - 74, '🎵 INSPIRATION : GRATUIT', '#ff9ad5');
     if (!offensive) return context;
     w.arcane++;
+    // Soif de sang doublée (Berserker) : la compétence offensive qui suit une utilitaire.
+    if (w.thirst) {
+      w.thirst = false;
+      context.thirst = true;
+      float(HP.x, HP.y - 74, '🩸 SOIF DE SANG ×2', '#e0404f');
+    }
     // Empreinte de l'Assassin : une compétence utilitaire renforce la prochaine compétence offensive.
     if (w.umbra) {
       w.umbra = false;
@@ -515,6 +620,10 @@
     if (id === 'paladin') for (const h of group) giveShield(h, h.player.mhp * 0.1, 5, '☀️ Bouclier');
     // Écho mélodieux (Barde) : une compétence utilitaire soigne le groupe proche de 10 % des PV max.
     if (id === 'barde') for (const h of group) healFloat(h, h.player.mhp * 0.1);
+    if (id === 'berserker') {
+      w.thirst = true;
+      float(HP.x, HP.y - 74, '🩸 Soif de sang prête', '#e0404f');
+    }
     if (id === 'assassin') {
       w.umbra = true;
       float(HP.x, HP.y - 74, '🌑 Embuscade prête', '#c48cff');
@@ -547,6 +656,10 @@
       return offensive
         ? '🎵 Barde : soigne l’allié le plus blessé à 8 cases (toi compris) de 20 % des dégâts infligés.'
         : '🎵 Barde : soigne aussi toi et tes alliés à 6 cases de 10 % de leurs PV max.';
+    if (id === 'berserker')
+      return offensive
+        ? '🩸 Berserker : se paie en PV au lieu du mana, et te rend 15 % des dégâts infligés.'
+        : '🩸 Berserker : se paie en PV ; ta prochaine compétence offensive te rend 30 % des dégâts infligés.';
     if (id === 'invocateur')
       return '☠️ Invocateur : chaque coup pose une charge de Peste (8 au maximum, 8 % de ton Attaque par charge et par seconde).';
     if (!offensive)
@@ -560,8 +673,8 @@
     if (el.name === 'Glace') return '❄️ Glace : ralentit les cibles de 30 % pendant 2,5 s.';
     return '⚡ Foudre : chaque coup rebondit sur 2 ennemis proches (35 % des dégâts).';
   }
-  // Attaques de base plus rapides en forme féline (verrou × 0,8).
-  window.CANAAN_CLASS_BASIC_LOCK = forHero(() => (feral() ? 0.8 : 1), 0);
+  // Attaques de base plus rapides en forme féline et pendant la Rage écarlate (verrou × 0,8 chacune).
+  window.CANAAN_CLASS_BASIC_LOCK = forHero(() => (feral() ? 0.8 : 1) * (raging() ? 0.8 : 1), 0);
   // Avant un coup d'un héros : multiplicateurs de dégâts.
   function before(m, damage, options = {}) {
     const t = now();
@@ -591,6 +704,15 @@
     if (t < w.vivifyUntil) mult *= 1.05;
     if (on('barde', 'crescendo') && t < w.crescendoUntil) mult *= 1 + 0.03 * w.crescendo;
     if (m._dissonant > t) mult *= 1.08;
+    // Berserker : Soif de sang (+1 % par tranche de 2 % de PV perdus, 50 % au plus), Cicatrices, Curée ; Cri de
+    // guerre reçu (de n'importe quel Berserker).
+    if (isClass('berserker')) {
+      const lost = HP.mhp ? Math.max(0, 1 - HP.hp / HP.mhp) : 0;
+      mult *= 1 + Math.min(50, Math.floor(lost * 50 + 1e-9)) / 100;
+    }
+    if (on('berserker', 'scars') && t < w.scarsUntil) mult *= 1 + 0.02 * w.scars;
+    if (on('berserker', 'hunger') && bleeding(m)) mult *= 1.15;
+    if (t < w.warcryUntil) mult *= 1.1;
     // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
     if (options.skill && options.offensive && isClass('assassin'))
       mult *= options.slot === 3 && ratio < 0.5 ? 1.12 * 1.3 : 1.12;
@@ -626,7 +748,17 @@
         .sort((a, b) => a.player.hp / a.player.mhp - b.player.hp / b.player.mhp)
         .slice(0, on('barde', 'choir') ? 2 : 1))
         healFloat(hero, dealt * 0.2);
+    // Soif de sang (Berserker) : 15 % des dégâts rendus (45 % sous 15 % de PV avec Dernier carré), doublés après une
+    // compétence utilitaire.
+    if (skill && dealt > 0 && isClass('berserker')) {
+      const rate =
+          (on('berserker', 'lastStand') && HP.hp < HP.mhp * 0.15 ? 0.45 : 0.15) * (options.thirst ? 2 : 1),
+        h = applyHeal(dealt * rate, false, me(), me(), true);
+      if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#ff8a96');
+    }
     if (dealt > 0 && alive(m)) {
+      // Saignée (Berserker) : 30 % des dégâts en saignement sur 4 s.
+      if (skill && on('berserker', 'bloodletting')) dot(m, 'bleed', 4, dealt * 0.3, 'blood');
       // Barde : Dissonance (la cible subit +8 % de dégâts pendant 4 s).
       if (skill && on('barde', 'dissonance')) {
         if (!(m._dissonant > t)) float(m.x, m.y - 50, '🎵', '#ff9ad5');
@@ -717,6 +849,12 @@
   // Coup reçu : bouclier, puis le combat continue. Le reste des réductions est dans la Garde (statistiques).
   window.CANAAN_CLASS_DEFENSE = forHero(function (source, damage) {
     let d = damage;
+    // Berserker : Peau de fer (−1 % par tranche de 5 % de PV perdus, 18 % au plus) et Cicatrices (une par coup).
+    if (on('berserker', 'ironSkin')) {
+      const lost = HP.mhp ? Math.max(0, 1 - HP.hp / HP.mhp) : 0;
+      d *= 1 - Math.min(18, Math.floor(lost * 20 + 1e-9)) / 100;
+    }
+    if (on('berserker', 'scars') && damage > 0) addScars(1);
     if (w.shield > 0 && now() < w.shieldUntil && d > 0) {
       const absorb = Math.min(w.shield, d);
       w.shield -= absorb;
@@ -729,17 +867,28 @@
   window.CANAAN_CLASS_ON_DODGE = forHero(function () {
     if (on('assassin', 'dance')) w.danceUntil = now() + 3;
   }, 0);
-  // Coup critique ennemi subi : Volonté sacrée.
+  // Coup critique ennemi subi : Volonté sacrée, Cicatrices (deux de plus que pour un coup normal).
   window.CANAAN_CLASS_ON_CRIT_TAKEN = forHero(function () {
     const t = now();
+    if (on('berserker', 'scars')) addScars(2);
     if (!on('paladin', 'will') || t < w.willReady) return;
     w.willReady = t + 20;
     const h = applyHeal(HP.mhp * 0.05, true, me(), me());
     if (h > 0) float(HP.x, HP.y - 60, '✨ +' + Math.round(h) + ' PV', '#ffe9a0');
   }, 0);
-  // Coup fatal : Intervention divine (une fois par combat) laisse le Paladin à 1 PV avec un bouclier.
+  // Coup fatal : la Rage écarlate et Immortel (Berserker) gardent 1 PV ; Intervention divine (une fois par combat)
+  // laisse le Paladin à 1 PV avec un bouclier.
   window.CANAAN_CLASS_FATAL = forHero(function (n) {
-    if (HP.hp - n > 0 || !on('paladin', 'intervention') || w.interventionUsed) return n;
+    if (HP.hp - n > 0) return n;
+    const t = now();
+    if (raging()) return Math.max(0, Math.ceil(HP.hp) - 1);
+    if (on('berserker', 'undying') && t >= w.undyingReady) {
+      w.undyingReady = t + 90;
+      startRage(4, false);
+      notice('🩸 Immortel !');
+      return Math.max(0, Math.ceil(HP.hp) - 1);
+    }
+    if (!on('paladin', 'intervention') || w.interventionUsed) return n;
     w.interventionUsed = true;
     giveShield(me(), HP.mhp * 0.25, 5, '✨ INTERVENTION DIVINE');
     burst(HP.x, HP.y, '#ffd76a', 30);
@@ -818,6 +967,8 @@
       burst(HP.x, HP.y, '#7b3fa0', 14);
       float(HP.x, HP.y - 62, '☣️ CONTAGION', '#a4e83c');
       for (const m of game.world.monsters.slice()) if (alive(m) && near(m, HP, 7)) addPlague(m, 4);
+    } else if (s.id === 'rage') {
+      startRage(8, true);
     } else if (s.id === 'hymn') {
       // Hymne de l'Aurore : 15 % des PV max tout de suite, puis 3 % par seconde pendant 6 s, et +10 % de dégâts.
       CANAAN_SKILLS.fx('ring', HP.x, HP.y, 0, TILES(8), 0, '#ff9ad5', 0.8);
@@ -878,6 +1029,24 @@
     if (HP.veiled && t >= w.veilUntil) endVeil();
     if (w.shield > 0 && t >= w.shieldUntil) w.shield = 0;
     HP.shielded = w.shield > 0 ? 1 : 0;
+    // Fin de la Rage écarlate : 20 % des PV max perdus, sans jamais tomber sous 1 PV.
+    if (w.rageUntil > 0 && t >= w.rageUntil) {
+      w.rageUntil = 0;
+      const loss = w.ragePenalty ? Math.floor(Math.min(HP.mhp * 0.2, HP.hp - 1)) : 0;
+      w.ragePenalty = false;
+      if (loss > 0) {
+        HP.hp -= loss;
+        float(HP.x, HP.y - 30, '🩸 −' + loss, '#e0404f');
+      }
+    }
+    if (w.scars > 0 && t >= w.scarsUntil) w.scars = 0;
+    // Cri de guerre (Berserker) : sous 50 % de PV en combat, +10 % de dégâts au groupe proche pendant 6 s.
+    if (on('berserker', 'warcry') && fighting && ratio < 0.5 && t >= w.warcryReady) {
+      w.warcryReady = t + 30;
+      CANAAN_SKILLS.fx('ring', HP.x, HP.y, 0, TILES(6), 0, '#e0404f', 0.7);
+      float(HP.x, HP.y - 62, '💢 CRI DE GUERRE', '#e0404f');
+      for (const h of groupAround(6)) runtime(h).warcryUntil = t + 6;
+    }
     if (on('druide', 'bark') && ratio < 0.4 && t >= w.barkReady) {
       w.barkUntil = t + 6;
       w.barkReady = t + 40;
@@ -1032,6 +1201,17 @@
           c: '#ff9ad5',
           r: 2.5
         });
+      // Rage écarlate : gouttes de sang qui montent autour du héros.
+      if (raging(hero) && time % 6 === 0)
+        particles.push({
+          x: p.x + (Math.random() - 0.5) * 32,
+          y: p.y + 10,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: -0.9,
+          life: 24,
+          c: Math.random() < 0.5 ? '#e0404f' : '#8a1020',
+          r: 2.5
+        });
       if (p.form === 'feral' && time % 9 === 0)
         particles.push({
           x: p.x + (Math.random() - 0.5) * 30,
@@ -1056,7 +1236,8 @@
         game.hero.player.form === 'feral' ||
           !!game.hero.player.veiled ||
           now() < runtime(game.hero).contagionUntil ||
-          now() < runtime(game.hero).hymnUntil
+          now() < runtime(game.hero).hymnUntil ||
+          now() < runtime(game.hero).rageUntil
       );
     }
   };
@@ -1113,7 +1294,8 @@
     assassin: [1, 3, 4, 5, 8, 9, 0, 2, 6, 7],
     elementaliste: [0, 3, 7, 1, 9, 4, 6, 2, 5, 8],
     invocateur: [1, 3, 0, 5, 9, 2, 4, 7, 6, 8],
-    barde: [1, 5, 8, 0, 9, 3, 7, 4, 2, 6]
+    barde: [1, 5, 8, 0, 9, 3, 7, 4, 2, 6],
+    berserker: [4, 5, 0, 9, 3, 7, 1, 8, 2, 6]
   });
   function autoTalents(hero) {
     const k = classe(hero);
@@ -1174,6 +1356,10 @@
     ui.page = page;
     renderTalents();
   };
+  // Coût et recharge du sort spécial (le Berserker n'y met pas de mana).
+  const specialCost = c =>
+    (c.special.mana > 0 ? 'Mana ' + c.special.mana : 'Sans mana') +
+    (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '');
   const escape = s =>
     String(s).replace(
       /[&<>"']/g,
@@ -1209,9 +1395,8 @@
       escape(c.special.name) +
       '</b>' +
       escape(c.special.desc) +
-      ' <small>Mana ' +
-      c.special.mana +
-      (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') +
+      ' <small>' +
+      specialCost(c) +
       '</small></p>' +
       (def
         ? '<div class="class-line class-pact"><b>' +
@@ -1313,9 +1498,8 @@
       escape(c.special.name) +
       '</b><span>' +
       escape(c.special.desc) +
-      ' Mana ' +
-      c.special.mana +
-      (c.special.cooldown >= 5 ? ' · recharge ' + c.special.cooldown + ' s' : '') +
+      ' ' +
+      specialCost(c) +
       '.</span></div></div>' +
       pactLine(hero) +
       '<div class="talent-slots">';
@@ -1480,6 +1664,10 @@
     plague: (hero, m, n) => within(hero, () => addPlague(m, n)),
     plagueStacks: (m, hero = game.hero) => plagueStacks(m, hero),
     blast: (hero, x, y, tiles, amount, element) => within(hero, () => blast(x, y, tiles, amount, element)),
+    // Berserker : prix en PV d'une compétence (null pour une classe qui paie en mana) et Rage écarlate en cours.
+    bloodCost: (hero, mana) => (isClass('berserker', hero) ? bloodPrice(hero, mana) : null),
+    raging: (hero = game.hero) => raging(hero),
+    specialCost,
     audit: (hero = game.hero) => ({
       id: classe(hero).id,
       talents: [...classe(hero).talents],
@@ -1488,7 +1676,9 @@
       classes: CLASSES.length,
       talentCount: CLASSES.reduce((n, c) => n + c.talents.length, 0),
       shield: Math.round(runtime(hero).shield),
-      form: hero.player.form || null
+      form: hero.player.form || null,
+      rage: Math.max(0, Math.round((runtime(hero).rageUntil - now()) * 10) / 10),
+      scars: runtime(hero).scars
     })
   });
   Object.assign(window, { renderTalents, canaanUseSpecial: useSpecial });

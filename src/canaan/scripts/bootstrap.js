@@ -95,6 +95,8 @@
         CANAAN_CLASS_ON_DODGE: 'function',
         CANAAN_CLASS_ON_CRIT_TAKEN: 'function',
         CANAAN_CLASS_FATAL: 'function',
+        CANAAN_CLASS_PAY: 'function',
+        CANAAN_CLASS_CAN_PAY: 'function',
         'CANAAN_CLASS.audit': 'function',
         'CANAAN_CLASS.special': 'function',
         'CANAAN_CLASS_ATTACK.before': 'function',
@@ -520,15 +522,15 @@
         draw: !!draw,
         save: !!saveGame,
         load: !!loadGame,
-        weaponTypes: Object.keys(WEAPON_SPELLS).length === 11 && CRAFT_WEAPONS.length === 10,
+        weaponTypes: Object.keys(WEAPON_SPELLS).length === 12 && CRAFT_WEAPONS.length === 10,
         classes: !!window.CANAAN_CLASS,
         talentMenu: !!document.querySelector('#menuButtons button[data-action="toggleTalents"]'),
         talentShortcut: !!toggleTalents,
         offensiveCore: !!window.CANAAN_STATS_ATTACK && !!window.CANAAN_COMBAT.rawAttack,
-        sixClasses:
+        sevenClasses:
           !!window.CANAAN_CLASS &&
-          window.CANAAN_CLASS.audit().classes === 6 &&
-          window.CANAAN_CLASS.audit().talentCount === 60,
+          window.CANAAN_CLASS.audit().classes === 7 &&
+          window.CANAAN_CLASS.audit().talentCount === 70,
         clock: !!window.CANAAN_CLOCK && window.CANAAN_CLOCK.tickMs === 1000 / 60,
         randomStreams: worldRnd !== visualRnd,
         version: window.CANAAN_VERSION === CANAAN_VERSION,

@@ -106,6 +106,34 @@
           w.crescendo
         )
       );
+    // Berserker : Rage écarlate, Cicatrices, Soif de sang doublée prête ; Cri de guerre reçu.
+    if (c.id === 'berserker' && on(w.rageUntil))
+      out.push(
+        E(
+          'cls-rage',
+          '🩸',
+          'Rage écarlate',
+          'Impossible de tomber sous 1 PV, attaques de base +25 %, soins doublés.',
+          'buff',
+          w.rageUntil - t
+        )
+      );
+    if (c.id === 'berserker' && on(w.scarsUntil) && w.scars > 0)
+      out.push(
+        E('cls-scars', '💢', tal(1)[0], 'Dégâts +' + 2 * w.scars + ' %.', 'buff', w.scarsUntil - t, w.scars)
+      );
+    if (c.id === 'berserker' && w.thirst)
+      out.push(
+        E(
+          'cls-thirst',
+          '🩸',
+          'Soif de sang',
+          'Ta prochaine compétence offensive te rend 30 % des dégâts infligés.',
+          'buff'
+        )
+      );
+    if (on(w.warcryUntil))
+      out.push(E('cls-warcry', '💢', 'Cri de guerre', 'Dégâts +10 %.', 'buff', w.warcryUntil - t));
     if (hero.player.form === 'feral') out.push(E('cls-feral', '🐆', 'Forme féline', c.special.desc, 'buff'));
   }
   const STANCES = [

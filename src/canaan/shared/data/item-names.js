@@ -182,5 +182,15 @@ export const RELIC_NAMES = Object.freeze({
       [40, 'Tome des légions mortes'],
       [50, 'Évangile du Fléau éternel']
     ])
+  ),
+  greataxe: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Hache du maraudeur'],
+      [10, 'Fendoir des clans'],
+      [20, 'Grande hache sanglante'],
+      [30, 'Hache du carnage'],
+      [40, 'Dévoreuse écarlate'],
+      [50, 'Faucheuse des mille batailles']
+    ])
   )
 });

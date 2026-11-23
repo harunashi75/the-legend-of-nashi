@@ -1,8 +1,9 @@
 // Armes tenues en main : chaque héros porte la vraie arme équipée (épée, épées doubles, hache, masse, lance,
-// dagues, arc, égide, bâton, luth, Grimoire), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
+// dagues, arc, égide, bâton, luth, Grimoire, Grande hache), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
 // chaque famille : taille en arc (épée, hache, masse), double taille (épées doubles), estocs (lance, dagues),
 // tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton), cordes pincées et notes
-// (luth), livre ouvert vers la mire et lueur de peste (Grimoire).
+// (luth), livre ouvert vers la mire et lueur de peste (Grimoire), grand coup à deux mains par-dessus la tête
+// (Grande hache du Berserker).
 // Le héros se tourne vers sa mire à l'arrêt et pendant une attaque. Rien n'est sauvegardé ni simulé ici.
 (() => {
   'use strict';
@@ -19,7 +20,8 @@
     staff: '#b38aff',
     shield: '#ffe4a2',
     lute: '#ff9ad5',
-    grimoire: '#a4e83c'
+    grimoire: '#a4e83c',
+    greataxe: '#e0404f'
   };
   // ---------------------------------------------------------------- Sprites (pointe vers +x, poignée au point pivot)
   // Chaque dessin renvoie {w, h, px, py, draw(R)} : taille en pixels du sprite, pivot (main), et ses rectangles.
@@ -84,6 +86,42 @@
         R(17, 4, 3, 3, ST);
         R(17, 10, 3, 2, STD);
         R(16, 7, 5, 1, GOD);
+      }
+    },
+    // Grande hache (Berserker) : long manche gainé de cuir rouge, double tranchant d'acier sombre taché de sang.
+    greataxe: {
+      w: 34,
+      h: 18,
+      px: 3,
+      py: 9,
+      draw(R) {
+        R(-1, 7, 2, 4, GO);
+        R(0, 8, 28, 2, '#4a2e22');
+        R(0, 9, 28, 1, '#2e1c14');
+        R(3, 7, 1, 4, '#8a1a24');
+        R(6, 7, 1, 4, '#8a1a24');
+        R(9, 7, 1, 4, '#8a1a24');
+        // Lame du haut.
+        R(23, 6, 7, 2, STD);
+        R(21, 2, 11, 4, ST);
+        R(20, 0, 13, 2, ST);
+        R(20, 0, 13, 1, '#f6d2d6');
+        R(21, 5, 11, 1, STD);
+        // Lame du bas.
+        R(23, 10, 7, 2, STD);
+        R(21, 12, 11, 4, ST);
+        R(20, 16, 13, 2, ST);
+        R(20, 17, 13, 1, STD);
+        R(21, 12, 11, 1, STL);
+        // Douille, rivet et pointe.
+        R(24, 7, 6, 4, '#3a3a46');
+        R(26, 8, 2, 2, GO);
+        R(30, 8, 4, 2, ST);
+        // Sang.
+        R(21, 3, 2, 2, '#c0202e');
+        R(22, 1, 1, 1, '#c0202e');
+        R(28, 13, 3, 2, '#c0202e');
+        R(29, 16, 2, 1, '#8a1020');
       }
     },
     mace: {
@@ -523,6 +561,20 @@
       oy = y + 6;
     const behind = up ? 'back' : 'front';
     const color = TRAIL[type] || '#ffffff';
+    if (type === 'greataxe') {
+      if (layer !== behind) return;
+      const len = 32 * SCALE;
+      if (attacking) {
+        // Coup à deux mains : la hache part loin derrière l'épaule et s'abat devant la mire.
+        const a0 = aim - side * 2.3,
+          a1 = aim + side * 1.1,
+          e = ease(k * 1.25),
+          rot = a0 + (a1 - a0) * e;
+        trail(c, hx, hy, len, a0, rot, color, 1 - k);
+        piece(c, 'greataxe', hx, hy, rot, side);
+      } else piece(c, 'greataxe', hx - side * 2, hy, -Math.PI / 2 + side * 0.3, side);
+      return;
+    }
     if (type === 'sword' || type === 'axe' || type === 'mace') {
       if (layer !== behind) return;
       const len = (type === 'axe' ? 24 : type === 'mace' ? 22 : 24) * SCALE;

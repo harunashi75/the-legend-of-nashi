@@ -1,5 +1,5 @@
 // @ts-check
-// Les six classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
+// Les sept classes : élément de leurs compétences d'armes, passif de classe, sort spécial (touche F) et dix talents.
 // Le joueur équipe 5 talents au plus parmi les 10 de sa classe (un emplacement aux niveaux 1, 10, 20, 30 et 40).
 // Une classe peut avoir une arme liée (weapon) : elle la reçoit en la choisissant et n'en manie aucune autre.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
@@ -17,7 +17,8 @@ export const ELEMENTS = deepFreeze({
   ice: { name: 'Glace', icon: '⟦el_ice⟧', color: '#8fdcff' },
   lightning: { name: 'Foudre', icon: '⟦el_lightning⟧', color: '#f4f07a' },
   poison: { name: 'Poison', icon: '⟦el_poison⟧', color: '#a4e83c' },
-  harmony: { name: 'Harmonie', icon: '⟦el_harmony⟧', color: '#ff9ad5' }
+  harmony: { name: 'Harmonie', icon: '⟦el_harmony⟧', color: '#ff9ad5' },
+  blood: { name: 'Sang', icon: '⟦el_blood⟧', color: '#e0404f' }
 });
 export const CLASSES = deepFreeze([
   {
@@ -345,6 +346,59 @@ export const CLASSES = deepFreeze([
         'Toutes les 6 compétences offensives, un accord final inflige 120 % de l’Attaque aux ennemis à moins de 4 cases et soigne ton groupe proche de 8 % de ses PV max. Recharge : 12 s.'
       ]
     ]
+  },
+  {
+    id: 'berserker',
+    icon: '⟦cls_berserker⟧',
+    name: 'Berserker',
+    style: 'Corps à corps sauvage, sang versé et vol de vie',
+    spec: 'Il paie ses compétences avec ses PV : plus il est blessé, plus il frappe fort',
+    color: '#e0404f',
+    // Arme liée : la Grande hache, reçue en choisissant la classe ; elle suit le niveau du héros.
+    weapon: 'greataxe',
+    elements: ['blood', 'blood', 'blood', 'blood'],
+    passive: {
+      name: 'Soif de sang',
+      desc: 'Tes compétences coûtent des PV au lieu du mana, sans jamais pouvoir te tuer. +1 % de dégâts par tranche de 2 % de PV perdus (jusqu’à +50 %). Tes compétences offensives te rendent 15 % des dégâts infligés ; une compétence utilitaire double ce vol de vie pour ta compétence offensive suivante. Tu ne manies que ta Grande hache, qui grandit avec toi.'
+    },
+    special: {
+      id: 'rage',
+      icon: '🩸',
+      name: 'Rage écarlate',
+      desc: 'Pendant 8 secondes, tu ne peux pas descendre sous 1 PV, tes attaques de base sont 25 % plus rapides et tes soins sont doublés. À la fin, tu perds 20 % de tes PV maximum (sans pouvoir en mourir).',
+      mana: 0,
+      cooldown: 60
+    },
+    talents: [
+      ['Frénésie', 'Tuer un ennemi réduit de 2 secondes les recharges de tes compétences.'],
+      [
+        'Cicatrices',
+        'Chaque coup subi te donne une Cicatrice : +2 % de dégâts par Cicatrice, 10 au maximum, pendant 6 secondes (durée renouvelée). Un coup critique ennemi en donne 3.'
+      ],
+      [
+        'Dernier carré',
+        'Sous 15 % de PV, ta Soif de sang te rend 45 % des dégâts infligés au lieu de 15 % (le double après une compétence utilitaire).'
+      ],
+      ['Peau de fer', 'Tu subis 1 % de dégâts en moins par tranche de 5 % de PV perdus (jusqu’à 18 %).'],
+      [
+        'Saignée',
+        'Tes compétences offensives font saigner leurs cibles : 30 % des dégâts infligés, en plus, sur 4 secondes.'
+      ],
+      ['Curée', 'Inflige 15 % de dégâts supplémentaires aux ennemis qui saignent.'],
+      [
+        'Sang bouillant',
+        'Chaque fois que tu as dépensé 25 % de tes PV maximum pour tes compétences, ton sang explose : 150 % de l’Attaque aux ennemis à moins de 3 cases.'
+      ],
+      [
+        'Cri de guerre',
+        'Passer sous 50 % de PV en combat te fait pousser un cri : toi et tes alliés à moins de 6 cases infligez 10 % de dégâts en plus pendant 6 secondes. Recharge : 30 s.'
+      ],
+      ['Carnage', 'Tuer un ennemi te soigne de 4 % de tes PV maximum.'],
+      [
+        'Immortel',
+        'Une fois toutes les 90 s, un coup fatal te laisse à 1 PV et déclenche une Rage écarlate de 4 secondes, sans perte de PV à la fin.'
+      ]
+    ]
   }
 ]);
 export const CLASS_IDS = Object.freeze(CLASSES.map(c => c.id));
@@ -357,5 +411,6 @@ export const UTILITY_SKILLS = Object.freeze([
   'dualdagger:2',
   'staff:2',
   'shield:3',
-  'lute:2'
+  'lute:2',
+  'greataxe:2'
 ]);

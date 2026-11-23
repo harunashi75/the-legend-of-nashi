@@ -1,4 +1,5 @@
-// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (10 armes et le Grimoire × 4)
+// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (10 armes, le Grimoire et la
+// Grande hache × 4)
 // et par sort de classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur
 // propre à l'arme, halo doux. CANAAN_SKILL_ICONS.weapon(type, i) et .special(id) renvoient le balisage SVG.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
@@ -27,7 +28,8 @@ const ACCENT = {
   shield: '#ffe08a',
   staff: '#b98cff',
   lute: '#ff9ad5',
-  grimoire: '#a4e83c'
+  grimoire: '#a4e83c',
+  greataxe: '#e0404f'
 };
 const at = (x, y, rot = 0, s = 1, inner = '') =>
   '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ') scale(' + s + ')">' + inner + '</g>';
@@ -86,6 +88,22 @@ const P = {
     '" ' +
     st +
     '/>',
+  // Grande hache : long manche, double tranchant taché de sang.
+  greataxe: () =>
+    '<rect x="-1.3" y="-12" width="2.6" height="26" rx="1" fill="' +
+    K.woodD +
+    '" ' +
+    st +
+    '/><path d="M1 -12 C8 -14 12 -8 11 -2 C7 -4 4 -4 1 -4 Z" fill="' +
+    K.steel +
+    '" ' +
+    st +
+    '/><path d="M-1 -12 C-8 -14 -12 -8 -11 -2 C-7 -4 -4 -4 -1 -4 Z" fill="' +
+    K.steel +
+    '" ' +
+    st +
+    '/><path d="M3 -11 C7 -11 9 -8 10 -5" fill="none" stroke="#c0202e" stroke-width="1.4"/>' +
+    '<path d="M-1.3 6 L1.3 6 M-1.3 9 L1.3 9" stroke="#8a1a24" stroke-width="1.2"/>',
   mace: () =>
     '<rect x="-1.3" y="-2" width="2.6" height="15" rx="1" fill="' +
     K.wood +
@@ -622,6 +640,13 @@ ICONS.lute = [
     at(8, 7, 0, 0.45, E.sparkle('#fff')),
   a => E.waves(a) + at(0, -1, 0, 1, E.notes(a))
 ];
+// Grande hache : fendoir qui fend le sol, bond qui écrase, hurlement de rage, châtiment sanglant.
+ICONS.greataxe = [
+  a => at(1, 0, 30, 0.95, P.greataxe()) + at(-2, 10, 0, 0.9, E.crack(a)),
+  a => at(0, -3, 0, 0.8, P.greataxe()) + at(0, 7, 180, 0.6, E.chevrons(a)) + at(0, 11, 0, 0.9, E.crack(a)),
+  a => E.rings(a) + at(0, 1, 0, 1, E.burst(a, 9, 8)) + at(0, 1, 0, 0.6, E.drop('#e0404f')),
+  a => at(-3, 0, 25, 0.9, P.greataxe()) + at(6, 7, 0, 0.7, E.skull()) + at(7, -6, 0, 0.6, E.drop(a))
+];
 const SPECIALS = {
   feral: () => frame('#7ee36a', E.claw('#7ee36a')),
   divine: () => frame('#ffd76a', E.sun('#ffd76a') + at(0, 0, 0, 0.5, E.sparkle('#fff'))),
@@ -640,6 +665,12 @@ const SPECIALS = {
       E.rings('#a4e83c') +
         [0, 120, 240].map(r => at(0, 0, r, 1, at(0, -9, 0, 0.7, E.drop('#a4e83c')))).join('') +
         at(0, 1, 0, 0.9, E.skull())
+    ),
+  // Rage écarlate : goutte de sang entre deux griffes, dans une onde rouge.
+  rage: () =>
+    frame(
+      '#e0404f',
+      E.rings('#e0404f') + at(0, 0, 0, 1.05, E.claw('#ff8a96')) + at(0, 1, 0, 1.1, E.drop('#e0404f'))
     ),
   // Hymne de l'Aurore : soleil levant et notes roses dans une onde.
   hymn: () =>

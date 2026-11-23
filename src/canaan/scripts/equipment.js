@@ -36,12 +36,18 @@
     canaanLootNotice(hero, '🔒 Niveau ' + need + ' requis pour ' + gearDisplayName(item) + '.');
     return true;
   }
-  // Arme liée (le Grimoire de l'Invocateur) : elle ne quitte jamais sa main, et aucune autre arme ne s'équipe.
+  // Arme liée (Grimoire de l'Invocateur, Grande hache du Berserker) : elle ne quitte jamais sa main, et aucune
+  // autre arme ne s'équipe.
   function boundLock(hero, slot) {
     if (slot !== 'weapon' && slot !== 'weapon2') return false;
     const pact = hero.equipment.weapon;
     if (!isBoundItem(pact)) return false;
-    canaanLootNotice(hero, '📕 ' + gearDisplayName(pact) + ' est lié à ton âme : aucune autre arme.');
+    canaanLootNotice(
+      hero,
+      (pact.weaponType === 'greataxe' ? '🪓 ' : '📕 ') +
+        gearDisplayName(pact) +
+        ' est lié à ton âme : aucune autre arme.'
+    );
     return true;
   }
   // Emplacement où va un objet : le sien ; une bague va dans la bague demandée (ring ou ring2), sinon dans la

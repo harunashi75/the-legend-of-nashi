@@ -1,4 +1,5 @@
-/* Armes : dix familles (dont le Luth) et le Grimoire lié de l'Invocateur, 44 compétences, ciblage et effets. */
+/* Armes : dix familles (dont le Luth), le Grimoire lié de l'Invocateur et la Grande hache liée du Berserker,
+   48 compétences, ciblage et effets. */
 (() => {
   // Repousse un monstre loin du lanceur courant.
   function pushAway(m, distance) {
@@ -75,7 +76,8 @@
     staff: '#b38aff',
     shield: '#ffe4a2',
     lute: '#ff9ad5',
-    grimoire: '#a4e83c'
+    grimoire: '#a4e83c',
+    greataxe: '#e0404f'
   };
   // Portée des attaques de base à distance (px) : on frappe de loin, sans coller l'ennemi.
   const BASIC_RANGE = Object.freeze({ bow: 900, staff: 760, lute: 700, grimoire: 720 });
@@ -691,11 +693,11 @@
       key = type + ':' + i;
     if (!s || (weaponCooldowns[key] || 0) > 0) return null;
     const cost = window.CANAAN_CLASS_MANA_COST(type, i, s.mp);
-    if (P.mp < cost) {
-      toast('Mana insuffisant');
+    // Mana, ou PV pour le Berserker (Soif de sang).
+    if (!window.CANAAN_CLASS_PAY(cost)) {
+      toast(CANAAN_CLASS.bloodCost(game.hero, cost) !== null ? 'PV insuffisants' : 'Mana insuffisant');
       return null;
     }
-    P.mp -= cost;
     // La Célérité (et les talents) réduit le verrou réel, également utilisé par l'affichage et le changement d'arme.
     const recovery = Math.max(0, Math.min(80, stats().cooldownReduction || 0));
     weaponCooldowns[key] = s.max * (1 - recovery / 100) * CANAAN_ARTEFACTS.cooldownFactor();
@@ -782,6 +784,12 @@
         linear(heavy ? 185 : 160, heavy ? 30 : 22, m);
         // Percée : la lance file droit devant, des ondes de choc le long du coup.
         if (heavy) effect('thrust', AP.x, AP.y, a, 190, 30, col, 0.45);
+        return;
+      case 'greataxe':
+        if (!heavy) return cone(140, Math.PI * 0.6, m);
+        // Moulinet : la grande hache fait le tour du héros et fend le sol.
+        circle(140, m);
+        effect('slam', AP.x, AP.y, a, 155, Math.PI * 0.9, col, 0.6);
         return;
       case 'mace':
       case 'shield':
@@ -931,7 +939,7 @@
       !!spec &&
       !hero.player.dead &&
       (skillStateOf(hero).cooldowns[spec.key] || 0) <= 0 &&
-      hero.player.mp >= spec.cost
+      window.CANAAN_CLASS_CAN_PAY(spec.cost, hero)
     );
   }
   function heroUseSkill(hero, i) {
@@ -939,7 +947,7 @@
     if (!started || paused || !skillReady(hero, i)) return false;
     const spec = skillSpec(hero, i),
       recovery = Math.max(0, Math.min(80, characterStats(hero).cooldownReduction || 0));
-    hero.player.mp -= spec.cost;
+    if (!window.CANAAN_CLASS_PAY(spec.cost, hero)) return false;
     skillStateOf(hero).cooldowns[spec.key] =
       spec.cooldown * (1 - recovery / 100) * CANAAN_ARTEFACTS.cooldownFactor(hero);
     // Talents de classe (élément, Consécration…) et artéfacts de l'Arène (Cœur de Cendres) du lanceur.
@@ -956,7 +964,7 @@
       return true;
     });
   }
-  // Les 44 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
+  // Les 48 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
   // Les valeurs suivent le catalogue (shared/data/equipment.js) : la puissance affichée est celle infligée.
   function castSkill(type, i) {
     const focus = S.focus > 0 && isOffensiveSkill(type, i);
@@ -1169,6 +1177,39 @@
           float(AP.x, AP.y - 65, 'SERMENT DU GARDIEN', '#ffe4a2');
         }
         break;
+      case 'greataxe':
+        if (i === 0) {
+          cone(150, Math.PI * 0.66, 3);
+          effect('slam', AP.x, AP.y, a, 160, Math.PI * 0.66, col, 0.6);
+        }
+        if (i === 1) {
+          // Bond du boucher : saut jusqu'à la souris (200 px au plus), puis impact autour du point d'arrivée qui
+          // étourdit (pas les boss).
+          const spot = groundTarget();
+          dash(Math.min(200, Math.hypot(spot.x - AP.x, spot.y - AP.y)), a);
+          circle(125, 2.4, m => {
+            if (m.boss || m.worldBoss) return;
+            m.cd = Math.max(m.cd, 1);
+            applyEffect(m, 'stun', 1);
+          });
+          splash(AP.x, AP.y, 125, col);
+        }
+        if (i === 2) {
+          // Hurlement sanguinaire : Rage (+25 % de dégâts, +15 % de dégâts subis) et ennemis proches affaiblis.
+          S.berserk = 6;
+          ring(TS * 4, col);
+          float(AP.x, AP.y - 42, '💢 HURLEMENT : DÉGÂTS +25 %', '#ff8a96');
+          for (const m of game.world.monsters.slice())
+            if (m.hp > 0 && canaanBodyGap(m, AP.x, AP.y) < TS * 4) debuff(m, 'weak', 4);
+        }
+        if (i === 3) {
+          // Châtiment du sang : 700 % si le lanceur est sous 30 % de ses PV.
+          const low = AP.hp < AP.mhp * 0.3;
+          arc(155, a, Math.PI / 2, fxColor());
+          for (const m of targets(155, a, Math.PI / 2)) dmg(m, low ? 7 : 4.5);
+          if (low) float(AP.x, AP.y - 60, '💀 CHÂTIMENT 700 %', '#e0404f');
+        }
+        break;
       case 'grimoire':
         // Invocations (summons.js) : le lanceur, la compétence, son contexte (élément, bonus) et sa visée.
         window.CANAAN_SUMMONS.cast(actor, i, { ...castContext, magic: true }, { a, ...groundTarget() });
@@ -1244,6 +1285,11 @@
     S.arcane = Math.min(3, S.arcane + 1);
     if (S.arcane > before) float(AP.x, AP.y - 72, '🔮 Charge ' + S.arcane + '/3', '#d6aaff');
   }
+  // Frénésie (Berserker) : recharges des compétences d'un héros réduites de seconds (l'hôte : celles de sa barre).
+  function hasten(hero, seconds) {
+    const cds = hero === game.hero ? weaponCooldowns : skillStateOf(hero).cooldowns;
+    for (const key of Object.keys(cds)) cds[key] = Math.max(0, cds[key] - seconds);
+  }
   // Puissance (Attaque ou magie) d'un héros, pour les dégâts estimés des info-bulles.
   function powerOf(hero, magic) {
     return withActor(hero, () => (magic ? magPower() : power()));
@@ -1261,6 +1307,7 @@
       remoteEffect,
       ageEffects,
       fx: effect,
+      hasten,
       power: powerOf
     }),
     CANAAN_BASIC_ATTACK: Object.freeze({

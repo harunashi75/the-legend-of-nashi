@@ -246,7 +246,11 @@
     // Arme liée (Relique) : elle suit le niveau du héros et ne le quitte pas.
     if (isBoundItem(item))
       html +=
-        '<div class="tooltip-relic">📕 Arme liée à l’Invocateur : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.</div>';
+        '<div class="tooltip-relic">' +
+        (item.bound === 'berserker'
+          ? '🪓 Arme liée au Berserker : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.'
+          : '📕 Arme liée à l’Invocateur : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.') +
+        '</div>';
     return html + requirement(item);
   }
   // Ce que fait une statistique (fiche du personnage).

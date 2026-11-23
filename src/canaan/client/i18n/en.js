@@ -466,6 +466,13 @@ export default {
   'Mélodie vivifiante': 'Invigorating melody',
   'Vitesse +10 %, dégâts +5 %.': 'Speed +10%, damage +5%.',
   'Dégâts +{n} %.': 'Damage +{n}%.',
+  'Rage écarlate': 'Scarlet rage',
+  'Impossible de tomber sous 1 PV, attaques de base +25 %, soins doublés.':
+    'Cannot drop below 1 HP, basic attacks +25%, healing doubled.',
+  'Soif de sang': 'Bloodthirst',
+  'Ta prochaine compétence offensive te rend 30 % des dégâts infligés.':
+    'Your next offensive skill returns 30% of the damage dealt to you.',
+  'Cri de guerre': 'War cry',
   'Forme féline': 'Cat form',
   'Garde': 'Guard',
   'Parade prête : les coups sont bloqués.': 'Parry ready: blows are blocked.',
@@ -592,6 +599,8 @@ export default {
   '(enchantement)': '(enchantment)',
   'Arme liée à l’Invocateur : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.':
     'Weapon bound to the Summoner: it takes your level and grows with you. Cannot be removed, sold or traded.',
+  'Arme liée au Berserker : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.':
+    'Weapon bound to the Berserker: it takes your level and grows with you. Cannot be removed, sold or traded.',
   'Points': 'Points',
   'Statistiques principales': 'Primary stats',
   'Statistiques secondaires': 'Secondary stats',
@@ -1021,6 +1030,29 @@ export default {
     'A symphony rings out where you aim: 5 waves over 2 s, 100% each to enemies within 3 tiles. Each wave heals the heroes in the area for 2% of their max HP.',
   'CHANT DE GUÉRISON': 'HEALING SONG',
   'SYMPHONIE': 'SYMPHONY',
+  'Grande hache': 'Great axe',
+  'Hache à deux mains : larges coups, bond écrasant et hurlement de rage, payés avec ton sang.':
+    'Two-handed axe: wide blows, a crushing leap and a howl of rage, paid for with your blood.',
+  'Grand cône': 'Wide cone',
+  'Un coup de hache très large devant toi, qui fend le sol et touche tous les ennemis du cône.':
+    'A very wide axe blow in front of you that splits the ground and hits every enemy in the cone.',
+  'Bond du boucher': 'Butcher’s leap',
+  'Bond vers la souris': 'Leap toward the mouse',
+  '240 % autour de toi': '240% around you',
+  'étourdit 1 s': 'stuns 1 s',
+  'Tu bondis jusqu’à la souris (4 cases au plus) et t’écrases au sol : 240 % aux ennemis autour du point d’arrivée, et les monstres (pas les boss) sont étourdis 1 s.':
+    'You leap to the mouse (4 tiles at most) and crash into the ground: 240% to enemies around the landing point, and monsters (not bosses) are stunned for 1 s.',
+  'Hurlement sanguinaire': 'Bloodthirsty howl',
+  'Rage 6 s : dégâts +25 %': 'Rage 6 s: damage +25%',
+  'affaiblit autour de toi': 'weakens around you',
+  'Tu hurles : pendant 6 s, tes coups infligent 25 % de dégâts en plus, mais tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases sont affaiblis pendant 4 s.':
+    'You howl: for 6 s, your blows deal 25% more damage, but you take 15% more damage. Enemies within 4 tiles are weakened for 4 s.',
+  'Châtiment du sang': 'Blood punishment',
+  '450 %, ou 700 % sous 30 % de tes PV': '450%, or 700% below 30% of your HP',
+  'Un coup terrible devant toi. Si tes PV sont sous 30 % de leur maximum, il inflige 700 %.':
+    'A terrible blow in front of you. If your HP is below 30% of its maximum, it deals 700%.',
+  'HURLEMENT : DÉGÂTS +25 %': 'HOWL: DAMAGE +25%',
+  'CHÂTIMENT 700 %': 'PUNISHMENT 700%',
   // ------------------------------------------------------------ Classes et talents (shared/data/classes.js)
   'Nature': 'Nature',
   'Sacré': 'Holy',
@@ -1029,6 +1061,7 @@ export default {
   'Glace': 'Ice',
   'Foudre': 'Lightning',
   'Harmonie': 'Harmony',
+  'Sang': 'Blood',
   'Druide': 'Druid',
   'Polyvalence, soins, poison et régénération': 'Versatility, healing, poison and regeneration',
   'Nature, poison, régénération et soutien': 'Nature, poison, regeneration and support',
@@ -1251,6 +1284,42 @@ export default {
   'Grand final': 'Grand finale',
   'Toutes les 6 compétences offensives, un accord final inflige 120 % de l’Attaque aux ennemis à moins de 4 cases et soigne ton groupe proche de 8 % de ses PV max. Recharge : 12 s.':
     'Every 6 offensive skills, a final chord deals 120% of Attack to enemies within 4 tiles and heals your nearby group for 8% of their max HP. Cooldown: 12 s.',
+  'Berserker': 'Berserker',
+  'Corps à corps sauvage, sang versé et vol de vie': 'Savage melee, spilled blood and life steal',
+  'Il paie ses compétences avec ses PV : plus il est blessé, plus il frappe fort':
+    'Pays for skills with HP: the more wounded, the harder he strikes',
+  'Tes compétences coûtent des PV au lieu du mana, sans jamais pouvoir te tuer. +1 % de dégâts par tranche de 2 % de PV perdus (jusqu’à +50 %). Tes compétences offensives te rendent 15 % des dégâts infligés ; une compétence utilitaire double ce vol de vie pour ta compétence offensive suivante. Tu ne manies que ta Grande hache, qui grandit avec toi.':
+    'Your skills cost HP instead of mana, and can never kill you. +1% damage per 2% of HP lost (up to +50%). Your offensive skills return 15% of the damage dealt to you; a utility skill doubles this life steal for your next offensive skill. You wield only your Great axe, which grows with you.',
+  'Pendant 8 secondes, tu ne peux pas descendre sous 1 PV, tes attaques de base sont 25 % plus rapides et tes soins sont doublés. À la fin, tu perds 20 % de tes PV maximum (sans pouvoir en mourir).':
+    'For 8 seconds, you cannot drop below 1 HP, your basic attacks are 25% faster and your healing is doubled. At the end, you lose 20% of your maximum HP (it cannot kill you).',
+  'Tuer un ennemi réduit de 2 secondes les recharges de tes compétences.':
+    'Killing an enemy reduces your skill cooldowns by 2 seconds.',
+  'Cicatrices': 'Scars',
+  'Chaque coup subi te donne une Cicatrice : +2 % de dégâts par Cicatrice, 10 au maximum, pendant 6 secondes (durée renouvelée). Un coup critique ennemi en donne 3.':
+    'Each blow you take gives you a Scar: +2% damage per Scar, 10 at most, for 6 seconds (duration refreshed). An enemy critical hit gives 3.',
+  'Dernier carré': 'Last stand',
+  'Sous 15 % de PV, ta Soif de sang te rend 45 % des dégâts infligés au lieu de 15 % (le double après une compétence utilitaire).':
+    'Below 15% HP, your Bloodthirst returns 45% of the damage dealt instead of 15% (double after a utility skill).',
+  'Peau de fer': 'Iron skin',
+  'Tu subis 1 % de dégâts en moins par tranche de 5 % de PV perdus (jusqu’à 18 %).':
+    'You take 1% less damage per 5% of HP lost (up to 18%).',
+  'Saignée': 'Bloodletting',
+  'Tes compétences offensives font saigner leurs cibles : 30 % des dégâts infligés, en plus, sur 4 secondes.':
+    'Your offensive skills make their targets bleed: 30% of the damage dealt, extra, over 4 seconds.',
+  'Curée': 'Quarry',
+  'Inflige 15 % de dégâts supplémentaires aux ennemis qui saignent.':
+    'Deals 15% extra damage to bleeding enemies.',
+  'Sang bouillant': 'Boiling blood',
+  'Chaque fois que tu as dépensé 25 % de tes PV maximum pour tes compétences, ton sang explose : 150 % de l’Attaque aux ennemis à moins de 3 cases.':
+    'Each time you have spent 25% of your maximum HP on skills, your blood explodes: 150% of Attack to enemies within 3 tiles.',
+  'Passer sous 50 % de PV en combat te fait pousser un cri : toi et tes alliés à moins de 6 cases infligez 10 % de dégâts en plus pendant 6 secondes. Recharge : 30 s.':
+    'Dropping below 50% HP in combat makes you let out a cry: you and your allies within 6 tiles deal 10% more damage for 6 seconds. Cooldown: 30 s.',
+  'Carnage': 'Carnage',
+  'Tuer un ennemi te soigne de 4 % de tes PV maximum.':
+    'Killing an enemy heals you for 4% of your maximum HP.',
+  'Immortel': 'Undying',
+  'Une fois toutes les 90 s, un coup fatal te laisse à 1 PV et déclenche une Rage écarlate de 4 secondes, sans perte de PV à la fin.':
+    'Once every 90 s, a fatal blow leaves you at 1 HP and triggers a 4-second Scarlet rage, with no HP lost at the end.',
   // ------------------------------------------------------------ Noms des objets (shared/data/item-names.js)
   'Épée émoussée': 'Blunted sword',
   'Hachettes rouillées': 'Rusty hatchets',
@@ -1360,6 +1429,12 @@ export default {
   'Codex de la peste noire': 'Codex of the black plague',
   'Tome des légions mortes': 'Tome of the dead legions',
   'Évangile du Fléau éternel': 'Gospel of the eternal Scourge',
+  'Hache du maraudeur': 'Marauder’s axe',
+  'Fendoir des clans': 'Clan cleaver',
+  'Grande hache sanglante': 'Bloody great axe',
+  'Hache du carnage': 'Axe of carnage',
+  'Dévoreuse écarlate': 'Scarlet devourer',
+  'Faucheuse des mille batailles': 'Reaper of a thousand battles',
   // ------------------------------------------------------------ Monde, donjons, raids et Arène (shared/data)
   'La Cave des Terriers Abandonnés': 'The Cave of the Abandoned Burrows',
   'Gardien des Os': 'Bone Guardian',
@@ -2057,6 +2132,21 @@ export default {
   'GRAND FINAL': 'GRAND FINALE',
   'CONTRE-CHANT': 'COUNTERSONG',
   'INSPIRATION : GRATUIT': 'INSPIRATION: FREE',
+  'Berserker : se paie en PV au lieu du mana, et te rend 15 % des dégâts infligés.':
+    'Berserker: paid with HP instead of mana, and returns 15% of the damage dealt to you.',
+  'Berserker : se paie en PV ; ta prochaine compétence offensive te rend 30 % des dégâts infligés.':
+    'Berserker: paid with HP; your next offensive skill returns 30% of the damage dealt to you.',
+  'SANG BOUILLANT': 'BOILING BLOOD',
+  'RAGE ÉCARLATE': 'SCARLET RAGE',
+  'SOIF DE SANG ×2': 'BLOODTHIRST ×2',
+  'Soif de sang prête': 'Bloodthirst ready',
+  'CRI DE GUERRE': 'WAR CRY',
+  'Immortel !': 'Undying!',
+  'PV insuffisants': 'Not enough HP',
+  'Sans mana': 'No mana',
+  'La Grande hache retourne au sang. Elle reviendra si tu redeviens Berserker.':
+    'The Great axe returns to the blood. It will come back if you become a Berserker again.',
+  'Ta Grande hache grandit :': 'Your Great axe grows:',
   '{element} : libère une décharge autour de toi (100 % de l’Attaque, rayon 2,5 cases).':
     '{element}: releases a discharge around you (100% of Attack, 2.5-tile radius).',
   'Feu : brûle les cibles (30 % des dégâts infligés, en plus, sur 4 s).':

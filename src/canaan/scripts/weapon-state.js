@@ -56,6 +56,7 @@ function canaanSkillBadge(type, i, st) {
     sword: 'parryReady',
     dualsword: 'flurry',
     axe: 'berserk',
+    greataxe: 'berserk',
     dualdagger: 'shadow',
     staff: 'focus'
   }[type];
@@ -105,8 +106,8 @@ function canaanSkillTooltip(i) {
       '<div class="skill-tip-desc">' +
       esc(c.special.desc) +
       '</div>' +
-      '<div class="skill-tip-meta">Mana ' +
-      c.special.mana +
+      '<div class="skill-tip-meta">' +
+      (c.special.mana > 0 ? 'Mana ' + c.special.mana : 'Sans mana') +
       ' · recharge ' +
       c.special.cooldown +
       ' s</div>'
@@ -154,7 +155,14 @@ function canaanSkillTooltip(i) {
       power +
       ')</div>';
   }
-  lines += '<div class="skill-tip-meta">Recharge ' + cd + ' s · Mana ' + mana + '</div>';
+  // Le Berserker paie en PV (Soif de sang) : le prix suit ses PV max.
+  const blood = CANAAN_CLASS.bloodCost(game.hero, mana);
+  lines +=
+    '<div class="skill-tip-meta">Recharge ' +
+    cd +
+    ' s · ' +
+    (blood !== null ? blood + ' PV' : 'Mana ' + mana) +
+    '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
   if (rider) lines += '<div class="skill-tip-class">' + esc(rider) + '</div>';
   if (type === 'staff')

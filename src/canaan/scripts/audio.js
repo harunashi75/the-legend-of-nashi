@@ -1030,6 +1030,13 @@
         stab(t + 0.06);
       }
     },
+    // Grande hache : souffle lourd et grave, choc sourd ; le moulinet (lourd) frappe le sol.
+    greataxe(d, t, v, heavy) {
+      swing(d, t, 220, 1000, heavy ? 0.5 : 0.4, (heavy ? 0.75 : 0.65) * v, 0.9);
+      burst(d, t + 0.05, 'bandpass', 420, 4, 0.1, 0.14 * v, 0.02);
+      tone(d, t, 'sine', 95, 45, 0.35, 0.16 * v, 0.06);
+      if (heavy) slam(d, t + 0.3, v);
+    },
     axe(d, t, v, heavy) {
       swing(d, t, 300, 1300, heavy ? 0.42 : 0.32, (heavy ? 0.7 : 0.6) * v, 1);
       burst(d, t, 'bandpass', 520, 5, 0.08, 0.12 * v, 0.02);
