@@ -35,7 +35,8 @@
     troc: 0,
     shells: [],
     paid: 0,
-    v: QUEST_VERSION
+    v: QUEST_VERSION,
+    guild: sanitizeGuild(null)
   });
   const stateOf = hero => {
     const st = (hero.quetes ??= fresh());
@@ -43,6 +44,7 @@
     st.shells ??= [];
     st.paid ??= 0;
     st.v ??= QUEST_VERSION;
+    st.guild ??= sanitizeGuild(null);
     return st;
   };
   // État du monde : drapeaux (pont, lanternes, sanctuaires ouverts…) et énigmes résolues.
@@ -133,10 +135,18 @@
         target = { x: p.x + def.offset[0], y: p.y + def.offset[1] };
         free = false;
       } else target = tools.polar(def.polar[0], def.polar[1]);
+      // Hors du village fortifié, assez loin pour que la clairière ne touche pas les remparts.
       const accept = (x, y) =>
         tools.walkableLand(x, y) &&
         reach[y * MAPW + x] === 1 &&
         !isSafe(x, y) &&
+        !camp.area.some(
+          ([x0, y0, x1, y1]) =>
+            x - camp.x >= x0 - def.r - 2 &&
+            x - camp.x <= x1 + def.r + 2 &&
+            y - camp.y >= y0 - def.r - 2 &&
+            y - camp.y <= y1 + def.r + 2
+        ) &&
         roomy(tools, x, y, def.r) &&
         (!free || !taken.some(([a, b]) => Math.hypot(a - x, b - y) < def.r + 5));
       const spot = tools.nearestSpot(target.x, target.y, def.zone, accept);
@@ -156,7 +166,8 @@
     }
     for (const [id, def] of Object.entries(QUEST_NPCS)) {
       const site = SITES[def.site];
-      if (QUEST_SITES[def.site].under || def.dwarfName) continue;
+      // La maîtresse de guilde se tient dans la maison de guilde (guild.js).
+      if (def.guild || QUEST_SITES[def.site].under || def.dwarfName) continue;
       let at = def.at || [0, 0];
       if (def.camp) at = [camp.x + def.camp[0] - site.x, camp.y + def.camp[1] - site.y];
       const [dx, dy] = walkableNear(site, at[0], at[1], tools);
@@ -170,6 +181,19 @@
         site
       };
     }
+    // Maîtresse de guilde : derrière son comptoir, dans la maison de guilde.
+    const hall = CANAAN_ROOMS.find(r => r.id === 'guilde');
+    if (hall)
+      NPCS.guilde = {
+        id: 'guilde',
+        def: QUEST_NPCS.guilde,
+        x: (hall.x + 7.5) * T,
+        y: (hall.y + 3.9) * T,
+        face: 0,
+        quest: null,
+        site: null,
+        guild: true
+      };
     for (const site of surfaceSites())
       FIELD.build(site, {
         ok: (x, y) =>
@@ -1463,11 +1487,10 @@
     // Le lieu change pour tout le monde.
     for (const f of ended.world || []) qworld.flags[f] = true;
     if (ended.world) changed();
-    const npc = QUEST_NPCS[q.npc];
     tell(
       hero,
       st.step >= q.steps.length
-        ? '📜 ' + q.title + ' : retourne voir ' + npc.name + '.'
+        ? '📜 ' + q.title + ' : retourne voir ' + whoTo(q) + '.'
         : '📜 Objectif accompli : ' + ended.text
     );
     if (hero === game.hero) CANAAN_SOUND.cue('puzzle');
@@ -1486,23 +1509,98 @@
     window.CANAAN_PERSISTENCE.requestSave();
     return true;
   }
+  // Un avis de la guilde se rend à la maîtresse de guilde ; une demande d'habitant, à cet habitant.
+  const nearGiver = (hero, q) => {
+    if (q.npc === 'guilde') return CANAAN_GUILD.near(hero);
+    const npc = NPCS[q.npc];
+    return !!npc && Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) <= 3.5 * T;
+  };
+  // Personnage à qui rendre une quête (texte).
+  const whoTo = q => (q.npc === 'guilde' ? GUILD_MASTER + ', à la guilde' : QUEST_NPCS[q.npc].name);
   function turnIn(hero, id) {
     const q = quest(id),
-      st = stateOf(hero),
-      npc = q && NPCS[q.npc];
-    if (
-      !q ||
-      !questReady(st, q) ||
-      !npc ||
-      Math.hypot(hero.player.x - npc.x, hero.player.y - npc.y) > 3.5 * T
-    )
-      return false;
+      st = stateOf(hero);
+    if (!q || !questReady(st, q) || !nearGiver(hero, q)) return false;
+    // Première fois : les récompenses propres à une demande d'habitant (recette, coffre, bijou…).
+    const first = !st.done[q.id];
     delete st.active[q.id];
     st.done[q.id] = Date.now();
     if (st.track === q.id) st.track = Object.keys(st.active).map(Number)[0] || null;
-    reward(hero, q);
+    if (isContract(q)) rewardContract(hero, q, first);
+    else reward(hero, q);
     window.CANAAN_PERSISTENCE.requestSave();
     return true;
+  }
+  // Prendre un contrat au tableau de la guilde (près de la maîtresse de guilde).
+  function take(hero, id) {
+    const q = quest(id),
+      st = stateOf(hero);
+    refreshBoard(st, hero.level, Date.now());
+    if (!q || !CANAAN_GUILD.near(hero) || !canTakeContract(st, q)) return false;
+    st.guild.taken.push(q.id);
+    st.active[q.id] = { step: 0, got: [], n: 0 };
+    st.track = q.id;
+    tell(hero, '📜 Contrat accepté : ' + q.title);
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Renoncer au contrat en cours : il ne revient pas avant le prochain tableau.
+  function abandon(hero, id) {
+    const q = quest(id),
+      st = stateOf(hero);
+    if (!q || !isContract(q) || !st.active[q.id]) return false;
+    delete st.active[q.id];
+    if (st.track === q.id) st.track = Object.keys(st.active).map(Number)[0] || null;
+    tell(hero, '📜 Contrat abandonné : ' + q.title);
+    window.CANAAN_PERSISTENCE.requestSave();
+    return true;
+  }
+  // Contrat rendu : or, XP, renommée et équipement de son rang ; la première fois, la récompense propre à la demande.
+  function rewardContract(hero, q, first) {
+    const st = stateOf(hero),
+      g = st.guild,
+      rank = contractRank(q),
+      level = clampLevel(hero.level),
+      gold = questGold(q, level),
+      before = guildRankIndex(g.fame);
+    hero.player.gold += gold;
+    g.fame += contractFame(q);
+    g.count++;
+    const r = q.reward;
+    if (first) {
+      for (const f of r.flags || []) st.flags[f] = true;
+      if (r.jewel) giveJewel(hero, q);
+      if (r.item === 'Légendaire') giveGear(level, 'quest', 'Légendaire', hero);
+      if (r.fishXp || r.goldenFish)
+        CANAAN_PROF.questReward(hero, { fishXp: r.fishXp || 0, goldenFish: r.goldenFish || 0 });
+    }
+    giveGear(level, 'quest', rank.better && Math.random() < rank.better ? 'Légendaire' : rank.item, hero);
+    canaanGrantXp(hero, questXp(q, level), hero.player);
+    tell(
+      hero,
+      '🏆 Contrat rempli : ' +
+        q.title +
+        ' · +' +
+        gold +
+        ' or · +' +
+        contractFame(q) +
+        ' renommée' +
+        (first && (r.flags || r.jewel || r.recipe || r.fishXp || r.item === 'Légendaire')
+          ? ' · ' + r.text
+          : '')
+    );
+    if (hero === game.hero) {
+      CANAAN_SOUND.cue('levelup');
+      burst(hero.player.x, hero.player.y - 20, '#ffe08a', 30);
+    }
+    const after = guildRankIndex(g.fame);
+    if (after > before) {
+      const R = GUILD_RANKS[after];
+      tell(hero, '🛡️ Nouveau rang de guilde : ' + R.id + ' · ' + R.title);
+      if (hero === game.hero)
+        fanfare('🛡️', 'Rang ' + R.id + ' · ' + R.title, 'Contrats ' + R.tier.toLowerCase());
+      refreshBoard(st, hero.level, Date.now());
+    }
   }
   function reward(hero, q) {
     const r = q.reward,
@@ -1935,6 +2033,8 @@
   // Demandes d'un invité, vérifiées par l'hôte (distance, étape, objet existant).
   function handle(hero, a) {
     if (a.op === 'quest-accept') return accept(hero, a.q);
+    if (a.op === 'quest-take') return take(hero, a.q);
+    if (a.op === 'quest-abandon') return abandon(hero, a.q);
     if (a.op === 'quest-turnin') return turnIn(hero, a.q);
     if (a.op === 'quest-track') {
       const st = stateOf(hero);
@@ -2014,16 +2114,35 @@
   };
 
   // ---------------------------------------------------------------- Dialogues des PNJ
+  // Contrat (demande d'habitant) : 'ready', 'active', ou 'idle' quand il n'est pas en cours (il se prend à la guilde).
   function npcState(hero, q) {
     if (!q) return 'none';
     const st = stateOf(hero);
-    if (st.done[q.id]) return 'after';
     if (questReady(st, q)) return 'ready';
     if (st.active[q.id]) return 'active';
+    if (isContract(q)) return 'idle';
+    if (st.done[q.id]) return 'after';
     return canStart(st, q) ? 'offer' : 'locked';
   }
   function rewardLine(q) {
     const level = clampLevel(game.hero.level);
+    if (isContract(q)) {
+      const rank = contractRank(q),
+        first = !stateOf(game.hero).done[q.id],
+        r = q.reward,
+        special = first && (r.flags || r.jewel || r.recipe || r.fishXp || r.item === 'Légendaire');
+      return (
+        '+' +
+        questXp(q, level) +
+        ' XP · +' +
+        questGold(q, level) +
+        ' or · +' +
+        contractFame(q) +
+        ' renommée · équipement ' +
+        rank.item +
+        (special ? ' · la première fois : ' + r.text : '')
+      );
+    }
     return '+' + questXp(q, level) + ' XP · +' + questGold(q, level) + ' or · ' + q.reward.text;
   }
   // Madame Nacre : la collection de coquillages chantants et ses paliers.
@@ -2096,6 +2215,7 @@
   }
   function talkTo(id) {
     if (NPCS[id].def.collector) return talkCollector(NPCS[id]);
+    if (NPCS[id].def.guild) return CANAAN_GUILD.open();
     const npc = NPCS[id],
       q = npc.quest,
       hero = game.hero,
@@ -2128,6 +2248,17 @@
           .join('');
       }
     } else if (!q) body = '<p class="quest-text">« Bonjour, voyageur. Le vent tourne, ces temps-ci… »</p>';
+    else if (mode === 'idle')
+      body =
+        '<p class="quest-text">« ' +
+        esc(
+          st.done[q.id]
+            ? q.talk.afterChoice?.[st.choices[q.id]] || q.talk.after
+            : q.talk.idle || 'Bonjour, voyageur. J’ai déposé une demande à la guilde du Camp de l’Aurore.'
+        ) +
+        ' »</p><p class="quest-note">' +
+        esc(tt('Demande affichée parfois au tableau de la guilde (rang {rang}).', { rang: q.contract })) +
+        '</p>';
     else if (mode === 'locked') {
       const before = missingQuest(st, q);
       body =
@@ -2148,7 +2279,12 @@
         ' »</p><p class="quest-reward">🏆 ' +
         esc(rewardLine(q)) +
         '</p>';
-      buttons = '<button data-action="questTurnIn" data-quest="' + q.id + '">Terminer la quête</button>';
+      buttons =
+        '<button data-action="questTurnIn" data-quest="' +
+        q.id +
+        '">' +
+        (isContract(q) ? 'Rendre le contrat' : 'Terminer la quête') +
+        '</button>';
     } else
       body =
         '<p class="quest-text">« ' + esc(q.talk.afterChoice?.[st.choices[q.id]] || q.talk.after) + ' »</p>';
@@ -2161,7 +2297,7 @@
         esc(npc.def.name) +
         (task
           ? ' <small>· ' + esc(task.q.title) + '</small>'
-          : mode === 'offer' || mode === 'active' || mode === 'ready'
+          : mode === 'offer' || mode === 'active' || mode === 'ready' || mode === 'idle'
             ? ' <small>· ' + esc(q.title) + '</small>'
             : '') +
         '</h2>' +
@@ -2217,7 +2353,14 @@
       '<div class="quest-card' +
       (q.main ? ' main' : '') +
       '"><b>' +
-      (q.main ? '📖 Histoire · ' + chapterName(chapter) : '🍃 Quête secondaire') +
+      (q.main
+        ? '📖 Histoire · ' + chapterName(chapter)
+        : isContract(q)
+          ? '🛡️ Contrat de rang ' +
+            q.contract +
+            ' · ' +
+            (q.npc === 'guilde' ? 'Avis de la guilde' : QUEST_NPCS[q.npc].name)
+          : '🍃 Quête secondaire') +
       ' — ' +
       esc(q.title) +
       '</b>' +
@@ -2246,7 +2389,7 @@
         })
         .join('') +
       (a && a.step >= q.steps.length
-        ? '<li class="current">➤ Retourner voir ' + esc(QUEST_NPCS[q.npc].name) + '</li>'
+        ? '<li class="current">➤ Retourner voir ' + esc(whoTo(q)) + '</li>'
         : '') +
       '</ul><p class="quest-reward">🏆 ' +
       esc(rewardLine(q)) +
@@ -2388,25 +2531,12 @@
         }
       });
     } else if (tab === 'side') {
+      // Guilde : rang, renommée, contrat en cours (et les anciennes quêtes secondaires encore en cours).
+      html += CANAAN_GUILD.summary(game.hero);
       const side = QUESTS.filter(q => !q.main && st.active[q.id]);
       html += side.length
         ? side.map(list).join('')
-        : '<p class="quest-note">Aucune quête secondaire en cours. Les habitants de l’île en proposent : cherche les « ! » dorés au-dessus des têtes.</p>';
-      // Par chapitre : celles que ce héros peut déjà prendre.
-      const level = clampLevel(game.hero.level);
-      CHAPTERS.forEach((c, i) => {
-        const open = QUESTS.filter(
-          q => !q.main && q.chapter === i && canStart(st, q) && (q.scaled || q.level <= level + 3)
-        );
-        if (open.length)
-          html +=
-            '<h3 class="quest-chapter">' +
-            chapterName(c) +
-            ' <small>· ' +
-            esc(chapterPlace(c)) +
-            '</small></h3>' +
-            open.map(discover).join('');
-      });
+        : '<p class="quest-note">Aucun contrat en cours. Le tableau de la guilde, au Camp de l’Aurore, en propose trois nouveaux tous les quarts d’heure.</p>';
     } else if (tab === 'treasure') {
       // Grand troc : l'objet tenu et à qui le porter.
       const held = tradeItem(st),
@@ -2503,7 +2633,8 @@
           .join('') +
         '</ul><p class="quest-note">Chaque lieu de quête en cache un, un peu à l’écart. Madame Nacre, au Camp de l’Aurore, récompense les collectionneurs.</p></div>';
     } else {
-      const done = QUESTS.filter(q => st.done[q.id]);
+      // Les contrats de la guilde se comptent dans l'onglet Guilde.
+      const done = QUESTS.filter(q => st.done[q.id] && !isContract(q));
       html += done.length
         ? done
             .map(
@@ -2525,7 +2656,7 @@
     }
     const tabs = [
       ['main', '📖 Histoire principale'],
-      ['side', '🍃 Quêtes secondaires'],
+      ['side', '🛡️ Guilde'],
       ['treasure', '🎁 Trésors'],
       ['done', '✓ Terminées']
     ];
@@ -3250,15 +3381,17 @@
           (Math.hypot(dx, dy) < 6 * T && tradeAt(game.hero, npc.id)) ||
           (def.collector && shellRewardsDue(stateOf(game.hero)).length),
         // Une étape en cours l'attend (parler, choisir) : « ? », comme une quête à rendre.
-        mark = errand(game.hero, npc)
-          ? '?'
-          : mode === 'offer'
-            ? '!'
-            : mode === 'ready'
-              ? '?'
-              : mode === 'active'
-                ? '…'
-                : '';
+        mark = def.guild
+          ? guildMark(game.hero)
+          : errand(game.hero, npc)
+            ? '?'
+            : mode === 'offer'
+              ? '!'
+              : mode === 'ready'
+                ? '?'
+                : mode === 'active'
+                  ? '…'
+                  : '';
       if (gift && !mark) rune(c, at0.x, at0.y - 58 * s + Math.sin(time * 0.08) * 3, '🎁', '#ffffff', 22);
       if (mark) {
         c.font = 'bold 26px Georgia, serif';
@@ -3288,6 +3421,11 @@
       prompt(c, x, y - (n.npc ? 74 : 44), label(game.hero, n));
     }
     c.restore();
+  }
+  // Maîtresse de guilde : « ? » quand un avis de la guilde est à rendre, « ! » quand aucun contrat n'est en cours.
+  function guildMark(hero) {
+    const c = activeContract(stateOf(hero));
+    return !c ? '!' : c.npc === 'guilde' && questReady(stateOf(hero), c) ? '?' : '';
   }
   // Bulles : un PNJ qui a une quête à proposer appelle le héros qui passe.
   function drawBubbles(c) {
@@ -3406,13 +3544,28 @@
       q = quest(st.track);
     if (!q || !st.active[q.id]) return null;
     const a = st.active[q.id],
-      step = q.steps[a.step],
-      site = SITES[step?.site || q.site];
-    if (!site) return null;
+      step = q.steps[a.step];
+    // Avis de la guilde : il se rend à la guilde ; ses objectifs se font n'importe où.
+    if (q.npc === 'guilde' && !step) {
+      const door = CANAAN_GUILD.door();
+      return door && { ...door, text: 'Retourne voir ' + whoTo(q), q };
+    }
+    const site = SITES[step?.site || q.site];
+    if (!site)
+      return step
+        ? {
+            x: hero.player.x,
+            y: hero.player.y,
+            text: step.text,
+            count: FIELD.progress(step, a),
+            q,
+            anywhere: true
+          }
+        : null;
     // Personnage à voir : celui de la quête à rendre, ou celui de l'étape.
     const who = !step ? q.npc : step.k === 'talk' || step.k === 'choice' ? step.npc || q.npc : null,
       npc = who && NPCS[who],
-      text = step ? step.text : 'Retourne voir ' + QUEST_NPCS[q.npc].name,
+      text = step ? step.text : 'Retourne voir ' + whoTo(q),
       count = step ? FIELD.progress(step, a) : null,
       under = npc ? !!npc.under : !!site.under;
     // L'objectif est sur l'autre couche : l'entrée des Tréfonds la plus proche.
@@ -3470,7 +3623,7 @@
     const offers = Object.values(NPCS).filter(
       n => n.quest && !n.def.collector && present(hero, n) && npcState(hero, n.quest) === 'offer'
     );
-    if (!offers.length) return null;
+    if (!offers.length) return guildOffer(hero);
     const near = offers.filter(n => !!n.under === under).sort((a, b) => dist(a) - dist(b)),
       main = offers.filter(n => n.quest.main && !n.under).sort((a, b) => a.quest.id - b.quest.id)[0],
       pick =
@@ -3479,6 +3632,11 @@
         near.find(n => fits(n.quest)) ||
         main;
     if (!pick) return null;
+    // La suite de l'histoire est trop haute : un contrat de la guilde d'abord, s'il n'y en a pas en cours.
+    if (!fits(pick.quest) && !activeContract(stateOf(hero)) && !under) {
+      const g = guildOffer(hero);
+      if (g) return g;
+    }
     const q = pick.quest,
       text = tt('Parler à {nom} pour une nouvelle quête', { nom: pick.def.name });
     if (!!pick.under !== under) {
@@ -3489,6 +3647,21 @@
     }
     return { x: pick.x, y: pick.y, text, q, offer: true, high: !fits(q) };
   }
+  // Le tableau de la guilde, quand le héros n'a pas de contrat en cours (à la surface).
+  function guildOffer(hero) {
+    if (canaanUnder() || activeContract(stateOf(hero))) return null;
+    const door = CANAAN_GUILD.door();
+    return (
+      door && {
+        ...door,
+        text: 'Choisir un contrat au tableau de la guilde',
+        q: GUILD_BOARD_QUEST,
+        offer: true
+      }
+    );
+  }
+  // Pseudo-quête affichée par le suivi pour le tableau de la guilde.
+  const GUILD_BOARD_QUEST = Object.freeze({ id: 0, title: GUILD_NAME, contract: 'F', main: false });
   const trackerEl = document.createElement('div');
   trackerEl.id = 'questTracker';
   trackerEl.hidden = true;
@@ -3506,9 +3679,17 @@
     const d = Math.round(Math.hypot(tr.x - P.x, tr.y - P.y) / T),
       a = Math.atan2(tr.y - P.y, tr.x - P.x),
       html =
-        (tr.offer ? '<small>' + (tr.high ? 'Suite de l’histoire' : 'Nouvelle quête') + '</small>' : '') +
+        (tr.offer
+          ? '<small>' +
+            (tr.high
+              ? 'Suite de l’histoire'
+              : tr.q === GUILD_BOARD_QUEST
+                ? 'Nouveau contrat'
+                : 'Nouvelle quête') +
+            '</small>'
+          : '') +
         '<b>' +
-        (tr.q.main ? '📖 ' : '🍃 ') +
+        (tr.q.main ? '📖 ' : isContract(tr.q) ? '🛡️ ' : '🍃 ') +
         esc(tr.q.title) +
         (tr.high ? ' <small>(' + tt('niveau {n}', { n: tr.q.level }) + ')</small>' : '') +
         '</b><span>' +
@@ -3516,14 +3697,16 @@
         '</span>' +
         (tr.count ? '<b class="quest-count">' + tr.count[0] + ' / ' + tr.count[1] + '</b>' : '') +
         '<em>' +
-        (tr.area
-          ? 'Par ici'
-          : d <= 2
-            ? 'Tu y es'
-            : '<i style="transform:rotate(' +
-              a.toFixed(2) +
-              'rad)">➤</i> ' +
-              (tr.vague && d < 8 ? 'tout près' : d + ' cases')) +
+        (tr.anywhere
+          ? 'Partout sur l’île'
+          : tr.area
+            ? 'Par ici'
+            : d <= 2
+              ? 'Tu y es'
+              : '<i style="transform:rotate(' +
+                a.toFixed(2) +
+                'rad)">➤</i> ' +
+                (tr.vague && d < 8 ? 'tout près' : d + ' cases')) +
         '</em>';
     if (trackerEl.innerHTML !== html) trackerEl.innerHTML = html;
   }
@@ -3670,6 +3853,8 @@
     puzzles: () => ST,
     accept,
     turnIn,
+    take,
+    abandon,
     advance,
     act: (hero, siteId, objId) => {
       const site = SITES[siteId],
@@ -3693,6 +3878,7 @@
     drawWorld,
     drawBubbles,
     render: renderJournal,
+    card: (q, st) => card(q, st),
     target,
     // Prochaine quête à prendre quand aucune n'est suivie (suivi, conseils de Lumi).
     nextOffer

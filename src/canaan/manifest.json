@@ -319,6 +319,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-guild",
+      "file": "scripts/guild.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-camp-life",
       "file": "scripts/camp-life.js"
     },

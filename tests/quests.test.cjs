@@ -12,7 +12,9 @@ const PLAYER = `started=true;paused=false;P.dead=false;game.world.instance=null;
  globalThis.tick=n=>{for(let i=0;i<n;i++){time++;CanaanStages.quests.after()}};
  globalThis.st=()=>Q.state(HR);globalThis.step=id=>st().active[id]?st().active[id].step:(st().done[id]?'done':'none');
  globalThis.npcOf=id=>QUESTS.find(q=>q.id===id).npc;
- globalThis.take=id=>{toNpc(npcOf(id));return Q.accept(HR,id)};
+ globalThis.board=id=>{const g=st().guild;g.slot=guildSlot(Date.now());g.rank=guildRankIndex(g.fame);g.board=[id];g.taken=[]};
+ globalThis.take=id=>{const q=QUESTS.find(q=>q.id===id);if(q.contract){board(id);toNpc('guilde');const ok=Q.take(HR,id);if(q.npc!=='guilde')toNpc(q.npc);return ok}toNpc(npcOf(id));return Q.accept(HR,id)};
+ globalThis.dungeonFor=s=>instances.findIndex(d=>!d.arena&&(!s.raid||d.raid)&&(!s.under||d.under)&&(d.scaled||(d.mobLevel||1)>=clampLevel(HR.level)-6));
  globalThis.give=id=>{toNpc(npcOf(id));return Q.turnIn(HR,id)};
  globalThis.alive=f=>game.world.monsters.filter(f);
  globalThis.slay=f=>{alive(f).forEach(m=>{m.hp=0});game.world.monsters=game.world.monsters.filter(m=>m.hp>0||m.questGuardian||m.title)};
@@ -38,14 +40,14 @@ const PLAYER = `started=true;paused=false;P.dead=false;game.world.instance=null;
   30:{1:()=>{for(const [x,y] of [[-2,-1],[0,-2],[1,0],[0,1],[2,1]]){tp('q30',x,y);tick(1)}}}
  };
  globalThis.playStep=id=>{
-  const q=QUESTS.find(q=>q.id===id),i=step(id),s=q.steps[i],site=S(s.site||q.site);
-  layer(!!site.under);game.world.monsters=game.world.monsters.filter(m=>m.hp>0);
+  const q=QUESTS.find(q=>q.id===id),i=step(id),s=q.steps[i],site=S(s.site||q.site)||null;
+  if(site)layer(!!site.under);game.world.monsters=game.world.monsters.filter(m=>m.hp>0);
   if(PUZZLES[id]?.[i])return PUZZLES[id][i]();
-  const objs=site.objs.filter(o=>o.kind==='field'&&o.quest.id===id&&o.step===i),o=objs[0],key=id+'_'+i,runs=Q.field().runs();
+  const objs=site?site.objs.filter(o=>o.kind==='field'&&o.quest.id===id&&o.step===i):[],o=objs[0],key=id+'_'+i,runs=Q.field().runs();
   const at=v=>{P.x=v.x;P.y=v.y};
   P.hp=P.mhp;P.dead=false;
   switch(s.k){
-   case 'kill':case 'loot':for(let k=0;k<200&&step(id)===i;k++)canaanAchieve(HR,'kill',{t:s.mobs[k%s.mobs.length],x:P.x,y:P.y,hp:0});return;
+   case 'kill':case 'loot':for(let k=0;k<200&&step(id)===i;k++)canaanAchieve(HR,'kill',s.mobs==='*'?{t:'Loup',x:P.x,y:P.y,hp:0,level:clampLevel(HR.level),elite:!!s.elite,worldBoss:!!s.boss}:{t:s.mobs[k%s.mobs.length],x:P.x,y:P.y,hp:0});return;
    case 'pick':for(const v of objs){at(v);if(Q.act(HR,site.id,v.id)===false)throw 'objet '+v.id}return;
    case 'wave':at(o);act(site.id,o.id);for(let k=0;k<30&&step(id)===i;k++){P.hp=P.mhp;tick(130);slay(m=>m.questRun===key)}return;
    case 'escort':{at(o);act(site.id,o.id);for(let k=0;k<6000&&step(id)===i;k++){const r=runs.get(key);if(!r)throw 'escorte perdue '+__t.at(-1);P.x=r.x+20;P.y=r.y;tick(1);slay(m=>m.questRun===key)}return}
@@ -54,8 +56,8 @@ const PLAYER = `started=true;paused=false;P.dead=false;game.world.instance=null;
    case 'race':{const go=objs.find(v=>v.race==='go');at(go);act(site.id,go.id);for(let k=0;k<s.n;k++){at(objs.find(v=>v.race===k));tick(1)}return}
    case 'talk':toNpc(s.npc);Q.handle(HR,{op:'quest-talk',q:id});return;
    case 'choice':toNpc(s.npc||q.npc);Q.handle(HR,{op:'quest-choice',q:id,choice:q.answer??1});return;
-   case 'work':for(let k=0;k<s.n;k++)s.job==='fish'?canaanAchieve(HR,'fish','gardon',1):canaanAchieve(HR,'gather',s.job,'x',1);return;
-   case 'clear':canaanAchieve(HR,'clear',s.instance);return;
+   case 'work':for(let k=0;k<s.n;k++)s.job==='fish'?canaanAchieve(HR,'fish','gardon',1):s.job==='cook'?canaanAchieve(HR,'cook','x',1):canaanAchieve(HR,'gather',s.job,'x',1);return;
+   case 'clear':for(let k=0;k<(s.n||1);k++)canaanAchieve(HR,'clear',s.instance==='*'?dungeonFor(s):s.instance);return;
    case 'sky':layer(false);time=Math.ceil(time/30)*30-1;tick(2);return;
    case 'guardian':{const seal=site.objs.find(v=>v.kind==='gseal');tp(site.id,0,1);Q.act(HR,site.id,'gseal');const m=alive(m=>m.questGuardian===site.id)[0];if(!m)throw 'gardien absent';m.hp=0;tick(1);return}
   }
@@ -87,8 +89,8 @@ test('Quêtes : les 30 quêtes de la surface se jouent de bout en bout (chasse, 
     run('JSON.stringify(Q.world().flags)')
   );
   assert.equal(run('HR.prof.fish["dore:3"]'), 2, 'poissons dorés');
-  assert.equal(run('HR.inventory.length'), 1, 'bijou du lac');
-  assert.equal(run('HR.inventory[0].rarity'), 'Légendaire');
+  // Contrat du lac (rendu la première fois) : le bijou, en plus de l'équipement du rang.
+  assert.ok(run('HR.inventory.some(i=>["ring","neck"].includes(i.slot)&&i.rarity==="Légendaire")'), 'bijou du lac');
   assert.equal(run('CANAAN_QUESTS.questLook(HR)'), 7, 'Lumi, bénédiction et aura');
   // Le pont porte ; un sanctuaire ouvert reçoit son visiteur.
   assert.equal(run('(o=>canWalk(o.x,o.y))(S("q13").objs.find(o=>o.id==="plank1"))'), true);
@@ -224,7 +226,7 @@ test('Quêtes à plusieurs : chacun sa progression, une épreuve gagnée ensembl
     '{"op":"quest-act","site":"q12","obj":"f12_0_3"}'
   );
   assert.equal(run('sanitizeAction({op:"quest-act",site:"<x>",obj:"a"})'), null);
-  assert.equal(run('sanitizeAction({op:"quest-accept",q:100})'), null);
+  assert.equal(run('sanitizeAction({op:"quest-accept",q:200})'), null);
   assert.equal(run('JSON.stringify(sanitizeAction({op:"quest-talk",q:31,x:1}))'), '{"op":"quest-talk","q":31}');
   assert.equal(run('sanitizeAction({op:"quest-choice",q:14,choice:9})'), null);
   assert.equal(run('Q.handle(ally,{op:"quest-talk",q:31})'), false, 'pas à cette étape');
@@ -239,7 +241,7 @@ test('Quêtes à plusieurs : chacun sa progression, une épreuve gagnée ensembl
   // d'avant la refonte reprend à sa première étape.
   assert.equal(
     run(
-      'JSON.stringify(sanitizeQuests({v:2,active:{1:{step:99,n:7},77:{step:0}},done:{2:5},flags:{lumi:1,triche:1},deco:["mouton","x"]}))'
+      'JSON.stringify((({guild,...o})=>o)(sanitizeQuests({v:2,active:{1:{step:99,n:7},77:{step:0}},done:{2:5},flags:{lumi:1,triche:1},deco:["mouton","x"]})))'
     ),
     JSON.stringify({
       active: { 1: { step: 3, got: [], n: 7 } },
@@ -260,7 +262,7 @@ test('Quêtes à plusieurs : chacun sa progression, une épreuve gagnée ensembl
   );
   assert.equal(
     run(
-      'JSON.stringify(sanitizeQuests({v:2,troc:99,shells:["c_q1","c_q1","x"],paid:-3,flags:{heart_q2:1,heart_q36:1,heart_q99:1}}))'
+      'JSON.stringify((({guild,...o})=>o)(sanitizeQuests({v:2,troc:99,shells:["c_q1","c_q1","x"],paid:-3,flags:{heart_q2:1,heart_q36:1,heart_q99:1}})))'
     ),
     JSON.stringify({
       active: {},
@@ -315,7 +317,7 @@ test('Objectifs de terrain : course au chronomètre, fuyard qui court, escorte p
   run('for(let i=0;i<24;i++)canaanAchieve(HR,"kill",{t:"Gobelin",x:P.x,y:P.y,hp:0})');
   assert.equal(run('step(7)'), 1, 'six fioles en 24 gobelins au plus');
   // Chaque lieu se dessine à chaque étape, sur sa couche, sans erreur.
-  run(`for(const q of QUESTS)for(let i=0;i<=q.steps.length;i++){st().active={[q.id]:{step:i,got:[],n:1}};st().track=q.id;const s=S(q.steps[i]?.site||q.site);layer(!!s.under);
+  run(`for(const q of QUESTS)for(let i=0;i<=q.steps.length;i++){st().active={[q.id]:{step:i,got:[],n:1}};st().track=q.id;const s=S(q.steps[i]?.site||q.site);if(!s){layer(false);const t=Q.target(HR);if(!t||!Number.isFinite(t.x)||!t.text)throw new Error('objectif '+q.id+' étape '+i);continue}layer(!!s.under);
    for(const o of s.objs.filter(o=>o.kind==='field'&&o.step===i&&o.quest===q)){P.x=o.x;P.y=o.y;camX=P.x-W/2;camY=P.y-H/2;CANAAN_QUESTS.drawWorld(ctx)}
    P.x=(s.x+.5)*TS;P.y=(s.y+.5)*TS;camX=P.x-W/2;camY=P.y-H/2;time++;CANAAN_QUESTS.drawWorld(ctx);CANAAN_QUESTS.drawBubbles(ctx);CanaanStages.drawQuests();const t=Q.target(HR);if(!t||!Number.isFinite(t.x)||!t.text)throw new Error('objectif '+q.id+' étape '+i)}`);
   // Les personnages parlent tous, à chaque moment de leur quête.
@@ -459,5 +461,97 @@ test('Suivi : sans quête en cours, il mène au prochain personnage qui en donne
   assert.equal(next(), '2 offre', 'Orven après la quête rendue');
   run('take(2)');
   assert.equal(next(), '2 étape', 'la quête prise est suivie');
+  assert.equal(errors.length, 0, errors.join('\n'));
+});
+
+test('Guilde : rangs F à S, tableau de trois contrats renouvelé tous les quarts d’heure, un contrat à la fois, rejouable', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  run(PLAYER + ';HR.inventory.length=0;HR.bagLimit=100;');
+  // 51 contrats : les 28 demandes des habitants et 23 avis de la guilde, sept rangs avec leurs titres.
+  assert.equal(run('QUESTS.filter(q=>q.contract).length'), 51);
+  assert.equal(run('QUESTS.filter(q=>q.contract&&q.npc==="guilde").length'), 23);
+  assert.equal(run('GUILD_RANKS.map(r=>r.id+":"+r.title).join()'), 'F:Recrue,E:Aventurier,D:Explorateur,C:Vétéran,B:Champion,A:Héros,S:Légende');
+  assert.ok(run('GUILD_RANKS.every(r=>QUESTS.filter(q=>q.contract===r.id).length>=6)'));
+  assert.ok(run('QUESTS.filter(q=>q.contract).every(q=>q.scaled&&!q.main)'), 'tous au niveau du héros');
+  // Un contrat ne se prend jamais auprès d'un habitant : pas de « ! », une réplique qui renvoie à la guilde.
+  run('game.hero.level=5;globalThis.__p=[];modernPanel=h=>__p.push(h);toNpc("milo");Q.interact()');
+  assert.equal(run('Q.npcMode(HR,Q.npcs().milo)'), 'idle');
+  assert.equal(run('Q.accept(HR,3)'), false);
+  assert.match(run('__p.at(-1)'), /tableau de la guilde \(rang F\)/);
+  // Tableau : trois contrats de rang F à la portée d'un héros de niveau 5, les mêmes tout le quart d'heure.
+  run('const g=st().guild;g.fame=0;g.rank=-1;g.board=[];refreshBoard(st(),5,Date.UTC(2026,0,1,10,1))');
+  const first = run('JSON.stringify(st().guild.board)');
+  assert.equal(run('st().guild.board.length'), 3);
+  assert.ok(run('st().guild.board.every(id=>{const q=QUESTS.find(q=>q.id===id);return q.contract==="F"&&q.level<=8})'));
+  assert.equal(run('refreshBoard(st(),5,Date.UTC(2026,0,1,10,14))'), false);
+  assert.equal(run('JSON.stringify(st().guild.board)'), first);
+  const boards = new Set(
+    JSON.parse(run('JSON.stringify(Array.from({length:8},(_,k)=>(refreshBoard(st(),5,Date.UTC(2026,0,1,10+k,20)),st().guild.board.join())))'))
+  );
+  assert.ok(boards.size > 1, 'le tableau change');
+  assert.equal(run('guildRefreshIn(Date.UTC(2026,0,1,10,1))'), 14 * 60 * 1000);
+  // Prendre : près de la maîtresse de guilde, un seul à la fois, jamais deux fois sur le même tableau.
+  run('refreshBoard(st(),5,Date.now());globalThis.B=st().guild.board.slice();tp("q3",0,0)');
+  assert.equal(run('Q.take(HR,B[0])'), false, 'loin de la guilde');
+  run('toNpc("guilde")');
+  assert.equal(run('CANAAN_GUILD.near(HR)'), true);
+  assert.equal(run('Q.take(HR,B[0])'), true);
+  assert.equal(run('Q.take(HR,B[1])'), false, 'un seul contrat à la fois');
+  assert.equal(run('Q.handle(HR,{op:"quest-abandon",q:B[0]})'), true);
+  assert.equal(run('Q.take(HR,B[0])'), false, 'déjà pris sur ce tableau');
+  assert.equal(run('Q.handle(HR,{op:"quest-take",q:B[1]})'), true);
+  run('Q.abandon(HR,B[1])');
+  // Fenêtre de la guilde : rang, renommée, trois contrats et compte à rebours ; le journal a son onglet Guilde.
+  run('__p.length=0;CANAAN_GUILD.open();Q.render("side")');
+  assert.match(run('__p.join("")'), /Rang F · Recrue/);
+  assert.match(run('__p.join("")'), /nouveaux contrats dans \d+:\d\d/);
+  assert.equal(run('(__p.find(h=>h.includes("guild-panel")&&h.includes("guildTake"))||"").match(/guild-contract/g).length'), 3);
+  assert.match(run('__p.at(-1)'), /Guilde des Aventuriers/);
+  // Un avis se joue et se rend à la guilde : or, XP, renommée et équipement de son rang ; rejouable au tableau suivant.
+  run('game.hero.level=20;HR.exp=0;HR.inventory.length=0');
+  const gold = run('P.gold');
+  assert.equal(run('play(101)'), 'ok');
+  assert.ok(run('P.gold') > gold);
+  assert.equal(run('st().guild.fame'), 10);
+  assert.equal(run('st().guild.count'), 1);
+  assert.equal(run('HR.inventory.length'), 1);
+  assert.equal(run('HR.inventory[0].rarity'), 'Peu commun');
+  assert.equal(run('play(101)'), 'ok', 'rejouable');
+  // Un avis ne compte que des créatures à la mesure du héros.
+  run('board(101);toNpc("guilde");Q.take(HR,101)');
+  run('canaanAchieve(HR,"kill",{t:"Loup",x:P.x,y:P.y,hp:0,level:3})');
+  assert.equal(run('st().active[101].n'), 0, 'trop faible');
+  run('canaanAchieve(HR,"kill",{t:"Loup",x:P.x,y:P.y,hp:0,level:18})');
+  assert.equal(run('st().active[101].n'), 1);
+  run('Q.abandon(HR,101)');
+  // Demande d'habitant : rendue à son client, avec sa récompense propre la première fois seulement.
+  assert.equal(run('play(5)'), 'ok');
+  assert.equal(run('HR.prof.fish["dore:3"]'), 2);
+  assert.equal(run('play(5)'), 'ok');
+  assert.equal(run('HR.prof.fish["dore:3"]'), 2, 'poissons dorés une seule fois');
+  // Rang : la renommée fait monter de F à S ; chaque avis se joue de bout en bout au niveau 60.
+  run('game.hero.level=60');
+  for (const id of JSON.parse(run('JSON.stringify(QUESTS.filter(q=>q.npc==="guilde").map(q=>q.id))'))) {
+    run('HR.inventory.length=0');
+    assert.equal(run('play(' + id + ')'), 'ok', 'avis ' + id);
+  }
+  run('st().guild.fame=2090');
+  assert.equal(run('guildRankIndex(st().guild.fame)'), 6);
+  assert.equal(run('CANAAN_GUILD.rankOf(HR).title'), 'Légende');
+  // Un avis de raid n'est affiché qu'à partir du niveau des raids.
+  assert.equal(run('drawBoard(1,1,5,20).includes(117)'), false);
+  assert.equal(run('contractFits(QUESTS.find(q=>q.id===117),46)'), true);
+  // Récompense : la part d'un niveau monte avec le rang ; la renommée aussi.
+  assert.ok(run('questXp(QUESTS.find(q=>q.id===123),30)>questXp(QUESTS.find(q=>q.id===101),30)'));
+  assert.equal(run('contractFame(QUESTS.find(q=>q.id===123))'), 60);
+  // État vérifié : renommée bornée, tableau limité à des contrats connus.
+  assert.equal(
+    run('JSON.stringify((({seed,...g})=>g)(sanitizeGuild({fame:-5,board:[101,1,999,102,103,104],taken:[1],slot:"x",count:3.7})))'),
+    '{"fame":0,"slot":0,"rank":-1,"board":[101,102,103],"taken":[],"count":3}'
+  );
+  // En ligne : prendre et abandonner un contrat passent par l'hôte.
+  assert.deepEqual(JSON.parse(run('JSON.stringify(sanitizeAction({op:"quest-take",q:101}))')), { op: 'quest-take', q: 101 });
+  assert.equal(run('sanitizeAction({op:"quest-abandon",q:"x"})'), null);
   assert.equal(errors.length, 0, errors.join('\n'));
 });

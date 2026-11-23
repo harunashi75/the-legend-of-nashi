@@ -60,7 +60,16 @@
       return a && a.step < q.steps.length ? q.steps[a.step] : null;
     };
     // Niveau des ennemis d'un lieu : celui de sa zone (bornée), ou celui du héros dans les Tréfonds.
-    const levelAt = site => (site.under ? clampLevel(game.hero.level) : canaanZoneMobLevel(site.x, site.y));
+    // Contrat de la guilde (toujours au niveau du héros) : jamais plus faibles que le héros le plus fort présent.
+    const levelAt = (site, q) =>
+      site.under
+        ? clampLevel(game.hero.level)
+        : q?.scaled
+          ? Math.max(
+              canaanZoneMobLevel(site.x, site.y),
+              ...heroesNear(px(site, 0), py(site, 0), LOST).map(h => clampLevel(h.level))
+            )
+          : canaanZoneMobLevel(site.x, site.y);
 
     // ---------------------------------------------------------------- Placement
     // Objets des étapes qui se passent dans ce lieu. ok(x, y) : case où l'on peut poser quelque chose ; cavern(b, kind) :
@@ -160,7 +169,7 @@
           for (const id of Object.keys(stateOf(h).active)) {
             const q = questById(Number(id)),
               s = q && currentStep(h, q);
-            if (!s || !s.mobs?.includes(a.t)) continue;
+            if (!s || !mobFits(h, s, a)) continue;
             if (s.k === 'kill') bump(h, q, '⚔️', s.what);
             else if (s.k === 'loot') {
               const dry = DRY.get(h) || 0,
@@ -174,21 +183,46 @@
           }
         return;
       }
-      const job = type === 'fish' ? 'fish' : type === 'gather' ? a : null;
+      const job = type === 'fish' ? 'fish' : type === 'gather' ? a : type === 'cook' ? 'cook' : null;
       for (const id of Object.keys(stateOf(hero).active)) {
         const q = questById(Number(id)),
           s = q && currentStep(hero, q);
         if (!s) continue;
         if (s.k === 'work' && job === s.job)
-          bump(hero, q, job === 'fish' ? '🎣' : job === 'ore' ? '⛏️' : '🌿', 'Récolte');
-        else if (s.k === 'clear' && type === 'clear' && a === s.instance) advance(hero, q);
+          bump(
+            hero,
+            q,
+            job === 'fish' ? '🎣' : job === 'ore' ? '⛏️' : job === 'cook' ? '🍳' : '🌿',
+            job === 'cook' ? 'Repas' : 'Récolte'
+          );
+        else if (s.k === 'clear' && type === 'clear' && instanceFits(hero, s, a))
+          bump(hero, q, '🏰', 'Donjon');
       }
+    }
+    // Créature qui compte pour une étape : celles qu'elle nomme, ou (mobs: '*', contrats de la guilde) une créature de
+    // l'île à la mesure du héros : au plus 5 niveaux de moins (10 pour un boss mondial), élite ou boss si demandé.
+    function mobFits(hero, s, m) {
+      if (s.mobs !== '*') return !!s.mobs?.includes(m.t);
+      if (s.boss) return !!m.worldBoss && (m.level || 1) >= clampLevel(hero.level) - 10;
+      if (s.elite && !m.elite) return false;
+      return !m.worldBoss && (m.level || 1) >= clampLevel(hero.level) - 5;
+    }
+    // Donjon terminé qui compte : celui que l'étape nomme, ou (instance: '*') un donjon à la mesure du héros (au plus
+    // 6 niveaux de moins, ou un donjon des Tréfonds, toujours à son niveau) ; raid ou Tréfonds si demandé.
+    function instanceFits(hero, s, index) {
+      if (s.instance !== '*') return index === s.instance;
+      const d = instances[index];
+      if (!d || d.arena || (s.raid && !d.raid) || (s.under && !d.under)) return false;
+      if (d.scaled) return true;
+      const level = game.world.instance?.scaledLevel || instanceDifficulty()?.mobLevel || d.mobLevel || 1;
+      return level >= clampLevel(hero.level) - 6;
     }
 
     // ---------------------------------------------------------------- Ennemis
-    function spawnFoe(site, name, x, y, extra = {}) {
+    // extra.quest : quête de l'épreuve (pour le niveau des ennemis) ; le reste est copié sur le monstre.
+    function spawnFoe(site, name, x, y, { quest, ...extra } = {}) {
       const type = canaanMobTypes().find(t => t.name === name) || MOB_TYPES[0],
-        level = levelAt(site),
+        level = levelAt(site, quest),
         elite = !!extra.elite,
         hp = Math.round(mobHealth(level, elite, type.hp) * (extra.title ? CHAMPION_HP : 1)),
         m = {
@@ -281,7 +315,7 @@
         cue(hero, s.art === 'miner' ? 'puzzle' : 'note' + (((a.got.length - 1) % 4) + 1));
         tell(hero, s.icon + ' ' + s.item + ' · ' + a.got.length + ' / ' + s.n);
         if (s.ambush) {
-          spawnRing(site, [s.ambush[0]], s.ambush[1], o.x, o.y, 2.6 * T);
+          spawnRing(site, [s.ambush[0]], s.ambush[1], o.x, o.y, 2.6 * T, { quest: q });
           float(o.x, o.y - 60, '⚠️ Embuscade !', '#ff8a6a');
         }
         if (a.got.length >= s.n) advance(hero, q);
@@ -306,8 +340,13 @@
         return true;
       }
       if (o.k === 'hunt') {
-        const m = spawnFoe(site, s.mob, o.x, o.y - T * 0.5, { elite: true, title: s.title, questRun: key });
-        if (s.adds) spawnRing(site, [s.adds[0]], s.adds[1], o.x, o.y, 2.6 * T, { questRun: key });
+        const m = spawnFoe(site, s.mob, o.x, o.y - T * 0.5, {
+          elite: true,
+          title: s.title,
+          questRun: key,
+          quest: q
+        });
+        if (s.adds) spawnRing(site, [s.adds[0]], s.adds[1], o.x, o.y, 2.6 * T, { questRun: key, quest: q });
         RUNS.set(key, { k: 'hunt', o, site, m, x: o.x, y: o.y });
         burst(o.x, o.y, '#ff6a3a', 34);
         for (const h of partners(o, o.x, o.y)) {
@@ -419,7 +458,7 @@
       if (run.wave >= s.waves.length) return finish(key, run, true);
       const n = s.waves[run.wave] + Math.max(0, near.length - 1),
         names = s.seasons ? [s.seasons[run.wave]] : s.mobs;
-      spawnRing(run.site, names, n, run.x, run.y, 6.5 * T, { questRun: key });
+      spawnRing(run.site, names, n, run.x, run.y, 6.5 * T, { questRun: key, quest: run.o.quest });
       run.wave++;
       run.next = time + 120;
       float(run.x, run.y - 90, '⚔️ Vague ' + run.wave + ' / ' + s.waves.length, '#ffd0a0');
@@ -445,7 +484,10 @@
       const part = run.path.length > 1 ? run.at / (run.path.length - 1) : 1;
       if (run.sprung < s.ambush.length && part >= (run.sprung + 1) / (s.ambush.length + 1)) {
         const [name, n] = s.ambush[run.sprung++];
-        spawnRing(run.site, [name], n + near.length - 1, run.x, run.y, 4 * T, { questRun: key });
+        spawnRing(run.site, [name], n + near.length - 1, run.x, run.y, 4 * T, {
+          questRun: key,
+          quest: run.o.quest
+        });
         float(run.x, run.y - 70, '⚠️ Embuscade !', '#ff8a6a');
         changed();
         return;
@@ -631,7 +673,7 @@
     // Avancement d'une étape : [fait, total], ou null.
     function progress(s, a) {
       if (!s.n || s.k === 'guardian') return null;
-      if (['kill', 'loot', 'chase', 'work'].includes(s.k))
+      if (['kill', 'loot', 'chase', 'work', 'clear'].includes(s.k))
         return s.n > 1 ? [Math.min(s.n, a.n || 0), s.n] : null;
       return [Math.min(s.n, a.got.length), s.n];
     }

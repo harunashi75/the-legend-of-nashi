@@ -383,6 +383,18 @@ export const HOUSE_FURNITURE = deepFreeze({
     h: 1,
     light: '#bfffee'
   },
+  tableau_contrats: {
+    name: 'Tableau des contrats',
+    layer: 'wall',
+    w: 3,
+    h: 2
+  },
+  banniere_guilde: {
+    name: 'Bannière de la guilde',
+    layer: 'wall',
+    w: 1,
+    h: 2
+  },
   pilier_nain: {
     name: 'Pilier de pierre runique',
     layer: 'floor',
@@ -713,6 +725,31 @@ export const HOUSE_ROOM_FURNITURE = deepFreeze({
     ['lampe', 9, 6]
   ],
   // Ferme du camp.
+  // Maison de la Guilde : le tableau des contrats au-dessus du comptoir de la maîtresse, bannières, cheminée,
+  // bibliothèque des registres et deux tables pour les aventuriers.
+  guilde: [
+    ['fenetre', 1, 0],
+    ['trophee', 2, 0],
+    ['banniere_guilde', 4, 0],
+    ['tableau_contrats', 6, 0],
+    ['banniere_guilde', 10, 0],
+    ['rack_armes', 12, 0],
+    ['fenetre', 13, 0],
+    ['cheminee', 1, 2],
+    ['bibliotheque', 12, 2],
+    ['comptoir', 6, 4],
+    ['plante', 1, 4],
+    ['tonneau', 13, 4],
+    ['table', 2, 6],
+    ['chaise', 1, 6, 3],
+    ['chaise', 4, 6, 1],
+    ['table', 11, 6],
+    ['chaise', 10, 6, 3],
+    ['chaise', 13, 6, 1],
+    ['tapis_long', 6, 6],
+    ['lampe', 1, 8],
+    ['lampe', 13, 8]
+  ],
   grange: [
     ['trophee', 3, 0],
     ['herbes', 6, 0],
@@ -883,5 +920,9 @@ export const HOUSE_ROOM_RESIDENTS = deepFreeze({
   pilotis: [['pecheur', 6.5, 4.6]],
   rousses: [['villageois', 6.5, 4.6]],
   cristaux: [['ermite', 6.5, 4.6]],
-  grange: [['villageois', 7.5, 4.6]]
+  grange: [['villageois', 7.5, 4.6]],
+  guilde: [
+    ['voyageur', 3.5, 7.4],
+    ['villageois', 11.5, 7.4]
+  ]
 });

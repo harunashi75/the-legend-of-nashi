@@ -1027,7 +1027,7 @@
     // Objectif de la quête suivie ; sur la mini-carte, une flèche au bord s'il est plus loin.
     const questGoal = () => {
       const tr = CANAAN_QUESTS.target(game.hero);
-      if (tr && !tr.area) {
+      if (tr && !tr.area && !tr.anywhere) {
         const [sx, sy] = S(tr.x / TS, tr.y / TS);
         if (seen(sx, sy, -6)) icon(c, 'target', sx, sy, k);
         else if (v.mini) {

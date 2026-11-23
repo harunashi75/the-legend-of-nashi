@@ -67,14 +67,19 @@
   canaanHouseBlocked = blocked;
 
   // ---------------------------------------------------------------- Bâtiments sur l'île
-  // Camp de l'Aurore : échoppe, cuisine et deux demeures autour du feu (décalages en cases depuis le camp) ;
-  // la Chaumière des Glycines à l'ouest du camp, loin des portails ; chaque refuge devient une cabane où l'on entre.
+  // Camp de l'Aurore, village fortifié (décalages en cases depuis la fontaine, plan dans camp-life.js) : la Maison de la
+  // Guilde au nord, au bout de la rue centrale ; la Marmite dorée et l'échoppe de Lira de part et d'autre de la place, au
+  // bord de la Grand-Rue ; la Demeure des Aubépines, la Demeure du Puits et la Chaumière des Glycines dans les îlots de
+  // l'ouest. Chaque porte donne sur une rue. Chaque refuge de l'île devient une cabane où l'on entre.
   const VILLAGE = [
-    { room: 'marmite', style: 'auberge', form: 'storey', w: 5, h: 3, dx: -2, dy: -11, sign: 'bol' },
-    { room: 'echoppe', style: 'echoppe', w: 5, h: 3, dx: 5, dy: -9, sign: 'or' },
-    { room: 'aubepines', style: 'demeure', form: 'gable', w: 4, h: 3, dx: -12, dy: -7 },
-    { room: 'puits', style: 'demeure_bleue', form: 'storey', w: 4, h: 3, dx: -12, dy: 2 }
+    { room: 'guilde', style: 'guilde', form: 'storey', w: 7, h: 3, dx: -3, dy: -18, sign: 'guilde' },
+    { room: 'marmite', style: 'auberge', form: 'storey', w: 5, h: 3, dx: -8, dy: -6, sign: 'bol' },
+    { room: 'echoppe', style: 'echoppe', w: 5, h: 3, dx: 4, dy: -6, sign: 'or' },
+    { room: 'aubepines', style: 'demeure', form: 'gable', w: 4, h: 3, dx: -19, dy: -6 },
+    { room: 'puits', style: 'demeure_bleue', form: 'storey', w: 4, h: 3, dx: -9, dy: 1 }
   ];
+  // Chaumière des Glycines (la maison du joueur) : dans l'îlot du sud-ouest du village.
+  const COTTAGE_AT = { dx: -20, dy: 1 };
   const REFUGES = {
     'Refuge du Vieux Chêne': 'chene',
     'Refuge des Clairières': 'clairieres',
@@ -100,28 +105,6 @@
     const t = game.world.overworld[y]?.[x];
     return t !== undefined && !SOLID.includes(t) && t !== 15 && t !== 30;
   };
-  // Emplacement de la chaumière : herbe des Plaines à l'ouest du camp, loin des portails, de l'Arène et des lieux.
-  function findCottage() {
-    const tiles = game.world.overworld,
-      ok = (x, y) => [1, 2, 10].includes(tiles[y]?.[x]),
-      tx = CANAAN_CAMP.x - 24,
-      ty = CANAAN_CAMP.y - 5;
-    for (let r = 0; r < 40; r++)
-      for (let k = 0; k < Math.max(1, r * 6); k++) {
-        const a = (k / Math.max(1, r * 6)) * Math.PI * 2,
-          fx = Math.round(tx + Math.cos(a) * r) - 2,
-          fy = Math.round(ty + Math.sin(a) * r) - 1;
-        let good = regionAt(fx + 2, fy + 1) === ZONES[0];
-        for (let y = fy - 1; y <= fy + 5 && good; y++)
-          for (let x = fx - 1; x <= fx + 4 && good; x++) good = ok(x, y);
-        if (!good || Math.hypot(fx + 2 - CANAAN_CAMP.x, fy + 1 - CANAAN_CAMP.y) < CANAAN_CAMP.r + 6) continue;
-        if (instances.some(d => Math.hypot(d.x - fx - 2, d.y - fy - 1) < 32)) continue;
-        if (Math.hypot(CANAAN_ARENA_PORTAL.x - fx - 2, CANAAN_ARENA_PORTAL.y - fy - 1) < 16) continue;
-        if (PIXEL_PLACES.some(p => Math.hypot(p.x - fx - 2, p.y - fy - 1) < 10)) continue;
-        return { x: fx, y: fy };
-      }
-    return { x: CANAAN_CAMP.x - 26, y: CANAAN_CAMP.y - 6 };
-  }
   // Cabane d'un refuge : juste au nord du lieu (sa porte donne sur lui), sinon à côté, sur la terre ferme.
   function findCabin(p) {
     for (const [dx, dy] of [
@@ -175,7 +158,7 @@
         }
     }
     buildings = [];
-    const home = findCottage();
+    const home = { x: CANAAN_CAMP.x + COTTAGE_AT.dx, y: CANAAN_CAMP.y + COTTAGE_AT.dy };
     for (const v of VILLAGE)
       buildings.push({
         room: ROOM[v.room],

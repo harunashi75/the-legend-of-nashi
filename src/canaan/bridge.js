@@ -19,6 +19,7 @@ import * as resourceRules from './shared/rules/resources.js';
 import * as quests from './shared/data/quests.js';
 import * as interlude from './shared/data/quests-interlude.js';
 import * as questRules from './shared/rules/quests.js';
+import * as guildData from './shared/data/guild.js';
 import * as saveSchema from './shared/save/schema.js';
 import * as combatRules from './shared/rules/combat.js';
 import * as netMessages from './shared/net/messages.js';
@@ -65,6 +66,7 @@ Object.assign(
   quests,
   interlude,
   questRules,
+  guildData,
   saveSchema,
   combatRules,
   netMessages,

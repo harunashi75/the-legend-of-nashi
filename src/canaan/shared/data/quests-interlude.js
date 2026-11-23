@@ -501,7 +501,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q37',
     level: 1,
     summary:
-      'Gloin veut offrir à sa femme la plus belle lanterne de Durgrim. Il lui manque du minerai, des carapaces brillantes, et du courage.',
+      'Mineur Gloin, de Durgrim : il fabrique pour sa femme Ylva des lanternes toujours plus belles, pour rentrer avant qu’elles ne s’éteignent. Il lui faut du minerai et des carapaces de scarabées foreurs.',
     steps: [
       { k: 'work', job: 'ore', n: 5, text: 'Extraire cinq minerais, en bas ou à la surface' },
       {
@@ -522,8 +522,8 @@ export const INTERLUDE_QUESTS = deepFreeze([
       active:
         'Les scarabées foreurs des Galeries ont les plus belles carapaces. On dirait du ciel, paraît-il.',
       ready:
-        'Elle est… oh. Elle est magnifique. Tu crois qu’elle va pleurer ? Moi, je pleure déjà. Tiens, prends ça.',
-      after: 'Je suis rentré à l’heure. Elle a cru que j’étais malade.'
+        'Elle est… magnifique. Ylva va pleurer. Moi, je pleure déjà. La prochaine sera encore plus belle !',
+      after: 'Je suis rentré à l’heure. Elle a cru que j’étais malade. J’en fabrique déjà une autre.'
     }
   },
   {
@@ -535,7 +535,8 @@ export const INTERLUDE_QUESTS = deepFreeze([
     npc: 'fili',
     site: 'q38',
     level: 1,
-    summary: 'Petit Fili n’a jamais vu le ciel. Il voudrait que tu lui en rapportes un morceau. Pas un gros.',
+    summary:
+      'Petit Fili, de Durgrim, n’a jamais vu le ciel. Il voudrait une fiole remplie de ciel et quelque chose qui sent dehors. Sa fiole se vide toujours trop vite.',
     steps: [
       { k: 'sky', text: 'Remonter à la surface et remplir la fiole de ciel' },
       { k: 'work', job: 'herb', n: 2, text: 'Cueillir deux herbes qui sentent le soleil' }
@@ -548,8 +549,9 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'N’oublie pas de bien refermer le bouchon. Le ciel, ça doit s’échapper.',
       ready:
-        'Elle est vide ! … Non. Attends. Elle est pleine de bleu très clair. Je la mettrai près de mon lit. Tiens, mon caillou. Il est tombé d’en haut, une nuit, il y a trois semaines. Il chantait.',
-      after: 'La nuit, je débouche un tout petit peu la fiole. Ça sent l’herbe.'
+        'Elle est pleine de bleu très clair ! Je la mettrai près de mon lit. Tiens, un de mes cailloux : celui-là est tombé d’en haut, une nuit. Il chantait.',
+      after:
+        'La nuit, je débouche un tout petit peu la fiole. Ça sent l’herbe. Quand elle sera vide, tu reviendras ?'
     },
     memory:
       'Le caillou de Fili : un éclat de la même étoile que Lumi. Elle n’est pas tombée à côté du Camp par hasard : une moitié est allée vers l’île, l’autre vers ce qu’il y a dessous.'
@@ -563,7 +565,8 @@ export const INTERLUDE_QUESTS = deepFreeze([
     npc: 'balin',
     site: 'q39',
     level: 1,
-    summary: 'Le frère de Balin est mort dans la Mine Effondrée. Quelque chose y tient encore sa pioche.',
+    summary:
+      'Garde Balin, de Durgrim : Grumbar hante toujours la Mine Effondrée avec les outils des mineurs morts, dont la pioche de son frère Frerin. Il faut dégager la route de la mine et la terminer.',
     steps: [
       {
         k: 'kill',
@@ -582,8 +585,8 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'La mine est au bout de la route des Galeries, à l’ouest. Entre à plusieurs si tu peux.',
       ready:
-        'Sa pioche… Il y avait gravé nos deux noms. Je croyais l’avoir rêvé. Prends mon arme de parade, je n’en ai plus besoin.',
-      after: 'J’ai demandé un tour de garde de moins par semaine. Pour aller lui porter de la bière.'
+        'Sa pioche… Il y avait gravé nos deux noms. Grumbar reviendra, il revient toujours. Mais aujourd’hui, Frerin peut dormir.',
+      after: 'Je porte de la bière à Frerin chaque semaine. Quand Grumbar se réveille, je préviens la guilde.'
     }
   },
   {
@@ -596,7 +599,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q40',
     level: 1,
     summary:
-      'Dorn le Tavernier a perdu un pari contre Helga : il doit servir une bière de champignon que même Dwalin trouvera forte.',
+      'Dorn le Tavernier, de Durgrim : Helga trouve encore sa bière « tendre ». Il lui faut des chapeaux de myconide et de la bave de limace pour une bière plus forte, et un témoin : le Garde Dwalin, qui doit la goûter.',
     steps: [
       {
         k: 'loot',
@@ -631,8 +634,9 @@ export const INTERLUDE_QUESTS = deepFreeze([
         'Il me faut des chapeaux de myconide bien mûrs, et de la bave de limace pour les bulles. Ne fais pas cette tête, on en met dans tout.'
       ],
       active: 'Fangeval, au sud de la forteresse. Ça sent déjà ma bière, tu ne peux pas te tromper.',
-      ready: 'Il a dit « les Dorn » ? Au pluriel ? HELGA ! VIENS PAR ICI ! Tiens, l’ami, ta part du pari.',
-      after: 'On l’a appelée la Voit-Double. Dwalin en commande une par semaine, assis.'
+      ready:
+        'Il a dit « les Dorn » ? Au pluriel ? HELGA ! Tiens, l’ami, ta part. Elle trouvera bien autre chose à redire…',
+      after: 'On l’a appelée la Voit-Double. Helga parie déjà sur la prochaine.'
     }
   },
   {
@@ -645,7 +649,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q41',
     level: 1,
     summary:
-      'Perrin vendait des rubans à la surface. Il s’est assis sur une trappe pour manger un sandwich. Depuis, il vend des rubans à personne.',
+      'Perrin, colporteur de la surface, est encore tombé par une trappe dans les Tréfonds avec toute sa marchandise. Il faut retrouver ses rubans, reprendre son sandwich à une bête et l’escorter jusqu’à la route de Durgrim.',
     steps: [
       {
         k: 'pick',
@@ -688,8 +692,9 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'Les rubans jaunes sont les plus chers. Le sandwich, c’est sentimental.',
       ready:
-        'Une route ! Des gens ! Petits, mais des gens ! Tiens, prends ceci, c’était dans le lot invendu.',
-      after: 'Les naines adorent mes rubans pour leurs tresses. Je crois que je vais rester un peu.'
+        'Une route ! Des gens ! Petits, mais des gens ! Je fais toujours attention aux trappes… sauf quand je mange.',
+      after:
+        'Les naines adorent mes rubans. Je remonte vendre là-haut, et je retombe toujours au même endroit.'
     }
   },
   {
@@ -702,7 +707,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q42',
     level: 1,
     summary:
-      'Orsik sonnait la cloche de Khaz-Ombral. Le dernier soir, il n’a pas eu le temps. Mille ans plus tard, ça le tracasse encore.',
+      'Orsik le Sonneur, esprit de Khaz-Ombral : chaque année, au soir de la Grande Fermeture, il veut sonner sa cloche pour dire au revoir. Il faut en retrouver les éclats, la défendre pendant qu’elle sonne et terminer les Halls Engloutis.',
     steps: [
       {
         k: 'pick',
@@ -735,7 +740,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'Les gargouilles détestent les cloches. C’est une vieille histoire de pigeons.',
       ready:
-        'Tu l’as entendue ? Elle était un peu fausse. Elle l’a toujours été. Merci. J’ai fini mon service.',
+        'Tu l’as entendue ? Un peu fausse, comme toujours. Merci. Je la sonnerai encore l’an prochain : on ne dit jamais assez au revoir.',
       after: 'Dong… Pardon. L’habitude.'
     }
   },
@@ -749,7 +754,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q43',
     level: 1,
     summary:
-      'Sœur Runa a juré de refermer la Crypte des Mille Tombes. Pour l’instant, elle en compte mille douze.',
+      'Sœur Runa, de la Crypte des Mille Tombes : le Fossoyeur Éternel recommence à creuser des tombes en trop. Il faut reprendre les clés d’os aux chevaliers et aux goules, terminer la crypte et décider de ce qu’on fera des clés.',
     steps: [
       {
         k: 'loot',
@@ -771,7 +776,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
       active: 'Si tu vois une tombe à ton nom, ne t’allonge pas dedans pour vérifier la taille.',
       ask: 'C’est fini. Voilà les quatre clés. Dis-moi, toi qui en reviens : on ferme la crypte pour de bon, ou on laisse une porte aux familles ?',
       ready:
-        'Ce sera fait comme tu l’as dit. Prends ceci dans le tronc des offrandes, les morts n’en ont pas l’usage.',
+        'Ce sera fait comme tu l’as dit. Le Fossoyeur ne se lasse jamais, mais moi non plus. Prends ceci dans le tronc des offrandes.',
       after: 'Le registre dit mille, et j’en compte mille. Je dors mieux.',
       afterChoice: [
         'La crypte est fermée. J’ai jeté les clés dans le lac. Elles ont fait un joli bruit.',
@@ -790,7 +795,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q44',
     level: 1,
     summary:
-      'Girolle est une myconide, et elle est polie. Sa reine, au fond des Tréfonds Fongiques, ne l’est plus du tout.',
+      'Girolle, myconide polie des Tréfonds Fongiques : une nouvelle reine a grandi, et les limaces ont encore pondu dans ses rêves. Il faut chasser les limaces et les mille-pattes, détruire les pontes et terminer les Tréfonds Fongiques.',
     steps: [
       {
         k: 'kill',
@@ -820,7 +825,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'Pontes rondes, pontes gluantes. Écraser avec le talon, pas avec la pointe. Pointe glisse.',
       ready:
-        'La reine est dé-réveillée ! Nouvelle reine petite-petite pousse déjà. Elle danse mal. C’est très beau. Cadeau !',
+        'Reine dé-réveillée ! Nouvelle reine petite-petite danse mal. C’est très beau. Les limaces reviendront, toujours. Cadeau !',
       after: 'Girolle apprend la valse des pieds. Un-deux-trois-mousse, un-deux-trois-mousse.'
     }
   },
@@ -833,7 +838,8 @@ export const INTERLUDE_QUESTS = deepFreeze([
     npc: 'nog',
     site: 'q45',
     level: 1,
-    summary: 'Une taupe a volé le dentier en or de Grand-père Nog. Elle s’en sert, et c’est ça le pire.',
+    summary:
+      'Grand-père Nog, de Durgrim : la taupe au sourire doré lui a encore volé son dentier en or. Il faut la rattraper et lui trouver des asticots, pour qu’elle rende les dents de bon cœur.',
     steps: [
       {
         k: 'chase',
@@ -860,7 +866,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'Elle creufe Fite mais elle court comme moi. F’est dire.',
       ready:
-        'Clac. Ah. Beaucoup mieux. Elle les a nettoyées, la brave bête. Elles n’ont jamais autant brillé. Tiens, pour toi.',
+        'Clac. Ah. Beaucoup mieux. Elle les a nettoyées, la brave bête. Elle reviendra les emprunter, elle aime bien briller.',
       after: 'On déjeune ensemble le dimanche, elle et moi. Elle mange plus proprement.'
     }
   },
@@ -874,7 +880,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
     site: 'q46',
     level: 1,
     summary:
-      'Bolet organise la grande course des spores. Il est le seul inscrit depuis quarante ans, et il finit toujours deuxième.',
+      'Bolet, myconide coureur, organise la course des spores à chaque saison. Il cherche un concurrent : une course entre les fanions, des spores fugueuses à rattraper, puis la revanche.',
     steps: [
       { k: 'race', n: 7, spread: [4, 9], text: 'Courir la course des spores avant qu’elles retombent' },
       {
@@ -895,7 +901,7 @@ export const INTERLUDE_QUESTS = deepFreeze([
       ],
       active: 'Les jambes, c’est comme les racines mais ça va moins profond et plus loin.',
       ready:
-        'Premier ! Bolet encore deuxième ! Mais deuxième derrière un pas-mousse, c’est une première. Cadeau !',
+        'Premier ! Bolet encore deuxième ! Mais deuxième derrière un pas-mousse, c’est une première. Revanche bientôt !',
       after: 'L’an prochain, Bolet invite la reine. Elle finira troisième. Enfin un podium.'
     }
   }

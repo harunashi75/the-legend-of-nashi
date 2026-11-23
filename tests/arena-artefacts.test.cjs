@@ -135,7 +135,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  // Portail accessible à pied depuis le camp, à l'est, hors de la zone sûre.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_WORLD_AUDIT().unreachable)')),[]);
  assert.equal(run("npcs.filter(n=>n.type==='arena').length"),1);
- assert.ok(run('Math.hypot(CANAAN_ARENA_PORTAL.x-CANAAN_CAMP.x,CANAAN_ARENA_PORTAL.y-CANAAN_CAMP.y)')<20);
+ assert.ok(run('Math.hypot(CANAAN_ARENA_PORTAL.x-CANAAN_CAMP.x,CANAAN_ARENA_PORTAL.y-CANAAN_CAMP.y)')<25);
  assert.equal(run('isSafe(CANAAN_ARENA_PORTAL.x,CANAAN_ARENA_PORTAL.y)'),false);
  // Douze boss du document, multiplicateurs proposés, tous les mouvements existent.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARENA.bosses)')),['Gorath, le Gardien de Fer','Fenrath, Croc des Ombres','Tharok, le Colosse de Pierre','Morgana, la Sorcière des Brumes','Valdris, le Chevalier Déchu','Hydrass, l’Hydre Écarlate','Zephiron, Seigneur des Tempêtes','Kael’Thor, l’Exécuteur Astral','Ametheon, le Titan de Cristal','Ignaroth, le Dragon des Cendres','Nihil, l’Avatar du Néant','Aurelion, le Souverain des Épreuves']);

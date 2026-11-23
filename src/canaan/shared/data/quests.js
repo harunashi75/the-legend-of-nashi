@@ -5,10 +5,11 @@
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 import { INTERLUDE_NPCS, INTERLUDE_QUESTS, INTERLUDE_SITES } from './quests-interlude.js';
+import { CONTRACT_RANKS, GUILD_CONTRACTS, GUILD_MASTER } from './guild.js';
 
 export const STORY_TITLE = 'Les Échos de l’Aurore';
 export const STORY_INTRO =
-  'Autrefois, six sanctuaires reliés au Cœur de l’Aurore protégeaient l’île. Un jour, les anciens ont dispersé son énergie pour la sauver. Des siècles plus tard, une petite lumière tombe près du Camp de l’Aurore… et une femme voilée se met en route pour l’éteindre.';
+  'Autrefois, le Cœur de l’Aurore protégeait l’île. Pour le sauver d’une Ombre venue de la mer, les anciens l’ont endormi et ont caché ses six étoiles dans six sanctuaires. Des siècles plus tard, une petite lumière tombe près du Camp de l’Aurore. Ton but : retrouver les six étoiles et réveiller le Cœur, avant qu’une femme voilée, Vesper, ne les éteigne.';
 // under : chapitre des Tréfonds, à côté de l'histoire de la surface, au niveau du héros. intro : en tête du journal.
 export const CHAPTERS = deepFreeze([
   {
@@ -16,42 +17,48 @@ export const CHAPTERS = deepFreeze([
     title: 'La Première Étincelle',
     zone: 0,
     levels: [1, 10],
-    intro: 'Une étoile tombe, une carte se déchire, et quelqu’un siffle les loups dans la nuit.'
+    intro:
+      'Une petite lumière tombe près du camp. Le vieil Orven sait ce qu’elle est : une étincelle du Cœur de l’Aurore, et le début de la quête des six étoiles.'
   },
   {
     n: 'II',
     title: 'La Forêt qui chante',
     zone: 1,
     levels: [10, 20],
-    intro: 'La forêt se remet à chanter. On la saigne pour la faire taire.'
+    intro:
+      'Première étoile : la Forêt ancienne. L’arbre gardien l’a recueillie, mais une femme voilée paie des gobelins pour le saigner.'
   },
   {
     n: 'III',
     title: 'Les Lanternes du Marais',
     zone: 2,
     levels: [20, 30],
-    intro: 'Les lumières s’éteignent une à une, et les miroirs brisés livrent un nom : Vesper.'
+    intro:
+      'Deuxième étoile : le marais. Les lanternes éteintes cachent le chemin du Sanctuaire des Reflets, et ses miroirs savent qui est Vesper.'
   },
   {
     n: 'IV',
     title: 'Les Couleurs du Passé',
     zone: 3,
     levels: [30, 40],
-    intro: 'La Confrérie du Voile pille les souvenirs. Les saisons, elles, n’ont rien oublié.'
+    intro:
+      'Troisième étoile : la Forêt automnale. Un village oublié la garde, et les archives des saisons disent pourquoi le Cœur s’est endormi.'
   },
   {
     n: 'V',
     title: 'La Cité des Étoiles',
     zone: 4,
     levels: [40, 50],
-    intro: 'Sous le sable, une machine attend. Derrière un pilier, une femme écoute.'
+    intro:
+      'Quatrième et cinquième étoiles : le désert. Sous le sable, une machine des anciens sait comment réveiller le Cœur.'
   },
   {
     n: 'VI',
     title: 'Le Réveil de l’Aurore',
     zone: 5,
     levels: [50, 60],
-    intro: 'Un frère garde le Cœur, une sœur vient l’éteindre. Lumi se souvient enfin.'
+    intro:
+      'Les étoiles réunies, Lumi mène au sanctuaire central. Le Cœur peut se réveiller… si Vesper ne l’éteint pas avant.'
   },
   {
     n: 'Interlude',
@@ -349,6 +356,13 @@ export const QUEST_NPCS = deepFreeze({
     collector: true,
     look: { sex: 'f', race: 'humain', hair: '#f4d8e8', outfit: 'glace' },
     tool: 'basket'
+  },
+  // Maîtresse de la guilde (guild.js) : elle affiche les contrats et reçoit les avis de la guilde. Elle se tient dans
+  // la maison de guilde du camp ; elle n'est pas posée comme les autres personnages.
+  guilde: {
+    name: GUILD_MASTER,
+    guild: true,
+    look: { sex: 'f', race: 'humain', hair: '#7a4a2a', outfit: 'cuir' }
   }
 });
 // Objectifs : k = mécanique. Terrain (scripts/quest-field.js) : kill (vaincre n créatures), loot (n objets lâchés par
@@ -360,1450 +374,1507 @@ export const QUEST_NPCS = deepFreeze({
 // catch (feuille au vent), defense (les six cristaux), puzzle (énigme partagée) et guardian (gardien, voir GUARDIANS).
 // world : changements du monde quand l'étape est finie. Chacun garde sa progression ; les combats comptent pour tout le
 // groupe proche.
-export const QUESTS = deepFreeze([
-  // ---------------------------------------------------------------- Chapitre I
-  {
-    id: 1,
-    chapter: 0,
-    main: true,
-    title: 'La lumière tombée du ciel',
-    npc: 'liora',
-    site: 'q1',
-    level: 2,
-    summary:
-      'Cette nuit, une lumière est tombée près du Camp de l’Aurore. Liora l’a vue filer derrière les collines, et elle n’était pas la seule à la regarder.',
-    steps: [
-      { k: 'trail', text: 'Suivre les traces lumineuses depuis le camp' },
-      {
-        k: 'pick',
-        n: 4,
-        spread: [2, 5],
-        icon: '✨',
-        item: 'Éclat d’étoile',
-        label: 'Ramasser l’éclat',
-        text: 'Ramasser les éclats tombés autour du cristal'
-      },
-      {
-        k: 'wave',
-        waves: [2, 3],
-        mobs: ['Slime'],
-        what: 'le cristal',
-        art: 'crystal',
-        at: [0, 1],
-        label: 'Rendre ses éclats au cristal',
-        text: 'Protéger le cristal des slimes attirés par sa lumière'
-      }
-    ],
-    reward: { gold: 60, flags: ['lumi'], text: 'Lumi devient ta compagne de voyage' },
-    talk: {
-      offer: [
-        'Tu l’as vue, toi aussi ? Une étoile est tombée cette nuit, juste derrière le camp !',
-        'Elle a laissé des traces qui brillent dans l’herbe. Je n’ose pas les suivre seule… Tu veux bien aller voir ?'
+// Les anciennes quêtes secondaires sont des contrats de la guilde (CONTRACT_RANKS) : rejouables, au niveau du héros.
+/** @type {Record<number, string>} */
+const RANK_OF = CONTRACT_RANKS;
+/** @type {(q: any) => any} */
+const asContract = q => (RANK_OF[q.id] ? { ...q, contract: RANK_OF[q.id], scaled: true } : q);
+export const QUESTS = deepFreeze(
+  [
+    // ---------------------------------------------------------------- Chapitre I
+    {
+      id: 1,
+      chapter: 0,
+      main: true,
+      title: 'La lumière tombée du ciel',
+      npc: 'liora',
+      site: 'q1',
+      level: 2,
+      summary:
+        'Cette nuit, une lumière est tombée juste à l’est du Camp de l’Aurore. Liora l’a vue, et elle a peur d’aller voir seule.',
+      steps: [
+        { k: 'trail', text: 'Suivre les traces lumineuses depuis le camp' },
+        {
+          k: 'pick',
+          n: 4,
+          spread: [2, 5],
+          icon: '✨',
+          item: 'Éclat d’étoile',
+          label: 'Ramasser l’éclat',
+          text: 'Ramasser les éclats tombés autour du cristal'
+        },
+        {
+          k: 'wave',
+          waves: [2, 3],
+          mobs: ['Slime'],
+          what: 'le cristal',
+          art: 'crystal',
+          at: [0, 1],
+          label: 'Rendre ses éclats au cristal',
+          text: 'Protéger le cristal des slimes attirés par sa lumière'
+        }
       ],
-      active: 'Les traces partent vers l’est du camp. Elles brillent encore, dépêche-toi !',
-      ready:
-        'Oh ! Elle… elle te suit ? C’est une petite créature de lumière ! Elle s’appelle Lumi ? Quel joli nom.',
-      after: 'Lumi brille un peu plus chaque jour. Orven, aux Ruines de la Couronne, voudra sûrement la voir.'
-    }
-  },
-  {
-    id: 2,
-    chapter: 0,
-    main: true,
-    title: 'La carte aux six étoiles',
-    npc: 'orven',
-    site: 'q2',
-    requires: 1,
-    level: 5,
-    summary:
-      'Orven, le vieil érudit des ruines, possédait une carte où brillaient six étoiles. Des loups l’ont mise en pièces, et quelqu’un les y a poussés.',
-    steps: [
-      {
-        k: 'loot',
-        n: 5,
-        mobs: ['Loup', 'Sanglier'],
-        icon: '🗺️',
-        item: 'Fragment de carte',
-        text: 'Reprendre les fragments de carte aux loups et aux sangliers'
-      },
-      {
-        k: 'pick',
-        n: 3,
-        at: [
-          [-4, -3],
-          [4, -2],
-          [1, 4]
+      reward: { gold: 60, flags: ['lumi'], text: 'Lumi devient ta compagne de voyage' },
+      talk: {
+        offer: [
+          'Tu l’as vue, toi aussi ? Une lumière est tombée cette nuit, juste à l’est du camp !',
+          'Elle a laissé des traces qui brillent dans l’herbe. Suis-les, s’il te plaît, et dis-moi ce que c’est. Moi, je n’ose pas y aller seule.'
         ],
-        icon: '✦',
-        item: 'Sceau d’ombre',
-        label: 'Arracher le sceau',
-        ambush: ['Loup', 2],
-        text: 'Arracher les trois sceaux d’ombre plantés dans les ruines'
-      },
-      { k: 'guardian', text: 'Vaincre Ronce-Moussue, l’écho des ruines (E sur le sceau)' }
-    ],
-    reward: { gold: 90, flags: ['starmap'], text: 'Carte des sanctuaires dans le journal' },
-    talk: {
-      offer: [
-        'Par ma barbe… cette lueur ! Ma vieille carte l’aurait reconnue : six étoiles, six sanctuaires.',
-        'Mais une femme voilée est passée hier soir. Elle a sifflé, et les loups ont tout déchiré. Retrouve les morceaux, et arrache les clous noirs qu’elle a plantés dans mes ruines !'
-      ],
-      active:
-        'Les loups et les sangliers des plaines ont emporté les morceaux. Les sceaux, eux, sont ici, dans les ruines.',
-      ready:
-        'La carte est entière ! Et ce monstre gardait un couplet gravé dans la pierre… Le premier sanctuaire dort dans la Forêt ancienne. Garde la carte, elle sera mieux dans ton journal.',
-      after:
-        'Le Cœur de l’Aurore… on n’en parlait que dans les berceuses. Va voir Sylva, dans la Forêt ancienne. Et méfie-toi de la femme voilée.'
-    },
-    verse: 'Une étincelle tombe où nul ne l’attend, et la plaine se souvient du premier chant.',
-    memory:
-      'Sur le dernier sceau, un nom gravé à l’envers : Vesper. Orven a pâli en le lisant, et n’a rien voulu en dire.'
-  },
-  {
-    id: 3,
-    chapter: 0,
-    main: false,
-    title: 'Le mouton aux grandes ambitions',
-    npc: 'milo',
-    site: 'q3',
-    level: 4,
-    summary:
-      'Pompon, le mouton de Milo, rêve de voir le monde du haut de la colline. Il s’est encore échappé, et les loups rôdent.',
-    steps: [
-      {
-        k: 'chase',
-        n: 1,
-        art: 'sheep',
-        who: 'Pompon',
-        label: 'Attraper Pompon',
-        text: 'Rattraper Pompon, qui court dans tous les sens'
-      },
-      { k: 'kill', n: 6, mobs: ['Loup'], what: 'Loup vaincu', text: 'Éloigner les loups de la colline' },
-      {
-        k: 'escort',
-        art: 'sheep',
-        who: 'Pompon',
-        from: [-4, 3],
-        to: [3, -4],
-        ambush: [['Loup', 2]],
-        label: 'Emmener Pompon',
-        text: 'Accompagner Pompon jusqu’au drapeau du sommet',
-        world: ['sommet']
+        active: 'Les traces partent vers l’est du camp. Suis-les jusqu’au bout : la lumière doit être là.',
+        ready:
+          'Elle te suit ? C’est une petite créature de lumière… Lumi, c’est ça ? Le vieil Orven, aux Ruines de la Couronne, saura ce qu’elle est. Va le voir avec elle.',
+        after: 'Va voir Orven aux Ruines de la Couronne. Il connaît toutes les vieilles histoires de lumière.'
       }
-    ],
-    reward: { gold: 70, item: 'Rare', text: 'Équipement Rare de ton niveau' },
-    talk: {
-      offer: [
-        'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Alors il saute la barrière toutes les nuits.',
-        'Rattrape-le, chasse les loups, puis monte là-haut avec lui. Juste une fois. Pour qu’il voie.'
-      ],
-      active: 'Pompon court vite, mais il se fatigue. Coupe-lui la route ! Têtu comme un mouton.',
-      ready:
-        'IL EST EN HAUT ! Regarde-le, il est si fier ! Tiens, prends ça : c’était à mon grand-père, il courait aussi après ses moutons.',
-      after: 'Depuis, Pompon regarde le coucher de soleil tous les soirs. Il a l’air d’un philosophe.'
-    }
-  },
-  {
-    id: 4,
-    chapter: 0,
-    main: false,
-    title: 'Le trésor qui n’existe pas',
-    npc: 'bastian',
-    site: 'q4',
-    level: 6,
-    summary:
-      'Bastian jure qu’un trésor est enterré « là où les ombres de trois arbres se rejoignent ». Tout le camp se moque de lui. Surtout depuis qu’un sanglier a mangé sa preuve.',
-    steps: [
-      {
-        k: 'loot',
-        n: 4,
-        mobs: ['Sanglier'],
-        icon: '📜',
-        item: 'Page de chanson mâchonnée',
-        text: 'Reprendre aux sangliers les pages de la chanson'
-      },
-      { k: 'spot', at: [2, 1], text: 'Trouver où se croisent les ombres des trois arbres et creuser (E)' },
-      {
-        k: 'hunt',
-        mob: 'Sanglier',
-        title: 'Dent-de-Cale, le gardien du coffre',
-        at: [2, 2],
-        icon: '🐗',
-        label: 'Ouvrir le coffre',
-        text: 'Vaincre le vieux sanglier qui dormait sur le coffre'
-      }
-    ],
-    reward: { gold: 40, item: 'Rare', text: 'Le coffre secret (équipement Rare de ton niveau)' },
-    talk: {
-      offer: [
-        'Ils disent que mon trésor n’existe pas. Pfff. La vieille chanson dit : « Là où trois ombres se tiennent la main, dort le coffre du marin. »',
-        'La preuve ? Un sanglier l’a mangée. Enfin, presque toute. Retrouve les pages, suis l’ombre des trois chênes, et creuse !'
-      ],
-      active: 'Regarde bien les ombres des chênes : elles pointent toutes vers le même endroit.',
-      ready: 'UN COFFRE ! Je le savais ! Garde ce qu’il contient, moi je veux juste voir leur tête au camp.',
-      after: 'Ils ne rient plus du tout, au camp. Je cherche déjà la suite de la chanson…'
-    }
-  },
-  {
-    id: 5,
-    chapter: 0,
-    main: false,
-    title: 'Le poisson du vieux pêcheur',
-    npc: 'eloi',
-    site: 'q5',
-    level: 7,
-    summary:
-      'Depuis quarante ans, Éloi poursuit un poisson doré qui ne se montre qu’à ceux qui savent lire l’eau.',
-    steps: [
-      { k: 'work', job: 'fish', n: 3, text: 'Pêcher trois poissons pour l’appât, dans n’importe quelle eau' },
-      { k: 'timing', text: 'Observer les ondulations de l’étang et pêcher le poisson doré (E au bon remous)' }
-    ],
-    reward: {
-      gold: 50,
-      fishXp: 120,
-      recipe: 'dore',
-      goldenFish: 2,
-      text: 'Expérience de pêche, recette « Poisson doré en croûte de sel »'
     },
-    talk: {
-      offer: [
-        'Le poisson doré ne mord pas au ver. Il lui faut du poisson frais. Trois prises, pêchées de ta main.',
-        'Ensuite, regarde mon étang : quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !'
+    {
+      id: 2,
+      chapter: 0,
+      main: true,
+      title: 'La carte aux six étoiles',
+      npc: 'orven',
+      site: 'q2',
+      requires: 1,
+      level: 5,
+      summary:
+        'Orven reconnaît Lumi : une étincelle du Cœur de l’Aurore. Sa vieille carte montre où dorment les six étoiles du Cœur, mais une femme voilée a lâché les loups dessus.',
+      steps: [
+        {
+          k: 'loot',
+          n: 5,
+          mobs: ['Loup', 'Sanglier'],
+          icon: '🗺️',
+          item: 'Fragment de carte',
+          text: 'Reprendre les fragments de carte aux loups et aux sangliers'
+        },
+        {
+          k: 'pick',
+          n: 3,
+          at: [
+            [-4, -3],
+            [4, -2],
+            [1, 4]
+          ],
+          icon: '✦',
+          item: 'Sceau d’ombre',
+          label: 'Arracher le sceau',
+          ambush: ['Loup', 2],
+          text: 'Arracher les trois sceaux d’ombre plantés dans les ruines'
+        },
+        { k: 'guardian', text: 'Vaincre Ronce-Moussue, l’écho des ruines (E sur le sceau)' }
       ],
-      active:
-        'L’appât d’abord. Ensuite, patience : regarde les remous jusqu’à ce que l’un d’eux brille d’or.',
-      ready:
-        'Quarante ans… et tu l’as eu du premier coup. Tiens, la recette de ma grand-mère. Elle disait qu’il porte bonheur.',
-      after: 'Je reviens chaque matin, juste pour regarder l’étang. Il est plus beau maintenant que je sais.'
-    }
-  },
-  // ---------------------------------------------------------------- Chapitre II
-  {
-    id: 6,
-    chapter: 1,
-    main: true,
-    title: 'La mélodie des anciens',
-    npc: 'sylva',
-    site: 'q6',
-    requires: 2,
-    level: 12,
-    summary:
-      'Sylva, la gardienne des chants, entend la forêt fredonner depuis l’arrivée de Lumi. Mais les araignées étouffent la mélodie sous leurs toiles.',
-    steps: [
-      {
-        k: 'kill',
-        n: 8,
-        mobs: ['Araignée'],
-        what: 'Araignée vaincue',
-        text: 'Chasser les araignées de la forêt'
-      },
-      {
-        k: 'pick',
-        n: 4,
-        spread: [4, 9],
-        art: 'cocoon',
-        icon: '🕸️',
-        item: 'Cocon déchiré',
-        label: 'Déchirer le cocon',
-        ambush: ['Araignée', 1],
-        text: 'Libérer les oiseaux chanteurs pris dans les cocons'
-      },
-      { k: 'collect', n: 4, text: 'Retrouver les quatre pierres musicales dans la forêt' },
-      { k: 'puzzle', text: 'Jouer la mélodie des anciens sur le cercle de pierres' }
-    ],
-    reward: { gold: 120, flags: ['sanct_murmures'], text: 'Accès au Sanctuaire des Murmures' },
-    talk: {
-      offer: [
-        'La forêt chante, ce matin. Elle ne l’avait pas fait depuis des siècles. C’est ta petite lumière qui la réveille.',
-        'Mais les araignées tissent partout, comme si quelqu’un le leur avait demandé. Libère les oiseaux, retrouve les pierres musicales, puis joue au cercle : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.'
-      ],
-      active:
-        'Grave, aiguë, puis les deux du milieu de la plus grave à la plus aiguë. Écoute bien chaque pierre.',
-      ready:
-        'Le passage s’ouvre… Le Sanctuaire des Murmures ! Personne n’y est entré depuis l’époque des anciens.',
-      after: 'Les arbres murmurent un nom : Aelor. Il veille sur le vieil arbre aux racines d’or.'
-    }
-  },
-  {
-    id: 7,
-    chapter: 1,
-    main: true,
-    title: 'Le gardien aux racines d’or',
-    npc: 'aelor',
-    site: 'q7',
-    requires: 6,
-    level: 16,
-    summary:
-      'L’arbre gardien se meurt : des gobelins le saignent la nuit et vendent sa sève d’or à une femme voilée.',
-    steps: [
-      {
-        k: 'loot',
-        n: 6,
-        mobs: ['Gobelin'],
-        icon: '🏺',
-        item: 'Fiole de sève d’or',
-        text: 'Reprendre la sève d’or aux gobelins'
-      },
-      {
-        k: 'wave',
-        waves: [3, 4, 5],
-        mobs: ['Gobelin', 'Ours'],
-        what: 'l’arbre gardien',
-        icon: '🌳',
-        art: 'roots',
-        at: [2, 0],
-        label: 'Verser la sève aux racines',
-        text: 'Défendre l’arbre gardien pendant qu’il boit sa sève',
-        world: ['goldtree']
-      },
-      { k: 'guardian', text: 'Vaincre Sylvenoir, l’écho de la forêt (E sur le sceau)' },
-      { k: 'reach', at: [2, -1], text: 'Écouter l’arbre gardien' }
-    ],
-    reward: {
-      gold: 160,
-      flags: ['blessing', 'star1'],
-      text: 'Bénédiction des racines d’or (cosmétique) et première étoile'
-    },
-    talk: {
-      offer: [
-        'L’arbre gardien dort, et on profite de son sommeil. Les gobelins percent son écorce et remplissent des fioles.',
-        'Reprends-leur la sève et verse-la aux racines. Ils viendront la rechercher : tiens bon, le temps qu’il la boive.'
-      ],
-      active:
-        'Les gobelins rôdent partout dans la Forêt ancienne. La sève brille dans leurs fioles, tu ne peux pas la manquer.',
-      ready:
-        'Il t’a parlé… Le Cœur de l’Aurore. Et cette étoile qui flotte près de Lumi : la première des six. Que la forêt te bénisse.',
-      after:
-        'L’arbre gardien chante doucement chaque nuit. Va vers le marais : Maëline cherche de l’aide pour ses lanternes.'
-    },
-    verse: 'La racine écoute, la feuille répond, l’or coule en silence sous les troncs profonds.',
-    memory:
-      'L’arbre gardien : « Petite étincelle, te voilà revenue. Une autre est venue avant toi, la voilée. Elle chantait, jadis. Maintenant elle cherche les étoiles pour les éteindre. Trouve-les avant elle. »'
-  },
-  {
-    id: 8,
-    chapter: 1,
-    main: false,
-    title: 'Le chemin des lucioles',
-    npc: 'nima',
-    site: 'q8',
-    level: 13,
-    summary: 'Les panneaux du bosquet mentent, dit Nima. Seules les lucioles connaissent le vrai chemin.',
-    steps: [
-      {
-        k: 'chase',
-        n: 3,
-        art: 'firefly',
-        who: 'Luciole farceuse',
-        label: 'Attraper la luciole',
-        at: [0, 10],
-        text: 'Attraper trois lucioles farceuses devant le bosquet'
-      },
-      { k: 'reach', at: [0, -8], text: 'Traverser le labyrinthe en suivant les lucioles (pas les panneaux)' }
-    ],
-    reward: {
-      gold: 90,
-      flags: ['shortcut'],
-      text: 'Raccourci forestier : une pierre de passage vers le Camp de l’Aurore'
-    },
-    talk: {
-      offer: [
-        'Ce bosquet est un labyrinthe. Les panneaux ? Une farce des fées : ils mentent tous.',
-        'Attrape trois lucioles et elles t’aideront. Suis-les jusqu’à la vieille pierre de passage, de l’autre côté.'
-      ],
-      active: 'Ne lis pas les panneaux. Regarde les lucioles.',
-      ready: 'Tu as réveillé la pierre de passage ! Elle te ramènera au camp, et du camp jusqu’ici (E).',
-      after: 'Les fées sont vexées : leur farce ne marche plus. Tant mieux.'
-    }
-  },
-  {
-    id: 9,
-    chapter: 1,
-    main: false,
-    title: 'Le voleur invisible',
-    npc: 'brin',
-    site: 'q9',
-    level: 15,
-    summary: 'Chaque nuit, les provisions de Brin disparaissent. Pas de trace de pas… ou presque.',
-    steps: [
-      { k: 'trail', text: 'Suivre les petites empreintes (elles n’apparaissent que de près)' },
-      {
-        k: 'chase',
-        n: 1,
-        art: 'thief',
-        who: 'Le voleur',
-        label: 'Attraper le voleur',
-        at: [5, -4],
-        text: 'Rattraper le voleur avant qu’il ne disparaisse'
-      },
-      { k: 'choice', text: 'Décider du sort du petit voleur' }
-    ],
-    reward: { gold: 110, item: 'Rare', text: 'Or et équipement Rare de ton niveau' },
-    talk: {
-      offer: [
-        'On me vole mes provisions ! Des pommes, du fromage, même mes biscuits au miel.',
-        'Je ne vois jamais personne. Mais il y a de toutes petites empreintes… Tu veux bien enquêter ?'
-      ],
-      active: 'Les empreintes partent de mon sac. Regarde par terre, de près.',
-      ask: 'Un… caméléon-renard ? Avec les joues pleines de mon miel ? Dis-moi, toi qui l’as attrapé : j’en fais quoi ?',
-      ready: 'Bon. C’est décidé, alors. Prends ceci pour ta peine !',
-      after: 'Le petit voleur vient manger dans ma main maintenant. On est amis.',
-      afterChoice: [
-        'Le petit voleur vient manger dans ma main maintenant. On est amis.',
-        'Il travaille pour payer ses dettes : il garde mon sac. Je n’ai jamais eu de meilleur gardien.'
-      ]
-    },
-    choices: ['Lui laisser un biscuit chaque soir', 'L’engager comme gardien du sac']
-  },
-  {
-    id: 10,
-    chapter: 1,
-    main: false,
-    title: 'Le peintre des ombres',
-    npc: 'theon',
-    site: 'q10',
-    level: 17,
-    summary:
-      'Théon veut peindre l’ombre d’un arbre qui prend la forme d’un oiseau. Il n’a plus ni pigments, ni pinceaux, ni le bon endroit.',
-    steps: [
-      { k: 'work', job: 'herb', n: 3, text: 'Cueillir trois herbes pour les pigments' },
-      {
-        k: 'loot',
-        n: 5,
-        mobs: ['Chauve-souris'],
-        icon: '🖌️',
-        item: 'Touffe de poils fins',
-        text: 'Prendre des poils de chauve-souris pour les pinceaux'
-      },
-      {
-        k: 'spot',
-        at: [-1, -3],
-        text: 'Trouver le point d’observation où l’ombre de l’arbre devient un oiseau (E)'
-      }
-    ],
-    reward: { gold: 90, item: 'Rare', text: 'Équipement Rare de ton niveau' },
-    talk: {
-      offer: [
-        'Un jour, d’un endroit précis, l’ombre de ce vieil arbre est devenue un oiseau. Un oiseau parfait !',
-        'Il me faut des herbes pour les couleurs, des poils de chauve-souris pour les pinceaux. Et l’endroit : « au nord de l’arbre, un pas à l’ouest ». Appelle-moi (E) quand tu y es.'
-      ],
-      active: 'Au nord de l’arbre, un pas à l’ouest… L’ombre change quand on se déplace.',
-      ready: 'Le voilà ! Mon oiseau d’ombre ! Tiens, prends ceci : tu l’as bien mérité.',
-      after: 'Je peins maintenant toutes les ombres de la forêt. Elles ont toutes une histoire.'
-    }
-  },
-  // ---------------------------------------------------------------- Chapitre III
-  {
-    id: 11,
-    chapter: 2,
-    main: true,
-    title: 'Les lanternes perdues',
-    npc: 'maeline',
-    site: 'q11',
-    requires: 7,
-    level: 22,
-    summary:
-      'Le réseau de lanternes qui guidait les voyageurs dans le marais s’est éteint en une nuit. Les feux follets, eux, brillent plus fort que jamais.',
-    steps: [
-      {
-        k: 'loot',
-        n: 6,
-        mobs: ['Wisp'],
-        icon: '🔥',
-        item: 'Flamme volée',
-        text: 'Reprendre les flammes volées par les feux follets'
-      },
-      {
-        k: 'pick',
-        n: 4,
-        at: [
-          [-3, -2],
-          [-1, -3],
-          [1, -3],
-          [3, -2]
+      reward: { gold: 90, flags: ['starmap'], text: 'Carte des sanctuaires dans le journal' },
+      talk: {
+        offer: [
+          'Par ma barbe… Cette lumière vient du Cœur de l’Aurore ! Le Cœur protégeait l’île, autrefois. Les anciens l’ont endormi et ont caché ses six étoiles dans six sanctuaires. Ma carte les montre.',
+          'Hier soir, une femme voilée a sifflé, et les loups ont mis ma carte en pièces. Reprends les morceaux aux loups et aux sangliers, puis arrache les sceaux noirs qu’elle a plantés dans mes ruines.'
         ],
-        art: 'lantern',
-        keep: true,
-        icon: '🏮',
-        item: 'Lanterne rallumée',
-        label: 'Rallumer la lanterne',
-        ambush: ['Wisp', 1],
-        text: 'Rallumer les quatre lanternes'
+        active:
+          'Les morceaux de ma carte sont dans la gueule des loups et des sangliers des plaines. Les sceaux noirs sont ici, dans les ruines.',
+        ready:
+          'La carte est entière ! Regarde : six étoiles, six sanctuaires. Si on les retrouve toutes et qu’on les ramène au Cœur, il se réveillera, et l’île sera de nouveau protégée. La première dort dans la Forêt ancienne : va voir Sylva, la gardienne des chants. Et méfie-toi de la femme voilée : elle cherche les étoiles, elle aussi.',
+        after:
+          'La première étoile est dans la Forêt ancienne. Sylva t’y attend. Trouve les étoiles avant la femme voilée.'
       },
-      {
-        k: 'wave',
-        waves: [3, 4, 5],
-        mobs: ['Wisp', 'Mante des roseaux', 'Araignée venimeuse'],
-        what: 'les lanternes',
-        icon: '🏮',
-        art: 'lantern',
-        at: [0, 1],
-        label: 'Lever la grande lanterne',
-        text: 'Défendre les lanternes jusqu’à l’aube',
-        world: ['lanterns', 'sanct_reflets']
-      }
-    ],
-    reward: { gold: 200, flags: ['sanct_reflets'], text: 'Passage vers le Sanctuaire des Reflets' },
-    talk: {
-      offer: [
-        'Mes lanternes se sont toutes éteintes la même nuit. Depuis, trois voyageurs ne sont pas rentrés.',
-        'Les feux follets ont avalé leurs flammes. Reprends-les, rallume tout, et tiens jusqu’à l’aube : le marais n’aime pas la lumière.'
-      ],
-      active: 'Une flamme avalée par un feu follet ne s’éteint pas. Il faut seulement la lui reprendre.',
-      ready:
-        'Elles brillent toutes ! J’ai vu des silhouettes fuir, des hommes au visage voilé. Et regarde… les lanternes éclairent un chemin vers le Sanctuaire des Reflets.',
-      after: 'Les voyageurs ne se perdent plus. Néris t’attend près des vieux miroirs, au nord.'
+      verse: 'Une étincelle tombe où nul ne l’attend, et la plaine se souvient du premier chant.',
+      memory:
+        'Sur le dernier sceau, un nom gravé à l’envers : Vesper. Orven a pâli en le lisant, et n’a rien voulu en dire.'
     },
-    memory:
-      'Dans la boue, une broche en forme de voile. Vesper n’est plus seule : des gens la suivent et se font appeler la Confrérie du Voile.'
-  },
-  {
-    id: 12,
-    chapter: 2,
-    main: true,
-    title: 'Le miroir des souvenirs',
-    npc: 'neris',
-    site: 'q12',
-    requires: 11,
-    level: 26,
-    summary:
-      'Quelqu’un a brisé les miroirs qui montraient le passé. Néris pense qu’ils cachaient la vérité sur le Cœur, et sur celle qui veut l’éteindre.',
-    steps: [
-      {
-        k: 'pick',
-        n: 4,
-        spread: [4, 9],
-        icon: '🪞',
-        item: 'Éclat de miroir',
-        label: 'Ramasser l’éclat',
-        ambush: ['Basilic', 1],
-        text: 'Retrouver les éclats des miroirs brisés'
-      },
-      {
-        k: 'pick',
-        n: 4,
-        at: [
-          [-3, -1],
-          [-1, -1],
-          [1, -1],
-          [3, -1]
+    {
+      id: 3,
+      chapter: 0,
+      main: false,
+      title: 'Le mouton aux grandes ambitions',
+      npc: 'milo',
+      site: 'q3',
+      level: 4,
+      summary:
+        'Milo, berger des Plaines verdoyantes : Pompon, son mouton, s’est encore sauvé pour monter au sommet de la colline, et les loups rôdent. Il faut le rattraper, chasser les loups et l’accompagner là-haut, sinon il recommencera cette nuit.',
+      steps: [
+        {
+          k: 'chase',
+          n: 1,
+          art: 'sheep',
+          who: 'Pompon',
+          label: 'Attraper Pompon',
+          text: 'Rattraper Pompon, qui court dans tous les sens'
+        },
+        { k: 'kill', n: 6, mobs: ['Loup'], what: 'Loup vaincu', text: 'Éloigner les loups de la colline' },
+        {
+          k: 'escort',
+          art: 'sheep',
+          who: 'Pompon',
+          from: [-4, 3],
+          to: [3, -4],
+          ambush: [['Loup', 2]],
+          label: 'Emmener Pompon',
+          text: 'Accompagner Pompon jusqu’au drapeau du sommet',
+          world: ['sommet']
+        }
+      ],
+      reward: { gold: 70, item: 'Rare', text: 'Équipement Rare de ton niveau' },
+      talk: {
+        offer: [
+          'Pompon veut monter au sommet de la colline. Il en rêve, je te jure ! Alors il saute la barrière toutes les nuits.',
+          'Rattrape-le, chasse les loups, puis monte là-haut avec lui. Juste une fois. Pour qu’il voie.'
         ],
-        art: 'frame',
-        keep: true,
-        icon: '🪞',
-        item: 'Miroir réparé',
-        label: 'Réparer le miroir',
-        panels: [
-          'Le premier miroir : les anciens chantent autour du Cœur de l’Aurore. Deux voix mènent le chœur, un frère et une sœur. Auralis et Vesper.',
-          'Le deuxième miroir : une ombre immense monte de la mer. Elle se nourrit de lumière. Vesper est la seule à ne pas reculer : elle écoute.',
-          'Le troisième miroir : le Cœur se brise en six étoiles pour échapper à l’Ombre. Vesper hurle. On ne l’a pas prévenue.',
-          'Le dernier miroir : six sanctuaires s’allument sur l’île. Vesper est restée du mauvais côté de la mer, seule avec l’Ombre.'
+        active:
+          'Rattrape Pompon, chasse les loups de la colline, puis monte avec lui jusqu’au drapeau. Têtu comme un mouton, je te dis !',
+        ready:
+          'Il est en haut ! Regarde-le, il est si fier. Merci de ta patience : la guilde aura ton paiement, et moi ma nuit de sommeil.',
+        after:
+          'Pompon regarde le coucher de soleil du haut de la colline. Il recommencera, j’en suis sûr : je repasserai par la guilde.'
+      }
+    },
+    {
+      id: 4,
+      chapter: 0,
+      main: false,
+      title: 'Le trésor qui n’existe pas',
+      npc: 'bastian',
+      site: 'q4',
+      level: 6,
+      summary:
+        'Bastian, chasseur de trésors des Plaines verdoyantes : les sangliers ont encore mâchonné les pages de sa vieille chanson de marin. Elle dit qu’un coffre dort là où se croisent les ombres de trois chênes. Il faut reprendre les pages, creuser au bon endroit et chasser le vieux sanglier qui dort dessus.',
+      steps: [
+        {
+          k: 'loot',
+          n: 4,
+          mobs: ['Sanglier'],
+          icon: '📜',
+          item: 'Page de chanson mâchonnée',
+          text: 'Reprendre aux sangliers les pages de la chanson'
+        },
+        { k: 'spot', at: [2, 1], text: 'Trouver où se croisent les ombres des trois arbres et creuser (E)' },
+        {
+          k: 'hunt',
+          mob: 'Sanglier',
+          title: 'Dent-de-Cale, le gardien du coffre',
+          at: [2, 2],
+          icon: '🐗',
+          label: 'Ouvrir le coffre',
+          text: 'Vaincre le vieux sanglier qui dormait sur le coffre'
+        }
+      ],
+      reward: { gold: 40, item: 'Rare', text: 'Le coffre secret (équipement Rare de ton niveau)' },
+      talk: {
+        offer: [
+          'Ils disent que mon trésor n’existe pas. Pfff. La vieille chanson dit : « Là où trois ombres se tiennent la main, dort le coffre du marin. »',
+          'La preuve ? Un sanglier l’a mangée. Enfin, presque toute. Retrouve les pages, suis l’ombre des trois chênes, et creuse !'
         ],
-        text: 'Remettre les éclats dans leurs cadres et regarder'
-      },
-      {
-        k: 'hunt',
-        mob: 'Spectre',
-        title: 'Le Reflet menteur',
-        at: [0, 2],
-        icon: '🪞',
-        label: 'Regarder ton reflet',
-        text: 'Affronter le reflet qui ne te ressemble pas'
-      },
-      { k: 'guardian', text: 'Vaincre Miroitombe, l’écho des reflets (E sur le sceau)' }
-    ],
-    reward: { gold: 240, flags: ['star2'], text: 'Deuxième étoile et un souvenir dans le journal' },
-    talk: {
-      offer: [
-        'Ces miroirs se souvenaient de tout. Une nuit, des hommes voilés les ont brisés, un par un, en pleurant presque.',
-        'Retrouve les éclats et remets-les dans leurs cadres. On ne casse pas un miroir pour rien : il a montré quelque chose à quelqu’un.'
-      ],
-      active: 'Les basilics adorent ce qui brille. Méfie-toi quand tu ramasses un éclat.',
-      ready:
-        'Alors c’était ça… Vesper était des leurs. Ils ont sauvé le Cœur, et ils l’ont oubliée, elle. Voici la deuxième étoile.',
-      after:
-        'L’Ombre approchait, et les anciens ont choisi de disperser la lumière. Personne n’a choisi Vesper.'
-    },
-    verse: 'L’eau garde un visage que l’eau n’a pas pris ; qui regarde longtemps s’y trouve, et sourit.',
-    memory:
-      'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore, guidés par deux chanteurs, Auralis et sa sœur Vesper. Une ombre est venue de la mer. Ils ont brisé le Cœur en six étoiles pour le sauver. Vesper, restée au large, a entendu le silence tomber. Elle n’a jamais su que c’était un sacrifice. Elle a cru à une trahison.'
-  },
-  {
-    id: 13,
-    chapter: 2,
-    main: false,
-    title: 'Le pont qui ne tient jamais',
-    npc: 'goran',
-    site: 'q13',
-    level: 23,
-    summary:
-      'Le pont de Goran s’effondre dès qu’on pose le pied dessus. Et quand il le répare, les bêtes du marais le mangent.',
-    steps: [
-      {
-        k: 'pick',
-        n: 6,
-        spread: [6, 11],
-        art: 'plank',
-        icon: '🪵',
-        item: 'Planche solide',
-        label: 'Ramasser la planche',
-        text: 'Ramasser des planches échouées autour de l’étang'
-      },
-      {
-        k: 'loot',
-        n: 5,
-        mobs: ['Mante des roseaux'],
-        icon: '🧵',
-        item: 'Tendon de mante',
-        text: 'Prendre des tendons de mante pour les cordes'
-      },
-      {
-        k: 'wave',
-        waves: [3, 4],
-        mobs: ['Mante des roseaux', 'Basilic'],
-        what: 'le pont',
-        icon: '🔨',
-        art: 'barrel',
-        at: [-4, 1],
-        label: 'Commencer les travaux',
-        text: 'Défendre le pont pendant que Goran cloue',
-        world: ['bridge']
+        active:
+          'Reprends les pages aux sangliers, puis regarde les ombres des trois chênes : elles se croisent juste au-dessus du coffre.',
+        ready:
+          'Un coffre ! Encore un ! La chanson a plus de couplets que je ne croyais. Garde ce qu’il contient, moi je veux juste voir leur tête au camp.',
+        after:
+          'Chaque couplet de la chanson cache un coffre. Je dépose une demande à la guilde dès que je trouve le suivant.'
       }
-    ],
-    reward: { gold: 160, flags: ['bridge'], text: 'Le pont restauré pour toujours' },
-    talk: {
-      offer: [
-        'Mon pont ? Une catastrophe. Onze fois que je le reconstruis. Onze fois !',
-        'Cette fois, on fait ça bien : de vraies planches, de vraies cordes. Et toi, avec ton arme, entre les bêtes et moi pendant que je cloue.'
+    },
+    {
+      id: 5,
+      chapter: 0,
+      main: false,
+      title: 'Le poisson du vieux pêcheur',
+      npc: 'eloi',
+      site: 'q5',
+      level: 7,
+      summary:
+        'Éloi, vieux pêcheur des Plaines verdoyantes : le poisson doré de son étang ne mord qu’au poisson frais, et seulement quand une onde brille d’or. Il lui faut trois poissons pour l’appât, puis quelqu’un qui sache ferrer au bon moment.',
+      steps: [
+        {
+          k: 'work',
+          job: 'fish',
+          n: 3,
+          text: 'Pêcher trois poissons pour l’appât, dans n’importe quelle eau'
+        },
+        {
+          k: 'timing',
+          text: 'Observer les ondulations de l’étang et pêcher le poisson doré (E au bon remous)'
+        }
       ],
-      active: 'Des planches bien droites, hein ! Pas celles qui ont déjà servi de radeau à une mante.',
-      ready: 'Il tient ! Il tient vraiment ! Je vais l’appeler… le Pont qui Tient. Merci, l’ami !',
-      after: 'Le Pont qui Tient tient toujours. Je traverse dix fois par jour, juste pour le plaisir.'
-    }
-  },
-  {
-    id: 14,
-    chapter: 2,
-    main: false,
-    title: 'Le fantôme qui avait oublié son nom',
-    npc: 'esprit',
-    site: 'q14',
-    level: 25,
-    summary:
-      'Un esprit amical erre dans le marais. Il a oublié son nom, et sans nom, il ne peut pas partir en paix.',
-    steps: [
-      { k: 'clues', n: 4, text: 'Interroger les habitants et examiner les objets du marais (4 indices)' },
-      { k: 'choice', text: 'Rendre son nom à l’esprit' },
-      {
-        k: 'escort',
-        art: 'ghost',
-        who: 'Ilian',
-        from: [0, -2],
-        to: [0, 12],
-        ambush: [
-          ['Wisp', 2],
-          ['Wisp', 3]
+      reward: {
+        gold: 50,
+        fishXp: 120,
+        recipe: 'dore',
+        goldenFish: 2,
+        text: 'Expérience de pêche, recette « Poisson doré en croûte de sel »'
+      },
+      talk: {
+        offer: [
+          'Le poisson doré ne mord pas au ver. Il lui faut du poisson frais. Trois prises, pêchées de ta main.',
+          'Ensuite, regarde mon étang : quand une onde brille d’or, il est dessous. Approche-toi de ce remous et ferre (E) pendant qu’il brille !'
         ],
-        label: 'Accompagner Ilian',
-        text: 'Accompagner Ilian pour sa dernière tournée'
+        active:
+          'Trois poissons pour l’appât, pêchés n’importe où. Ensuite, regarde mon étang : quand un remous brille d’or, approche-toi et ferre (E).',
+        ready:
+          'Tu l’as eu ! Il y en a toujours un autre dans cet étang, tu sais. C’est pour ça que je reviens chaque matin.',
+        after: 'Le poisson doré revient toujours. Quand il se montre, je fais passer le mot à la guilde.'
       }
-    ],
-    reward: { gold: 150, item: 'Épique', text: 'Équipement Épique de ton niveau' },
-    talk: {
-      offer: [
-        'Bouuh… pardon. Je ne voulais pas te faire peur. J’ai oublié mon nom, tu sais. Ça arrive, quand on est mort depuis longtemps.',
-        'Les gens d’ici et les objets du marais se souviennent peut-être de moi. Tu veux bien chercher ?'
-      ],
-      active:
-        'Une lanterne, une barque, un vieux chapeau… et les habitants. Quelqu’un se souvient forcément.',
-      ask: 'Alors… tu sais qui j’étais ?',
-      ready:
-        'Ilian le lanternier. Oui. C’était moi. J’ai pu faire ma tournée une dernière fois. Prends ceci : que ma lumière guide ta route.',
-      after: 'Une douce lumière flotte parfois sur l’eau, là où Ilian allumait ses lanternes.'
     },
-    choices: ['Orrin le passeur', 'Ilian le lanternier', 'Barnabé le pêcheur', 'Silas le chapelier'],
-    answer: 1
-  },
-  {
-    id: 15,
-    chapter: 2,
-    main: false,
-    title: 'La traversée des nénuphars',
-    npc: 'pipo',
-    site: 'q15',
-    level: 27,
-    summary:
-      'Pipo a vu un coffre sur l’îlot de l’étang. Le basilic du coin a avalé la clé, et le seul chemin est fait de nénuphars qui coulent.',
-    steps: [
-      {
-        k: 'kill',
-        n: 6,
-        mobs: ['Basilic'],
-        what: 'Basilic vaincu',
-        text: 'Attirer le vieux basilic en chassant les siens'
-      },
-      {
-        k: 'hunt',
-        mob: 'Basilic',
-        title: 'Gobe-Tout, le basilic glouton',
-        at: [-5, -2],
-        icon: '🗝️',
-        label: 'Appeler Gobe-Tout',
-        text: 'Vaincre Gobe-Tout et récupérer la clé'
-      },
-      {
-        k: 'reach',
-        at: [4, 0],
-        text: 'Traverser l’étang sur les nénuphars sans t’arrêter et ouvrir le coffre de l’îlot'
-      }
-    ],
-    reward: { gold: 120, item: 'Épique', text: 'Le coffre caché (équipement Épique de ton niveau)' },
-    talk: {
-      offer: [
-        'Il y a un coffre sur l’îlot ! J’avais la clé, mais Gobe-Tout l’a gobée. Il gobe tout. C’est pour ça qu’il s’appelle comme ça.',
-        'Après, saute de nénuphar en nénuphar sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !'
+    // ---------------------------------------------------------------- Chapitre II
+    {
+      id: 6,
+      chapter: 1,
+      main: true,
+      title: 'La mélodie des anciens',
+      npc: 'sylva',
+      site: 'q6',
+      requires: 2,
+      level: 12,
+      summary:
+        'Le Sanctuaire des Murmures, où dormait la première étoile, ne s’ouvre qu’à la mélodie des anciens. Mais des araignées étouffent la forêt sous leurs toiles.',
+      steps: [
+        {
+          k: 'kill',
+          n: 8,
+          mobs: ['Araignée'],
+          what: 'Araignée vaincue',
+          text: 'Chasser les araignées de la forêt'
+        },
+        {
+          k: 'pick',
+          n: 4,
+          spread: [4, 9],
+          art: 'cocoon',
+          icon: '🕸️',
+          item: 'Cocon déchiré',
+          label: 'Déchirer le cocon',
+          ambush: ['Araignée', 1],
+          text: 'Libérer les oiseaux chanteurs pris dans les cocons'
+        },
+        { k: 'collect', n: 4, text: 'Retrouver les quatre pierres musicales dans la forêt' },
+        { k: 'puzzle', text: 'Jouer la mélodie des anciens sur le cercle de pierres' }
       ],
-      active: 'Ne reste pas plus de deux secondes sur un nénuphar !',
-      ready: 'Tu l’as fait ! Hi hi, tu sens le basilic. Le trésor est à toi !',
-      after: 'Je m’entraîne à sauter. Un jour, j’y arriverai aussi.'
-    }
-  },
-  // ---------------------------------------------------------------- Chapitre IV
-  {
-    id: 16,
-    chapter: 3,
-    main: true,
-    title: 'Le village des feuilles dorées',
-    npc: 'erable',
-    site: 'q16',
-    requires: 12,
-    level: 32,
-    summary:
-      'Les ruines d’un village oublié dorment sous les feuilles d’automne. La Confrérie du Voile les pille, maison par maison.',
-    steps: [
-      { k: 'collect', n: 4, text: 'Toucher les quatre feuilles dorées pour voir les souvenirs du village' },
-      {
-        k: 'kill',
-        n: 8,
-        mobs: ['Pilleur', 'Bandit'],
-        what: 'Voilé mis en fuite',
-        text: 'Chasser les pilleurs et les bandits de la Confrérie'
-      },
-      {
-        k: 'loot',
-        n: 4,
-        mobs: ['Pilleur', 'Bandit'],
-        icon: '🎒',
-        item: 'Objet du village',
-        text: 'Reprendre ce qu’ils ont volé au village'
-      },
-      {
-        k: 'pick',
-        n: 4,
-        at: [
-          [-4, -2],
-          [4, -2],
-          [-4, 2],
-          [4, 2]
+      reward: { gold: 120, flags: ['sanct_murmures'], text: 'Accès au Sanctuaire des Murmures' },
+      talk: {
+        offer: [
+          'Orven t’envoie ? Alors tu cherches la première étoile. Elle dormait dans le Sanctuaire des Murmures, et le sanctuaire ne s’ouvre qu’à la mélodie des anciens.',
+          'Mais les araignées ont tout envahi, comme si quelqu’un le leur avait demandé. Chasse-les, libère les oiseaux chanteurs pris dans leurs cocons, retrouve les quatre pierres musicales, puis joue au cercle : la plus grave, la plus aiguë, puis les deux du milieu, de la plus grave à la plus aiguë.'
         ],
-        art: 'house',
-        keep: true,
-        icon: '🏚️',
-        item: 'Maison rendue à elle-même',
-        label: 'Rendre l’objet à la maison',
-        text: 'Rendre à chaque maison ce qui lui appartient',
-        world: ['sanct_saisons']
+        active:
+          'Grave, aiguë, puis les deux du milieu de la plus grave à la plus aiguë. Écoute bien chaque pierre.',
+        ready:
+          'Le sanctuaire s’ouvre ! Mais l’autel est vide… L’étoile n’est plus là. Les arbres murmurent un nom : Aelor. Il veille sur l’arbre gardien aux racines d’or. Si quelqu’un sait où l’étoile est partie, c’est lui.',
+        after:
+          'L’étoile a quitté le sanctuaire. Va voir Aelor, près de l’arbre gardien aux racines d’or, dans la Forêt ancienne.'
       }
-    ],
-    reward: {
-      gold: 280,
-      flags: ['star3', 'sanct_saisons'],
-      text: 'Troisième étoile et accès à la Bibliothèque des Saisons'
     },
-    talk: {
-      offer: [
-        'Ici vivait un village, avant. Ses maisons sont tombées, mais les feuilles dorées se souviennent de tout.',
-        'Les Voilés fouillent les ruines et emportent les souvenirs. Touche les feuilles, reprends ce qu’ils ont pris, et rends-le à chaque maison.'
+    {
+      id: 7,
+      chapter: 1,
+      main: true,
+      title: 'Le gardien aux racines d’or',
+      npc: 'aelor',
+      site: 'q7',
+      requires: 6,
+      level: 16,
+      summary:
+        'L’arbre gardien a recueilli la première étoile. Il dépérit : des gobelins le saignent la nuit et vendent sa sève d’or à la femme voilée.',
+      steps: [
+        {
+          k: 'loot',
+          n: 6,
+          mobs: ['Gobelin'],
+          icon: '🏺',
+          item: 'Fiole de sève d’or',
+          text: 'Reprendre la sève d’or aux gobelins'
+        },
+        {
+          k: 'wave',
+          waves: [3, 4, 5],
+          mobs: ['Gobelin', 'Ours'],
+          what: 'l’arbre gardien',
+          icon: '🌳',
+          art: 'roots',
+          at: [2, 0],
+          label: 'Verser la sève aux racines',
+          text: 'Défendre l’arbre gardien pendant qu’il boit sa sève',
+          world: ['goldtree']
+        },
+        { k: 'guardian', text: 'Vaincre Sylvenoir, l’écho de la forêt (E sur le sceau)' },
+        { k: 'reach', at: [2, -1], text: 'Écouter l’arbre gardien' }
       ],
-      active:
-        'Ils rôdent dans toute la Forêt automnale. Ils croient chercher une étoile : elle est ici, sous leurs pieds.',
-      ready:
-        'Le village se souvient de lui-même… Et regarde : une étoile se lève des feuilles. La Bibliothèque des Saisons s’ouvre !',
-      after: 'Solenne garde les fresques des quatre saisons, près des grands érables à l’ouest.'
-    },
-    memory:
-      'Les feuilles dorées : un village heureux, une forge, un four, une cloche et une harpe. Quand l’ombre vint, les villageois partirent vers les sanctuaires… en laissant tout derrière eux.'
-  },
-  {
-    id: 17,
-    chapter: 3,
-    main: true,
-    title: 'Le secret des quatre saisons',
-    npc: 'solenne',
-    site: 'q17',
-    requires: 16,
-    level: 36,
-    summary:
-      'Une fresque brisée raconte pourquoi les anciens ont endormi le Cœur. Les esprits des saisons la gardent, et ils ne reconnaissent plus personne.',
-    steps: [
-      { k: 'collect', n: 4, text: 'Retrouver les quatre fragments de la fresque' },
-      {
-        k: 'wave',
-        waves: [3, 3, 4, 4],
-        seasons: ['Fée sauvage', 'Élémentaire', 'Corbeau spectral', 'Serpent des glaces'],
-        mobs: ['Corbeau spectral'],
-        what: 'la fresque',
-        icon: '🍂',
-        art: 'pillar',
-        at: [0, 0],
-        label: 'Assembler la fresque',
-        text: 'Tenir tête aux quatre saisons, l’une après l’autre',
-        world: ['archives']
+      reward: {
+        gold: 160,
+        flags: ['blessing', 'star1'],
+        text: 'Bénédiction des racines d’or (cosmétique) et première étoile'
       },
-      { k: 'guardian', text: 'Vaincre Fanegrise, l’écho de l’automne (E sur le sceau)' }
-    ],
-    reward: {
-      gold: 320,
-      flags: ['archives'],
-      text: 'Accès aux archives anciennes (un souvenir dans le journal)'
-    },
-    talk: {
-      offer: [
-        'La fresque des saisons est en morceaux. Rassemble-les, et repose-les au centre du cercle.',
-        'Prépare-toi : le printemps, l’été, l’automne et l’hiver viendront voir qui ose. Ils ne sont pas méchants. Ils ont peur.'
-      ],
-      active: 'Les fragments sont au nord, à l’est, au sud et à l’ouest. Comme les saisons.',
-      ready:
-        'Les archives… « Le Cœur fut endormi pour qu’il ne soit pas dévoré. Il rêve, et attend. » Et cette rature, là : le nom de Vesper, effacé du chœur.',
-      after: 'Le désert garde la Cité des Étoiles. Sahir connaît les obélisques.'
-    },
-    verse: 'Quatre saisons tournent autour d’un seul nom ; la feuille qui tombe est encore une chanson.',
-    memory:
-      'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller. Dans la marge, une autre main a écrit : « Moi, je m’en souviens. »'
-  },
-  {
-    id: 18,
-    chapter: 3,
-    main: false,
-    title: 'Le concours des feuilles',
-    npc: 'flavio',
-    site: 'q18',
-    level: 33,
-    summary:
-      'Flavio organise le grand concours d’automne : une course à travers les érables, puis la feuille dorée à attraper au vol.',
-    steps: [
-      { k: 'race', n: 6, spread: [6, 11], text: 'Courir la boucle du concours avant la fin du temps' },
-      { k: 'catch', text: 'Attraper la feuille dorée dans le vent (E quand elle est sur toi)' }
-    ],
-    reward: { gold: 220, item: 'Épique', text: 'Équipement Épique de ton niveau' },
-    talk: {
-      offer: [
-        'Le grand concours d’automne ! Première épreuve : la boucle des érables. Six fanions, et le temps file.',
-        'Deuxième épreuve : une feuille dorée danse dans le vent. Ne la poursuis pas, devine où elle va. E quand elle passe sur toi !'
-      ],
-      active:
-        'Touche les fanions dans l’ordre. Pour la feuille, regarde la girouette : elle tourne toujours dans le même sens.',
-      ready: 'Tu l’as eue ! Elle ne fanera jamais, tu sais. Garde-la, c’est le prix du champion.',
-      after: 'L’an prochain, je te bats. Je m’entraîne déjà.'
-    }
-  },
-  {
-    id: 19,
-    chapter: 3,
-    main: false,
-    title: 'Le moulin qui tournait à l’envers',
-    npc: 'odel',
-    site: 'q19',
-    level: 35,
-    summary:
-      'Des trolls ont volé les engrenages du moulin d’Odel pour s’en faire des colliers. Depuis, il tourne à l’envers et moud la farine… en grain.',
-    steps: [
-      {
-        k: 'loot',
-        n: 3,
-        chance: 0.5,
-        mobs: ['Troll'],
-        icon: '⚙️',
-        item: 'Engrenage',
-        text: 'Reprendre les engrenages aux trolls'
-      },
-      {
-        k: 'pick',
-        n: 3,
-        at: [
-          [-2, 0],
-          [0, 0],
-          [2, 0]
+      talk: {
+        offer: [
+          'La première étoile ? Elle s’est réfugiée dans l’arbre gardien, quand le sanctuaire s’est tu. Mais l’arbre dépérit : les gobelins percent son écorce et vendent sa sève à une femme voilée.',
+          'Reprends la sève aux gobelins et verse-la à ses racines. Ils reviendront la chercher : tiens bon le temps qu’il la boive. Quand il aura repris des forces, il te confiera l’étoile.'
         ],
-        art: 'gear',
-        keep: true,
-        icon: '⚙️',
-        item: 'Engrenage remonté',
-        label: 'Remonter l’engrenage',
-        text: 'Remonter les engrenages du moulin',
-        world: ['grenier']
+        active:
+          'Les gobelins rôdent partout dans la Forêt ancienne. La sève brille dans leurs fioles, tu ne peux pas la manquer.',
+        ready:
+          'Il t’a parlé, et il t’a confié l’étoile. Une sur six ! La femme voilée s’appelle Vesper, dit l’arbre, et elle veut éteindre les étoiles. La deuxième dort dans le marais, au Sanctuaire des Reflets. Maëline y entretient les lanternes : elle te montrera le chemin.',
+        after:
+          'Une étoile sur six. La suivante dort au Sanctuaire des Reflets, dans le Marais brumeux. Va voir Maëline et ses lanternes.'
       },
-      {
-        k: 'hunt',
-        mob: 'Corbeau spectral',
-        title: 'Scrr-Scrr, la terreur du grenier',
-        at: [4, 2],
-        icon: '🪶',
-        label: 'Ouvrir le grenier',
-        text: 'Déloger ce qui fait « scrr-scrr » dans le grenier'
-      }
-    ],
-    reward: {
-      gold: 300,
-      flags: ['grenier'],
-      item: 'Épique',
-      text: 'Or et le coffre du grenier (équipement Épique)'
+      verse: 'La racine écoute, la feuille répond, l’or coule en silence sous les troncs profonds.',
+      memory:
+        'L’arbre gardien : « Petite étincelle, te voilà revenue. Une autre est venue avant toi, la voilée. Elle chantait, jadis. Maintenant elle cherche les étoiles pour les éteindre. Trouve-les avant elle. »'
     },
-    talk: {
-      offer: [
-        'Les trolls m’ont pris trois engrenages. Des colliers ! Ils en font des colliers ! Et mon moulin tourne à l’envers.',
-        'Reprends-les, remonte-les. Et tant que tu y es… quelque chose fait « scrr-scrr » dans mon grenier. Je préfère ne pas savoir.'
+    {
+      id: 8,
+      chapter: 1,
+      main: false,
+      title: 'Le chemin des lucioles',
+      npc: 'nima',
+      site: 'q8',
+      level: 13,
+      summary:
+        'Nima, de la Forêt ancienne : les fées ont encore retourné les panneaux du bosquet, et les voyageurs s’y perdent. Seules les lucioles connaissent le vrai chemin : il faut en attraper trois et les suivre jusqu’à la pierre de passage.',
+      steps: [
+        {
+          k: 'chase',
+          n: 3,
+          art: 'firefly',
+          who: 'Luciole farceuse',
+          label: 'Attraper la luciole',
+          at: [0, 10],
+          text: 'Attraper trois lucioles farceuses devant le bosquet'
+        },
+        {
+          k: 'reach',
+          at: [0, -8],
+          text: 'Traverser le labyrinthe en suivant les lucioles (pas les panneaux)'
+        }
       ],
-      active: 'Un troll au cou qui brille, c’est un troll qui porte mon moulin.',
-      ready:
-        'Elle tourne dans le bon sens ! Et le grenier est silencieux… Ce qu’il y a dans le coffre est pour toi.',
-      after: 'Ma farine n’a jamais été aussi fine. Reviens goûter mon pain.'
-    }
-  },
-  {
-    id: 20,
-    chapter: 3,
-    main: false,
-    title: 'Le renard et les trois voyageurs',
-    npc: 'voyageurs',
-    site: 'q20',
-    level: 37,
-    summary: 'Trois voyageurs ont vu un renard magique, mais ne sont d’accord sur rien. Lequel dit vrai ?',
-    steps: [
-      { k: 'clues', n: 3, text: 'Écouter les trois témoignages' },
-      { k: 'search', text: 'Fouiller la bonne cachette (E)' },
-      {
-        k: 'chase',
-        n: 1,
-        art: 'fox',
-        who: 'Malice',
-        label: 'Attraper le renard',
-        at: [-4, -2],
-        text: 'Rattraper le renard magique'
-      }
-    ],
-    reward: { gold: 260, item: 'Épique', text: 'La cachette secrète du renard (équipement Épique)' },
-    talk: {
-      offer: [
-        'Un renard qui brille ! Il a filé avec nos provisions. Chacun de nous l’a vu, mais pas au même endroit…',
-        'Écoute-nous tous les trois, compare, et trouve sa cachette. Attention, l’un de nous se trompe souvent.'
-      ],
-      active: 'Deux de nos témoignages sont vrais. Le troisième… c’est Gaspard, il voit mal.',
-      ready:
-        'Sa cachette ! Et nos provisions… et un trésor qu’il avait amassé. Prends-le, tu l’as bien mérité.',
-      after: 'Le renard vient nous voir le soir. On l’a appelé Malice.'
-    },
-    witnesses: true
-  },
-  // ---------------------------------------------------------------- Chapitre V
-  {
-    id: 21,
-    chapter: 4,
-    main: true,
-    title: 'La cité sous les sables',
-    npc: 'sahir',
-    site: 'q21',
-    requires: 17,
-    level: 42,
-    summary:
-      'Trois obélisques veillent sur le désert. Les morts de l’ancienne cité se sont relevés pour empêcher quiconque d’y descendre.',
-    steps: [
-      {
-        k: 'kill',
-        n: 10,
-        mobs: ['Squelette'],
-        what: 'Veilleur renvoyé au sable',
-        text: 'Renvoyer au sable les veilleurs de la cité'
+      reward: {
+        gold: 90,
+        flags: ['shortcut'],
+        text: 'Raccourci forestier : une pierre de passage vers le Camp de l’Aurore'
       },
-      {
-        k: 'pick',
-        n: 3,
-        at: [
-          [-5, 0],
-          [5, 0],
-          [0, 5]
+      talk: {
+        offer: [
+          'Ce bosquet est un labyrinthe. Les panneaux ? Une farce des fées : ils mentent tous.',
+          'Attrape trois lucioles et elles t’aideront. Suis-les jusqu’à la vieille pierre de passage, de l’autre côté.'
         ],
-        art: 'obelisk',
-        keep: true,
-        icon: '🗿',
-        item: 'Obélisque dégagé',
-        label: 'Dégager l’obélisque',
-        ambush: ['Squelette', 2],
-        text: 'Dégager les trois obélisques ensevelis'
-      },
-      {
-        k: 'hunt',
-        mob: 'Chevalier déchu',
-        title: 'Rakhem, le gardien sans visage',
-        at: [0, 1],
-        icon: '✦',
-        label: 'Poser la main sur l’étoile gravée',
-        text: 'Vaincre le gardien qui barre l’escalier',
-        world: ['cite', 'sanct_etoiles']
+        active:
+          'Attrape trois lucioles devant le bosquet, puis suis-les. Surtout, ne lis pas les panneaux : les fées les ont retournés.',
+        ready:
+          'Te voilà de l’autre côté ! La pierre de passage te ramène au camp quand tu veux (E). Les fées vont encore bouder.',
+        after:
+          'Les fées retournent les panneaux tous les quelques jours. Si le bosquet se remet à mentir, je préviendrai la guilde.'
       }
-    ],
-    reward: {
-      gold: 380,
-      flags: ['star4', 'sanct_etoiles'],
-      text: 'Quatrième étoile et accès à la Cité des Étoiles'
     },
-    talk: {
-      offer: [
-        'La nuit, trois obélisques chantent sous le sable. Mon grand-père disait qu’ils montrent l’entrée de la cité des étoiles.',
-        'Mais les morts marchent depuis le passage de la Confrérie. Ouvre-nous la route, dégage les pierres, et réveille le gardien.'
+    {
+      id: 9,
+      chapter: 1,
+      main: false,
+      title: 'Le voleur invisible',
+      npc: 'brin',
+      site: 'q9',
+      level: 15,
+      summary:
+        'Brin, voyageur de la Forêt ancienne : ses provisions disparaissent chaque nuit, et il ne voit que de toutes petites empreintes. Il faut suivre la piste, attraper le voleur et décider de son sort.',
+      steps: [
+        { k: 'trail', text: 'Suivre les petites empreintes (elles n’apparaissent que de près)' },
+        {
+          k: 'chase',
+          n: 1,
+          art: 'thief',
+          who: 'Le voleur',
+          label: 'Attraper le voleur',
+          at: [5, -4],
+          text: 'Rattraper le voleur avant qu’il ne disparaisse'
+        },
+        { k: 'choice', text: 'Décider du sort du petit voleur' }
       ],
-      active:
-        'Les squelettes ne sont pas cruels. Ils obéissent à un ordre vieux de mille ans : « Ne laissez entrer personne. »',
-      ready:
-        'Le sable s’effondre… un escalier ! La Cité des Étoiles. Et cette lumière… une quatrième étoile !',
-      after: 'Astéria étudie la vieille machine, sous la cité. Elle a besoin de toi.'
-    }
-  },
-  {
-    id: 22,
-    chapter: 4,
-    main: true,
-    title: 'La machine de l’Aurore',
-    npc: 'asteria',
-    site: 'q22',
-    requires: 21,
-    level: 47,
-    summary:
-      'Une machine des anciens dort sous le désert. Pour la réveiller, il faut du feu, du verre, et quelqu’un pour la défendre.',
-    steps: [
-      {
-        k: 'loot',
-        n: 4,
-        mobs: ['Drake des dunes'],
-        icon: '🔶',
-        item: 'Écaille de verre solaire',
-        text: 'Prendre des écailles de verre aux drakes des dunes'
-      },
-      {
-        k: 'pick',
-        n: 3,
-        at: [
-          [-2, 3],
-          [0, 3],
-          [2, 3]
+      reward: { gold: 110, item: 'Rare', text: 'Or et équipement Rare de ton niveau' },
+      talk: {
+        offer: [
+          'On me vole mes provisions ! Des pommes, du fromage, même mes biscuits au miel.',
+          'Je ne vois jamais personne. Mais il y a de toutes petites empreintes… Tu veux bien enquêter ?'
         ],
-        art: 'lever',
-        keep: true,
-        icon: '⚙️',
-        item: 'Anneau lancé',
-        label: 'Lancer l’anneau',
-        ambush: ['Scorpion', 2],
-        text: 'Lancer les trois anneaux de la machine'
+        active:
+          'Les empreintes partent de mon sac. Regarde par terre, de près : elles n’apparaissent qu’à quelques pas.',
+        ask: 'Un… caméléon-renard ? Avec les joues pleines de mon miel ? Dis-moi, toi qui l’as attrapé : j’en fais quoi ?',
+        ready: 'Bon, c’est décidé. Merci d’avoir tiré ça au clair : la guilde te paiera pour moi.',
+        after: 'Le petit voleur vient manger dans ma main maintenant. On est amis.',
+        afterChoice: [
+          'Le petit voleur vient manger dans ma main maintenant. On est amis.',
+          'Il travaille pour payer ses dettes : il garde mon sac. Je n’ai jamais eu de meilleur gardien.'
+        ]
       },
-      {
-        k: 'wave',
-        waves: [3, 4, 5],
-        mobs: ['Scorpion', 'Squelette', 'Minotaure'],
-        what: 'la machine',
-        icon: '⚙️',
-        art: 'barrel',
-        at: [0, 4],
-        label: 'Allumer la machine',
-        text: 'Défendre la machine pendant qu’elle chauffe',
-        world: ['machine']
-      },
-      { k: 'guardian', text: 'Vaincre Sablamort, l’écho des dunes (E sur le sceau)' }
-    ],
-    reward: {
-      gold: 460,
-      flags: ['star5'],
-      item: 'Épique',
-      text: 'Cinquième étoile et la salle du trésor (équipement Épique)'
+      choices: ['Lui laisser un biscuit chaque soir', 'L’engager comme gardien du sac']
     },
-    talk: {
-      offer: [
-        'Trois anneaux, six symboles chacun. Quand ils tournent ensemble, la machine montre comment réveiller le Cœur.',
-        'Il lui faut du verre solaire, et les drakes le portent sur le dos. Une fois lancée, elle fera du bruit. Beaucoup de bruit. On viendra.'
+    {
+      id: 10,
+      chapter: 1,
+      main: false,
+      title: 'Le peintre des ombres',
+      npc: 'theon',
+      site: 'q10',
+      level: 17,
+      summary:
+        'Théon, peintre de la Forêt ancienne : d’un endroit précis, l’ombre de son vieil arbre prend la forme d’un oiseau. Pour la peindre, il lui faut des herbes pour ses couleurs, des poils de chauve-souris pour ses pinceaux, et quelqu’un pour retrouver le bon endroit.',
+      steps: [
+        { k: 'work', job: 'herb', n: 3, text: 'Cueillir trois herbes pour les pigments' },
+        {
+          k: 'loot',
+          n: 5,
+          mobs: ['Chauve-souris'],
+          icon: '🖌️',
+          item: 'Touffe de poils fins',
+          text: 'Prendre des poils de chauve-souris pour les pinceaux'
+        },
+        {
+          k: 'spot',
+          at: [-1, -3],
+          text: 'Trouver le point d’observation où l’ombre de l’arbre devient un oiseau (E)'
+        }
       ],
-      active: 'Les drakes des dunes muent souvent. Ceux qui muent sont de mauvaise humeur.',
-      ready:
-        'La machine s’illumine : « Six étoiles réunies, une étincelle du Cœur, et le chant des anciens. » Une étincelle… Lumi ?',
-      after:
-        'Lumi t’attend dans la Forêt enchantée. Elle sait où se trouve le sanctuaire central. Vesper aussi, maintenant.'
-    },
-    verse: 'Le sable a tout bu, sauf l’étoile et le soir ; marche, voyageur, la nuit n’est pas le noir.',
-    memory:
-      'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles. Derrière un pilier, une femme voilée écoutait. Elle est partie sans se battre.'
-  },
-  {
-    id: 23,
-    chapter: 4,
-    main: false,
-    title: 'Le marchand qui vendait du vent',
-    npc: 'zafir',
-    site: 'q23',
-    level: 43,
-    summary:
-      'Zafir vend du vent en bouteille. Ses plus belles cuvées se sont échappées et tourbillonnent autour de son étal.',
-    steps: [
-      {
-        k: 'chase',
-        n: 4,
-        art: 'whirl',
-        who: 'Tourbillon',
-        label: 'Mettre en bouteille',
-        text: 'Remettre quatre tourbillons en bouteille'
-      },
-      {
-        k: 'kill',
-        n: 6,
-        mobs: ['Drake des dunes'],
-        what: 'Drake mis en fuite',
-        text: 'Éloigner les drakes qui respirent la marchandise'
-      },
-      {
-        k: 'talk',
-        npc: 'amira',
-        lines: [
-          'Une bouteille de brise, de la part de Zafir ? Il me doit de l’argent depuis trois ans, et il m’envoie du vent.',
-          'Oh… mais c’est du vrai. Il sent la mer. Dis-lui que nous sommes quittes. Et que… non, rien. Dis-lui juste merci.'
+      reward: { gold: 90, item: 'Rare', text: 'Équipement Rare de ton niveau' },
+      talk: {
+        offer: [
+          'Un jour, d’un endroit précis, l’ombre de ce vieil arbre est devenue un oiseau. Un oiseau parfait !',
+          'Il me faut des herbes pour les couleurs, des poils de chauve-souris pour les pinceaux. Et l’endroit : « au nord de l’arbre, un pas à l’ouest ». Appelle-moi (E) quand tu y es.'
         ],
-        text: 'Livrer une bouteille de brise à Amira, à l’oasis'
+        active:
+          'Des herbes pour les couleurs, des poils de chauve-souris pour les pinceaux. Puis l’endroit : au nord de l’arbre, un pas à l’ouest. Appelle-moi (E) quand tu y es.',
+        ready:
+          'Le voilà, mon oiseau d’ombre ! Il change avec les saisons, alors je le repeins souvent. Merci, l’ami.',
+        after:
+          'L’ombre de l’arbre change avec la lumière. Quand mes couleurs s’épuisent, je repasse par la guilde.'
       }
-    ],
-    reward: { gold: 330, item: 'Épique', text: 'Équipement Épique de ton niveau' },
-    talk: {
-      offer: [
-        'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde-le courir, il s’est échappé !',
-        'Rattrape mes tourbillons, éloigne les drakes qui les respirent, et porte une bouteille à Amira. Discrètement. C’est un cadeau.'
+    },
+    // ---------------------------------------------------------------- Chapitre III
+    {
+      id: 11,
+      chapter: 2,
+      main: true,
+      title: 'Les lanternes perdues',
+      npc: 'maeline',
+      site: 'q11',
+      requires: 7,
+      level: 22,
+      summary:
+        'Les lanternes de Maëline guidaient les voyageurs jusqu’au Sanctuaire des Reflets, où dort la deuxième étoile. Elles se sont toutes éteintes en une nuit.',
+      steps: [
+        {
+          k: 'loot',
+          n: 6,
+          mobs: ['Wisp'],
+          icon: '🔥',
+          item: 'Flamme volée',
+          text: 'Reprendre les flammes volées par les feux follets'
+        },
+        {
+          k: 'pick',
+          n: 4,
+          at: [
+            [-3, -2],
+            [-1, -3],
+            [1, -3],
+            [3, -2]
+          ],
+          art: 'lantern',
+          keep: true,
+          icon: '🏮',
+          item: 'Lanterne rallumée',
+          label: 'Rallumer la lanterne',
+          ambush: ['Wisp', 1],
+          text: 'Rallumer les quatre lanternes'
+        },
+        {
+          k: 'wave',
+          waves: [3, 4, 5],
+          mobs: ['Wisp', 'Mante des roseaux', 'Araignée venimeuse'],
+          what: 'les lanternes',
+          icon: '🏮',
+          art: 'lantern',
+          at: [0, 1],
+          label: 'Lever la grande lanterne',
+          text: 'Défendre les lanternes jusqu’à l’aube',
+          world: ['lanterns', 'sanct_reflets']
+        }
       ],
-      active: 'Un tourbillon file toujours loin de toi. Accule-le contre une dune !',
-      ready: 'Elle a souri ? Elle a SOURI ? Tiens, un cadeau de la maison. Non, deux. Non, un.',
-      after: 'Les affaires marchent. Et Amira passe tous les jours. Pour le vent, dit-elle.'
-    }
-  },
-  {
-    id: 24,
-    chapter: 4,
-    main: false,
-    title: 'Le temple des miroirs',
-    npc: 'noura',
-    site: 'q24',
-    level: 46,
-    summary:
-      'La porte d’un petit temple ne s’ouvre qu’à la lumière du soleil. Des miroirs anciens sont encore là. Leur gardienne aussi.',
-    steps: [
-      { k: 'puzzle', text: 'Orienter les miroirs pour diriger le rayon solaire sur la porte' },
-      {
-        k: 'hunt',
-        mob: 'Squelette',
-        title: 'Néfer, la gardienne du rayon',
-        at: [2, -2],
-        icon: '☀️',
-        label: 'Franchir la porte',
-        text: 'Vaincre la gardienne du temple'
-      }
-    ],
-    reward: { gold: 360, item: 'Épique', text: 'Le coffre du temple (équipement Épique)' },
-    talk: {
-      offer: [
-        'Ce temple garde un coffre depuis mille ans. Sa porte attend un rayon de soleil.',
-        'Quatre miroirs, un rayon. Tourne-les (E), et suis la lumière jusqu’au soleil gravé sur la porte. Puis salue Néfer. Elle déteste être réveillée.'
-      ],
-      active: 'Certains miroirs ne servent à rien. Suis le rayon depuis la pierre solaire.',
-      ready: 'Néfer dort de nouveau, et la porte est ouverte. Le coffre est à toi, voyageur de lumière.',
-      after: 'Je viens prier ici chaque matin. Le rayon touche toujours la porte.'
-    }
-  },
-  {
-    id: 25,
-    chapter: 4,
-    main: false,
-    title: 'Le secret de l’oasis',
-    npc: 'amira',
-    site: 'q25',
-    level: 48,
-    summary:
-      'L’oasis d’Amira s’assèche. Des scorpions ont bâti leurs nids dans l’aqueduc, et plus personne n’ose porter l’eau.',
-    steps: [
-      {
-        k: 'kill',
-        n: 10,
-        mobs: ['Scorpion'],
-        what: 'Scorpion vaincu',
-        text: 'Chasser les scorpions de l’oasis'
-      },
-      {
-        k: 'pick',
-        n: 4,
-        spread: [4, 8],
-        art: 'nest',
-        icon: '🦂',
-        item: 'Nid détruit',
-        label: 'Détruire le nid',
-        ambush: ['Scorpion', 2],
-        text: 'Détruire les nids qui bouchent l’aqueduc'
-      },
-      {
-        k: 'escort',
-        art: 'person',
-        look: { sex: 'm', race: 'humain', skin: '#a8724a', hair: '#1a1418', outfit: 'or' },
-        who: 'Porteur d’eau',
-        from: [-5, -3],
-        to: [2, 1],
-        ambush: [
-          ['Scorpion', 2],
-          ['Drake des dunes', 1]
+      reward: { gold: 200, flags: ['sanct_reflets'], text: 'Passage vers le Sanctuaire des Reflets' },
+      talk: {
+        offer: [
+          'Tu cherches le Sanctuaire des Reflets ? Mes lanternes en montraient le chemin. Elles se sont toutes éteintes la même nuit, et trois voyageurs ne sont pas rentrés.',
+          'Les feux follets ont avalé leurs flammes. Reprends-les-leur, rallume les quatre lanternes, et défends-les jusqu’à l’aube : le marais n’aime pas la lumière.'
         ],
-        label: 'Accompagner le porteur',
-        text: 'Escorter le porteur d’eau jusqu’au bassin',
-        world: ['oasis']
+        active: 'Une flamme avalée par un feu follet ne s’éteint pas. Il faut seulement la lui reprendre.',
+        ready:
+          'Elles brillent toutes ! J’ai vu des silhouettes au visage voilé s’enfuir : Vesper n’est plus seule. Et regarde, les lanternes tracent le chemin du Sanctuaire des Reflets. Néris garde ses vieux miroirs : elle t’attend là-bas.',
+        after: 'Le chemin du Sanctuaire des Reflets est éclairé. Néris t’attend près des vieux miroirs.'
+      },
+      memory:
+        'Dans la boue, une broche en forme de voile. Vesper n’est plus seule : des gens la suivent et se font appeler la Confrérie du Voile.'
+    },
+    {
+      id: 12,
+      chapter: 2,
+      main: true,
+      title: 'Le miroir des souvenirs',
+      npc: 'neris',
+      site: 'q12',
+      requires: 11,
+      level: 26,
+      summary:
+        'Les miroirs du Sanctuaire des Reflets montraient le passé. Les Voilés les ont brisés pour cacher la vérité sur Vesper. La deuxième étoile est derrière eux.',
+      steps: [
+        {
+          k: 'pick',
+          n: 4,
+          spread: [4, 9],
+          icon: '🪞',
+          item: 'Éclat de miroir',
+          label: 'Ramasser l’éclat',
+          ambush: ['Basilic', 1],
+          text: 'Retrouver les éclats des miroirs brisés'
+        },
+        {
+          k: 'pick',
+          n: 4,
+          at: [
+            [-3, -1],
+            [-1, -1],
+            [1, -1],
+            [3, -1]
+          ],
+          art: 'frame',
+          keep: true,
+          icon: '🪞',
+          item: 'Miroir réparé',
+          label: 'Réparer le miroir',
+          panels: [
+            'Le premier miroir : les anciens chantent autour du Cœur de l’Aurore. Deux voix mènent le chœur, un frère et une sœur. Auralis et Vesper.',
+            'Le deuxième miroir : une ombre immense monte de la mer. Elle se nourrit de lumière. Vesper est la seule à ne pas reculer : elle écoute.',
+            'Le troisième miroir : le Cœur se brise en six étoiles pour échapper à l’Ombre. Vesper hurle. On ne l’a pas prévenue.',
+            'Le dernier miroir : six sanctuaires s’allument sur l’île. Vesper est restée du mauvais côté de la mer, seule avec l’Ombre.'
+          ],
+          text: 'Remettre les éclats dans leurs cadres et regarder'
+        },
+        {
+          k: 'hunt',
+          mob: 'Spectre',
+          title: 'Le Reflet menteur',
+          at: [0, 2],
+          icon: '🪞',
+          label: 'Regarder ton reflet',
+          text: 'Affronter le reflet qui ne te ressemble pas'
+        },
+        { k: 'guardian', text: 'Vaincre Miroitombe, l’écho des reflets (E sur le sceau)' }
+      ],
+      reward: { gold: 240, flags: ['star2'], text: 'Deuxième étoile et un souvenir dans le journal' },
+      talk: {
+        offer: [
+          'Ces miroirs se souvenaient de tout. Une nuit, des hommes voilés les ont brisés, un par un. Ils ne voulaient pas qu’on voie ce qu’ils montrent : l’histoire de Vesper.',
+          'Retrouve les éclats et remets-les dans leurs cadres. Quand les miroirs seront entiers, le sanctuaire te rendra la deuxième étoile. Méfie-toi : un miroir brisé a parfois un reflet qui ne te ressemble pas.'
+        ],
+        active: 'Les basilics adorent ce qui brille. Méfie-toi quand tu ramasses un éclat.',
+        ready:
+          'Alors c’était ça… Vesper chantait avec les anciens. Ils ont endormi le Cœur pour le sauver, et ils l’ont oubliée au large. Elle croit qu’on l’a trahie. Voici la deuxième étoile : deux sur six. La troisième dort dans la Forêt automnale, où Érable garde un village oublié.',
+        after:
+          'Deux étoiles sur six. La troisième est dans la Forêt automnale : Érable t’y attend, dans les ruines du village aux feuilles dorées.'
+      },
+      verse: 'L’eau garde un visage que l’eau n’a pas pris ; qui regarde longtemps s’y trouve, et sourit.',
+      memory:
+        'Le miroir des souvenirs : les anciens vivaient en paix autour du Cœur de l’Aurore, guidés par deux chanteurs, Auralis et sa sœur Vesper. Une ombre est venue de la mer. Ils ont brisé le Cœur en six étoiles pour le sauver. Vesper, restée au large, a entendu le silence tomber. Elle n’a jamais su que c’était un sacrifice. Elle a cru à une trahison.'
+    },
+    {
+      id: 13,
+      chapter: 2,
+      main: false,
+      title: 'Le pont qui ne tient jamais',
+      npc: 'goran',
+      site: 'q13',
+      level: 23,
+      summary:
+        'Goran, bâtisseur du Marais brumeux : les bêtes du marais rongent encore son pont. Il lui faut des planches échouées, des tendons de mante pour les cordes, et quelqu’un pour tenir les bêtes à distance pendant qu’il cloue.',
+      steps: [
+        {
+          k: 'pick',
+          n: 6,
+          spread: [6, 11],
+          art: 'plank',
+          icon: '🪵',
+          item: 'Planche solide',
+          label: 'Ramasser la planche',
+          text: 'Ramasser des planches échouées autour de l’étang'
+        },
+        {
+          k: 'loot',
+          n: 5,
+          mobs: ['Mante des roseaux'],
+          icon: '🧵',
+          item: 'Tendon de mante',
+          text: 'Prendre des tendons de mante pour les cordes'
+        },
+        {
+          k: 'wave',
+          waves: [3, 4],
+          mobs: ['Mante des roseaux', 'Basilic'],
+          what: 'le pont',
+          icon: '🔨',
+          art: 'barrel',
+          at: [-4, 1],
+          label: 'Commencer les travaux',
+          text: 'Défendre le pont pendant que Goran cloue',
+          world: ['bridge']
+        }
+      ],
+      reward: { gold: 160, flags: ['bridge'], text: 'Le pont restauré pour toujours' },
+      talk: {
+        offer: [
+          'Mon pont ? Une catastrophe. Onze fois que je le reconstruis. Onze fois !',
+          'Cette fois, on fait ça bien : de vraies planches, de vraies cordes. Et toi, avec ton arme, entre les bêtes et moi pendant que je cloue.'
+        ],
+        active:
+          'Des planches bien droites autour de l’étang, des tendons de mante pour les cordes. Ensuite, reste entre les bêtes et moi pendant que je cloue.',
+        ready: 'Il tient ! Encore une fois ! Les mantes finiront par se lasser avant moi. Merci, l’ami.',
+        after: 'Le Pont qui Tient tient… jusqu’à la prochaine mante affamée. Je laisserai un mot à la guilde.'
       }
-    ],
-    reward: { gold: 380, recipe: 'tajine', text: 'Recette « Tajine de l’oasis » et oasis restaurée' },
-    talk: {
-      offer: [
-        'L’eau n’arrive plus. Les scorpions ont fait leurs nids dans les conduits, et mes porteurs refusent de sortir.',
-        'Nettoie l’aqueduc, puis accompagne le dernier porteur courageux jusqu’au bassin. Une seule jarre suffira : l’eau appelle l’eau.'
-      ],
-      active: 'Un nid détruit, c’est une colère réveillée. Garde ton arme en main.',
-      ready:
-        'L’eau chante dans le bassin ! L’oasis va refleurir. Tiens, la recette de ma mère : elle demande une eau pure.',
-      after: 'Les palmiers ont déjà de nouvelles palmes. Merci, l’ami de l’eau.'
-    }
-  },
-  // ---------------------------------------------------------------- Chapitre VI
-  {
-    id: 26,
-    chapter: 5,
-    main: true,
-    title: 'Le sanctuaire des six lumières',
-    npc: 'lumi',
-    site: 'q26',
-    requires: 22,
-    level: 52,
-    summary:
-      'Lumi te guide jusqu’au sanctuaire central. Trois épreuves attendent : celle du souffle, celle du courage, celle de la lumière.',
-    steps: [
-      {
-        k: 'race',
-        n: 6,
-        spread: [5, 10],
-        text: 'Épreuve du souffle : courir avec la lumière avant qu’elle s’éteigne'
-      },
-      {
-        k: 'wave',
-        waves: [4, 5, 5],
-        mobs: ['Gardien astral', 'Fée sauvage'],
-        what: 'la flamme du sanctuaire',
-        icon: '🔥',
-        art: 'crystal',
-        at: [0, 1],
-        label: 'Allumer la flamme',
-        text: 'Épreuve du courage : garder la flamme du sanctuaire'
-      },
-      {
-        k: 'pick',
-        n: 6,
-        spread: [4, 9],
-        art: 'crystal',
-        icon: '✨',
-        item: 'Lumière retrouvée',
-        label: 'Recueillir la lumière',
-        text: 'Épreuve de la lumière : recueillir les six lumières égarées'
-      },
-      { k: 'spot', at: [0, -1], text: 'Placer les étoiles sur l’autel (E)' }
-    ],
-    reward: { gold: 520, flags: ['sanct_lumieres'], text: 'Accès à la Chambre de l’Aurore' },
-    talk: {
-      offer: [
-        '✨ Tu entends ? C’est ici. Le sanctuaire des six lumières… je m’en souviens, je crois.',
-        '✨ Trois épreuves. Les anciens voulaient des gens qui courent, qui tiennent et qui regardent. Puis pose les étoiles sur l’autel. Je reste près de toi.'
-      ],
-      active: '✨ Je brille plus fort quand tu es près de moi. Tu l’avais remarqué ?',
-      ready:
-        '✨ Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis nous attend… et quelqu’un d’autre.',
-      after: '✨ Je me sens… plus chaude. Comme si je rentrais chez moi.'
-    }
-  },
-  {
-    id: 27,
-    chapter: 5,
-    main: true,
-    title: 'Le Cœur de l’Aurore',
-    npc: 'auralis',
-    site: 'q27',
-    requires: 26,
-    level: 58,
-    summary:
-      'Auralis, le dernier gardien, attend dans la Chambre de l’Aurore. Vesper, sa sœur, y arrive en même temps que toi. Et elle n’est pas venue seule.',
-    steps: [
-      { k: 'spot', at: [-4, 0], text: 'Lire la fresque du gardien (E)' },
-      {
-        k: 'defense',
-        text: 'Protéger les six cristaux (E sur l’autel pour commencer)'
-      },
-      { k: 'guardian', text: 'Vaincre l’Ombre, le cœur des échos (E sur le sceau)' },
-      { k: 'choice', npc: 'vesper', text: 'Décider du sort de Vesper' },
-      { k: 'collect', n: 6, text: 'Réunir la lumière des six cristaux' }
-    ],
-    reward: {
-      gold: 900,
-      flags: ['star6', 'sanct_aurore', 'title', 'aurora'],
-      text: 'Titre « Gardien de l’Aurore », aura lumineuse, sixième étoile et la Chambre de l’Aurore pour toujours'
     },
-    talk: {
-      offer: [
-        'Je suis Auralis. J’étais le gardien du Cœur… et je suis resté, même quand tout le monde est parti. Même quand ma sœur a cessé de chanter.',
-        'Elle arrive, et l’Ombre avec elle. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille.'
+    {
+      id: 14,
+      chapter: 2,
+      main: false,
+      title: 'Le fantôme qui avait oublié son nom',
+      npc: 'esprit',
+      site: 'q14',
+      level: 25,
+      summary:
+        'Un esprit amical erre dans le Marais brumeux. Il oublie son nom à chaque nouvelle lune, et sans nom il ne peut pas faire sa tournée. Il faut interroger les habitants et les objets du marais, lui rendre son nom et l’accompagner.',
+      steps: [
+        { k: 'clues', n: 4, text: 'Interroger les habitants et examiner les objets du marais (4 indices)' },
+        { k: 'choice', text: 'Rendre son nom à l’esprit' },
+        {
+          k: 'escort',
+          art: 'ghost',
+          who: 'Ilian',
+          from: [0, -2],
+          to: [0, 12],
+          ambush: [
+            ['Wisp', 2],
+            ['Wisp', 3]
+          ],
+          label: 'Accompagner Ilian',
+          text: 'Accompagner Ilian pour sa dernière tournée'
+        }
       ],
-      active: 'Tiens bon. Tant qu’il reste des cristaux, le Cœur peut se réveiller.',
-      ask: 'L’Ombre m’a tenu compagnie quand vous m’avez laissée. Elle n’était pas mauvaise, au début. Elle avait faim, et moi aussi. Je suis fatiguée, gardien. Que fais-tu de moi ?',
-      ready:
-        'Le Cœur s’éveille… Et Lumi… regarde-la. Elle était une étincelle du Cœur depuis le début. Elle pouvait rentrer. Elle a choisi de rester avec toi. Gardien de l’Aurore.',
-      after: 'L’île respire à nouveau. Les six sanctuaires brillent. Merci, Gardien.',
-      afterChoice: [
-        'Ma sœur a repris sa place dans le chœur. Elle chante faux. C’est le plus beau son que j’aie entendu depuis mille ans.',
-        'Ma sœur a repris la mer. Elle écrira, dit-elle. Je lui ai laissé une étoile allumée, au cas où.'
-      ]
-    },
-    choices: ['Reviens chanter avec nous', 'Pars en paix, et ne reviens pas'],
-    verse: 'Cœur, réveille-toi : nous chantons à nouveau, l’aube a gardé ta place au bord de l’eau.',
-    memory:
-      'Le Cœur de l’Aurore se réveille. Les six sanctuaires retrouvent leur lumière, et Lumi révèle la vérité : elle était une étincelle du Cœur, tombée du ciel pour trouver quelqu’un capable de le réveiller. Ce quelqu’un, c’était toi. Quant à Vesper, elle a entendu son nom dans la Ballade. Personne ne l’avait effacé de la musique.'
-  },
-  {
-    id: 28,
-    chapter: 5,
-    main: false,
-    title: 'Le monde à l’envers',
-    npc: 'lyss',
-    site: 'q28',
-    level: 53,
-    summary:
-      'Deux clairières se reflètent l’une l’autre. Ce qu’on change dans la première change la seconde… à l’envers.',
-    steps: [
-      {
-        k: 'kill',
-        n: 6,
-        mobs: ['Fée sauvage'],
-        what: 'Fée calmée',
-        text: 'Calmer les fées qui brouillent le reflet'
+      reward: { gold: 150, item: 'Épique', text: 'Équipement Épique de ton niveau' },
+      talk: {
+        offer: [
+          'Bouuh… pardon. Je ne voulais pas te faire peur. J’ai oublié mon nom, tu sais. Ça arrive, quand on est mort depuis longtemps.',
+          'Les gens d’ici et les objets du marais se souviennent peut-être de moi. Tu veux bien chercher ?'
+        ],
+        active:
+          'Une lanterne, une barque, un vieux chapeau… et les habitants. Quelqu’un se souvient forcément.',
+        ask: 'Alors… tu sais qui j’étais ?',
+        ready:
+          'Ilian le lanternier. Oui, c’était moi. Merci d’avoir fait la tournée avec moi. À la prochaine lune, je l’aurai sans doute encore oublié…',
+        after:
+          'Je m’appelle… Ilian, je crois. À chaque nouvelle lune, ça m’échappe encore. Si je l’oublie, la guilde saura où me trouver.'
       },
-      {
-        k: 'puzzle',
-        text: 'Actionner les leviers pour ouvrir un passage dans l’autre clairière'
+      choices: ['Orrin le passeur', 'Ilian le lanternier', 'Barnabé le pêcheur', 'Silas le chapelier'],
+      answer: 1
+    },
+    {
+      id: 15,
+      chapter: 2,
+      main: false,
+      title: 'La traversée des nénuphars',
+      npc: 'pipo',
+      site: 'q15',
+      level: 27,
+      summary:
+        'Pipo, enfant du Marais brumeux : Gobe-Tout, le vieux basilic de l’étang, a encore avalé la clé du coffre de l’îlot. Il faut attirer le basilic en chassant les siens, le vaincre pour reprendre la clé, puis traverser sur les nénuphars qui coulent.',
+      steps: [
+        {
+          k: 'kill',
+          n: 6,
+          mobs: ['Basilic'],
+          what: 'Basilic vaincu',
+          text: 'Attirer le vieux basilic en chassant les siens'
+        },
+        {
+          k: 'hunt',
+          mob: 'Basilic',
+          title: 'Gobe-Tout, le basilic glouton',
+          at: [-5, -2],
+          icon: '🗝️',
+          label: 'Appeler Gobe-Tout',
+          text: 'Vaincre Gobe-Tout et récupérer la clé'
+        },
+        {
+          k: 'reach',
+          at: [4, 0],
+          text: 'Traverser l’étang sur les nénuphars sans t’arrêter et ouvrir le coffre de l’îlot'
+        }
+      ],
+      reward: { gold: 120, item: 'Épique', text: 'Le coffre caché (équipement Épique de ton niveau)' },
+      talk: {
+        offer: [
+          'Il y a un coffre sur l’îlot ! J’avais la clé, mais Gobe-Tout l’a gobée. Il gobe tout. C’est pour ça qu’il s’appelle comme ça.',
+          'Après, saute de nénuphar en nénuphar sans t’arrêter. Si tu tombes, l’eau te ramène sur la rive. Promis, je ne rirai pas !'
+        ],
+        active:
+          'Chasse les basilics pour faire sortir Gobe-Tout, reprends-lui la clé, puis saute de nénuphar en nénuphar sans t’arrêter !',
+        ready:
+          'Tu l’as fait ! Hi hi, tu sens le basilic. Gobe-Tout avale tout ce qui brille, alors il y aura sûrement une prochaine fois.',
+        after: 'Je m’entraîne à sauter. Et Gobe-Tout a déjà avalé ma nouvelle clé…'
       }
-    ],
-    reward: { gold: 500, item: 'Légendaire', text: 'Le coffre enchanté (équipement Légendaire)' },
-    talk: {
-      offer: [
-        'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite. Et les fées s’amusent à le rider.',
-        'Calme-les, puis abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.'
+    },
+    // ---------------------------------------------------------------- Chapitre IV
+    {
+      id: 16,
+      chapter: 3,
+      main: true,
+      title: 'Le village des feuilles dorées',
+      npc: 'erable',
+      site: 'q16',
+      requires: 12,
+      level: 32,
+      summary:
+        'La troisième étoile dort sous les feuilles d’un village oublié de la Forêt automnale. La Confrérie du Voile pille ses ruines pour la trouver avant toi.',
+      steps: [
+        { k: 'collect', n: 4, text: 'Toucher les quatre feuilles dorées pour voir les souvenirs du village' },
+        {
+          k: 'kill',
+          n: 8,
+          mobs: ['Pilleur', 'Bandit'],
+          what: 'Voilé mis en fuite',
+          text: 'Chasser les pilleurs et les bandits de la Confrérie'
+        },
+        {
+          k: 'loot',
+          n: 4,
+          mobs: ['Pilleur', 'Bandit'],
+          icon: '🎒',
+          item: 'Objet du village',
+          text: 'Reprendre ce qu’ils ont volé au village'
+        },
+        {
+          k: 'pick',
+          n: 4,
+          at: [
+            [-4, -2],
+            [4, -2],
+            [-4, 2],
+            [4, 2]
+          ],
+          art: 'house',
+          keep: true,
+          icon: '🏚️',
+          item: 'Maison rendue à elle-même',
+          label: 'Rendre l’objet à la maison',
+          text: 'Rendre à chaque maison ce qui lui appartient',
+          world: ['sanct_saisons']
+        }
       ],
-      active: 'Deux leviers abaissés, un seul levé. Regarde quels rochers bougent de l’autre côté du miroir.',
-      ready: 'Tu as traversé le miroir ! Le coffre enchanté est à toi.',
-      after: 'Parfois, je me demande quelle clairière est la vraie.'
-    }
-  },
-  {
-    id: 29,
-    chapter: 5,
-    main: false,
-    title: 'Le dragon qui avait peur de voler',
-    npc: 'pyria',
-    site: 'q29',
-    level: 55,
-    summary:
-      'Pyria élève un jeune dragon qui n’ose pas voler. Il lui faut du sucre, du courage, et quelqu’un qui coure devant lui.',
-    steps: [
-      {
-        k: 'pick',
-        n: 5,
-        spread: [5, 10],
-        icon: '🍑',
-        item: 'Pêche étoilée',
-        label: 'Cueillir la pêche',
-        text: 'Cueillir des pêches étoilées pour Braise'
+      reward: {
+        gold: 280,
+        flags: ['star3', 'sanct_saisons'],
+        text: 'Troisième étoile et accès à la Bibliothèque des Saisons'
       },
-      {
-        k: 'wave',
-        waves: [2, 3],
-        mobs: ['Drake astral'],
-        what: 'Braise',
-        icon: '🐉',
-        art: 'horn',
-        at: [-3, 1],
-        label: 'Sonner le cor',
-        text: 'Protéger Braise des drakes qui se moquent de lui'
+      talk: {
+        offer: [
+          'Ici vivait un village, avant l’Ombre. Ses maisons sont tombées, mais les feuilles dorées se souviennent de tout, et la troisième étoile dort sous elles.',
+          'Les Voilés fouillent les ruines et emportent les souvenirs des maisons. Touche les feuilles pour voir le village, chasse les pilleurs, reprends ce qu’ils ont volé et rends-le à chaque maison. Quand le village se souviendra de lui-même, l’étoile se lèvera.'
+        ],
+        active:
+          'Les pilleurs de la Confrérie rôdent dans toute la Forêt automnale. Ils cherchent l’étoile sans savoir qu’elle est sous leurs pieds.',
+        ready:
+          'Le village se souvient… et l’étoile se lève des feuilles ! Trois sur six. Mais une question demeure : pourquoi les anciens ont-ils endormi le Cœur, et comment le réveiller ? Solenne garde la fresque des saisons, près des grands érables. Elle le sait peut-être.',
+        after:
+          'Trois étoiles sur six. Solenne garde la fresque des saisons : elle sait pourquoi le Cœur s’est endormi.'
       },
-      {
-        k: 'race',
-        n: 6,
-        spread: [5, 10],
-        text: 'Courir devant Braise pour lui montrer comment prendre son élan',
-        world: ['pyria']
+      memory:
+        'Les feuilles dorées : un village heureux, une forge, un four, une cloche et une harpe. Quand l’ombre vint, les villageois partirent vers les sanctuaires… en laissant tout derrière eux.'
+    },
+    {
+      id: 17,
+      chapter: 3,
+      main: true,
+      title: 'Le secret des quatre saisons',
+      npc: 'solenne',
+      site: 'q17',
+      requires: 16,
+      level: 36,
+      summary:
+        'La fresque des saisons raconte pourquoi les anciens ont endormi le Cœur. Elle est en morceaux, et les esprits des saisons la gardent.',
+      steps: [
+        { k: 'collect', n: 4, text: 'Retrouver les quatre fragments de la fresque' },
+        {
+          k: 'wave',
+          waves: [3, 3, 4, 4],
+          seasons: ['Fée sauvage', 'Élémentaire', 'Corbeau spectral', 'Serpent des glaces'],
+          mobs: ['Corbeau spectral'],
+          what: 'la fresque',
+          icon: '🍂',
+          art: 'pillar',
+          at: [0, 0],
+          label: 'Assembler la fresque',
+          text: 'Tenir tête aux quatre saisons, l’une après l’autre',
+          world: ['archives']
+        },
+        { k: 'guardian', text: 'Vaincre Fanegrise, l’écho de l’automne (E sur le sceau)' }
+      ],
+      reward: {
+        gold: 320,
+        flags: ['archives'],
+        text: 'Accès aux archives anciennes (un souvenir dans le journal)'
+      },
+      talk: {
+        offer: [
+          'La fresque des saisons dit pourquoi le Cœur s’est endormi. Elle est en quatre morceaux : rassemble-les et repose-les au centre du cercle.',
+          'Les esprits du printemps, de l’été, de l’automne et de l’hiver viendront voir qui ose. Ils ne sont pas méchants : ils ont peur. Tiens bon.'
+        ],
+        active: 'Les fragments sont au nord, à l’est, au sud et à l’ouest. Comme les saisons.',
+        ready:
+          'Les archives parlent : « Le Cœur fut endormi pour que l’Ombre ne le dévore pas. » Mais personne n’a écrit comment le réveiller… sauf une main, dans la marge : « Moi, je m’en souviens. » Vesper. Les anciens ont laissé une machine sous le désert, dans la Cité des Étoiles : elle saura. Sahir connaît le chemin.',
+        after:
+          'Pour savoir comment réveiller le Cœur, il faut la machine de la Cité des Étoiles, sous le Désert oublié. Sahir connaît les obélisques qui en gardent l’entrée.'
+      },
+      verse: 'Quatre saisons tournent autour d’un seul nom ; la feuille qui tombe est encore une chanson.',
+      memory:
+        'Les archives des saisons : l’Ombre se nourrissait de lumière. Pour l’affamer, les anciens endormirent le Cœur et cachèrent ses six étoiles. Quand l’Ombre disparut, plus personne ne se souvenait comment le réveiller. Dans la marge, une autre main a écrit : « Moi, je m’en souviens. »'
+    },
+    {
+      id: 18,
+      chapter: 3,
+      main: false,
+      title: 'Le concours des feuilles',
+      npc: 'flavio',
+      site: 'q18',
+      level: 33,
+      summary:
+        'Flavio, de la Forêt automnale, organise un concours à chaque saison et cherche des concurrents : une course à travers les érables, puis la feuille dorée à attraper au vol.',
+      steps: [
+        { k: 'race', n: 6, spread: [6, 11], text: 'Courir la boucle du concours avant la fin du temps' },
+        { k: 'catch', text: 'Attraper la feuille dorée dans le vent (E quand elle est sur toi)' }
+      ],
+      reward: { gold: 220, item: 'Épique', text: 'Équipement Épique de ton niveau' },
+      talk: {
+        offer: [
+          'Le grand concours d’automne ! Première épreuve : la boucle des érables. Six fanions, et le temps file.',
+          'Deuxième épreuve : une feuille dorée danse dans le vent. Ne la poursuis pas, devine où elle va. E quand elle passe sur toi !'
+        ],
+        active:
+          'Touche les six fanions avant la fin du temps. Pour la feuille, ne la poursuis pas : devine où le vent l’emmène, et E quand elle passe sur toi.',
+        ready:
+          'Champion ! Garde la feuille, elle ne fanera jamais. Reviens au prochain concours : je compte bien te battre.',
+        after: 'Le prochain concours approche. Je l’annoncerai au tableau de la guilde.'
       }
-    ],
-    reward: {
-      gold: 540,
-      item: 'Épique',
-      flags: ['pyria'],
-      text: 'Équipement Épique de ton niveau et Pyria s’installe dans la forêt'
     },
-    talk: {
-      offer: [
-        'Braise a peur du vide. Les grands drakes le savent, et ils viennent rire de lui tous les soirs.',
-        'Donne-lui des pêches, fais taire les moqueurs, puis cours devant lui. Aussi vite que tu peux. Il te suivra, j’en suis sûre.'
+    {
+      id: 19,
+      chapter: 3,
+      main: false,
+      title: 'Le moulin qui tournait à l’envers',
+      npc: 'odel',
+      site: 'q19',
+      level: 35,
+      summary:
+        'Odel, meunier de la Forêt automnale : les trolls lui ont encore volé ses engrenages pour s’en faire des colliers. Depuis, son moulin tourne à l’envers, le grain s’entasse au grenier, et une grosse bête y a fait son nid.',
+      steps: [
+        {
+          k: 'loot',
+          n: 3,
+          chance: 0.5,
+          mobs: ['Troll'],
+          icon: '⚙️',
+          item: 'Engrenage',
+          text: 'Reprendre les engrenages aux trolls'
+        },
+        {
+          k: 'pick',
+          n: 3,
+          at: [
+            [-2, 0],
+            [0, 0],
+            [2, 0]
+          ],
+          art: 'gear',
+          keep: true,
+          icon: '⚙️',
+          item: 'Engrenage remonté',
+          label: 'Remonter l’engrenage',
+          text: 'Remonter les engrenages du moulin',
+          world: ['grenier']
+        },
+        {
+          k: 'hunt',
+          mob: 'Corbeau spectral',
+          title: 'Scrr-Scrr, la terreur du grenier',
+          at: [4, 2],
+          icon: '🪶',
+          label: 'Ouvrir le grenier',
+          text: 'Déloger ce qui fait « scrr-scrr » dans le grenier'
+        }
       ],
-      active: 'Il aime les pêches bien mûres. Et il aime bien tes bottes, mais ne le laisse pas les manger.',
-      ready:
-        'IL VOLE ! Braise vole ! On va rester dans la forêt, il adore les cristaux. Tiens, il a choisi ça pour toi dans mes affaires.',
-      after: 'Braise fait des loopings maintenant. Il est insupportable. Je l’adore.'
-    }
-  },
-  {
-    id: 30,
-    chapter: 5,
-    main: false,
-    title: 'Le lac aux mille étoiles',
-    npc: 'elya',
-    site: 'q30',
-    level: 57,
-    summary:
-      'Le lac reflète une constellation, mais des ents malades lui font de l’ombre. Élya dit qu’il faut marcher sur ses étoiles, dans l’ordre où elles s’allument.',
-    steps: [
-      {
-        k: 'kill',
-        n: 6,
-        mobs: ['Ent corrompu'],
-        what: 'Ent apaisé',
-        text: 'Apaiser les ents corrompus autour du lac'
+      reward: {
+        gold: 300,
+        flags: ['grenier'],
+        item: 'Épique',
+        text: 'Or et le coffre du grenier (équipement Épique)'
       },
-      { k: 'puzzle', text: 'Marcher sur les pierres du lac dans l’ordre de la constellation reflétée' }
-    ],
-    reward: {
-      gold: 600,
-      jewel: true,
-      text: 'Un bijou Légendaire avec des statistiques secondaires aléatoires'
+      talk: {
+        offer: [
+          'Les trolls m’ont pris trois engrenages. Des colliers ! Ils en font des colliers ! Et mon moulin tourne à l’envers.',
+          'Reprends-les, remonte-les. Et tant que tu y es… quelque chose fait « scrr-scrr » dans mon grenier. Je préfère ne pas savoir.'
+        ],
+        active:
+          'Reprends mes engrenages aux trolls, remonte-les dans le moulin, puis chasse la bête qui mange mon grain au grenier.',
+        ready:
+          'Il tourne dans le bon sens, et le grenier est calme. Les trolls finiront par revenir, ils adorent ce qui brille. Merci !',
+        after:
+          'Ma farine est fine comme de la poussière d’étoile. Si les trolls reviennent, la guilde le saura.'
+      }
     },
-    talk: {
-      offer: [
-        'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre. Enfin, quand les ents ne lui cachent pas le ciel.',
-        'Apaise-les, puis marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.'
+    {
+      id: 20,
+      chapter: 3,
+      main: false,
+      title: 'Le renard et les trois voyageurs',
+      npc: 'voyageurs',
+      site: 'q20',
+      level: 37,
+      summary:
+        'Trois voyageurs campent dans la Forêt automnale : un renard magique leur vole leurs provisions, et ils ne sont jamais d’accord sur l’endroit où il se cache. Il faut écouter leurs témoignages, trouver la cachette et rattraper le renard.',
+      steps: [
+        { k: 'clues', n: 3, text: 'Écouter les trois témoignages' },
+        { k: 'search', text: 'Fouiller la bonne cachette (E)' },
+        {
+          k: 'chase',
+          n: 1,
+          art: 'fox',
+          who: 'Malice',
+          label: 'Attraper le renard',
+          at: [-4, -2],
+          text: 'Rattraper le renard magique'
+        }
       ],
-      active: 'Regarde le reflet : l’étoile qui s’allume en premier, puis la suivante…',
-      ready: 'Le lac t’a reconnu. Ce bijou a été taillé dans une étoile tombée. Il est à toi.',
-      after: 'Les nuits claires, le lac brille encore pour toi.'
-    }
-  },
-  ...INTERLUDE_QUESTS
-]);
+      reward: { gold: 260, item: 'Épique', text: 'La cachette secrète du renard (équipement Épique)' },
+      talk: {
+        offer: [
+          'Un renard qui brille ! Il a filé avec nos provisions. Chacun de nous l’a vu, mais pas au même endroit…',
+          'Écoute-nous tous les trois, compare, et trouve sa cachette. Attention, l’un de nous se trompe souvent.'
+        ],
+        active: 'Deux de nos témoignages sont vrais. Le troisième… c’est Gaspard, il voit mal.',
+        ready:
+          'La cachette ! Et nos provisions… Ce renard est malin : il trouvera une autre cachette, c’est sûr.',
+        after: 'Malice, le renard, change de cachette à chaque lune. On laisse toujours un mot à la guilde.'
+      },
+      witnesses: true
+    },
+    // ---------------------------------------------------------------- Chapitre V
+    {
+      id: 21,
+      chapter: 4,
+      main: true,
+      title: 'La cité sous les sables',
+      npc: 'sahir',
+      site: 'q21',
+      requires: 17,
+      level: 42,
+      summary:
+        'Trois obélisques gardent l’entrée de la Cité des Étoiles, où dorment la quatrième étoile et la machine des anciens. Les morts de la cité en barrent la route.',
+      steps: [
+        {
+          k: 'kill',
+          n: 10,
+          mobs: ['Squelette'],
+          what: 'Veilleur renvoyé au sable',
+          text: 'Renvoyer au sable les veilleurs de la cité'
+        },
+        {
+          k: 'pick',
+          n: 3,
+          at: [
+            [-5, 0],
+            [5, 0],
+            [0, 5]
+          ],
+          art: 'obelisk',
+          keep: true,
+          icon: '🗿',
+          item: 'Obélisque dégagé',
+          label: 'Dégager l’obélisque',
+          ambush: ['Squelette', 2],
+          text: 'Dégager les trois obélisques ensevelis'
+        },
+        {
+          k: 'hunt',
+          mob: 'Chevalier déchu',
+          title: 'Rakhem, le gardien sans visage',
+          at: [0, 1],
+          icon: '✦',
+          label: 'Poser la main sur l’étoile gravée',
+          text: 'Vaincre le gardien qui barre l’escalier',
+          world: ['cite', 'sanct_etoiles']
+        }
+      ],
+      reward: {
+        gold: 380,
+        flags: ['star4', 'sanct_etoiles'],
+        text: 'Quatrième étoile et accès à la Cité des Étoiles'
+      },
+      talk: {
+        offer: [
+          'La Cité des Étoiles ? Trois obélisques en gardent l’entrée, sous le sable. La quatrième étoile y dort, et la machine des anciens aussi.',
+          'Mais les morts se sont relevés depuis le passage de la Confrérie. Renvoie-les au sable, dégage les trois obélisques et vaincs le gardien de l’escalier.'
+        ],
+        active:
+          'Les squelettes ne sont pas cruels. Ils obéissent à un ordre vieux de mille ans : « Ne laissez entrer personne. »',
+        ready:
+          'Le sable s’effondre… un escalier ! La Cité des Étoiles, et sa lumière : la quatrième étoile ! Quatre sur six. En bas, Astéria étudie la vieille machine. Elle a besoin de toi pour la faire parler.',
+        after:
+          'Quatre étoiles sur six. Descends dans la Cité des Étoiles : Astéria t’y attend avec la machine des anciens.'
+      }
+    },
+    {
+      id: 22,
+      chapter: 4,
+      main: true,
+      title: 'La machine de l’Aurore',
+      npc: 'asteria',
+      site: 'q22',
+      requires: 21,
+      level: 47,
+      summary:
+        'Sous la Cité des Étoiles, une machine des anciens sait comment réveiller le Cœur. Il lui faut du verre solaire, et quelqu’un pour la défendre quand elle s’éveille.',
+      steps: [
+        {
+          k: 'loot',
+          n: 4,
+          mobs: ['Drake des dunes'],
+          icon: '🔶',
+          item: 'Écaille de verre solaire',
+          text: 'Prendre des écailles de verre aux drakes des dunes'
+        },
+        {
+          k: 'pick',
+          n: 3,
+          at: [
+            [-2, 3],
+            [0, 3],
+            [2, 3]
+          ],
+          art: 'lever',
+          keep: true,
+          icon: '⚙️',
+          item: 'Anneau lancé',
+          label: 'Lancer l’anneau',
+          ambush: ['Scorpion', 2],
+          text: 'Lancer les trois anneaux de la machine'
+        },
+        {
+          k: 'wave',
+          waves: [3, 4, 5],
+          mobs: ['Scorpion', 'Squelette', 'Minotaure'],
+          what: 'la machine',
+          icon: '⚙️',
+          art: 'barrel',
+          at: [0, 4],
+          label: 'Allumer la machine',
+          text: 'Défendre la machine pendant qu’elle chauffe',
+          world: ['machine']
+        },
+        { k: 'guardian', text: 'Vaincre Sablamort, l’écho des dunes (E sur le sceau)' }
+      ],
+      reward: {
+        gold: 460,
+        flags: ['star5'],
+        item: 'Épique',
+        text: 'Cinquième étoile et la salle du trésor (équipement Épique)'
+      },
+      talk: {
+        offer: [
+          'Cette machine a été faite pour une seule chose : dire comment réveiller le Cœur. Trois anneaux, six symboles chacun. Quand ils tournent ensemble, elle parle.',
+          'Il lui faut du verre solaire, et les drakes des dunes le portent sur le dos. Une fois lancée, elle fera du bruit. Beaucoup de bruit. Tout le désert viendra : il faudra la défendre.'
+        ],
+        active: 'Les drakes des dunes muent souvent. Ceux qui muent sont de mauvaise humeur.',
+        ready:
+          'Elle parle : « Réunissez les six étoiles dans le sanctuaire central, et qu’une étincelle du Cœur chante avec elles. » Une étincelle du Cœur… c’est Lumi ! La cinquième étoile était dans la machine : cinq sur six. Lumi connaît le chemin du sanctuaire central, dans la Forêt enchantée. Et Vesper aussi, maintenant : elle écoutait derrière un pilier.',
+        after:
+          'Cinq étoiles sur six. Suis Lumi dans la Forêt enchantée, jusqu’au Sanctuaire des Six Lumières. Vesper y va aussi.'
+      },
+      verse: 'Le sable a tout bu, sauf l’étoile et le soir ; marche, voyageur, la nuit n’est pas le noir.',
+      memory:
+        'La machine de l’Aurore : pour réveiller le Cœur, il faut réunir les six étoiles dans le sanctuaire central, puis qu’une étincelle du Cœur lui-même chante avec elles. Derrière un pilier, une femme voilée écoutait. Elle est partie sans se battre.'
+    },
+    {
+      id: 23,
+      chapter: 4,
+      main: false,
+      title: 'Le marchand qui vendait du vent',
+      npc: 'zafir',
+      site: 'q23',
+      level: 43,
+      summary:
+        'Zafir, marchand du Désert oublié, vend du vent en bouteille. Ses tourbillons se sont échappés, les drakes des dunes les avalent, et il veut offrir une bouteille de brise à Amira, à l’oasis, pour se faire pardonner une vieille dette.',
+      steps: [
+        {
+          k: 'chase',
+          n: 4,
+          art: 'whirl',
+          who: 'Tourbillon',
+          label: 'Mettre en bouteille',
+          text: 'Remettre quatre tourbillons en bouteille'
+        },
+        {
+          k: 'kill',
+          n: 6,
+          mobs: ['Drake des dunes'],
+          what: 'Drake mis en fuite',
+          text: 'Éloigner les drakes qui respirent la marchandise'
+        },
+        {
+          k: 'talk',
+          npc: 'amira',
+          lines: [
+            'Une bouteille de brise, de la part de Zafir ? Il me doit de l’argent depuis trois ans, et il m’envoie du vent.',
+            'Oh… mais c’est du vrai. Il sent la mer. Dis-lui que nous sommes quittes. Et que… non, rien. Dis-lui juste merci.'
+          ],
+          text: 'Livrer une bouteille de brise à Amira, à l’oasis'
+        }
+      ],
+      reward: { gold: 330, item: 'Épique', text: 'Équipement Épique de ton niveau' },
+      talk: {
+        offer: [
+          'Du vent du nord, du sud, de l’est, de l’ouest ! Tu ne me crois pas ? Regarde-le courir, il s’est échappé !',
+          'Rattrape mes tourbillons, éloigne les drakes qui les respirent, et porte une bouteille à Amira. Discrètement. C’est un cadeau.'
+        ],
+        active:
+          'Remets mes tourbillons en bouteille, chasse les drakes qui les avalent, puis porte une bouteille de brise à Amira, à l’oasis. Discrètement : c’est un cadeau.',
+        ready:
+          'Elle a souri ? Elle a SOURI ? Je lui en enverrai une autre à la prochaine lune. Merci, l’ami du vent.',
+        after: 'Chaque lune, j’envoie une bouteille à Amira. Et chaque lune, mes tourbillons s’échappent.'
+      }
+    },
+    {
+      id: 24,
+      chapter: 4,
+      main: false,
+      title: 'Le temple des miroirs',
+      npc: 'noura',
+      site: 'q24',
+      level: 46,
+      summary:
+        'Noura, prêtresse du Désert oublié : le sable a encore dérangé les miroirs du petit temple, et sa porte ne s’ouvre qu’au rayon du soleil. Il faut orienter les miroirs, puis calmer Néfer, la gardienne, que la lumière réveille.',
+      steps: [
+        { k: 'puzzle', text: 'Orienter les miroirs pour diriger le rayon solaire sur la porte' },
+        {
+          k: 'hunt',
+          mob: 'Squelette',
+          title: 'Néfer, la gardienne du rayon',
+          at: [2, -2],
+          icon: '☀️',
+          label: 'Franchir la porte',
+          text: 'Vaincre la gardienne du temple'
+        }
+      ],
+      reward: { gold: 360, item: 'Épique', text: 'Le coffre du temple (équipement Épique)' },
+      talk: {
+        offer: [
+          'Ce temple garde un coffre depuis mille ans. Sa porte attend un rayon de soleil.',
+          'Quatre miroirs, un rayon. Tourne-les (E), et suis la lumière jusqu’au soleil gravé sur la porte. Puis salue Néfer. Elle déteste être réveillée.'
+        ],
+        active:
+          'Tourne les miroirs (E) et suis le rayon depuis la pierre solaire jusqu’au soleil de la porte. Puis calme Néfer : elle déteste être réveillée.',
+        ready:
+          'La porte est ouverte et Néfer dort de nouveau. Les tempêtes déplacent les miroirs à chaque saison : reviens quand la guilde t’enverra.',
+        after: 'Je prie ici chaque matin. Quand une tempête dérange les miroirs, j’écris à la guilde.'
+      }
+    },
+    {
+      id: 25,
+      chapter: 4,
+      main: false,
+      title: 'Le secret de l’oasis',
+      npc: 'amira',
+      site: 'q25',
+      level: 48,
+      summary:
+        'Amira, de l’oasis du Désert oublié : les scorpions ont encore fait leurs nids dans l’aqueduc, l’eau n’arrive plus et les porteurs n’osent plus sortir. Il faut chasser les scorpions, détruire les nids et escorter un porteur jusqu’au bassin.',
+      steps: [
+        {
+          k: 'kill',
+          n: 10,
+          mobs: ['Scorpion'],
+          what: 'Scorpion vaincu',
+          text: 'Chasser les scorpions de l’oasis'
+        },
+        {
+          k: 'pick',
+          n: 4,
+          spread: [4, 8],
+          art: 'nest',
+          icon: '🦂',
+          item: 'Nid détruit',
+          label: 'Détruire le nid',
+          ambush: ['Scorpion', 2],
+          text: 'Détruire les nids qui bouchent l’aqueduc'
+        },
+        {
+          k: 'escort',
+          art: 'person',
+          look: { sex: 'm', race: 'humain', skin: '#a8724a', hair: '#1a1418', outfit: 'or' },
+          who: 'Porteur d’eau',
+          from: [-5, -3],
+          to: [2, 1],
+          ambush: [
+            ['Scorpion', 2],
+            ['Drake des dunes', 1]
+          ],
+          label: 'Accompagner le porteur',
+          text: 'Escorter le porteur d’eau jusqu’au bassin',
+          world: ['oasis']
+        }
+      ],
+      reward: { gold: 380, recipe: 'tajine', text: 'Recette « Tajine de l’oasis » et oasis restaurée' },
+      talk: {
+        offer: [
+          'L’eau n’arrive plus. Les scorpions ont fait leurs nids dans les conduits, et mes porteurs refusent de sortir.',
+          'Nettoie l’aqueduc, puis accompagne le dernier porteur courageux jusqu’au bassin. Une seule jarre suffira : l’eau appelle l’eau.'
+        ],
+        active: 'Un nid détruit, c’est une colère réveillée. Garde ton arme en main.',
+        ready:
+          'L’eau chante dans le bassin ! Les scorpions reviendront avec la saison sèche, mais aujourd’hui l’oasis respire. Merci, l’ami de l’eau.',
+        after:
+          'Les palmiers reverdissent. À la saison sèche, les scorpions reviennent toujours : la guilde le saura.'
+      }
+    },
+    // ---------------------------------------------------------------- Chapitre VI
+    {
+      id: 26,
+      chapter: 5,
+      main: true,
+      title: 'Le sanctuaire des six lumières',
+      npc: 'lumi',
+      site: 'q26',
+      requires: 22,
+      level: 52,
+      summary:
+        'Lumi te mène au Sanctuaire des Six Lumières. Trois épreuves attendent avant qu’on puisse poser les étoiles sur l’autel et ouvrir la Chambre de l’Aurore.',
+      steps: [
+        {
+          k: 'race',
+          n: 6,
+          spread: [5, 10],
+          text: 'Épreuve du souffle : courir avec la lumière avant qu’elle s’éteigne'
+        },
+        {
+          k: 'wave',
+          waves: [4, 5, 5],
+          mobs: ['Gardien astral', 'Fée sauvage'],
+          what: 'la flamme du sanctuaire',
+          icon: '🔥',
+          art: 'crystal',
+          at: [0, 1],
+          label: 'Allumer la flamme',
+          text: 'Épreuve du courage : garder la flamme du sanctuaire'
+        },
+        {
+          k: 'pick',
+          n: 6,
+          spread: [4, 9],
+          art: 'crystal',
+          icon: '✨',
+          item: 'Lumière retrouvée',
+          label: 'Recueillir la lumière',
+          text: 'Épreuve de la lumière : recueillir les six lumières égarées'
+        },
+        { k: 'spot', at: [0, -1], text: 'Placer les étoiles sur l’autel (E)' }
+      ],
+      reward: { gold: 520, flags: ['sanct_lumieres'], text: 'Accès à la Chambre de l’Aurore' },
+      talk: {
+        offer: [
+          '✨ C’est ici. Le Sanctuaire des Six Lumières… je m’en souviens. Si tu poses les étoiles sur l’autel, la Chambre de l’Aurore s’ouvrira, et le Cœur sera derrière.',
+          '✨ Mais les anciens ont laissé trois épreuves : courir avec la lumière, garder la flamme, et recueillir les lumières égarées. Je reste près de toi.'
+        ],
+        active:
+          '✨ Trois épreuves, puis l’autel. Je brille plus fort quand tu es près de moi. Tu l’avais remarqué ?',
+        ready:
+          '✨ Les étoiles brillent ensemble ! La Chambre de l’Aurore est ouverte. Auralis, le gardien du Cœur, nous y attend… et Vesper arrive.',
+        after: '✨ La Chambre de l’Aurore est ouverte. Auralis nous attend. Vite, avant Vesper !'
+      }
+    },
+    {
+      id: 27,
+      chapter: 5,
+      main: true,
+      title: 'Le Cœur de l’Aurore',
+      npc: 'auralis',
+      site: 'q27',
+      requires: 26,
+      level: 58,
+      summary:
+        'Dans la Chambre de l’Aurore, Auralis, le dernier gardien, attend pour réveiller le Cœur. Sa sœur Vesper arrive en même temps que toi, et l’Ombre avec elle.',
+      steps: [
+        { k: 'spot', at: [-4, 0], text: 'Lire la fresque du gardien (E)' },
+        {
+          k: 'defense',
+          text: 'Protéger les six cristaux (E sur l’autel pour commencer)'
+        },
+        { k: 'guardian', text: 'Vaincre l’Ombre, le cœur des échos (E sur le sceau)' },
+        { k: 'choice', npc: 'vesper', text: 'Décider du sort de Vesper' },
+        { k: 'collect', n: 6, text: 'Réunir la lumière des six cristaux' }
+      ],
+      reward: {
+        gold: 900,
+        flags: ['star6', 'sanct_aurore', 'title', 'aurora'],
+        text: 'Titre « Gardien de l’Aurore », aura lumineuse, sixième étoile et la Chambre de l’Aurore pour toujours'
+      },
+      talk: {
+        offer: [
+          'Je suis Auralis, le gardien du Cœur. Je suis resté ici quand tout le monde est parti, même quand ma sœur Vesper a cessé de chanter.',
+          'Elle arrive, et l’Ombre avec elle. Lis ma fresque, puis défends les six cristaux pendant que le Cœur s’éveille. Si l’Ombre les brise tous, il se rendormira pour toujours.'
+        ],
+        active: 'Tiens bon. Tant qu’il reste des cristaux, le Cœur peut se réveiller.',
+        ask: 'L’Ombre m’a tenu compagnie quand vous m’avez laissée. Elle n’était pas mauvaise, au début. Elle avait faim, et moi aussi. Je suis fatiguée, gardien. Que fais-tu de moi ?',
+        ready:
+          'Le Cœur s’éveille… Et Lumi… regarde-la. Elle était une étincelle du Cœur depuis le début. Elle pouvait rentrer. Elle a choisi de rester avec toi. Gardien de l’Aurore.',
+        after: 'L’île respire à nouveau. Les six sanctuaires brillent. Merci, Gardien.',
+        afterChoice: [
+          'Ma sœur a repris sa place dans le chœur. Elle chante faux. C’est le plus beau son que j’aie entendu depuis mille ans.',
+          'Ma sœur a repris la mer. Elle écrira, dit-elle. Je lui ai laissé une étoile allumée, au cas où.'
+        ]
+      },
+      choices: ['Reviens chanter avec nous', 'Pars en paix, et ne reviens pas'],
+      verse: 'Cœur, réveille-toi : nous chantons à nouveau, l’aube a gardé ta place au bord de l’eau.',
+      memory:
+        'Le Cœur de l’Aurore se réveille. Les six sanctuaires retrouvent leur lumière, et Lumi révèle la vérité : elle était une étincelle du Cœur, tombée du ciel pour trouver quelqu’un capable de le réveiller. Ce quelqu’un, c’était toi. Quant à Vesper, elle a entendu son nom dans la Ballade. Personne ne l’avait effacé de la musique.'
+    },
+    {
+      id: 28,
+      chapter: 5,
+      main: false,
+      title: 'Le monde à l’envers',
+      npc: 'lyss',
+      site: 'q28',
+      level: 53,
+      summary:
+        'Lyss, de la Forêt enchantée : deux clairières se reflètent l’une l’autre, et les fées sauvages brouillent encore le reflet. Il faut les calmer, puis actionner les leviers pour ouvrir un passage jusqu’au coffre de l’autre clairière.',
+      steps: [
+        {
+          k: 'kill',
+          n: 6,
+          mobs: ['Fée sauvage'],
+          what: 'Fée calmée',
+          text: 'Calmer les fées qui brouillent le reflet'
+        },
+        {
+          k: 'puzzle',
+          text: 'Actionner les leviers pour ouvrir un passage dans l’autre clairière'
+        }
+      ],
+      reward: { gold: 500, item: 'Légendaire', text: 'Le coffre enchanté (équipement Légendaire)' },
+      talk: {
+        offer: [
+          'Regarde : deux clairières jumelles. Mais le miroir est capricieux : la gauche devient la droite. Et les fées s’amusent à le rider.',
+          'Calme-les, puis abaisse les leviers (E) ici, et les rochers de l’autre clairière bougeront. Ouvre-toi un chemin jusqu’au coffre.'
+        ],
+        active:
+          'Deux leviers abaissés, un seul levé. Regarde quels rochers bougent de l’autre côté du miroir.',
+        ready:
+          'Tu as traversé le miroir ! Le reflet remplit le coffre à chaque pleine lune. Reviens quand les fées recommenceront.',
+        after: 'Parfois, je me demande quelle clairière est la vraie. Les fées, elles, s’en moquent.'
+      }
+    },
+    {
+      id: 29,
+      chapter: 5,
+      main: false,
+      title: 'Le dragon qui avait peur de voler',
+      npc: 'pyria',
+      site: 'q29',
+      level: 55,
+      summary:
+        'Pyria, de la Forêt enchantée, élève un jeune dragon, Braise, qui a peur du vide. Les grands drakes viennent se moquer de lui. Il faut lui donner du courage avec des pêches étoilées, chasser les moqueurs et courir devant lui pour lui montrer comment prendre son élan.',
+      steps: [
+        {
+          k: 'pick',
+          n: 5,
+          spread: [5, 10],
+          icon: '🍑',
+          item: 'Pêche étoilée',
+          label: 'Cueillir la pêche',
+          text: 'Cueillir des pêches étoilées pour Braise'
+        },
+        {
+          k: 'wave',
+          waves: [2, 3],
+          mobs: ['Drake astral'],
+          what: 'Braise',
+          icon: '🐉',
+          art: 'horn',
+          at: [-3, 1],
+          label: 'Sonner le cor',
+          text: 'Protéger Braise des drakes qui se moquent de lui'
+        },
+        {
+          k: 'race',
+          n: 6,
+          spread: [5, 10],
+          text: 'Courir devant Braise pour lui montrer comment prendre son élan',
+          world: ['pyria']
+        }
+      ],
+      reward: {
+        gold: 540,
+        item: 'Épique',
+        flags: ['pyria'],
+        text: 'Équipement Épique de ton niveau et Pyria s’installe dans la forêt'
+      },
+      talk: {
+        offer: [
+          'Braise a peur du vide. Les grands drakes le savent, et ils viennent rire de lui tous les soirs.',
+          'Donne-lui des pêches, fais taire les moqueurs, puis cours devant lui. Aussi vite que tu peux. Il te suivra, j’en suis sûre.'
+        ],
+        active:
+          'Il aime les pêches bien mûres. Et il aime bien tes bottes, mais ne le laisse pas les manger.',
+        ready:
+          'IL VOLE ! Braise vole ! Il oublie parfois comment faire, alors on recommencera. Merci, il t’adore.',
+        after: 'Braise fait des loopings, quand il n’a pas peur. Les jours de vent, il faut tout recommencer.'
+      }
+    },
+    {
+      id: 30,
+      chapter: 5,
+      main: false,
+      title: 'Le lac aux mille étoiles',
+      npc: 'elya',
+      site: 'q30',
+      level: 57,
+      summary:
+        'Élya, de la Forêt enchantée : les ents corrompus cachent encore le ciel au lac aux mille étoiles. Il faut les apaiser, puis marcher sur les pierres du lac dans l’ordre où s’allument les étoiles du reflet.',
+      steps: [
+        {
+          k: 'kill',
+          n: 6,
+          mobs: ['Ent corrompu'],
+          what: 'Ent apaisé',
+          text: 'Apaiser les ents corrompus autour du lac'
+        },
+        { k: 'puzzle', text: 'Marcher sur les pierres du lac dans l’ordre de la constellation reflétée' }
+      ],
+      reward: {
+        gold: 600,
+        jewel: true,
+        text: 'Un bijou Légendaire avec des statistiques secondaires aléatoires'
+      },
+      talk: {
+        offer: [
+          'Regarde le reflet : une constellation, le Cerf des neiges. Ses étoiles s’allument l’une après l’autre. Enfin, quand les ents ne lui cachent pas le ciel.',
+          'Apaise-les, puis marche sur les pierres du lac dans le même ordre. Une erreur, et le reflet s’efface : il faudra recommencer.'
+        ],
+        active: 'Regarde le reflet : l’étoile qui s’allume en premier, puis la suivante…',
+        ready:
+          'Le lac t’a reconnu. Chaque nuit claire, il recommence sa constellation. Reviens quand les ents la cacheront de nouveau.',
+        after: 'Les nuits claires, le lac brille pour toi. Les ents, eux, n’aiment pas la lumière.'
+      }
+    },
+    ...INTERLUDE_QUESTS
+  ]
+    .map(asContract)
+    .concat(GUILD_CONTRACTS)
+);
 // Changements du monde visibles par tous (monde.quetes.flags), et ceux des anciennes énigmes résolues.
 export const WORLD_FLAGS = Object.freeze([
   ...new Set([

@@ -32,15 +32,16 @@ function visualRnd() {
   return Math.random();
 }
 // Camp de l'Aurore : seule zone sûre de l'île, au cœur des Plaines verdoyantes (coordonnées en tuiles).
-// area : emprise du camp, en rectangles [x0, y0, x1, y1] (cases depuis le feu, bornes comprises), qui couvre tout ce
-// que camp-life.js et house.js y posent : le cœur (demeures, jardin, ferme, champs, ruisseau, verger) et le port
-// (quai et navire, à l'ouest). La zone sûre (isSafe) est ce rectangle, plus le cercle de rayon r + 2 autour du feu.
+// area : emprise du camp, en rectangles [x0, y0, x1, y1] (cases depuis le feu, bornes comprises) : le village fortifié
+// (remparts compris) et le port à l'ouest (quai et navire). La zone sûre (isSafe) est ce rectangle, plus le cercle de
+// rayon r + 2 autour du feu.
 const CANAAN_CAMP = Object.freeze({
   name: 'Camp de l’Aurore',
   x: 72,
   y: 234,
   r: 10,
-  area: Object.freeze([Object.freeze([-31, -21, 10, 21]), Object.freeze([-47, -2, -31, 9])])
+  // Enceinte du village (remparts compris, voir camp-life.js) et port, à l'ouest de la porte du quai.
+  area: Object.freeze([Object.freeze([-25, -21, 14, 20]), Object.freeze([-47, 0, -26, 9])])
 });
 // Intérieurs des bâtiments où l'on entre (house.js) : chaque pièce est posée dans un coin d'océan de la carte
 // (cases, murs compris), assez loin des autres pour qu'on n'en voie qu'une à la fois. La première est la maison
@@ -72,6 +73,8 @@ const CANAAN_ROOMS = Object.freeze(
     { id: 'sylv_racines', name: 'Maison des Racines', kind: 'elfroots', x: 336, y: 60, w: 13, h: 9 },
     { id: 'grange', name: 'Grange du Camp', kind: 'barn', x: 336, y: 90, w: 15, h: 9 },
     { id: 'poulailler', name: 'Poulailler', kind: 'barn', x: 366, y: 90, w: 11, h: 9 },
+    // Maison de la Guilde des Aventuriers (guild.js), au Camp de l'Aurore (océan de l'est).
+    { id: 'guilde', name: 'Maison de la Guilde', kind: 'guild', x: 366, y: 58, w: 15, h: 10 },
     // Forteresse naine de Durgrim, dans les Tréfonds (under) : pièces creusées dans la roche, au nord de la carte.
     {
       id: 'dur_hall',

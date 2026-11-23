@@ -846,6 +846,52 @@
           R(g, x + W / 2 - 1, y + 28, 2, 28, '#c8a038');
         }
       },
+      // Tableau des contrats de la guilde : panneau de liège encadré, avis épinglés, planche gravée en haut.
+      tableau_contrats: {
+        draw(g, x, y, W, H) {
+          R(g, x + 4, y + 10, W - 8, 72, '#2e1c10');
+          R(g, x + 7, y + 13, W - 14, 66, '#6a4428');
+          R(g, x + 10, y + 26, W - 20, 50, '#b8875a');
+          R(g, x + 10, y + 26, W - 20, 3, '#cfa070');
+          // Planche du haut.
+          R(g, x + 24, y + 13, W - 48, 11, '#8a5e38');
+          R(g, x + 30, y + 17, W - 60, 3, '#3a2414');
+          // Trois avis.
+          const notes = [
+            ['#f4ead0', 18, 32, -1],
+            ['#fbf3df', W / 2 - 15, 30, 0],
+            ['#efe2c0', W - 50, 33, 1]
+          ];
+          for (const [col, nx, ny, tilt] of notes) {
+            R(g, x + nx, y + ny + tilt, 30, 38, '#00000033');
+            R(g, x + nx - 1, y + ny - 1, 30, 38, col);
+            for (let k = 0; k < 5; k++) R(g, x + nx + 4, y + ny + 8 + k * 5, 20 - (k % 2) * 6, 2, '#8a7a60');
+            R(g, x + nx + 12, y + ny - 3, 5, 5, '#c83a2a');
+            R(g, x + nx + 13, y + ny - 2, 2, 2, '#ff8a6a');
+          }
+          // Le sceau rouge de la guilde sur l'avis du milieu.
+          R(g, x + W / 2 + 4, y + 58, 8, 8, '#a82a20');
+        }
+      },
+      banniere_guilde: {
+        draw(g, x, y, W, H) {
+          R(g, x + 6, y + 14, W - 12, 4, '#d8b040');
+          R(g, x + 10, y + 18, W - 20, 50, '#3c4c8c');
+          R(g, x + 10, y + 18, W - 20, 4, '#5a6cb0');
+          g.fillStyle = '#3c4c8c';
+          g.beginPath();
+          g.moveTo(x + 10, y + 68);
+          g.lineTo(x + W / 2, y + 80);
+          g.lineTo(x + W - 10, y + 68);
+          g.fill();
+          // Écu d'or.
+          R(g, x + W / 2 - 8, y + 30, 16, 14, '#d8b040');
+          R(g, x + W / 2 - 6, y + 32, 12, 11, '#2e3c6c');
+          R(g, x + W / 2 - 5, y + 44, 10, 3, '#d8b040');
+          R(g, x + W / 2 - 2, y + 47, 4, 3, '#d8b040');
+          R(g, x + W / 2 - 1, y + 33, 2, 9, '#eef2f8');
+        }
+      },
       banniere_naine: {
         draw(g, x, y, W, H) {
           R(g, x + 6, y + 14, W - 12, 4, '#5a5e66');
@@ -964,6 +1010,13 @@
           floor: { style: 'planks', a: '#a07444', b: '#74502e', c: '#c0905c' },
           wall: { style: 'paper', face: '#a8bc94', dark: '#879c74', light: '#c4d4b0', top: '#3e2a18' },
           wains: ['#6a4428', '#4a2e1a', '#8a5e38'],
+          edge: WOOD_EDGE
+        },
+        // Maison de la Guilde : dalles de pierre, murs de pierre claire, lambris sombre.
+        guild: {
+          floor: { style: 'flagstone', a: '#a49a88', b: '#7c7262', c: '#c0b6a2' },
+          wall: { style: 'brick', face: '#cfc4ae', dark: '#a89c84', light: '#e6dcc8', top: '#3a2a1e' },
+          wains: ['#5a3c24', '#3a2414', '#7a5634'],
           edge: WOOD_EDGE
         },
         kitchen: {
@@ -2220,7 +2273,17 @@
       R(c, x - 3, y + 8, 26, 24, OUT);
       R(c, x - 2, y + 9, 24, 22, '#7a5230');
       R(c, x, y + 11, 20, 18, '#b08250');
-      if (kind === 'or') {
+      if (kind === 'guilde') {
+        // Écu bleu à bordure d'or et deux épées croisées.
+        R(c, x + 4, y + 13, 12, 10, '#d8b040');
+        R(c, x + 5, y + 14, 10, 9, '#3c4c8c');
+        R(c, x + 6, y + 23, 8, 2, '#d8b040');
+        R(c, x + 8, y + 25, 4, 2, '#d8b040');
+        for (let k = 0; k < 6; k++) {
+          R(c, x + 6 + k, y + 15 + k, 1, 1, '#eef2f8');
+          R(c, x + 13 - k, y + 15 + k, 1, 1, '#eef2f8');
+        }
+      } else if (kind === 'or') {
         R(c, x + 5, y + 16, 10, 10, '#c8a050');
         R(c, x + 7, y + 14, 6, 3, '#8a6a30');
         R(c, x + 8, y + 19, 4, 4, '#ffe080');
@@ -3398,6 +3461,31 @@
       BUILT.set(b, s);
       return s;
     }
+    // Enseigne de la Maison de la Guilde : planche de bois cerclée d'or au-dessus de la porte, entre les colonnes du
+    // porche, « GUILDE » en lettres dorées (traduit).
+    function guildPlaque(c, mid, base) {
+      const w = 70,
+        h = 17,
+        x = Math.round(mid - w / 2),
+        y = Math.round(base - 73);
+      c.fillStyle = OUT;
+      c.fillRect(x - 2, y - 2, w + 4, h + 4);
+      c.fillStyle = '#d8b040';
+      c.fillRect(x, y, w, h);
+      c.fillStyle = '#6a4428';
+      c.fillRect(x + 2, y + 2, w - 4, h - 4);
+      c.fillStyle = '#8a5a34';
+      c.fillRect(x + 2, y + 2, w - 4, 3);
+      c.fillStyle = '#f6dc78';
+      for (const sx of [x + 6, x + w - 9]) c.fillRect(sx, y + 6, 3, 5);
+      c.font = 'bold 11px Georgia, serif';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillStyle = OUT;
+      c.fillText(tt('GUILDE'), mid + 1, y + h / 2 + 2);
+      c.fillStyle = '#ffe28a';
+      c.fillText(tt('GUILDE'), mid, y + h / 2 + 1);
+    }
     function drawBuilding(c, b) {
       const X = b.x * TS,
         Y = b.y * TS,
@@ -3443,6 +3531,7 @@
           else if (e[0] === 10) campfire(c, e[1], e[2]);
         }
         roofTop = s.roofTop;
+        if (b.room?.id === 'guilde') guildPlaque(c, mid, base);
       } else roofTop = paintBuilding(c, b);
       // Nom du lieu (de près pour les demeures) et invitation à entrer (pas pour les maisons fermées des hameaux).
       const near = Math.hypot(P.x - mid, P.y - base) < 320;

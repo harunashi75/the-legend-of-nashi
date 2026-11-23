@@ -188,8 +188,13 @@ export function sanitizeAction(raw) {
   if (r.op === 'class-special') return { op: r.op };
   // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
   const questId = /** @param {unknown} v */ v =>
-    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 99 ? v : null;
-  if (['quest-accept', 'quest-turnin', 'quest-track', 'quest-talk'].includes(r.op))
+    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 199 ? v : null;
+  // quest-take / quest-abandon : prendre un contrat au tableau de la guilde, ou y renoncer.
+  if (
+    ['quest-accept', 'quest-turnin', 'quest-track', 'quest-talk', 'quest-take', 'quest-abandon'].includes(
+      r.op
+    )
+  )
     return questId(r.q) !== null ? { op: r.op, q: r.q } : null;
   if (r.op === 'quest-choice')
     return questId(r.q) !== null && Number.isInteger(r.choice) && r.choice >= 0 && r.choice <= 7

@@ -495,6 +495,115 @@ const MODELS = {
     e.window(x + w - 18, bot - 22, 10, 9);
     return r.roofTop - 10;
   },
+  // Maison de la Guilde des Aventuriers : grand hall de pierre claire, étage à colombages, haut toit d'ardoise bleue,
+  // pignon central à l'écu de la guilde, porche de pierre à double porte cintrée, bannières bleues, lanternes, fanions.
+  guilde(k, W, bot, e) {
+    const x = 6,
+      w = W - 12,
+      cx = W / 2,
+      blue = ['#7a8ee0', '#4a5eb4', '#33428a', '#222c5e'],
+      gold = ['#fff0a0', '#f0c850', '#c89a30', '#8a6418'];
+    // Rez-de-chaussée de pierre, étage à colombages sous le grand toit.
+    wallStone(k, x, bot - 26, w, 26, RAMP.stone);
+    const r = gableHouse(k, {
+      x: x + 6,
+      w: w - 12,
+      bot: bot - 26,
+      wallH: 26,
+      gableH: 30,
+      depth: 26,
+      roof: RAMP.roofSlate,
+      trim: RAMP.darkwood,
+      gableRamp: RAMP.plaster,
+      wall: (k2, wx, wy, ww, wh) => wallPlaster(k2, wx, wy, ww, wh, RAMP.plaster, RAMP.darkwood),
+      gable: (k2, gx, gy, gw, gcx) => {
+        // Écu de la guilde : bleu bordé d'or, deux épées croisées.
+        k2.rect(gcx - 8, gy - 22, 16, 13, gold[2]);
+        k2.rect(gcx - 7, gy - 21, 14, 11, blue[2]);
+        k2.poly(
+          [
+            [gcx - 8, gy - 9],
+            [gcx, gy - 3],
+            [gcx + 8, gy - 9]
+          ],
+          gold[2]
+        );
+        k2.poly(
+          [
+            [gcx - 7, gy - 10],
+            [gcx, gy - 5],
+            [gcx + 7, gy - 10]
+          ],
+          blue[2]
+        );
+        k2.rect(gcx - 7, gy - 21, 14, 2, blue[1]);
+        k2.line(gcx - 5, gy - 19, gcx + 4, gy - 8, '#eef2f8');
+        k2.line(gcx + 4, gy - 19, gcx - 5, gy - 8, '#eef2f8');
+        k2.rect(gcx - 6, gy - 13, 3, 1, gold[1]);
+        k2.rect(gcx + 3, gy - 13, 3, 1, gold[1]);
+      }
+    });
+    // Poutre entre les deux niveaux.
+    k.rect(x - 2, bot - 28, w + 4, 3, RAMP.darkwood[2]);
+    k.rect(x - 2, bot - 28, w + 4, 1, RAMP.darkwood[0]);
+    // Fenêtres de l'étage (volets bleus) et bannières entre elles.
+    for (const wx of [x + 14, x + 40, x + w - 50, x + w - 24]) {
+      windowRect(k, wx, bot - 47, 10, 10, RAMP.darkwood, blue);
+      e.window(wx, bot - 47, 10, 10);
+    }
+    for (const bx of [x + 28, x + w - 36]) {
+      k.rect(bx - 1, bot - 52, 10, 2, gold[2]);
+      k.rect(bx, bot - 50, 8, 18, blue[2]);
+      k.rect(bx, bot - 50, 8, 2, blue[1]);
+      k.rect(bx + 7, bot - 50, 1, 18, blue[3]);
+      k.rect(bx, bot - 32, 3, 2, blue[2]);
+      k.rect(bx + 5, bot - 32, 3, 2, blue[2]);
+      k.rect(bx + 2, bot - 45, 4, 5, gold[1]);
+      k.rect(bx + 3, bot - 44, 2, 3, blue[3]);
+    }
+    // Fenêtres cintrées du rez-de-chaussée.
+    for (const wx of [x + 8, x + 28, x + w - 38, x + w - 18]) {
+      windowArch(k, wx, bot - 22, 10, 14, RAMP.darkwood);
+      e.window(wx, bot - 19, 10, 11);
+    }
+    // Porche de pierre en avancée : fronton, colonnes, double porte cintrée, marches.
+    const px = cx - 22;
+    wallStone(k, px, bot - 34, 44, 34, RAMP.stone);
+    k.rect(px - 2, bot - 36, 48, 3, RAMP.stone[1]);
+    k.rect(px - 2, bot - 36, 48, 1, RAMP.stone[0]);
+    k.poly(
+      [
+        [px - 3, bot - 36],
+        [cx, bot - 50],
+        [px + 47, bot - 36]
+      ],
+      RAMP.roofSlate[2]
+    );
+    k.line(px - 3, bot - 36, cx, bot - 50, RAMP.roofSlate[1], 2);
+    k.line(cx, bot - 50, px + 47, bot - 36, RAMP.roofSlate[3], 2);
+    windowRound(k, cx, bot - 41, 3, RAMP.darkwood);
+    for (const colX of [px + 2, px + 38]) {
+      k.rect(colX, bot - 33, 4, 33, RAMP.stone[0]);
+      k.rect(colX + 3, bot - 33, 1, 33, RAMP.stone[2]);
+      k.rect(colX - 1, bot - 34, 6, 2, RAMP.stone[1]);
+    }
+    door(k, cx, bot, 18, 24, RAMP.wood, 'arch');
+    k.rect(cx - 14, bot + 3, 28, 2, RAMP.stone[2]);
+    k.rect(cx - 14, bot + 3, 28, 1, RAMP.stone[1]);
+    lantern(k, px - 5, bot, e.fx, e.toWorld);
+    lantern(k, px + 49, bot, e.fx, e.toWorld);
+    // Cheminée, fumée, fanions bleus sur le faîte.
+    chimney(k, x + w - 32, r.roofTop + 12, 20, RAMP.stone);
+    e.smoke(x + w - 27, r.roofTop + 8);
+    e.flag(x + 12, r.roofTop + 22, blue[1], 9);
+    e.flag(x + w - 14, r.roofTop + 22, blue[1], 9);
+    e.sign(x - 6, bot - 30, 'guilde');
+    barrel(k, x - 6, bot + 1);
+    crate(k, x + w - 2, bot + 1);
+    flowerBox(k, x + 6, bot - 7, 14, ['#f6c050', '#ffffff', '#7ab4f0']);
+    flowerBox(k, x + w - 20, bot - 7, 14, ['#f6c050', '#ffffff', '#7ab4f0']);
+    return r.roofTop - 12;
+  },
   // La Marmite dorée : grande auberge, rez de pierre, étage à colombages, deux pignons, enseigne au bol.
   marmite(k, W, bot, e) {
     const x = 6,

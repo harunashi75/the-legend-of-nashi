@@ -23,7 +23,8 @@
   // Eau (mer, marais, lacs) hors des ponts : la route s'y arrête en bord organique, l'eau animée passe dessous.
   const WET = new Set([0, 15, 18]);
   const isWet = (x, y) => WET.has(tileAt(x, y)) && !BRIDGE_TILES.has(y * MAPW + x);
-  const isHard = (x, y) => !isRoad(x, y) && !SOFT.has(tileAt(x, y)) && !isWet(x, y);
+  // Le pied d'un bâtiment (case 32, house.js) n'est pas un bord dur : le chemin s'y arrondit au lieu de s'y couper net.
+  const isHard = (x, y) => !isRoad(x, y) && !SOFT.has(tileAt(x, y)) && !isWet(x, y) && tileAt(x, y) !== 32;
   // Bruit : hachage entier, bruit de valeur lissé et somme fractale.
   function ih(x, y, s) {
     let n = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 1442695041)) | 0;
@@ -253,6 +254,22 @@
       }
     }
   }
+  // Seuils des bâtiments : la case devant chaque porte et les deux d'en dessous. Le chemin y finit en terre battue unie,
+  // sans ornières ni bande d'herbe (sur un bout de chemin si court, elles feraient une boucle).
+  let doorsFor = null,
+    doorTiles = new Set();
+  function atDoor(wx, wy) {
+    if (doorsFor !== game.world.tiles) {
+      doorsFor = game.world.tiles;
+      doorTiles = new Set();
+      for (const b of CANAAN_HOUSE.buildings()) {
+        const dx = Math.floor(b.door.x / S),
+          dy = Math.floor(b.door.y / S);
+        for (let y = dy; y <= dy + 2; y++) for (let x = dx - 1; x <= dx + 1; x++) doorTiles.add(y * MAPW + x);
+      }
+    }
+    return doorTiles.has(Math.floor(wy / S) * MAPW + Math.floor(wx / S));
+  }
   function shadeDirt(zone, wx, wy, d, F, gF, lit) {
     const pal = DIRT[zone] || DIRT[0],
       n = fbm(wx / 34, wy / 34, 11 + zone);
@@ -261,9 +278,11 @@
     else mix(pal[2], (n - 0.5) * 1.6);
     // Terre tassée au milieu, plus claire ; grain fin.
     if (F > 0.9) mix(pal[2], 0.18);
-    ruts(F, gF, d, lit);
+    const doorstep = atDoor(wx, wy);
+    if (!doorstep) ruts(F, gF, d, lit);
     // Bande d'herbe entre les ornières, en touffes.
     if (
+      !doorstep &&
       zone === 0 &&
       F > 0.95 &&
       fbm(wx / 16, wy / 16, 51) + (ih(wx >> 1, wy >> 1, 53) - 0.5) * 0.18 > 0.54

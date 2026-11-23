@@ -119,6 +119,10 @@
     questHear: element => questHear(actionInteger(element, 'quest')),
     questTrade: element => questTrade(actionText(element, 'npc')),
     questShells: () => questShells(),
+    // Guilde : prendre, abandonner (deux clics) ou rendre un contrat.
+    guildTake: element => guildTake(actionInteger(element, 'quest')),
+    guildAbandon: element => guildAbandon(actionInteger(element, 'quest')),
+    guildTurnIn: element => guildTurnIn(actionInteger(element, 'quest')),
     toggleInventory: () => toggleInventory(),
     toggleCharacter: () => toggleCharacter(),
     toggleMap: () => toggleMap(),
