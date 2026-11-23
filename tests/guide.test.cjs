@@ -59,3 +59,7 @@ test('Guide : une arme d’un autre type ou trop haute n’est pas marquée comm
   assert.equal(run('gearUpgrade({id:"c",slot:"weapon",weaponType:"sword",level:30,rarity:"Commun"})'), false);
   assert.equal(run('gearUpgrade({id:"d",slot:"weapon",weaponType:"sword",level:4,rarity:"Commun"})'), false);
 });
+
+test('Guide : la carte cachée ne reste pas affichée vide (display: flex ne l’emporte pas sur hidden)', () => {
+  assert.match(source, /#lumiTip\[hidden\]\s*\{\s*display:\s*none/);
+});

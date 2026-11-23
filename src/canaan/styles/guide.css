@@ -20,6 +20,10 @@
   z-index: 30;
   animation: lumi-tip-in 0.35s ease-out;
 }
+/* display: flex ci-dessus l'emporterait sur l'attribut hidden : la carte vide resterait affichée. */
+#lumiTip[hidden] {
+  display: none;
+}
 #lumiTip.lumi {
   border-color: #9fd4f0;
   box-shadow:
