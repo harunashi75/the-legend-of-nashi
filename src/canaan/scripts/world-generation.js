@@ -679,8 +679,8 @@
     });
     // Arène des Épreuves : à l'est du camp, ouverte à tous, reliée au camp par un chemin.
     {
-      // Devant la porte est du village fortifié, à quelques pas des remparts.
-      const spot = nearestSpot(camp.x + 21, camp.y - 3, BIOME_MAP[camp.y * MAPW + camp.x]);
+      // À droite de la grande route nord-sud du camp, sans la couvrir.
+      const spot = nearestSpot(camp.x + 17, camp.y - 3, BIOME_MAP[camp.y * MAPW + camp.x]);
       CANAAN_ARENA_PORTAL.x = spot.x;
       CANAAN_ARENA_PORTAL.y = spot.y;
       clearArea(spot.x, spot.y, 3);

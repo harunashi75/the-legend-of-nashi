@@ -28,9 +28,9 @@ test('Bâtiments : échoppe, cuisine, demeures, chaumière et refuges où l’on
  for(const [id,ok] of linked)assert.equal(ok,true,'sentier de '+id);
  // Chaque style de façade se dessine (un par biome, et ceux du camp).
  assert.equal(run('CANAAN_HOUSE.styles().length'),10);
- // La chaumière est loin des portails (le premier donjon était trop près) ; toutes les portes du village sont dans son enceinte.
+ // La chaumière est loin des portails (le premier donjon était trop près) ; le camp regroupe ses bâtiments.
  assert.ok(run('instances.every(d=>Math.hypot(d.x-CANAAN_HOUSE.outside().x-2,d.y-CANAAN_HOUSE.outside().y-1)>=32)'));
- for(const id of ['echoppe','marmite','aubepines','puits','guilde','maison'])assert.ok(run(`(d=>isSafe(d.x/TS,d.y/TS))(CANAAN_HOUSE.outsideDoor("${id}"))`),id);
+ for(const id of ['echoppe','marmite','aubepines','puits'])assert.ok(run(`Math.hypot(CANAAN_HOUSE.outsideDoor("${id}").x/TS-CANAAN_CAMP.x,CANAAN_HOUSE.outsideDoor("${id}").y/TS-CANAAN_CAMP.y)`)<run('CANAAN_CAMP.r')+2,id);
  // Le marchand est derrière le comptoir de son échoppe : on y entre par la porte (E), puis on lui parle.
  assert.equal(run('canaanRoomAt(game.world.npcs.find(n=>n.type==="shop").x/TS,game.world.npcs.find(n=>n.type==="shop").y/TS).id'),'echoppe');
  run('{const d=CANAAN_HOUSE.outsideDoor("echoppe");P.x=d.x;P.y=d.y+20}');assert.equal(run('nearMerchant()'),false);

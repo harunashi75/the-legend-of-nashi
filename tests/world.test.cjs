@@ -249,32 +249,30 @@ test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habita
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Vie du camp : village fortifié (remparts, tours, portes), rues, ferme, enclos, champs, verger, fontaine, ruisseau sous des ponts, sans monstres ni passage bloqué',()=>{
+test('Vie du camp : ferme, enclos, champs, verger, Maison de la Guilde, fontaine, ruisseau sous des ponts, sans monstres ni passage bloqué',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  // Tout le plan trouve sa place, autour des maisons, des lieux de quête et des coffres ; l'île reste entièrement accessible.
  const audit=JSON.parse(run('JSON.stringify(CANAAN_CAMP_LIFE.audit())'));
  assert.deepEqual(audit.missing,[]);
- for(const k of ['barn','silo','coop','pen','trough','hay','cart','field:wheat','field:veg','field:fruit','scarecrow','lantern','apple','crates','basket','logs','woodpile','chop','fountain','spring','wall','tower','arch'])assert.ok(audit.kinds.includes(k),k);
+ for(const k of ['barn','silo','coop','pen','trough','hay','cart','field:wheat','field:veg','field:fruit','scarecrow','lantern','apple','crates','basket','logs','woodpile','chop','fountain','bench','spring'])assert.ok(audit.kinds.includes(k),k);
  assert.ok(audit.stream>=40&&audit.pond>=10&&audit.flowers>=30,JSON.stringify(audit));
  assert.equal(run('JSON.stringify(CANAAN_WORLD_AUDIT().unreachable)'),'[]');
  const at=(dx,dy)=>`((CANAAN_CAMP.x+${dx}+.5)*TS),((CANAAN_CAMP.y+${dy}+.5)*TS)`;
- // Le ruisseau longe le rempart ouest ; la rue du Quai le franchit sur un pont, jusqu'à la porte ouest.
- assert.equal(run(`canWalk(${at(-22,-11)})`),false,'ruisseau');
- assert.ok(run('[...BRIDGE_TILES].filter(k=>{const x=k%MAPW,y=(k-x)/MAPW;return Math.abs(y-CANAAN_CAMP.y-5.5)<1&&Math.abs(x-CANAAN_CAMP.x+22.5)<1.5}).length')>=4,'pont du quai');
- assert.equal(run(`canWalk(${at(-22,5)})`),true,'on traverse le pont');
- // Remparts et tours bloquent ; on entre par les portes (nord, est, ouest).
- for(const [dx,dy,name] of [[-25,-5,'rempart ouest'],[0,-21,'rempart nord'],[14,-10,'rempart est'],[-15,20,'rempart sud'],[-25,-21,'tour nord-ouest']])assert.equal(run(`canWalk(${at(dx,dy)})`),false,name);
- for(const [dx,dy,name] of [[11,-21,'porte nord'],[14,-1,'porte est'],[-25,6,'porte ouest']])assert.equal(run(`canWalk(${at(dx,dy)})`),true,name);
- // Les bâtiments, la fontaine et les clôtures bloquent ; les champs, la cour et les rues se traversent.
- for(const [dx,dy,name] of [[4,9,'grange'],[8,10,'silo'],[-2,9,'poulailler'],[0,0,'fontaine au centre'],[6,-14,'forge'],[-11,10,'clôture de l’enclos'],[0,-17,'Maison de la Guilde'],[-20,8,'pommier'],[-9,16,'épouvantail']])assert.equal(run(`canWalk(${at(dx,dy)})`),false,name);
- for(const [dx,dy,name] of [[-2,16,'champ de légumes'],[-11,18,'champ de blé'],[5,17,'champ de fruits'],[0,10,'allée de la ferme'],[5,-1,'Grand-Rue'],[-5,-12,'rue du Nord'],[11,-10,'rue de l’Est'],[0,-14,'rue de la Guilde']])assert.equal(run(`canWalk(${at(dx,dy)})`),true,name);
- // Les rues sont des routes ; la fontaine au centre de la place, la forge à côté de la Maison de la Guilde.
- for(const [dx,dy] of [[5,-1],[-5,-12],[11,-10],[0,-14],[-13,0],[-20,5]])assert.equal(run(`overworld[CANAAN_CAMP.y+${dy}][CANAAN_CAMP.x+${dx}]`),2);
+ // Le ruisseau est de l'eau ; la route de l'ouest et l'allée du verger le franchissent sur des ponts.
+ assert.equal(run(`canWalk(${at(-18,-11)})`),false,'ruisseau');
+ assert.ok(run('[...BRIDGE_TILES].filter(k=>{const x=k%MAPW,y=(k-x)/MAPW;return Math.abs(y-CANAAN_CAMP.y+2.5)<1.5&&Math.abs(x-CANAAN_CAMP.x+15.5)<2}).length')>=4,'pont de la route');
+ assert.ok(run('[...BRIDGE_TILES].filter(k=>{const x=k%MAPW,y=(k-x)/MAPW;return Math.abs(y-CANAAN_CAMP.y-5.5)<1&&Math.abs(x-CANAAN_CAMP.x+16.5)<2.5}).length')>=4,'pont du verger');
+ assert.equal(run(`canWalk(${at(-16,-3)})`),true,'on traverse le pont');
+ // Les bâtiments, la fontaine et les clôtures bloquent ; les champs, la cour et la porte du jardin se traversent.
+ for(const [dx,dy,name] of [[4,7,'grange'],[7,9,'silo'],[-2,8,'poulailler'],[0,0,'fontaine au centre'],[-5,-5,'forge'],[-12,10,'clôture de l’enclos'],[-3,-17,'Maison de la Guilde'],[-24,2,'pommier'],[-10,17,'épouvantail']])assert.equal(run(`canWalk(${at(dx,dy)})`),false,name);
+ for(const [dx,dy,name] of [[-6,16,'champ de légumes'],[-12,18,'champ de blé'],[5,17,'champ de fruits'],[0,10,'allée de la ferme'],[-2,-4,'herbe près de la forge'],[-4,-2,'allée de la forge']])assert.equal(run(`canWalk(${at(dx,dy)})`),true,name);
+ // Plus de vieille place pavée : la forge est à sa place, reliée au centre par une allée ; la fontaine au centre.
+ assert.equal(run(`CANAAN_CAMP_LIFE.groundAt(CANAAN_CAMP.x-5,CANAAN_CAMP.y-3)`),null);
  assert.equal(run(`(()=>{const f=CANAAN_CAMP_LIFE.items().find(i=>i.kind==='fountain');return f.x===CANAAN_CAMP.x-1&&f.y===CANAAN_CAMP.y-1})()`),true);
- assert.equal(run(`(()=>{const f=CANAAN_CAMP_LIFE.items().find(i=>i.kind==='forge');return f.x===CANAAN_CAMP.x+5&&f.y===CANAAN_CAMP.y-15})()`),true);
+ assert.equal(run(`(()=>{const f=CANAAN_CAMP_LIFE.items().find(i=>i.kind==='forge');return f.x===CANAAN_CAMP.x-6&&f.y===CANAAN_CAMP.y-5})()`),true);
  // En donjon, la carte de l'instance réutilise les mêmes coordonnées : rien de la ferme n'y bloque.
- assert.equal(run(`(()=>{const s=game.world.instance;game.world.instance={index:0};const r=canaanCampLife.blocked(${at(4,9)});game.world.instance=s;return r})()`),false);
+ assert.equal(run(`(()=>{const s=game.world.instance;game.world.instance={index:0};const r=canaanCampLife.blocked(${at(4,7)});game.world.instance=s;return r})()`),false);
  // Les bêtes de la ferme restent chez elles : l'enclos garde moutons, vaches et cochons ; les poules autour du poulailler.
  run('started=true;paused=false;game.world.monsters=[];CANAAN_LIFE.update()');
  const farm=JSON.parse(run('JSON.stringify(CANAAN_LIFE.animals().filter(a=>a.farm).map(a=>a.kind).sort())'));

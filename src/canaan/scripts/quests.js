@@ -135,18 +135,10 @@
         target = { x: p.x + def.offset[0], y: p.y + def.offset[1] };
         free = false;
       } else target = tools.polar(def.polar[0], def.polar[1]);
-      // Hors du village fortifié, assez loin pour que la clairière ne touche pas les remparts.
       const accept = (x, y) =>
         tools.walkableLand(x, y) &&
         reach[y * MAPW + x] === 1 &&
         !isSafe(x, y) &&
-        !camp.area.some(
-          ([x0, y0, x1, y1]) =>
-            x - camp.x >= x0 - def.r - 2 &&
-            x - camp.x <= x1 + def.r + 2 &&
-            y - camp.y >= y0 - def.r - 2 &&
-            y - camp.y <= y1 + def.r + 2
-        ) &&
         roomy(tools, x, y, def.r) &&
         (!free || !taken.some(([a, b]) => Math.hypot(a - x, b - y) < def.r + 5));
       const spot = tools.nearestSpot(target.x, target.y, def.zone, accept);
