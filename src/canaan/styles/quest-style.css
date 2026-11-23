@@ -253,13 +253,17 @@
   font-style: italic;
   line-height: 1.45;
 }
+/* Gardien : braise et or, comme la barre des boss. */
 #questFanfare.boss {
-  border-color: #b070ff;
-  background: radial-gradient(circle at 50% 0%, rgba(160, 90, 255, 0.3), rgba(14, 8, 22, 0.95) 70%);
-  box-shadow: 0 0 30px rgba(150, 80, 255, 0.5);
+  border-color: var(--rpg-gold);
+  background: radial-gradient(circle at 50% 0%, rgba(210, 60, 36, 0.34), rgba(24, 8, 6, 0.95) 70%);
+  box-shadow:
+    0 0 0 1px var(--rpg-outline),
+    0 0 30px rgba(220, 70, 40, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.6);
 }
 #questFanfare.boss b {
-  color: #e8c8ff;
+  color: #ffd2a0;
   font-size: calc(24px * var(--font-scale, 1));
 }
 @keyframes questFanfareIn {

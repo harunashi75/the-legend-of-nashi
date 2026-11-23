@@ -301,5 +301,5 @@
   margin: 6px 0;
 }
 #window .raid-mode.locked {
-  border-color: #52476d;
+  border-color: rgba(106, 78, 42, 0.45);
 }

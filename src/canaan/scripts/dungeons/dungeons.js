@@ -2170,7 +2170,6 @@
     prewarmInstance: ART.prewarm,
     drawDungeonDecor: ART.drawDungeonDecor,
     dungeonAmbience: ART.dungeonAmbience,
-    drawDungeonEntrance: ART.drawDungeonEntrance,
     dungeonMinimapColor: ART.dungeonMinimapColor,
     arenaLayout,
     CANAAN_DUNGEON_AUDIT: auditDungeon,

@@ -350,10 +350,10 @@
   transform: translateX(-50%);
   z-index: 2;
   padding: 0 5px;
-  border: 1px solid #8b7bd8;
+  border: 1px solid var(--rpg-gold);
   border-radius: 8px;
-  background: #1b1630f0;
-  color: #f1eaff;
+  background: linear-gradient(180deg, #4a3218f0, #20140af0);
+  color: var(--rpg-cream);
   font-size: calc(10px * var(--font-scale));
   font-weight: 800;
   line-height: 15px;
@@ -386,7 +386,7 @@
 #gearHoverTooltip .skill-tip-class {
   margin-top: 8px;
   padding-top: 7px;
-  border-top: 1px solid #504769;
+  border-top: 1px solid var(--rpg-gold-dark);
   color: #c8f0b8;
   line-height: 1.4;
 }
@@ -415,7 +415,7 @@
   width: 34px;
   height: 34px;
   flex: none;
-  border: 1px solid #6c5a9a;
+  border: 1px solid var(--rpg-gold-dark);
   border-radius: 7px;
   background: radial-gradient(circle at 40% 30%, #3a2c20, var(--rpg-night) 75%);
 }

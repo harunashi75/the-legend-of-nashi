@@ -132,8 +132,12 @@ test('Monde au niveau des donjons : créatures détaillées, textures des biomes
  assert.equal(run("monsters.find(m=>m.worldBossId==='chronos').look"),'horror');
  // Textures : une bande de quatre variantes pour chaque terrain de l'île.
  assert.equal(run('[0,1,2,3,4,5,10,11,15,16,17,18].every(t=>PIXEL_TERRAIN[t]&&PIXEL_TERRAIN[t].width===192)'),true);
- // Rendu d'une zone de l'île et des dix entrées sans erreur ; les arbres lumineux éclairent.
- run('resetCanaanLights();for(let y=0;y<400;y+=7)for(let x=0;x<400;x+=7)drawWorldTile(ctx,x,y,world[y][x],decor[y][x]);instances.forEach((d,i)=>drawDungeonEntrance(ctx,i,d.x*TS,d.y*TS))');
+ // Rendu d'une zone de l'île et des entrées sans erreur ; les arbres lumineux éclairent. Chaque décor de l'île a son
+ // sprite et chaque instance son portail en pixel art : plus aucun dessin de secours.
+ run('resetCanaanLights();for(let y=0;y<400;y+=7)for(let x=0;x<400;x+=7)drawWorldTile(ctx,x,y,world[y][x],decor[y][x]);instances.forEach((d,i)=>CANAAN_PORTAL_ART.draw(ctx,i,d.x*TS,d.y*TS))');
+ assert.deepEqual(JSON.parse(run('{const m=new Set();for(const row of decor)for(const d of row)if(d&&!PIXEL_DECOR[d])m.add(d);JSON.stringify([...m])}')),[]);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(instances.map((d,i)=>i).filter(i=>!CANAAN_PORTAL_ART.has(i)))')),[]);
+ assert.equal(run("typeof drawDungeonEntrance+typeof drawBiomeDecor"),'undefinedundefined');
  // Ambiance : la Forêt enchantée est plus sombre que les Plaines.
  const amb=b=>JSON.parse(run('{const z=ZONES['+b+'];P.x=(z.x+0.5)*TS;P.y=(z.y+0.5)*TS;let a;for(let k=0;k<400;k++)a=worldAmbience();JSON.stringify(a)}'));
  const plains=amb(0),enchanted=amb(5);
@@ -313,6 +317,8 @@ test('Les Tréfonds : monde souterrain sous l’île, quatre biomes, forteresse 
  assert.ok(run('CANAAN_UNDER.structures().length')>=25);assert.ok(run('CANAAN_UNDER.dwarves().length')>=10);
  assert.ok(run('CANAAN_UNDER.nodes().length')>100);assert.ok(run('CANAAN_UNDER.spots().length')>10);assert.ok(run('CANAAN_UNDER.fauna().ground.length')>50);
  assert.equal(run('game.world.underdecor.flat().filter(d=>d==="tomb"||d==="cross").length>20&&game.world.underdecor.flat().includes("deadtree")'),true);
+ // Chaque décor des Tréfonds a son modèle en pixel art (under-art.js) : plus aucun dessin de secours.
+ assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(game.world.underdecor.flat().filter(Boolean))].filter(d=>{let k=d.startsWith("k:")?d.slice(2):d;return !CANAAN_UNDER_ART.has(k==="skullpile"?"bonepile":k)}))')),[]);
  // Descente : tout le groupe passe dans les Tréfonds ; créatures du biome au niveau du héros, boss mondiaux à son niveau.
  run('started=true;paused=false;game.hero.level=33;recomputeStats();P.hp=P.mhp;const e=CANAAN_UNDER.ENTRANCES[0];P.x=(e.x+.5)*TS;P.y=(e.y+1.5)*TS;interact()');
  assert.equal(run('game.world.layer'),'under');assert.equal(run('game.world.tiles===game.world.underworld'),true);assert.equal(run('canWalk(P.x,P.y)'),true);

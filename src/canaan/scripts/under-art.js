@@ -830,7 +830,7 @@
     R(x - 0.5 * q, y - 9 * q + f, q, 3 * q, cols[1]);
     R(x - q, y - 4 * q, 2 * q, 3 * q, cols[2]);
   }
-  // Dessine le décor d au pied de la case (x, y) ; faux si ce décor n'a pas de modèle (ancien dessin en secours).
+  // Dessine le décor d au pied de la case (x, y) ; faux si ce décor n'a pas de modèle (un test vérifie qu'ils en ont tous).
   function draw(c, d, x, y, b, th) {
     let kind = d.startsWith('k:') ? d.slice(2) : d;
     kind = ALIAS[kind] || ALIAS[d] || kind;
@@ -840,7 +840,7 @@
     if (!S) return false;
     const X = x * TS,
       Y = y * TS,
-      // Pied du décor au bas de la case (comme l'ancien dessin) ; objet de paroi centré sur la face de la roche.
+      // Pied du décor au bas de la case ; objet de paroi centré sur la face de la roche.
       x0 = Math.round(X + 24 - (S.w * U) / 2),
       y0 = S.wall ? Math.round(Y + 26 - (S.h * U) / 2) : Math.round(Y + 42 - S.h * U),
       flip = !S.wall && hash(x, y * 7) > 0.5 && kind !== 'fence';

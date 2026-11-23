@@ -2181,228 +2181,9 @@
   }
 
   // ---------------------------------------------------------------- Décor (dessin)
+  // Décor en pixel art (under-art.js), aux couleurs du biome.
   function drawDecor(c, d, x, y, b) {
-    const X = x * TS,
-      Y = y * TS,
-      cx = X + 24,
-      by = Y + 40,
-      th = themeOf(b),
-      seed = x * 5 + y * 3,
-      wall = th.wall;
-    // Décor en pixel art (under-art.js) ; les dessins ci-dessous restent en secours.
-    if (CANAAN_UNDER_ART.draw(c, d, x, y, b, th)) return;
-    if (d.startsWith('k:')) {
-      const kind = d.slice(2) === 'skullpile' ? 'bonepile' : d.slice(2);
-      return K().floorProp(
-        c,
-        { x, y, kind },
-        { ...th.th, wall, floor: th.floors[T.FLOOR] || th.floors[T.STONE], hazard: {} }
-      );
-    }
-    if (d.startsWith('w:'))
-      return K().wallProp(c, { x, y, kind: d.slice(2), wall: true }, { ...th.th, wall });
-    switch (d) {
-      case 'stalag':
-      case 'stalag2': {
-        const big = d === 'stalag',
-          h = big ? 58 + hash(x, y, 2) * 30 : 22 + hash(x, y, 3) * 14;
-        for (const [dx, k] of big
-          ? [
-              [0, 1],
-              [-14, 0.55],
-              [13, 0.4]
-            ]
-          : [
-              [-6, 1],
-              [7, 0.7]
-            ]) {
-          const hh = h * k,
-            ww = (big ? 22 : 12) * Math.max(0.6, k);
-          for (let s = 0; s < 5; s++)
-            R(
-              c,
-              cx + dx - (ww * (5 - s)) / 10,
-              by - (hh * (s + 1)) / 5,
-              (ww * (5 - s)) / 5,
-              hh / 5 + 1,
-              s % 2 ? wall.face : wall.light
-            );
-          R(c, cx + dx - ww / 2, by - 3, ww, 3, wall.dark);
-        }
-        break;
-      }
-      case 'beam': {
-        R(c, cx - 22, by - 64, 6, 64, '#6a4a2c');
-        R(c, cx + 16, by - 64, 6, 64, '#6a4a2c');
-        R(c, cx - 26, by - 70, 52, 8, '#5a3e26');
-        R(c, cx - 22, by - 64, 2, 64, '#8a6a40');
-        break;
-      }
-      case 'lanternpost': {
-        R(c, cx - 3, by - 70, 6, 70, '#3a2a1e');
-        R(c, cx - 3, by - 70, 18, 4, '#3a2a1e');
-        R(c, cx + 8, by - 66, 10, 14, '#ffd36d');
-        R(c, cx + 8, by - 66, 10, 3, '#2a2420');
-        canaanLight(cx + 13, by - 58, 170, '#ffc860');
-        break;
-      }
-      case 'roots': {
-        c.strokeStyle = '#4a3020';
-        c.lineWidth = 4;
-        for (let k = 0; k < 4; k++) {
-          c.beginPath();
-          c.moveTo(cx - 18 + k * 12, by - 6);
-          c.quadraticCurveTo(
-            cx - 10 + k * 8 + hash(k, x, y) * 14,
-            by - 22,
-            cx - 20 + k * 14,
-            by - 34 - hash(x, k, 4) * 12
-          );
-          c.stroke();
-        }
-        break;
-      }
-      case 'deadtree': {
-        // Arbre mort : tronc tordu gris-brun, branches nues crochues.
-        R(c, cx - 7, by - 70, 14, 70, '#4a4238');
-        R(c, cx - 7, by - 70, 4, 70, '#6a6054');
-        R(c, cx - 14, by - 6, 28, 6, '#3a3228');
-        c.strokeStyle = '#4a4238';
-        c.lineCap = 'round';
-        for (const [a, l, w] of [
-          [-2.3, 40, 6],
-          [-0.8, 46, 6],
-          [-1.6, 34, 5],
-          [-2.8, 26, 4],
-          [-0.3, 28, 4]
-        ]) {
-          const sx = cx,
-            sy = by - 60 - hash(a * 10, x, y) * 10,
-            ex = sx + Math.cos(a) * l,
-            ey = sy + Math.sin(a) * l;
-          c.lineWidth = w;
-          c.beginPath();
-          c.moveTo(sx, sy);
-          c.lineTo(ex, ey);
-          c.lineTo(ex + Math.cos(a + 0.8) * l * 0.35, ey + Math.sin(a + 0.8) * l * 0.35);
-          c.stroke();
-        }
-        break;
-      }
-      case 'tomb': {
-        // Pierre tombale arrondie, fissure, mousse et nom effacé.
-        const st = hash(x, y, 5) < 0.5 ? '#7a7c74' : '#6a6c66';
-        R(c, cx - 14, by - 40, 28, 40, st);
-        c.fillStyle = st;
-        c.beginPath();
-        c.arc(cx, by - 40, 14, Math.PI, 0);
-        c.fill();
-        R(c, cx - 14, by - 40, 4, 40, '#8a8c84');
-        R(c, cx - 8, by - 38, 16, 2, '#4a4c46');
-        R(c, cx - 6, by - 32, 12, 2, '#4a4c46');
-        R(c, cx + 3, by - 26, 2, 12, '#3a3c36');
-        R(c, cx - 14, by - 8, 28, 8, '#4a6a3a');
-        R(c, cx - 18, by - 2, 36, 4, '#2a2c26');
-        break;
-      }
-      case 'cross': {
-        const st = '#6e6a62';
-        R(c, cx - 4, by - 56, 8, 56, st);
-        R(c, cx - 16, by - 44, 32, 8, st);
-        R(c, cx - 4, by - 56, 3, 56, '#8a867c');
-        R(c, cx - 12, by - 4, 24, 4, '#2a2c26');
-        break;
-      }
-      case 'grave': {
-        c.fillStyle = '#3a3428';
-        c.beginPath();
-        c.ellipse(cx, by - 6, 20, 9, 0, 0, Math.PI * 2);
-        c.fill();
-        R(c, cx - 4, by - 26, 8, 18, '#6a6058');
-        R(c, cx - 10, by - 22, 20, 5, '#6a6058');
-        break;
-      }
-      case 'fence': {
-        R(c, X, by - 34, TS, 4, '#2a2c30');
-        R(c, X, by - 16, TS, 4, '#2a2c30');
-        for (let k = 4; k < TS; k += 10) {
-          R(c, X + k, by - 44, 4, 44, '#34363c');
-          R(c, X + k - 1, by - 48, 6, 4, '#4a4c54');
-        }
-        break;
-      }
-      case 'candles2': {
-        for (const [dx, h] of [
-          [-10, 14],
-          [0, 20],
-          [9, 11]
-        ]) {
-          R(c, cx + dx - 2, by - h, 4, h, '#e8e0c8');
-          K().flame(c, cx + dx, by - h, 0.45, th.th.flame, seed + dx);
-        }
-        canaanLight(cx, by - 20, 90, th.th.flame[1]);
-        break;
-      }
-      case 'giantshroom': {
-        // Champignon géant luisant : pied pâle, chapeau coloré tacheté, lueur.
-        const cols = [
-            ['#c8508a', '#ff9ad0'],
-            ['#4ab8a8', '#a8fff0'],
-            ['#9a5ad8', '#e0b8ff']
-          ][Math.floor(hash(x, y, 6) * 3)],
-          h = 56 + hash(x, y, 7) * 26,
-          r = 26 + hash(x, y, 8) * 12;
-        R(c, cx - 7, by - h, 14, h, '#e8dcc0');
-        R(c, cx - 7, by - h, 4, h, '#fff4e0');
-        c.fillStyle = cols[0];
-        c.beginPath();
-        c.ellipse(cx, by - h, r, r * 0.55, 0, Math.PI, 0);
-        c.fill();
-        R(c, cx - r, by - h - 2, r * 2, 5, cols[0]);
-        for (let k = 0; k < 5; k++)
-          R(c, cx - r * 0.7 + k * r * 0.33, by - h - r * 0.35 + (k % 2) * 6, 5, 5, cols[1]);
-        canaanLight(cx, by - h, 130, cols[1]);
-        break;
-      }
-      case 'shrooms': {
-        for (const [dx, h, col] of [
-          [-10, 12, '#c8508a'],
-          [2, 18, '#4ab8a8'],
-          [11, 9, '#d8a040']
-        ]) {
-          R(c, cx + dx - 2, by - h, 4, h, '#e8dcc0');
-          c.fillStyle = col;
-          c.beginPath();
-          c.ellipse(cx + dx, by - h, 7, 4, 0, Math.PI, 0);
-          c.fill();
-        }
-        if (hash(x, y, 9) < 0.4) canaanLight(cx, by - 12, 60, '#a8fff0');
-        break;
-      }
-      case 'mudreeds': {
-        for (let k = 0; k < 5; k++) {
-          const h = 18 + hash(k, x, y) * 18;
-          R(c, cx - 14 + k * 7, by - h, 3, h, '#6a7a3a');
-          R(c, cx - 15 + k * 7, by - h - 6, 5, 7, '#8a5a3a');
-        }
-        break;
-      }
-      case 'ruinwall': {
-        stoneWall(c, X - 8, by - 50 + hash(x, y, 4) * 16, TS + 16, 50 - hash(x, y, 4) * 16, wall, seed);
-        R(c, X - 10, by - 4, TS + 20, 6, wall.dark);
-        break;
-      }
-      case 'brokenpillar': {
-        const [pc, pd, pl] = th.th.pillar,
-          h = 30 + hash(x, y, 5) * 30;
-        R(c, cx - 20, by - 8, 40, 10, pd);
-        R(c, cx - 15, by - h, 30, h - 6, pc);
-        R(c, cx - 15, by - h, 5, h - 6, pl);
-        R(c, cx - 15, by - h - 4, 22, 6, pl);
-        R(c, cx + 12, by - 6, 18, 10, pc);
-        break;
-      }
-    }
+    CANAAN_UNDER_ART.draw(c, d, x, y, b, themeOf(b));
   }
 
   // ---------------------------------------------------------------- Sols (dessin)
@@ -2603,34 +2384,9 @@
   }
 
   // ---------------------------------------------------------------- Entrées (dessin, île et Tréfonds)
+  // À la surface : gouffre en pixel art (under-art.js), habillé de l'herbe de la région.
   function drawHole(c, e, x, y) {
-    // À la surface : gouffre en pixel art (under-art.js), habillé de l'herbe de la région ; sinon l'ancien dessin.
-    if (CANAAN_UNDER_ART.hole(c, x, y, Math.max(0, ZONES.indexOf(regionAt(e.x, e.y))))) return;
-    c.save();
-    c.fillStyle = 'rgba(0,0,0,.35)';
-    c.beginPath();
-    c.ellipse(x, y + 8, 46, 20, 0, 0, Math.PI * 2);
-    c.fill();
-    c.fillStyle = '#4a4a4e';
-    c.beginPath();
-    c.ellipse(x, y, 40, 22, 0, 0, Math.PI * 2);
-    c.fill();
-    c.fillStyle = '#050404';
-    c.beginPath();
-    c.ellipse(x, y, 31, 15, 0, 0, Math.PI * 2);
-    c.fill();
-    for (let k = 0; k < 9; k++) {
-      const a = (k / 9) * Math.PI * 2;
-      R(c, x + Math.cos(a) * 36 - 6, y + Math.sin(a) * 19 - 5, 12, 9, k % 2 ? '#6a6a6e' : '#8a8a8e');
-    }
-    for (const sx of [-26, 22]) R(c, x + sx, y - 54, 5, 50, '#6a4a2c');
-    R(c, x - 30, y - 58, 60, 7, '#5a3e26');
-    R(c, x - 6, y - 51, 2, 40, '#c8b890');
-    R(c, x + 4, y - 51, 2, 40, '#c8b890');
-    for (let k = 0; k < 4; k++) R(c, x - 6, y - 46 + k * 10, 12, 2, '#a89060');
-    R(c, x + 22, y - 50, 10, 12, '#ffd36d');
-    canaanLight(x + 27, y - 44, 120, '#ffc860');
-    c.restore();
+    CANAAN_UNDER_ART.hole(c, x, y, Math.max(0, ZONES.indexOf(regionAt(e.x, e.y))));
   }
   function drawShaft(c, e, x, y) {
     // Dans les Tréfonds : rai de lumière du jour qui tombe du trou, échelle de corde, éboulis.
@@ -2708,8 +2464,8 @@
       if (!d.under) return;
       const x = d.x * TS,
         y = d.y * TS;
-      // Entrée en pixel art habillée du biome souterrain (portal-art.js) ; l'ancien dessin reste en secours.
-      if (inView(x, y) && !CANAAN_PORTAL_ART.draw(c, i, x, y)) drawDungeonEntrance(c, i, x, y);
+      // Entrée en pixel art habillée du biome souterrain (portal-art.js).
+      if (inView(x, y)) CANAAN_PORTAL_ART.draw(c, i, x, y);
     });
     for (const e of ENTRANCES) {
       const x = (e.x + 0.5) * TS,

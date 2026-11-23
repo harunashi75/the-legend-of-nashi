@@ -605,10 +605,8 @@
       c.translate(0, base);
       c.transform(1, 0, -bend * (sprite && sprite.height > 100 ? 0.6 : 1), 1, 0, 0);
       if (sprite) c.drawImage(sprite, sx, sy - base, sprite.width, sprite.height);
-      else drawBiomeDecor(c, d, X, Y - base, x, y);
       c.restore();
     } else if (sprite) c.drawImage(sprite, sx, sy, sprite.width, sprite.height);
-    else drawBiomeDecor(c, d, X, Y, x, y);
     if (GLOWING[d] && (x + y) % 2 === 0) canaanLight(X + 24, Y + 10, d === 'glowtree' ? 120 : 70, GLOWING[d]);
   }
   // Dessin complet d'une case (dans une maison, où le reste du monde passe dans le noir).
@@ -1030,15 +1028,6 @@
       heroLight: target.heroLight || 330
     };
   }
-  // Décors : volume, grain et contour, une seule fois au chargement.
-  function polishDecor() {
-    for (const [name, sprite] of Object.entries(PIXEL_DECOR)) {
-      // Décors de nature-art.js : déjà modelés et cernés.
-      if (sprite.canaanPolished) continue;
-      canaanPolish(sprite, 2, name.length);
-      PIXEL_DECOR[name] = canaanOutline(sprite, 2);
-    }
-  }
   // Eau peu profonde des marais : ronds dans l'eau, jambes immergées et éclaboussures en marchant.
   let ripples = [];
   function wading(x, y) {
@@ -1254,7 +1243,6 @@
     }
   }
   buildTerrain();
-  polishDecor();
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, {
     drawCanaanOcclusion,

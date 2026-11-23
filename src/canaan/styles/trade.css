@@ -48,8 +48,7 @@
   border-color: var(--rpg-good);
   box-shadow: 0 0 0 1px rgba(143, 227, 174, 0.35);
 }
-#window .trade-side h3,
-#window .trade-bag-title {
+#window .trade-side h3 {
   margin: 0;
   font-size: calc(15px * var(--font-scale));
   color: var(--rpg-gold-light);
@@ -57,36 +56,6 @@
 #window .trade-ok {
   font-size: calc(12px * var(--font-scale));
   color: var(--rpg-good);
-}
-#window .trade-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-#window .trade-list li,
-#window .trade-bag button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-#window .trade-item {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-}
-#window .trade-ilvl {
-  font-size: calc(12px * var(--font-scale));
-  color: var(--rpg-muted);
-}
-#window .trade-x {
-  padding: 2px 8px;
 }
 #window .trade-gold {
   display: flex;
@@ -111,16 +80,6 @@
 #window .trade-gold-them {
   margin: auto 0 0;
   color: var(--rpg-gold-light);
-}
-#window .trade-bag {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 6px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-#window .trade-bag button {
-  text-align: left;
 }
 #window button.trade-primary {
   background: linear-gradient(180deg, #3f8a52, #24563a);

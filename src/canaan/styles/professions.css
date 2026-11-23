@@ -135,7 +135,6 @@
   font-weight: 400;
   color: var(--rpg-muted);
 }
-#window .prof-help,
 #window .prof-empty {
   margin: 0;
   font-size: calc(13px * var(--font-scale));
@@ -641,17 +640,6 @@
   font-style: italic;
 }
 /* Sac (touche I) : une seule vue rangée par rubriques, le bouton Trier en haut, les matériaux à part en bas. */
-#window .bag-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-#window .bag-toolbar p {
-  flex: 1 1 260px;
-  margin: 0;
-}
 #window .bag-sort {
   flex: none;
 }

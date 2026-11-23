@@ -53,7 +53,6 @@
         drawDungeonTile: 'function',
         drawDungeonGround: 'function',
         drawDungeonDecor: 'function',
-        drawDungeonEntrance: 'function',
         dungeonAmbience: 'function',
         dungeonMinimapColor: 'function'
       }

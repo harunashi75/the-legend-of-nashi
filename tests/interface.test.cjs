@@ -325,7 +325,7 @@ test('Icônes illustrées, taille des textes et cases carrées : chaque objet a 
  // couleur de l'ancien thème violet en verre.
  assert.doesNotMatch(css,/#([\w-]+)#\1\b/,'sélecteur à identifiant doublé');
  assert.doesNotMatch(css,/var\(--rpg-[\w-]+,/,'valeur de secours d’une couleur de la palette');
- assert.doesNotMatch(css,/#(8d79dd|6c5ce7|8f7bff|a79aff|8b78c4|8574c8|44366f|2c2454)\b|rgba\(140, 120, 255/i,'couleur de l’ancien thème violet');
+ assert.doesNotMatch(css,/#(8d79dd|6c5ce7|8f7bff|a79aff|8b78c4|8574c8|44366f|2c2454|b070ff|47375c|504769|6c5a9a|8b7bd8|8272b5|6a6387|10162c|182b43)\b|rgba\((140, 120|160, 90|150, 80), 255/i,'couleur de l’ancien thème violet');
  assert.deepEqual([...css.matchAll(/font-size:\s*([^;]+);/g)].map(m=>m[1]).filter(v=>/px/.test(v)&&!/--font-scale/.test(v)),[],'chaque police en pixels suit le réglage');
  run('started=true;openSettings()');assert.equal(run('canaanTextScale()'),1.25);
  run('settingsStep("textscale",1)');assert.equal(run('canaanTextScale()'),1.4);assert.equal(run('CANAAN_PREFERENCES.read("settings",{}).textScale'),1.4);
