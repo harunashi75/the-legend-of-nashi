@@ -1971,7 +1971,7 @@
     function sigil(c, id, x, y, lit, size = 14) {
       const sg = SIGILS[id];
       c.save();
-      c.font = 'bold ' + size + 'px system-ui, sans-serif';
+      c.font = canaanGlyphFont(size, 'bold');
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = INK;
@@ -2096,7 +2096,7 @@
       c.fillStyle = th.rune;
       c.fillRect(cx - 6, cy - 6, 12, 12);
       c.globalAlpha = 1;
-      c.font = 'bold 14px system-ui, sans-serif';
+      c.font = canaanGlyphFont(14, 'bold');
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = INK;
@@ -2487,15 +2487,9 @@
         const left = Math.max(0, Math.ceil((ls.t - time) / 60)),
           g = plan.doors[s],
           [x, y] = g.cells[Math.floor(g.cells.length / 2)];
-        c.save();
-        c.font = 'bold 18px monospace';
-        c.textAlign = 'center';
-        c.lineWidth = 4;
-        c.strokeStyle = '#1a1008';
-        c.fillStyle = left <= 5 ? '#ff6a4a' : '#ffd36d';
-        c.strokeText('⏳ ' + left, x * TS + 24, y * TS - 22);
-        c.fillText('⏳ ' + left, x * TS + 24, y * TS - 22);
-        c.restore();
+        canaanText(c, '⏳ ' + left, x * TS + 24, y * TS - 22, 18, left <= 5 ? '#ff6a4a' : '#ffd36d', {
+          line: 4
+        });
       });
       // Invitation à agir sur ce qui est à portée de main.
       const what = reachable(P);
@@ -2626,19 +2620,13 @@
       const d = instances[i],
         mode = instanceDifficulty();
       if (plan.title && view(plan.title.x, plan.title.y, 6)) {
-        c.textAlign = 'center';
-        c.font = 'bold 18px monospace';
-        c.lineWidth = 4;
-        c.strokeStyle = '#0b0a10';
         const name = plan.arena ? CANAAN_ARENA_NAME : d.name,
           title =
             '✦ ' +
             translateText(name).toUpperCase() +
             (mode ? ' · ' + mode.icon + ' ' + mode.label : '') +
             ' ✦';
-        c.strokeText(title, plan.title.x * TS + 24, plan.title.y * TS);
-        c.fillStyle = th.rune;
-        c.fillText(title, plan.title.x * TS + 24, plan.title.y * TS);
+        canaanText(c, title, plan.title.x * TS + 24, plan.title.y * TS, 18, th.rune, { line: 4 });
       }
       drawCanaanPrompt(c, '↟ SORTIE [E] ↟', instanceEntrance.x, instanceEntrance.y + 62);
       c.restore();

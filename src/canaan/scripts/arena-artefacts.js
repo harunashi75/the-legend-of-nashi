@@ -467,7 +467,7 @@
     c.strokeStyle = a.light;
     c.lineWidth = 3;
     c.strokeRect(x - size / 2, y - size / 2, size, size);
-    c.font = Math.round(size * 0.62) + 'px sans-serif';
+    c.font = canaanGlyphFont(Math.round(size * 0.62));
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillText(a.icon, x, y + size * 0.03);

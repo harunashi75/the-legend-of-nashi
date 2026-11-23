@@ -160,13 +160,7 @@
       c.imageSmoothingEnabled = false;
       // Du fond vers l'avant, pour que les objets proches passent devant.
       for (const p of [...PROPS].sort((a, b) => a.dy - b.dy)) DRAW[p.kind](c, x + p.dx, y + p.dy);
-      c.textAlign = 'center';
-      c.font = 'bold 16px monospace';
-      c.lineWidth = 4;
-      c.strokeStyle = '#131b24';
-      c.strokeText('✦ ' + translateText(v.name).toUpperCase() + ' ✦', x, y - 200);
-      c.fillStyle = '#ffd98a';
-      c.fillText('✦ ' + translateText(v.name).toUpperCase() + ' ✦', x, y - 200);
+      canaanText(c, '✦ ' + translateText(v.name).toUpperCase() + ' ✦', x, y - 200, 16, '#ffd98a');
       c.restore();
     }
   }

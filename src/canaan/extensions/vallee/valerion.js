@@ -650,13 +650,13 @@
     c.fillRect(x - 2, y - 2, 144, 14);
     c.fillStyle = cs.seals ? '#ffe88a' : '#ff9a4a';
     c.fillRect(x, y, 140 * k, 10);
-    c.font = 'bold 13px sans-serif';
-    c.textAlign = 'center';
-    c.fillStyle = '#fff4d0';
-    c.fillText(
+    canaanText(
+      c,
       tt(cs.name) + (cs.seals ? ' · ' + tt('sceaux {n}/2', { n: cs.seals.length }) : ''),
       m.x,
-      y - 6
+      y - 6,
+      13,
+      '#fff4d0'
     );
     c.restore();
   }

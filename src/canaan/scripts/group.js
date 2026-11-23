@@ -409,14 +409,8 @@
       c.fill();
       c.globalAlpha = faded ? 0.45 : 1;
       drawPixelHero(c, p.x, p.y, hero.color, p.anim, false, p, hero.look, hero);
-      c.textAlign = 'center';
-      c.font = 'bold 12px Palatino Linotype, Georgia, serif';
-      c.lineWidth = 3;
-      c.strokeStyle = '#120c07';
-      c.fillStyle = hero.color || '#fff';
       const label = (hero.away ? '⏳ ' : p.dead ? '💀 ' : '') + hero.name;
-      c.strokeText(label, p.x, p.y - 52);
-      c.fillText(label, p.x, p.y - 52);
+      canaanText(c, label, p.x, p.y - 52, 12, hero.color || '#fff');
       c.fillStyle = 'rgba(0,0,0,.65)';
       c.fillRect(p.x - 20, p.y - 47, 40, 5);
       c.fillStyle = '#e04848';

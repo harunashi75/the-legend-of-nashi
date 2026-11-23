@@ -1584,14 +1584,8 @@
     canaanLight(o.x, o.y + bobOf(P), 170, o.col);
     const d = i === 'arena' ? null : instances[i],
       label = i === 'arena' ? '✦ ARÈNE ✦' : d && d.raid ? '✦ RAID ✦' : '✦ DONJON ✦';
-    c.font = 'bold 12px system-ui';
-    c.textAlign = 'center';
-    c.lineWidth = 3;
-    c.strokeStyle = '#101522';
-    c.strokeText(label, o.x, P.top - 20);
-    c.fillStyle = o.col;
-    c.fillText(label, o.x, P.top - 20);
     c.restore();
+    canaanText(c, label, o.x, P.top - 20, 12, o.col);
     return true;
   }
   // Hauteur du libellé « [E] Entrer » au-dessus d'une entrée (monde), null si inconnue.

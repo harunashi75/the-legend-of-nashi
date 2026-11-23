@@ -1535,18 +1535,8 @@
     c.save();
     c.textAlign = 'center';
     c.lineJoin = 'round';
-    const text = (s, x, y, size, col, stroke = 5) => {
-      c.font =
-        'bold ' +
-        size +
-        'px ' +
-        (size > 20 ? "'Palatino Linotype', Georgia, serif" : 'system-ui, sans-serif');
-      c.lineWidth = stroke;
-      c.strokeStyle = 'rgba(10,6,4,.9)';
-      c.strokeText(s, x, y);
-      c.fillStyle = col;
-      c.fillText(s, x, y);
-    };
+    const text = (s, x, y, size, col, stroke = 5) =>
+      canaanText(c, s, x, y, size, col, { line: stroke, ink: 'rgba(10,6,4,.9)' });
     if (run.phase !== 'victory')
       text(
         '⚔️ VAGUE ' + wave + ' / ' + WAVES + ' · ' + translateText(tier).toUpperCase(),

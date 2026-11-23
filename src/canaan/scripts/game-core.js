@@ -1347,14 +1347,11 @@ function draw() {
   CANAAN_LIFE.drawBubbles(ctx);
   CANAAN_QUESTS.drawBubbles(ctx);
   // floaters
-  ctx.font = 'bold 16px sans-serif';
-  ctx.textAlign = 'center';
   floaters.forEach(f => {
     // Chiffres de dégâts masqués au choix (les gains d'or, d'XP et de PV restent affichés).
     if (!canaanDisplay.damage && (typeof f.txt === 'number' || /^-\d+$/.test(f.txt))) return;
     ctx.globalAlpha = f.life / 50;
-    ctx.fillStyle = f.c;
-    ctx.fillText(f.txt, f.x, f.y);
+    canaanText(ctx, f.txt, f.x, f.y, 16, f.c);
   });
   ctx.globalAlpha = 1;
   ctx.restore();

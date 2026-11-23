@@ -1513,17 +1513,10 @@
         c.restore();
       }
       if (!title) continue;
-      c.save();
-      c.textAlign = 'center';
-      c.font = 'italic bold 11px Palatino Linotype, Georgia, serif';
-      c.lineWidth = 3;
-      c.strokeStyle = '#120c07';
-      c.fillStyle = auraOf(hero) ? '#ffe27a' : '#e8c878';
-      const y = p.y - (self ? 52 : 66),
-        text = '« ' + title + ' »';
-      c.strokeText(text, p.x, y);
-      c.fillText(text, p.x, y);
-      c.restore();
+      const y = p.y - (self ? 52 : 66);
+      canaanText(c, '« ' + title + ' »', p.x, y, 11, auraOf(hero) ? '#ffe27a' : '#e8c878', {
+        style: 'italic bold'
+      });
     }
   }
 

@@ -451,17 +451,14 @@
       c.strokeStyle = kind === 'buff' ? '#6fd38a' : '#e5484d';
       c.lineWidth = 2;
       c.strokeRect(bx + 1, y + 1, S - 2, S - 2);
-      c.font = '15px system-ui,sans-serif';
+      c.font = canaanGlyphFont(15);
       c.fillStyle = '#ffffff';
       c.fillText(ic, bx + S / 2, y + S / 2 + 1);
       if (l >= 0) {
-        c.font = 'bold 10px system-ui,sans-serif';
-        c.lineWidth = 3;
-        c.strokeStyle = '#000000';
         const txt = l < 10 ? l.toFixed(1) : String(Math.ceil(l));
-        c.strokeText(txt, bx + S / 2, y + S + 7);
-        c.fillStyle = kind === 'buff' ? '#c8f8d0' : '#ffc0b0';
-        c.fillText(txt, bx + S / 2, y + S + 7);
+        canaanText(c, txt, bx + S / 2, y + S + 7, 10, kind === 'buff' ? '#c8f8d0' : '#ffc0b0', {
+          baseline: 'middle'
+        });
       }
     });
     c.restore();

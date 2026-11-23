@@ -1058,13 +1058,7 @@
           s = q && currentStep(game.hero, q),
           a = stateOf(game.hero).active[id];
         if (s?.k !== 'race' || !a.n) continue;
-        c.font = 'bold 20px Georgia, serif';
-        c.textAlign = 'center';
-        c.lineWidth = 4;
-        c.strokeStyle = '#2a1a08';
-        c.fillStyle = a.n <= 5 ? '#ff6a4a' : '#ffe9a0';
-        c.strokeText(String(a.n), P.x, P.y - 84);
-        c.fillText(String(a.n), P.x, P.y - 84);
+        canaanText(c, String(a.n), P.x, P.y - 84, 20, a.n <= 5 ? '#ff6a4a' : '#ffe9a0');
       }
     }
     return Object.freeze({

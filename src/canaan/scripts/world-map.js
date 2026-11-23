@@ -56,7 +56,6 @@
   // Encre des contours et des noms, parchemin des noms : ceux du thème de l'interface.
   const INK = '#1a120b';
   const PARCHMENT = '#f6e2b1';
-  const SERIF = "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif";
   const TREES = {
     tree: ['#2c6a34', '#5aa04a', 3],
     bigtree: ['#245a2e', '#4e9440', 4],
@@ -868,7 +867,7 @@
         c.beginPath();
         c.arc(0, 0, 6.5, 0, Math.PI * 2);
         c.fill();
-        c.font = 'bold 12px ' + SERIF;
+        c.font = canaanFont(12);
         c.textAlign = 'center';
         c.textBaseline = 'middle';
         c.fillStyle = mark === '…' ? '#c8c0b0' : col;
@@ -950,7 +949,7 @@
   // Nom posé sur la carte : police à empattements du thème, cerné d'encre. region : nom de région, en italique doré.
   function label(c, text, x, y, size = 11, color = PARCHMENT, region = false) {
     c.save();
-    c.font = (region ? 'italic bold ' : 'bold ') + size + 'px ' + SERIF;
+    c.font = canaanFont(size, region ? 'italic bold' : 'bold');
     if ('letterSpacing' in c) c.letterSpacing = region ? '1.5px' : '0px';
     c.textAlign = 'center';
     c.textBaseline = 'middle';

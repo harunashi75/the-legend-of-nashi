@@ -1681,7 +1681,7 @@
   }
   function bubble(c, x, y, text) {
     c.save();
-    c.font = '12px sans-serif';
+    c.font = canaanFont(12, '');
     // Traduite entière avant d'être coupée en lignes (une ligne seule ne serait pas reconnue).
     const words = translateText(text).split(' '),
       lines = [];
@@ -2410,15 +2410,7 @@
     c.restore();
   }
   function drawLabel(c, x, y, text, sub) {
-    c.save();
-    c.textAlign = 'center';
-    c.font = 'bold 13px Palatino Linotype, Georgia, serif';
-    c.lineWidth = 3;
-    c.strokeStyle = '#120c07';
-    c.fillStyle = '#ffe8a8';
-    c.strokeText(text, x, y);
-    c.fillText(text, x, y);
-    c.restore();
+    canaanText(c, text, x, y, 13, '#ffe8a8');
     if (sub) drawCanaanPrompt(c, sub, x, y + 17);
   }
   const inView = (x, y, m = 200) => x > camX - m && x < camX + W + m && y > camY - m && y < camY + H + m;

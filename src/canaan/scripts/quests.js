@@ -2714,7 +2714,7 @@
     R(c, x + 2, y + h - 2, w - 5, 2, p[2]);
   }
   function rune(c, x, y, text, col, size = 14) {
-    c.font = size + 'px serif';
+    c.font = canaanFont(size, '');
     c.textAlign = 'center';
     c.fillStyle = col;
     c.fillText(text, x, y);
@@ -3255,7 +3255,7 @@
           y = py(site, s.dy);
         R(c, x - 2, y - 24, 4, 26, '#6a4a2a');
         R(c, x - 14 + s.dir[0] * 6, y - 30, 28, 10, '#a8804a');
-        c.font = 'bold 9px system-ui';
+        c.font = canaanFont(9);
         c.textAlign = 'center';
         c.fillStyle = '#2a1a0a';
         c.fillText(
@@ -3386,15 +3386,19 @@
                   : '';
       if (gift && !mark) rune(c, at0.x, at0.y - 58 * s + Math.sin(time * 0.08) * 3, '🎁', '#ffffff', 22);
       if (mark) {
-        c.font = 'bold 26px Georgia, serif';
-        c.textAlign = 'center';
-        c.lineWidth = 4;
-        c.strokeStyle = '#2a1a08';
-        c.fillStyle = mark === '…' ? '#c8c0b0' : npc.quest?.main ? '#ffd84a' : '#fff0a0';
         // Au-dessus du nom et de l'invitation des nains.
         const yy = at0.y - (npc.dwarf ? 78 : 58 * s) + Math.sin(time * 0.08) * 3;
-        c.strokeText(mark, at0.x, yy);
-        c.fillText(mark, at0.x, yy);
+        canaanText(
+          c,
+          mark,
+          at0.x,
+          yy,
+          26,
+          mark === '…' ? '#c8c0b0' : npc.quest?.main ? '#ffd84a' : '#fff0a0',
+          {
+            line: 4
+          }
+        );
       }
       if (!npc.dwarf && Math.hypot(dx, dy) < 4 * T) nameTag(c, npc.x, npc.y - 46 * s, def.name);
     }
@@ -3430,7 +3434,7 @@
       const said = translateText(npc.quest.talk.offer[0]),
         text = said.slice(0, 60) + (said.length > 60 ? '…' : '');
       c.save();
-      c.font = '12px system-ui, sans-serif';
+      c.font = canaanFont(12, '');
       c.textAlign = 'center';
       const w = Math.min(240, c.measureText(text).width + 20),
         x = npc.x - w / 2,

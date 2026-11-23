@@ -1488,13 +1488,7 @@
         R(1, -146, 22, 3, '#e0c060');
         canaanLight(x, y - 60, 130, '#ffd36b');
       }
-      c.font = 'bold 12px system-ui';
-      c.textAlign = 'center';
-      c.strokeStyle = '#101b20';
-      c.lineWidth = 3;
-      c.strokeText(p.name, 0, p.type === 'tower' ? -158 : -90);
-      c.fillStyle = '#f6e2b1';
-      c.fillText(p.name, 0, p.type === 'tower' ? -158 : -90);
+      drawCanaanName(c, p.name, 0, p.type === 'tower' ? -158 : -90);
       c.restore();
     }
   }

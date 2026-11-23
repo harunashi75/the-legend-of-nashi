@@ -447,28 +447,49 @@
     c.restore();
     canaanLight(x, y - h * 0.2, boss ? 200 : 80, boss ? '#fff0a8' : '#ffd36b');
   }
-  // ---------------------------------------------------------------- Textes au-dessus du monde
-  // Une seule facture pour tout ce qui s'active avec la touche E (entrées des donjons et des raids, bâtiments,
-  // marchands, PNJ, coffres, récolte, mécanismes) : serif doré cerné d'encre, comme les coffres secrets. Les noms des
-  // PNJ et des lieux prennent la même police et le même contour, en parchemin, pour se distinguer de l'invitation.
-  const WORLD_FONT = 'Palatino Linotype, Georgia, serif';
-  function worldText(c, text, x, y, size, color) {
+  // ---------------------------------------------------------------- Textes du canevas
+  // Une seule facture pour tout le texte dessiné dans le jeu : la serif du thème, en gras, cernée d'encre sombre.
+  // Invitations (touche E), noms des PNJ et des lieux, bulles, chiffres de dégâts, minuteurs, titres des instances…
+  // Seuls les émojis et symboles dessinés comme des icônes gardent leur propre police.
+  // Même pile que --rpg-serif (styles/palette.css) ; un test vérifie qu'elles restent identiques.
+  const CANAAN_SERIF = "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif";
+  // Police du thème à la taille donnée (style : 'bold', 'italic bold' ou '' pour le romain).
+  function canaanFont(size, style = 'bold') {
+    return (style ? style + ' ' : '') + size + 'px ' + CANAAN_SERIF;
+  }
+  // Émojis et symboles dessinés comme des icônes (effets, sceaux, énigmes, Lumi) : police du système, puis émojis.
+  function canaanGlyphFont(size, style = '') {
+    return (
+      (style ? style + ' ' : '') + size + 'px system-ui, "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
+    );
+  }
+  // Texte cerné d'encre : contour d'autant plus épais que le texte est grand (line: 0 pour un texte sans contour).
+  function canaanText(c, text, x, y, size, color, opts = {}) {
+    const {
+      style = 'bold',
+      ink = '#1a1008',
+      line = Math.max(3, Math.round(size / 5)),
+      align = 'center',
+      baseline = 'alphabetic'
+    } = opts;
     c.save();
-    c.font = 'bold ' + size + 'px ' + WORLD_FONT;
-    c.textAlign = 'center';
-    c.textBaseline = 'alphabetic';
+    c.font = canaanFont(size, style);
+    c.textAlign = align;
+    c.textBaseline = baseline;
     c.lineJoin = 'round';
-    c.lineWidth = 3;
-    c.strokeStyle = '#1a1008';
-    c.strokeText(text, x, y);
+    if (line) {
+      c.lineWidth = line;
+      c.strokeStyle = ink;
+      c.strokeText(text, x, y);
+    }
     c.fillStyle = color;
     c.fillText(text, x, y);
     c.restore();
   }
   // Invitation à interagir : « [E] Entrer », « [E] Parler », « [E] Ouvrir »…
-  const drawCanaanPrompt = (c, text, x, y, color = '#f6dc98') => worldText(c, text, x, y, 13, color);
+  const drawCanaanPrompt = (c, text, x, y, color = '#f6dc98') => canaanText(c, text, x, y, 13, color);
   // Nom d'un PNJ ou d'un lieu.
-  const drawCanaanName = (c, text, x, y, color = '#f6e2b1') => worldText(c, text, x, y, 12, color);
+  const drawCanaanName = (c, text, x, y, color = '#f6e2b1') => canaanText(c, text, x, y, 12, color);
   // ---------------------------------------------------------------- Plaque des monstres
   // Au-dessus de chaque monstre (hors boss, qui ont le même cadre en grand en haut de l'écran), à la façon des barres de vie des
   // MMO : nom en serif cerné d'encre, barre rouge à reflet graduée par quarts, traînée claire qui fond après un coup,
@@ -568,7 +589,7 @@
     c.imageSmoothingEnabled = false;
     // Nom.
     const name = mobTitle(m);
-    worldText(
+    canaanText(
       c,
       name,
       Math.round(m.x),
@@ -603,7 +624,7 @@
     c.fillRect(bx + 1, by + 1, 12, 5);
     if (gap >= 10) plateSkull(c, bx + 7, by + 7);
     else {
-      c.font = 'bold ' + (level >= 10 ? 9 : 10) + 'px ' + WORLD_FONT;
+      c.font = canaanFont(level >= 10 ? 9 : 10);
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.lineWidth = 2;
@@ -799,8 +820,8 @@
     c.fillRect(-vr, -vr, vr * 2, vr * 2);
     c.restore();
     // Nom, entre deux filets dorés qui s'effacent vers les bords.
-    worldText(c, boss.t, W / 2, y - 12, 20, '#ffe2a0');
-    c.font = 'bold 20px ' + WORLD_FONT;
+    canaanText(c, boss.t, W / 2, y - 12, 20, '#ffe2a0', { line: 3 });
+    c.font = canaanFont(20);
     const half = c.measureText(boss.t).width / 2 + 14,
       room = w / 2 - half - 8;
     if (room > 16)
@@ -854,7 +875,7 @@
     for (let k = 1; k < 10; k++) c.fillRect(x + Math.round((w * k) / 10), y + h - 5, 1, 5);
     c.fillStyle = 'rgba(12,8,6,.6)';
     for (const q of [0.25, 0.5, 0.75]) c.fillRect(x + Math.round(w * q) - 1, y, 2, h);
-    worldText(
+    canaanText(
       c,
       Math.ceil(boss.hp) + ' / ' + boss.mhp + ' · ' + Math.round(ratio * 100) + ' %',
       W / 2,
@@ -887,7 +908,7 @@
       c.scale(2.5, 2.5);
       plateSkull(c, 0, 0.5);
       c.restore();
-    } else worldText(c, String(level), left + size / 2, mid + 6, 17, levelColor(gap));
+    } else canaanText(c, String(level), left + size / 2, mid + 6, 17, levelColor(gap));
     plateEmblem(c, emblem, right + 6, top + 6, 2, accent);
     // Nature du boss, sous la barre.
     const label = arena
@@ -901,13 +922,16 @@
             : count > 1
               ? 'Boss ' + ((boss.bossStage || 0) + 1) + '/' + count
               : 'Boss';
-    worldText(c, label + (mode ? ' · ' + mode.label : ''), W / 2, under + 13, 12, '#e0d0ac');
+    canaanText(c, label + (mode ? ' · ' + mode.label : ''), W / 2, under + 13, 12, '#e0d0ac');
     // Bonus du boss et malus infligés par les héros, sous la barre.
     if (window.CANAAN_BUFF_BAR) CANAAN_BUFF_BAR.drawMonster(c, boss, x, under + 20, w);
     c.restore();
   }
   // Noms publics du module ; tout le reste est privé.
   Object.assign(window, {
+    canaanFont,
+    canaanGlyphFont,
+    canaanText,
     drawCanaanPrompt,
     drawCanaanName,
     drawCanaanMobPlate,

@@ -283,7 +283,7 @@
     if (!list.length) return;
     ctx.save();
     ctx.translate(Math.round(-camX), Math.round(-camY));
-    ctx.font = '22px "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.font = canaanGlyphFont(22);
     ctx.textAlign = 'center';
     for (const s of list) {
       const x = s.x,

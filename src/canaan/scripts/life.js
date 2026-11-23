@@ -1533,7 +1533,7 @@
   function drawBubbles(c) {
     if (game.world.instance || canaanUnder() || !settled) return;
     c.save();
-    c.font = '12px system-ui, sans-serif';
+    c.font = canaanFont(12, '');
     c.textAlign = 'center';
     const here = canaanRoomAt(P.x / TS, P.y / TS);
     for (const v of villagers) {

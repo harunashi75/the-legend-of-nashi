@@ -3478,7 +3478,7 @@
       c.fillRect(x + 2, y + 2, w - 4, 3);
       c.fillStyle = '#f6dc78';
       for (const sx of [x + 6, x + w - 9]) c.fillRect(sx, y + 6, 3, 5);
-      c.font = 'bold 11px Georgia, serif';
+      c.font = canaanFont(11);
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = OUT;

@@ -246,6 +246,15 @@ test('Nettoyage : systèmes morts absents et progression par équipement conserv
  }
  assert.doesNotMatch(source,/canaan_bags_v1_7_39|#quest\b|\.questdone\b|\.xp\b|dayPhase/);
  assert.doesNotMatch(source,/canaan_crafting_events_v1|legacyKey/);
+ // Un seul dessin par chose : les anciens dessins « de secours » (décors de l'île, entrées des instances, décors des
+ // Tréfonds, ancien camp) et l'ancienne feuille qui repeignait l'interface par-dessus ne reviennent pas.
+ assert.doesNotMatch(source,/\bfunction (drawPixDecor|polishDecor|drawDungeonEntrance|drawBiomeDecor|paintAccent|membrane|worldText)\b|canaan-rpg-theme|rpg-theme\.css/);
+ // Une seule police pour le texte du canevas : la serif du thème (canaanFont, canaanText), ou celle des icônes
+ // (canaanGlyphFont) ; aucune police écrite à la main. Elle reste celle de l'interface (--rpg-serif, palette.css).
+ const handFonts=scripts.flatMap(m=>[...m[2].matchAll(/\.font\s*=(?!\s*canaan(?:Glyph)?Font\()[^;\n]*/g)].map(f=>f[0]));
+ assert.deepEqual(handFonts,[],'police de canevas écrite à la main');
+ const serif=source.match(/const CANAAN_SERIF = "([^"]+)"/)[1],cssSerif=source.match(/--rpg-serif:\s*([^;]+);/)[1];
+ assert.equal(serif,cssSerif.trim(),'la police du canevas suit --rpg-serif');
  // Anciennes sauvegardes (schémas 4 à 8) : migrations, statistiques héritées et alias de rareté retirés.
  assert.doesNotMatch(source,/CANAAN_SAVE_MIGRATIONS|LEGACY_GEAR_STATS|cleanLegacyStats|rarityAliases|_balancedVersion|Artisan élite|Grand Master/);
  assert.equal(scripts.some(m=>m[1].includes('canaan-save-migrations')),false);

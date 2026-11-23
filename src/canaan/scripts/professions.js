@@ -582,7 +582,7 @@
         c.stroke();
         if (hero === game.hero) {
           c.globalAlpha = 1;
-          c.font = 'bold 22px system-ui';
+          c.font = canaanGlyphFont(22, 'bold');
           c.textAlign = 'center';
           c.lineWidth = 4;
           c.strokeStyle = '#120c07';
