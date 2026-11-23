@@ -1556,16 +1556,6 @@
         '#ffd36d',
         4
       );
-    // Bouclier de cristal : jauge sous la barre du boss.
-    const b = run.boss;
-    if (b && b.shieldHp > 0) {
-      const w = Math.min(520, W - 40),
-        x = (W - w) / 2;
-      c.fillStyle = 'rgba(20,10,30,.85)';
-      c.fillRect(x, 178, w, 8);
-      c.fillStyle = '#e0c0ff';
-      c.fillRect(x, 178, w * (b.shieldHp / b.shieldMax), 8);
-    }
     if (run.phase === 'enter')
       text('Avance sur la piste pour commencer l’épreuve', W / 2, H * 0.3, 22, '#fff2cb');
     if (run.phase === 'countdown' || run.phase === 'rest') {
@@ -1685,6 +1675,7 @@
         ? {
             k: run.boss.netId,
             shieldHp: run.boss.shieldHp || 0,
+            shieldMax: run.boss.shieldMax || 0,
             parryUntil: run.boss.parryUntil || 0,
             phase: run.boss.phase,
             wave: run.boss.wave
@@ -1754,6 +1745,7 @@
       if (b) {
         Object.assign(b, {
           shieldHp: +v.boss.shieldHp || 0,
+          shieldMax: +v.boss.shieldMax || 0,
           parryUntil: +v.boss.parryUntil || 0,
           phase: v.boss.phase | 0,
           wave,

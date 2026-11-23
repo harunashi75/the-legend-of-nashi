@@ -18,7 +18,10 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 - **Barre de vie des monstres redessinée** ❤️ : chaque monstre a maintenant une plaque façon MMO, posée juste au-dessus de sa tête : son nom, une barre rouge à reflet graduée par quarts, et une traînée claire qui fond après chaque coup pour voir ce qu’on vient d’enlever. À gauche, une pastille donne **son niveau**, colorée selon l’écart avec le héros : gris (sans danger), vert, jaune (de ton niveau), orange, rouge, et un crâne pour un monstre d’au moins dix niveaux de plus. Les élites ont une plaque plus large, un cadre et des ailes dorés. Le monstre sous le curseur est mis en avant (liseré blanc et chevrons) et sa plaque passe devant les autres. Les plaques restent au-dessus des personnages et des arbres. En ligne, les invités voient le niveau décidé par l’hôte.
 
+- **Barre des boss au même visuel que celle des monstres** 👑 : en haut de l’écran, le cadre des boss (donjon, raid, boss caché, boss mondial, Arène) reprend la plaque des monstres en grand : nom doré entre deux filets, barre rouge à reflet graduée par dixièmes et par quarts, traînée claire après chaque coup, **niveau du boss** dans un médaillon coloré selon l’écart avec le héros (crâne à +10). À droite, un emblème dit à qui on a affaire : crâne (donjon), crâne couronné (raid), étoile (boss mondial), œil (boss caché), épées (Arène). Des ailes dorées l’encadrent, doublées de la couleur du boss pour les raids et les boss mondiaux ; la barre bat sous 30 % de PV. Le bouclier de cristal de l’Arène s’accroche sous la barre.
+
 ### Corrigé
+- **Gardiens de quête sans barre de vie** : les gardiens affrontés dehors ou dans les Tréfonds ont maintenant, eux aussi, la barre des boss.
 - **Monstres dans le Camp de l’Aurore** : la zone sûre était restée un cercle autour du feu alors que le camp avait grandi (jardin, ferme, champs, verger, quai). Elle couvre maintenant tout le camp et son port ; aucun monstre n’y apparaît, et ceux qui s’y attardaient disparaissent.
 
 ## [0.11.0] — 2026-11-19

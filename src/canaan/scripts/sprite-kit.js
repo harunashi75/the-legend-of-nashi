@@ -367,61 +367,6 @@
     MIST.set(col, cv);
     return cv;
   }
-  // Barre de boss en haut de l'écran : boss d'instance (progression du raid) ou boss mondial proche.
-  function drawCanaanBossFrame(c) {
-    const boss = game.world.monsters
-      .filter(m => (game.world.instance ? m.boss : m.worldBoss) && m.hp > 0)
-      .sort((a, b) => Math.hypot(a.x - P.x, a.y - P.y) - Math.hypot(b.x - P.x, b.y - P.y))[0];
-    if (!boss || (Math.hypot(boss.x - P.x, boss.y - P.y) > 640 && boss.hp >= boss.mhp)) return;
-    const arena = !!game.world.instance?.arena,
-      d = game.world.instance && !arena ? instances[game.world.instance.index] : null,
-      count = d ? (d.bosses || [d.boss]).length : 0,
-      edge = d ? d.color : boss.bossColor || '#ffd36d',
-      w = Math.min(520, W - 40),
-      x = (W - w) / 2,
-      y = 160,
-      ratio = Math.max(0, boss.hp / boss.mhp),
-      mode = instanceDifficulty();
-    c.save();
-    c.fillStyle = 'rgba(8,8,14,.82)';
-    c.fillRect(x - 4, y - 24, w + 8, 46);
-    c.strokeStyle = edge;
-    c.lineWidth = 2;
-    c.strokeRect(x - 4, y - 24, w + 8, 46);
-    c.font = 'bold 14px system-ui,sans-serif';
-    c.textAlign = 'left';
-    c.fillStyle = '#ffe9b0';
-    c.fillText((d || arena ? '☠ ' : '⭐ ') + boss.t, x + 4, y - 6);
-    c.textAlign = 'right';
-    c.fillStyle = '#c8c0d8';
-    const label = arena
-      ? CANAAN_ARENA.frameLabel(boss)
-      : !d
-        ? 'Boss mondial'
-        : boss.secretBoss !== undefined
-          ? 'Boss caché'
-          : count > 1
-            ? 'Boss ' + ((boss.bossStage || 0) + 1) + '/' + count
-            : 'Boss';
-    c.fillText(label + (mode ? ' · ' + mode.label : ''), x + w - 4, y - 6);
-    c.fillStyle = '#2a1418';
-    c.fillRect(x, y, w, 14);
-    c.fillStyle = ratio > 0.3 ? '#c8303a' : '#ff6a3c';
-    c.fillRect(x, y, w * ratio, 14);
-    c.fillStyle = 'rgba(255,255,255,.18)';
-    c.fillRect(x, y, w * ratio, 4);
-    c.font = 'bold 11px system-ui,sans-serif';
-    c.textAlign = 'center';
-    c.fillStyle = '#fff';
-    c.fillText(
-      Math.ceil(boss.hp) + ' / ' + boss.mhp + ' · ' + Math.round(ratio * 100) + ' %',
-      x + w / 2,
-      y + 11
-    );
-    // Bonus du boss et malus infligés par les héros, sous la barre.
-    if (window.CANAAN_BUFF_BAR) CANAAN_BUFF_BAR.drawMonster(c, boss, x - 4, y + 28, w + 8);
-    c.restore();
-  }
   // Coffres : bois cerclé de fer et mousse pour les coffres cachés, or et gemme pour le coffre de boss.
   const CHESTS = {};
   function canaanChestSprite(kind) {
@@ -525,7 +470,7 @@
   // Nom d'un PNJ ou d'un lieu.
   const drawCanaanName = (c, text, x, y, color = '#f6e2b1') => worldText(c, text, x, y, 12, color);
   // ---------------------------------------------------------------- Plaque des monstres
-  // Au-dessus de chaque monstre (hors boss, qui ont leur cadre en haut de l'écran), à la façon des barres de vie des
+  // Au-dessus de chaque monstre (hors boss, qui ont le même cadre en grand en haut de l'écran), à la façon des barres de vie des
   // MMO : nom en serif cerné d'encre, barre rouge à reflet graduée par quarts, traînée claire qui fond après un coup,
   // pastille du niveau colorée selon l'écart avec le héros (gris : sans danger … rouge : bien plus fort, crâne à +10).
   // Élite : plaque plus large, cadre et ailes dorés. Monstre visé (le plus proche du curseur) : liseré et chevrons.
@@ -550,6 +495,53 @@
     R(-1, 2, 1, 1, PLATE_INK);
     R(0, 2, 1, 1, '#ff4a3a');
   }
+  // Traînée : la part perdue reste claire un instant, puis fond jusqu'aux PV restants.
+  function plateTrail(m, ratio) {
+    if (!(m._plateTrail >= ratio) || m._plateTrail > 1) [m._plateTrail, m._plateHold] = [ratio, 0];
+    else if (m._plateTrail > ratio) {
+      if (m._plateLast > ratio) m._plateHold = 24;
+      if (m._plateHold > 0) m._plateHold--;
+      else m._plateTrail = Math.max(ratio, m._plateTrail - 0.012);
+    }
+    m._plateLast = ratio;
+  }
+  // PV perdus à l'instant, puis PV restants : rouge vif, reflet en haut, ombre en bas (u : épaisseur des bandes).
+  function plateFill(c, m, x, y, w, h, ratio, u = 1) {
+    const fill = Math.round(w * ratio),
+      trail = Math.round(w * m._plateTrail);
+    if (trail > fill) {
+      c.fillStyle = '#ffe2a8';
+      c.fillRect(x + fill, y, trail - fill, h);
+    }
+    if (fill > 0) {
+      c.fillStyle = '#d8323a';
+      c.fillRect(x, y, fill, h);
+      c.fillStyle = '#f2646a';
+      c.fillRect(x, y, fill, 2 * u);
+      c.fillStyle = 'rgba(255,255,255,.35)';
+      c.fillRect(x, y, fill, u);
+      c.fillStyle = '#8c1820';
+      c.fillRect(x, y + h - u, fill, u);
+    }
+  }
+  // Aile à trois plumes, cernée d'encre, déployée derrière une pastille de 14 px dont (x, y) est le coin ; s : échelle,
+  // dir : 1 vers la gauche, −1 vers la droite ; col : plumage, reflet, ombre.
+  function plateWing(c, x, y, s, dir, col = ['#e8b848', '#fff0b0', '#a8782a']) {
+    const wing = (color, ...pts) => {
+      c.fillStyle = color;
+      c.beginPath();
+      pts.forEach(([px, py], i) => c[i ? 'lineTo' : 'moveTo'](px, py));
+      c.fill();
+    };
+    c.save();
+    c.translate(x, y);
+    c.scale(s * dir, s);
+    wing(PLATE_INK, [3, -2], [-6, -6], [-12, -3], [-8, 1], [-14, 4], [-9, 8], [-13, 12], [-6, 13], [3, 16]);
+    wing(col[0], [3, -1], [-6, -4], [-10, -2], [-6, 2], [-12, 4], [-7, 8], [-11, 11], [-5, 12], [3, 15]);
+    wing(col[1], [3, -1], [-6, -4], [-10, -2], [-4, 1]);
+    wing(col[2], [3, 12], [-5, 12], [-11, 11], [-4, 9], [3, 9]);
+    c.restore();
+  }
   // Monstre visé : le plus proche du curseur, à moins de 46 px (null sinon).
   function aimedMob() {
     let aimed = null;
@@ -571,14 +563,7 @@
       x = Math.round(m.x - w / 2 + 7),
       y = Math.round(top),
       ratio = m.mhp > 0 ? Math.max(0, Math.min(1, m.hp / m.mhp)) : 0;
-    // Traînée : la part perdue reste claire un instant, puis fond jusqu'aux PV restants.
-    if (!(m._plateTrail >= ratio) || m._plateTrail > 1) [m._plateTrail, m._plateHold] = [ratio, 0];
-    else if (m._plateTrail > ratio) {
-      if (m._plateLast > ratio) m._plateHold = 24;
-      if (m._plateHold > 0) m._plateHold--;
-      else m._plateTrail = Math.max(ratio, m._plateTrail - 0.012);
-    }
-    m._plateLast = ratio;
+    plateTrail(m, ratio);
     c.save();
     c.imageSmoothingEnabled = false;
     // Nom.
@@ -598,23 +583,7 @@
     c.fillRect(x - 1, y - 1, w + 2, h + 2);
     c.fillStyle = '#2a1014';
     c.fillRect(x, y, w, h);
-    // PV perdus à l'instant, puis PV restants : rouge vif, reflet en haut, ombre en bas.
-    const fill = Math.round(w * ratio),
-      trail = Math.round(w * m._plateTrail);
-    if (trail > fill) {
-      c.fillStyle = '#ffe2a8';
-      c.fillRect(x + fill, y, trail - fill, h);
-    }
-    if (fill > 0) {
-      c.fillStyle = '#d8323a';
-      c.fillRect(x, y, fill, h);
-      c.fillStyle = '#f2646a';
-      c.fillRect(x, y, fill, 2);
-      c.fillStyle = 'rgba(255,255,255,.35)';
-      c.fillRect(x, y, fill, 1);
-      c.fillStyle = '#8c1820';
-      c.fillRect(x, y + h - 1, fill, 1);
-    }
+    plateFill(c, m, x, y, w, h, ratio);
     // Graduations par quarts.
     c.fillStyle = 'rgba(12,8,6,.55)';
     for (const q of [0.25, 0.5, 0.75]) c.fillRect(x + Math.round(w * q), y + 1, 1, h - 2);
@@ -623,63 +592,7 @@
       gap = level - (game.hero?.level || 1),
       bx = x - 15,
       by = y + h / 2 - 7;
-    if (elite) {
-      // Aile dorée à trois plumes, cernée d'encre, déployée derrière la pastille.
-      const wing = (pts, col) => {
-        c.fillStyle = col;
-        c.beginPath();
-        c.moveTo(bx + pts[0][0], by + pts[0][1]);
-        for (const [px, py] of pts.slice(1)) c.lineTo(bx + px, by + py);
-        c.fill();
-      };
-      wing(
-        [
-          [3, -2],
-          [-6, -6],
-          [-12, -3],
-          [-8, 1],
-          [-14, 4],
-          [-9, 8],
-          [-13, 12],
-          [-6, 13],
-          [3, 16]
-        ],
-        PLATE_INK
-      );
-      wing(
-        [
-          [3, -1],
-          [-6, -4],
-          [-10, -2],
-          [-6, 2],
-          [-12, 4],
-          [-7, 8],
-          [-11, 11],
-          [-5, 12],
-          [3, 15]
-        ],
-        '#e8b848'
-      );
-      wing(
-        [
-          [3, -1],
-          [-6, -4],
-          [-10, -2],
-          [-4, 1]
-        ],
-        '#fff0b0'
-      );
-      wing(
-        [
-          [3, 12],
-          [-5, 12],
-          [-11, 11],
-          [-4, 9],
-          [3, 9]
-        ],
-        '#a8782a'
-      );
-    }
+    if (elite) plateWing(c, bx, by, 1, 1);
     c.fillStyle = PLATE_INK;
     c.fillRect(bx - 1, by - 1, 16, 16);
     c.fillStyle = target ? '#f4f0e8' : elite ? '#e8b848' : '#6a5638';
@@ -722,6 +635,275 @@
         c.fill();
       }
     }
+    c.restore();
+  }
+  // ---------------------------------------------------------------- Cadre de boss
+  // En haut de l'écran : la plaque des monstres en grand. Nom entre deux filets, barre rouge à traînée graduée par
+  // dixièmes, niveau à gauche, emblème à droite (crâne : donjon et gardien de quête, crâne couronné : raid, étoile :
+  // boss mondial, œil : boss caché, épées : Arène), ailes de chaque côté (doubles pour un raid ou un boss mondial).
+  // '#' : métal, '+' : reflet, 'o' : couleur du boss.
+  const EMBLEMS = {
+    skull: [
+      '...........',
+      '..+++++##..',
+      '.++++#####.',
+      '.+++######.',
+      '.+..###..#.',
+      '.+o.###o.#.',
+      '.###.#.###.',
+      '..#######..',
+      '..#.#.#.#..',
+      '..#.#.#.#..',
+      '...........'
+    ],
+    crowned: [
+      'o....o....o',
+      'oo..ooo..oo',
+      'ooooooooooo',
+      '...........',
+      '.+++++####.',
+      '.+++######.',
+      '.+..###..#.',
+      '.+o.###o.#.',
+      '.###.#.###.',
+      '..#######..',
+      '..#.#.#.#..'
+    ],
+    star: [
+      '.....+.....',
+      '.....+.....',
+      '....++#....',
+      '....+o#....',
+      '+++++oo####',
+      '.+++ooo###.',
+      '..++ooo##..',
+      '..++o.o##..',
+      '.+++...###.',
+      '.++.....##.',
+      '.+.......#.'
+    ],
+    eye: [
+      '...........',
+      '...........',
+      '...+++++...',
+      '.++ooooo##.',
+      '++oo...oo##',
+      '+oo..+..oo#',
+      '++oo...oo##',
+      '.++ooooo##.',
+      '...#####...',
+      '...........',
+      '...........'
+    ],
+    swords: [
+      '++.......##',
+      '+++.....###',
+      '.+++...###.',
+      '..+++.###..',
+      '...+++##...',
+      '....###....',
+      '...##+++...',
+      'o.##...++.o',
+      '.oo.....oo.',
+      'o.o.....o.o',
+      'o.........o'
+    ]
+  };
+  function plateEmblem(c, name, x, y, px, accent) {
+    EMBLEMS[name].forEach((row, j) => {
+      for (let i = 0; i < row.length; i++) {
+        if (row[i] === '.') continue;
+        c.fillStyle = row[i] === '+' ? '#fff0b0' : row[i] === 'o' ? accent : '#e8b848';
+        c.fillRect(x + i * px, y + j * px, px, px);
+      }
+    });
+  }
+  // Médaillon carré : encre, or, filet de la couleur du boss, fond sombre à reflet.
+  function plateMedal(c, x, y, size, accent) {
+    const ring = (d, col) => {
+      c.fillStyle = col;
+      c.fillRect(x + d, y + d, size - 2 * d, size - 2 * d);
+    };
+    ring(-2, PLATE_INK);
+    ring(0, '#e8b848');
+    c.fillStyle = '#fff0b0';
+    c.fillRect(x, y, size, 1);
+    c.fillRect(x, y, 1, size);
+    c.fillStyle = '#a8782a';
+    c.fillRect(x, y + size - 1, size, 1);
+    c.fillRect(x + size - 1, y, 1, size);
+    ring(2, PLATE_INK);
+    ring(3, accent);
+    ring(4, '#1a120c');
+    c.fillStyle = 'rgba(255,255,255,.08)';
+    c.fillRect(x + 4, y + 4, size - 8, Math.round(size / 2) - 4);
+  }
+  // Petite gemme en losange, de la couleur du boss.
+  function plateGem(c, x, y, r, accent) {
+    for (const [d, col] of [
+      [2, PLATE_INK],
+      [1, '#e8b848'],
+      [0, accent]
+    ]) {
+      c.fillStyle = col;
+      c.beginPath();
+      c.moveTo(x, y - r - d);
+      c.lineTo(x + r + d, y);
+      c.lineTo(x, y + r + d);
+      c.lineTo(x - r - d, y);
+      c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,.6)';
+    c.fillRect(x - 1, y - r + 1, 2, 2);
+  }
+  // Boss affiché : en instance, un de ses boss ; dehors, un boss mondial ou un gardien de quête. Le plus proche, à
+  // moins de 640 px ou déjà blessé.
+  function framedBoss() {
+    const dist = m => Math.hypot(m.x - P.x, m.y - P.y),
+      boss = game.world.monsters
+        .filter(m => (m.boss || (!game.world.instance && m.worldBoss)) && m.hp > 0)
+        .sort((a, b) => dist(a) - dist(b))[0];
+    return boss && (dist(boss) <= 640 || boss.hp < boss.mhp) ? boss : null;
+  }
+  function drawCanaanBossFrame(c) {
+    const boss = framedBoss();
+    if (!boss) return;
+    const arena = !!game.world.instance?.arena,
+      d = game.world.instance && !arena ? instances[game.world.instance.index] : null,
+      count = d ? (d.bosses || [d.boss]).length : 0,
+      accent = d?.color || boss.bossColor || boss.mobColor || boss.pal?.[3] || '#ffd36d',
+      hidden = boss.secretBoss !== undefined,
+      great = !!(boss.worldBoss || d?.raid),
+      emblem = arena ? 'swords' : boss.worldBoss ? 'star' : hidden ? 'eye' : d?.raid ? 'crowned' : 'skull',
+      // Les ailes restent entre le panneau du héros et la mini-carte dès 1280 px de large.
+      w = Math.round(Math.max(320, Math.min(460, W - 880))),
+      h = 16,
+      x = Math.round((W - w) / 2),
+      y = 160,
+      mid = y + h / 2,
+      size = 34,
+      ratio = boss.mhp > 0 ? Math.max(0, Math.min(1, boss.hp / boss.mhp)) : 0,
+      mode = instanceDifficulty();
+    plateTrail(boss, ratio);
+    c.save();
+    c.imageSmoothingEnabled = false;
+    // Voile sombre, fondu de tous côtés, pour rester lisible sur la neige comme sur le sable.
+    const vr = w / 2 + 70;
+    c.save();
+    c.translate(W / 2, mid - 5);
+    c.scale(1, 52 / vr);
+    const veil = c.createRadialGradient(0, 0, vr * 0.35, 0, 0, vr);
+    veil.addColorStop(0, 'rgba(8,6,4,.5)');
+    veil.addColorStop(1, 'rgba(8,6,4,0)');
+    c.fillStyle = veil;
+    c.fillRect(-vr, -vr, vr * 2, vr * 2);
+    c.restore();
+    // Nom, entre deux filets dorés qui s'effacent vers les bords.
+    worldText(c, boss.t, W / 2, y - 12, 20, '#ffe2a0');
+    c.font = 'bold 20px ' + WORLD_FONT;
+    const half = c.measureText(boss.t).width / 2 + 14,
+      room = w / 2 - half - 8;
+    if (room > 16)
+      for (const dir of [-1, 1]) {
+        const x0 = W / 2 + dir * half,
+          x1 = x0 + dir * room,
+          line = c.createLinearGradient(x0, 0, x1, 0);
+        line.addColorStop(0, '#e8b848');
+        line.addColorStop(1, 'rgba(232,184,72,0)');
+        c.fillStyle = line;
+        c.fillRect(Math.min(x0, x1), y - 19, room, 2);
+        plateGem(c, Math.round(x0), y - 18, 3, accent);
+      }
+    // Ailes derrière les médaillons : doubles et teintées pour un raid ou un boss mondial.
+    const left = x - size - 2,
+      right = x + w + 2,
+      top = mid - size / 2,
+      tinted = [accent, shade(accent, 1.4), shade(accent, 0.6)];
+    for (const [cx, dir] of [
+      [left, 1],
+      [right + size, -1]
+    ]) {
+      if (great) plateWing(c, cx - dir * 4, top - 10, 2.9, dir, tinted);
+      plateWing(c, cx, top, 2.4, dir);
+    }
+    // Cadre de la barre : encre, or bombé, filet de la couleur du boss, fond sombre.
+    const ring = (n, col) => {
+      c.fillStyle = col;
+      c.fillRect(x - n, y - n, w + 2 * n, h + 2 * n);
+    };
+    ring(6, PLATE_INK);
+    ring(5, '#a8782a');
+    c.fillStyle = '#fff0b0';
+    c.fillRect(x - 5, y - 5, w + 10, 1);
+    c.fillStyle = '#e8b848';
+    c.fillRect(x - 5, y - 4, w + 10, h + 6);
+    ring(3, PLATE_INK);
+    ring(2, accent);
+    ring(1, PLATE_INK);
+    ring(0, '#2a1014');
+    plateFill(c, boss, x, y, w, h, ratio, 2);
+    // Sous 30 % : la barre bat.
+    if (ratio > 0 && ratio < 0.3) {
+      c.globalAlpha = 0.18 + 0.18 * Math.sin(time * 0.12);
+      c.fillStyle = '#ffb060';
+      c.fillRect(x, y, Math.round(w * ratio), h);
+      c.globalAlpha = 1;
+    }
+    // Graduations par dixièmes, plus marquées à chaque quart.
+    c.fillStyle = 'rgba(12,8,6,.35)';
+    for (let k = 1; k < 10; k++) c.fillRect(x + Math.round((w * k) / 10), y + h - 5, 1, 5);
+    c.fillStyle = 'rgba(12,8,6,.6)';
+    for (const q of [0.25, 0.5, 0.75]) c.fillRect(x + Math.round(w * q) - 1, y, 2, h);
+    worldText(
+      c,
+      Math.ceil(boss.hp) + ' / ' + boss.mhp + ' · ' + Math.round(ratio * 100) + ' %',
+      W / 2,
+      mid + 4,
+      12,
+      '#ffffff'
+    );
+    // Bouclier (Arène) : jauge violette accrochée sous la barre.
+    let under = y + h + 6;
+    if (boss.shieldHp > 0) {
+      c.fillStyle = PLATE_INK;
+      c.fillRect(x + 20, under, w - 40, 8);
+      c.fillStyle = '#2a1a3a';
+      c.fillRect(x + 22, under, w - 44, 6);
+      const sw = Math.round((w - 44) * Math.min(1, boss.shieldHp / (boss.shieldMax || boss.shieldHp)));
+      c.fillStyle = '#b888f0';
+      c.fillRect(x + 22, under, sw, 6);
+      c.fillStyle = '#e8d0ff';
+      c.fillRect(x + 22, under, sw, 2);
+      under += 9;
+    }
+    // Médaillons : niveau (crâne à +10) à gauche, emblème à droite.
+    const level = canaanMobLevel(boss),
+      gap = level - (game.hero?.level || 1);
+    plateMedal(c, left, top, size, accent);
+    plateMedal(c, right, top, size, accent);
+    if (gap >= 10) {
+      c.save();
+      c.translate(left + size / 2, mid);
+      c.scale(2.5, 2.5);
+      plateSkull(c, 0, 0.5);
+      c.restore();
+    } else worldText(c, String(level), left + size / 2, mid + 6, 17, levelColor(gap));
+    plateEmblem(c, emblem, right + 6, top + 6, 2, accent);
+    // Nature du boss, sous la barre.
+    const label = arena
+      ? CANAAN_ARENA.frameLabel(boss)
+      : boss.worldBoss
+        ? 'Boss mondial'
+        : !d
+          ? 'Gardien'
+          : hidden
+            ? 'Boss caché'
+            : count > 1
+              ? 'Boss ' + ((boss.bossStage || 0) + 1) + '/' + count
+              : 'Boss';
+    worldText(c, label + (mode ? ' · ' + mode.label : ''), W / 2, under + 13, 12, '#e0d0ac');
+    // Bonus du boss et malus infligés par les héros, sous la barre.
+    if (window.CANAAN_BUFF_BAR) CANAAN_BUFF_BAR.drawMonster(c, boss, x, under + 20, w);
     c.restore();
   }
   // Noms publics du module ; tout le reste est privé.

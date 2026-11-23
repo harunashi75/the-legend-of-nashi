@@ -184,6 +184,22 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
  run('game.hero.level=3;game.world.monsters.slice(0,4).forEach((m,i)=>{m.elite=i===1;m.level=i===3?20:3;m.hp=Math.round(m.mhp*(i?0.4:1));m.x=P.x+(i-1.5)*90;m.y=P.y-80});mouseWorldX=game.world.monsters[2].x;mouseWorldY=game.world.monsters[2].y-10;camX=P.x-W/2;camY=P.y-H/2;draw()');
  assert.ok(run('game.world.monsters.slice(0,4).every(m=>Number.isFinite(m._headY)&&m._headY<m.y&&m._headY>m.y-100&&m._plateTrail>=0)'));
  assert.equal(run('canaanAimedMob()===game.world.monsters[2]'),true);
+ // Cadre de boss : boss mondial, gardien de quête, donjon, boss caché, raid et Arène (bouclier), avec la traînée des
+ // PV perdus, le niveau et la nature du boss.
+ const frame=(m,inst='null')=>{g.__texts=[];run('{const keep=[game.world.monsters,game.world.instance],real=ctx.fillText;ctx.fillText=t=>{__texts.push(String(t))};globalThis.fb=Object.assign({x:P.x,y:P.y,hp:400,mhp:1000,level:8,pal:["#111","#222","#333","#444","#555"]},'+m+');game.hero.level=5;game.world.monsters=[fb];game.world.instance='+inst+';drawCanaanBossFrame(ctx);fb.hp=200;drawCanaanBossFrame(ctx);ctx.fillText=real;[game.world.monsters,game.world.instance]=keep}');return g.__texts.map(String)};
+ for(const [m,inst,label] of [
+  ['{t:"Fenrir, Croc Ancien",worldBoss:true,bossColor:"#82c6d9"}','null','Boss mondial'],
+  ['{t:"Auralis",boss:true,bossColor:"#a080e0"}','null','Gardien'],
+  ['{t:"Chef",boss:true}','{index:0}','Boss 1/'],
+  ['{t:"Ombre",boss:true,secretBoss:0}','{index:0}','Boss caché'],
+  ['{t:"Titan",boss:true}','{index:instances.findIndex(d=>d.raid)}','Boss 1/'],
+  ['{t:"Souverain",boss:true,arenaBoss:true,wave:3,shieldHp:50,shieldMax:90}','{index:0,arena:true}','Vague 3/12']]){
+  const texts=frame(m,inst);
+  assert.ok(texts.includes('8')&&texts.includes('400 / 1000 · 40 %')&&texts.some(t=>t.startsWith(label)),label+' '+JSON.stringify(texts));
+  assert.equal(run('fb._plateTrail'),0.4,'la part perdue reste visible un instant');
+ }
+ assert.ok(!frame('{t:"Colosse",worldBoss:true,level:20}').includes('20'),'un crâne remplace le niveau à +10');
+ assert.deepEqual(frame('{t:"Loup"}'),[],'pas de cadre pour un monstre ordinaire');
  run('game.hero.level=1;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;game.world.monsters=[]');
  // Coffres cachés et coffre de boss : sprites dédiés, dessinés sans erreur.
  run('drawCanaanChest(ctx,100,100,false,1);drawCanaanChest(ctx,200,100,true,2);drawChests()');
