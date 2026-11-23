@@ -519,14 +519,18 @@
     },
     {
       "kind": "script",
-      "id": "canaan-ext-vallee-art",
-      "file": "extensions/vallee/art.js",
-      "extension": "vallee"
+      "id": "canaan-mount-art",
+      "file": "scripts/mount-art.js"
     },
     {
       "kind": "script",
-      "id": "canaan-ext-vallee-mounts",
-      "file": "extensions/vallee/mounts.js",
+      "id": "canaan-mounts",
+      "file": "scripts/mounts.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-ext-vallee-art",
+      "file": "extensions/vallee/art.js",
       "extension": "vallee"
     },
     {

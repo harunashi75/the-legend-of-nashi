@@ -519,6 +519,8 @@
         canaanLootNotice(hero, '🌟 ' + tt('Pièce Mythique !') + (item ? ' ' + item.name : ''));
         chat('Boss mondial', hero.name ? hero.name + ' — ' + tt('Pièce Mythique !') : tt('Pièce Mythique !'));
       }
+      // Monture de Valérion : tirage à part, pour chaque participant.
+      CANAAN_MOUNTS.drop('valerion', hero);
       canaanLootNotice(hero, '🏆 ' + tt('Valérion vaincu : +{or} or et une pièce Épique !', { or: gold }));
     }
     chat(

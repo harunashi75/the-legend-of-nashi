@@ -35,7 +35,9 @@
     [-6, -13, -5, -8],
     [2, 10, 8, 11],
     // Allée de la forge jusqu'au centre du camp.
-    [-5, -3, -2, -2]
+    [-5, -3, -2, -2],
+    // Sentier de la Ménagerie, depuis l'allée du jardin.
+    [-11, -11, -7, -10]
   ];
   // Objets : genre, case du coin haut-gauche, taille en cases ; block : toutes les cases bloquent.
   // Places de rechange de la forge autour du camp (cases depuis le camp), des plus proches aux plus lointaines.
@@ -88,6 +90,9 @@
     { kind: 'garden', x: -7, y: -19, w: 10, h: 6, gate: [-6, -5] },
     { kind: 'apple', x: -6, y: -18, w: 1, h: 1, block: true },
     { kind: 'apple', x: 1, y: -18, w: 1, h: 1, block: true },
+    // Ménagerie (mounts.js) : enclos des montures à vendre et roulotte d'Oriane, à l'ouest du jardin.
+    { kind: 'pen', mounts: true, x: -16, y: -16, w: 9, h: 4 },
+    { kind: 'wagon', x: -15, y: -10, w: 4, h: 2, block: true },
     { kind: 'bench', x: -3, y: -18, w: 2, h: 1, block: true },
     { kind: 'birdbath', x: -1, y: -17, w: 1, h: 1, block: true },
     { kind: 'arch', x: -6, y: -14, w: 2, h: 1 },
@@ -191,7 +196,8 @@
     [-15, 3, 9, 20],
     [-28, 0, -19, 13],
     [-9, -20, 3, -13],
-    [-22, -16, -14, 16]
+    [-22, -16, -14, 16],
+    [-17, -17, -6, -8]
   ];
 
   // ---------------------------------------------------------------- État posé sur l'île
@@ -561,7 +567,7 @@
 
     // Bêtes de la ferme : l'enclos (moutons, vaches, cochons) et les poules autour du poulailler.
     const at = (x, y) => ({ x: (cx + x + 0.5) * T, y: (cy + y + 0.5) * T });
-    if (items.some(it => it.kind === 'pen')) {
+    if (items.some(it => it.kind === 'pen' && !it.mounts)) {
       for (const [kind, x, y, variant] of [
         ['mouton', -11, 10, 0],
         ['mouton', -10, 11, 0],
@@ -652,6 +658,7 @@
     barn: 270,
     silo: 220,
     coop: 150,
+    wagon: 190,
     apple: 190,
     forge: 150,
     barber: 150,
@@ -2507,9 +2514,9 @@
       return;
     }
     const by = Y + h - T,
-      gate = garden ? it.gate.map(g => g + origin.x - it.tx) : [it.w - 3, it.w - 2];
+      gate = it.mounts ? [] : garden ? it.gate.map(g => g + origin.x - it.tx) : [it.w - 3, it.w - 2];
     for (let k = 0; k < it.w; k++) if (!gate.includes(k)) c.drawImage(rail, X + k * T, by + 2, T, 44);
-    if (!garden) c.drawImage(gateSprite(), X + gate[0] * T, by - 4);
+    if (gate.length && !garden) c.drawImage(gateSprite(), X + gate[0] * T, by - 4);
     for (const sx of [X + 20, X + w - 26]) c.drawImage(post, sx - 5, by - 8, 16, 52);
   }
   function drawLantern(c, x, y) {
@@ -3140,6 +3147,16 @@
           if (t < 50) rectOf(c)(cx + 10 + Math.sin(t * 0.2) * 6, bottom - 10 - t * 0.4, 3, 2, '#f4f0e8');
         }
         break;
+      case 'wagon': {
+        // Roulotte de la Ménagerie (mount-art.js) : son bas dépasse d'un peu les roues ; lanterne de la porte.
+        const art = CANAAN_MOUNT_ART.wagon();
+        shadow(c, cx, bottom - 6, w * 0.52, 10);
+        if (art) c.drawImage(art, Math.round(cx - art.width / 2), Math.round(bottom - 2 - art.height + 8));
+        canaanLight(cx - 20, bottom - 90, 90, '#ffd36b');
+        if (Math.hypot(P.x - cx, P.y - bottom) < 360)
+          drawCanaanName(c, '🐾 ' + tt('Ménagerie de l’Aurore'), cx, bottom - 194);
+        break;
+      }
       case 'pen':
       case 'garden':
         drawFence(c, it);
@@ -3428,6 +3445,20 @@
     barber() {
       const b = items.find(it => it.kind === 'barber');
       return b ? { x: (b.tx + 2) * TS, y: (b.ty + 1) * TS + 28 } : null;
+    },
+    // Ménagerie : où se tient Oriane (pixels), son enclos (cases) et la clôture de devant, redessinée devant les
+    // montures ; null si elle n'a pas trouvé sa place.
+    menagerie() {
+      const w = items.find(it => it.kind === 'wagon'),
+        pen = items.find(it => it.mounts && it.part === 'front');
+      return w && pen
+        ? {
+            x: (w.tx + 5.2) * TS,
+            y: (w.ty + 1) * TS,
+            pen: { x: pen.tx, y: pen.ty, w: pen.w, h: pen.h },
+            drawFront: c => drawFence(c, pen)
+          }
+        : null;
     },
     groundAt: (tx, ty) => ground.get(key(tx, ty))?.type || null,
     // Navire draconique amarré au quai (centre de sa ligne d'eau, en pixels), ou null s'il n'a pas trouvé sa place :

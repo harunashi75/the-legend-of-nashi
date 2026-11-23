@@ -11,6 +11,7 @@
     ['moveLeft', 'Aller à gauche', ['a'], 'Déplacement'],
     ['moveRight', 'Aller à droite', ['d'], 'Déplacement'],
     ['dodge', 'Roulade', [' ', 'shift'], 'Déplacement'],
+    ['mount', 'Monture', ['h'], 'Déplacement'],
     ['skill1', 'Compétence 1', ['1'], 'Combat'],
     ['skill2', 'Compétence 2', ['2'], 'Combat'],
     ['skill3', 'Compétence 3', ['3'], 'Combat'],

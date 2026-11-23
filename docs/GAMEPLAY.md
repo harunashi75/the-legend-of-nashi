@@ -147,6 +147,40 @@ Au cœur de l’île, à la place de l’ancien massif de roche : une grande cit
 - **Garde-robe (onglet des Collections, V)** : toutes les apparences en cartes au cadre de leur qualité, aperçu de la tenue sur ton héros, « ??? » pour celles à découvrir ; un clic pour porter, « Retirer l’apparence » pour revenir à la tenue de création.
 - **Données** : la collection est gardée par héros (`skins.owned`, sauvegardée) ; la tenue portée est dans son apparence (`look.wear`, ajoutée à la forme compacte seulement quand il y en a une), donc sauvegardée, envoyée aux autres joueurs et dessinée chez chacun. En ligne, l’invité demande à l’hôte (`skin-wear`), qui vérifie qu’il la possède.
 
+## Montures (touche H, Collections touche V)
+
+Montures du jeu de base : `shared/data/mounts.js` (`BASE_MOUNTS`, marchands `MOUNT_SHOPS`) ; règles, boutique et dessin du cavalier : `scripts/mounts.js` (`CANAAN_MOUNTS`) ; pixel art : `scripts/mount-art.js` (`CANAAN_MOUNT_ART`). Une extension ajoute les siennes (`mounts`, `mountShops`).
+
+- **Appeler ou renvoyer** la monture choisie : touche H (Paramètres → Clavier), dans le monde ouvert seulement (ni donjon, raid, Arène, Tréfonds ou maison) et hors combat. Attaquer, rouler, être touché, pêcher, récolter ou entrer dans un lieu fermé fait descendre de selle.
+- **Vitesse** : +40 % à +70 % pour le jeu de base ; seule la vitesse change, jamais le combat.
+- **Ménagerie de l’Aurore** (nord-ouest du camp, posée par `camp-life.js` : roulotte et enclos où se promènent quatre montures) : Oriane (touche E) vend 16 montures, une fois par personnage.
+
+| Monture | Espèce | Qualité | Vitesse | Prix ou source |
+| --- | --- | --- | --- | --- |
+| Poney des Prés | cheval | Peu commun | +40 % | 1 200 or |
+| Sanglier Trotteur | sanglier | Peu commun | +40 % | 1 800 or |
+| Varan des Dunes | lézard | Rare | +45 % | 3 500 or |
+| Chameau des Caravanes | chameau | Rare | +45 % | 4 000 or |
+| Grand Cerf des Bois | cerf | Rare | +50 % | 4 500 or |
+| Rainette du Marais | grenouille (bondit) | Rare | +50 % | 5 000 or |
+| Loup des Neiges | loup | Rare | +55 % | 5 500 or |
+| Casoar des Sables | oiseau coureur | Rare | +55 % | 6 000 or |
+| Tortue Moussue | tortue | Rare | +45 % | 6 500 or |
+| Ours des Cavernes | ours | Rare | +55 % | 8 000 or |
+| Scarabée Royal | scarabée | Épique | +60 % | 15 000 or |
+| Tigre des Brumes | tigre | Épique | +65 % | 18 000 or |
+| Tisse-Nuit | araignée | Épique | +60 % | 20 000 or |
+| Tapis Volant | objet (flotte) | Épique | +65 % | 25 000 or |
+| Balai de Sorcière | objet (flotte) | Épique | +65 % | 28 000 or |
+| Renard Boréal | renard à trois queues | Légendaire | +70 % | 60 000 or |
+| Cauchemar de Braise | cheval de feu | Légendaire | +70 % | boss de raid, 2 % |
+| Drake Écarlate | dragon | Légendaire | +70 % | boss mondiaux, 2 % |
+| Petit Nuage | nuage (flotte) | Légendaire | +70 % | coffres secrets et boss cachés, 4 % |
+
+- **Trouvailles** (`CANAAN_MOUNTS.drop(source, héros)`) : mêmes sources que la garde-robe, tirées pour chaque héros ; une monture déjà possédée n’est plus tirée.
+- **Sauvegarde** : `hero.ext.mounts = { owned, active }`. Les anciennes sauvegardes (montures rangées dans les données de leur extension) sont reprises à la lecture ; une monture inconnue du build est gardée sans s’afficher.
+- **Coopératif** : l’hôte décide (action `ext` « mounts » : `buy`, `choose`, `mount`) ; chacun voit les montures de tous.
+
 ## Coopératif en ligne (phases 4 à 6)
 
 Un hôte ouvre son aventure à ses amis ; jusqu’à trois invités le rejoignent par un code de salon. Le **relais** (`relay/server.cjs`) ne fait que les mettre en relation : il ne simule rien et ne garde aucune sauvegarde.

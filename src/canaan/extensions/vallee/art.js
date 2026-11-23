@@ -1,14 +1,13 @@
 // Extension 1 — la Vallée des Héros : pixel art de ses lieux et de ses montures, avec le kit commun
 // (client/art/pixel-kit.js : même pinceau, même contour d'encre, même modelé et même grille de gros pixels de 2 que les
 // bâtiments, les portails et les créatures du jeu). Rien n'est dessiné ici à chaque image : chaque sprite est peint une
-// fois, gardé, puis posé par vallee.js, mounts.js et valerion.js.
-// - Chevaux : profil (quatre images de galop, une à l'arrêt, une tête baissée qui broute), de face et de dos ; avec ou
-//   sans selle ; la monture montée est coupée en deux calques (dessous / devant le cavalier).
+// fois, gardé, puis posé par vallee.js et valerion.js.
+// - Montures de la vallée : licorne, pégase, lion, griffon, bélier, coq et aigle, avec les outils de mount-art.js.
 // - Statues des héros (huit poses), statue de l'Aurore (marbre et or), statues de l'arène de Valérion.
 // - Écurie des Héros, moulin (tour et ailes), clôtures, auge, bottes de foin, pont de pierre, dalles de l'arène.
 (() => {
   'use strict';
-  const { brush, outline, polish, tint, makeCanvas, hashGrid: hash } = CANAAN_PIXEL_KIT;
+  const { brush, outline, polish, makeCanvas, hashGrid: hash } = CANAAN_PIXEL_KIT;
   const U = 2;
   const cache = new Map();
   // Peint une fois sur la grille d'art (w × h), modelé et cerné, puis agrandi × 2 sans flou ; null sans canevas.
@@ -32,271 +31,156 @@
     cache.set(key, out);
     return out;
   }
-  const ell = (k, cx, cy, rx, ry, col) => {
-    for (let y = -ry; y <= ry; y++) {
-      const hw = Math.round(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry))));
-      k.rect(Math.round(cx - hw), Math.round(cy + y), hw * 2 + 1, 1, col);
-    }
-  };
   const P = s => s.split(',').map(p => p.trim().split(/\s+/).map(Number));
 
-  // ---------------------------------------------------------------- Chevaux
-  // Grille d'art du profil : 46 × 38, sabots à la ligne 36, tourné vers la droite ; dos (selle) vers x = 21, y = 12.
-  const SIDE_W = 46,
-    SIDE_H = 38,
-    GROUND = 36;
-  // Pattes : [attache x, attache y] et, pour chaque image, [décalage du sabot, hauteur levée, pli du genou].
-  const LEGS = {
-    // arrière lointaine, arrière proche, avant lointaine, avant proche
-    attach: [
-      [13, 23],
-      [16, 24],
-      [29, 23],
-      [32, 24]
-    ],
-    stand: [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
-    ],
-    gallop: [
-      [
-        [-5, 1, -1],
-        [-3, 0, -1],
-        [5, 2, 2],
-        [7, 3, 2]
-      ],
-      [
-        [-2, 4, 2],
-        [1, 2, 1],
-        [2, 0, 0],
-        [4, 1, 1]
-      ],
-      [
-        [3, 3, 2],
-        [5, 5, 2],
-        [-3, 2, -2],
-        [-1, 0, -1]
-      ],
-      [
-        [0, 1, 0],
-        [-2, 0, -1],
-        [0, 4, 3],
-        [3, 3, 2]
-      ]
-    ]
-  };
-  function leg(k, ax, ay, dx, lift, bend, col, sock, hoof) {
-    const hx = ax + dx,
-      hy = GROUND - lift,
-      kx = Math.round((ax + hx) / 2 + bend),
-      ky = Math.round(ay + (hy - ay) * 0.48);
-    k.line(ax, ay, kx, ky, col, 2);
-    k.line(kx, ky, hx, hy - 2, col, 2);
-    k.rect(hx - 1, hy - 4, 3, 3, sock);
-    k.rect(hx - 1, hy - 1, 3, 2, hoof);
-  }
-  // Profil complet. o : { frame (0-3, -1 à l'arrêt), saddle, graze, swish (queue), blanket }.
-  function horseSide(k, M, o) {
-    const [lt, base, sh, deep] = M.coat,
-      [mLt, mDk] = M.mane,
-      hoof = '#2a1c14',
-      far = tint(base, 0.78),
-      pose = o.frame < 0 ? LEGS.stand : LEGS.gallop[o.frame],
-      bob = o.frame === 1 || o.frame === 3 ? -1 : 0;
-    // Queue : crins qui tombent et ondulent.
-    const sw = o.swish || 0;
-    k.poly(
-      P(`11 ${15 + bob}, 7 ${17 + bob}, ${4 + sw} 26, ${3 + sw} 31, ${6 + sw} 30, 9 23, 12 ${19 + bob}`),
-      mDk
-    );
-    k.line(9, 17 + bob, 5 + sw, 28, mLt);
-    // Pattes du côté lointain, plus sombres.
-    for (const i of [0, 2])
-      leg(k, LEGS.attach[i][0], LEGS.attach[i][1] + bob, ...pose[i], far, tint(M.sock, 0.8), hoof);
-    // Corps : croupe, ventre, poitrail.
-    ell(k, 13, 17 + bob, 6, 6, base);
-    ell(k, 21, 19 + bob, 11, 6, base);
-    ell(k, 30, 18 + bob, 5, 6, base);
-    k.rect(11, 22 + bob, 22, 2, sh);
-    k.rect(14, 13 + bob, 14, 2, lt);
-    // Encolure et tête (relevée, ou baissée pour brouter).
-    if (o.graze) {
-      k.poly(P(`28 ${14 + bob}, 33 13, 38 22, 39 29, 35 30, 33 22, 30 ${22 + bob}`), base);
-      k.poly(P('35 27, 40 26, 43 31, 42 34, 38 34, 35 31'), base);
-      k.rect(41, 32, 2, 1, deep);
-      k.px(39, 28, '#1a1410');
-      k.poly(P('34 27, 35 24, 37 26'), sh);
-      for (let i = 0; i < 6; i++) k.line(30 + i, 13 + i * 2, 29 + i, 15 + i * 2, i % 2 ? mDk : mLt);
-    } else {
-      k.poly(
-        P(
-          `27 ${14 + bob}, 31 ${6 + bob}, 35 ${3 + bob}, 38 ${5 + bob}, 35 ${13 + bob}, 33 ${20 + bob}, 28 ${21 + bob}`
-        ),
-        base
-      );
-      k.poly(
-        P(
-          `34 ${3 + bob}, 37 ${1 + bob}, 41 ${4 + bob}, 44 ${9 + bob}, 43 ${11 + bob}, 39 ${11 + bob}, 35 ${8 + bob}`
-        ),
-        base
-      );
-      k.rect(37, 2 + bob, 3, 1, lt);
-      k.rect(41, 10 + bob, 3, 1, deep);
-      k.px(43, 8 + bob, '#1a1410');
-      k.px(38, 5 + bob, '#1a1410');
-      k.px(37, 5 + bob, '#ffffff');
-      // Oreilles.
-      k.poly(P(`34 ${3 + bob}, 35 ${-1 + bob + 1}, 37 ${2 + bob}`), sh);
-      // Crinière et toupet.
-      for (let i = 0; i < 7; i++) k.line(29 + i, 10 + bob - i, 27 + i, 14 + bob - i, i % 2 ? mDk : mLt);
-      k.line(37, 2 + bob, 39, 4 + bob, mLt);
-    }
-    // Pattes du côté proche.
-    for (const i of [1, 3])
-      leg(k, LEGS.attach[i][0], LEGS.attach[i][1] + bob, ...pose[i], base, M.sock, hoof);
-    // Selle : tapis, selle de cuir à liseré d'or, sangle, étrier ; bride et rênes.
-    if (o.saddle) {
-      const blanket = M.blanket || '#3a6ab0';
-      k.rect(15, 12 + bob, 13, 7, blanket);
-      k.rect(15, 18 + bob, 13, 1, '#e8c860');
-      k.rect(17, 10 + bob, 9, 4, '#6a3e1e');
-      k.rect(17, 10 + bob, 9, 1, '#9a6236');
-      k.rect(25, 9 + bob, 2, 2, '#9a6236');
-      k.rect(16, 9 + bob, 2, 2, '#6a3e1e');
-      k.rect(21, 14 + bob, 1, 8, '#4a2a14');
-      if (!o.graze) {
-        k.line(43, 9 + bob, 37, 5 + bob, '#4a2a14');
-        k.line(37, 6 + bob, 26, 11 + bob, '#5a3418');
+  // ---------------------------------------------------------------- Montures de la vallée
+  // Repère et outils : scripts/mount-art.js (profil tourné vers la droite, (0, 0) au sol sous la selle).
+  const {
+    define,
+    horse,
+    quad,
+    bird,
+    feline,
+    ell,
+    shape,
+    twin,
+    twinPoly,
+    eyeSide,
+    eyesFront,
+    TAILS,
+    tailDown,
+    CAT,
+    HOOF
+  } = CANAAN_MOUNT_ART.tools;
+  define('unicorn', horse({ horn: true }));
+  define('pegasus', horse({ wings: true }));
+  define(
+    'lion',
+    quad({
+      ...CAT,
+      ...feline({ maned: true }),
+      tail: TAILS.thin,
+      tailBack: tailDown(M => M.coat[1], 2, 12)
+    })
+  );
+  // Griffon : corps de lion, tête, ailes et serres d'aigle.
+  define(
+    'griffon',
+    quad({
+      ...CAT,
+      hgt: 16,
+      chest: [7, 7],
+      wide: 9,
+      wings: 'feather',
+      faceDy: -2,
+      tail: TAILS.thin,
+      tailBack: tailDown(M => M.coat[1], 2, 12),
+      deco(k, M, cy) {
+        for (let i = 0; i < 5; i++) k.rect(7 + i * 2, cy - 3 + (i % 2) * 3, 3, 4, M.mane[i % 2]);
+      },
+      head(k, M, o, x, y) {
+        shape(k, x, y, '-8 1, -2 -6, 2 -12, 8 -12, 7 -3, 5 6, -1 9, -6 7', M.mane[0]);
+        for (const [a, b] of [[-4, 0], [-1, -4], [1, 2], [3, -2], [-2, 5], [2, 6]]) k.rect(x + a, y + b, 3, 2, M.mane[1]); // prettier-ignore
+        shape(k, x, y, '1 -14, -3 -19, 5 -15', M.mane[1]);
+        ell(k, x + 6, y - 11, 5, 4, M.mane[0]);
+        shape(k, x, y, '10 -14, 15 -13, 17 -9, 15 -6, 14 -9, 10 -8', '#f0b830');
+        k.rect(x + 10, y - 10, 4, 1, '#a8701a');
+        eyeSide(k, x + 8, y - 13, M.eye);
+      },
+      face(k, M, y) {
+        twinPoly(k, [[-5, y - 3], [-7, y - 10], [-2, y - 5]], M.mane[1]); // prettier-ignore
+        ell(k, 0, y, 6, 6, M.mane[0]);
+        ell(k, 0, y + 8, 6, 4, M.mane[0]);
+        for (const x of [-4, 0, 3]) k.rect(x, y + 8, 2, 3, M.mane[1]);
+        k.poly([[-2, y], [3, y], [2, y + 4], [0.5, y + 7], [-1, y + 4]], '#f0b830'); // prettier-ignore
+        eyesFront(k, -5, y - 2, M.eye);
+      },
+      nape(k, M, y) {
+        twinPoly(k, [[-5, y - 2], [-7, y - 9], [-2, y - 4]], M.mane[1]); // prettier-ignore
+        ell(k, 0, y, 6, 6, M.mane[0]);
+        for (const x of [-4, 0, 3]) k.rect(x, y + 1, 2, 3, M.mane[1]);
       }
-    }
+    })
+  );
+  // Corne enroulée du bélier.
+  function horn(k, x, y, M) {
+    k.disc(x, y, 5, M.mane[1]);
+    k.disc(x, y, 4, M.mane[0]);
+    k.disc(x + 1, y + 1, 2, M.mane[1]);
+    k.px(x + 1, y + 1, M.mane[0]);
   }
-  // Calque « devant » du profil monté : le flanc sous la selle, la selle et l'étrier (ils cachent les jambes du
-  // cavalier) ; la botte du cavalier dans l'étrier est dessinée par mounts.js.
-  function horseSideFront(k, M, o) {
-    const [lt, base, sh] = M.coat,
-      bob = o.frame === 1 || o.frame === 3 ? -1 : 0,
-      blanket = M.blanket || '#3a6ab0';
-    ell(k, 21, 19 + bob, 7, 4, base);
-    k.rect(14, 22 + bob, 15, 1, sh);
-    k.rect(15, 15 + bob, 13, 4, blanket);
-    k.rect(15, 18 + bob, 13, 1, '#e8c860');
-    k.rect(18, 13 + bob, 7, 4, '#6a3e1e');
-    k.rect(18, 13 + bob, 7, 1, '#9a6236');
-    k.rect(20, 17 + bob, 3, 5, '#5a3418');
-    // Botte du cavalier dans l'étrier doré.
-    k.rect(19, 19 + bob, 4, 3, '#2a1c14');
-    k.rect(19, 19 + bob, 1, 3, '#4a3424');
-    k.rect(18, 22 + bob, 6, 2, '#c8a040');
-    k.px(16, 16 + bob, lt);
-  }
-  // Face (vers le bas de l'écran) : 26 × 38. under : corps et pattes ; over : encolure, tête et poitrail.
-  function horseFront(k, M, o, part) {
-    const [lt, base, sh, deep] = M.coat,
-      [mLt, mDk] = M.mane,
-      step = o.frame % 2,
-      hoof = '#2a1c14';
-    if (part === 'under') {
-      // Pattes arrière, dans l'ombre, puis le corps et les pattes avant.
-      k.rect(8, 24, 2, 11, tint(base, 0.7));
-      k.rect(16, 24, 2, 11, tint(base, 0.7));
-      ell(k, 13, 19, 9, 7, base);
-      k.rect(5, 22, 16, 2, sh);
-      for (const [x, up] of [
-        [9, step ? 2 : 0],
-        [15, step ? 0 : 2]
-      ]) {
-        k.rect(x, 24, 3, 11 - up, base);
-        k.rect(x, 31 - up, 3, 3, M.sock);
-        k.rect(x, 34 - up, 3, 2, hoof);
+  define(
+    'ram',
+    quad({
+      hgt: 15,
+      len: 8,
+      rump: [7, 7],
+      belly: [11, 7],
+      chest: [7, 7],
+      wide: 10,
+      foot: 'hoof',
+      faceDy: -4,
+      tail: TAILS.short,
+      tailBack: (k, M, o, cy) => ell(k, 0, cy, 3, 4, M.coat[0]),
+      // Toison bouclée.
+      deco(k, M, cy) {
+        for (let i = 0; i < 26; i++) {
+          const x = -14 + Math.floor(hash(i, 3) * 28),
+            y = -6 + Math.floor(hash(i, 8) * 12);
+          k.rect(x, cy + y, 3, 1, M.coat[2]);
+          k.px(x + 2, cy + y - 1, M.coat[0]);
+        }
+      },
+      sides(k, M, cy, half) {
+        for (let i = 0; i < 12; i++)
+          k.rect(
+            -half + 2 + Math.floor(hash(i, 4) * (half * 2 - 5)),
+            cy - 5 + Math.floor(hash(i, 6) * 10),
+            3,
+            1,
+            M.coat[2]
+          );
+      },
+      head(k, M, o, x, y) {
+        const face = '#5a4a3e';
+        ell(k, x, y - 2, 6, 7, M.coat[1]);
+        shape(k, x, y, '2 -11, 8 -12, 15 -5, 14 -1, 8 -2, 3 -4', face);
+        k.rect(x + 13, y - 4, 2, 2, HOOF);
+        k.rect(x + 3, y - 12, 6, 3, M.coat[0]);
+        eyeSide(k, x + 9, y - 9, '#e8c050');
+        horn(k, x + 2, y - 7, M);
+      },
+      face(k, M, y) {
+        for (const x of [-8, 7]) horn(k, x, y - 1, M);
+        shape(k, 0, y, '-5 -4, 6 -4, 4 4, 3 8, -2 8, -3 4', '#5a4a3e');
+        k.rect(-4, y - 7, 9, 4, M.coat[0]);
+        twin(k, -2, y + 5, 1, 2, HOOF);
+        eyesFront(k, -4, y - 1, '#e8c050');
+      },
+      nape(k, M, y) {
+        for (const x of [-8, 7]) horn(k, x, y, M);
+        ell(k, 0, y, 6, 5, M.coat[0]);
       }
-      if (o.saddle) {
-        k.rect(2, 13, 4, 7, M.blanket || '#3a6ab0');
-        k.rect(20, 13, 4, 7, M.blanket || '#3a6ab0');
-        k.rect(2, 19, 4, 1, '#e8c860');
-        k.rect(20, 19, 4, 1, '#e8c860');
-        k.rect(4, 12, 18, 3, '#6a3e1e');
+    })
+  );
+  // Coq : crête dentelée, barbillon, queue en faucille.
+  define(
+    'rooster',
+    bird({
+      neck: 12,
+      tail: 'hook',
+      crest(k, M, x, y, view) {
+        if (view === 'side') {
+          shape(k, x, y, '-5 3, -5 -2, -3 0, -1 -4, 1 0, 3 -3, 4 3', M.crest);
+          shape(k, x, y, '4 6, 7 6, 6 11, 4 10', M.crest);
+        } else {
+          k.rect(0, y - 4, 2, 5, M.crest);
+          k.rect(-1, y - 1, 4, 2, M.crest);
+        }
       }
-      return;
-    }
-    // Encolure, tête longue, liste blanche, oreilles, toupet, naseaux.
-    k.rect(10, 9, 6, 9, base);
-    k.rect(9, 15, 8, 5, base);
-    k.poly(P('9 1, 17 1, 16 12, 14 15, 12 15, 10 12'), base);
-    k.rect(12, 2, 2, 11, lt);
-    k.poly(P('8 2, 9 -1, 11 1'), sh);
-    k.poly(P('18 2, 17 -1, 15 1'), sh);
-    k.rect(11, 0, 4, 2, mDk);
-    k.px(12, 0, mLt);
-    k.px(9, 5, '#1a1410');
-    k.px(16, 5, '#1a1410');
-    k.rect(11, 13, 1, 1, deep);
-    k.rect(14, 13, 1, 1, deep);
-    for (let y = 8; y < 16; y += 2) {
-      k.px(9, y, y % 4 ? mDk : mLt);
-      k.px(16, y, y % 4 ? mLt : mDk);
-    }
-    if (o.saddle) {
-      k.line(10, 12, 7, 15, '#4a2a14');
-      k.line(16, 12, 19, 15, '#4a2a14');
-    }
-  }
-  // Dos (vers le haut de l'écran) : 26 × 38. under : encolure et oreilles (derrière le cavalier) ; over : croupe et queue.
-  function horseBack(k, M, o, part) {
-    const [lt, base, sh] = M.coat,
-      [mLt, mDk] = M.mane,
-      step = o.frame % 2,
-      hoof = '#2a1c14';
-    if (part === 'under') {
-      k.rect(10, 3, 6, 10, base);
-      k.poly(P('9 4, 10 0, 12 3'), sh);
-      k.poly(P('17 4, 16 0, 14 3'), sh);
-      for (let y = 3; y < 12; y += 2) k.rect(12, y, 2, 2, y % 4 ? mDk : mLt);
-      ell(k, 13, 15, 8, 5, base);
-      if (o.saddle) k.rect(5, 11, 16, 6, M.blanket || '#3a6ab0');
-      return;
-    }
-    for (const [x, up] of [
-      [8, step ? 2 : 0],
-      [15, step ? 0 : 2]
-    ]) {
-      k.rect(x, 24, 3, 11 - up, base);
-      k.rect(x, 31 - up, 3, 3, M.sock);
-      k.rect(x, 34 - up, 3, 2, hoof);
-    }
-    ell(k, 13, 21, 9, 6, base);
-    k.rect(6, 17, 14, 2, lt);
-    k.rect(5, 25, 16, 2, sh);
-    k.rect(12, 16, 2, 2, sh);
-    // Queue au milieu de la croupe.
-    const sw = o.swish || 0;
-    k.poly(P(`11 18, 15 18, ${15 + sw} 30, ${13 + sw} 33, ${11 + sw} 30`), mDk);
-    k.line(13, 19, 13 + sw, 30, mLt);
-  }
-  // Sprites d'une monture : side(frame, …), front/back(part, frame) ; cachés par clé.
-  const HORSE = {
-    side: (M, frame, o = {}) =>
-      bake(
-        'hs|' + M.id + '|' + frame + '|' + (o.saddle ? 1 : 0) + (o.graze ? 1 : 0) + '|' + (o.swish || 0),
-        SIDE_W,
-        SIDE_H,
-        k => horseSide(k, M, { frame, ...o })
-      ),
-    sideFront: (M, frame) =>
-      bake('hsf|' + M.id + '|' + frame, SIDE_W, SIDE_H, k => horseSideFront(k, M, { frame })),
-    front: (M, part, frame, saddle = true) =>
-      bake('hf|' + M.id + '|' + part + '|' + (frame % 2) + '|' + (saddle ? 1 : 0), 26, 38, k =>
-        horseFront(k, M, { frame, saddle }, part)
-      ),
-    back: (M, part, frame, saddle = true, swish = 0) =>
-      bake('hb|' + M.id + '|' + part + '|' + (frame % 2) + '|' + (saddle ? 1 : 0) + '|' + swish, 26, 38, k =>
-        horseBack(k, M, { frame, saddle, swish }, part)
-      ),
-    // Point d'ancrage (en pixels d'écran) : centre de la selle et ligne des sabots.
-    SIDE: { w: SIDE_W * U, h: SIDE_H * U, saddleX: 21 * U, ground: GROUND * U },
-    FRONT: { w: 26 * U, h: 38 * U, cx: 13 * U, ground: 36 * U }
-  };
+    })
+  );
+  define('eagle', bird({ neck: 8, wings: true, hooked: true, headCol: M => M.mane[0], crest() {} }));
 
   // ---------------------------------------------------------------- Statues
   const STONE = ['#ece6d6', '#cbc3b1', '#a39b8b', '#746d60'];
@@ -641,7 +525,6 @@
 
   window.CANAAN_VALLEY_ART = Object.freeze({
     U,
-    HORSE,
     statue,
     arenaStatue,
     stable,

@@ -105,6 +105,9 @@ function recordKill(m, hero = game.hero) {
   // Apparences (garde-robe) : une petite chance sur chaque monstre, plus sur les élites et les boss mondiaux. Les
   // boss d'instance tirent la leur dans dungeons.js, pour chaque héros du groupe.
   if (!m.boss) CANAAN_WARDROBE.drop(m.worldBoss ? 'worldBoss' : m.elite ? 'elite' : 'normal', hero);
+  // Montures rares : boss mondiaux, et créatures désignées par leur nom (« mob:… »).
+  if (m.worldBoss) CANAAN_MOUNTS.drop('worldBoss', hero);
+  else if (!m.boss) CANAAN_MOUNTS.drop('mob:' + m.t, hero);
   // Expérience : pour le vainqueur et ses alliés proches (progression.js).
   canaanKillXp(m, hero);
   saveProgress();
@@ -972,6 +975,7 @@ function openNearbyChest(hero = game.hero) {
     grantSourceReward('secretChest', hero, level);
     canaanLootNotice(hero, '🗝️ Coffre secret ouvert : équipement Épique + ' + gold + ' or !');
     CANAAN_WARDROBE.drop('secretChest', hero);
+    CANAAN_MOUNTS.drop('secretChest', hero);
   }
   saveGame();
   return true;

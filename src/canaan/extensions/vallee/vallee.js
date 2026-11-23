@@ -4,7 +4,8 @@
 // - les Ruisseaux Dorés : deux cours d'eau peu profonds qui se rejoignent dans un étang (pêche), franchis par des
 //   ponts de pierre ;
 // - les chemins : du Col des Héros à l'écurie, à l'Allée des Légendes, à l'arène et aux moulins des Champs d'Or ;
-// - l'Écurie des Héros : grange, enclos et ses quatre chevaux, Garance la maîtresse d'écurie (montures, mounts.js) ;
+// - l'Écurie des Héros : grange, enclos et quelques-unes de ses bêtes, Garance la maîtresse d'écurie, qui vend les
+//   montures de la vallée (mounts.js) ;
 // - l'Allée des Légendes : dalles, huit statues de héros et leurs plaques, la statue de l'Aurore (elle s'illumine
 //   pour un héros qui porte le titre « Gardien de l'Aurore »), et Hector, le gardien de l'Allée ;
 // - l'Arène de Valérion : dalles en cercle, quatre statues (rayons, abris et sceaux du combat, valerion.js) ;
@@ -12,9 +13,11 @@
 (() => {
   'use strict';
   const A = () => window.CANAAN_VALLEY_ART || null;
-  const MOUNTS = () => window.CANAAN_VALLEY_MOUNTS;
+  const MOUNTS = () => window.CANAAN_MOUNTS;
   const BOSS = () => window.CANAAN_VALLEY_BOSS;
   const esc = (s, params) => safeGearText(tt(String(s), params));
+  // Montures qui se promènent dans l'enclos de l'écurie.
+  const PADDOCK = ['aurore', 'licorne', 'griffon', 'belier', 'lion'];
   let land = null,
     plan = null,
     remoteLit = false;
@@ -68,7 +71,7 @@
     'On dit qu’il récompense les dignes : parfois, une pièce mythique, une chance sur neuf environ pour chacun.'
   ];
   const GARANCE_LINES = [
-    'Des chevaux de héros, rien de moins ! Viens voir l’enclos.',
+    'Des montures de héros, rien de moins ! Viens voir l’enclos.',
     'Une monture se monte dans le monde ouvert. En combat, mieux vaut garder les pieds sur terre.',
     'Le Coursier de l’Aurore ? Il ne se laisse monter que par les plus déterminés… et les plus riches.'
   ];
@@ -276,10 +279,10 @@
       D[s.y][s.x] = null;
       if (T[s.y][s.x] === 15) T[s.y][s.x] = 2;
     }
-    // Chevaux de l'enclos, chacun de sa robe.
-    const horses = MOUNTS().MOUNTS.map((M, i) => ({
-      M,
-      x: (paddock.x + 1.5 + i * 2) * TS,
+    // Bêtes de l'enclos : quelques montures à vendre.
+    const horses = PADDOCK.map((id, i) => ({
+      M: MOUNTS().BY[id],
+      x: (paddock.x + 1.4 + i * 1.5) * TS,
       y: (paddock.y + 1.5 + (i % 2) * 2) * TS,
       tx: null,
       ty: null,
@@ -400,7 +403,7 @@
   }
   function talk(n) {
     plan.line++;
-    if (n.id === 'garance') return MOUNTS().shop();
+    if (n.id === 'garance') return MOUNTS().shop('ecurie');
     modernPanel(
       rpgHeader('💬 ' + tt(n.name)) +
         '<div class="modern-body"><p class="city-lore">« ' +
@@ -450,7 +453,7 @@
       const r = reach(hero.player);
       return r?.kind === 'seal' && r.i === i && BOSS().seal(i, hero);
     }
-    return MOUNTS().handle(hero, action);
+    return false;
   }
   // Résurrection : un héros tombé dans la vallée se relève devant l'écurie.
   function respawnFor(hero) {
@@ -725,21 +728,7 @@
     sides();
     const horses = plan.horses.slice().sort((a, b) => a.y - b.y);
     for (const h of horses) {
-      const moving = h.tx !== null && h.wait <= 0,
-        frame = moving ? Math.floor(h.phase * 0.25) % 4 : -1,
-        swish = Math.round(Math.sin(time * 0.04 + h.x) * 1.5),
-        spr = art.HORSE.side(h.M, frame, { graze: !moving && h.graze, swish });
-      if (!spr) continue;
-      const H = art.HORSE.SIDE,
-        top = Math.round(h.y + 18 - H.ground);
-      c.save();
-      if (h.face < 0) {
-        c.translate(Math.round(h.x), 0);
-        c.scale(-1, 1);
-        c.drawImage(spr, -H.saddleX, top);
-      } else c.drawImage(spr, Math.round(h.x - H.saddleX), top);
-      c.restore();
-      if (h.M.glow && typeof canaanLight === 'function') canaanLight(h.x, h.y, 60, h.M.glow);
+      MOUNTS().drawFree(c, h);
     }
     row(p.y + p.h);
   }
@@ -844,15 +833,13 @@
     talk: id => {
       const n = plan?.people.find(p => p.id === id);
       if (n) talk(n);
-    },
-    ...MOUNTS().ui
+    }
   };
   CANAAN_EXT.register({
     id: 'vallee',
     afterWorld: build,
     step() {
       stepHorses();
-      MOUNTS().step();
       BOSS().step();
     },
     draw,
@@ -864,24 +851,21 @@
     handle,
     ui,
     respawnFor,
-    speed: hero => MOUNTS().speed(hero),
-    heroBody: (hero, body, face, moving, phase) => MOUNTS().heroBody(hero, body, face, moving, phase),
-    view: idOf => ({ m: MOUNTS().view(idOf), b: BOSS().view(), lit: game.heroes.some(titled) ? 1 : 0 }),
-    apply(data, heroOf) {
-      MOUNTS().apply(data?.m, heroOf);
+    view: () => ({ b: BOSS().view(), lit: game.heroes.some(titled) ? 1 : 0 }),
+    apply(data) {
       BOSS().apply(data?.b);
       remoteLit = !!data?.lit;
     },
-    key: action => MOUNTS().key(action),
     bossKilled: (m, hero) => BOSS().bossKilled(m, hero),
     spawnBosses: () => BOSS().spawnBosses(),
-    collectionTabs: () => MOUNTS().collectionTabs(),
     mapPaint,
     markers
   });
+  const nearStable = p => !!plan && near(p, plan.door.x, plan.door.y - 0.6, 2.6);
+  MOUNTS().setShopNear('ecurie', p => !game.world.instance && game.world.layer !== 'under' && nearStable(p));
   window.CANAAN_VALLEY = Object.freeze({
     plan: () => plan,
-    nearStable: p => !!plan && near(p, plan.door.x, plan.door.y - 0.6, 2.6),
+    nearStable,
     reach,
     LEGENDS,
     AURORA

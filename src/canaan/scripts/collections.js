@@ -1,6 +1,6 @@
 'use strict';
 // Collections (touche V), comme dans les grands MMO : tout ce que le héros collectionne, réuni dans une seule fenêtre
-// à onglets. D’abord les onglets des extensions, puis la Garde-robe (wardrobe.js), le
+// à onglets. D’abord les Montures (mounts.js) et les onglets des extensions, puis la Garde-robe (wardrobe.js), le
 // Bestiaire (achievements.js) et les Fouilles (digging.js). L'onglet choisi est gardé d'une ouverture à l'autre.
 // Une extension ajoute ses onglets par collectionTabs() : [{ id, label, count, section() }] (voir extensions.js).
 const CANAAN_COLLECTIONS = (() => {

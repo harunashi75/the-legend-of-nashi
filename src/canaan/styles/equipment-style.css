@@ -195,7 +195,9 @@
 #window button.collection-item img {
   justify-self: center;
   width: auto;
+  max-width: 60px;
   height: 48px;
+  object-fit: contain;
   image-rendering: pixelated;
 }
 #window .collection-name {
@@ -257,7 +259,7 @@
   width: 100%;
   flex-shrink: 0;
 }
-/* Trois fois la taille de l'aperçu, en pixels nets (cheval 92×76, tenue 76×76). */
+/* L'aperçu agrandi, en pixels nets (montures, tenues). */
 #window .collection-stage img {
   width: auto;
   max-width: 100%;
@@ -396,6 +398,57 @@
 }
 
 /* Cité elfique : boutiques (armurerie, atelier) et paroles du Grand Arbre. */
+/* Marchands de montures : une carte par monture, sur une scène à la couleur de sa qualité. */
+#window .mount-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+#window .mount-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 10px 10px;
+  border: 1px solid color-mix(in srgb, var(--rarity) 60%, transparent);
+  border-radius: 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rarity) 16%, #1a120c), rgba(20, 13, 8, 0.9));
+  text-align: center;
+}
+#window .mount-card-stage {
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 112px;
+  padding-bottom: 8px;
+  background: radial-gradient(
+    ellipse at 50% 88%,
+    color-mix(in srgb, var(--rarity) 45%, transparent),
+    transparent 62%
+  );
+}
+#window .mount-card-stage .mount-thumb {
+  max-width: 100%;
+  max-height: 100px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
+}
+#window .mount-card small {
+  color: var(--rpg-gold-light, #f3e6c4);
+}
+#window .mount-card p {
+  flex: 1;
+  margin: 2px 0 6px;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .mount-card button {
+  margin: 0;
+  width: 100%;
+}
+#window .mount-card.owned {
+  opacity: 0.8;
+}
 #window .city-shop {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

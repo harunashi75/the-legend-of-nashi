@@ -13,8 +13,6 @@ CANAAN_I18N.extend('en', {
   'Aigle royal': 'Royal Eagle',
   'Valérion, le Dernier Champion': 'Valerion, the Last Champion',
   // Montures.
-  Monture: 'Mount',
-  Montures: 'Mounts',
   'Destrier des Plaines': 'Plains Charger',
   'Coursier d’Argent': 'Silver Courser',
   'Destrier du Crépuscule': 'Twilight Charger',
@@ -27,38 +25,40 @@ CANAAN_I18N.extend('en', {
     'Black as falling night with violet sheens; its hooves leave mauve sparks.',
   'Doré et lumineux : on dit qu’il est né du premier rayon de l’aube.':
     'Golden and radiant: they say it was born from the first ray of dawn.',
-  'Tu n’as pas encore de monture : l’Écurie des Héros en vend, dans la Vallée des Héros.':
-    'You don’t have a mount yet: the Heroes’ Stable sells them, in the Valley of Heroes.',
-  'Les montures ne servent que dans le monde ouvert.': 'Mounts can only be used in the open world.',
-  'Impossible d’appeler ta monture en plein combat.': 'You can’t call your mount in the middle of a fight.',
-  '{nom} : en selle !': '{nom}: in the saddle!',
-  'Ta monture repart au pré.': 'Your mount trots back to the meadow.',
   'Parle à Garance, à l’Écurie des Héros, pour acheter une monture.':
     'Talk to Garance at the Heroes’ Stable to buy a mount.',
-  'Ce cheval est déjà à toi.': 'This horse is already yours.',
-  '{nom} rejoint tes montures (touche {touche}).': '{nom} joins your mounts (key {touche}).',
-  'Tu sautes de ta monture pour combattre.': 'You leap off your mount to fight.',
-  'Déjà dans ton écurie': 'Already in your stable',
-  'À l’Écurie des Héros : {or} or': 'At the Heroes’ Stable: {or} gold',
-  '✔ Monture choisie': '✔ Chosen mount',
-  '+{n} % de vitesse': '+{n}% speed',
   'Écurie des Héros — Garance': 'Heroes’ Stable — Garance',
-  '« Chaque cheval ici a porté un héros. Choisis le tien : il te suivra partout dans le monde ouvert. » Touche de la monture : {touche}.':
-    '“Every horse here has carried a hero. Choose yours: it will follow you anywhere in the open world.” Mount key: {touche}.',
-  'Ton or': 'Your gold',
-  'Touche {touche} : appeler ou renvoyer ta monture, dans le monde ouvert et hors combat. On descend de selle en combattant.':
-    'Key {touche}: call or dismiss your mount, in the open world and out of combat. You dismount when you fight.',
-  'Aucune monture pour l’instant : l’Écurie des Héros est dans la Vallée des Héros, au sud-ouest de l’île.':
-    'No mount yet: the Heroes’ Stable is in the Valley of Heroes, in the south-west of the island.',
-  '🐎 En selle : {nom}': '🐎 Riding: {nom}',
   'Écurie des Héros, Vallée des Héros (sud-ouest de l’île)':
     'Heroes’ Stable, Valley of Heroes (south-west of the island)',
-  'Montures obtenues': 'Mounts collected',
-  '{or} or': '{or} gold',
-  or: 'gold',
-  Choisir: 'Choose',
-  'Appeler ({touche})': 'Summon ({touche})',
-  'Renvoyer ({touche})': 'Dismiss ({touche})',
+  '« Chaque bête ici a porté un héros. Choisis la tienne : elle te suivra partout dans le monde ouvert. » Touche de la monture : {touche}.':
+    '“Every beast here has carried a hero. Choose yours: it will follow you anywhere in the open world.” Mount key: {touche}.',
+  'Bélier aux Cornes d’Or': 'Golden-Horned Ram',
+  'Il gravit les collines de la vallée en ligne droite, murs et clôtures compris.':
+    'It climbs the valley’s hills in a straight line, walls and fences included.',
+  'Grand Coq des Moissons': 'Great Harvest Rooster',
+  'Réveille la vallée entière à l’aube, et le reste du monde au passage.':
+    'Wakes the whole valley at dawn, and the rest of the world along the way.',
+  'Lion des Moissons': 'Harvest Lion',
+  'Sa crinière a la couleur des blés mûrs. Les Fauves s’écartent sur son passage.':
+    'Its mane is the colour of ripe wheat. Prowlers step aside as it passes.',
+  'Aigle Royal des Cimes': 'Royal Summit Eagle',
+  'Il préfère voler, mais il court pour te faire plaisir.': 'It would rather fly, but it runs to please you.',
+  'Licorne d’Ivoire': 'Ivory Unicorn',
+  'Elle n’approche que les cœurs sincères. Trente secondes de silence, et elle est là.':
+    'It only comes to sincere hearts. Thirty seconds of silence, and there it is.',
+  'Griffon des Cimes': 'Summit Griffin',
+  'Serres d’aigle, pattes de lion, et la fierté des deux.':
+    'Eagle’s talons, lion’s paws, and the pride of both.',
+  'Pégase des Nuées': 'Cloudborne Pegasus',
+  'Ses sabots effleurent à peine l’herbe dorée ; le reste du temps, il attend le vent.':
+    'Its hooves barely brush the golden grass; the rest of the time, it waits for the wind.',
+  'Destrier des Échos': 'Charger of Echoes',
+  'La monture d’un héros tombé. Elle cherche encore son cavalier ; peut-être que c’est toi.':
+    'The mount of a fallen hero. It still seeks its rider; perhaps that is you.',
+  'Échos de héros, Vallée des Héros': 'Heroes’ Echoes, Valley of Heroes',
+  'Dragon de l’Aurore': 'Dragon of the Dawn',
+  'Né du dernier rayon que Valérion tenait dans sa main. Il ne suit que les dignes.':
+    'Born from the last ray Valerion held in his hand. It follows only the worthy.',
   // Lieux et habitants.
   'Écurie des Héros': 'Heroes’ Stable',
   'Allée des Légendes': 'Avenue of Legends',
@@ -72,8 +72,8 @@ CANAAN_I18N.extend('en', {
   '💬 Écouter encore': '💬 Listen again',
   'Quatre gardiens de pierre veillent sur l’arène de Valérion. Leurs disques solaires dorment… jusqu’à ce que le champion soit éprouvé.':
     'Four stone guardians watch over Valerion’s arena. Their sun discs slumber… until the champion is put to the test.',
-  'Des chevaux de héros, rien de moins ! Viens voir l’enclos.':
-    'Heroes’ horses, nothing less! Come and see the paddock.',
+  'Des montures de héros, rien de moins ! Viens voir l’enclos.':
+    'Heroes’ mounts, nothing less! Come and see the paddock.',
   'Une monture se monte dans le monde ouvert. En combat, mieux vaut garder les pieds sur terre.':
     'Mounts are ridden in the open world. In a fight, better keep your feet on the ground.',
   'Le Coursier de l’Aurore ? Il ne se laisse monter que par les plus déterminés… et les plus riches.':

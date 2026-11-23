@@ -66,6 +66,8 @@ function canaanLockedAt(px, py) {
 }
 
 // ---------------------------------------------------------------- Crochets
+// Un module du jeu de base peut se brancher sur les mêmes crochets (core: true ; montures : mounts.js) : il est dans
+// tous les builds et ne compte pas parmi les extensions (canaanExtensionIds).
 // Chaque extension chargée enregistre un objet { id, … } dont le jeu appelle les crochets présents :
 //   afterWorld()              île générée : poser ses lieux (cases déjà générées par world-generation.js)
 //   step()                    pas de simulation (hôte et solo), après le cœur
@@ -106,7 +108,7 @@ const CANAAN_EXT = (() => {
   const here = () => typeof started !== 'undefined' && started && !game.world.instance;
   return Object.freeze({
     register(api) {
-      if (!api || !canaanExtension(api.id) || list.some(e => e.id === api.id))
+      if (!api || (!api.core && !canaanExtension(api.id)) || list.some(e => e.id === api.id))
         throw new Error('Extension non déclarée : ' + api?.id);
       list.push(api);
       // L'île est générée au chargement (interface-foundation.js), avant les fichiers des extensions : une extension

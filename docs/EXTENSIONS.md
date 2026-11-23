@@ -19,17 +19,20 @@ La terre de la vallée (coin sud-ouest, reliée à la Forêt enchantée par un i
 - un banc de brume la couvre dans le monde (`CANAAN_LOCKED_FOG`), un grand nuage blanc sur la carte M et la mini-carte (`paintClouds`, world-map.js) ;
 - elle s'appelle « Brumes impénétrables » et n'est pas listée dans le panneau de la carte.
 
-Les données d'une extension dans une sauvegarde (`hero.ext.vallee` : montures) sont gardées telles quelles par un build qui ne la connaît pas. En coopératif, l'hôte refuse un invité qui n'a pas les mêmes extensions.
+Les données d'une extension dans une sauvegarde (`hero.ext[id]`, et ses montures dans `hero.ext.mounts`) sont gardées telles quelles par un build qui ne la connaît pas. En coopératif, l'hôte refuse un invité qui n'a pas les mêmes extensions.
 
 ## Fichiers
 
 - `scripts/extensions.js` (jeu de base) : registre, crochets (`CANAAN_EXT`), terres fermées, brume.
-- `extensions/vallee/data.js` : zone, créatures, Valérion, montures, touche H (déclarés avant la génération de l'île).
+- `extensions/vallee/data.js` : zone, créatures, Valérion, montures et leur marchand (déclarés avant la génération de l'île).
 - `extensions/vallee/i18n.js` : traductions anglaises de l'extension (hors de `client/i18n/en.js`).
-- `extensions/vallee/art.js` : pixel art (chevaux, statues, écurie, moulin, clôtures, ponts, dalles), avec le kit commun.
-- `extensions/vallee/mounts.js` : montures (achat, H, vitesse, descente en combat, onglet Montures des Collections V).
+- `extensions/vallee/art.js` : pixel art (montures de la vallée, statues, écurie, moulin, clôtures, ponts, dalles), avec le kit commun.
 - `extensions/vallee/valerion.js` : Valérion, le Dernier Champion (trois phases, PV selon les participants, butin).
 - `extensions/vallee/vallee.js` : lieux, habitants, interactions, carte ; enregistre l'extension.
+
+## Montures de la vallée
+
+Le système de montures est dans le jeu de base (`scripts/mounts.js`, voir `docs/GAMEPLAY.md`) ; l'extension y ajoute les siennes (`mounts`), son marchand (`mountShops`, comptoir déclaré par `CANAAN_MOUNTS.setShopNear`) et ses espèces (`CANAAN_MOUNT_ART.tools.define`). À l'Écurie des Héros, Garance vend onze montures (+75 à +80 %) : quatre chevaux, bélier, coq, lion, aigle, licorne, griffon, pégase. Deux se gagnent : le Destrier des Échos (Échos de héros et de champion, 0,4 %) et le Dragon de l'Aurore (Valérion, 4 % pour chaque participant, +85 %).
 
 ## Sortir l'extension
 

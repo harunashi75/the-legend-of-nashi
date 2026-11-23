@@ -1320,6 +1320,7 @@
       for (const h of members()) {
         CANAAN_BAG.add(h, 'key', 'secret', 0, 1);
         CANAAN_WARDROBE.drop('secretBoss', h);
+        CANAAN_MOUNTS.drop('secretBoss', h);
         canaanLootNotice(
           h,
           '🗝️ ' +
@@ -1337,6 +1338,7 @@
       else canaanLootNotice(h, '🎲 ' + m.t + ' : pas d’équipement cette fois.');
       // Apparence : chance propre à chaque héros (plus haute et plus belle en raid).
       CANAAN_WARDROBE.drop(instances[i].raid ? 'raid' : 'dungeon', h);
+      CANAAN_MOUNTS.drop(instances[i].raid ? 'raid' : 'dungeon', h);
     }
     inst.bossesDown = (inst.bossesDown || 0) + 1;
     if (inst.bossesDown >= total) return true;

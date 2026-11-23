@@ -15,7 +15,7 @@ const ROOT = path.join(__dirname, '..', 'src', 'canaan');
 
 test('Build de sortie : aucun fichier ni texte de l’Extension 1 ; build de test : la vallée complète', () => {
   const ext = manifest().filter(m => m.extension);
-  assert.ok(ext.length >= 5, 'fichiers de l’extension déclarés dans le manifeste');
+  assert.ok(ext.length >= 4, 'fichiers de l’extension déclarés dans le manifeste');
   assert.ok(ext.every(m => m.extension === 'vallee' && m.file.startsWith('extensions/vallee/')));
   for (const m of ext) {
     assert.ok(!locked.includes('id="' + m.id + '"'), 'retiré du build de sortie : ' + m.id);
@@ -30,8 +30,8 @@ test('Build de sortie : aucun fichier ni texte de l’Extension 1 ; build de tes
     'Garance',
     'Coursier',
     'Valley of Heroes',
-    'monture',
-    'Monture',
+    'Écurie des Héros',
+    'Pégase',
     'Col des Héros'
   ])
     assert.ok(!locked.includes(word), 'aucune trace de « ' + word + ' » dans le build de sortie');
@@ -109,7 +109,7 @@ test('Vallée des Héros (build de test) : terre ouverte, lieux posés, créatur
   const plan = JSON.parse(run('JSON.stringify(CANAAN_VALLEY.plan())'));
   assert.equal(plan.statues.length, 8);
   assert.equal(plan.arena.statues.length, 4);
-  assert.equal(plan.horses.length, 4);
+  assert.equal(plan.horses.length, 5);
   assert.equal(plan.mills.length, 2);
   // Tout est dans la vallée, accessible à pied depuis le Col des Héros.
   const land = JSON.parse(run('JSON.stringify(CANAAN_EXT_LANDS[0])'));
@@ -169,21 +169,21 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   const door = JSON.parse(run('JSON.stringify(CANAAN_VALLEY.plan().door)'));
   // Loin de l'écurie : refusé ; pas assez d'or : refusé.
   run('P.gold=100000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y');
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.buy(game.hero,"plaines")'), false);
+  assert.equal(run('CANAAN_MOUNTS.buy(game.hero,"plaines")'), false);
   run(`P.x=${door.x}*TS;P.y=(${door.y}+0.3)*TS;P.gold=4000`);
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.buy(game.hero,"plaines")'), false);
+  assert.equal(run('CANAAN_MOUNTS.buy(game.hero,"plaines")'), false);
   run('P.gold=40000');
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.buy(game.hero,"plaines")'), true);
+  assert.equal(run('CANAAN_MOUNTS.buy(game.hero,"plaines")'), true);
   assert.equal(run('P.gold'), 35000);
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.buy(game.hero,"plaines")'), false, 'une seule fois par personnage');
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.buy(game.hero,"aurore")'), true);
+  assert.equal(run('CANAAN_MOUNTS.buy(game.hero,"plaines")'), false, 'une seule fois par personnage');
+  assert.equal(run('CANAAN_MOUNTS.buy(game.hero,"aurore")'), true);
   assert.equal(run('P.gold'), 0);
-  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.ext.vallee)')), {
-    mounts: ['plaines', 'aurore'],
+  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.ext.mounts)')), {
+    owned: ['plaines', 'aurore'],
     active: 'aurore'
   });
   assert.equal(
-    run('CANAAN_VALLEY_MOUNTS.choose(game.hero,"argent")'),
+    run('CANAAN_MOUNTS.choose(game.hero,"argent")'),
     false,
     'pas un cheval qu’on ne possède pas'
   );
@@ -197,14 +197,16 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
       view: html.split('collection-view')[1] || ''
     };
   };
-  assert.deepEqual(tab().items, [
+  // Les obtenues d'abord, puis toutes les autres (jeu de base et extension), verrouillées.
+  assert.deepEqual(tab().items.slice(0, 3), [
     ['plaines', false],
     ['aurore', false],
-    ['argent', true],
-    ['crepuscule', true]
+    ['poney', true]
   ]);
+  assert.equal(tab().items.length, run('CANAAN_MOUNTS.MOUNTS.length'));
+  assert.ok(tab().items.some(([id, locked]) => id === 'griffon' && locked));
   assert.match(tab().view, /Coursier de l’Aurore/);
-  run('CANAAN_EXT.ui("vallee","pick","argent")');
+  run('CANAAN_EXT.ui("mounts","pick","argent")');
   assert.match(tab().view, /Pas encore obtenue/);
   assert.match(tab().view, /Écurie des Héros, Vallée des Héros/);
   assert.match(tab().view, /8\s000 or/);
@@ -228,24 +230,61 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   // (Un coup reçu peut être dévié au hasard : on passe par la défense, qui marque toujours le combat.)
   run('P.atk=0;CANAAN_ARTEFACTS.defense({x:P.x,y:P.y,t:"Test",level:60},5,{},game.hero)');
   assert.equal(run('CANAAN_ARTEFACTS.inCombat(game.hero)'), true);
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.mount(game.hero)'), false);
+  assert.equal(run('CANAAN_MOUNTS.mount(game.hero)'), false);
   // Hors du monde ouvert (instance) : pas de monture.
   run('enterInstance(0)');
-  assert.equal(run('CANAAN_VALLEY_MOUNTS.mount(game.hero)'), false);
+  assert.equal(run('CANAAN_MOUNTS.mount(game.hero)'), false);
   run('leaveInstance()');
   // Gardées dans la sauvegarde du personnage.
   run('saveGame();game.hero.ext={};loadGame()');
-  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_VALLEY_MOUNTS.stateOf(game.hero))')), {
-    mounts: ['plaines', 'aurore'],
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero))')), {
+    owned: ['plaines', 'aurore'],
     active: 'aurore'
   });
+  // Anciennes sauvegardes (montures rangées dans les données de l'extension) : reprises telles quelles.
+  assert.deepEqual(
+    JSON.parse(
+      run(
+        '(()=>{const h={ext:{vallee:{mounts:["argent","aurore"],active:"aurore"}}};CANAAN_MOUNTS.stateOf(h);return JSON.stringify(h.ext)})()'
+      )
+    ),
+    { mounts: { owned: ['argent', 'aurore'], active: 'aurore' } }
+  );
   // Réseau : la monture de chacun, envoyée aux invités.
   run('game.hero.riding="aurore"');
   assert.deepEqual(
-    JSON.parse(run('JSON.stringify(CANAAN_EXT.view(h=>h===game.hero?"host":h.id).vallee.m.r)')),
+    JSON.parse(run('JSON.stringify(CANAAN_EXT.view(h=>h===game.hero?"host":h.id).mounts.r)')),
     { host: 'aurore' }
   );
   assert.equal(errors.length, 0, errors.join('\n'));
+});
+
+test('Montures de l’extension : bêtes de l’écurie, Échos et Valérion, textes traduits', () => {
+  const { run, errors } = boot(open);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  const list = JSON.parse(
+    run('JSON.stringify(CANAAN_MOUNTS.MOUNTS.filter(m=>!BASE_MOUNTS.some(b=>b.id===m.id)))')
+  );
+  assert.ok(list.length >= 13, 'assez de montures : ' + list.length);
+  assert.ok(new Set(list.map(m => m.species)).size >= 8, 'pas que des chevaux');
+  assert.ok(run('CANAAN_MOUNTS.shopMounts("ecurie").length') >= 11);
+  // Chaque espèce existe, dessinée dans les quatre directions sans erreur.
+  run(
+    'started=true;for(const M of CANAAN_MOUNTS.MOUNTS){if(!CANAAN_MOUNT_ART.species().includes(M.species))throw new Error(M.species);game.hero.ext={mounts:{owned:[M.id],active:M.id}};game.hero.riding=M.id;for(const f of [0,1,2,3]){P.vx=[0,1,0,-1][f];P.vy=[1,0,-1,0][f];drawPixelHero(ctx,P.x,P.y,"#fff",4,true)}}game.hero.riding=null;game.hero.ext={}'
+  );
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("valerion",game.hero,()=>0))')), ['solaire']);
+  assert.deepEqual(
+    JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("mob:Écho de champion",game.hero,()=>0))')),
+    ['spectre']
+  );
+  assert.equal(errors.length, 0, errors.join('\n'));
+  const extDict = {};
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'extensions', 'vallee', 'i18n.js'), 'utf8'), {
+    CANAAN_I18N: { extend: (lang, table) => Object.assign(extDict, table) }
+  });
+  for (const m of list)
+    for (const text of [m.name, m.desc, m.source])
+      if (text) assert.ok(Object.hasOwn(extDict, text), text);
 });
 
 test('Valérion : PV selon les participants, attaques annoncées, abris du Jugement, sceaux, butin individuel à 11 %', () => {
@@ -374,8 +413,8 @@ test('Réseau et langue : actions d’extension vérifiées, même contenu exig�
     'Vallée des Héros',
     'Valérion, le Dernier Champion',
     'Coursier de l’Aurore',
-    'Aldric le Brave',
-    'Monture'
+    'Griffon des Cimes',
+    'Aldric le Brave'
   ])
     assert.ok(Object.hasOwn(extDict, name), name);
   // Le dictionnaire du jeu (livré) ne contient aucun texte de l'extension.
