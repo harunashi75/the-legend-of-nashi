@@ -96,7 +96,7 @@ function openPortal(n) {
         '<p>' +
         safeGearText(d.subtitle || 'RAID') +
         ' · Boss : ' +
-        safeGearText((d.bosses || [d.boss]).join(' → ')) +
+        safeGearText((d.bosses || [d.boss]).map(b => tt(b)).join(' → ')) +
         ' · Ton niveau : <b>' +
         lv +
         '</b></p><div class="raid-modes">' +

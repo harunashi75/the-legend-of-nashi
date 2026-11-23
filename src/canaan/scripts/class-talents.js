@@ -1628,15 +1628,15 @@
     if (button) button.classList.toggle('attention', started && !classe(game.hero).id);
     if (prompted || !started || classe(game.hero).id) return;
     prompted = true;
+    // Noms des classes traduits un par un : la liste entière n'est pas une entrée du dictionnaire.
     chat(
       'Système',
-      'Choisis ta classe : ' +
-        CLASSES.slice(0, -1)
-          .map(c => c.name)
-          .join(', ') +
-        ' ou ' +
-        CLASSES[CLASSES.length - 1].name +
-        ' (touche T).'
+      tt('Choisis ta classe : {liste} ou {nom} (touche T).', {
+        liste: CLASSES.slice(0, -1)
+          .map(c => tt(c.name))
+          .join(', '),
+        nom: tt(CLASSES[CLASSES.length - 1].name)
+      })
     );
     toast('⚔️ Choisis ta classe (T)');
   }

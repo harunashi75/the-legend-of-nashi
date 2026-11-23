@@ -129,12 +129,14 @@ function canaanSkillTooltip(i) {
     '</span>' +
     esc(name) +
     '</div>' +
-    '<div class="tooltip-sub">Compétence ' +
-    (i + 1) +
-    ' · ' +
-    esc(weapon.name) +
-    ' · ' +
-    (summon ? 'invocation' : offensive ? 'offensive' : 'utilitaire') +
+    '<div class="tooltip-sub">' +
+    esc(
+      tt('Compétence {n} · {arme} · {genre}', {
+        n: i + 1,
+        arme: tt(weapon.name),
+        genre: tt(summon ? 'invocation' : offensive ? 'offensive' : 'utilitaire')
+      })
+    ) +
     '</div>' +
     '<div class="skill-tip-desc">' +
     esc(detail || summary) +
@@ -144,24 +146,26 @@ function canaanSkillTooltip(i) {
       extra = type === 'staff' && i === 3 ? 1.4 * (st.arcane | 0) : 0;
     lines +=
       '<div class="skill-tip-dmg">≈ ' +
-      Math.round(power * (mult + extra)) +
-      (summon ? (i === 2 ? ' dégâts par seconde' : ' dégâts par coup') : ' dégâts par cible') +
-      (extra ? ' (avec ' + (st.arcane | 0) + ' charge' + ((st.arcane | 0) > 1 ? 's' : '') + ')' : '') +
+      // Chaque morceau est une entrée du dictionnaire : la phrase change selon l'arme, les charges et la magie.
+      tt(summon ? (i === 2 ? '{n} dégâts par seconde' : '{n} dégâts par coup') : '{n} dégâts par cible', {
+        n: Math.round(power * (mult + extra))
+      }) +
+      (extra ? ' ' + tt('(avec {n} charge(s))', { n: st.arcane | 0 }) : '') +
       ' · ' +
-      Math.round((mult + extra) * 100) +
-      ' % de ta Puissance' +
-      (magic ? ' magique' : '') +
-      ' (' +
-      power +
-      ')</div>';
+      tt(magic ? '{n} % de ta Puissance magique ({m})' : '{n} % de ta Puissance ({m})', {
+        n: Math.round((mult + extra) * 100),
+        m: power
+      }) +
+      '</div>';
   }
   // Le Berserker paie en PV (Soif de sang) : le prix suit ses PV max.
   const blood = CANAAN_CLASS.bloodCost(game.hero, mana);
   lines +=
-    '<div class="skill-tip-meta">Recharge ' +
-    cd +
-    ' s · ' +
-    (blood !== null ? blood + ' PV' : 'Mana ' + mana) +
+    '<div class="skill-tip-meta">' +
+    tt(blood !== null ? 'Recharge {n} s · {m} PV' : 'Recharge {n} s · Mana {m}', {
+      n: cd,
+      m: blood !== null ? blood : mana
+    }) +
     '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
   if (rider) lines += '<div class="skill-tip-class">' + esc(rider) + '</div>';
@@ -169,7 +173,8 @@ function canaanSkillTooltip(i) {
     lines += '<div class="skill-tip-state">🔮 Charges arcaniques : <b>' + (st.arcane | 0) + ' / 3</b></div>';
   const badge = canaanSkillBadge(type, i, st);
   if (badge?.on && type !== 'staff')
-    lines += '<div class="skill-tip-state">✦ Bonus prêt : ' + esc(badge.text) + '</div>';
+    lines +=
+      '<div class="skill-tip-state">✦ ' + esc(tt('Bonus prêt : {nom}', { nom: tt(badge.text) })) + '</div>';
   return lines;
 }
 function showSkillTooltip(i, event) {
