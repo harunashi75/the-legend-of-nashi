@@ -229,8 +229,8 @@
   // Collection : nombre de prises et meilleure qualité de chaque espèce (poissons et gibier).
   const discover = profRecordCatch;
 
-  // Chasse : un animal abattu donne sa viande et sa peau (qualité selon le niveau de chasse). L'hôte vérifie l'espèce,
-  // le biome du chasseur et un court délai entre deux prises.
+  // Chasse : un animal abattu donne sa viande (qualité selon le niveau de chasse) et sa peau (qualité selon le niveau
+  // de travail du cuir). L'hôte vérifie l'espèce, le biome du chasseur et un court délai entre deux prises.
   function hunt(hero, kind) {
     const g = GAME[kind],
       p = hero?.player;
@@ -251,8 +251,10 @@
     }
     const first = discover(prof, kind, q);
     prof.meat[key] = (prof.meat[key] || 0) + 1;
-    // Sa peau, pour le travail du cuir (s'il reste de la place parmi les matériaux).
-    if (CANAAN_BAG.room(hero, 'hide', 'peau', q)) CANAAN_BAG.add(hero, 'hide', 'peau', q, 1);
+    // Sa peau, pour le travail du cuir (s'il reste de la place parmi les matériaux) : sa qualité suit le niveau de
+    // travail du cuir, pour qu'on puisse toujours la tanner.
+    const hq = profHideQuality(prof.leatherworking.level, Math.random);
+    if (CANAAN_BAG.room(hero, 'hide', 'peau', hq)) CANAAN_BAG.add(hero, 'hide', 'peau', hq, 1);
     float(
       p.x,
       p.y - 50,

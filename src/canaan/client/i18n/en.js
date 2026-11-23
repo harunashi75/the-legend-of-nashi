@@ -5113,8 +5113,8 @@ export default {
   '🏹 Gibier chassé → peau': '🏹 Hunted game → hide',
   'peaux = 1 cuir': 'hides = 1 leather',
   '🐾 Selles : vitesse des montures': '🐾 Saddles: mount speed',
-  'Chaque animal chassé donne une peau brute, de la qualité de la prise. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.':
-    'Every hunted animal gives a raw hide of the same quality as the catch. Tan them into leather at Oriane’s workbench, in the Menagerie of the Dawn Camp, then stitch mount saddles: one per quality.',
+  'Chaque animal chassé donne une peau brute, de qualité selon ton niveau de travail du cuir. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.':
+    'Every hunted animal gives a raw hide whose quality follows your leatherworking level. Tan them into leather at Oriane’s workbench, in the Menagerie of the Dawn Camp, then stitch mount saddles: one per quality.',
   'Une selle s’équipe dans l’onglet Montures (touche V) et donne sa vitesse à toutes tes montures. Chaque qualité demande son niveau de métier. Tanner et coudre prennent quelques secondes : reste immobile.':
     'A saddle is equipped in the Mounts tab (key V) and gives its speed to all your mounts. Each quality needs its profession level. Tanning and stitching take a few seconds: stay still.',
   'Tanner les peaux': 'Tan hides',

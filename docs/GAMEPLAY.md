@@ -182,7 +182,7 @@ Montures du jeu de base : `shared/data/mounts.js` (`BASE_MOUNTS`, marchands `MOU
 
 `scripts/leatherworking.js` (`CANAAN_LEATHER`), données dans `shared/data/professions.js` (`PROF_HIDES`, `PROF_TAN_HIDES`, `PROF_SADDLE_LEATHER`, `PROF_SADDLE_GOLD`).
 
-- **Peaux** : chaque gibier chassé donne une peau brute de la qualité de la prise (s’il reste de la place parmi les matériaux). Peaux et cuirs sont des matériaux du sac (`hero.prof.hide`, repère `hide:peau:q`), qui se vendent au marchand.
+- **Peaux** : chaque gibier chassé donne une peau brute (s’il reste de la place parmi les matériaux). Sa qualité suit le niveau de **travail du cuir**, pas celui de la chasse, pour qu’on puisse toujours la tanner (`profHideQuality`) : toujours Commune jusqu’au niveau 5 ; dès qu’une qualité est débloquée, elle tombe 15 % du temps, +5 points par niveau au-delà (45 % au plus), et sinon la qualité juste en dessous. Exemples : niveau 6, 85 % Commun et 15 % Peu commun ; niveau 11, 60 % / 40 % ; niveau 12, 85 % Peu commun et 15 % Rare. Peaux et cuirs sont des matériaux du sac (`hero.prof.hide`, repère `hide:peau:q`), qui se vendent au marchand.
 - **Établi** : à la Ménagerie du Camp de l’Aurore, auprès d’Oriane. Tanner et coudre sont des travaux minutés (6 s, rester immobile).
 - **Tanner** : 2 peaux d’une qualité = 1 cuir de la même qualité (jusqu’à 20 d’un coup).
 - **Selles** : une par qualité, avec des cuirs de cette qualité ou meilleurs (les moins bons d’abord) et de l’or.

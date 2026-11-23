@@ -1,5 +1,6 @@
 // Travail du cuir (panneau P, Artisanat) : septième métier, appris auprès d'Oriane à la Ménagerie du Camp de l'Aurore.
-// - La chasse donne une peau brute de la qualité de la prise (professions.js), en plus de la viande.
+// - La chasse donne une peau brute en plus de la viande (professions.js) ; sa qualité suit le niveau de travail du cuir
+//   (profHideQuality : Commune jusqu'au niveau 5, puis de plus en plus souvent la meilleure qualité débloquée).
 // - Tanner : PROF_TAN_HIDES peaux d'une qualité donnent un cuir tanné de la même qualité.
 // - Coudre une selle de monture : une par qualité (Peu commun à Mythique), avec des cuirs de cette qualité ou
 //   meilleurs (les moins bons d'abord) et de l'or. La selle rejoint la sellerie du héros (hero.ext.mounts.saddles) et
@@ -120,7 +121,7 @@
       h.status(at, at ? '🧵 À l’établi d’Oriane : tu peux travailler.' : farText) +
       h.tips(
         ['🏹 Gibier chassé → peau', PROF_TAN_HIDES + ' peaux = 1 cuir', '🐾 Selles : vitesse des montures'],
-        'Chaque animal chassé donne une peau brute, de la qualité de la prise. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.' +
+        'Chaque animal chassé donne une peau brute, de qualité selon ton niveau de travail du cuir. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.' +
           ' Une selle s’équipe dans l’onglet Montures (touche V) et donne sa vitesse à toutes tes montures. Chaque qualité demande son niveau de métier. Tanner et coudre prennent quelques secondes : reste immobile.'
       ) +
       '<h3>' +

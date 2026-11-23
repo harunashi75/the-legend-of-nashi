@@ -119,6 +119,21 @@ export function profQualityCap(level) {
 }
 
 /**
+ * Qualité d'une peau de gibier, selon le niveau de travail du cuir (pas celui de la chasse : on reçoit des peaux
+ * qu'on sait tanner). Jusqu'au niveau 5, toujours Commune ; dès qu'une qualité est débloquée, elle tombe 15 % du temps,
+ * +5 points par niveau au-delà (45 % au plus), et sinon la qualité juste en dessous.
+ * @param {number} level niveau de travail du cuir
+ * @param {() => number} rng générateur dans [0, 1[
+ * @returns {number}
+ */
+export function profHideQuality(level, rng) {
+  const cap = profQualityCap(level);
+  if (cap === 0) return 0;
+  const chance = Math.min(0.45, 0.15 + 0.05 * (level - PROF_QUALITY_LEVEL[cap]));
+  return rng() < chance ? cap : cap - 1;
+}
+
+/**
  * Ajoute de l'expérience à un métier ; renvoie les niveaux atteints (pour les messages). Au niveau maximum,
  * l'expérience s'arrête.
  * @param {SkillState} skill modifié sur place

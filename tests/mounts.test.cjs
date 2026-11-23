@@ -136,12 +136,27 @@ test('Travail du cuir : peaux de chasse, tannage, selles par qualité, vitesse e
   assert.equal(errors.length, 0, errors.join('\n'));
   run('started=true;paused=false;game.world.monsters=[]');
   assert.deepEqual(JSON.parse(run('JSON.stringify(MOUNT_SADDLE_SPEED)')), [40, 50, 60, 70, 80, 100]);
-  // La chasse donne une peau de la qualité de la prise.
+  // La chasse donne une peau dont la qualité suit le travail du cuir, pas la chasse : un grand chasseur débutant au
+  // cuir ne reçoit que des peaux Communes, qu'il sait tanner.
   run(
     'globalThis.__z=ZONES.findIndex(z=>z.name==="Plaines verdoyantes");P.x=(ZONES[__z].x+0.5)*TS;P.y=(ZONES[__z].y+0.5)*TS'
   );
-  run('game.hero.prof.hunting.level=1;game.hero.huntCd=0;CANAAN_PROF.hunt(game.hero,"lapin")');
-  assert.equal(run('CANAAN_BAG.count(game.hero,"hide","peau",0)'), 1);
+  run(
+    'game.hero.prof.hunting.level=30;for(let i=0;i<5;i++){game.hero.huntCd=0;time+=50;CANAAN_PROF.hunt(game.hero,"lapin")}'
+  );
+  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.prof.hide)')), { 'peau:0': 5 });
+  // Chances : Commune jusqu'au niveau 5 ; au niveau 6, 15 % de Peu commun (+5 points par niveau, 45 % au plus).
+  const share = (level, q) =>
+    run(
+      `(()=>{let n=0;for(let i=0;i<1000;i++)if(profHideQuality(${level},()=>i/1000)===${q})n++;return n})()`
+    );
+  assert.equal(share(5, 0), 1000);
+  assert.equal(share(6, 1), 150);
+  assert.equal(share(11, 1), 400);
+  assert.equal(share(12, 2), 150);
+  assert.equal(share(12, 0), 0);
+  assert.equal(share(19, 2), 450, '45 % au plus');
+  assert.equal(share(40, 5), 400);
   // Loin de l'établi d'Oriane : rien.
   const m = JSON.parse(run('JSON.stringify(CANAAN_CAMP_LIFE.menagerie())'));
   run('game.hero.prof.hide={"peau:0":4,"peau:2":10}');
