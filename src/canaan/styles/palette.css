@@ -1,0 +1,41 @@
+/* Palette du jeu : bois sombre sculpté, liserés dorés, encre claire et titres à empattements. Chargée en premier :
+   toutes les feuilles prennent leurs couleurs ici. */
+:root {
+  /* Taille des textes (Paramètres → Affichage, 125 % par défaut) : client/icons/icons.js la change. */
+  --font-scale: 1.25;
+  --rpg-wood: linear-gradient(180deg, #2b2018 0%, #1c140e 55%, #150f0a 100%);
+  --rpg-grain: repeating-linear-gradient(
+    93deg,
+    rgba(255, 220, 160, 0.025) 0 2px,
+    rgba(0, 0, 0, 0.04) 2px 5px,
+    rgba(255, 220, 160, 0.015) 5px 9px
+  );
+  --rpg-rivets:
+    radial-gradient(circle at 9px 9px, #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
+    radial-gradient(circle at calc(100% - 9px) 9px, #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
+    radial-gradient(circle at 9px calc(100% - 9px), #e8c878 0 2px, #6a4a22 2.5px 3.5px, transparent 4px),
+    radial-gradient(
+      circle at calc(100% - 9px) calc(100% - 9px),
+      #e8c878 0 2px,
+      #6a4a22 2.5px 3.5px,
+      transparent 4px
+    );
+  --rpg-gold: #d4aa5a;
+  --rpg-gold-light: #f6dc98;
+  --rpg-gold-dark: #7a5a2a;
+  --rpg-ink: #f3e6c8;
+  --rpg-muted: #b8a483;
+  /* Teintes récurrentes : or vif (montants, valeurs), crème (texte sur or), parchemin (texte courant des encadrés),
+     liseré de cuir des encadrés, contour noir des cadres, fond le plus sombre, vert des bonus. */
+  --rpg-gold-bright: #ffd76a;
+  --rpg-cream: #fff4d0;
+  --rpg-parchment: #e8d9b8;
+  --rpg-leather-edge: #6a4e2a;
+  --rpg-outline: #0c0805;
+  --rpg-night: #120c08;
+  --rpg-good: #8fe3ae;
+  --rpg-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
+  --rpg-frame:
+    0 0 0 1px var(--rpg-outline), inset 0 0 0 1px rgba(255, 226, 160, 0.18),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.35), inset 0 0 28px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.55);
+}

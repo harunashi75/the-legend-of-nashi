@@ -6,9 +6,9 @@
      lg    talents (T), métiers (P), collections (V)
    La fenêtre ne défile jamais elle-même : l'en-tête et les onglets restent en place, seule sa zone .panel-scroll
    défile, et seulement quand son contenu déborde. .panel-fill passe la hauteur restante à ses enfants.
-   Chargée juste avant le thème : ses sélecteurs (#window#window[data-size]) remplacent les largeurs et hauteurs
-   données ailleurs à ces fenêtres. */
-#window#window[data-size] {
+   Chargée parmi les dernières feuilles : ses sélecteurs (#window[data-size]) remplacent les largeurs et hauteurs
+   données ailleurs à ces fenêtres ; la hauteur posée par panel-dock.css est levée là-bas. */
+#window[data-size] {
   --panel-w: 880px;
   --panel-h: 660px;
   display: flex;
@@ -20,23 +20,23 @@
   overflow: hidden;
   padding: 14px 18px 16px;
 }
-#window#window[data-size='bag'] {
+#window[data-size='bag'] {
   --panel-w: 470px;
   --panel-h: 680px;
 }
-#window#window[data-size='char'] {
+#window[data-size='char'] {
   --panel-w: 760px;
   --panel-h: 700px;
 }
-#window#window[data-size='md'] {
+#window[data-size='md'] {
   --panel-w: 880px;
   --panel-h: 680px;
 }
-#window#window[data-size='duo'] {
+#window[data-size='duo'] {
   --panel-w: 1250px;
   --panel-h: 700px;
 }
-#window#window[data-size='lg'] {
+#window[data-size='lg'] {
   --panel-w: 1140px;
   --panel-h: 780px;
 }
@@ -81,7 +81,7 @@
 }
 #window[data-size] .rpg-head h2 small {
   margin-left: 6px;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: 0.6em;
   font-weight: normal;
 }
@@ -110,8 +110,6 @@
 }
 #window[data-size='bag'] .bag-panel .modern-bag,
 #window[data-size='duo'] .duo-bag .bag-panel .modern-bag {
-  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
-  gap: 6px;
   margin-top: 4px;
 }
 #window[data-size='bag'] .bag-panel .bag-none,
@@ -126,7 +124,7 @@
   gap: 8px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--rpg-gold-dark, #6a4e2a);
+  border-top: 1px solid var(--rpg-gold-dark);
 }
 #window[data-size='bag'] .bag-foot button,
 #window[data-size='duo'] .duo-bag .bag-foot button {
@@ -134,7 +132,7 @@
 }
 #window[data-size='bag'] .bag-gold,
 #window[data-size='duo'] .duo-bag .bag-gold {
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   font-family: var(--rpg-serif);
   font-weight: bold;
 }
@@ -171,9 +169,9 @@
   margin: 0;
   padding: 10px;
 }
-/* #window#window : plus fort que les règles de la poupée du thème. */
-#window#window[data-size='char'] .character-doll,
-#window#window[data-size='duo'] .duo-char .character-doll {
+/* #window : plus fort que les règles de la poupée du thème. */
+#window[data-size='char'] .character-doll,
+#window[data-size='duo'] .duo-char .character-doll {
   column-gap: 16px;
   justify-content: space-between;
 }
@@ -182,8 +180,8 @@
 #window[data-size='duo'] .duo-char .character-left > .rpg-paper:first-child {
   padding-inline: 10px;
 }
-#window#window[data-size='char'] .doll-center,
-#window#window[data-size='duo'] .duo-char .doll-center {
+#window[data-size='char'] .doll-center,
+#window[data-size='duo'] .duo-char .doll-center {
   width: 140px;
 }
 #window[data-size='char'] .doll-center canvas,
@@ -218,7 +216,6 @@
 }
 #window[data-size='char'] .stat-desc,
 #window[data-size='duo'] .duo-char .stat-desc {
-  font-size: calc(10.5px * var(--font-scale));
   line-height: 1.25;
 }
 #window[data-size='char'] .stat-table td,
@@ -231,7 +228,7 @@
 
 /* ---------------------------------------------------------------- Sac et fiche ensemble (C puis I, ou I puis C) */
 /* Deux panneaux côte à côte, chacun sur son fond : la fiche à gauche, le sac à droite. Chacun défile à part. */
-#window#window[data-size='duo'] .gear-duo {
+#window[data-size='duo'] .gear-duo {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
@@ -244,7 +241,7 @@
   min-width: 0;
   min-height: 0;
   padding: 10px 12px 12px;
-  border: 1px solid var(--rpg-gold-dark, #6a4e2a);
+  border: 1px solid var(--rpg-gold-dark);
   border-radius: 10px;
   background: #1a120cc0;
 }
@@ -259,7 +256,7 @@
   padding-left: 0;
 }
 @media (max-width: 1100px) {
-  #window#window[data-size='duo'] .gear-duo {
+  #window[data-size='duo'] .gear-duo {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
@@ -323,62 +320,62 @@
 
 /* ---------------------------------------------------------------- Marchand et banque (fenêtres des PNJ) */
 /* Deux colonnes de même hauteur qui remplissent la fenêtre ; dans chacune, seule la zone du milieu défile. */
-#window#window[data-size] .npc-panel {
+#window[data-size] .npc-panel {
   flex: 1 1 auto;
   min-height: 0;
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 12px;
 }
-#window#window[data-size] .npc-col {
+#window[data-size] .npc-col {
   display: flex;
   flex-direction: column;
   min-height: 0;
   padding: 10px 12px;
 }
-#window#window[data-size] .npc-col > * {
+#window[data-size] .npc-col > * {
   flex-shrink: 0;
 }
-#window#window[data-size] .npc-col > .panel-scroll {
+#window[data-size] .npc-col > .panel-scroll {
   flex: 1 1 auto;
 }
-#window#window[data-size] .npc-col-title {
+#window[data-size] .npc-col-title {
   margin: 0 0 4px;
   font-size: calc(15px * var(--font-scale));
 }
-#window#window[data-size] .npc-col-title small {
+#window[data-size] .npc-col-title small {
   margin-left: 4px;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-weight: normal;
   font-size: 0.8em;
 }
-#window#window[data-size] .npc-col .bag-subhead {
+#window[data-size] .npc-col .bag-subhead {
   margin: 10px 0 4px;
 }
-#window#window[data-size] .npc-col .panel-scroll > .bag-subhead:first-child {
+#window[data-size] .npc-col .panel-scroll > .bag-subhead:first-child {
   margin-top: 0;
 }
-#window#window[data-size] .npc-col .modern-bag {
+#window[data-size] .npc-col .modern-bag {
   grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   gap: 6px;
 }
-#window#window[data-size] .npc-col .shop-stock {
+#window[data-size] .npc-col .shop-stock {
   row-gap: 22px;
   margin-bottom: 22px;
 }
-#window#window[data-size] .npc-col .bag-upgrade {
+#window[data-size] .npc-col .bag-upgrade {
   margin: 6px 0;
 }
-#window#window[data-size] .npc-col .bank-free {
+#window[data-size] .npc-col .bank-free {
   margin: 10px 0 0;
 }
 /* Ligne d'aide, pied et or : comme dans le sac (I). */
-#window#window[data-size] .npc-col .bag-hint {
+#window[data-size] .npc-col .bag-hint {
   margin: 0 0 8px;
   font-size: calc(12px * var(--font-scale));
   line-height: 1.35;
 }
-#window#window[data-size] .npc-col .bag-foot {
+#window[data-size] .npc-col .bag-foot {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -386,20 +383,20 @@
   min-height: 30px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--rpg-gold-dark, #6a4e2a);
+  border-top: 1px solid var(--rpg-gold-dark);
   font-size: calc(12px * var(--font-scale));
 }
-#window#window[data-size] .npc-col .bag-foot button {
+#window[data-size] .npc-col .bag-foot button {
   margin: 0;
 }
-#window#window[data-size] .npc-col .bag-gold {
-  color: var(--rpg-gold-light, #f6dc98);
+#window[data-size] .npc-col .bag-gold {
+  color: var(--rpg-gold-light);
   font-family: var(--rpg-serif);
   font-size: calc(14px * var(--font-scale));
   font-weight: bold;
   white-space: nowrap;
 }
-#window#window[data-size] .npc-col .bag-gold::before {
+#window[data-size] .npc-col .bag-gold::before {
   content: '';
   display: inline-block;
   width: 0.8em;
@@ -411,7 +408,7 @@
   vertical-align: -0.05em;
 }
 @media (max-width: 900px) {
-  #window#window[data-size] .npc-panel {
+  #window[data-size] .npc-panel {
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
 }

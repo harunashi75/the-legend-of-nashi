@@ -14,7 +14,7 @@
   background:
     radial-gradient(ellipse at 50% 38%, rgba(255, 180, 90, 0.18), transparent 55%),
     radial-gradient(ellipse at center, #2a1c12, #0a0604 75%);
-  color: #f6dc98;
+  color: var(--rpg-gold-light);
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
   opacity: 1;
   transition: opacity 0.45s ease;
@@ -55,7 +55,7 @@
   top: 0;
   width: 8px;
   height: 8px;
-  background: #f6dc98;
+  background: var(--rpg-gold-light);
   box-shadow: 0 0 8px #e8b850;
   transform-origin: 4px 42px;
 }

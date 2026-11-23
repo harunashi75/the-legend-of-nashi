@@ -13,7 +13,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 4px 16px;
-  border-bottom: 1px solid var(--rpg-gold-dark, #7a5a2a);
+  border-bottom: 1px solid var(--rpg-gold-dark);
   margin-bottom: 12px;
 }
 #window .map-head h2 {
@@ -22,13 +22,13 @@
   background: none;
 }
 #window .map-here {
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(13px * var(--font-scale));
   padding-bottom: 8px;
 }
 #window .map-here b {
-  color: var(--rpg-gold-light, #f6dc98);
-  font-family: var(--rpg-serif, serif);
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
 }
 #window .map-instance-layout {
   display: grid;
@@ -41,13 +41,13 @@
   position: relative;
   width: var(--map-size);
   aspect-ratio: 1;
-  border: 3px solid #7a5a2a;
+  border: 3px solid var(--rpg-gold-dark);
   border-radius: 6px;
   background: #0e3462;
   box-shadow:
-    0 0 0 1px #0c0805,
+    0 0 0 1px var(--rpg-outline),
     0 0 0 4px #2a1f16,
-    0 0 0 5px #d4aa5a,
+    0 0 0 5px var(--rpg-gold),
     0 8px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
@@ -68,6 +68,11 @@
   touch-action: none;
   image-rendering: pixelated;
   display: block;
+  border: 3px double var(--rpg-gold);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 2px var(--rpg-outline),
+    0 6px 18px rgba(0, 0, 0, 0.6);
 }
 #window #bigMap.dragging {
   cursor: var(--cursor-grabbing);
@@ -91,7 +96,7 @@
   padding: 4px;
   border-radius: 6px;
   background: rgba(23, 16, 11, 0.82);
-  border: 1px solid var(--rpg-gold-dark, #7a5a2a);
+  border: 1px solid var(--rpg-gold-dark);
 }
 #window .map-tools button {
   padding: 4px 10px;
@@ -108,8 +113,8 @@
   line-height: 1;
 }
 #window #mapZoomLevel {
-  color: var(--rpg-gold-light, #f6dc98);
-  font-family: var(--rpg-serif, serif);
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
   font-size: calc(11px * var(--font-scale));
   padding: 3px 0;
   text-align: center;
@@ -117,7 +122,7 @@
   line-height: 1.1;
 }
 #window .map-hint {
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(11px * var(--font-scale));
   text-align: center;
   margin-top: 8px;
@@ -132,7 +137,7 @@
   padding: 8px 10px 10px;
   margin-bottom: 12px;
   background: rgba(10, 7, 4, 0.45);
-  border: 1px solid var(--rpg-gold-dark, #7a5a2a);
+  border: 1px solid var(--rpg-gold-dark);
   border-radius: 6px;
 }
 #window .map-legend h3,
@@ -150,7 +155,7 @@
   align-items: center;
   gap: 6px;
   font-size: calc(11.5px * var(--font-scale));
-  color: var(--rpg-ink, #f3e6c8);
+  color: var(--rpg-ink);
   line-height: 1.15;
 }
 #window .map-key canvas {
@@ -162,18 +167,14 @@
 #window .island-section {
   margin: 8px 0 12px;
   padding: 8px 10px 6px 12px;
-  background: linear-gradient(90deg, rgba(255, 226, 160, 0.05), transparent 60%), rgba(10, 7, 4, 0.45);
-  border: 1px solid #4a3820;
-  border-left: 4px solid var(--biome, #7a5a2a);
-  border-radius: 6px;
 }
 #window .island-section.here {
-  border-color: var(--rpg-gold, #d4aa5a);
-  border-left-color: var(--biome, #d4aa5a);
+  border-color: var(--rpg-gold);
+  border-left-color: var(--biome, var(--rpg-gold));
   box-shadow: 0 0 12px rgba(212, 170, 90, 0.25);
 }
 #window .island-section h4 {
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   margin-bottom: 5px;
   font-size: calc(13px * var(--font-scale));
 }
@@ -185,7 +186,8 @@
   border: 0;
   font-size: calc(12px * var(--font-scale));
 }
-/* Boutons-lignes de la liste : texte simple, sans l'habillage des boutons de laiton. */
+/* Boutons-lignes de la liste : texte simple, sans l'habillage des boutons de laiton. Les lieux gardent le fond
+   en cuir des lignes (.entry) ; les régions n'ont pas de fond. */
 #window .map-region,
 #window .map-place {
   display: flex;
@@ -194,12 +196,11 @@
   gap: 2px 6px;
   width: 100%;
   text-align: left;
-  background: none;
   border: 0;
   box-shadow: none;
   border-radius: 4px;
   padding: 4px 4px;
-  color: var(--rpg-ink, #f3e6c8);
+  color: var(--rpg-ink);
   font-family: inherit;
   font-weight: 400;
   letter-spacing: 0;
@@ -214,31 +215,32 @@
 }
 #window .map-region {
   align-items: center;
+  background: none;
   padding: 2px 4px 4px;
 }
 #window .map-region-name {
-  font-family: var(--rpg-serif, serif);
+  font-family: var(--rpg-serif);
   font-weight: 700;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   font-size: calc(14px * var(--font-scale));
 }
 #window .map-swatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  background: var(--biome, #7a5a2a);
+  background: var(--biome, var(--rpg-gold-dark));
   box-shadow:
-    0 0 0 1px #0c0805,
+    0 0 0 1px var(--rpg-outline),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   align-self: center;
 }
 #window .map-levels {
   margin-left: auto;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(11px * var(--font-scale));
 }
 #window .map-here-tag {
-  color: var(--rpg-gold, #d4aa5a);
+  color: var(--rpg-gold);
   font-size: calc(11px * var(--font-scale));
   padding: 0 4px 2px;
 }
@@ -288,10 +290,8 @@
   margin-top: 12px;
 }
 #window .raid-mode {
-  border: 1px solid #8b78c4;
-  border-radius: 10px;
+  border: 1px solid var(--rpg-leather-edge);
   padding: 12px 14px;
-  background: #241c3d;
 }
 #window .raid-mode h3 {
   color: #f5cf78;

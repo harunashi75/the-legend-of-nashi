@@ -38,7 +38,7 @@
   color: #bfe8ff;
 }
 #window .quest-reward {
-  color: #ffd76a;
+  color: var(--rpg-gold-bright);
   font-size: calc(13px * var(--font-scale));
   margin: 8px 0 0;
 }
@@ -51,14 +51,14 @@
 #window .quest-card {
   margin: 10px 0;
   padding: 10px 12px;
-  border: 1px solid #6a4e2a;
+  border: 1px solid var(--rpg-leather-edge);
   border-left: 3px solid #b8a070;
   background: linear-gradient(180deg, rgba(48, 34, 22, 0.88), rgba(20, 13, 8, 0.92));
   font-size: calc(13px * var(--font-scale));
   line-height: 1.5;
 }
 #window .quest-card.main {
-  border-left-color: #ffd76a;
+  border-left-color: var(--rpg-gold-bright);
 }
 #window .quest-card.done {
   opacity: 0.85;
@@ -80,7 +80,7 @@
 }
 #window .quest-kinds i {
   padding: 0 7px;
-  border: 1px solid #6a4e2a;
+  border: 1px solid var(--rpg-leather-edge);
   border-radius: 9px;
   background: rgba(0, 0, 0, 0.3);
   color: #d8c090;
@@ -89,7 +89,7 @@
 }
 #window .quest-count,
 #questTracker .quest-count {
-  color: #ffd76a;
+  color: var(--rpg-gold-bright);
   font-style: normal;
 }
 #window .quest-ballad p {
@@ -103,7 +103,7 @@
   list-style: none;
 }
 #window .quest-card li.done {
-  color: #8fe3ae;
+  color: var(--rpg-good);
 }
 #window .quest-card li.current {
   color: #fff2cb;
@@ -131,7 +131,7 @@
   color: #e8d8b8;
 }
 #window .quest-stars {
-  color: #ffd76a;
+  color: var(--rpg-gold-bright);
   font-size: calc(15px * var(--font-scale));
 }
 #window .quest-map {
@@ -146,7 +146,7 @@
   list-style: none;
 }
 #window .quest-chapter {
-  color: #ffd76a;
+  color: var(--rpg-gold-bright);
   margin: 16px 0 4px;
   font-size: calc(16px * var(--font-scale));
 }
@@ -156,7 +156,7 @@
   font-weight: normal;
 }
 #window .quest-done-line {
-  color: #8fe3ae;
+  color: var(--rpg-good);
   margin: 4px 0;
   font-size: calc(13px * var(--font-scale));
 }
@@ -171,7 +171,7 @@
   border: 1px solid #8a6a3a;
   border-radius: 5px;
   color: #f0e2c4;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(12px * var(--font-scale));
   line-height: 1.45;
   pointer-events: none;
@@ -187,7 +187,7 @@
 }
 #questTracker em {
   display: block;
-  color: #ffd76a;
+  color: var(--rpg-gold-bright);
   font-style: normal;
   margin-top: 3px;
 }
@@ -216,14 +216,14 @@
   min-width: 260px;
   max-width: min(480px, 92vw);
   padding: 14px 26px 16px;
-  border: 2px solid var(--rpg-gold-light, #f0d070);
+  border: 2px solid var(--rpg-gold-light);
   border-radius: 10px;
   background: radial-gradient(circle at 50% 0%, rgba(255, 230, 150, 0.28), rgba(26, 16, 8, 0.94) 70%);
   box-shadow:
     0 0 28px rgba(255, 214, 110, 0.45),
     0 8px 24px rgba(0, 0, 0, 0.6);
   color: #f6e8c8;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   text-align: center;
   pointer-events: none;
   animation: questFanfareIn 0.35s ease-out;
@@ -390,7 +390,7 @@
 }
 #window .guild-ladder li.current {
   opacity: 1;
-  border-color: #ffd76a;
+  border-color: var(--rpg-gold-bright);
   box-shadow: 0 0 10px rgba(255, 215, 106, 0.3);
 }
 #window .guild-ladder small {

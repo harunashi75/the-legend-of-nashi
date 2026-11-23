@@ -207,8 +207,11 @@ test('Version actuelle, actions sans onclick et CSS sans important',()=>{
  // Le CSS vit dans les feuilles du template ; le JavaScript n'injecte ni feuille ni style en ligne complet.
  assert.doesNotMatch(source,/createElement\(\s*['"]style['"]\s*\)|\.style\.cssText\s*=/);
  const head=source.slice(0,source.indexOf('</head>'));
- const order=['canaan-interface-style','canaan-panels-style'].map(id=>head.indexOf('<style id="'+id+'">'));
+ const order=['canaan-palette','canaan-interface-style','canaan-panels-style'].map(id=>head.indexOf('<style id="'+id+'">'));
  assert.ok(order.every((at,i)=>at>=0&&(i===0||at>order[i-1])),String(order));
+ // Un seul thème : la palette est la première feuille, aucune feuille ne repeint les autres par-dessus.
+ assert.equal([...head.matchAll(/<style id="([^"]+)"/g)][0][1],'canaan-palette');
+ assert.doesNotMatch(head,/canaan-rpg-theme/);
  assert.match(head,/#regionBanner\s*\{\s*position:\s*fixed/);
  // Styles en ligne : aucun dans le balisage, et seulement des valeurs calculées dans le HTML généré.
  const markup=source.slice(source.indexOf('<body'),source.indexOf('<script',source.indexOf('<body')));

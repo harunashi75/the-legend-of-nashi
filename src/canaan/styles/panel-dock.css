@@ -1,8 +1,8 @@
 /* Fenêtres non bloquantes (scripts/panel-dock.js) : plus de voile plein écran, le jeu reste jouable et cliquable
    autour de la fenêtre ; elle est posée à la main (left / top) au-dessus de son bouton ou là où on l'a déplacée.
-   Chargée juste avant le thème (qui reste le dernier style) : ses sélecteurs à deux identifiants (#overlay#overlay,
-   #overlay > #window) remplacent le fond, le centrage et les hauteurs du thème et de panel-sizes.css. */
-#overlay#overlay {
+   Chargée après panel-sizes.css : ses sélecteurs (#overlay > #window, deux identifiants) remplacent le fond, le
+   centrage et les hauteurs des autres feuilles. Une fenêtre à taille fixe (data-size) n'a pas de hauteur maximale. */
+#overlay {
   background: none;
   pointer-events: none;
   padding: 0;
@@ -15,7 +15,8 @@
   pointer-events: auto;
   max-height: min(calc(100vh - 16px), var(--dock-max-h, 100vh));
 }
-#overlay > #window#window[data-size] {
+#overlay > #window[data-size] {
+  max-height: none;
   height: min(var(--panel-h), calc(100vh - 16px), var(--dock-max-h, 100vh));
   width: min(var(--panel-w), calc(100vw - 16px));
 }
@@ -24,27 +25,27 @@
 #window h2 {
   cursor: var(--cursor-grab);
 }
-#window#window.dock-dragging,
-#window#window.dock-dragging * {
+#window.dock-dragging,
+#window.dock-dragging * {
   cursor: var(--cursor-grabbing);
   user-select: none;
 }
 /* Poignées de redimensionnement : trois coins (la croix occupe le quatrième), des traits dorés discrets. */
-#window#window .dock-grip {
+#window .dock-grip {
   position: absolute;
   z-index: 5;
   width: 16px;
   height: 16px;
   opacity: 0.45;
   cursor: var(--cursor-grab);
-  --grip: var(--rpg-gold, #c9a14a);
+  --grip: var(--rpg-gold);
   transition: opacity 0.15s;
 }
-#window#window .dock-grip:hover,
-#window#window.dock-dragging .dock-grip {
+#window .dock-grip:hover,
+#window.dock-dragging .dock-grip {
   opacity: 1;
 }
-#window#window .dock-grip[data-edge='br'] {
+#window .dock-grip[data-edge='br'] {
   right: 1px;
   bottom: 1px;
   background: linear-gradient(
@@ -56,7 +57,7 @@
     transparent 78%
   );
 }
-#window#window .dock-grip[data-edge='bl'] {
+#window .dock-grip[data-edge='bl'] {
   left: 1px;
   bottom: 1px;
   background: linear-gradient(
@@ -68,7 +69,7 @@
     transparent 78%
   );
 }
-#window#window .dock-grip[data-edge='tr'] {
+#window .dock-grip[data-edge='tr'] {
   right: 1px;
   top: 1px;
   background: linear-gradient(

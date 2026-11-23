@@ -23,14 +23,14 @@
 #window .tab-head h3,
 #window .art-head h3 {
   margin: 0;
-  font-family: var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
   font-size: calc(17px * var(--font-scale));
   letter-spacing: 0.5px;
 }
 #window .tab-head span,
 #window .art-head span {
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(12px * var(--font-scale));
 }
 
@@ -52,12 +52,10 @@
   border-radius: 6px;
   border: 2px solid var(--art, rgba(212, 170, 90, 0.35));
   background: rgba(0, 0, 0, 0.32);
-  color: var(--rpg-ink, #f3e6c8);
+  color: var(--rpg-ink);
   font: inherit;
   text-shadow: none;
   box-shadow: none;
-}
-#window .art-slot {
   aspect-ratio: 1;
   max-height: 72px;
 }
@@ -69,9 +67,9 @@
   position: absolute;
   right: 4px;
   bottom: 2px;
-  font: 700 calc(11px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
+  font: 700 calc(11px * var(--font-scale)) var(--rpg-serif);
   font-style: normal;
-  color: var(--art-l, #f6dc98);
+  color: var(--art-l, var(--rpg-gold-light));
 }
 #window .art-slot.empty {
   border-style: dashed;
@@ -83,13 +81,13 @@
   cursor: var(--cursor-pointer);
 }
 #window button.art-slot:hover {
-  border-color: var(--art-l, #f6dc98);
+  border-color: var(--art-l, var(--rpg-gold-light));
   background: color-mix(in srgb, var(--art) 18%, rgba(0, 0, 0, 0.32));
 }
 #window .art-note {
   margin: 10px 0 0;
   font-size: calc(11.5px * var(--font-scale));
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   text-align: center;
 }
 
@@ -118,20 +116,20 @@
   margin: 4px 0;
 }
 .art-unknown {
-  color: #b8a483;
+  color: var(--rpg-muted);
 }
 .art-tip-note {
   max-width: 300px;
   font-size: calc(11.5px * var(--font-scale));
-  color: #b8a483;
+  color: var(--rpg-muted);
   margin-top: 4px;
 }
 
 /* Portail de l'Arène : records, règles et douze épreuves. */
 #window .arena-motto {
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-style: italic;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
 }
 #window .arena-layout {
   display: grid;
@@ -149,8 +147,8 @@
 #window .arena-board h3,
 #window .arena-bosses h3 {
   margin: 0 0 8px;
-  font-family: var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
   font-size: calc(15px * var(--font-scale));
 }
 #window .arena-board h3 + .arena-record {
@@ -190,15 +188,15 @@
   font-size: calc(13px * var(--font-scale));
 }
 #window .arena-boss span {
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   text-align: right;
 }
 #window .arena-boss.done b {
-  color: #8fe3ae;
+  color: var(--rpg-good);
 }
 #window .arena-boss em {
   font-style: normal;
-  color: #8fe3ae;
+  color: var(--rpg-good);
 }
 #window .arena-actions {
   display: flex;
@@ -216,6 +214,6 @@
 /* Artéfacts non équipés, dans le sac (I) : des cases du sac, bordées de leur couleur ; leur rang en chiffres
    romains dans le coin. */
 #window .art-bag-cell .bag-ilvl {
-  font-family: var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
 }

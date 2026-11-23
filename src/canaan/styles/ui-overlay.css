@@ -129,9 +129,9 @@ html.cursor-press {
   padding: 6px 11px;
   border: 2px solid var(--rpg-gold-dark);
   border-radius: 4px;
-  background: linear-gradient(180deg, #221810, #120c08);
+  background: linear-gradient(180deg, #221810, var(--rpg-night));
   box-shadow:
-    0 0 0 1px #0c0805,
+    0 0 0 1px var(--rpg-outline),
     inset 0 0 0 1px rgba(255, 226, 160, 0.15),
     0 8px 26px rgba(0, 0, 0, 0.8);
   color: var(--rpg-ink);
@@ -174,7 +174,7 @@ html.cursor-press {
   border-radius: 6px;
   background: var(--rpg-rivets), var(--rpg-grain), linear-gradient(180deg, #2a1f16, #150e09);
   box-shadow:
-    0 0 0 2px #0c0805,
+    0 0 0 2px var(--rpg-outline),
     inset 0 0 30px rgba(0, 0, 0, 0.6),
     0 16px 50px rgba(0, 0, 0, 0.85);
   color: var(--rpg-ink);
@@ -211,7 +211,7 @@ html.cursor-press {
   border: 1px solid var(--rpg-gold-dark);
   border-radius: 4px;
   background: linear-gradient(180deg, #3a2a1c, #22170e);
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
   font-family: var(--rpg-serif);
   font-size: calc(14px * var(--font-scale));
   font-weight: 700;
@@ -247,9 +247,9 @@ html.cursor-press {
   padding: 4px;
   border: 2px solid var(--rpg-gold-dark);
   border-radius: 5px;
-  background: linear-gradient(180deg, #221810, #120c08);
+  background: linear-gradient(180deg, #221810, var(--rpg-night));
   box-shadow:
-    0 0 0 1px #0c0805,
+    0 0 0 1px var(--rpg-outline),
     inset 0 0 0 1px rgba(255, 226, 160, 0.15),
     0 8px 26px rgba(0, 0, 0, 0.8);
   font-family: var(--rpg-serif);

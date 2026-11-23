@@ -2,6 +2,11 @@
   "modules": [
     {
       "kind": "style",
+      "id": "canaan-palette",
+      "file": "styles/palette.css"
+    },
+    {
+      "kind": "style",
       "id": "canaan-interface-style",
       "file": "styles/interface-style.css"
     },
@@ -506,11 +511,6 @@
       "kind": "style",
       "id": "canaan-panel-dock-style",
       "file": "styles/panel-dock.css"
-    },
-    {
-      "kind": "style",
-      "id": "canaan-rpg-theme",
-      "file": "styles/rpg-theme.css"
     },
     {
       "kind": "script",

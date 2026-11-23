@@ -159,11 +159,11 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
  assert.equal(run('walker._rippleT===time'),true);
  run('globalThis.dry={};drawWade(ctx,dry,CANAAN_SPAWN.x,CANAAN_SPAWN.y,40,true,1);drawWaterRipples(ctx)');
  assert.equal(run('dry._rippleT'),undefined);
- // Arbres redessinés deux fois plus grands (pixels de 2) et thème RPG chargé en dernier.
+ // Arbres redessinés deux fois plus grands (pixels de 2) et palette du thème RPG chargée en premier.
  assert.equal(run("['tree','bigtree','pine','palm','twisted','autumn_red','glowtree'].every(k=>PIXEL_DECOR[k]&&PIXEL_DECOR[k].width===132)"),true);
  assert.equal(run("['rock','flower','bush','cactus'].every(k=>PIXEL_DECOR[k]&&PIXEL_DECOR[k].width===68)"),true);
  const styles=[...source.matchAll(/<style id="([^"]+)"/g)].map(m=>m[1]);
- assert.equal(styles[styles.length-1],'canaan-rpg-theme');
+ assert.equal(styles[0],'canaan-palette');
  assert.match(source,/--rpg-serif:/);
  // Chaque région ne fait apparaître que ses créatures (plus de Slime de secours ailleurs que dans les Plaines).
  for(let i=1;i<6;i++){

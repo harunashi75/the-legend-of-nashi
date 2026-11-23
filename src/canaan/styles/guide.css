@@ -14,7 +14,7 @@
   border-radius: 8px;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
   color: #f0e2c4;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(13px * var(--font-scale));
   line-height: 1.45;
   z-index: 30;
@@ -57,11 +57,11 @@
   display: block;
   margin: 6px 0 0 auto;
   padding: 3px 12px;
-  border: 1px solid var(--rpg-gold, #d4aa5a);
+  border: 1px solid var(--rpg-gold);
   border-radius: 4px;
   background: linear-gradient(180deg, #5a3e22, #2a1c10);
-  color: var(--rpg-gold-light, #f6dc98);
-  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
   font-size: calc(12px * var(--font-scale));
   text-shadow: 0 1px 0 #000;
   cursor: var(--cursor-pointer);
@@ -108,11 +108,11 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 1px 4px;
-  border: 1px solid var(--rpg-gold, #c8a050);
+  border: 1px solid var(--rpg-gold);
   border-radius: 3px;
   background: linear-gradient(180deg, #5a3e22, #2a1c10);
-  color: var(--rpg-gold-light, #f6dc98);
-  font-family: var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
   text-shadow: 0 1px 0 #000;
   font-size: calc(9px * var(--font-scale));
   font-weight: 700;

@@ -1,10 +1,18 @@
 #window {
   width: min(1060px, 96vw);
-  background: linear-gradient(140deg, #141e29, #182d33 55%, #1c2138);
-  border: 1px solid #ba9b62;
 }
-#window h2 {
-  color: #f4d68d;
+#window,
+#dialog {
+  background:
+    var(--rpg-rivets), var(--rpg-grain), linear-gradient(180deg, #2a1f16, #17100b 70%, var(--rpg-night));
+  border: 3px double var(--rpg-gold);
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px var(--rpg-outline),
+    inset 0 0 0 1px rgba(255, 226, 160, 0.15),
+    inset 0 0 50px rgba(0, 0, 0, 0.65),
+    0 24px 80px rgba(0, 0, 0, 0.8);
+  color: var(--rpg-ink);
 }
 #window .rpg-head {
   display: flex;
@@ -14,6 +22,7 @@
   border-bottom: 1px solid #665c4c;
   padding-bottom: 13px;
   margin-bottom: 14px;
+  border-bottom-color: var(--rpg-gold-dark);
 }
 #window .rpg-tabs {
   display: flex;
@@ -21,8 +30,9 @@
   flex-wrap: wrap;
 }
 #window .rpg-tabs button {
-  background: #172c3a;
   border: 1px solid #8a795d;
+  color: var(--rpg-gold-light);
+  font-family: var(--rpg-serif);
 }
 #window .rpg-grid {
   display: grid;
@@ -30,9 +40,6 @@
   gap: 18px;
 }
 #window .rpg-paper {
-  background: #0c1927c9;
-  border: 1px solid #4a5961;
-  border-radius: 13px;
   padding: 14px;
 }
 #window .rpg-slot-grid {
@@ -41,9 +48,7 @@
   gap: 8px;
 }
 #window .rpg-slot {
-  background: linear-gradient(135deg, #1c3240, #111d2d);
   border: 1px solid #6c6370;
-  border-radius: 12px;
   min-height: 94px;
   padding: 8px;
   text-align: center;
@@ -104,7 +109,6 @@
 }
 #window.rpg-modern {
   width: min(1100px, 97vw);
-  max-height: 94vh;
   overflow: hidden;
   padding: 16px 20px;
 }
@@ -114,30 +118,29 @@
   flex-direction: column;
 }
 #window .modern-bag {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 9px;
   margin-top: 12px;
 }
 #window .bag-cell {
   position: relative;
-  min-height: 100px;
-  border: 1px solid #657184;
-  border-radius: 11px;
-  background: linear-gradient(145deg, #23384a, #111d2e);
-  padding: 8px;
   cursor: var(--cursor-pointer);
   text-align: center;
   color: #f2e9d7;
   overflow: hidden;
 }
+#window .entry,
+#window .bag-cell {
+  background: linear-gradient(180deg, rgba(60, 42, 26, 0.55), rgba(24, 16, 10, 0.7));
+  border: 1px solid #5a4226;
+  border-radius: 4px;
+}
 #window .bag-cell:hover {
-  border-color: #e9c77c;
   background: #304659;
+  border-color: var(--rpg-gold);
+  box-shadow: 0 0 10px rgba(240, 190, 90, 0.35);
 }
 #window .bag-cell.empty {
-  opacity: 0.5;
   cursor: var(--cursor-default);
+  background: rgba(10, 6, 4, 0.55);
 }
 #window .bag-cell .bag-icon {
   font-size: calc(26px * var(--font-scale));
@@ -146,12 +149,9 @@
 #window .bag-cell .bag-name {
   font-size: calc(11px * var(--font-scale));
   display: block;
-  overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 #window .bag-cell .bag-ilvl {
-  font-size: calc(10px * var(--font-scale));
   color: #d7c59c;
 }
 #window .bag-details {
@@ -175,14 +175,6 @@
   align-items: start;
 }
 #window .character-doll {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  gap: 9px;
-  align-items: center;
-}
-#window .doll-column {
-  display: flex;
-  flex-direction: column;
   gap: 9px;
 }
 #window .doll-center {
@@ -194,19 +186,21 @@
   height: 240px;
 }
 #window .equip-square {
-  height: 77px;
-  padding: 6px;
   border: 1px solid #5e7180;
-  border-radius: 10px;
-  background: #122537;
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   text-align: center;
   gap: 3px;
   cursor: var(--cursor-pointer);
-  overflow: hidden;
+}
+#window .rpg-slot,
+#window .equip-square,
+#window .class-page,
+#window .talent-row,
+#window .raid-mode,
+#window .rpg-tabs button {
+  background: linear-gradient(180deg, #33251a, #1a120c);
+  border-color: var(--rpg-leather-edge);
+  border-radius: 4px;
 }
 #window .equip-square:hover {
   border-color: #f2ce7d;
@@ -220,8 +214,6 @@
 }
 #window .equip-square .eq-name {
   font-size: calc(10px * var(--font-scale));
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
@@ -258,7 +250,6 @@
   }
 }
 #window #bigMap {
-  image-rendering: auto;
   filter: none;
 }
 #window .bag-upgrade {
@@ -269,9 +260,24 @@
   flex-wrap: wrap;
   margin: 12px 0 16px;
   padding: 15px;
-  background: #13273a;
-  border: 1px solid #658aa6;
-  border-radius: 12px;
+}
+/* Encadrés intérieurs des fenêtres : cuir sombre et liseré doré, à la place des anciens fonds bleus. */
+#window .rpg-paper,
+#window .character-layout > .rpg-paper,
+#window .bag-upgrade,
+#window .stats52,
+#window .map-instance-list,
+#window .island-section,
+#window .class-box,
+#window .talent-slot,
+#window .preview,
+#saveRecovery {
+  background: linear-gradient(180deg, rgba(48, 34, 22, 0.88), rgba(20, 13, 8, 0.92));
+  border: 1px solid var(--rpg-leather-edge);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 160, 0.08),
+    inset 0 0 18px rgba(0, 0, 0, 0.45);
 }
 #window .bag-upgrade strong {
   color: #f7dfa0;
@@ -294,4 +300,72 @@
 #window .bag-max {
   color: #8ce0ae;
   font-size: calc(12px * var(--font-scale));
+}
+
+/* Fenêtres (inventaire, personnage, carte, boutique, portail) et dialogues. */
+
+#window h2,
+#dialog h2 {
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
+  letter-spacing: 1.5px;
+  text-shadow:
+    0 2px 0 #000,
+    0 0 14px rgba(212, 170, 90, 0.35);
+  border-bottom: 1px solid var(--rpg-gold-dark);
+  padding-bottom: 8px;
+  background: linear-gradient(90deg, transparent, rgba(212, 170, 90, 0.08), transparent);
+}
+#window h3,
+#window h4 {
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold);
+  letter-spacing: 0.8px;
+}
+#window .muted {
+  color: var(--rpg-muted);
+}
+
+/* Barres de défilement du thème : la fenêtre, toutes ses zones qui défilent (carte, métiers…) et le chat. */
+#window::-webkit-scrollbar,
+#window *::-webkit-scrollbar,
+#chatlog::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+#window::-webkit-scrollbar-track,
+#window *::-webkit-scrollbar-track,
+#chatlog::-webkit-scrollbar-track {
+  background: var(--rpg-night);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(232, 184, 80, 0.12);
+}
+#window::-webkit-scrollbar-thumb,
+#window *::-webkit-scrollbar-thumb,
+#chatlog::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #6a4a28, #3e2a16);
+  border: 1px solid var(--rpg-gold-dark);
+  border-radius: 4px;
+}
+#window *::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(180deg, #6a4a28, #3e2a16);
+}
+#window::-webkit-scrollbar-thumb:hover,
+#window *::-webkit-scrollbar-thumb:hover,
+#chatlog::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #8a6234, #54381c);
+}
+#window::-webkit-scrollbar-corner,
+#window *::-webkit-scrollbar-corner {
+  background: var(--rpg-night);
+}
+#window::-webkit-scrollbar-button,
+#window *::-webkit-scrollbar-button {
+  display: none;
+}
+#window .talent-slot.filled,
+#window .talent-row.equipped {
+  background: linear-gradient(180deg, #5a4020, #2e1f10);
+  border-color: var(--rpg-gold);
+  box-shadow: 0 0 10px rgba(240, 190, 90, 0.3);
 }

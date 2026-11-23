@@ -3,7 +3,7 @@
 body.pad-active .pad-focus,
 body.pad-active button.pad-focus,
 body.pad-active #window .pad-focus {
-  outline: 3px solid var(--rpg-gold-light, #f6dc98);
+  outline: 3px solid var(--rpg-gold-light);
   outline-offset: 2px;
   box-shadow:
     0 0 0 5px rgba(122, 90, 42, 0.55),
@@ -30,7 +30,7 @@ body.pad-active .skill .key[data-pad]::after {
   font-size: calc(12px * var(--font-scale, 1));
 }
 .pad-help dt {
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   font-weight: 700;
 }
 .pad-help dd {

@@ -9,7 +9,7 @@
 #window .group-note,
 #window .group-empty {
   margin: 0;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(13px * var(--font-scale));
   line-height: 1.45;
 }
@@ -32,7 +32,7 @@
   background: rgba(0, 0, 0, 0.28);
 }
 #window .group-card.here {
-  border-color: #8fe3ae;
+  border-color: var(--rpg-good);
 }
 #window .group-card.confirm {
   border-color: #c4553a;
@@ -42,8 +42,8 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-family: var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
   font-size: calc(16px * var(--font-scale));
   overflow-wrap: anywhere;
 }
@@ -57,7 +57,7 @@
 #window .group-meta {
   margin: 0;
   font-size: calc(12.5px * var(--font-scale));
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
 }
 #window .group-warning {
   margin: 0;
@@ -87,7 +87,7 @@
   gap: 8px;
 }
 #window .group-new label {
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(13px * var(--font-scale));
 }
 #window .group-new input {
@@ -96,8 +96,8 @@
   border-radius: 4px;
   border: 1px solid rgba(232, 184, 80, 0.6);
   background: #120c07;
-  color: #fff4d0;
-  font: calc(14px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-cream);
+  font: calc(14px * var(--font-scale)) var(--rpg-serif);
 }
 #window .group-online {
   display: flex;

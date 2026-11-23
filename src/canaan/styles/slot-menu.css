@@ -1,10 +1,21 @@
 /* Écran titre : sélection des aventures (scène au centre, liste à droite, « Entrer dans le monde » en bas)
    et création du héros (races à gauche, aperçu au centre, classe et apparence à droite). */
+/* Nuit de pleine lune : la lune et son halo, un ciel profond, une lueur chaude au niveau de la scène. */
 #title {
   justify-content: flex-start;
   padding: 16px 24px 14px;
   box-sizing: border-box;
   overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 91% 9%,
+      #f4ecd8 0 3.2vmin,
+      rgba(244, 236, 216, 0.35) 3.4vmin,
+      transparent 4.4vmin
+    ),
+    radial-gradient(circle at 91% 9%, rgba(190, 200, 230, 0.22), transparent 26vmin),
+    radial-gradient(ellipse at 42% 70%, rgba(255, 170, 80, 0.14), transparent 50%),
+    linear-gradient(180deg, #0c1124 0%, #1a1630 45%, #22140f 100%);
 }
 #title > * {
   position: relative;
@@ -119,10 +130,10 @@
 }
 #title #slotMenu .cs-stage p.cs-empty {
   margin: 0;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(24px * var(--font-scale));
   letter-spacing: 1px;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
 }
 #title #slotMenu .cs-stage p.cs-empty-sub {
   margin: 0;
@@ -131,7 +142,7 @@
     calc(14px * var(--font-scale)) system-ui,
     sans-serif;
   letter-spacing: 0;
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
   text-align: center;
 }
 #slotMenu .cs-nameplate {
@@ -139,10 +150,10 @@
 }
 #slotMenu .cs-nameplate h2 {
   margin: 0;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(30px * var(--font-scale));
   letter-spacing: 2px;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   text-shadow:
     0 2px 0 #1a0e04,
     0 0 18px rgba(240, 170, 70, 0.45);
@@ -154,12 +165,12 @@
     calc(14px * var(--font-scale)) system-ui,
     sans-serif;
   letter-spacing: 0;
-  color: #fff4d0;
+  color: var(--rpg-cream);
 }
 #title #slotMenu .cs-nameplate p.cs-world {
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-style: italic;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
 }
 #title #slotMenu p.cs-meta {
   margin: 0;
@@ -167,11 +178,11 @@
     calc(12.5px * var(--font-scale)) system-ui,
     sans-serif;
   letter-spacing: 0;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   text-align: center;
 }
 #slotMenu .slot-class {
-  color: var(--cls, #e8d9b8);
+  color: var(--cls, var(--rpg-parchment));
   white-space: nowrap;
 }
 #slotMenu .slot-class svg.ico {
@@ -212,19 +223,19 @@
     radial-gradient(ellipse at 50% 0%, rgba(255, 200, 120, 0.1), transparent 60%),
     linear-gradient(180deg, rgba(36, 24, 16, 0.78), rgba(14, 9, 6, 0.84));
   box-shadow:
-    0 0 0 2px #0c0805,
+    0 0 0 2px var(--rpg-outline),
     inset 0 0 30px rgba(0, 0, 0, 0.55),
     0 12px 36px rgba(0, 0, 0, 0.6);
 }
 #slotMenu .cs-roster-title {
   margin: 0 0 2px;
   padding-bottom: 8px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(18px * var(--font-scale));
   letter-spacing: 4px;
   text-transform: uppercase;
   text-align: center;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   border-bottom: 1px solid rgba(232, 184, 80, 0.35);
 }
 /* Huit aventures : la liste défile seule si elle ne tient pas, « Rejoindre » reste visible en bas. */
@@ -237,7 +248,7 @@
   overflow-y: auto;
   padding-right: 2px;
   scrollbar-width: thin;
-  scrollbar-color: #7a5a2a transparent;
+  scrollbar-color: var(--rpg-gold-dark) transparent;
 }
 #title #slotMenu button.slot-card {
   display: flex;
@@ -253,10 +264,10 @@
   border-radius: 5px;
   background: linear-gradient(180deg, rgba(48, 34, 22, 0.9), rgba(22, 15, 9, 0.95));
   box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.08);
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
 }
 #title #slotMenu button.slot-card.selected {
-  border-color: var(--rpg-gold-light, #f6dc98);
+  border-color: var(--rpg-gold-light);
   background:
     linear-gradient(90deg, rgba(255, 200, 110, 0.22), transparent 80%),
     linear-gradient(180deg, rgba(74, 50, 26, 0.95), rgba(36, 24, 12, 0.96));
@@ -285,8 +296,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 700 calc(26px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold, #d4aa5a);
+  font: 700 calc(26px * var(--font-scale)) var(--rpg-serif);
+  color: var(--rpg-gold);
 }
 #slotMenu .slot-text {
   display: flex;
@@ -295,23 +306,23 @@
   min-width: 0;
 }
 #slotMenu .slot-hero {
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(16px * var(--font-scale));
   font-weight: 700;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
   overflow-wrap: anywhere;
 }
 #slotMenu .slot-meta {
   font:
     calc(12.5px * var(--font-scale)) system-ui,
     sans-serif;
-  color: #fff4d0;
+  color: var(--rpg-cream);
 }
 #slotMenu .slot-world {
   font:
     calc(11.5px * var(--font-scale)) system-ui,
     sans-serif;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   overflow-wrap: anywhere;
 }
 #slotMenu .slot-confirm {
@@ -322,7 +333,7 @@
 }
 #slotMenu .slot-confirm h3 {
   margin: 0 0 4px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   color: #ffc7b0;
   overflow-wrap: anywhere;
 }
@@ -344,17 +355,17 @@
 }
 #title #slotMenu button.cs-enter-button {
   padding: 13px 58px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(20px * var(--font-scale));
   font-weight: 700;
   letter-spacing: 3px;
   border-radius: 6px;
-  border: 2px solid var(--rpg-gold-light, #f6dc98);
+  border: 2px solid var(--rpg-gold-light);
   background: linear-gradient(180deg, #b0362a, #761a12 55%, #4e0e08);
-  color: #fff4d0;
+  color: var(--rpg-cream);
   text-shadow: 0 2px 0 #2a0804;
   box-shadow:
-    0 0 0 2px #0c0805,
+    0 0 0 2px var(--rpg-outline),
     inset 0 1px 0 rgba(255, 220, 190, 0.45),
     0 0 30px rgba(220, 80, 50, 0.45);
 }
@@ -378,7 +389,7 @@
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   border: 1px solid rgba(232, 184, 80, 0.45);
   box-shadow: none;
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
 }
 #title #slotMenu button.slot-danger {
   background: linear-gradient(180deg, #a8402a, #6a2214);
@@ -389,7 +400,7 @@
   background: transparent;
   border: 1px solid rgba(232, 184, 80, 0.3);
   box-shadow: none;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
   font-size: calc(12.5px * var(--font-scale));
   letter-spacing: 0;
 }
@@ -411,7 +422,7 @@
 }
 #slotMenu .slot-label {
   font-size: calc(12px * var(--font-scale));
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
 }
 #slotMenu .slot-input {
   box-sizing: border-box;
@@ -420,11 +431,11 @@
   border-radius: 4px;
   border: 1px solid rgba(232, 184, 80, 0.6);
   background: #120c07;
-  color: #fff4d0;
-  font: calc(15px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
+  color: var(--rpg-cream);
+  font: calc(15px * var(--font-scale)) var(--rpg-serif);
 }
 #slotMenu .slot-input:focus {
-  outline: 2px solid var(--rpg-gold-light, #f6dc98);
+  outline: 2px solid var(--rpg-gold-light);
   outline-offset: 1px;
 }
 
@@ -450,7 +461,7 @@
 }
 #slotMenu .slot-join h3 {
   margin: 0 0 4px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   color: #dff2ff;
 }
 #slotMenu .slot-join label {
@@ -472,12 +483,12 @@
 }
 #slotMenu .cc-head h3 {
   margin: 0;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(20px * var(--font-scale));
   letter-spacing: 3px;
   text-align: center;
   text-transform: uppercase;
-  color: var(--rpg-gold-light, #f6dc98);
+  color: var(--rpg-gold-light);
 }
 #slotMenu .look-body {
   display: grid;
@@ -501,17 +512,17 @@
   border-radius: 6px;
   background: linear-gradient(180deg, rgba(36, 24, 16, 0.78), rgba(14, 9, 6, 0.84));
   box-shadow:
-    0 0 0 2px #0c0805,
+    0 0 0 2px var(--rpg-outline),
     inset 0 0 30px rgba(0, 0, 0, 0.5);
 }
 #slotMenu .cc-title {
   margin: 4px 0 0;
   padding-bottom: 4px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(14px * var(--font-scale));
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--rpg-gold, #d4aa5a);
+  color: var(--rpg-gold);
   border-bottom: 1px solid rgba(232, 184, 80, 0.25);
 }
 #slotMenu .race-list {
@@ -520,7 +531,7 @@
   gap: 5px;
 }
 #title #slotMenu button.race-choice.on .race-portrait {
-  border-color: #f6dc98;
+  border-color: var(--rpg-gold-light);
   box-shadow: 0 0 8px rgba(246, 220, 152, 0.5);
 }
 #title #slotMenu button.race-choice {
@@ -530,7 +541,7 @@
   width: 100%;
   gap: 12px;
   padding: 3px 12px 3px 3px;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(17px * var(--font-scale));
   letter-spacing: 1px;
 }
@@ -544,18 +555,18 @@
 }
 #slotMenu .cc-lore {
   padding: 8px 10px;
-  border-left: 3px solid var(--rpg-gold, #d4aa5a);
+  border-left: 3px solid var(--rpg-gold);
   background: rgba(0, 0, 0, 0.3);
 }
 #slotMenu .cc-lore b {
-  font-family: var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif);
+  color: var(--rpg-gold-light);
 }
 #title #slotMenu .cc-lore p {
   margin: 2px 0 0;
-  font: italic calc(12.5px * var(--font-scale)) / 1.4 var(--rpg-serif, Georgia, serif);
+  font: italic calc(12.5px * var(--font-scale)) / 1.4 var(--rpg-serif);
   letter-spacing: 0;
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
 }
 #slotMenu .look-stage {
   display: flex;
@@ -586,14 +597,14 @@
     calc(13px * var(--font-scale)) system-ui,
     sans-serif;
   letter-spacing: 0;
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
   text-align: center;
 }
 #title #slotMenu p.look-note {
   margin-top: 4px;
   text-align: left;
   font-size: calc(12px * var(--font-scale));
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
 }
 #slotMenu .look-row {
   display: grid;
@@ -605,7 +616,7 @@
   font:
     600 calc(12.5px * var(--font-scale)) system-ui,
     sans-serif;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
 }
 #slotMenu .look-options {
   display: flex;
@@ -619,12 +630,12 @@
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   border: 1px solid rgba(232, 184, 80, 0.4);
   box-shadow: none;
-  color: #e8d9b8;
+  color: var(--rpg-parchment);
 }
 #title #slotMenu button.look-choice.on {
   background: linear-gradient(180deg, #8a6420, #5a3e12);
-  border-color: #f6dc98;
-  color: #fff4d0;
+  border-color: var(--rpg-gold-light);
+  color: var(--rpg-cream);
   box-shadow: 0 0 10px rgba(240, 180, 80, 0.35);
 }
 #title #slotMenu button.look-swatch {
@@ -636,9 +647,9 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 #title #slotMenu button.look-swatch.on {
-  border-color: #f6dc98;
+  border-color: var(--rpg-gold-light);
   box-shadow:
-    0 0 0 2px #f6dc98,
+    0 0 0 2px var(--rpg-gold-light),
     inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 /* Classes : une tuile par classe, liserée de sa couleur quand elle est choisie. */
@@ -660,10 +671,10 @@
   height: 30px;
 }
 #title #slotMenu button.class-choice.on {
-  border-color: var(--cls, #f6dc98);
+  border-color: var(--cls, var(--rpg-gold-light));
   box-shadow:
-    0 0 0 1px var(--cls, #f6dc98),
-    0 0 12px color-mix(in srgb, var(--cls, #f6dc98) 50%, transparent);
+    0 0 0 1px var(--cls, var(--rpg-gold-light)),
+    0 0 12px color-mix(in srgb, var(--cls, var(--rpg-gold-light)) 50%, transparent);
 }
 /* Pied : Annuler à gauche, noms au centre de l'écran (sous le héros), Créer à droite. */
 #slotMenu .cc-foot {
@@ -683,24 +694,26 @@
   grid-template-columns: auto minmax(120px, 220px) auto minmax(120px, 240px);
   align-items: center;
   gap: 6px 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(10, 6, 4, 0.62);
 }
 #title #slotMenu button.cc-create {
   padding: 12px clamp(18px, 2.2vw, 40px);
   white-space: nowrap;
-  font-family: var(--rpg-serif, Georgia, serif);
+  font-family: var(--rpg-serif);
   font-size: calc(18px * var(--font-scale));
   font-weight: 700;
   letter-spacing: 2px;
-  border: 2px solid var(--rpg-gold-light, #f6dc98);
+  border: 2px solid var(--rpg-gold-light);
   border-radius: 6px;
   background: linear-gradient(180deg, #b0362a, #761a12 55%, #4e0e08);
-  color: #fff4d0;
+  color: var(--rpg-cream);
   box-shadow:
-    0 0 0 2px #0c0805,
+    0 0 0 2px var(--rpg-outline),
     inset 0 1px 0 rgba(255, 220, 190, 0.45),
     0 0 24px rgba(220, 80, 50, 0.4);
 }
-
 #slotMenu .cc-left {
   justify-self: start;
 }
@@ -1073,8 +1086,8 @@
 }
 #slotMenu .look-caption {
   grid-column: 2;
-  font: italic calc(12px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
-  color: var(--rpg-muted, #b8a483);
+  font: italic calc(12px * var(--font-scale)) var(--rpg-serif);
+  color: var(--rpg-muted);
 }
 #slotMenu .look-stepper {
   display: grid;
@@ -1092,19 +1105,19 @@
   background: linear-gradient(180deg, #3a2a1c, #22170e);
   border: 1px solid rgba(232, 184, 80, 0.5);
   box-shadow: none;
-  color: #f6dc98;
+  color: var(--rpg-gold-light);
 }
 #slotMenu .look-step-value {
   padding: 4px 6px;
   text-align: center;
-  font: calc(14px * var(--font-scale)) var(--rpg-serif, Georgia, serif);
-  color: #fff4d0;
+  font: calc(14px * var(--font-scale)) var(--rpg-serif);
+  color: var(--rpg-cream);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.3);
 }
 #slotMenu .look-step-value small {
   font-size: 0.75em;
-  color: var(--rpg-muted, #b8a483);
+  color: var(--rpg-muted);
 }
 
 /* Petits textes posés sur le décor peint : ombre portée et fond sombre pour rester lisibles sur un sol clair. */
@@ -1115,8 +1128,10 @@
     0 1px 2px #000,
     0 0 6px #000;
 }
-#slotMenu .cc-names {
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(10, 6, 4, 0.62);
+#title #slotMenu button:hover:not(:disabled),
+#titleTools button:hover {
+  filter: brightness(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.4),
+    0 0 12px rgba(240, 190, 90, 0.45);
 }
