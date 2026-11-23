@@ -5219,5 +5219,9 @@ export default {
   'Coudre': 'Stitch',
   'Selle': 'Saddle',
   'Sans selle': 'No saddle',
-  'À coudre au travail du cuir (panneau P)': 'To stitch in leatherworking (panel P)'
+  'À coudre au travail du cuir (panneau P)': 'To stitch in leatherworking (panel P)',
+  // Suivi : prochaine quête à prendre
+  'Nouvelle quête': 'New quest',
+  'Suite de l’histoire': 'Story continues',
+  'Parler à {nom} pour une nouvelle quête': 'Talk to {nom} for a new quest'
 };

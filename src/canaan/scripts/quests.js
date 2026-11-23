@@ -3445,20 +3445,56 @@
       return { x: px(site, 0), y: py(site, 0), text: step.text, q, vague: true };
     return { x: px(site, 0), y: py(site, 0), text: step.text, q };
   }
+  // Aucune quête suivie : le prochain personnage qui a une quête à donner (« ! »). D'abord l'histoire principale à
+  // portée du niveau du héros, puis la quête secondaire la plus proche sur la même couche (au plus trois niveaux
+  // au-dessus du héros), et à défaut la suite de l'histoire, même plus haute.
+  function nextOffer(hero) {
+    const level = clampLevel(hero.level),
+      p = hero.player,
+      under = canaanUnder(),
+      fits = q => q.scaled || q.level <= level + 3,
+      dist = n => Math.hypot(n.x - p.x, n.y - p.y);
+    const offers = Object.values(NPCS).filter(
+      n => n.quest && !n.def.collector && present(hero, n) && npcState(hero, n.quest) === 'offer'
+    );
+    if (!offers.length) return null;
+    const near = offers.filter(n => !!n.under === under).sort((a, b) => dist(a) - dist(b)),
+      main = offers.filter(n => n.quest.main && !n.under).sort((a, b) => a.quest.id - b.quest.id)[0],
+      pick =
+        (main && fits(main.quest) && main) ||
+        near.find(n => n.quest.main && fits(n.quest)) ||
+        near.find(n => fits(n.quest)) ||
+        main;
+    if (!pick) return null;
+    const q = pick.quest,
+      text = tt('Parler à {nom} pour une nouvelle quête', { nom: pick.def.name });
+    if (!!pick.under !== under) {
+      const e = [...CANAAN_UNDER.ENTRANCES].sort(
+        (u, v) => Math.hypot(u.x * T - p.x, u.y * T - p.y) - Math.hypot(v.x * T - p.x, v.y * T - p.y)
+      )[0];
+      return { x: (e.x + 0.5) * T, y: (e.y + 0.5) * T, text: 'Remonter à la surface', q, offer: true };
+    }
+    return { x: pick.x, y: pick.y, text, q, offer: true, high: !fits(q) };
+  }
   const trackerEl = document.createElement('div');
   trackerEl.id = 'questTracker';
   trackerEl.hidden = true;
   document.body.appendChild(trackerEl);
   function tracker() {
-    const tr = started && !game.world.instance ? target(game.hero) || shellTarget(game.hero) : null;
+    const tr =
+      started && !game.world.instance
+        ? target(game.hero) || nextOffer(game.hero) || shellTarget(game.hero)
+        : null;
     trackerEl.hidden = !tr;
     if (!tr) return;
     const d = Math.round(Math.hypot(tr.x - P.x, tr.y - P.y) / T),
       a = Math.atan2(tr.y - P.y, tr.x - P.x),
       html =
+        (tr.offer ? '<small>' + (tr.high ? 'Suite de l’histoire' : 'Nouvelle quête') + '</small>' : '') +
         '<b>' +
         (tr.q.main ? '📖 ' : '🍃 ') +
         esc(tr.q.title) +
+        (tr.high ? ' <small>(' + tt('niveau {n}', { n: tr.q.level }) + ')</small>' : '') +
         '</b><span>' +
         esc(tr.text) +
         '</span>' +
@@ -3641,7 +3677,9 @@
     drawWorld,
     drawBubbles,
     render: renderJournal,
-    target
+    target,
+    // Prochaine quête à prendre quand aucune n'est suivie (suivi, conseils de Lumi).
+    nextOffer
   });
   Object.assign(window, { toggleJournal });
 })();

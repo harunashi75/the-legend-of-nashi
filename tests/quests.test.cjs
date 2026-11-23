@@ -449,3 +449,15 @@ test('Règles partagées des énigmes : chaque état résolu mène à la solutio
     assert.ok(v >= 0 && v < 1);
   }
 });
+
+test('Suivi : sans quête en cours, il mène au prochain personnage qui en donne une, l’histoire d’abord', () => {
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+  run(PLAYER + ';game.hero.level=1;HR.bagLimit=100;');
+  const next = () => run('(t=>t?t.q.id+" "+(t.offer?"offre":"étape"):"rien")(Q.target(HR)||Q.nextOffer(HR))');
+  assert.equal(next(), '1 offre', 'Liora au départ');
+  assert.equal(run('play(1)'), 'ok');
+  assert.equal(next(), '2 offre', 'Orven après la quête rendue');
+  run('take(2)');
+  assert.equal(next(), '2 étape', 'la quête prise est suivie');
+  assert.equal(errors.length, 0, errors.join('\n'));
+});
