@@ -564,7 +564,7 @@ function openDialog(npc) {
 }
 // game loop
 // Réglages d'affichage du menu Paramètres (settings.js) : secousses de l'écran, lueurs des lumières, particules et
-// vent, chiffres de dégâts, compteur d'images par seconde et limite d'images (0 : aucune, l'écran décide).
+// vent, chiffres de dégâts, compteur d'images par seconde, limite d'images (0 : aucune, l'écran décide) et conseils.
 const canaanDisplay = {
   shake: true,
   glow: true,
@@ -572,7 +572,9 @@ const canaanDisplay = {
   damage: true,
   fps: false,
   fpsCap: 0,
-  rumble: true
+  rumble: true,
+  // Conseils de Lumi (guide.js) : astuces au bon moment pour découvrir le jeu.
+  tips: true
 };
 let shake = 0,
   time = 0,

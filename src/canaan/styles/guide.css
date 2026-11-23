@@ -1,0 +1,134 @@
+/* Guide du joueur (scripts/guide.js) : carte des conseils de Lumi, pastilles des boutons de menu, repère ▲ du sac. */
+#lumiTip {
+  position: fixed;
+  left: 50%;
+  bottom: 178px;
+  transform: translateX(-50%);
+  width: min(460px, calc(100vw - 32px));
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 34px 10px 12px;
+  background: linear-gradient(180deg, rgba(48, 34, 22, 0.94), rgba(20, 13, 8, 0.95));
+  border: 1px solid #8a6a3a;
+  border-radius: 8px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  color: #f0e2c4;
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.45;
+  z-index: 30;
+  animation: lumi-tip-in 0.35s ease-out;
+}
+#lumiTip.lumi {
+  border-color: #9fd4f0;
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(160, 220, 255, 0.25);
+}
+#lumiTip b {
+  display: block;
+  color: #ffe9b0;
+  font-size: calc(13px * var(--font-scale));
+}
+#lumiTip.lumi b {
+  color: #cfeeff;
+}
+#lumiTip p {
+  margin: 2px 0 0;
+}
+#lumiTip .lumi-orb {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0 22%, #bfe8ff 40%, rgba(191, 232, 255, 0) 72%);
+  animation: lumi-orb 1.6s ease-in-out infinite;
+}
+#lumiTip:not(.lumi) .lumi-orb {
+  background: radial-gradient(circle, #fff6d0 0 22%, #ffd84a 40%, rgba(255, 216, 74, 0) 72%);
+}
+#lumiTip button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #c8b890;
+  cursor: var(--cursor-pointer);
+  font-size: calc(13px * var(--font-scale));
+}
+#lumiTip button:hover {
+  color: #ffffff;
+}
+@keyframes lumi-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
+@keyframes lumi-orb {
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Pastilles des boutons de menu : place du sac au-dessus du bouton, point doré en haut à droite. */
+#menuButtons .menu-count {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 4px;
+  border: 1px solid #6a5a9a;
+  border-radius: 5px;
+  background: #15182b;
+  color: #e8e0ff;
+  font-size: calc(9px * var(--font-scale));
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#menuButtons .menu-count.warn {
+  border-color: #c8952a;
+  color: #ffd76a;
+}
+#menuButtons .menu-count.full {
+  border-color: #d04a3a;
+  background: #3a1410;
+  color: #ffb0a0;
+}
+#menuButtons .menu-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #2a1a08;
+  border-radius: 50%;
+  background: #ffd84a;
+  box-shadow: 0 0 8px #ffd84a;
+  pointer-events: none;
+  animation: menu-dot 1.2s ease-in-out infinite;
+}
+@keyframes menu-dot {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+/* Sac : équipement meilleur que celui porté. */
+#window .bag-cell .bag-up {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: #6ee87a;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  text-shadow: 0 1px 2px #000;
+}

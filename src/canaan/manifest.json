@@ -424,6 +424,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-guide",
+      "file": "scripts/guide.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-collections",
       "file": "scripts/collections.js"
     },
@@ -466,6 +471,11 @@
       "kind": "style",
       "id": "canaan-trade-style",
       "file": "styles/trade.css"
+    },
+    {
+      "kind": "style",
+      "id": "canaan-guide-style",
+      "file": "styles/guide.css"
     },
     {
       "kind": "style",

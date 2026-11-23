@@ -1,7 +1,7 @@
 // Paramètres (écran d'accueil, menu pause, barre du haut), rangés en onglets : Audio (bouton et volumes, gérés par
 // audio.js), Affichage (plein écran, résolution de la fenêtre, échelle, synchronisation verticale), Graphismes (lueurs,
 // particules et vent, limite et compteur d'images par seconde), Interface (langue, taille des textes, chiffres de
-// dégâts, secousses de l'écran), Clavier (touches réglables, keybinds.js), Manette (commandes, vibrations), et Quitter le jeu.
+// dégâts, secousses de l'écran, conseils de Lumi), Clavier (touches réglables, keybinds.js), Manette (commandes, vibrations), et Quitter le jeu.
 // Dans l'application de bureau, la fenêtre est réglée par Electron (canaanDesktop.display) ; dans un navigateur, seul
 // le plein écran est possible. Les réglages du jeu sont gardés dans les préférences de l'appareil.
 (() => {
@@ -9,7 +9,7 @@
   const screen = document.getElementById('settingsScreen');
   const desktop = window.canaanDesktop?.display || null;
   const FPS_CAPS = [0, 30, 60, 90, 120, 144, 165, 240];
-  const TOGGLES = ['shake', 'glow', 'particles', 'damage', 'fps', 'rumble'];
+  const TOGGLES = ['shake', 'glow', 'particles', 'damage', 'fps', 'rumble', 'tips'];
   // Taille des textes (polices des menus, barres, info-bulles et textes du jeu ; l'interface garde sa taille).
   const TEXT_SCALES = [1, 1.1, 1.25, 1.4, 1.6];
   let textScale = 1.25;
@@ -68,6 +68,7 @@
     setText('setParticles', onOff(canaanDisplay.particles), canaanDisplay.particles);
     setText('setShake', onOff(canaanDisplay.shake, '✓ Activées', 'Désactivées'), canaanDisplay.shake);
     setText('setDamage', onOff(canaanDisplay.damage, '✓ Affichés', 'Masqués'), canaanDisplay.damage);
+    setText('setTips', onOff(canaanDisplay.tips, '✓ Affichés', 'Masqués'), canaanDisplay.tips);
     setText('setRumble', onOff(canaanDisplay.rumble, '✓ Activées', 'Désactivées'), canaanDisplay.rumble);
     // Hors application de bureau : résolution, échelle et VSync indisponibles.
     for (const id of ['setResolutionRow', 'setZoomRow', 'setVsyncRow'])

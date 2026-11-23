@@ -5223,5 +5223,28 @@ export default {
   // Suivi : prochaine quête à prendre
   'Nouvelle quête': 'New quest',
   'Suite de l’histoire': 'Story continues',
-  'Parler à {nom} pour une nouvelle quête': 'Talk to {nom} for a new quest'
+  'Parler à {nom} pour une nouvelle quête': 'Talk to {nom} for a new quest',
+  // Guide du joueur : conseils de Lumi, pastilles, repère du sac (guide.js)
+  'Astuce': 'Tip',
+  'Fermer': 'Close',
+  '✨ Conseils de Lumi': '✨ Lumi’s tips',
+  'Mieux que ce que tu portes': 'Better than what you wear',
+  'Bienvenue à Canaan ! Déplace-toi avec {h} {g} {b} {d} (ou les flèches), attaque avec le clic gauche et parle aux habitants avec {e}.':
+    'Welcome to Canaan! Move with {h} {g} {b} {d} (or the arrow keys), attack with left click and talk to people with {e}.',
+  'L’encadré à droite, sous la mini-carte, te montre toujours où aller : suis sa flèche jusqu’au personnage marqué d’un « ! » doré.':
+    'The box on the right, under the minimap, always shows where to go: follow its arrow to the character marked with a golden “!”.',
+  'Quête acceptée ! Sa prochaine étape est dans l’encadré à droite. Le journal ({l}) raconte toutes tes quêtes et permet d’en suivre une autre.':
+    'Quest accepted! Its next step is in the box on the right. The journal ({l}) tells all your quests and lets you track another one.',
+  'Coucou, c’est Lumi ! Je reste avec toi : je vole toujours du côté où tu dois aller, et je te soufflerai des conseils en chemin.':
+    'Hi, I’m Lumi! I’m staying with you: I always fly towards where you need to go, and I’ll whisper tips along the way.',
+  'Tu as trouvé un équipement meilleur que le tien ! Ouvre ton sac ({i}) et clique dessus pour l’équiper : le ▲ vert marque ce qui est mieux que ce que tu portes.':
+    'You found gear better than yours! Open your bag ({i}) and click it to equip it: the green ▲ marks what beats what you wear.',
+  'Tu as un talent à choisir ! Ouvre Classe et talents ({t}) : le bouton garde un point doré tant qu’une case est libre.':
+    'You have a talent to choose! Open Class and talents ({t}): the button keeps a golden dot while a slot is free.',
+  'Ton sac se remplit ({n} / {max}) ! Lira rachète ton butin à l’Échoppe du Camp de l’Aurore (la bourse 💰 sur la carte, {m}). Tu peux aussi démanteler une pièce (clic droit).':
+    'Your bag is filling up ({n} / {max})! Lira buys your loot at her stall in Dawn Camp (the 💰 purse on the map, {m}). You can also salvage an item (right click).',
+  'Voici l’Échoppe de Lira, la marchande du camp : entre ({e}) pour vendre ton butin, acheter des potions et agrandir ton sac.':
+    'Here is Lira’s Stall, the camp merchant: go in ({e}) to sell your loot, buy potions and enlarge your bag.',
+  'Un donjon est à ta portée : {nom} (niveau {n}). Son portail est sur la carte ({m}). Le meilleur butin s’y trouve : emmène des compagnons ou des amis !':
+    'A dungeon is within reach: {nom} (level {n}). Its portal is on the map ({m}). The best loot is there: bring companions or friends!'
 };

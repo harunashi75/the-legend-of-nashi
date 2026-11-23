@@ -3370,11 +3370,24 @@
       }
       if (!flags.lumi) continue;
       const l = lumiAt.get(hero) || { x: p.x, y: p.y };
-      const tx = p.x - 26 * (p.face || 1),
-        ty = p.y - 52 + Math.sin(time * 0.07) * 6;
+      // Lumi guide son héros : elle vole du côté de l'objectif suivi (encadré du suivi), sinon derrière lui.
+      const goal = hero === game.hero && guideTo && Math.hypot(guideTo.x - p.x, guideTo.y - p.y) > 3 * T,
+        ga = goal ? Math.atan2(guideTo.y - p.y, guideTo.x - p.x) : 0;
+      const tx = goal ? p.x + Math.cos(ga) * 46 : p.x - 26 * (p.face || 1),
+        ty = (goal ? p.y - 30 + Math.sin(ga) * 30 : p.y - 52) + Math.sin(time * 0.07) * 6;
       l.x += (tx - l.x) * 0.06;
       l.y += (ty - l.y) * 0.06;
       lumiAt.set(hero, l);
+      // Lumi parle (conseil de guide.js) : un anneau de lumière qui pulse autour d'elle.
+      if (hero === game.hero && CANAAN_GUIDE.speaking()) {
+        ctx.globalAlpha = 0.5 + 0.3 * Math.sin(time * 0.15);
+        ctx.strokeStyle = '#dff4ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(l.x, l.y, 12 + Math.sin(time * 0.15) * 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
       glow(ctx, l.x, l.y, 30, '#bfe8ff', 0.55);
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
@@ -3480,11 +3493,14 @@
   trackerEl.id = 'questTracker';
   trackerEl.hidden = true;
   document.body.appendChild(trackerEl);
+  // Objectif montré par le suivi : Lumi vole de ce côté.
+  let guideTo = null;
   function tracker() {
     const tr =
       started && !game.world.instance
         ? target(game.hero) || nextOffer(game.hero) || shellTarget(game.hero)
         : null;
+    guideTo = tr;
     trackerEl.hidden = !tr;
     if (!tr) return;
     const d = Math.round(Math.hypot(tr.x - P.x, tr.y - P.y) / T),

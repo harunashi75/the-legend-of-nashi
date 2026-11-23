@@ -204,5 +204,15 @@
   // Pièce portée à laquelle comparer un objet (info-bulles) : celle qu'il remplacerait.
   const wornAgainst = (item, hero = game.hero) =>
     item ? hero.equipment[equipSlotFor(item, hero)] || null : null;
-  Object.assign(window, { equipItem, unequip, equipReserveWeapon, switchWeapon, wornAgainst });
+  // Pièce du sac meilleure que celle portée à sa place (repère ▲ du sac, pastille du bouton, conseil de Lumi) :
+  // portable dès maintenant et plus forte par son niveau et sa qualité, ou pour un emplacement vide. Une arme ne
+  // compte que du même type que celle en main (changer de type change les compétences), jamais à côté d'une arme liée.
+  function gearUpgrade(item, hero = game.hero) {
+    if (!item?.slot || requiredLevel(item) > clampLevel(hero.level)) return false;
+    const worn = wornAgainst(item, hero);
+    if (!worn) return true;
+    if (item.slot === 'weapon' && (isBoundItem(worn) || worn.weaponType !== item.weaponType)) return false;
+    return statBase(item.level ?? 1, item.rarity) > statBase(worn.level ?? 1, worn.rarity) + 1e-6;
+  }
+  Object.assign(window, { equipItem, unequip, equipReserveWeapon, switchWeapon, wornAgainst, gearUpgrade });
 })();

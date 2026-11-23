@@ -29,6 +29,7 @@ const CANAAN_PIPELINE = Object.freeze({
     'drawWeaponEffects',
     'drawClassEffects',
     'drawQuests',
+    'drawGuide',
     'drawBossMechanics',
     'drawDodge',
     'drawArenaHud'

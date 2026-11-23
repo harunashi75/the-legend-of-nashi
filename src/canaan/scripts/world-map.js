@@ -1089,8 +1089,12 @@
         for (const b of houses)
           if (b.name && !b.place && !canaanRoomAt(b.x, b.y))
             label(c, b.name, ...S(b.x + b.w / 2, b.y - 0.4), 13, '#e8d6a8');
+      // Marchands : la porte des bâtiments qui en ont un (Échoppe de Lira), à tous les zooms ; un marchand rangé
+      // dans une pièce intérieure (coin d'océan de la carte) n'est pas montré là où est sa pièce.
+      for (const s of CANAAN_GUIDE.shops()) put('shop', s.x / TS, s.y / TS, {}, s.name);
       for (const n of game.world.npcs)
-        if (n.type === 'shop' && (v.mini || v.scale >= 6)) put('shop', n.x / TS, n.y / TS, {}, null);
+        if (n.type === 'shop' && !canaanRoomAt(n.x, n.y) && (v.mini || v.scale >= 6))
+          put('shop', n.x / TS, n.y / TS, {}, null);
       for (const b of WORLD_BOSSES) put('boss', b.x, b.y, {}, b.name);
       put('arena', CANAAN_ARENA_PORTAL.x, CANAAN_ARENA_PORTAL.y, {}, CANAAN_ARENA_NAME);
       instances.forEach((d, i) => {

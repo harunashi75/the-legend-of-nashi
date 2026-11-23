@@ -311,6 +311,13 @@
       }
     },
     {
+      name: 'guide',
+      exports: {
+        'CANAAN_GUIDE.speaking': 'function',
+        'CANAAN_GUIDE.shops': 'function'
+      }
+    },
+    {
       name: 'succès',
       exports: {
         'CANAAN_ACHIEVEMENTS.event': 'function',

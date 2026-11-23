@@ -62,7 +62,9 @@
       ' · clic : équiper · clic droit : options">' +
       '<span class="bag-icon">' +
       icon +
-      '</span><span class="bag-name" style="color:' +
+      '</span>' +
+      (gearUpgrade(item) ? '<span class="bag-up" title="Mieux que ce que tu portes">▲</span>' : '') +
+      '<span class="bag-name" style="color:' +
       rarity.color +
       '">' +
       safeGearText(gearDisplayName(item)) +
