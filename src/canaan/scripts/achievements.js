@@ -564,7 +564,7 @@
       40,
       h =>
         Math.max(
-          ...['fishing', 'cooking', 'hunting', 'mining', 'herbalism', 'enchanting'].map(
+          ...['fishing', 'cooking', 'hunting', 'mining', 'herbalism', 'enchanting', 'leatherworking'].map(
             k => profOf(h)[k]?.level || 1
           )
         ),

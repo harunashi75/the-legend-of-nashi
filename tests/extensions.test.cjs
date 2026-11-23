@@ -180,7 +180,9 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   assert.equal(run('P.gold'), 0);
   assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.ext.mounts)')), {
     owned: ['plaines', 'aurore'],
-    active: 'aurore'
+    active: 'aurore',
+    saddles: [],
+    saddle: 0
   });
   assert.equal(
     run('CANAAN_MOUNTS.choose(game.hero,"argent")'),
@@ -210,16 +212,16 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   assert.match(tab().view, /Pas encore obtenue/);
   assert.match(tab().view, /Écurie des Héros, Vallée des Héros/);
   assert.match(tab().view, /8\s000 or/);
-  // Touche H : en selle, vitesse +75 % (Coursier de l'Aurore), dessin du cavalier dans les quatre directions.
+  // Touche H : en selle, vitesse +40 % sans selle, dessin du cavalier dans les quatre directions.
   run('closePanels()');
   fire(run('globalThis'), 'keydown', { key: 'h' });
   assert.equal(run('game.hero.riding'), 'aurore');
-  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.75);
+  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.4);
   const x0 = run('P.x');
   run(
     'for(let i=0;i<60;i++){game.hero.intent.dx=1;game.hero.intent.dy=0;simulateStep()}game.hero.intent.dx=0'
   );
-  assert.ok(run('P.x') - x0 > 60 * 4.1 * 1.5, 'plus rapide à cheval');
+  assert.ok(run('P.x') - x0 > 60 * 4.1 * 1.3, 'plus rapide à cheval');
   run(
     'camX=P.x-W/2;camY=P.y-H/2;for(const f of [0,1,2,3]){P.vx=[0,1,0,-1][f];P.vy=[1,0,-1,0][f];drawPixelHero(ctx,P.x,P.y,"#fff",4,true)}'
   );
@@ -239,7 +241,9 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
   run('saveGame();game.hero.ext={};loadGame()');
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero))')), {
     owned: ['plaines', 'aurore'],
-    active: 'aurore'
+    active: 'aurore',
+    saddles: [],
+    saddle: 0
   });
   // Anciennes sauvegardes (montures rangées dans les données de l'extension) : reprises telles quelles.
   assert.deepEqual(
@@ -248,7 +252,7 @@ test('Montures : achat à l’écurie, choix, en selle (H), vitesse, descente en
         '(()=>{const h={ext:{vallee:{mounts:["argent","aurore"],active:"aurore"}}};CANAAN_MOUNTS.stateOf(h);return JSON.stringify(h.ext)})()'
       )
     ),
-    { mounts: { owned: ['argent', 'aurore'], active: 'aurore' } }
+    { mounts: { owned: ['argent', 'aurore'], active: 'aurore', saddles: [], saddle: 0 } }
   );
   // Réseau : la monture de chacun, envoyée aux invités.
   run('game.hero.riding="aurore"');

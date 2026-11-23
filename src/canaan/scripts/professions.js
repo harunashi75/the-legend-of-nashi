@@ -159,7 +159,8 @@
           hunting: '⟦prof_hunting⟧ Chasse',
           mining: '⟦prof_mining⟧ Minage',
           herbalism: '⟦prof_herbalism⟧ Cueillette',
-          enchanting: '⟦prof_enchanting⟧ Enchanteur'
+          enchanting: '⟦prof_enchanting⟧ Enchanteur',
+          leatherworking: '⟦prof_leather⟧ Travail du cuir'
         }[skill] +
           ' niveau ' +
           level +
@@ -228,7 +229,7 @@
   // Collection : nombre de prises et meilleure qualité de chaque espèce (poissons et gibier).
   const discover = profRecordCatch;
 
-  // Chasse : un animal abattu donne sa viande (qualité selon le niveau de chasse). L'hôte vérifie l'espèce,
+  // Chasse : un animal abattu donne sa viande et sa peau (qualité selon le niveau de chasse). L'hôte vérifie l'espèce,
   // le biome du chasseur et un court délai entre deux prises.
   function hunt(hero, kind) {
     const g = GAME[kind],
@@ -250,6 +251,8 @@
     }
     const first = discover(prof, kind, q);
     prof.meat[key] = (prof.meat[key] || 0) + 1;
+    // Sa peau, pour le travail du cuir (s'il reste de la place parmi les matériaux).
+    if (CANAAN_BAG.room(hero, 'hide', 'peau', q)) CANAAN_BAG.add(hero, 'hide', 'peau', q, 1);
     float(
       p.x,
       p.y - 50,
@@ -384,6 +387,8 @@
       action.op === 'enchant-reroll'
     )
       return CANAAN_GATHER.handle(hero, action);
+    if (action.op === 'leather-tan' || action.op === 'leather-saddle')
+      return CANAAN_LEATHER.handle(hero, action);
     return false;
   }
   // Étape du pipeline : touches et poissons qui s'échappent, soins des repas, fin des bonus.
@@ -928,7 +933,8 @@
       [
         ['cuisine', '⟦prof_cooking⟧ Cuisine', 'cooking'],
         // « Enchantement » : ici le métier (Enchanting), pas l'objet (Enchantment).
-        ['enchant', '⟦prof_enchanting⟧ ' + tt('Enchantement', null, 'métier'), 'enchanting']
+        ['enchant', '⟦prof_enchanting⟧ ' + tt('Enchantement', null, 'métier'), 'enchanting'],
+        ['cuir', '⟦prof_leather⟧ Travail du cuir', 'leatherworking']
       ]
     ]
   ];
@@ -1033,7 +1039,9 @@
                 ? CANAAN_GATHER.tabs.herbalism(helpers)
                 : ui.tab === 'enchant'
                   ? CANAAN_GATHER.tabs.enchant(helpers)
-                  : tabCooking() + '<h3>🍽️ Garde-manger</h3>' + tabMeals()) +
+                  : ui.tab === 'cuir'
+                    ? CANAAN_LEATHER.tab(helpers)
+                    : tabCooking() + '<h3>🍽️ Garde-manger</h3>' + tabMeals()) +
         '</div></div></div>'
     );
   }
@@ -1045,6 +1053,8 @@
       ui.tab,
       ui.codex,
       nearFire(P.x, P.y),
+      CANAAN_MOUNTS.nearMenagerie(P),
+      CANAAN_MOUNTS.stateOf(game.hero).saddles,
       game.hero.inventory.map(i => [i.id, i.ench?.value]),
       Object.values(game.hero.equipment).map(i => i && [i.id, i.ench?.value])
     ]);

@@ -398,6 +398,38 @@
 }
 
 /* Cité elfique : boutiques (armurerie, atelier) et paroles du Grand Arbre. */
+/* Sellerie (onglet Montures) : la selle équipée, allumée ; celles qui restent à coudre, grisées. */
+#window .mount-saddles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+#window button.mount-saddle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--rarity) 60%, transparent);
+  border-bottom: 3px solid var(--rarity);
+  background: rgba(20, 13, 8, 0.85);
+  color: var(--rarity);
+  font-weight: 400;
+}
+#window button.mount-saddle small {
+  color: var(--rpg-gold-light, #f3e6c4);
+}
+#window button.mount-saddle.on {
+  box-shadow:
+    0 0 0 2px #fff2cb,
+    0 0 10px var(--rarity);
+}
+#window button.mount-saddle.locked {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
 /* Marchands de montures : une carte par monture, sur une scène à la couleur de sa qualité. */
 #window .mount-cards {
   display: grid;

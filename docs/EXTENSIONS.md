@@ -32,7 +32,7 @@ Les données d'une extension dans une sauvegarde (`hero.ext[id]`, et ses monture
 
 ## Montures de la vallée
 
-Le système de montures est dans le jeu de base (`scripts/mounts.js`, voir `docs/GAMEPLAY.md`) ; l'extension y ajoute les siennes (`mounts`), son marchand (`mountShops`, comptoir déclaré par `CANAAN_MOUNTS.setShopNear`) et ses espèces (`CANAAN_MOUNT_ART.tools.define`). À l'Écurie des Héros, Garance vend onze montures (+75 à +80 %) : quatre chevaux, bélier, coq, lion, aigle, licorne, griffon, pégase. Deux se gagnent : le Destrier des Échos (Échos de héros et de champion, 0,4 %) et le Dragon de l'Aurore (Valérion, 4 % pour chaque participant, +85 %).
+Le système de montures est dans le jeu de base (`scripts/mounts.js`, voir `docs/GAMEPLAY.md`) ; l'extension y ajoute les siennes (`mounts`), son marchand (`mountShops`, comptoir déclaré par `CANAAN_MOUNTS.setShopNear`) et ses espèces (`CANAAN_MOUNT_ART.tools.define`). À l'Écurie des Héros, Garance vend onze montures (vitesse selon la selle, comme toutes les montures) : quatre chevaux, bélier, coq, lion, aigle, licorne, griffon, pégase. Deux se gagnent : le Destrier des Échos (Échos de héros et de champion, 0,4 %) et le Dragon de l'Aurore (Valérion, 4 % pour chaque participant).
 
 ## Sortir l'extension
 

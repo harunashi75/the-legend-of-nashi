@@ -10,6 +10,7 @@ import {
   PROF_FISH,
   PROF_GAME,
   PROF_HERBS,
+  PROF_HIDES,
   PROF_MAX_LEVEL,
   PROF_MEAT,
   PROF_OLD_QUALITY,
@@ -53,6 +54,7 @@ export function profIngredientKind(id) {
  * @property {SkillState} mining
  * @property {SkillState} herbalism
  * @property {SkillState} enchanting
+ * @property {SkillState} leatherworking
  * @property {Record<string, number>} fish
  * @property {Record<string, number>} meat
  * @property {Record<string, number>} meals
@@ -60,6 +62,7 @@ export function profIngredientKind(id) {
  * @property {Record<string, number>} herb
  * @property {Record<string, number>} ench
  * @property {Record<string, number>} treasure trésors enfouis (à vendre)
+ * @property {Record<string, number>} hide peaux et cuirs (travail du cuir)
  * @property {Record<string, number>} dust poudres d'enchantement (pièces démantelées)
  * @property {Record<string, number>} finds reliques trouvées en creusant (relique → nombre)
  * @property {number} shovel 1 quand le héros possède la pelle
@@ -79,6 +82,7 @@ export function profFresh() {
     mining: { level: 1, exp: 0 },
     herbalism: { level: 1, exp: 0 },
     enchanting: { level: 1, exp: 0 },
+    leatherworking: { level: 1, exp: 0 },
     fish: {},
     meat: {},
     meals: {},
@@ -87,6 +91,7 @@ export function profFresh() {
     ench: {},
     treasure: {},
     dust: {},
+    hide: {},
     finds: {},
     shovel: 0,
     codex: {},
@@ -289,7 +294,7 @@ export function profSanitize(raw) {
     }
   // Qualités au format actuel (qv 2) ; une ancienne sauvegarde est convertie (l'enchantement garde son métal).
   const convert = raw.qv !== 2;
-  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench' | 'treasure' | 'dust', object]>} */
+  /** @type {ReadonlyArray<readonly ['fish' | 'meat' | 'meals' | 'ore' | 'herb' | 'ench' | 'treasure' | 'dust' | 'hide', object]>} */
   const bags = [
     ['fish', PROF_FISH],
     ['meat', PROF_MEAT],
@@ -298,7 +303,8 @@ export function profSanitize(raw) {
     ['herb', PROF_HERBS],
     ['ench', PROF_ENCHANTS],
     ['treasure', PROF_TREASURES],
-    ['dust', PROF_DUSTS]
+    ['dust', PROF_DUSTS],
+    ['hide', PROF_HIDES]
   ];
   for (const [bag, known] of bags)
     if (raw[bag] && typeof raw[bag] === 'object')

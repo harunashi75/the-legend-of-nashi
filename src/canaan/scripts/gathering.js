@@ -309,12 +309,12 @@
   // ---------------------------------------------------------------- Travaux minutés (miner, cueillir, forger, cuisiner)
   // Le héros reste sur place le temps du travail, avec son animation ; bouger l'interrompt. À la fin, l'action a lieu
   // (et ses règles sont revérifiées). Un seul travail à la fois.
-  const WORK = { mine: 5, herb: 5, forge: 10, cook: 6, dig: 1.3 };
+  const WORK = { mine: 5, herb: 5, forge: 10, cook: 6, dig: 1.3, leather: 6 };
   const workTime = (kind, count = 1) =>
     (kind === 'forge'
       ? Math.min(30, WORK.forge + 2 * (count - 1))
-      : kind === 'cook'
-        ? Math.min(15, WORK.cook + 0.5 * (count - 1))
+      : kind === 'cook' || kind === 'leather'
+        ? Math.min(15, WORK[kind] + 0.5 * (count - 1))
         : WORK[kind]) * 60;
   // Forge du camp, ou celle de la Forteresse naine dans les Tréfonds.
   function forgeSpot() {
@@ -1073,7 +1073,7 @@
     startGather,
     startCraft,
     startCook,
-    // Coup de pelle (digging.js) : même travail minuté.
+    // Coup de pelle (digging.js) et travail du cuir (leatherworking.js) : même travail minuté.
     startWork,
     stepWork,
     cancelWork,

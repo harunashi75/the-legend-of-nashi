@@ -161,7 +161,8 @@ export function sanitizeIntent(raw) {
 // Action demandée par un invité (équipement, classe et talents, artéfacts) : l'hôte vérifie ensuite qu'elle est permise à son héros.
 const GEAR_SLOT = /^[a-z][a-z0-9]{1,15}$/;
 // Repère d'une pile du sac (voir scripts/bag.js).
-export const STACK_TOKEN = /^(fish|meat|meal|ore|herb|ench|key|treasure|dust):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
+export const STACK_TOKEN =
+  /^(fish|meat|meal|ore|herb|ench|key|treasure|dust|hide):[a-z_]{2,32}:[0-7]\*\d{1,3}$/;
 /**
  * @param {any} raw action reçue d'un invité (non fiable : chaque champ est vérifié)
  * @returns {Record<string, any> | null} action mise en forme, ou null si elle est invalide
@@ -257,6 +258,20 @@ export function sanitizeAction(raw) {
   // Minage et cueillette : numéro du gisement ; enchanteur : statistique, métal (0 à 5), nombre ; poser : pile et pièce.
   if (r.op === 'gather')
     return Number.isInteger(r.node) && r.node >= 0 && r.node < 5000 ? { op: 'gather', node: r.node } : null;
+  // Travail du cuir : tanner des peaux (qualité, nombre), coudre une selle (qualité).
+  if (r.op === 'leather-tan')
+    return Number.isInteger(r.quality) &&
+      r.quality >= 0 &&
+      r.quality <= 5 &&
+      Number.isInteger(r.count) &&
+      r.count >= 1 &&
+      r.count <= 20
+      ? { op: r.op, quality: r.quality, count: r.count }
+      : null;
+  if (r.op === 'leather-saddle')
+    return Number.isInteger(r.quality) && r.quality >= 1 && r.quality <= 5
+      ? { op: r.op, quality: r.quality }
+      : null;
   if (r.op === 'enchant-craft')
     return word(r.stat) &&
       Number.isInteger(r.tier) &&

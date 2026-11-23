@@ -14,17 +14,17 @@
   // Deux sections : le sac (équipement, repas, enchantements, clés, trésors déterrés) et les matériaux qu'on récolte
   // (minerais, poissons, herbes, viandes, poudres d'enchantement), avec leur propre place : MAT_LIMIT cases, sans
   // prendre celles du sac.
-  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'dust']);
+  const MAT_KINDS = new Set(['fish', 'meat', 'ore', 'herb', 'dust', 'hide']);
   const MAT_LIMIT = 100;
   const isMat = kind => MAT_KINDS.has(kind);
   const sectionOf = kind => (isMat(kind) ? 'mat' : 'main');
-  const KINDS = ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure', 'dust'];
+  const KINDS = ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'key', 'treasure', 'dust', 'hide'];
   // Rubriques du sac (touche I) : l'équipement (hero.inventory), les utilitaires (clés, repas, enchantements) et le
   // reste (trésors déterrés), dans la place du sac ; puis les matériaux, dans la leur.
   const CATEGORY = { key: 'util', meal: 'util', ench: 'util', treasure: 'other' };
   const categoryOf = kind => (isMat(kind) ? 'mat' : CATEGORY[kind] || 'other');
   // Ordre d'affichage des piles : par genre (dans cet ordre), la meilleure qualité d'abord, puis par nom.
-  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'dust', 'ore', 'herb', 'fish', 'meat'];
+  const KIND_ORDER = ['key', 'meal', 'ench', 'treasure', 'dust', 'ore', 'herb', 'hide', 'fish', 'meat'];
   const byKind = (a, b) =>
     KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
     b.q - a.q ||
@@ -63,7 +63,8 @@
     herb: 'herb',
     ench: 'ench',
     treasure: 'treasure',
-    dust: 'dust'
+    dust: 'dust',
+    hide: 'hide'
   };
   // Prix de vente d'une unité au marchand, selon le genre et la qualité (0 à 7).
   const UNIT_PRICE = {
@@ -77,7 +78,9 @@
     key: () => 0,
     // Trésor déterré et poudre : leur prix est dans leur catalogue (unitPrice).
     treasure: () => 1,
-    dust: () => 1
+    dust: () => 1,
+    // Peau et cuir : leur prix de base (catalogue) pour chaque qualité.
+    hide: q => 1 + q
   };
   // Les clés des secrets ne se vendent pas.
   const sellable = p => p.kind !== 'key';
@@ -100,7 +103,7 @@
     const keys = count(hero, 'key', 'secret');
     if (keys > 0) out.push({ kind: 'key', id: 'secret', q: 0, n: keys });
     const prof = profOf(hero);
-    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'treasure', 'dust'])
+    for (const kind of ['fish', 'meat', 'meal', 'ore', 'herb', 'ench', 'treasure', 'dust', 'hide'])
       for (const [key, n] of Object.entries(prof[PROF_BAG[kind]] || {}).sort()) {
         const [id, q] = key.split(':');
         if (n > 0) out.push({ kind, id, q: Number(q) || 0, n });
@@ -163,7 +166,7 @@
   }
 
   // ---------------------------------------------------------------- Repères (vente, échange)
-  const TOKEN = /^(fish|meat|meal|ore|herb|ench|key|treasure|dust):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
+  const TOKEN = /^(fish|meat|meal|ore|herb|ench|key|treasure|dust|hide):([a-z_]{2,32}):([0-7])\*(\d{1,3})$/;
   const token = (p, n = p.n) => p.kind + ':' + p.id + ':' + p.q + '*' + n;
   function parse(text) {
     const m = TOKEN.exec(String(text || ''));
@@ -185,7 +188,8 @@
       herb: CANAAN_GATHER.HERBS,
       ench: CANAAN_GATHER.ENCHANTS,
       treasure: PROF_TREASURES,
-      dust: PROF_DUSTS
+      dust: PROF_DUSTS,
+      hide: PROF_HIDES
     }[p.kind];
     // Un enchantement a un rang de 0 à 5 (le métal), pas une qualité ; un trésor ou une poudre n'a pas de qualité.
     return (
@@ -230,6 +234,20 @@
       };
     }
     const qual = { name: qualityName(p.q), color: qualityColor(p.q) };
+    if (p.kind === 'hide') {
+      const h = PROF_HIDES[p.id];
+      return {
+        name: h.name,
+        icon: h.icon,
+        color: qual.color,
+        sub: (p.id === 'peau' ? 'Peau' : 'Cuir') + ' · ' + qual.name,
+        desc:
+          p.id === 'peau'
+            ? 'Donnée par le gibier chassé. Le travail du cuir la tanne en cuir (panneau P).'
+            : 'Pour coudre les selles de monture, au travail du cuir (panneau P).',
+        quality: qual
+      };
+    }
     if (p.kind === 'fish') {
       const f = CANAAN_PROF.FISH[p.id];
       return {
@@ -323,7 +341,9 @@
                 ? PROF_TREASURES[p.id]?.value || 1
                 : p.kind === 'dust'
                   ? PROF_DUSTS[p.id]?.value || 1
-                  : 1)
+                  : p.kind === 'hide'
+                    ? PROF_HIDES[p.id]?.value || 1
+                    : 1)
         );
   const price = p => unitPrice(p) * p.n;
   const esc = s =>

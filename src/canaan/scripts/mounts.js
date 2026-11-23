@@ -5,7 +5,9 @@
 //   Une monture inconnue de ce build (extension absente) y reste, sans s'afficher.
 // - Touche de la monture (H par défaut, Paramètres → Clavier) : appeler ou renvoyer la monture choisie. Seulement
 //   dans le monde ouvert (île, hors des donjons, raids, Arène, Tréfonds et maisons) et hors combat.
-// - En selle : vitesse augmentée du bonus de la monture. On descend tout seul en attaquant, en lançant une compétence,
+// - En selle : +40 % de vitesse avec toutes les montures, plus avec une selle (MOUNT_SADDLE_SPEED, de 50 % à 100 %) :
+//   les selles se cousent au travail du cuir (leatherworking.js) et s'équipent dans l'onglet Montures (V).
+//   hero.ext.mounts.saddles : selles possédées (qualités 1 à 5) ; saddle : celle qui est équipée (0 : aucune). On descend tout seul en attaquant, en lançant une compétence,
 //   en roulant, en étant touché (combat), en tombant, ou en entrant dans un lieu fermé.
 // - Coopératif : l'hôte décide (action ext « mount », « buy », « choose ») ; chacun voit les montures de tous.
 // - Onglet « Montures » des Collections (V) : journal de collection — liste à gauche (obtenues en couleur,
@@ -48,7 +50,45 @@
     );
     const mine = s.owned.filter(id => BY[id]);
     if (!mine.includes(s.active)) s.active = mine[0] || null;
+    s.saddles = [
+      ...new Set(
+        (Array.isArray(s.saddles) ? s.saddles : []).filter(q => Number.isInteger(q) && q >= 1 && q <= 5)
+      )
+    ].sort();
+    if (!s.saddles.includes(s.saddle)) s.saddle = 0;
     return s;
+  }
+  // Selles : par qualité (0 : aucune), leur identifiant dans les actions réseau.
+  const SADDLE_IDS = ['aucune', 'peu_commun', 'rare', 'epique', 'legendaire', 'mythique'];
+  const saddleOf = hero => stateOf(hero).saddle || 0;
+  const speedOf = hero => MOUNT_SADDLE_SPEED[saddleOf(hero)] || MOUNT_SADDLE_SPEED[0];
+  // Une selle cousue rejoint la sellerie ; elle est équipée si elle vaut mieux que celle qu'on porte.
+  function addSaddle(hero, q) {
+    const s = stateOf(hero);
+    if (!(q >= 1 && q <= 5) || s.saddles.includes(q)) return false;
+    s.saddles.push(q);
+    s.saddles.sort();
+    if (q > s.saddle) s.saddle = q;
+    hero.netBag = null;
+    return true;
+  }
+  function equipSaddle(hero, q) {
+    const s = stateOf(hero);
+    if (q !== 0 && !s.saddles.includes(q)) return false;
+    s.saddle = q;
+    return true;
+  }
+  // La monture montée porte le tapis de selle à la couleur de la qualité de sa selle.
+  const dressed = new Map();
+  function withSaddle(M, q) {
+    if (!q) return M;
+    const key = M.id + '|' + q;
+    if (!dressed.has(key))
+      dressed.set(
+        key,
+        Object.freeze({ ...M, id: M.id + 'q' + q, blanket: GEAR_RARITIES[q]?.color || M.blanket })
+      );
+    return dressed.get(key);
   }
   const ownedOf = hero => stateOf(hero).owned.filter(id => BY[id]);
   const owns = (hero, id) => !!BY[id] && stateOf(hero).owned.includes(id);
@@ -171,13 +211,13 @@
       else if (hero.fishing || CANAAN_GATHER.workView(hero)) dismount(hero);
     }
   }
-  const speed = hero => (hero.riding && BY[hero.riding] ? 1 + BY[hero.riding].speed / 100 : 1);
+  const speed = hero => (hero.riding && BY[hero.riding] ? 1 + speedOf(hero) / 100 : 1);
 
   // ---------------------------------------------------------------- Dessin du cavalier
   // Le héros est soulevé à hauteur de selle ; la monture passe dessous et sa partie avant le recouvre (mount-art.js).
   // Profil : galop en quatre images ; de face et de dos : deux images. Les montures qui flottent ondulent.
   function heroBody(hero, body, face, moving, phase) {
-    const M = hero.riding && BY[hero.riding];
+    const M = hero.riding && BY[hero.riding] && withSaddle(BY[hero.riding], hero.netSaddle ?? saddleOf(hero));
     if (!M) return null;
     const sp = A.speciesOf(M),
       U = A.U,
@@ -448,8 +488,6 @@
       esc(M.name) +
       '</b><small>' +
       esc(M.rarity) +
-      ' · ' +
-      esc('+{n} % de vitesse', { n: M.speed }) +
       '</small><p class="muted">' +
       esc(M.desc) +
       '</p>' +
@@ -506,7 +544,7 @@
       '<span class="collection-name"><b>' +
       esc(M.name) +
       '</b><small>' +
-      (mine ? esc(M.rarity) + ' · ' + esc('+{n} % de vitesse', { n: M.speed }) : sourceText(M)) +
+      (mine ? esc(M.rarity) : sourceText(M)) +
       '</small></span><span class="collection-mark">' +
       (!mine ? '🔒' : s.active === M.id ? '★' : '') +
       '</span></button>'
@@ -546,7 +584,7 @@
       '</h3><p class="collection-sub">' +
       esc(M.rarity) +
       ' · ' +
-      esc('+{n} % de vitesse', { n: M.speed }) +
+      esc('+{n} % de vitesse', { n: speedOf(hero) }) +
       '</p><p class="muted">' +
       esc(M.desc) +
       '</p><div class="collection-source">📍 <b>' +
@@ -564,6 +602,38 @@
       '</div></div>'
     );
   }
+  // Sellerie : la selle équipée donne sa vitesse à toutes les montures ; les selles se cousent au travail du cuir.
+  function saddleBar(hero, s) {
+    return (
+      '<div class="mount-saddles"><b>⟦saddle⟧ ' +
+      esc('Selle') +
+      '</b>' +
+      MOUNT_SADDLE_SPEED.map((n, q) => {
+        const mine = q === 0 || s.saddles.includes(q),
+          on = s.saddle === q,
+          col = q ? rarityColor(GEAR_RARITIES[q].name) : '#c8c0b0';
+        return (
+          '<button type="button" class="mount-saddle' +
+          (on ? ' on' : '') +
+          (mine ? '' : ' locked') +
+          '" style="--rarity:' +
+          col +
+          '" data-action="mountSaddle" data-quality="' +
+          q +
+          '"' +
+          (mine ? '' : ' disabled') +
+          ' title="' +
+          esc(mine ? '' : 'À coudre au travail du cuir (panneau P)') +
+          '"><span>' +
+          esc(q ? GEAR_RARITIES[q].name : 'Sans selle') +
+          '</span><small>+' +
+          n +
+          ' %</small></button>'
+        );
+      }).join('') +
+      '</div>'
+    );
+  }
   function section() {
     const hero = game.hero,
       s = stateOf(hero);
@@ -576,7 +646,9 @@
         { touche: CANAAN_KEYS.labelOf('mount') }
       ) +
       (hero.riding ? ' <b>' + esc('🐾 En selle : {nom}', { nom: tt(BY[hero.riding].name) }) + '</b>' : '') +
-      '</p><div class="collection"><div class="collection-list" data-keep-scroll="mounts"><div class="collection-head">' +
+      '</p>' +
+      saddleBar(hero, s) +
+      '<div class="collection"><div class="collection-list" data-keep-scroll="mounts"><div class="collection-head">' +
       esc('Montures obtenues') +
       ' <b>' +
       ownedOf(hero).length +
@@ -624,12 +696,17 @@
       picked = id;
       canaanCollections('mounts');
     },
-    summon: () => ui.mount() && setTimeout(refresh, 120)
+    summon: () => ui.mount() && setTimeout(refresh, 120),
+    saddle: q =>
+      SADDLE_IDS[q] &&
+      act('saddle', SADDLE_IDS[q], () => equipSaddle(game.hero, q)) &&
+      setTimeout(refresh, 120)
   };
   function handle(hero, action) {
     if (action.act === 'buy') return buy(hero, action.id);
     if (action.act === 'choose') return choose(hero, action.id);
     if (action.act === 'mount') return toggle(hero);
+    if (action.act === 'saddle') return equipSaddle(hero, SADDLE_IDS.indexOf(action.id));
     return false;
   }
   function key(action) {
@@ -640,28 +717,40 @@
   // Réseau : la monture de chaque héros en selle (pour la dessiner chez tous), et les montures de chaque invité.
   function view(idOf) {
     const r = {},
+      sd = {},
       own = {};
     for (const hero of game.heroes) {
-      if (hero.riding) r[idOf(hero)] = hero.riding;
+      if (hero.riding) {
+        r[idOf(hero)] = hero.riding;
+        if (saddleOf(hero)) sd[idOf(hero)] = saddleOf(hero);
+      }
       if (hero !== game.hero) {
         const s = stateOf(hero);
-        own[idOf(hero)] = [s.owned.join(','), s.active || ''];
+        own[idOf(hero)] = [s.owned.join(','), s.active || '', s.saddles.join(','), s.saddle];
       }
     }
-    return { r, own };
+    return { r, sd, own };
   }
   function apply(data, heroOf) {
-    for (const hero of game.heroes) hero.riding = null;
+    for (const hero of game.heroes) [hero.riding, hero.netSaddle] = [null, null];
     for (const [id, m] of Object.entries(data?.r || {})) {
-      const hero = heroOf(id);
-      if (hero && BY[m]) hero.riding = m;
+      const hero = heroOf(id),
+        q = Number(data?.sd?.[id]) || 0;
+      if (hero && BY[m]) [hero.riding, hero.netSaddle] = [m, q >= 0 && q <= 5 ? q : 0];
     }
     // Ses propres montures (pour l'onglet et la boutique) : celles que l'hôte lui connaît.
-    for (const [id, [list, active]] of Object.entries(data?.own || {})) {
+    for (const [id, [list, active, saddles, saddle]] of Object.entries(data?.own || {})) {
       const hero = heroOf(id);
       if (hero !== game.hero || typeof list !== 'string') continue;
       hero.ext ||= {};
-      hero.ext.mounts = { owned: list.split(',').filter(Boolean), active: BY[active] ? active : null };
+      hero.ext.mounts = {
+        owned: list.split(',').filter(Boolean),
+        active: BY[active] ? active : null,
+        saddles: String(saddles || '')
+          .split(',')
+          .map(Number),
+        saddle: Number(saddle) || 0
+      };
       stateOf(hero);
     }
   }
@@ -695,6 +784,10 @@
     },
     stateOf,
     ownedOf,
+    addSaddle,
+    equipSaddle,
+    saddleOf,
+    speedOf,
     owns,
     grant,
     drop,

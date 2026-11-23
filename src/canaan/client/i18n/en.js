@@ -5086,5 +5086,48 @@ export default {
     'Too young to carry you into the sky, big enough to believe it flies.',
   'Petit Nuage': 'Little Cloud',
   'Un nuage tombé du ciel et resté par amitié. Il pleut un peu quand il est triste.':
-    'A cloud that fell from the sky and stayed out of friendship. It rains a little when it’s sad.'
+    'A cloud that fell from the sky and stayed out of friendship. It rains a little when it’s sad.',
+  // ------------------------------------------------------------ Travail du cuir et selles
+  'Travail du cuir': 'Leatherworking',
+  '⟦prof_leather⟧ Travail du cuir': '⟦prof_leather⟧ Leatherworking',
+  'Peau brute': 'Raw hide',
+  'Cuir tanné': 'Tanned leather',
+  'Cuir': 'Leather',
+  'Donnée par le gibier chassé. Le travail du cuir la tanne en cuir (panneau P).':
+    'Dropped by hunted game. Leatherworking tans it into leather (panel P).',
+  'Pour coudre les selles de monture, au travail du cuir (panneau P).':
+    'For stitching mount saddles, in leatherworking (panel P).',
+  '🧵 Le travail du cuir se fait à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore.':
+    '🧵 Leatherworking is done at Oriane’s workbench, in the Menagerie of the Dawn Camp.',
+  'Travail du cuir niveau {n} requis.': 'Leatherworking level {n} required.',
+  'Il faut {n} peaux brutes de cette qualité.': 'You need {n} raw hides of this quality.',
+  '🎒 Plus de place parmi les matériaux.': '🎒 No room left among your materials.',
+  '{n} cuir(s) tanné(s)': '{n} leather tanned',
+  '🧵 Tu as déjà cette selle.': '🧵 You already have this saddle.',
+  'Il faut {n} cuirs tannés de cette qualité ou meilleurs.':
+    'You need {n} tanned leathers of this quality or better.',
+  'Il faut {or} or.': 'You need {or} gold.',
+  'Selle {qualite} cousue : +{n} % de vitesse en selle (touche V).':
+    '{qualite} saddle stitched: +{n}% speed when riding (key V).',
+  '🧵 À l’établi d’Oriane : tu peux travailler.': '🧵 At Oriane’s workbench: you can work.',
+  '🏹 Gibier chassé → peau': '🏹 Hunted game → hide',
+  'peaux = 1 cuir': 'hides = 1 leather',
+  '🐾 Selles : vitesse des montures': '🐾 Saddles: mount speed',
+  'Chaque animal chassé donne une peau brute, de la qualité de la prise. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.':
+    'Every hunted animal gives a raw hide of the same quality as the catch. Tan them into leather at Oriane’s workbench, in the Menagerie of the Dawn Camp, then stitch mount saddles: one per quality.',
+  'Une selle s’équipe dans l’onglet Montures (touche V) et donne sa vitesse à toutes tes montures. Chaque qualité demande son niveau de métier. Tanner et coudre prennent quelques secondes : reste immobile.':
+    'A saddle is equipped in the Mounts tab (key V) and gives its speed to all your mounts. Each quality needs its profession level. Tanning and stitching take a few seconds: stay still.',
+  'Tanner les peaux': 'Tan hides',
+  'Tanner': 'Tan',
+  'Tout tanner': 'Tan all',
+  'Aucune peau pour l’instant : chasse le gibier de l’île.': 'No hides yet: hunt the island’s game.',
+  'Selles de monture': 'Mount saddles',
+  'Peaux : {p} · cuirs : {c}': 'Hides: {p} · leathers: {c}',
+  'Selle {qualite}': '{qualite} saddle',
+  '{c} / {n} cuirs ({qualite} ou mieux)': '{c} / {n} leathers ({qualite} or better)',
+  '✔ Dans ta sellerie': '✔ In your tack room',
+  'Coudre': 'Stitch',
+  'Selle': 'Saddle',
+  'Sans selle': 'No saddle',
+  'À coudre au travail du cuir (panneau P)': 'To stitch in leatherworking (panel P)'
 };

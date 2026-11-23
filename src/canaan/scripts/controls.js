@@ -168,6 +168,12 @@
         actionInteger(element, 'tier'),
         element.dataset.count ? actionInteger(element, 'count') : 1
       ),
+    // Travail du cuir (panneau P) : tanner des peaux, coudre une selle.
+    leatherTan: element =>
+      CANAAN_LEATHER.actions.tan(actionInteger(element, 'quality'), actionInteger(element, 'count')),
+    leatherSaddle: element => CANAAN_LEATHER.actions.saddle(actionInteger(element, 'quality')),
+    // Selle équipée (onglet Montures, touche V).
+    mountSaddle: element => CANAAN_MOUNTS.ui.saddle(actionInteger(element, 'quality')),
     enchantPick: element => CANAAN_GATHER.actions.pick(element.dataset.token),
     enchantApply: element => CANAAN_GATHER.actions.apply(element.dataset.ref),
     enchantReroll: element => CANAAN_GATHER.actions.reroll(element.dataset.ref),

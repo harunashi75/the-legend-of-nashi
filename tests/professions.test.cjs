@@ -73,7 +73,7 @@ test('Métiers : pêche dans l’eau profonde, qualités selon le niveau, cuisin
  const saved=JSON.parse(run('localStorage.getItem("canaan_slot_"+CANAAN_PERSISTENCE.slot)')).heros.hote.prof;
  assert.ok(saved.fishing.level>=20);assert.ok(saved.cooking.level>=15);assert.ok(saved.fish['truite:2']>=1||saved.meals['grillade:2']===undefined);
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fishing:{level:99,exp:-5},cooking:{level:"x"},fish:{"requin:3":2,"thon:9":1,"thon:2":3.7,"__proto__:1":1},meals:{"soupe:1":2}}))')),
-  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},mining:{level:1,exp:0},herbalism:{level:1,exp:0},enchanting:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},ore:{},herb:{},ench:{},treasure:{},dust:{},finds:{},shovel:0,codex:{},qv:2});
+  {fishing:{level:40,exp:0},cooking:{level:1,exp:0},hunting:{level:1,exp:0},mining:{level:1,exp:0},herbalism:{level:1,exp:0},enchanting:{level:1,exp:0},leatherworking:{level:1,exp:0},fish:{'thon:2':3},meat:{},meals:{'soupe:1':2},ore:{},herb:{},ench:{},treasure:{},dust:{},hide:{},finds:{},shovel:0,codex:{},qv:2});
  // Ancienne sauvegarde à huit qualités : Héroïque devient Épique, Céleste devient Mythique (une seule fois).
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({fish:{"thon:4":1,"carpe:7":2}}).fish)')),{'thon:3':1,'carpe:5':2});
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_PROF.sanitize({qv:2,fish:{"thon:4":1}}).fish)')),{'thon:4':1});

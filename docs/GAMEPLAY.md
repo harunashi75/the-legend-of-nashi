@@ -152,30 +152,51 @@ Au cœur de l’île, à la place de l’ancien massif de roche : une grande cit
 Montures du jeu de base : `shared/data/mounts.js` (`BASE_MOUNTS`, marchands `MOUNT_SHOPS`) ; règles, boutique et dessin du cavalier : `scripts/mounts.js` (`CANAAN_MOUNTS`) ; pixel art : `scripts/mount-art.js` (`CANAAN_MOUNT_ART`). Une extension ajoute les siennes (`mounts`, `mountShops`).
 
 - **Appeler ou renvoyer** la monture choisie : touche H (Paramètres → Clavier), dans le monde ouvert seulement (ni donjon, raid, Arène, Tréfonds ou maison) et hors combat. Attaquer, rouler, être touché, pêcher, récolter ou entrer dans un lieu fermé fait descendre de selle.
-- **Vitesse** : +40 % à +70 % pour le jeu de base ; seule la vitesse change, jamais le combat.
+- **Vitesse** : la même pour toutes les montures, selon la selle équipée (`MOUNT_SADDLE_SPEED`) : +40 % sans selle, Peu commun +50 %, Rare +60 %, Épique +70 %, Légendaire +80 %, Mythique +100 %. Seule la vitesse change, jamais le combat.
+- **Selles** : cousues au travail du cuir (voir ci-dessous), rangées dans la sellerie du héros (`hero.ext.mounts.saddles`) et équipées dans l’onglet Montures (V, `saddle`). Une selle cousue est équipée d’office si elle vaut mieux que celle qu’on porte. Le tapis de selle de la monture montée prend la couleur de la qualité (envoyé aux invités : `sd`).
 - **Ménagerie de l’Aurore** (nord-ouest du camp, posée par `camp-life.js` : roulotte et enclos où se promènent quatre montures) : Oriane (touche E) vend 16 montures, une fois par personnage.
 
-| Monture | Espèce | Qualité | Vitesse | Prix ou source |
+| Monture | Espèce | Qualité | Prix ou source |
+| --- | --- | --- | --- |
+| Poney des Prés | cheval | Peu commun | 1 200 or |
+| Sanglier Trotteur | sanglier | Peu commun | 1 800 or |
+| Varan des Dunes | lézard | Rare | 3 500 or |
+| Chameau des Caravanes | chameau | Rare | 4 000 or |
+| Grand Cerf des Bois | cerf | Rare | 4 500 or |
+| Rainette du Marais | grenouille (bondit) | Rare | 5 000 or |
+| Loup des Neiges | loup | Rare | 5 500 or |
+| Casoar des Sables | oiseau coureur | Rare | 6 000 or |
+| Tortue Moussue | tortue | Rare | 6 500 or |
+| Ours des Cavernes | ours | Rare | 8 000 or |
+| Scarabée Royal | scarabée | Épique | 15 000 or |
+| Tigre des Brumes | tigre | Épique | 18 000 or |
+| Tisse-Nuit | araignée | Épique | 20 000 or |
+| Tapis Volant | objet (flotte) | Épique | 25 000 or |
+| Balai de Sorcière | objet (flotte) | Épique | 28 000 or |
+| Renard Boréal | renard à trois queues | Légendaire | 60 000 or |
+| Cauchemar de Braise | cheval de feu | Légendaire | boss de raid, 2 % |
+| Drake Écarlate | dragon | Légendaire | boss mondiaux, 2 % |
+| Petit Nuage | nuage (flotte) | Légendaire | coffres secrets et boss cachés, 4 % |
+
+### Travail du cuir (panneau P, Artisanat)
+
+`scripts/leatherworking.js` (`CANAAN_LEATHER`), données dans `shared/data/professions.js` (`PROF_HIDES`, `PROF_TAN_HIDES`, `PROF_SADDLE_LEATHER`, `PROF_SADDLE_GOLD`).
+
+- **Peaux** : chaque gibier chassé donne une peau brute de la qualité de la prise (s’il reste de la place parmi les matériaux). Peaux et cuirs sont des matériaux du sac (`hero.prof.hide`, repère `hide:peau:q`), qui se vendent au marchand.
+- **Établi** : à la Ménagerie du Camp de l’Aurore, auprès d’Oriane. Tanner et coudre sont des travaux minutés (6 s, rester immobile).
+- **Tanner** : 2 peaux d’une qualité = 1 cuir de la même qualité (jusqu’à 20 d’un coup).
+- **Selles** : une par qualité, avec des cuirs de cette qualité ou meilleurs (les moins bons d’abord) et de l’or.
+
+| Selle | Vitesse | Niveau | Cuirs | Or |
 | --- | --- | --- | --- | --- |
-| Poney des Prés | cheval | Peu commun | +40 % | 1 200 or |
-| Sanglier Trotteur | sanglier | Peu commun | +40 % | 1 800 or |
-| Varan des Dunes | lézard | Rare | +45 % | 3 500 or |
-| Chameau des Caravanes | chameau | Rare | +45 % | 4 000 or |
-| Grand Cerf des Bois | cerf | Rare | +50 % | 4 500 or |
-| Rainette du Marais | grenouille (bondit) | Rare | +50 % | 5 000 or |
-| Loup des Neiges | loup | Rare | +55 % | 5 500 or |
-| Casoar des Sables | oiseau coureur | Rare | +55 % | 6 000 or |
-| Tortue Moussue | tortue | Rare | +45 % | 6 500 or |
-| Ours des Cavernes | ours | Rare | +55 % | 8 000 or |
-| Scarabée Royal | scarabée | Épique | +60 % | 15 000 or |
-| Tigre des Brumes | tigre | Épique | +65 % | 18 000 or |
-| Tisse-Nuit | araignée | Épique | +60 % | 20 000 or |
-| Tapis Volant | objet (flotte) | Épique | +65 % | 25 000 or |
-| Balai de Sorcière | objet (flotte) | Épique | +65 % | 28 000 or |
-| Renard Boréal | renard à trois queues | Légendaire | +70 % | 60 000 or |
-| Cauchemar de Braise | cheval de feu | Légendaire | +70 % | boss de raid, 2 % |
-| Drake Écarlate | dragon | Légendaire | +70 % | boss mondiaux, 2 % |
-| Petit Nuage | nuage (flotte) | Légendaire | +70 % | coffres secrets et boss cachés, 4 % |
+| Peu commun | +50 % | 6 | 6 | 500 |
+| Rare | +60 % | 12 | 10 | 2 000 |
+| Épique | +70 % | 20 | 14 | 6 000 |
+| Légendaire | +80 % | 28 | 18 | 15 000 |
+| Mythique | +100 % | 35 | 24 | 40 000 |
+
+- **Expérience** : tanner (8 + 6 × qualité par cuir) et coudre (60 + 50 × qualité). Chaque qualité demande son niveau (`PROF_QUALITY_LEVEL`).
+- **Coopératif** : actions `leather-tan` et `leather-saddle`, vérifiées par l’hôte ; la selle s’équipe par l’action `ext` « mounts » `saddle`.
 
 - **Trouvailles** (`CANAAN_MOUNTS.drop(source, héros)`) : mêmes sources que la garde-robe, tirées pour chaque héros ; une monture déjà possédée n’est plus tirée.
 - **Sauvegarde** : `hero.ext.mounts = { owned, active }`. Les anciennes sauvegardes (montures rangées dans les données de leur extension) sont reprises à la lecture ; une monture inconnue du build est gardée sans s’afficher.

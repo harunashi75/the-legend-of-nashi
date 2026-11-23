@@ -420,7 +420,8 @@
     herb: ['#5fcf5a', '#9ae08a'],
     forge: ['#ffd060', '#ff8a2a'],
     cook: ['#f4f8ff', '#dfe8f0'],
-    dig: ['#7a5232', '#a87a4a']
+    dig: ['#7a5232', '#a87a4a'],
+    leather: ['#8a5a32', '#c8945a']
   };
   function workParticles(kind, x, y) {
     const [a, b] = chips[kind];
@@ -439,7 +440,14 @@
   }
   // Animation d'un travail : l'outil du métier dans la main, des coups réguliers (un toutes les 0,6 s), une barre
   // d'avancement au-dessus du héros.
-  const TOOL = { mine: 'pickaxe', herb: 'sickle', forge: 'hammer', cook: 'ladle', dig: 'shovel' };
+  const TOOL = {
+    mine: 'pickaxe',
+    herb: 'sickle',
+    forge: 'hammer',
+    cook: 'ladle',
+    dig: 'shovel',
+    leather: 'hammer'
+  };
   function drawWork(c, body, x, y, layer, w) {
     const aim = Math.atan2(w.ty - body.y, w.tx - body.x),
       side = Math.cos(aim) >= 0 ? 1 : -1,
@@ -482,9 +490,14 @@
       c.save();
       c.fillStyle = '#120c08cc';
       c.fillRect(x - bw / 2 - 2, by - 2, bw + 4, 9);
-      c.fillStyle = { mine: '#c8ccd2', herb: '#7ee36a', forge: '#ff9a40', cook: '#ffd36d', dig: '#c8945a' }[
-        w.kind
-      ];
+      c.fillStyle = {
+        mine: '#c8ccd2',
+        herb: '#7ee36a',
+        forge: '#ff9a40',
+        cook: '#ffd36d',
+        dig: '#c8945a',
+        leather: '#d8945a'
+      }[w.kind];
       c.fillRect(x - bw / 2, by, bw * Math.min(1, w.p + 1 / (60 * 10)), 5);
       c.strokeStyle = '#f4d68d';
       c.lineWidth = 1;

@@ -31,7 +31,7 @@ test('Ménagerie du camp : roulotte et enclos posés, Oriane accessible à pied,
     assert.ok(/^[a-z]{2,24}$/.test(x.id), x.id);
     assert.ok(run(`CANAAN_MOUNT_ART.species().includes(${JSON.stringify(x.species)})`), x.species);
     assert.ok((x.shop && x.price > 0) || (x.drop && x.drop.chance > 0 && x.source), x.id);
-    assert.ok(x.speed >= 40 && x.speed <= 70, x.id);
+    assert.equal(x.speed, undefined, 'même vitesse pour toutes : ' + x.id);
   }
   // Dessin du camp, d'Oriane et de chaque cavalier, dans les quatre directions, sans erreur.
   run(
@@ -69,28 +69,41 @@ test('Montures du jeu de base : achat chez Oriane, touche H, vitesse, descente e
   run('closePanels()');
   fire(run('globalThis'), 'keydown', { key: 'h' });
   assert.equal(run('game.hero.riding'), 'tortue');
-  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.45);
+  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.4);
   run('P.atk=0.3;CANAAN_EXT.step()');
   assert.equal(run('game.hero.riding'), null);
   run('P.atk=0');
   // Trouvailles : une seule fois chacune, selon la source.
-  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("worldBoss",game.hero,()=>0))')), ['drake']);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("worldBoss",game.hero,()=>0))')), [
+    'drake'
+  ]);
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("worldBoss",game.hero,()=>0))')), []);
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("raid",game.hero,()=>0.5))')), []);
-  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("raid",game.hero,()=>0))')), ['cauchemar']);
-  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("secretBoss",game.hero,()=>0))')), ['nuage']);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("raid",game.hero,()=>0))')), [
+    'cauchemar'
+  ]);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.drop("secretBoss",game.hero,()=>0))')), [
+    'nuage'
+  ]);
   // Onglet Montures des Collections et sauvegarde ; une monture inconnue de ce build est gardée sans s'afficher.
   run('game.hero.ext.mounts.owned.push("inconnue");canaanCollections("mounts")');
   assert.match(run('document.getElementById("window").innerHTML'), /Drake Écarlate/);
   run('saveGame();game.hero.ext={};loadGame()');
   assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero))')), {
     owned: ['tortue', 'drake', 'cauchemar', 'nuage', 'inconnue'],
-    active: 'tortue'
+    active: 'tortue',
+    saddles: [],
+    saddle: 0
   });
   assert.equal(run('CANAAN_MOUNTS.ownedOf(game.hero).length'), 4);
   // Données abîmées : réparées.
   run('game.hero.ext={mounts:{owned:"x",active:7}}');
-  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero))')), { owned: [], active: null });
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero))')), {
+    owned: [],
+    active: null,
+    saddles: [],
+    saddle: 0
+  });
   assert.equal(errors.length, 0, errors.join('\n'));
 });
 
@@ -105,7 +118,7 @@ test('Montures : action réseau vérifiée chez l’hôte, montures de chacun en
   assert.equal(run('CANAAN_EXT.handle(__g,{op:"ext",ext:"mounts",act:"mount"})'), true);
   assert.equal(run('__g.player.gold'), 500);
   const v = JSON.parse(run('JSON.stringify(CANAAN_EXT.view(h=>h===game.hero?"host":h.id).mounts)'));
-  assert.deepEqual(v, { r: { g1: 'cerf' }, own: { g1: ['cerf', 'cerf'] } });
+  assert.deepEqual(v, { r: { g1: 'cerf' }, sd: {}, own: { g1: ['cerf', 'cerf', '', 0] } });
   run('__g.riding=null;CANAAN_EXT.apply({mounts:' + JSON.stringify(v) + '},id=>id==="g1"?__g:null)');
   assert.equal(run('__g.riding'), 'cerf');
   assert.deepEqual(JSON.parse(run('JSON.stringify(canaanExtensionIds())')), [], 'pas une extension');
@@ -116,4 +129,67 @@ test('Montures : action réseau vérifiée chez l’hôte, montures de chacun en
     for (const text of [x.name, x.desc, x.source]) if (text) assert.ok(Object.hasOwn(en, text), text);
   for (const s of Object.values(MOUNT_SHOPS))
     for (const text of Object.values(s)) assert.ok(Object.hasOwn(en, text), text);
+});
+
+test('Travail du cuir : peaux de chasse, tannage, selles par qualité, vitesse en selle équipée dans V', () => {
+  const { run, errors, click } = boot(release);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  run('started=true;paused=false;game.world.monsters=[]');
+  assert.deepEqual(JSON.parse(run('JSON.stringify(MOUNT_SADDLE_SPEED)')), [40, 50, 60, 70, 80, 100]);
+  // La chasse donne une peau de la qualité de la prise.
+  run(
+    'globalThis.__z=ZONES.findIndex(z=>z.name==="Plaines verdoyantes");P.x=(ZONES[__z].x+0.5)*TS;P.y=(ZONES[__z].y+0.5)*TS'
+  );
+  run('game.hero.prof.hunting.level=1;game.hero.huntCd=0;CANAAN_PROF.hunt(game.hero,"lapin")');
+  assert.equal(run('CANAAN_BAG.count(game.hero,"hide","peau",0)'), 1);
+  // Loin de l'établi d'Oriane : rien.
+  const m = JSON.parse(run('JSON.stringify(CANAAN_CAMP_LIFE.menagerie())'));
+  run('game.hero.prof.hide={"peau:0":4,"peau:2":10}');
+  assert.equal(run('CANAAN_LEATHER.startTan(game.hero,0,1)'), false);
+  run(`P.x=${m.x};P.y=${m.y}+30`);
+  // Tanner : 2 peaux = 1 cuir, en travail minuté ; une qualité trop haute pour le niveau est refusée.
+  assert.equal(run('CANAAN_LEATHER.startTan(game.hero,2,5)'), false, 'Rare : niveau 12');
+  assert.equal(run('CANAAN_LEATHER.startTan(game.hero,0,20)'), true);
+  run('for(let i=0;i<60*8;i++){time++;CANAAN_GATHER.stepWork()}');
+  assert.equal(run('CANAAN_BAG.count(game.hero,"hide","cuir",0)'), 2);
+  assert.equal(run('CANAAN_BAG.count(game.hero,"hide","peau",0)'), 0);
+  assert.ok(run('game.hero.prof.leatherworking.exp+game.hero.prof.leatherworking.level') > 1);
+  // Coudre une selle Rare : niveau, cuirs Rares ou meilleurs (les moins bons d'abord), or ; une seule fois.
+  run('game.hero.prof.leatherworking.level=12;game.hero.prof.hide={"cuir:2":8,"cuir:4":5};P.gold=3000');
+  assert.equal(run('CANAAN_LEATHER.saddle(game.hero,3)'), false, 'Épique : niveau 20');
+  assert.equal(run('CANAAN_LEATHER.saddle(game.hero,2)'), true);
+  assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.prof.hide)')), { 'cuir:4': 3 });
+  assert.equal(run('P.gold'), 1000);
+  assert.equal(run('CANAAN_LEATHER.saddle(game.hero,2)'), false, 'déjà dans la sellerie');
+  // Équipée d'office (meilleure que rien) : toutes les montures vont à +60 %.
+  run(
+    'game.hero.ext.mounts.owned=["tortue"];game.hero.ext.mounts.active="tortue";CANAAN_MOUNTS.mount(game.hero)'
+  );
+  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.6);
+  // Onglet Montures : la sellerie ; on peut retirer la selle et la remettre.
+  run('canaanCollections("mounts")');
+  assert.match(
+    run('document.getElementById("window").innerHTML'),
+    /data-action="mountSaddle" data-quality="2"/
+  );
+  click('mountSaddle', { quality: '0' });
+  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.4);
+  assert.equal(run('CANAAN_EXT.handle(game.hero,{op:"ext",ext:"mounts",act:"saddle",id:"mythique"})'), false);
+  assert.equal(run('CANAAN_EXT.handle(game.hero,{op:"ext",ext:"mounts",act:"saddle",id:"rare"})'), true);
+  assert.equal(run('CANAAN_EXT.speed(game.hero)'), 1.6);
+  // Onglet du panneau P, sauvegarde, et selle visible chez les autres joueurs.
+  run('closePanels();CANAAN_PROF.open("cuir")');
+  assert.match(run('document.getElementById("window").innerHTML'), /Selles de monture/);
+  run('saveGame();game.hero.ext={};game.hero.prof={};loadGame()');
+  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_MOUNTS.stateOf(game.hero).saddles)')), [2]);
+  assert.equal(run('game.hero.prof.leatherworking.level'), 12);
+  assert.equal(run('CANAAN_BAG.count(game.hero,"hide","cuir",4)'), 3);
+  run('game.hero.riding="tortue"');
+  assert.deepEqual(
+    JSON.parse(run('JSON.stringify(CANAAN_EXT.view(h=>h===game.hero?"host":h.id).mounts.sd)')),
+    {
+      host: 2
+    }
+  );
+  assert.equal(errors.length, 0, errors.join('\n'));
 });

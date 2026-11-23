@@ -1,11 +1,15 @@
 // @ts-check
-// Montures du jeu de base. Chaque monture : espèce (species : sa silhouette, scripts/mount-art.js), qualité, bonus de
-// vitesse en % dans le monde ouvert, couleurs et, selon d'où elle vient :
+// Montures du jeu de base. Chaque monture : espèce (species : sa silhouette, scripts/mount-art.js), qualité, couleurs
+// et, selon d'où elle vient :
 //   shop + price : vendue par un marchand de montures, une fois par personnage, contre de l'or ;
 //   drop : { sources, chance } : trouvée (mêmes sources que la garde-robe), jamais deux fois.
 // coat : [clair, base, ombre, profond] · mane : crins, crinière ou second ton [clair, sombre] · sock : pattes, bec ou
 // détail clair · blanket : tapis de selle · glow : lueur (facultative) · hover : flotte au-dessus du sol.
 import { deepFreeze } from '../freeze.js';
+
+// Vitesse en selle (%, dans le monde ouvert) : la même pour toutes les montures, selon la selle équipée (indice de
+// qualité dans GEAR_RARITIES : 0 sans selle, 1 Peu commun … 5 Mythique). Les selles se cousent au travail du cuir.
+export const MOUNT_SADDLE_SPEED = deepFreeze([40, 50, 60, 70, 80, 100]);
 
 // Marchands de montures du jeu de base : nom, lieu (onglet Montures) et phrase d'accueil.
 export const MOUNT_SHOPS = deepFreeze({
@@ -26,7 +30,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Peu commun',
     shop: 'menagerie',
     price: 1200,
-    speed: 40,
     coat: ['#e8c088', '#c89458', '#9a6a38', '#5e3e1e'],
     mane: ['#fff2d8', '#e0c8a0'],
     sock: '#fff6e4',
@@ -40,7 +43,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Peu commun',
     shop: 'menagerie',
     price: 1800,
-    speed: 40,
     coat: ['#8a6a50', '#664a36', '#4a3426', '#2c1e16'],
     mane: ['#3e2c22', '#241812'],
     sock: '#f0e6cc',
@@ -54,7 +56,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 3500,
-    speed: 45,
     coat: ['#e8d088', '#c8a450', '#967430', '#5a441a'],
     mane: ['#e8743a', '#a8442a'],
     sock: '#f4e8b8',
@@ -68,7 +69,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 4000,
-    speed: 45,
     coat: ['#ecc894', '#cc9c62', '#9c7040', '#624222'],
     mane: ['#a87444', '#7a5230'],
     sock: '#e0b880',
@@ -82,7 +82,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 4500,
-    speed: 50,
     coat: ['#c8925a', '#a06a3c', '#744a28', '#462c16'],
     mane: ['#f0dcb8', '#c8a878'],
     sock: '#5e3c22',
@@ -96,7 +95,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 5000,
-    speed: 50,
     coat: ['#a8e060', '#68b03c', '#428028', '#24501a'],
     mane: ['#f4f0a8', '#d8c860'],
     sock: '#f08a3a',
@@ -110,7 +108,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 5500,
-    speed: 55,
     coat: ['#f2f6fa', '#c8d2de', '#94a2b4', '#5a6678'],
     mane: ['#ffffff', '#aab6c6'],
     sock: '#eef4fa',
@@ -124,7 +121,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 6000,
-    speed: 55,
     coat: ['#4a5a78', '#2e3a54', '#1e2638', '#121722'],
     mane: ['#3ac0e0', '#1a7aa8'],
     sock: '#c8a878',
@@ -139,7 +135,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 6500,
-    speed: 45,
     coat: ['#b8d080', '#86a452', '#5c7836', '#344a1e'],
     mane: ['#b08858', '#7a5634'],
     sock: '#8ac84a',
@@ -153,7 +148,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Rare',
     shop: 'menagerie',
     price: 8000,
-    speed: 55,
     coat: ['#9a6a44', '#744a2c', '#52321c', '#301c0e'],
     mane: ['#c89a6a', '#8a5e38'],
     sock: '#402816',
@@ -167,7 +161,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Épique',
     shop: 'menagerie',
     price: 15000,
-    speed: 60,
     coat: ['#7af0d0', '#2aa88a', '#1a6e6a', '#0e3e44'],
     mane: ['#f0d060', '#b88a28'],
     sock: '#1e3036',
@@ -181,7 +174,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Épique',
     shop: 'menagerie',
     price: 18000,
-    speed: 65,
     coat: ['#ffb85a', '#e88a30', '#b05e1c', '#6a3410'],
     mane: ['#fff4e0', '#e8d8c0'],
     stripe: '#2e1a10',
@@ -196,7 +188,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Épique',
     shop: 'menagerie',
     price: 20000,
-    speed: 60,
     coat: ['#6a5a8a', '#443860', '#2c2440', '#181224'],
     mane: ['#c87af0', '#8a3ac8'],
     sock: '#241c36',
@@ -212,7 +203,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Épique',
     shop: 'menagerie',
     price: 25000,
-    speed: 65,
     hover: true,
     coat: ['#e8485a', '#b82a44', '#841a34', '#4e0e20'],
     mane: ['#ffe08a', '#d8a040'],
@@ -227,7 +217,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Épique',
     shop: 'menagerie',
     price: 28000,
-    speed: 65,
     hover: true,
     coat: ['#b07a48', '#80542e', '#58381e', '#341e0e'],
     mane: ['#f0c860', '#b88a30'],
@@ -243,7 +232,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Légendaire',
     shop: 'menagerie',
     price: 60000,
-    speed: 70,
     coat: ['#e0faff', '#8ad8f0', '#4a9ac8', '#285a8a'],
     mane: ['#ffffff', '#b8a0ff'],
     sock: '#f4ffff',
@@ -258,7 +246,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Légendaire',
     drop: { sources: ['raid'], chance: 0.02 },
     source: 'Boss de raid',
-    speed: 70,
     coat: ['#4a3a3e', '#2c2226', '#1c1518', '#0e0a0c'],
     mane: ['#ffd25a', '#f0581e'],
     sock: '#f0581e',
@@ -273,7 +260,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Légendaire',
     drop: { sources: ['worldBoss'], chance: 0.02 },
     source: 'Boss mondiaux',
-    speed: 70,
     coat: ['#f0684a', '#c03a2e', '#8a2222', '#501216'],
     mane: ['#ffd88a', '#e09a40'],
     sock: '#f0e0c0',
@@ -287,7 +273,6 @@ export const BASE_MOUNTS = deepFreeze([
     rarity: 'Légendaire',
     drop: { sources: ['secretChest', 'secretBoss'], chance: 0.04 },
     source: 'Coffres secrets et boss cachés',
-    speed: 70,
     hover: true,
     coat: ['#ffffff', '#eaf2fc', '#c4d6ee', '#94aed0'],
     mane: ['#ffe8a0', '#f0c0e0'],

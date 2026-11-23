@@ -1,5 +1,5 @@
 // @ts-check
-// Métiers : pêche, cuisine, chasse, minage, cueillette et enchanteur. Niveaux (1 à 40), qualités débloquées,
+// Métiers : pêche, cuisine, chasse, minage, cueillette, enchanteur et travail du cuir. Niveaux (1 à 40), qualités débloquées,
 // catalogues (poissons, gibier, viandes, recettes, minerais, herbes, enchantements) et tables de pêche.
 // Les règles sont dans shared/rules/professions.js ; les bancs, filons, dessins et fenêtres dans scripts/.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
@@ -12,7 +12,8 @@ export const PROF_SKILLS = Object.freeze([
   'hunting',
   'mining',
   'herbalism',
-  'enchanting'
+  'enchanting',
+  'leatherworking'
 ]);
 // ---------------------------------------------------------------- Données
 export const PROF_MAX_LEVEL = 40;
@@ -592,6 +593,23 @@ export const PROF_ENCH_LEVEL = deepFreeze([1, 6, 12, 20, 28, 35]);
 export const PROF_MEAL_PRICE_FACTOR = 3;
 // Minerais d'un même métal par enchantement, selon le rang du métal : plus le métal est rare, plus il en faut.
 export const PROF_ORES_PER_ENCHANT = deepFreeze([3, 3, 4, 4, 5, 5]);
+
+// ---------------------------------------------------------------- Travail du cuir
+// La chasse donne une peau (de la qualité de la prise) avec la viande. Le maroquinier tanne les peaux en cuir, puis
+// coud les selles de monture (une par qualité, de Peu commun à Mythique), qui s'équipent dans l'onglet Montures (V).
+// Peaux et cuirs sont des matériaux du sac (piles de 100), rangés dans hero.prof.hide ; value : prix d'une unité de
+// qualité Commune chez le marchand (+ autant par qualité).
+export const PROF_HIDES = deepFreeze({
+  peau: { name: 'Peau brute', icon: '⟦hide_peau⟧', value: 3 },
+  cuir: { name: 'Cuir tanné', icon: '⟦hide_cuir⟧', value: 9 }
+});
+// Tanner : PROF_TAN_HIDES peaux d'une qualité donnent un cuir de la même qualité (niveau de métier selon la qualité :
+// PROF_QUALITY_LEVEL).
+export const PROF_TAN_HIDES = 2;
+// Selles, par qualité (indice dans GEAR_RARITIES ; 0 : aucune selle) : cuirs demandés, de cette qualité ou meilleurs
+// (les moins bons d'abord), et or. Le niveau de travail du cuir requis est celui de la qualité (PROF_QUALITY_LEVEL).
+export const PROF_SADDLE_LEATHER = deepFreeze([0, 6, 10, 14, 18, 24]);
+export const PROF_SADDLE_GOLD = deepFreeze([0, 500, 2000, 6000, 15000, 40000]);
 
 // ---------------------------------------------------------------- Démantèlement et poudres d'enchantement
 // Démanteler une pièce d'équipement (bouton ⚒ du sac, partout, même en donjon) la réduit en poudre. Les poudres sont

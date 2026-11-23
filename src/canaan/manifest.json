@@ -529,6 +529,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-leatherworking",
+      "file": "scripts/leatherworking.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-ext-vallee-art",
       "file": "extensions/vallee/art.js",
       "extension": "vallee"

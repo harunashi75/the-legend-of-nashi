@@ -443,9 +443,18 @@
     if (action.op === 'salvage' || action.op === 'satchel-take') return CANAAN_SALVAGE.handle(hero, action);
     if (action.op.startsWith('house-')) return CANAAN_HOUSE.handle(hero, action);
     if (
-      ['fish', 'cook', 'eat', 'hunt', 'gather', 'enchant-craft', 'enchant-apply', 'enchant-reroll'].includes(
-        action.op
-      )
+      [
+        'fish',
+        'cook',
+        'eat',
+        'hunt',
+        'gather',
+        'enchant-craft',
+        'enchant-apply',
+        'enchant-reroll',
+        'leather-tan',
+        'leather-saddle'
+      ].includes(action.op)
     )
       return CANAAN_PROF.handle(hero, action);
     if (action.op.startsWith('quest-')) return CANAAN_QUESTS.handle(hero, action);
@@ -660,7 +669,7 @@
         hero.netAim = Number.isFinite(h.aim) ? h.aim / 100 : null;
         hero.netAct =
           Array.isArray(h.act) &&
-          ['mine', 'herb', 'forge', 'cook', 'dig'].includes(h.act[0]) &&
+          ['mine', 'herb', 'forge', 'cook', 'dig', 'leather'].includes(h.act[0]) &&
           h.act.slice(1).every(Number.isFinite)
             ? {
                 kind: h.act[0],
