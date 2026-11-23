@@ -5226,6 +5226,8 @@ export default {
   'Parler à {nom} pour une nouvelle quête': 'Talk to {nom} for a new quest',
   // Guide du joueur : conseils de Lumi, pastilles, repère du sac (guide.js)
   'Astuce': 'Tip',
+  'Suivant ▸': 'Next ▸',
+  'Compris': 'Got it',
   'Fermer': 'Close',
   '✨ Conseils de Lumi': '✨ Lumi’s tips',
   'Mieux que ce que tu portes': 'Better than what you wear',

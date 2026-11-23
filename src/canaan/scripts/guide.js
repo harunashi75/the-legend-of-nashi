@@ -153,11 +153,23 @@
   card.hidden = true;
   card.setAttribute('role', 'status');
   card.innerHTML =
-    '<i class="lumi-orb" aria-hidden="true"></i><div><b></b><p></p></div><button type="button" aria-label="Fermer">✕</button>';
+    '<i class="lumi-orb" aria-hidden="true"></i><div><b></b><p></p><button type="button" class="lumi-next"></button></div>' +
+    '<button type="button" class="lumi-close" aria-label="Fermer">✕</button>';
   document.body.appendChild(card);
   const cardName = card.querySelector('b'),
-    cardText = card.querySelector('p');
-  card.querySelector('button')?.addEventListener('click', () => hide());
+    cardText = card.querySelector('p'),
+    nextButton = card.querySelector('.lumi-next');
+  card.querySelector('.lumi-close').addEventListener('click', () => hide());
+  // Suivant : le conseil suivant tout de suite, sans attendre ; « Compris » ferme la carte quand il n'y en a pas.
+  nextButton.addEventListener('click', () => skip());
+  function skip() {
+    hide();
+    if (!canaanDisplay.tips) return;
+    const next = nextTip(game.hero);
+    if (!next) return;
+    markSeen(next.id);
+    show(next.tip.text(game.hero), game.hero);
+  }
   const SHOW_FRAMES = 60 * 12,
     GAP_FRAMES = 60 * 3;
   let shownAt = -Infinity,
@@ -170,6 +182,8 @@
     cardName.textContent = lumi ? 'Lumi' : tt('Astuce');
     cardText.textContent = text;
     card.classList.toggle('lumi', lumi);
+    // Un autre conseil attend déjà : « Suivant », sinon « Compris ».
+    nextButton.textContent = nextTip(hero) ? tt('Suivant ▸') : tt('Compris');
     card.hidden = false;
     speaking = true;
     shownAt = time;
@@ -285,6 +299,8 @@
   window.CANAAN_GUIDE = Object.freeze({
     // Lumi parle (anneau autour d'elle, quests.js).
     speaking: () => speaking,
+    // Bouton Suivant de la carte : le conseil suivant tout de suite.
+    next: () => skip(),
     shops,
     // Tests et Paramètres : oublier les conseils vus.
     reset: () => {

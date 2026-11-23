@@ -49,7 +49,27 @@
 #lumiTip:not(.lumi) .lumi-orb {
   background: radial-gradient(circle, #fff6d0 0 22%, #ffd84a 40%, rgba(255, 216, 74, 0) 72%);
 }
-#lumiTip button {
+#lumiTip .lumi-next {
+  display: block;
+  margin: 6px 0 0 auto;
+  padding: 3px 12px;
+  border: 1px solid var(--rpg-gold, #d4aa5a);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #5a3e22, #2a1c10);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif, Georgia, serif);
+  font-size: calc(12px * var(--font-scale));
+  text-shadow: 0 1px 0 #000;
+  cursor: var(--cursor-pointer);
+}
+#lumiTip .lumi-next:hover {
+  border-color: #ffe08a;
+  color: #ffffff;
+}
+#lumiTip > div {
+  flex: 1;
+}
+#lumiTip .lumi-close {
   position: absolute;
   top: 6px;
   right: 6px;
@@ -62,7 +82,7 @@
   cursor: var(--cursor-pointer);
   font-size: calc(13px * var(--font-scale));
 }
-#lumiTip button:hover {
+#lumiTip .lumi-close:hover {
   color: #ffffff;
 }
 @keyframes lumi-tip-in {
@@ -84,10 +104,12 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 1px 4px;
-  border: 1px solid #6a5a9a;
-  border-radius: 5px;
-  background: #15182b;
-  color: #e8e0ff;
+  border: 1px solid var(--rpg-gold, #c8a050);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #5a3e22, #2a1c10);
+  color: var(--rpg-gold-light, #f6dc98);
+  font-family: var(--rpg-serif, Georgia, serif);
+  text-shadow: 0 1px 0 #000;
   font-size: calc(9px * var(--font-scale));
   font-weight: 700;
   line-height: 1.2;
@@ -95,13 +117,14 @@
   pointer-events: none;
 }
 #menuButtons .menu-count.warn {
-  border-color: #c8952a;
-  color: #ffd76a;
+  border-color: #f0b030;
+  background: linear-gradient(180deg, #7a5418, #3a2608);
+  color: #ffe08a;
 }
 #menuButtons .menu-count.full {
   border-color: #d04a3a;
-  background: #3a1410;
-  color: #ffb0a0;
+  background: linear-gradient(180deg, #6a2018, #3a1008);
+  color: #ffc0b0;
 }
 #menuButtons .menu-dot {
   position: absolute;

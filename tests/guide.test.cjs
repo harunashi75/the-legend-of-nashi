@@ -15,7 +15,9 @@ test('Guide : bienvenue d’abord, puis suivi, équipement, Lumi, talent, donjon
   assert.deepEqual([...run('frames(200)')], ['welcome']);
   assert.equal(run('CANAAN_GUIDE.speaking()'), true);
   // Équipement meilleur que le porté : repère dans le sac et conseil.
-  run('HR.inventory.length=0;HR.equipment.helmet=null;HR.inventory.push({id:"casque-test",slot:"helmet",level:1,rarity:"Rare"})');
+  run(
+    'HR.inventory.length=0;HR.equipment.helmet=null;HR.inventory.push({id:"casque-test",slot:"helmet",level:1,rarity:"Rare"})'
+  );
   assert.equal(run('gearUpgrade(HR.inventory[0])'), true);
   assert.ok(run('frames(3000)').includes('gear'));
   // Lumi rejoint le héros : elle se présente, et parle désormais en son nom.
@@ -35,6 +37,12 @@ test('Guide : bienvenue d’abord, puis suivi, équipement, Lumi, talent, donjon
   // Déjà vus : ils ne reviennent pas.
   const seen = run('frames(3000)').length;
   assert.equal(run('frames(3000)').length, seen);
+  // Suivant : le conseil en attente s'affiche tout de suite, sans le délai entre deux conseils.
+  run('CANAAN_GUIDE.reset();frames(200);HR.level=8');
+  assert.deepEqual([...run('Object.keys(CANAAN_GUIDE.seen())')], ['welcome']);
+  run('CANAAN_GUIDE.next()');
+  assert.equal(run('CANAAN_GUIDE.speaking()'), true);
+  assert.equal(run('Object.keys(CANAAN_GUIDE.seen()).length'), 2);
   // Conseils coupés dans les Paramètres : plus rien ne s'affiche.
   run('CANAAN_GUIDE.reset();canaanDisplay.tips=false');
   assert.deepEqual([...run('frames(3000)')], []);
@@ -43,7 +51,9 @@ test('Guide : bienvenue d’abord, puis suivi, équipement, Lumi, talent, donjon
 
 test('Guide : une arme d’un autre type ou trop haute n’est pas marquée comme meilleure', () => {
   const { run } = require('./helpers/canaan-runtime.cjs')(source);
-  run('game.hero.level=10;game.hero.equipment.weapon={id:"w",slot:"weapon",weaponType:"sword",level:5,rarity:"Commun"}');
+  run(
+    'game.hero.level=10;game.hero.equipment.weapon={id:"w",slot:"weapon",weaponType:"sword",level:5,rarity:"Commun"}'
+  );
   assert.equal(run('gearUpgrade({id:"a",slot:"weapon",weaponType:"sword",level:8,rarity:"Commun"})'), true);
   assert.equal(run('gearUpgrade({id:"b",slot:"weapon",weaponType:"staff",level:8,rarity:"Épique"})'), false);
   assert.equal(run('gearUpgrade({id:"c",slot:"weapon",weaponType:"sword",level:30,rarity:"Commun"})'), false);
