@@ -131,39 +131,47 @@ test('Échange entre joueurs : demande, offres, validations, vérifications de l
   const id=guest.run('CANAAN_NET.state().heroId'),G='game.guests["'+id+'"]';
   const J=(side,expr)=>JSON.parse(side.run('JSON.stringify('+expr+')'));
   const step=async k=>{for(let i=0;i<k;i++){host.run('time++;simulateStep();CANAAN_NET.tick()');guest.run('time++;CANAAN_NET.tick()');await wait(2)}};
+  // Les messages font l'aller-retour invitée → relais → hôte : on avance jusqu'à ce qu'ils soient arrivés, pas d'un
+  // nombre de pas fixe (trop court quand la machine est chargée, par exemple tous les tests lancés en parallèle).
+  const until=async(ok,what)=>{for(let i=0;i<1500;i++){if(ok())return;await step(1)}assert.fail('délai dépassé : '+what)};
+  // Fenêtre d'échange de l'invitée, redessinée avec la dernière vue reçue de l'hôte.
+  const guestWindow=()=>(guest.run('canaanOpenTrade()'),guest.nodes.get('window').innerHTML);
   // Chacun a de quoi échanger.
   host.run('game.hero.inventory=[{id:"arc-hote",name:"Arc de l’hôte",slot:"weapon",weaponType:"bow",rarity:"Rare",ilvl:26},{id:"anneau-hote",name:"Anneau",slot:"ring",rarity:"Commun",ilvl:1}];P.gold=500');
   host.run(G+'.inventory=[{id:"bottes-lina",name:"Bottes de Lina",slot:"boots",rarity:"Épique",ilvl:46}];'+G+'.player.gold=80;'+G+'.netBag=null');
-  await step(10);
-  assert.equal(guest.run('game.hero.inventory.length'),1);
+  await until(()=>guest.run('game.hero.inventory.length')===1,'sac de l’invitée reçu');
   // Un compagnon local n'est pas un partenaire ; l'invité en ligne, si.
   host.run('CANAAN_GROUP.create("Robot")');
   assert.deepEqual(J(host,'CANAAN_TRADE.view(game.hero).partners.map(p=>p.name)'),['Lina']);
   // L'invitée demande l'échange ; l'hôte le voit et accepte.
-  guest.run('CANAAN_TRADE.actions.request("host")');await step(6);
-  assert.equal(host.run('CANAAN_TRADE.view(game.hero).state'),'incoming');assert.equal(guest.run('CANAAN_TRADE.view===undefined')||true,true);
-  host.run('CANAAN_TRADE.actions.answer(true)');await step(6);
-  // Fenêtre de l'invitée : échange ouvert avec l'hôte.
-  guest.run('toggleTrade()');assert.match(guest.nodes.get('window').innerHTML,/Offre de Hôte/);
+  guest.run('CANAAN_TRADE.actions.request("host")');
+  await until(()=>host.run('CANAAN_TRADE.view(game.hero).state')==='incoming','demande reçue par l’hôte');
+  host.run('CANAAN_TRADE.actions.answer(true)');
+  // Fenêtre de l'invitée : échange ouvert avec l'hôte (elle se redessine à chaque vue reçue).
+  await until(()=>/Offre de Hôte/.test(guestWindow()),'échange ouvert chez l’invitée');
   // Offres : l'invitée propose ses bottes et 30 or, l'hôte son arc.
-  guest.run('CANAAN_TRADE.actions.add(0)');await step(6);
-  guest.run('document.getElementById("tradeGold").value="30";CANAAN_TRADE.actions.gold()');await step(6);
-  host.run('CANAAN_TRADE.actions.add(0)');await step(6);
+  guest.run('CANAAN_TRADE.actions.add(0)');await until(()=>/Ton offre.{0,80}· 1 \//.test(guestWindow()),'bottes dans l’offre vue par l’invitée');
+  guest.run('document.getElementById("tradeGold").value="30";CANAAN_TRADE.actions.gold()');
+  await until(()=>host.run('CANAAN_TRADE.view(game.hero).theirs.gold')===30,'or de l’invitée reçu par l’hôte');
+  host.run('CANAAN_TRADE.actions.add(0)');
   assert.deepEqual(J(host,'CANAAN_TRADE.view(game.hero).theirs.items.map(i=>i.id)'),['bottes-lina']);assert.equal(host.run('CANAAN_TRADE.view(game.hero).theirs.gold'),30);
   // Une offre impossible est refusée par l'hôte (objet absent, or insuffisant).
   assert.equal(host.run(`CANAAN_TRADE.handle(${G},{op:'trade-offer',items:['arc-hote'],gold:0})`),false);
   assert.equal(host.run(`CANAAN_TRADE.handle(${G},{op:'trade-offer',items:['bottes-lina'],gold:9999})`),false);
   // Validation de l'hôte, puis changement de l'offre de l'invitée : les validations tombent.
-  host.run('CANAAN_TRADE.actions.ready()');await step(4);assert.equal(host.run('CANAAN_TRADE.view(game.hero).mine.ready'),true);
-  guest.run('document.getElementById("tradeGold").value="20";CANAAN_TRADE.actions.gold()');await step(6);
+  host.run('CANAAN_TRADE.actions.ready()');assert.equal(host.run('CANAAN_TRADE.view(game.hero).mine.ready'),true);
+  await until(()=>/Offre de Hôte.{0,80}Validé/.test(guestWindow()),'validation de l’hôte vue par l’invitée');
+  guest.run('document.getElementById("tradeGold").value="20";CANAAN_TRADE.actions.gold()');
+  await until(()=>host.run('CANAAN_TRADE.view(game.hero).theirs.gold')===20,'nouvelle offre reçue par l’hôte');
   assert.equal(host.run('CANAAN_TRADE.view(game.hero).mine.ready'),false,'offre changée : validation annulée');
+  await until(()=>!/Validé/.test(guestWindow()),'validations retirées chez l’invitée');
   // Les deux valident : l'échange a lieu chez l'hôte, et le sac de l'invitée suit.
-  host.run('CANAAN_TRADE.actions.ready()');guest.run('CANAAN_TRADE.actions.ready()');await step(10);
-  assert.equal(host.run('CANAAN_TRADE.sessions()'),0);
+  host.run('CANAAN_TRADE.actions.ready()');guest.run('CANAAN_TRADE.actions.ready()');
+  await until(()=>host.run('CANAAN_TRADE.sessions()')===0,'échange conclu chez l’hôte');
   assert.deepEqual(J(host,'game.hero.inventory.map(i=>i.id)'),['anneau-hote','bottes-lina']);
   assert.deepEqual(J(host,G+'.inventory.map(i=>i.id)'),['arc-hote']);
   assert.equal(host.run('P.gold'),520);assert.equal(host.run(G+'.player.gold'),60);
-  assert.deepEqual(J(guest,'game.hero.inventory.map(i=>i.id)'),['arc-hote'],'sac de l’invitée à jour');
+  await until(()=>guest.run('game.hero.inventory.length')===1&&guest.run('game.hero.inventory[0].id')==='arc-hote','sac de l’invitée à jour');
   // Sac plein : l'échange est suspendu, rien ne bouge.
   host.run(G+'.inventory=Array.from({length:20},(_,k)=>({id:"x"+k,name:"Pierre",slot:"ring",rarity:"Commun",ilvl:1}))');
   host.run('CANAAN_TRADE.actions.request("'+id+'")');host.run(`CANAAN_TRADE.handle(${G},{op:'trade-answer',yes:true})`);
