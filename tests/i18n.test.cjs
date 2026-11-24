@@ -93,7 +93,11 @@ test('Traduction au point de passage : texte entier, cœur sans émoji ni ponctu
     // Plusieurs phrases suivies d'un ajout ; un modèle ne déborde pas sur la phrase suivante.
     'Restaure 1 % des PV maximum toutes les 5 secondes en combat. Mana 15.':
       'Restores 1% of maximum HP every 5 seconds in combat. Mana 15.',
-    'Plaines verdoyantes, niveaux 1 à 10': 'Verdant Plains, levels 1 to 10'
+    'Plaines verdoyantes, niveaux 1 à 10': 'Verdant Plains, levels 1 to 10',
+    // Nombres : décimales françaises en point, séparateurs de milliers de la traduction gardés.
+    'étourdit 1,5 s (boss : affaibli)': 'stuns 1.5 s (bosses: weakened)',
+    'Vaincre 1 000 monstres.': 'Defeat 1,000 monsters.',
+    'Subir 1 000 000 de dégâts au total.': 'Take 1,000,000 damage in total.'
   };
   for (const [fr, en] of Object.entries(cases)) assert.equal(translateText(fr), en, fr);
   // Une traduction repassée reste telle quelle ; un texte inconnu est relevé.

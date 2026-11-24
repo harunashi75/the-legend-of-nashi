@@ -4,6 +4,9 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ## [Non publié]
 
+### Corrigé
+- **Grands nombres en anglais** : « Defeat 1,000 monsters » s’affichait « Defeat 1.000 monsters » (succès, hauts faits, descriptions) : la conversion des décimales françaises (« 2,5 s » → « 2.5 s ») prenait aussi les séparateurs de milliers de la traduction. Ils restent maintenant tels quels.
+
 ## [0.12.0] — 2026-11-23
 
 ### Ajouté

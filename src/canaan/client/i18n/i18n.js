@@ -198,8 +198,11 @@ function lookup(text, level = 0) {
 // Ponctuation française autour d'un texte traduit : pas d'espace avant « : ; ! ? » dans les autres langues.
 const punctuation = trail => trail.replace(/^[\s\u00a0\u202f]+(?=[:;!?])/u, '');
 
-// Nombres à l'anglaise dans un texte traduit : « 220 % » → « 220% », « 2,5 s » → « 2.5 s ».
-const typography = text => text.replace(/(\d)[\s\u00a0\u202f]%/g, '$1%').replace(/(\d),(\d)/g, '$1.$2');
+// Nombres à l'anglaise dans un texte traduit : « 220 % » → « 220% », « 2,5 s » → « 2.5 s ». Une virgule suivie
+// d'exactement trois chiffres sépare les milliers de la traduction (« 1,000 monsters ») : elle reste. Le texte
+// français du jeu n'a pas de décimale à trois chiffres.
+const typography = text =>
+  text.replace(/(\d)[\s\u00a0\u202f]%/g, '$1%').replace(/(\d),(?!\d{3}(?!\d))(\d)/g, '$1.$2');
 
 // Texte affiché (interface, info-bulle, canevas) : sa traduction, ou le texte tel quel.
 export function translateText(text) {
