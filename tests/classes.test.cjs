@@ -130,7 +130,7 @@ test('Druide : Sève vitale, forme féline (F) avec ses quatre compétences, Ins
   assert.equal(e.CANAAN_CLASS.audit().shield,10,'la recharge du talent est indépendante de Floraison');
 });
 
-test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, Aura de dévotion et Intervention divine',()=>{
+test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente et Intervention divine',()=>{
   const g=game();g.setClass('paladin',[0]);predictable(g,.99);g.P.mp=100;g.P.hp=10;g.P.mhp=1000;
   const m=mob(1e6);g.monsters=[m];
   // Frappe du croisé : cône de masse, 3 % des PV max rendus (6 % à la troisième en 10 s, avec une onde).
@@ -154,8 +154,6 @@ test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, 
   const z=game();z.setClass('paladin',[5]);z.P.mp=0;z.P.mmp=100;z.P.mhp=1000;z.CANAAN_CLASS_DEFENSE(mob(1),1);
   assert.ok(Math.abs(z.P.mp-7.15)<1e-9,'3 + 0,15 + 4');z.P.mp=100;z.advance(1);
   assert.equal(z.CANAAN_CLASS_MANA_COST('aegis',0,12),12);assert.ok(Math.abs(z.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-115)<1e-9);
-  // Aura de dévotion : 8 de Garde.
-  const a=game();a.setClass(null);const guard=a.characterStats().guard;a.setClass('paladin',[6]);assert.equal(a.characterStats().guard,guard+8);
   // Intervention divine : un coup fatal laisse 1 PV, 3 s d'invulnérabilité et un bouclier de 25 %, une fois par combat.
   const d=game();d.setClass('paladin',[9]);d.P.mhp=100;d.P.hp=10;assert.equal(d.CANAAN_COMBAT.hurt(500,mob(10)),9);assert.equal(d.P.hp,1);
   assert.equal(d.CANAAN_CLASS.audit().shield,25);assert.equal(d.CANAAN_CLASS_DEFENSE(mob(10),30),0,'invulnérable');
@@ -165,6 +163,25 @@ test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, 
   const l=game();l.setClass('paladin',[]);l.P.mp=100;l.P.hp=10;l.P.mhp=100;const g0=l.characterStats().guard;
   assert.equal(l.CANAAN_CLASS.special(),true);assert.equal(l.P.hp,30);assert.equal(l.P.mp,50,'Ferveur : le double du prix en mana');
   assert.equal(l.characterStats().guard,g0+20);
+});
+
+test('Rempart tournoyant : six pulsations mobiles qui frappent tout autour du Paladin',()=>{
+  const g=game();g.setClass('paladin',[6]);predictable(g,.99);g.P.mp=100;
+  const front=mob(1e6),back=mob(1e6),dest=mob(1e6);
+  front.x=100;back.x=-100;dest.x=450;g.monsters=[front,back,dest];
+  g.useSkill(2);
+  assert.equal(g.CANAAN_CLASS.runtime(g.game.hero).shieldOrbitUntil,6);
+  assert.equal(g.CANAAN_WEAPON_DEFENSE(front,100),65,'la protection de Rempart sacré reste active');
+  assert.match(g.canaanSkillTooltip(2),/Rempart tournoyant.*90 %/);
+  g.advance(2);
+  const pulse=1e6-front.hp;
+  assert.ok(pulse>0);
+  assert.equal(back.hp,front.hp,'la pulsation frappe devant et derrière');
+  assert.equal(dest.hp,1e6,'hors du rayon');
+  g.P.x=450;g.advance(360);
+  assert.equal(front.hp,1e6-pulse,'le tourbillon suit le Paladin');
+  assert.equal(dest.hp,1e6-pulse*5,'cinq autres pulsations, pas d’impact supplémentaire par bouclier');
+  g.advance(90);assert.equal(dest.hp,1e6-pulse*5,'terminé');
 });
 
 test('Paladin : dix coups sur le Sceau de lumière soignent dix fois, pendant 6 s',()=>{
@@ -313,4 +330,39 @@ test('Compétences des armes de classe : les 40 compétences se lancent, avec le
     if(c==='druide'){g.P.mp=1000;g.CANAAN_CLASS.special();for(let i=0;i<4;i++){g.P.mp=1000;g.useSkill(i);assert.ok(g.weaponCooldowns['feline:'+i]>0,'feline:'+i);g.advance(30)}}
     assert.ok(m.hp<1e7,c+' : les compétences frappent');
   }
+});
+
+test('Les talents équipés modifient les sorts d’armes sans remplacer leurs quatre emplacements',()=>{
+  const druid=game();druid.setClass('druide',[6]);druid.P.mp=100;
+  const prey=mob(1e6);prey.x=100;druid.mouseWorldX=100;druid.monsters=[prey];
+  assert.equal(druid.CANAAN_CLASS.special(),true);
+  druid.useSkill(1);assert.ok(prey.v1746_bleed>0,'Bond du prédateur applique le saignement');
+
+  const rogue=game();rogue.setClass('assassin',[8]);rogue.P.mp=100;
+  const daggerTarget=mob(1e6);rogue.useSkill(2);rogue.projectiles[0].onHit(daggerTarget);
+  assert.equal(daggerTarget._clsSlow.pct,.4,'Éventail de lames applique le venin paralysant');
+
+  const mage=game();mage.setClass('elementaliste',[4]);mage.P.mp=100;predictable(mage,.99);
+  const conduit=mob(1e6);mage.monsters=[conduit];mage.useSkill(2);mage.advance(20);
+  const first=1e6-conduit.hp;
+  mage.advance(3);assert.ok(first>0&&1e6-conduit.hp>first,'Conducteur frappe de nouveau une cible isolée');
+
+  const bard=game();bard.setClass('barde',[1]);bard.P.mp=100;bard.P.mhp=1000;bard.P.hp=100;
+  bard.useSkill(2);bard.advance(479);
+  const beforeFinale=bard.P.hp;
+  bard.advance(3);assert.equal(bard.P.hp-beforeFinale,79,'pulsation finale avec bonus de soins');
+
+  const hunter=game();hunter.setClass('chasseur',[1]);hunter.P.mp=100;predictable(hunter,.99);
+  const volleyTarget=mob(1e6);hunter.monsters=[volleyTarget];hunter.useSkill(2);hunter.advance(2);
+  const firstVolley=1e6-volleyTarget.hp;
+  hunter.advance(147);const beforeLast=volleyTarget.hp;
+  hunter.advance(5);assert.ok(beforeLast-volleyTarget.hp>2*firstVolley,'la dernière salve est renforcée');
+
+  const warrior=game();warrior.setClass('guerrier',[3]);warrior.P.mp=100;
+  warrior.monsters=[{...mob(1e6),boss:true}];warrior.useSkill(0);warrior.useSkill(3);
+  assert.equal(warrior.weaponCooldowns['dualsword:3'],warrior.WEAPON_SPELLS.dualsword[3][3]-4);
+
+  const berserker=game();berserker.setClass('berserker',[4]);berserker.P.hp=berserker.P.mhp=1000;
+  const wounded=mob(1e6);berserker.monsters=[wounded];berserker.useSkill(2);
+  assert.ok(wounded.v1746_bleed>0,'Hurlement sanguinaire prépare le saignement');
 });

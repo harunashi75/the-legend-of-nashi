@@ -180,6 +180,8 @@ function canaanSkillTooltip(i) {
     '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
   if (rider) lines += '<div class="skill-tip-class">' + esc(rider) + '</div>';
+  for (const [talent, bonus] of CANAAN_CLASS.skillTalents(type, i))
+    lines += '<div class="skill-tip-talent"><b>' + esc(tt(talent)) + '</b> · ' + esc(tt(bonus)) + '</div>';
   const badge = canaanSkillBadge(type, i, st);
   if (badge?.on)
     lines +=

@@ -27,13 +27,13 @@
       balanceFeline: 0,
       balanceUntil: 0,
       symbiosisUntil: 0,
-      // Paladin : Lumière divine reçue, Exaltation (Ferveur ardente), Aura de dévotion, Lumière vengeresse,
+      // Paladin : Lumière divine reçue, Exaltation (Ferveur ardente), Rempart tournoyant, Lumière vengeresse,
       // Intervention divine.
       divineUntil: 0,
       holySeal: null,
       exaltUntil: 0,
       exaltReady: 0,
-      devotionNext: 0,
+      shieldOrbitUntil: 0,
       radiantReady: 0,
       interventionUsed: false,
       invulnUntil: 0,
@@ -137,7 +137,7 @@
       sentence: 3,
       holyground: 4,
       zeal: 5,
-      devotion: 6,
+      orbit: 6,
       martyr: 7,
       radiant: 8,
       intervention: 9
@@ -293,13 +293,6 @@
     if (t < w.veilUntil) s.speed += 30;
     // Lumière divine reçue (d'un Paladin, soi compris).
     if (t < w.divineUntil) s.guard += 20;
-    // Aura de dévotion : un Paladin à moins de 6 cases (soi compris) ; non cumulable.
-    if (
-      game.heroes.some(
-        h => !h.player.dead && on('paladin', 'devotion', h) && (h === me() || near(h.player, HP, 6))
-      )
-    )
-      s.guard += 8;
     // Carapace d'os : au moins deux invocations en jeu.
     if (on('invocateur', 'carapace') && CANAAN_SUMMONS.count(me()) >= 2) s.guard += 10;
     // Mélodie vivifiante reçue (d'un Barde, soi compris).
@@ -862,6 +855,24 @@
     if (el.name === 'Glace') return '❄️ Glace : ralentit les cibles de 30 % pendant 2,5 s.';
     return '⚡ Foudre : chaque coup rebondit sur 2 ennemis proches (35 % des dégâts).';
   }
+  // Talents affichés dans l'info-bulle des compétences qu'ils modifient directement.
+  const SPELL_TALENTS = {
+    wildstaff: [['thornlash'], ['bloom', 'bark'], ['spores'], ['wrath']],
+    feline: [['bleeds'], ['predator'], ['bark'], ['bleeds']],
+    aegis: [['crusade'], ['radiantSeal'], ['bastion', 'orbit'], ['sentence', 'holyground']],
+    dualdagger: [['crippling', 'phantom'], ['assassinate'], ['fan', 'crippling'], ['rending', 'phantom']],
+    staff: [['combustion'], ['winter', 'frost'], ['conductor', 'static'], ['twin']],
+    lute: [['piercing'], ['counter'], ['ballad'], ['finale']],
+    bow: [['aimed', 'disengage'], ['prey'], ['torrent'], ['falconer']],
+    dualsword: [['honed'], ['cyclone'], ['unstoppable'], ['coupdegrace']],
+    greataxe: [[], ['butcher'], ['lastStand', 'bloodletting'], ['hunger']]
+  };
+  function skillTalents(type, i, hero = game.hero) {
+    const c = def(hero);
+    if (!c) return [];
+    const keys = SPELL_TALENTS[type]?.[i] || [];
+    return keys.filter(key => on(c.id, key, hero)).map(key => c.talents[T[c.id][key]]);
+  }
   // Attaques de base plus rapides : forme féline, Rage écarlate, Frénésie, Œil du faucon, Élan.
   window.CANAAN_CLASS_BASIC_LOCK = forHero(() => {
     const t = now();
@@ -1340,16 +1351,12 @@
     }
     if (w.scars > 0 && t >= w.scarsUntil) w.scars = 0;
     if (w.momentum > 0 && t >= w.momentumUntil) w.momentum = 0;
-    // Paladin : Ferveur ardente (Exaltation à 100 de Ferveur) et Aura de dévotion (1 % des PV toutes les 2 s).
+    // Paladin : Ferveur ardente (Exaltation à 100 de Ferveur).
     if (on('paladin', 'zeal') && HP.mp >= HP.mmp && HP.mmp > 0 && t >= w.exaltReady) {
       w.exaltUntil = t + 6;
       w.exaltReady = t + 20;
       fx('holyPillar', HP.x, HP.y, 50, '#ffd76a', 0.8);
       float(HP.x, HP.y - 70, '☀️ EXALTATION', '#ffd76a');
-    }
-    if (on('paladin', 'devotion') && fighting && t >= w.devotionNext) {
-      w.devotionNext = t + 2;
-      for (const h of groupAround(6)) applyHeal(h.player.mhp * 0.01, true, h, me());
     }
     // Pacte de sang : sous 35 % de PV, la plus ancienne invocation est sacrifiée pour 15 % des PV max.
     if (
@@ -1443,6 +1450,8 @@
       const r = runtime(hero),
         t = now();
       if (p.shielded) CANAAN_VFX.drawShield(ctx, p, time);
+      const orbit = game.mode === 'guest' ? p.shieldOrbit : r.shieldOrbitUntil - t;
+      if (orbit > 0) CANAAN_VFX.drawShieldOrbit(ctx, p, time, orbit);
       // Auras : notes de l'Hymne, sang de la Rage, sève du félin, œil du faucon, acier de la Volonté de fer.
       if (t < r.hymnUntil) CANAAN_VFX.aura(p, 'notes', time);
       if (raging(hero)) CANAAN_VFX.aura(p, 'blood', time);
@@ -1906,6 +1915,7 @@
     setClasse,
     decorateSkillBar,
     skillRider,
+    skillTalents,
     promptClass,
     giveShield,
     // Invocateur (summons.js) : Peste, talents, vitesse des invocations (Contagion) et explosions.

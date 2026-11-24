@@ -296,6 +296,7 @@
         // Arme tenue et visée (centièmes de radian), pour dessiner l'arme et son attaque chez chacun.
         wpn: hero.equipment?.weapon?.weaponType || '',
         aim: Math.round(CANAAN_WEAPON_LOOK.aimOf(hero, hero.player) * 100),
+        shieldOrbit: Math.max(0, Math.ceil((CANAAN_CLASS.runtime(hero).shieldOrbitUntil - time / 60) * 10)),
         // Travail en cours (miner, cueillir, forger, cuisiner) : animation vue par les autres.
         act: (w => (w ? [w.kind, w.p, w.tx, w.ty, w.node] : 0))(CANAAN_GATHER.workView(hero)),
         level: clampLevel(hero.level),
@@ -714,6 +715,7 @@
       p.form = h.form ? 'feral' : null;
       p.veiled = !!h.veil;
       p.shielded = h.shield ? 1 : 0;
+      p.shieldOrbit = Math.max(0, h.shieldOrbit | 0) / 10;
       hero.questLook = Number(h.q) || 0;
       hero.achTitle = typeof h.ttl === 'string' ? h.ttl.slice(0, 40) : '';
       hero.achAura = h.aur === 1;

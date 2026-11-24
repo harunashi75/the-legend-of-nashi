@@ -427,9 +427,12 @@
     return z;
   }
   // Remet à zéro la recharge d'une compétence d'un héros (Coup de grâce, Assassinat, Boucherie).
+  function reduceCooldown(hero, key, seconds) {
+    const cds = hero === game.hero ? weaponCooldowns : skillStateOf(hero).cooldowns;
+    cds[key] = Math.max(0, (cds[key] || 0) - seconds);
+  }
   function resetCooldown(hero, key) {
-    if (hero === game.hero) weaponCooldowns[key] = 0;
-    else skillStateOf(hero).cooldowns[key] = 0;
+    reduceCooldown(hero, key, Infinity);
   }
   // Postures du héros touché (l'hôte par défaut) : Hurlement, Rempart sacré (Bastion : 40 % des dégâts évités
   // renvoyés), Venin mortel (cible qui saigne : −10 %).
@@ -1095,7 +1098,17 @@
           // Bond du prédateur : saut jusqu'à la souris, griffes à l'atterrissage, étourdit les monstres.
           const spot = groundTarget();
           dash(Math.min(TS * 5, Math.hypot(spot.x - AP.x, spot.y - AP.y)), a, 'pounceTrail');
-          circle(TS * 1.8, 2.2, m => stun(m, 1), 'pounceLand');
+          const predator = talent('druide', 'predator'),
+            deep = talent('druide', 'bleeds') ? 1.4 : 1;
+          circle(
+            TS * 1.8,
+            2.2,
+            m => {
+              stun(m, 1);
+              if (predator) bleed(m, 4, power() * 0.45 * deep);
+            },
+            'pounceLand'
+          );
         }
         if (i === 2) {
           // Rugissement sauvage : 8 % des PV et attaques de base plus rapides et plus fortes 6 s.
@@ -1151,6 +1164,20 @@
           for (const h of groupNear(6)) CANAAN_CLASS.giveShield(h, h.player.mhp * 0.12, 6, '🏰 Bouclier');
           effect('aegisWall', AP.x, AP.y, a, TS * 2, 0, '#ffe4a2', 1.2);
           float(AP.x, AP.y - 65, '🏰 REMPART SACRÉ', '#ffe4a2');
+          if (talent('paladin', 'orbit')) {
+            const until = time / 60 + 6;
+            CANAAN_CLASS.runtime(actor).shieldOrbitUntil = until;
+            rep(6, 1, j => {
+              if (
+                actor.away ||
+                !game.heroes.includes(actor) ||
+                CANAAN_CLASS.runtime(actor).shieldOrbitUntil !== until
+              )
+                return;
+              effect('shieldPulse', AP.x, AP.y, j, TS * 3, 0, '#ffe08a', 0.65);
+              for (const m of around(AP.x, AP.y, TS * 3)) dmg(m, 0.9, false, { periodic: true });
+            });
+          }
         }
         if (i === 3) {
           // Marteau du Jugement : marteau de lumière sous la souris, puis sol consacré (Sentence, Terre sainte).
@@ -1233,6 +1260,7 @@
         if (i === 2) {
           // Éventail de lames : dagues en éventail qui font saigner (Lames jumelles : 8 dagues qui reviennent).
           const twin = talent('assassin', 'fan'),
+            crippling = talent('assassin', 'crippling'),
             n = twin ? 8 : 5,
             spread = twin ? 0.9 : 0.6;
           for (let k = 0; k < n; k++)
@@ -1243,6 +1271,7 @@
               flash: k === 0,
               onHit: m => {
                 bleed(m, 4, power() * 0.2);
+                if (crippling) CANAAN_CLASS.slow(actor, m, 0.4, 3, 'shadow');
                 if (twin)
                   later(0.3, () => {
                     if (m.hp <= 0) return;
@@ -1350,6 +1379,14 @@
             target = nearestTo(spot.x, spot.y, TS * 9),
             factor = 1;
           if (!target) effect('lightning', prev.x, prev.y, a, TS * 6, 0, '#f4f07a', 0.3);
+          if (conductor && target) {
+            const first = target;
+            later(0.35, () => {
+              if (first.hp <= 0) return;
+              effect('skybolt', first.x, first.y, 0, 44, 0, '#f4f07a', 0.55);
+              dmg(first, 1.5, true);
+            });
+          }
           for (let k = 0; target && k <= (conductor ? 7 : 4); k++) {
             const tgt = target,
               from = prev,
@@ -1440,6 +1477,11 @@
           rep(ticks, 1, () => {
             for (const h of groupNear(6)) healHero(h, h.player.mhp * 0.02);
           });
+          if (ticks === 8)
+            later(ticks, () => {
+              effect('healSong', AP.x, AP.y, 0, TS * 6, 0, '#ffc2e4', 1);
+              for (const h of groupNear(6)) healHero(h, h.player.mhp * 0.06);
+            });
         }
         if (i === 3) {
           // Symphonie : 5 ondes en 2 s là où tu vises (Grand final : un accord final à 300 % qui soigne 15 %).
@@ -1507,9 +1549,11 @@
             { x, y } = groundTarget(),
             r = 115;
           effect('rainMark', x, y, 0, r, 0, '#e8c27a', torrent ? 3.2 : 2.2);
-          rep(torrent ? 6 : 4, 0.5, () => {
+          rep(torrent ? 6 : 4, 0.5, j => {
             effect('arrowRain', x, y, 0, r, 0, '#e8c27a', 0.6);
-            area(x, y, r, 0.9, m => torrent && CANAAN_CLASS.slow(actor, m, 0.4, 1.5, 'wild'));
+            const final = torrent && j === 5;
+            if (final) effect('groundSmash', x, y, 0, r, 0, '#ffe493', 0.7);
+            area(x, y, r, final ? 2 : 0.9, m => torrent && CANAAN_CLASS.slow(actor, m, 0.4, 1.5, 'wild'));
           });
         }
         if (i === 3) {
@@ -1570,17 +1614,21 @@
         if (i === 3) {
           // Exécution croisée : 500 % (600 % en combo), ×1,5 sous 35 % (Coup de grâce : recharge remise à zéro).
           const boosted = S.combo > 0;
-          let killed = false;
+          let killed = false,
+            hitTarget = false;
           arc(145, a, Math.PI / 2.2, '#e8f0ff', 'crossSlash');
           for (const m of targets(145, a, Math.PI / 2.2)) {
-            dmg(m, (boosted ? 6 : 5) * (m.hp / m.mhp < 0.35 ? 1.5 : 1));
+            const dealt = dmg(m, (boosted ? 6 : 5) * (m.hp / m.mhp < 0.35 ? 1.5 : 1));
+            if (dealt > 0) hitTarget = true;
             if (m.hp <= 0) killed = true;
           }
           if (boosted) float(AP.x, AP.y - 60, 'COMBO !', '#e8f0ff');
           S.combo = 0;
-          if (killed && talent('guerrier', 'coupdegrace')) {
-            resetCooldown(actor, 'dualsword:3');
-            float(AP.x, AP.y - 74, '⚔️ COUP DE GRÂCE', '#e8f0ff');
+          if (talent('guerrier', 'coupdegrace')) {
+            if (killed) {
+              resetCooldown(actor, 'dualsword:3');
+              float(AP.x, AP.y - 74, '⚔️ COUP DE GRÂCE', '#e8f0ff');
+            } else if (boosted && hitTarget) reduceCooldown(actor, 'dualsword:3', 4);
           }
         }
         break;
@@ -1628,7 +1676,11 @@
           S.berserk = 6;
           effect('roar', AP.x, AP.y, a, TS * 4, 0, col, 0.7);
           float(AP.x, AP.y - 42, '💢 HURLEMENT : DÉGÂTS +25 %', '#ff8a96');
-          for (const m of around(AP.x, AP.y, TS * 4)) debuff(m, 'weak', 4);
+          const bloodletting = talent('berserker', 'bloodletting');
+          for (const m of around(AP.x, AP.y, TS * 4)) {
+            debuff(m, 'weak', 4);
+            if (bloodletting) bleed(m, 4, power() * 0.4);
+          }
         }
         if (i === 3) {
           // Châtiment du sang : renforcé pendant le Hurlement (Curée : consume les saignements).

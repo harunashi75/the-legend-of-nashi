@@ -1674,6 +1674,17 @@
         runeCircle(c, x, y, Math.min(r, 140), col, now, t);
         break;
       }
+      case 'shieldPulse': {
+        const wave = r * (0.3 + 0.7 * ease(age));
+        c.globalCompositeOperation = 'lighter';
+        runeCircle(c, x, y, wave, '#ffe08a', now * 0.8, 0.8 * t);
+        c.strokeStyle = rgba('#fff5d3', 0.7 * t);
+        c.lineWidth = 3 * t + 1;
+        c.beginPath();
+        c.ellipse(x, y, wave, wave * 0.58, 0, 0, TAU);
+        c.stroke();
+        break;
+      }
       case 'aegisWall': {
         // Égide de lumière : demi-dôme doré aux hexagones.
         c.globalCompositeOperation = 'lighter';
@@ -1997,6 +2008,69 @@
     c.moveTo(-4, -1);
     c.lineTo(4, -1);
     c.stroke();
+    c.restore();
+  }
+  // Les trois écus suivent le porteur. L'ellipse au sol et les traînées donnent de la profondeur à l'orbite.
+  function drawShieldOrbit(c, p, frame, left) {
+    const angle = frame * 0.1,
+      fade = Math.min(1, left * 4),
+      radius = 70;
+    c.save();
+    runeCircle(c, p.x, p.y, radius, '#ffe08a', angle * 0.6, 0.65 * fade);
+    const shields = [0, 1, 2].map(i => {
+      const a = angle + (i * TAU) / 3;
+      return { a, depth: Math.sin(a) };
+    });
+    shields.sort((a, b) => a.depth - b.depth);
+    for (const { a, depth } of shields) {
+      const x = p.x + Math.cos(a) * radius,
+        y = p.y - 22 + depth * 37;
+      c.save();
+      c.globalAlpha = fade;
+      c.globalCompositeOperation = 'lighter';
+      for (let i = 1; i <= 7; i++) {
+        const trail = a - i * 0.085;
+        soft(
+          c,
+          p.x + Math.cos(trail) * radius,
+          p.y - 22 + Math.sin(trail) * 37,
+          10 + i,
+          rgba('#f6c45d', 0.22 * (1 - i / 8)),
+          rgba('#f6c45d', 0)
+        );
+      }
+      soft(c, x, y, 30, rgba('#ffe08a', 0.42), rgba('#ffe08a', 0));
+      c.globalCompositeOperation = 'source-over';
+      c.translate(x, y);
+      const scale = 0.92 + depth * 0.17;
+      c.scale(scale, scale);
+      c.rotate(Math.cos(a) * 0.27);
+      const enamel = c.createLinearGradient(-12, -9, 10, 12);
+      enamel.addColorStop(0, '#76b7ed');
+      enamel.addColorStop(0.45, '#406cb2');
+      enamel.addColorStop(1, '#253a72');
+      c.fillStyle = enamel;
+      c.strokeStyle = '#ffdf86';
+      c.lineWidth = 2.5;
+      c.beginPath();
+      c.moveTo(0, -15);
+      c.quadraticCurveTo(7, -11, 13, -12);
+      c.quadraticCurveTo(12, 9, 0, 16);
+      c.quadraticCurveTo(-12, 9, -13, -12);
+      c.quadraticCurveTo(-7, -11, 0, -15);
+      c.closePath();
+      c.fill();
+      c.stroke();
+      c.strokeStyle = '#fff4c7';
+      c.lineWidth = 1.7;
+      c.beginPath();
+      c.moveTo(0, -9);
+      c.lineTo(0, 9);
+      c.moveTo(-7, -3);
+      c.lineTo(7, -3);
+      c.stroke();
+      c.restore();
+    }
     c.restore();
   }
   // Bouclier d'un héros : bulle de lumière bleutée qui ondule.
@@ -2509,6 +2583,7 @@
     drawMark,
     drawHolySeal,
     drawShield,
+    drawShieldOrbit,
     aura,
     projectile,
     emit,

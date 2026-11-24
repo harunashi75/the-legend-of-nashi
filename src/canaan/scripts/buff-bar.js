@@ -47,6 +47,12 @@
       ['balanceUntil', '🌿', 'Équilibre sauvage', 'Dégâts +25 %.'],
       ['symbiosisUntil', '🌿', 'Symbiose', 'Dégâts +10 %.'],
       ['divineUntil', '✨', 'Lumière divine', 'Dégâts reçus −20 %.'],
+      [
+        'shieldOrbitUntil',
+        '🛡',
+        'Rempart tournoyant',
+        'Trois boucliers infligent des dégâts sacrés autour de toi.'
+      ],
       ['exaltUntil', '☀', 'Exaltation', 'Compétences à moitié prix, dégâts +15 %.'],
       ['invulnUntil', '✨', 'Intervention divine', 'Invulnérable.'],
       ['veilUntil', '🌑', 'Voile d’ombre', 'Invisible, vitesse +30 %.'],

@@ -5652,8 +5652,8 @@ export default {
   'Tes saignements de forme féline infligent 40 % de plus ; Morsure féroce consume les saignements de sa cible : 150 % de ce qu’il leur restait à faire, d’un coup.':
     'Your cat form bleeds deal 40% more; Ferocious bite consumes its target’s bleeds: 150% of what they had left to deal, at once.',
   'Cœur du prédateur': 'Predator’s heart',
-  'En forme féline, chaque coup critique te soigne de 2 % de tes PV max et réduit d’1 s la recharge du Bond du prédateur.':
-    'In cat form, each critical hit heals you for 2% of max HP and reduces Predator’s leap cooldown by 1 s.',
+  'En forme féline, chaque coup critique te soigne de 2 % de tes PV max et réduit d’1 s la recharge du Bond du prédateur. Bond du prédateur fait aussi saigner ses cibles à l’arrivée pour 45 % de ta Puissance par seconde pendant 4 s.':
+    'In cat form, each critical hit heals you for 2% of your max HP and reduces Predator’s leap cooldown by 1 s. Predator’s leap also bleeds targets on landing for 45% of your Power per second over 4 s.',
   'Soigner un allié te rend 25 % du soin et lui donne +10 % de dégâts pendant 4 s.':
     'Healing an ally gives you 25% of the heal and grants them +10% damage for 4 s.',
   'Après 3 compétences de nature, entrer en forme féline donne +25 % de dégâts pendant 8 s ; après 3 compétences félines, reprendre forme normale soigne ton groupe proche de 15 % des PV max.':
@@ -5678,9 +5678,9 @@ export default {
   'Ferveur ardente': 'Burning fervour',
   'Chaque coup reçu te donne 4 Ferveur de plus ; à 100 de Ferveur, tu entres en Exaltation : compétences à moitié prix et +15 % de dégâts pendant 6 s. Recharge : 20 s.':
     'Each hit taken grants 4 more Fervour; at 100 Fervour, you enter Exaltation: skills at half cost and +15% damage for 6 s. Cooldown: 20 s.',
-  'Aura de dévotion': 'Devotion aura',
-  'Toi et tes alliés à moins de 6 cases subissez 8 % de dégâts en moins et récupérez 1 % des PV max toutes les 2 s en combat. Non cumulable.':
-    'You and your allies within 6 tiles take 8% less damage and recover 1% of max HP every 2 s in combat. Does not stack.',
+  'Rempart tournoyant': 'Whirling rampart',
+  'Rempart sacré fait tournoyer 3 boucliers autour de toi pendant 6 s. Toutes les secondes, les ennemis à moins de 3 cases subissent des dégâts sacrés égaux à 90 % de ta Puissance (540 % sur 6 s).':
+    'Holy rampart spins 3 shields around you for 6 s. Each second, enemies within 3 tiles take holy damage equal to 90% of your Power (540% over 6 s).',
   'Martyr': 'Martyr',
   'Tes alliés à moins de 6 cases subissent 20 % de dégâts en moins : tu en encaisses la moitié à leur place.':
     'Your allies within 6 tiles take 20% less damage: you take half of it in their place.',
@@ -5708,8 +5708,8 @@ export default {
   'Un double d’ombre accompagne Entaille et Mille coupures : il répète leurs coups à 40 %.':
     'A shadow double accompanies Gash and Thousand cuts: it repeats their hits at 40%.',
   'Venin paralysant': 'Crippling venom',
-  'Entaille ralentit de 40 % pendant 3 s ; les ennemis ralentis subissent 12 % de dégâts en plus de ta part.':
-    'Gash slows by 40% for 3 s; slowed enemies take 12% more damage from you.',
+  'Entaille et Éventail de lames ralentissent les ennemis touchés de 40 % pendant 3 s. Tu infliges 12 % de dégâts en plus aux ennemis que tu as ralentis.':
+    'Gash and Fan of blades slow enemies hit by 40% for 3 s. You deal 12% more damage to enemies you have slowed.',
   'Après 3 coups critiques, ta prochaine compétence offensive fait +40 % et ne coûte pas d’Énergie. Recharge : 12 s.':
     'After 3 critical hits, your next offensive skill deals +40% and costs no Energy. Cooldown: 12 s.',
   'Boule de feu, nova de givre, chaîne d’éclairs et météore':
@@ -5727,8 +5727,8 @@ export default {
   'Un ennemi gelé ou ralenti par ta glace qui subit du feu ou de la foudre se brise : +50 % de dégâts, et des éclats (60 % de l’Attaque) frappent les ennemis à 2 cases. Une fois par gel.':
     'An enemy frozen or slowed by your ice that takes fire or lightning shatters: +50% damage, and shards (60% of Attack) hit enemies within 2 tiles. Once per freeze.',
   'Conducteur': 'Conductor',
-  'Chaîne d’éclairs rebondit 3 fois de plus et ne perd plus de dégâts à chaque rebond.':
-    'Chain lightning bounces 3 more times and no longer loses damage on each bounce.',
+  'Chaîne d’éclairs rebondit 3 fois de plus et garde tous ses dégâts à chaque rebond. Un éclair supplémentaire frappe la première cible pour 150 % de ta Puissance magique en dégâts de foudre.':
+    'Chain lightning bounces 3 more times and retains full damage on each bounce. A bonus bolt strikes the first target for 150% of your Spell Power as lightning damage.',
   'Électricité statique': 'Static electricity',
   'Chaque coup de foudre pose une charge statique ; à 5 charges, la cible est frappée par la foudre céleste : 300 % de l’Attaque.':
     'Each lightning hit applies a static charge; at 5 charges, the target is struck by celestial lightning: 300% of Attack.',
@@ -5741,8 +5741,8 @@ export default {
     'Each offensive skill heals the most wounded ally within 8 tiles (you included) for 20% of the damage dealt; each utility skill heals your nearby group for 10% of their max HP. Your healing is increased by 10%.',
   'Chaque compétence offensive augmente tes dégâts et tes soins de 4 %, jusqu’à 20 %, pendant 8 secondes.':
     'Each offensive skill increases your damage and healing by 4%, up to 20%, for 8 seconds.',
-  'Tes soins sont augmentés de 20 % et Chant de guérison dure 3 s de plus.':
-    'Your healing is increased by 20% and Healing song lasts 3 s longer.',
+  'Tes soins sont augmentés de 20 %. Chant de guérison dure 3 s de plus et se termine par une pulsation qui rend 6 % de leurs PV max aux héros du groupe à moins de 6 cases.':
+    'Your healing is increased by 20%. Healing song lasts 3 s longer and ends with a pulse that restores 6% of max HP to party members within 6 tiles.',
   'Tes soins donnent à leur cible (toi compris) +15 % de vitesse et +8 % de dégâts pendant 5 s.':
     'Your heals grant their target (you included) +15% speed and +8% damage for 5 s.',
   'Les ennemis touchés par tes compétences offensives subissent 10 % de dégâts en plus, de toi et de ton groupe, pendant 6 s.':
@@ -5758,8 +5758,8 @@ export default {
     'Healing beyond max HP becomes a shield, up to 15% of the target’s max HP for 6 seconds.',
   'Tuer un ennemi réduit de 3 s les recharges de tes compétences, et tes attaques de base sont 15 % plus rapides pendant 5 s.':
     'Killing an enemy reduces your skill cooldowns by 3 s, and your basic attacks are 15% faster for 5 s.',
-  'Tes compétences offensives font saigner leurs cibles : 40 % des dégâts infligés, en plus, sur 4 secondes.':
-    'Your offensive skills make their targets bleed: 40% of the damage dealt, extra, over 4 seconds.',
+  'Tes compétences offensives font saigner leurs cibles pour 40 % des dégâts infligés sur 4 s. Hurlement sanguinaire fait aussi saigner les ennemis à moins de 4 cases pour 40 % de ta Puissance par seconde pendant 4 s.':
+    'Your offensive skills bleed their targets for 40% of their damage over 4 s. Bloodthirsty roar also bleeds enemies within 4 tiles for 40% of your Power per second over 4 s.',
   'Tu infliges 20 % de dégâts en plus aux ennemis qui saignent ; Châtiment du sang consume leurs saignements (150 % de ce qu’il leur restait à faire).':
     'You deal 20% more damage to bleeding enemies; Blood punishment consumes their bleeds (150% of what they had left to deal).',
   'Chaque fois que tu as dépensé 20 % de tes PV maximum pour tes compétences, ton sang explose : 200 % de l’Attaque aux ennemis à moins de 3 cases.':
@@ -5782,8 +5782,8 @@ export default {
   'Tir perçant fait +40 % contre une cible marquée, et il est toujours critique contre une cible à plus de 8 cases.':
     'Piercing shot deals +40% to a marked target, and is always critical against a target more than 8 tiles away.',
   'Pluie torrentielle': 'Torrential rain',
-  'Volée de flèches tire 6 salves au lieu de 4, et ralentit les ennemis touchés de 40 %.':
-    'Arrow volley fires 6 salvoes instead of 4, and slows enemies hit by 40%.',
+  'Volée de flèches tire 6 salves au lieu de 4. Chaque salve ralentit les ennemis touchés de 40 %. La dernière salve inflige des dégâts égaux à 200 % de ta Puissance au lieu de 90 %.':
+    'Arrow volley fires 6 volleys instead of 4. Each volley slows enemies hit by 40%. The final volley deals damage equal to 200% of your Power, up from 90%.',
   'Proie désignée': 'Designated prey',
   'Ta Marque fait subir 25 % de dégâts en plus au lieu de 15 % ; quand sa cible meurt, la Marque saute sur l’ennemi le plus proche.':
     'Your Mark makes its target take 25% more damage instead of 15%; when its target dies, the Mark jumps to the nearest enemy.',
@@ -5820,8 +5820,8 @@ export default {
   'Charge héroïque étourdit 1,5 s les monstres touchés (un boss est affaibli) et te donne 5 Élans d’un coup.':
     'Heroic charge stuns monsters hit for 1.5 s (a boss is weakened) and grants you 5 Momentum at once.',
   'Coup de grâce': 'Coup de grâce',
-  'Si Exécution croisée tue un ennemi, sa recharge est aussitôt remise à zéro.':
-    'If Cross execution kills an enemy, its cooldown is reset at once.',
+  'Exécution croisée réduit sa recharge de 4 s quand elle touche en combo. Si elle tue un ennemi, sa recharge est remise à zéro.':
+    'Cross execution reduces its cooldown by 4 s when it lands with the combo active. Killing an enemy resets its cooldown.',
   'Ambidextrie': 'Ambidexterity',
   'Tes attaques de base frappent deux fois : la seconde lame fait 40 % de la première.':
     'Your basic attacks strike twice: the second blade deals 40% of the first.',
@@ -6121,5 +6121,6 @@ export default {
   'Prochaine compétence offensive : +25 % de dégâts.': 'Your next offensive skill deals 25% more damage.',
   'Prochaine compétence offensive : +30 % de dégâts.': 'Your next offensive skill deals 30% more damage.',
   'Ta prochaine compétence féline est critique.': 'Your next cat skill is a critical hit.',
-  'Invulnérable pendant la roulade.': 'Invulnerable during the dodge roll.'
+  'Invulnérable pendant la roulade.': 'Invulnerable during the dodge roll.',
+  'Trois boucliers infligent des dégâts sacrés autour de toi.': 'Three shields deal holy damage around you.'
 };

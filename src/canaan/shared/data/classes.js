@@ -134,7 +134,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Cœur du prédateur',
-        'En forme féline, chaque coup critique te soigne de 2 % de tes PV max et réduit d’1 s la recharge du Bond du prédateur.'
+        'En forme féline, chaque coup critique te soigne de 2 % de tes PV max et réduit d’1 s la recharge du Bond du prédateur. Bond du prédateur fait aussi saigner ses cibles à l’arrivée pour 45 % de ta Puissance par seconde pendant 4 s.'
       ],
       ['Symbiose', 'Soigner un allié te rend 25 % du soin et lui donne +10 % de dégâts pendant 4 s.'],
       [
@@ -196,8 +196,8 @@ export const CLASSES = deepFreeze([
         'Chaque coup reçu te donne 4 Ferveur de plus ; à 100 de Ferveur, tu entres en Exaltation : compétences à moitié prix et +15 % de dégâts pendant 6 s. Recharge : 20 s.'
       ],
       [
-        'Aura de dévotion',
-        'Toi et tes alliés à moins de 6 cases subissez 8 % de dégâts en moins et récupérez 1 % des PV max toutes les 2 s en combat. Non cumulable.'
+        'Rempart tournoyant',
+        'Rempart sacré fait tournoyer 3 boucliers autour de toi pendant 6 s. Toutes les secondes, les ennemis à moins de 3 cases subissent des dégâts sacrés égaux à 90 % de ta Puissance (540 % sur 6 s).'
       ],
       [
         'Martyr',
@@ -265,7 +265,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Venin paralysant',
-        'Entaille ralentit de 40 % pendant 3 s ; les ennemis ralentis subissent 12 % de dégâts en plus de ta part.'
+        'Entaille et Éventail de lames ralentissent les ennemis touchés de 40 % pendant 3 s. Tu infliges 12 % de dégâts en plus aux ennemis que tu as ralentis.'
       ],
       [
         'Ombre meurtrière',
@@ -311,7 +311,10 @@ export const CLASSES = deepFreeze([
         'Éclats de glace',
         'Un ennemi gelé ou ralenti par ta glace qui subit du feu ou de la foudre se brise : +50 % de dégâts, et des éclats (60 % de l’Attaque) frappent les ennemis à 2 cases. Une fois par gel.'
       ],
-      ['Conducteur', 'Chaîne d’éclairs rebondit 3 fois de plus et ne perd plus de dégâts à chaque rebond.'],
+      [
+        'Conducteur',
+        'Chaîne d’éclairs rebondit 3 fois de plus et garde tous ses dégâts à chaque rebond. Un éclair supplémentaire frappe la première cible pour 150 % de ta Puissance magique en dégâts de foudre.'
+      ],
       [
         'Électricité statique',
         'Chaque coup de foudre pose une charge statique ; à 5 charges, la cible est frappée par la foudre céleste : 300 % de l’Attaque.'
@@ -418,7 +421,10 @@ export const CLASSES = deepFreeze([
         'Crescendo',
         'Chaque compétence offensive augmente tes dégâts et tes soins de 4 %, jusqu’à 20 %, pendant 8 secondes.'
       ],
-      ['Ballade réparatrice', 'Tes soins sont augmentés de 20 % et Chant de guérison dure 3 s de plus.'],
+      [
+        'Ballade réparatrice',
+        'Tes soins sont augmentés de 20 %. Chant de guérison dure 3 s de plus et se termine par une pulsation qui rend 6 % de leurs PV max aux héros du groupe à moins de 6 cases.'
+      ],
       [
         'Contre-chant',
         'Accord dissonant protège aussi ton groupe. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier de 15 % de vos PV max pendant 5 s.'
@@ -491,7 +497,7 @@ export const CLASSES = deepFreeze([
       ['Peau de fer', 'Gagne 10 points de Garde en permanence. Tes compétences coûtent 20 % de PV en moins.'],
       [
         'Saignée',
-        'Tes compétences offensives font saigner leurs cibles : 40 % des dégâts infligés, en plus, sur 4 secondes.'
+        'Tes compétences offensives font saigner leurs cibles pour 40 % des dégâts infligés sur 4 s. Hurlement sanguinaire fait aussi saigner les ennemis à moins de 4 cases pour 40 % de ta Puissance par seconde pendant 4 s.'
       ],
       [
         'Curée',
@@ -542,7 +548,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Pluie torrentielle',
-        'Volée de flèches tire 6 salves au lieu de 4, et ralentit les ennemis touchés de 40 %.'
+        'Volée de flèches tire 6 salves au lieu de 4. Chaque salve ralentit les ennemis touchés de 40 %. La dernière salve inflige des dégâts égaux à 200 % de ta Puissance au lieu de 90 %.'
       ],
       [
         'Fauconnier',
@@ -611,7 +617,10 @@ export const CLASSES = deepFreeze([
         'Élan imparable',
         'Charge héroïque étourdit 1,5 s les monstres touchés (un boss est affaibli) et te donne 5 Élans d’un coup.'
       ],
-      ['Coup de grâce', 'Si Exécution croisée tue un ennemi, sa recharge est aussitôt remise à zéro.'],
+      [
+        'Coup de grâce',
+        'Exécution croisée réduit sa recharge de 4 s quand elle touche en combo. Si elle tue un ennemi, sa recharge est remise à zéro.'
+      ],
       ['Ambidextrie', 'Tes attaques de base frappent deux fois : la seconde lame fait 40 % de la première.'],
       [
         'Second souffle',

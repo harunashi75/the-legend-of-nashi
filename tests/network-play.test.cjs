@@ -175,6 +175,14 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   host.run('time+=360');await step(12);
   assert.equal(guest.run('game.world.monsters.some(m=>m.holySeal===1)'),false,'marque retirée chez l’invité');
   assert.equal(guest.run('CANAAN_BUFF_BAR.list().some(e=>e.id==="cls-seal")'),false,'effet local retiré chez l’invité');
+  host.run(G+'.classe.talents.push(6);'+G+'.player.mp=100;globalThis.hpBeforeOrbit=sealTarget.hp');
+  guest.run('useSkill(2)');await step(18);
+  assert.ok(host.run('sealTarget.hp<hpBeforeOrbit'),'le tourbillon de l’invité frappe chez l’hôte');
+  assert.ok(guest.run('P.shieldOrbit>0'),'durée de l’orbite reçue pour le rendu');
+  assert.doesNotThrow(()=>guest.run('CANAAN_VFX.drawShieldOrbit(ctx,P,time,P.shieldOrbit)'));
+  assert.ok(guest.run('CANAAN_BUFF_BAR.list().some(e=>e.name==="Rempart tournoyant")'),'effet visible chez l’invité');
+  host.run('time+=360');await step(12);
+  assert.equal(guest.run('P.shieldOrbit'),0);
   assert.equal(host.errors.length+guest.errors.length,0,host.errors.concat(guest.errors).join('\n'));
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });

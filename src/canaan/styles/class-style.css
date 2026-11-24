@@ -390,6 +390,11 @@
   color: #c8f0b8;
   line-height: 1.4;
 }
+#gearHoverTooltip .skill-tip-talent {
+  margin-top: 6px;
+  color: #ffe2a3;
+  line-height: 1.4;
+}
 #gearHoverTooltip .skill-tip-state {
   margin-top: 6px;
   color: #e3c8ff;

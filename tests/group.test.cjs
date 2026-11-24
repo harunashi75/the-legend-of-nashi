@@ -242,12 +242,10 @@ test('Classes et artéfacts pour tous les héros : chaque allié a sa classe, se
  assert.equal(run('healed'),Math.round(40*run('hb')));
  assert.ok(Math.abs(run('ally.player.hp')-(1+run('healed')*0.25))<1e-9,'Symbiose : 25 % rendus au Druide');
  assert.ok(Math.abs(run('CANAAN_CLASS_ATTACK.before({hp:9,mhp:9,x:0,y:0},100,{}).damage')-110)<1e-9,'Symbiose : +10 % de dégâts pour l’hôte');
- // Paladin : ses soins sur lui-même soignent l'hôte proche à 50 % ; l'Aura de dévotion ne se cumule pas.
+ // Paladin : ses soins sur lui-même soignent l'hôte proche à 50 %.
  run('CANAAN_CLASS.setClasse(ally,{id:"paladin",talents:[6]});globalThis.hb=1+Math.max(0,characterStats(ally).healingBonus||0)/100');
  run('P.hp=1;ally.player.hp=1;canaanApplyHeal(60,false,ally)');
  assert.equal(run('P.hp'),1+Math.round(30*run('hb')),'Lumière sacrée');
- assert.equal(run('characterStats().guard'),8,'Aura de dévotion de l’allié');
- run('CANAAN_CLASS_STATE.import({id:"paladin",talents:[6]})');assert.equal(run('characterStats().guard'),8,'non cumulable');
  // Sauvegarde : classe et artéfacts de l'invité gardés et vérifiés au chargement (talent en double et artéfact non
  // possédé retirés).
  run('ally.id="local-test";ally.local=true;game.guests[ally.id]=ally');
