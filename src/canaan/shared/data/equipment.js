@@ -139,7 +139,7 @@ export const WEAPON_DEFINITIONS = {
   aegis: {
     name: 'Masse et égide',
     icon: '⟦w_aegis⟧',
-    role: 'Masse sacrée et bouclier : frappes qui soignent, charge, rempart et marteau du jugement.',
+    role: 'Masse sacrée et bouclier : frappes qui soignent, sceau de lumière, rempart et marteau du jugement.',
     bound: 'paladin',
     sp: [
       [
@@ -152,13 +152,13 @@ export const WEAPON_DEFINITIONS = {
         'Frappe les ennemis en cône dans la direction visée et inflige des dégâts sacrés égaux à 280 % de ta Puissance à chacun. Tu récupères 3 % de tes PV max.'
       ],
       [
-        '🛡️',
-        'Charge du bouclier',
-        'Ruée de 5 cases · dégâts sacrés · étourdissement',
+        '✨',
+        'Sceau de lumière',
+        'Marque de 6 s · 3 % de tes PV max rendus par coup',
         10,
         16,
-        2.2,
-        'Charge jusqu’à 5 cases dans la direction visée. Les ennemis sur ta trajectoire subissent des dégâts sacrés égaux à 220 % de ta Puissance. Les monstres touchés sont étourdis 1,2 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.'
+        0,
+        'Marque l’ennemi le plus proche du point visé parmi ceux à 6 cases ou moins de toi. Pendant 6 s, chaque attaque de base ou impact direct de tes compétences sur cette cible te rend 3 % de tes PV max. Tu peux marquer un seul ennemi à la fois.'
       ],
       [
         '🏰',

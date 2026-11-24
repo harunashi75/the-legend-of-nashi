@@ -30,6 +30,7 @@
       // Paladin : Lumière divine reçue, Exaltation (Ferveur ardente), Aura de dévotion, Lumière vengeresse,
       // Intervention divine.
       divineUntil: 0,
+      holySeal: null,
       exaltUntil: 0,
       exaltReady: 0,
       devotionNext: 0,
@@ -132,7 +133,7 @@
     paladin: {
       crusade: 0,
       bastion: 1,
-      avenger: 2,
+      radiantSeal: 2,
       sentence: 3,
       holyground: 4,
       zeal: 5,
@@ -392,6 +393,32 @@
       healer && healer.player ? healer : hero && hero.player ? hero : game.hero,
       splash
     );
+
+  function markHolySeal(m) {
+    w.holySeal = { target: m, until: now() + 6, hits: 0 };
+    CANAAN_ARTEFACTS.markCombat(me());
+    fx('holyPillar', m.x, m.y, 45, '#ffe08a', 0.75);
+  }
+  function healFromSeal(m, t) {
+    const seal = w.holySeal;
+    if (HP.dead || !seal || seal.target !== m || t >= seal.until) return;
+    const h = applyHeal(HP.mhp * 0.03, false, me(), me(), false);
+    if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#ffe9a0');
+    if (on('paladin', 'radiantSeal') && ++seal.hits === 3) {
+      seal.hits = 0;
+      blast(m.x, m.y, 3, characterStats(me()).attack * 1.5, 'holy');
+    }
+  }
+  function holySealTargets() {
+    const targets = new Set(),
+      t = now();
+    for (const hero of game.heroes) {
+      if (hero.player.dead || hero.away || !isClass('paladin', hero)) continue;
+      const seal = runtime(hero).holySeal;
+      if (seal && t < seal.until && alive(seal.target)) targets.add(seal.target);
+    }
+    return targets;
+  }
 
   // ---------------------------------------------------------------- Effets sur les monstres
   // Effet sur la durée d'un héros sur un monstre : un seul par type et par héros, la plus forte valeur gardée.
@@ -919,6 +946,7 @@
       id = classe().id;
     // Ferveur, Rythme, Concentration et Rage : une attaque de base qui touche les fait monter.
     if (basic && dealt > 0) gainResource('basic');
+    if (id === 'paladin' && dealt > 0 && (basic || skill) && !options.periodic) healFromSeal(m, t);
     // Instinct du traqueur : chaque compétence offensive qui touche rend 5 de Concentration.
     if (skill && dealt > 0 && id === 'chasseur' && t - w.focusGainAt >= RESOURCE_BASIC_GAP) {
       w.focusGainAt = t;
@@ -1287,6 +1315,12 @@
 
   // ---------------------------------------------------------------- Étape de simulation
   function stepHero(t) {
+    const seal = w.holySeal;
+    if (
+      seal &&
+      (t >= seal.until || HP.dead || !alive(seal.target) || !game.world.monsters.includes(seal.target))
+    )
+      w.holySeal = null;
     if (HP.dead || me().away) return;
     const ratio = HP.mhp ? HP.hp / HP.mhp : 1,
       fighting = inCombat();
@@ -1862,6 +1896,8 @@
     chill: (hero, m, sec) => within(hero, () => chill(m, sec)),
     poisoned: (hero, m) => within(hero, () => poisoned(m)),
     bleeding: m => bleeding(m),
+    markHolySeal: (hero, target) => within(hero, () => markHolySeal(target)),
+    holySealTargets,
     consumeBleeds: (hero, m, factor) => within(hero, () => consumeBleeds(m, factor)),
     reflect: (hero, m, amount, element) => within(hero, () => reflect(m, amount, element)),
     atCamp: hero => atCamp(hero),

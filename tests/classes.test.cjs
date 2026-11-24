@@ -40,7 +40,8 @@ test('Classes : neuf classes de dix talents, chacune son arme, cinq emplacements
   same(g.CANAAN_CLASS_STATE.export(),{id:'guerrier',talents:[6,7]});
   // Compétences offensives et utilitaires, éléments.
   assert.equal(g.isOffensiveSkill('wildstaff',1),false);assert.equal(g.isOffensiveSkill('wildstaff',0),true);
-  assert.equal(g.isOffensiveSkill('aegis',2),false);assert.equal(g.isOffensiveSkill('bow',1),false);
+  assert.equal(g.isOffensiveSkill('aegis',1),false);assert.equal(g.isOffensiveSkill('aegis',2),false);
+  assert.equal(g.isOffensiveSkill('bow',1),false);
   assert.equal(g.isOffensiveSkill('feline',2),false);assert.equal(g.isOffensiveSkill('dualsword',2),true);
   same([0,1,2,3].map(i=>g.skillElement('elementaliste',i)),['fire','ice','lightning','fire']);
   assert.equal(g.skillElement('chasseur',0),'wild');assert.equal(g.skillElement('guerrier',3),'steel');
@@ -159,6 +160,39 @@ test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, 
   const l=game();l.setClass('paladin',[]);l.P.mp=100;l.P.hp=10;l.P.mhp=100;const g0=l.characterStats().guard;
   assert.equal(l.CANAAN_CLASS.special(),true);assert.equal(l.P.hp,30);assert.equal(l.P.mp,50,'Ferveur : le double du prix en mana');
   assert.equal(l.characterStats().guard,g0+20);
+});
+
+test('Paladin : dix coups sur le Sceau de lumière soignent dix fois, pendant 6 s',()=>{
+  const g=game();g.setClass('paladin',[]);predictable(g,.99);
+  g.P.mhp=1000;g.P.hp=100;g.P.mp=100;
+  const foe={...mob(1e7),boss:true},other=mob(1e7);
+  foe.x=8*g.TS;g.monsters=[foe];g.mouseWorldX=foe.x;
+  g.useSkill(1);
+  assert.equal(g.P.mp,100,'pas de coût si aucune cible n’est à portée');
+  assert.equal(g.weaponCooldowns['aegis:1'],undefined);
+  foe.x=100;other.x=60;g.monsters=[other,foe];g.mouseWorldX=100;
+  g.useSkill(1);
+  assert.equal(foe.hp,foe.mhp,'la pose du sceau ne frappe pas');
+  assert.equal(g.CANAAN_CLASS.holySealTargets().has(foe),true);
+  assert.equal(g.CANAAN_CLASS.holySealTargets().has(other),false,'privilégie le point visé');
+  assert.equal(g.CANAAN_ARTEFACTS.inCombat(),true);
+  g.CANAAN_COMBAT.attack(other,100,basicHit);
+  const holy=skillHit('holy');
+  g.CANAAN_COMBAT.attack(foe,100,{...holy,periodic:true});
+  foe.bossShield=true;g.CANAAN_COMBAT.attack(foe,100,holy);foe.bossShield=false;
+  assert.equal(g.P.hp,100,'les autres cibles, dégâts périodiques et coups immunisés ne soignent pas');
+  for(let i=0;i<10;i++)g.CANAAN_COMBAT.attack(foe,100,i%2===0?basicHit:holy);
+  assert.equal(g.P.hp,400,'30 PV par coup, même quand plusieurs coups arrivent en même temps');
+  g.advance(360);
+  assert.equal(g.CANAAN_CLASS.holySealTargets().size,0);
+  g.CANAAN_COMBAT.attack(foe,100,basicHit);
+  assert.equal(g.P.hp,400,'aucun soin après expiration');
+  // Sceau rayonnant : le troisième coup déclenche une onde, sans soin supplémentaire.
+  g.setClass('paladin',[2]);g.P.mp=100;g.weaponCooldowns['aegis:1']=0;g.useSkill(1);
+  const nearby=other.hp;
+  for(let i=0;i<3;i++)g.CANAAN_COMBAT.attack(foe,100,basicHit);
+  assert.ok(other.hp<nearby);
+  assert.equal(g.P.hp,490);
 });
 
 test('Assassin : Précision mortelle, Lames déchirantes, Hémorragie, Ombre meurtrière, Pas de l’ombre et Voile d’ombre',()=>{

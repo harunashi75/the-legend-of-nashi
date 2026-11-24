@@ -5670,7 +5670,7 @@ export default {
   'Bastion': 'Bastion',
   'Rempart sacré dure 2 s de plus ; pendant ce temps, 40 % des dégâts que tu évites sont renvoyés à l’attaquant en lumière sacrée.':
     'Holy rampart lasts 2 s longer; meanwhile, 40% of the damage you avoid is sent back to the attacker as holy light.',
-  'Bouclier vengeur': 'Avenging shield',
+  'Sceau rayonnant': 'Radiant seal',
   'Sentence': 'Sentence',
   'Terre sainte': 'Holy ground',
   'Tes sols consacrés durent 3 s de plus et réduisent de 15 % les dégâts subis par les héros qui s’y tiennent.':
@@ -5846,10 +5846,13 @@ export default {
   'Bond du prédateur': 'Predator’s leap',
   'Morsure féroce': 'Ferocious bite',
   'Masse et égide': 'Mace and aegis',
-  'Masse sacrée et bouclier : frappes qui soignent, charge, rempart et marteau du jugement.':
-    'Holy mace and shield: healing strikes, charge, rampart and hammer of judgement.',
+  'Masse sacrée et bouclier : frappes qui soignent, sceau de lumière, rempart et marteau du jugement.':
+    'Holy mace and shield: healing strikes, seal of light, rampart and hammer of judgement.',
   'Frappe du croisé': 'Crusader strike',
-  'Charge du bouclier': 'Shield charge',
+  'Sceau de lumière': 'Seal of light',
+  'Aucune cible à portée': 'No target in range',
+  'En combat': 'In combat',
+  'Hors combat': 'Out of combat',
   'Marteau du Jugement': 'Hammer of judgement',
   'Dagues jumelles': 'Twin daggers',
   'Saignement : fais saigner, disparais dans l’ombre, puis consume les saignements.':
@@ -5965,9 +5968,9 @@ export default {
   'Dégâts sacrés en cône · soin personnel': 'Holy cone damage · self-heal',
   'Frappe les ennemis en cône dans la direction visée et inflige des dégâts sacrés égaux à 280 % de ta Puissance à chacun. Tu récupères 3 % de tes PV max.':
     'Strikes enemies in a cone in the aimed direction and deals holy damage equal to 280% of your Power to each. Restores 3% of your max HP.',
-  'Ruée de 5 cases · dégâts sacrés · étourdissement': '5-tile charge · holy damage · stun',
-  'Charge jusqu’à 5 cases dans la direction visée. Les ennemis sur ta trajectoire subissent des dégâts sacrés égaux à 220 % de ta Puissance. Les monstres touchés sont étourdis 1,2 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.':
-    'Charges up to 5 tiles in the aimed direction. Enemies in your path take holy damage equal to 220% of your Power. Monsters hit are stunned for 1.2 s. Bosses deal 5% less damage for 4 s instead.',
+  'Marque de 6 s · 3 % de tes PV max rendus par coup': '6 s mark · heals for 3% of your max HP per hit',
+  'Marque l’ennemi le plus proche du point visé parmi ceux à 6 cases ou moins de toi. Pendant 6 s, chaque attaque de base ou impact direct de tes compétences sur cette cible te rend 3 % de tes PV max. Tu peux marquer un seul ennemi à la fois.':
+    'Marks the enemy closest to the aimed point among those within 6 tiles of you. For 6 s, each basic attack or direct skill hit against that target restores 3% of your max HP. You can mark one enemy at a time.',
   'Réduit les dégâts reçus · bouclier de groupe': 'Reduces damage taken · party shield',
   'Tu subis 35 % de dégâts en moins pendant 6 s. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier qui absorbe l’équivalent de 12 % de vos PV max pendant 6 s.':
     'You take 35% less damage for 6 s. You and allies within 6 tiles each gain a shield that absorbs damage equal to 12% of your max HP for 6 s.',
@@ -6084,8 +6087,8 @@ export default {
     'Your dodge roll grants 30% movement speed and 20 Guard for 5 s. Talent cooldown is 15 s.',
   'Volonté de fer te donne aussi un bouclier de 15 % de tes PV max et te rend 5 % de tes PV max par seconde pendant 5 s.':
     'Iron will also grants a shield for 15% of your max HP and restores 5% of your max HP per second for 5 s.',
-  'Après Charge du bouclier, ton égide frappe jusqu’à 3 ennemis proches et inflige à chacun des dégâts sacrés égaux à 150 % de ta Puissance.':
-    'After Shield charge, your aegis hits up to 3 nearby enemies and deals holy damage equal to 150% of your Power to each.',
+  'Tous les 3 coups qui déclenchent le soin de ton Sceau de lumière, il libère une onde sacrée. Elle inflige 150 % de ton Attaque en dégâts sacrés à la cible et aux ennemis à moins de 3 cases d’elle.':
+    'Every 3 hits that trigger healing from your Seal of light release a holy wave. It deals holy damage equal to 150% of your Attack to the target and enemies within 3 tiles of it.',
   'Éventail de lames lance 8 dagues. Au retour, une dague qui a touché frappe de nouveau pour la moitié de ses dégâts de base à l’aller.':
     'Fan of blades throws 8 daggers. On its way back, a dagger that hit strikes again for half its base outgoing damage.',
   'À l’impact, Boule de feu libère jusqu’à 3 flammèches vers les ennemis proches. Chacune inflige des dégâts de feu égaux à 60 % de ta Puissance magique. Tes brûlures infligent 30 % de dégâts en plus.':

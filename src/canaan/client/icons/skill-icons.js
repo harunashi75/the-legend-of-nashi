@@ -602,10 +602,10 @@ const ICONS = {
       '/>' +
       at(8, 9, 0, 0.6, E.drop('#e03a4a'))
   ],
-  // Paladin : frappe du croisé, charge du bouclier, rempart sacré, marteau du jugement.
+  // Paladin : frappe du croisé, sceau de lumière, rempart sacré, marteau du jugement.
   aegis: [
     a => at(2, 1, 30, 1, P.mace()) + at(-6, -6, 0, 0.6, E.sun(a)),
-    a => at(4, 0, 0, 0.85, P.shield()) + at(-5, 0, 0, 1, E.speed(a)),
+    a => E.rings(a) + at(0, 0, 0, 0.8, E.sun(a)) + at(8, -8, 0, 0.55, E.sparkle('#fff4b0')),
     () => at(0, 1, 0, 1, P.shield('#3f63a8')) + E.rings('#ffe08a') + at(7, -8, 0, 0.55, E.sparkle('#fff4b0')),
     a => at(0, -3, 0, 0.9, P.mace()) + at(0, 9, 0, 1, E.waves(a)) + at(-8, -8, 0, 0.5, E.sparkle('#fff'))
   ]

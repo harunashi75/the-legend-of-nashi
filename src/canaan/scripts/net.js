@@ -46,6 +46,7 @@
     fx: [],
     // Invité : prédiction de son mouvement (vitesse donnée par l'hôte, positions passées, séquence des intentions).
     speed: 0,
+    inCombat: false,
     seq: 0,
     seqTicks: new Map(),
     history: new Map(),
@@ -285,6 +286,7 @@
           }
         : { instance: null, layer: game.world.layer === 'under' ? 'under' : 'surface' };
     for (const m of game.world.monsters) if (!m.netId) m.netId = ++net.monsterCounter;
+    const holySeals = CANAAN_CLASS.holySealTargets();
     return {
       t: 'state',
       tick: time,
@@ -311,6 +313,7 @@
       // Boss : ses effets en cours (barre de boss des invités).
       monsters: game.world.monsters.map(m => {
         const snap = monsterSnapshot(m);
+        if (holySeals.has(m)) snap.holySeal = 1;
         if ((m.boss || m.worldBoss || m.arenaBoss) && window.CANAAN_BUFF_BAR)
           snap.fx = CANAAN_BUFF_BAR.monsterCodes(m);
         return snap;
@@ -401,6 +404,7 @@
             ].map(k => [k, Math.round((st[k] || 0) * 10) / 10])
           ))(CANAAN_SKILLS.state(hero)),
         dodge: Math.round(CANAAN_COMBAT.dodgeState(hero).ready * 10) / 10,
+        inCombat: CANAAN_ARTEFACTS.inCombat(hero),
         revive: p.dead && hero.reviveAt ? Math.max(0, Math.ceil((hero.reviveAt - time) / 60)) : 0
       };
     const bag = JSON.stringify({
@@ -565,6 +569,7 @@
   function enterGuestMode(message) {
     game.mode = 'guest';
     net.heroId = message.heroId;
+    net.inCombat = false;
     game.hero.name = cleanPseudo(message.name);
     game.hero.look = decodeLook(settings().look);
     net.remote.clear();
@@ -732,7 +737,16 @@
       const m = old.get(s.k) || { x: s.x, y: s.y };
       const { x, y, ...rest } = s;
       // Les drapeaux ne sont envoyés que vrais : absents, ils sont retombés (boss de l'arène qui réapparaît après sa téléportation).
-      for (const key of ['boss', 'worldBoss', 'elite', 'arenaBoss', 'hidden', 'bossStage', 'secretBoss'])
+      for (const key of [
+        'boss',
+        'worldBoss',
+        'elite',
+        'arenaBoss',
+        'hidden',
+        'bossStage',
+        'secretBoss',
+        'holySeal'
+      ])
         if (!(key in rest)) delete m[key];
       Object.assign(m, rest);
       target(m, x, y);
@@ -790,6 +804,7 @@
           .map(([k, v]) => [k, Math.max(0, Math.min(99, v))])
       );
     net.revive = Number.isFinite(me.revive) ? me.revive : 0;
+    net.inCombat = me.inCombat === true;
     if (Number.isInteger(me.level) && Number.isInteger(me.exp)) {
       game.hero.level = clampLevel(me.level);
       game.hero.exp = Math.max(0, me.exp);
@@ -1061,6 +1076,7 @@
       return true;
     },
     privateSnapshot,
+    guestInCombat: () => net.inCombat,
     state: () => ({
       mode: game.mode,
       code: net.code,

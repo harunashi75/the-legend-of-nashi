@@ -29,6 +29,8 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   host.run('canaanRegenRates=()=>({mana:0,health:0})');
   const step=async n=>{for(let i=0;i<n;i++){host.run('time++;readInput();simulateStep();updateWorld();CANAAN_NET.tick()');guest.run('time++;readInput();CANAAN_NET.tick()');await wait(2)}};
   await step(20);
+  const combatHud = () => guest.run('updateView();document.getElementById("combatState").textContent');
+  assert.equal(combatHud(),'Hors combat');
   // Sac et équipement : l'invité voit son propre héros, tel que l'hôte le garde.
   assert.equal(guest.run('game.hero.equipment.weapon'),null,'pas d’arme avant de choisir une classe');
   assert.equal(guest.run('game.hero.equipment.armor.name'),'Tunique du voyageur');
@@ -67,6 +69,7 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.equal(host.run('mob.hp<=0'),true,'l’invité abat le monstre chez l’hôte');
   await step(10);
   assert.equal(host.run(G+'.kills'),kills0+1,'victime créditée à l’invité');assert.equal(guest.run('game.hero.kills'),kills0+1);
+  assert.equal(combatHud(),'En combat','le combat de l’invité est transmis par l’hôte');
   assert.equal(guest.run('game.world.monsters.some(m=>m.k==='+host.run('mob.netId')+')'),false,'le monstre disparaît chez l’invité');
   assert.ok(guest.run('floaters.length')>floaters0,'chiffres de dégâts affichés chez l’invité');
   // Butin individuel annoncé sur l'écran de l'invité, rangé dans son sac (chez l'hôte, puis chez lui).
@@ -97,6 +100,7 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   // Classe, talents et artéfacts de l'invité : il les gère depuis son écran, l'hôte vérifie, les applique à son héros et
   // les renvoie.
   host.run(G+'.level=20;'+G+'.artefacts.ranks.pierre_colosse=2;time+=600');await step(8);
+  assert.equal(combatHud(),'Hors combat','le retour hors combat est transmis aussi');
   assert.equal(guest.run('game.hero.artefacts.ranks.pierre_colosse'),2,'collection de l’invité visible chez lui');
   const speedBefore=guest.run('CANAAN_NET.debug.speed'),hpBefore=host.run(G+'.player.mhp');
   guest.run('chooseClass("assassin")');await step(6);guest.run('equipTalent(1)');guest.run('equipArtefact("pierre_colosse")');
@@ -157,6 +161,18 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   guest.run('CANAAN_NET.requestAction({op:"upgrade",id:"epee-hote"})');await step(8);
   assert.equal(host.run(G+'.inventory.length'),count0,'pas de vente loin du marchand');
   assert.equal(host.run('Object.hasOwn(game.hero.inventory.find(i=>i.id==="epee-hote"),"upgrade")'),false,'rien ne change sur l’objet de l’hôte');
+  // Le Paladin invité lance le sceau depuis son écran. L'hôte simule le soin et partage la marque à afficher.
+  host.run('{const h='+G+';CANAAN_CLASS.setClasse(h,{id:"paladin",talents:[]});CANAAN_SUMMONS.syncPact(h);recomputeHeroStats(h);h.player.hp=Math.floor(h.player.mhp/2);h.player.mp=100}');
+  host.run('globalThis.sealTarget={t:"Loup",x:'+G+'.player.x+40,y:'+G+'.player.y,hp:1e7,mhp:1e7,r:14,cd:1e9,g:0,level:20,_levelHp:true};game.world.monsters=[sealTarget]');
+  await step(18);
+  assert.equal(guest.run('game.hero.classe.id'),'paladin');
+  guest.run('mouseWorldX=P.x+40;mouseWorldY=P.y;useSkill(1)');await step(18);
+  assert.equal(guest.run('game.world.monsters.some(m=>m.holySeal===1)'),true,'marque visible chez l’invité');
+  const hpBeforeSealHit=guest.run('P.hp');
+  host.run('CANAAN_COMBAT.attack(sealTarget,100,{basic:true},'+G+')');await step(12);
+  assert.ok(guest.run('P.hp')>hpBeforeSealHit,'soin du sceau visible chez le Paladin');
+  host.run('time+=360');await step(12);
+  assert.equal(guest.run('game.world.monsters.some(m=>m.holySeal===1)'),false,'marque retirée chez l’invité');
   assert.equal(host.errors.length+guest.errors.length,0,host.errors.concat(guest.errors).join('\n'));
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });

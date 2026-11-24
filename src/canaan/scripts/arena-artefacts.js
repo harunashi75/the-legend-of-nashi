@@ -89,6 +89,7 @@
     return r;
   }
   function inCombat(hero = game.hero) {
+    if (game.mode === 'guest' && hero === game.hero) return CANAAN_NET.guestInCombat();
     return now() - rt(hero).lastCombat < 5 || CANAAN_ARENA.fighting();
   }
   const fx = (shape, x, y, r, c, d = 0.5, a = 0) => CANAAN_SKILLS.fx(shape, x, y, a, r, 0, c, d);
@@ -669,6 +670,7 @@
     grant,
     clean,
     inCombat,
+    markCombat: hero => (rt(hero).lastCombat = now()),
     stats,
     attackBefore,
     attackAfter,

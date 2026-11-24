@@ -180,8 +180,8 @@ export const CLASSES = deepFreeze([
         'Rempart sacré dure 2 s de plus ; pendant ce temps, 40 % des dégâts que tu évites sont renvoyés à l’attaquant en lumière sacrée.'
       ],
       [
-        'Bouclier vengeur',
-        'Après Charge du bouclier, ton égide frappe jusqu’à 3 ennemis proches et inflige à chacun des dégâts sacrés égaux à 150 % de ta Puissance.'
+        'Sceau rayonnant',
+        'Tous les 3 coups qui déclenchent le soin de ton Sceau de lumière, il libère une onde sacrée. Elle inflige 150 % de ton Attaque en dégâts sacrés à la cible et aux ennemis à moins de 3 cases d’elle.'
       ],
       [
         'Sentence',
@@ -642,6 +642,7 @@ export const CLASS_IDS = Object.freeze(CLASSES.map(c => c.id));
 export const UTILITY_SKILLS = Object.freeze([
   'wildstaff:1',
   'feline:2',
+  'aegis:1',
   'aegis:2',
   'dualdagger:1',
   'lute:2',

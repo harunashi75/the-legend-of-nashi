@@ -86,6 +86,31 @@ svg.ico.solo {
   font-size: calc(11px * var(--font-scale));
   color: var(--rpg-muted);
 }
+.hud-combat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  padding: 2px 8px;
+  border: 1px solid var(--rpg-gold-dark);
+  border-radius: 4px;
+  background: #17120d;
+  color: var(--rpg-muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 700;
+}
+.hud-combat::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hud-combat[data-combat='true'] {
+  border-color: #a4503b;
+  background: #30160f;
+  color: #ffb49b;
+}
 #hud #gold {
   color: var(--rpg-gold-bright);
 }

@@ -948,7 +948,6 @@
       case 'markCast':
         wildBurst(x, y, 30, 8);
         break;
-      case 'shieldCharge':
       case 'chargeTrail':
       case 'dashTrail':
       case 'pounceTrail':
@@ -1523,13 +1522,11 @@
         soft(c, x, y, 60 * t, rgba('#ffffff', 0.8), rgba(col, 0));
         break;
       case 'dashTrail':
-      case 'shieldCharge':
       case 'chargeTrail':
       case 'pounceTrail':
       case 'leapTrail':
       case 'shadowTrail':
-      case 'daggerReturn':
-      case 'shieldThrow': {
+      case 'daggerReturn': {
         // Traînée d'une ruée : rémanence effilée.
         c.translate(x, y);
         c.rotate(a);
@@ -1545,17 +1542,6 @@
         c.lineTo(r, w);
         c.closePath();
         c.fill();
-        if (e.shape === 'shieldThrow') {
-          c.translate(r * ease(age / 0.6), 0);
-          c.rotate(now * 20);
-          c.fillStyle = '#ffe4a2';
-          c.strokeStyle = '#a2772c';
-          c.lineWidth = 2;
-          c.beginPath();
-          c.arc(0, 0, 11, 0, TAU);
-          c.fill();
-          c.stroke();
-        }
         break;
       }
       case 'muzzle':
@@ -1988,6 +1974,30 @@
   // Marque du chasseur au-dessus d'une proie.
   function drawMark(c, m, frame) {
     drawMarkAt(c, m.x, m.y - (m.boss ? 90 : 60), 14, frame * 0.05, 0.9);
+  }
+  // Le sceau reste au-dessus de la cible pendant qu'elle se déplace.
+  function drawHolySeal(c, m, frame) {
+    const y = m.y - (m.boss || m.worldBoss || m.arenaBoss ? 110 : 72);
+    c.save();
+    c.translate(m.x, y);
+    soft(c, 0, 0, 20, rgba('#ffe08a', 0.35 + 0.12 * Math.sin(frame * 0.15)), rgba('#ffe08a', 0));
+    c.strokeStyle = '#ffe08a';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(0, -12);
+    c.lineTo(9, 0);
+    c.lineTo(0, 12);
+    c.lineTo(-9, 0);
+    c.closePath();
+    c.stroke();
+    c.strokeStyle = '#fff5cc';
+    c.beginPath();
+    c.moveTo(0, -6);
+    c.lineTo(0, 6);
+    c.moveTo(-4, -1);
+    c.lineTo(4, -1);
+    c.stroke();
+    c.restore();
   }
   // Bouclier d'un héros : bulle de lumière bleutée qui ondule.
   function drawShield(c, p, frame) {
@@ -2497,6 +2507,7 @@
     drawParticles,
     isGround: shape => GROUND.has(shape),
     drawMark,
+    drawHolySeal,
     drawShield,
     aura,
     projectile,

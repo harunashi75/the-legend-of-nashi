@@ -1159,6 +1159,12 @@ function updateView() {
   camY += (goalY - camY) * (room ? 0.2 : 0.1);
   if (shake > 0) shake *= 0.85;
   // HUD
+  const combatState = document.getElementById('combatState'),
+    fighting = CANAAN_ARTEFACTS.inCombat();
+  if (combatState.dataset.combat !== String(fighting)) {
+    combatState.dataset.combat = String(fighting);
+    combatState.textContent = tt(fighting ? 'En combat' : 'Hors combat');
+  }
   document.getElementById('hpb').style.width = (P.hp / P.mhp) * 100 + '%';
   document.getElementById('hpt').textContent = Math.ceil(P.hp) + ' / ' + P.mhp;
   // Ressource de la classe : couleur et nom selon la classe ; le Berserker (qui paie en PV) n'a pas de barre.

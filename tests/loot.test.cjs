@@ -203,9 +203,10 @@ test('Catalogues uniques : valeurs, butins et prix identiques à la référence 
  const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Les énigmes des ailes et les mécaniques des boss (refonte des donjons) ne sont pas des catalogues : hors référence.
  const data=JSON.parse(run('JSON.stringify({instances:instances.map(({wings,mechanics,secretMechanics,...d})=>d),rarities:GEAR_RARITIES,weapons:WEAPON_TYPES,craft:CRAFT_WEAPONS,spells:WEAPON_SPELLS})'));
- // La référence des sorts protège les valeurs de base. Les descriptions sont vérifiées dans les tests de combat.
+ // La référence protège les valeurs de base. Le nouveau Sceau de lumière est testé dans classes.test.cjs.
  const spellValues=spells=>Object.fromEntries(Object.entries(spells).map(([type,skills])=>[
-  type,skills.map(([icon,name,,recharge,cost,power])=>[icon,name,recharge,cost,power])
+  type,skills.map(([icon,name,,recharge,cost,power],i)=>
+   type==='aegis'&&i===1?[recharge,cost]:[icon,name,recharge,cost,power])
  ]));
  assert.deepEqual(spellValues(data.spells),spellValues(reference.spells),'valeurs de base des compétences');
  for(const key of ['instances','rarities','weapons','craft'])assert.deepEqual(data[key],reference[key],key);

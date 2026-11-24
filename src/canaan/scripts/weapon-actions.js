@@ -590,15 +590,24 @@
     ctx.stroke();
     ctx.globalAlpha = 1;
     // Marque du chasseur : réticule doré au-dessus de la proie (chez l'hôte).
-    const t = time / 60;
-    for (const m of game.world.monsters)
-      if (m.hp > 0 && m._huntMark && m._huntMark.until > t) CANAAN_VFX.drawMark(ctx, m, time);
+    const t = time / 60,
+      holySeals = game.mode === 'guest' ? null : CANAAN_CLASS.holySealTargets();
+    for (const m of game.world.monsters) {
+      if (m.hp <= 0) continue;
+      if (m._huntMark?.until > t) CANAAN_VFX.drawMark(ctx, m, time);
+      if (holySeals ? holySeals.has(m) : m.holySeal === 1) CANAAN_VFX.drawHolySeal(ctx, m, time);
+    }
     // Sols persistants (en dessous), puis effets, puis particules.
     for (const e of vfx) if (CANAAN_VFX.isGround(e.shape)) CANAAN_VFX.draw(ctx, e);
     for (const e of vfx) if (!CANAAN_VFX.isGround(e.shape)) CANAAN_VFX.draw(ctx, e);
     CANAAN_VFX.drawParticles(ctx);
     ctx.restore();
   };
+  function holySealTarget() {
+    const { x, y } = groundTarget();
+    return nearestTo(x, y, TS * 6);
+  }
+  const targetsHolySeal = (type, i) => type === 'aegis' && i === 1;
   function spend(i) {
     if (
       i < 0 ||
@@ -620,6 +629,12 @@
     const s = SKILLS[i],
       key = type + ':' + i;
     if (!s || (weaponCooldowns[key] || 0) > 0) return null;
+    const needsTarget = targetsHolySeal(type, i),
+      target = needsTarget ? holySealTarget() : null;
+    if (needsTarget && !target) {
+      toast(tt('Aucune cible à portée'));
+      return null;
+    }
     const cost = window.CANAAN_CLASS_MANA_COST(type, i, s.mp);
     // Ressource de la classe (mana, Énergie, Ferveur, Rythme, Concentration, Rage), ou PV pour le Berserker.
     if (!window.CANAAN_CLASS_PAY(cost)) {
@@ -633,7 +648,7 @@
     castContext = window.CANAAN_CLASS_CAST(type, i);
     // Artéfacts de l'Arène : Cœur de Cendres renforce les compétences.
     castContext = CANAAN_ARTEFACTS.onCast(type, i, key, castContext);
-    return type;
+    return { type, target };
   }
 
   // Attaque de base : gratuite (aucun mana), clic gauche rapide et clic droit lourd.
@@ -902,9 +917,8 @@
   function useSkill(i) {
     // Un invité demande la compétence à l'hôte, qui la lance avec ses statistiques.
     if (game.mode === 'guest') return CANAAN_NET.requestSkill(i);
-    const type = spend(i);
-    if (!type) return;
-    castSkill(type, i);
+    const cast = spend(i);
+    if (cast) castSkill(cast.type, i, cast.target);
   }
   // Compétence d'un allié : son arme (ou ses griffes), sa ressource, ses propres recharges (réduites par sa Célérité).
   function skillSpec(hero, i) {
@@ -930,6 +944,12 @@
     if (!started || paused || !skillReady(hero, i)) return false;
     const spec = skillSpec(hero, i),
       recovery = Math.max(0, Math.min(80, characterStats(hero).cooldownReduction || 0));
+    const needsTarget = targetsHolySeal(spec.type, i),
+      target = needsTarget ? withActor(hero, holySealTarget) : null;
+    if (needsTarget && !target) {
+      if (hero.peer) game.view.remote?.(hero, tt('Aucune cible à portée'));
+      return false;
+    }
     if (!window.CANAAN_CLASS_PAY(spec.cost, hero)) return false;
     skillStateOf(hero).cooldowns[spec.key] =
       spec.cooldown * (1 - recovery / 100) * CANAAN_ARTEFACTS.cooldownFactor(hero);
@@ -943,18 +963,18 @@
     );
     return withActor(hero, () => {
       castContext = context;
-      castSkill(spec.type, i);
+      castSkill(spec.type, i, target);
       return true;
     });
   }
   // Les 40 compétences, pour le lanceur courant (l'hôte, ou un allié via heroUseSkill).
   // Les valeurs suivent le catalogue (shared/data/equipment.js) : la puissance affichée est celle infligée.
-  function castSkill(type, i) {
-    runSkill(type, i);
+  function castSkill(type, i, target) {
+    runSkill(type, i, target);
     window.CANAAN_CLASS_AFTER_CAST(type, i, actor);
     canaanAchieve(actor, 'skill', type);
   }
-  function runSkill(type, i) {
+  function runSkill(type, i, target) {
     const a = aim();
     const col = ELEMENTS[castContext.element]?.color || color[type];
     const rep = (n, interval, fn) => {
@@ -1122,36 +1142,8 @@
           if (h > 0) float(AP.x, AP.y - 40, '+' + h + ' PV', '#ffe9a0');
         }
         if (i === 1) {
-          // Charge du bouclier : ruée de 5 cases qui étourdit (Bouclier vengeur : l'égide rebondit sur 3 ennemis).
-          const start = dash(TS * 5, a, 'shieldCharge');
-          for (const m of pathTargets(start, a)) {
-            dmg(m, 2.2);
-            stun(m, 1.2);
-          }
-          if (talent('paladin', 'avenger')) {
-            let from = { x: AP.x, y: AP.y };
-            const struck = new Set();
-            for (let k = 0; k < 3; k++) {
-              const next = nearestTo(from.x, from.y, TS * 6, struck);
-              if (!next) break;
-              struck.add(next);
-              const hop = from;
-              later(0.12 * (k + 1), () => {
-                effect(
-                  'shieldThrow',
-                  hop.x,
-                  hop.y,
-                  Math.atan2(next.y - hop.y, next.x - hop.x),
-                  Math.hypot(next.x - hop.x, next.y - hop.y),
-                  14,
-                  '#ffe4a2',
-                  0.3
-                );
-                dmg(next, 1.5);
-              });
-              from = { x: next.x, y: next.y };
-            }
-          }
+          CANAAN_CLASS.markHolySeal(actor, target);
+          AP.atk = 0.28;
         }
         if (i === 2) {
           // Rempart sacré : −35 % de dégâts 6 s (Bastion : 8 s) et bouclier de 12 % au groupe proche.
@@ -1177,7 +1169,7 @@
               life,
               1,
               z => {
-                for (const m of around(z.x, z.y, z.r)) dmg(m, 0.5, true);
+                for (const m of around(z.x, z.y, z.r)) dmg(m, 0.5, true, { periodic: true });
                 for (const h of groupNear(2.5, z.x, z.y)) healHero(h, h.player.mhp * 0.03, '#ffe9a0');
               },
               null,

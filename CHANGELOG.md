@@ -13,9 +13,11 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ### Modifié
 - **Tous les talents refaits** (sauf ceux de l’Invocateur) : chaque talent est centré sur sa classe et change vraiment sa façon de jouer, souvent en transformant une compétence (Météore jumeau, Lames jumelles, Croisade, Proie désignée, Élan imparable…).
+- **Sceau de lumière du Paladin**. La deuxième compétence marque une cible pendant 6 s et rend 3 % des PV max du Paladin à chaque coup direct sur elle. Sceau rayonnant ajoute une onde sacrée tous les trois coups.
+- **Indicateur de combat** sous les barres du héros, synchronisé avec l’hôte en ligne.
 - **Talents à déclencher en jouant**. Floraison ou Rugissement sauvage active Écorce de fer, Nova de givre protège et renforce le prochain sort de feu, Accord dissonant protège le groupe, la roulade active Instinct de survie et Volonté de fer déclenche Second souffle. Le Berserker gagne ses Cicatrices en frappant et renforce Châtiment du sang avec Hurlement sanguinaire. Sentence et Lames déchirantes fonctionnent sur les boss dès que leur condition de combo est remplie.
 - **Info-bulles des 40 compétences d’armes**. Elles indiquent la direction ou le point visé, la Puissance utilisée pour les dégâts, les soins en part des PV maximum et les valeurs par coup ou sur la durée.
-- **Compétences de toutes les classes repensées** pour leur arme : Boule de feu, Nova de givre, Chaîne d’éclairs et Météore pour l’Élémentaliste ; Frappe du croisé, Charge du bouclier, Rempart sacré et Marteau du Jugement pour le Paladin ; Pas de l’ombre (téléportation dans le dos de la cible) et Éventail de lames pour l’Assassin.
+- **Compétences de toutes les classes repensées** pour leur arme : Boule de feu, Nova de givre, Chaîne d’éclairs et Météore pour l’Élémentaliste ; Frappe du croisé, Sceau de lumière, Rempart sacré et Marteau du Jugement pour le Paladin ; Pas de l’ombre (téléportation dans le dos de la cible) et Éventail de lames pour l’Assassin.
 - **Artéfacts de l’Arène refaits** : des effets marquants, par exemple l’onde de choc du Cœur de Fer, les trois têtes de feu de l’Écaille Écarlate, la foudre de l’Œil des Tempêtes, l’écho du Néant qui explose après une roulade, ou le Prisme de Cristal qui éclate. Les rangs déjà gagnés sont gardés.
 - **Succès** : « Bûcheron des âmes » et « Masse atomique » deviennent « Danse des lames » (épées jumelles) et « Rempart inébranlable » (masse et égide) ; « Maître d’armes » demande l’arme de chacune des neuf classes.
 
