@@ -4,7 +4,14 @@
 export const ARENA_WAVES = 12;
 // Multiplicateurs du document de conception, vague 1 à 12.
 export const ARENA_HP_MULT = Object.freeze([1, 1.2, 1.4, 1.6, 1.9, 2.2, 2.5, 2.9, 3.3, 3.8, 4.3, 5]);
-export const ARENA_DMG_MULT = Object.freeze([1, 1.1, 1.2, 1.3, 1.4, 1.6, 1.7, 1.8, 2, 2.1, 2.3, 2.5]);
+// Dégâts des boss en part des PV maximum du héros touché, vague 1 à 12, avant défense et artéfacts :
+// un coup « de base » (×1) enlève 7 % des PV à la vague 1, 20 % à la vague 12, quelle que soit l'Endurance.
+// Les mouvements multiplient cette part (×2 à ×6) : une grosse attaque coûte ≈ 17 % à la vague 1, ≈ 48 % à la 12.
+export const ARENA_DMG_PCT = Object.freeze([
+  0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.155, 0.17, 0.185, 0.2
+]);
+// Un seul coup n'enlève jamais plus de 90 % des PV maximum (avant défense) : aucune mort en un coup à pleine vie.
+export const ARENA_HIT_CAP = 0.9;
 // Préparation du coopératif : PV et dégâts des boss selon le nombre de joueurs (1 à 4).
 export const ARENA_GROUP = Object.freeze([
   null,
@@ -13,9 +20,9 @@ export const ARENA_GROUP = Object.freeze([
   { hp: 2.4, dmg: 1.05 },
   { hp: 3.1, dmg: 1.1 }
 ]);
-// Boss de référence : PV et coup de base, avant les multiplicateurs de vague.
+// Boss de référence : PV avant les multiplicateurs de vague.
 // PV relevés avec les nouvelles attaques et compétences (≈ 2× plus de dégâts) : les combats gardent leur durée.
-export const ARENA_BASE = Object.freeze({ hp: 15000, hit: 62 });
+export const ARENA_BASE = Object.freeze({ hp: 15000 });
 // Cadence : les boss enchaînent leurs attaques de plus en plus vite (vague 1 : ×1, vague 12 : ×0,76 d'intervalle).
 // Les annonces au sol gardent leur durée : chaque attaque reste lisible et esquivable.
 /** @type {(wave: number) => number} */

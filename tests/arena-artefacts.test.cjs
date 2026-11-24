@@ -140,7 +140,7 @@ test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompe
  // Douze boss du document, multiplicateurs proposés, tous les mouvements existent.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARENA.bosses)')),['Gorath, le Gardien de Fer','Fenrath, Croc des Ombres','Tharok, le Colosse de Pierre','Morgana, la Sorcière des Brumes','Valdris, le Chevalier Déchu','Hydrass, l’Hydre Écarlate','Zephiron, Seigneur des Tempêtes','Kael’Thor, l’Exécuteur Astral','Ametheon, le Titan de Cristal','Ignaroth, le Dragon des Cendres','Nihil, l’Avatar du Néant','Aurelion, le Souverain des Épreuves']);
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARENA.hpMult)')),[1,1.2,1.4,1.6,1.9,2.2,2.5,2.9,3.3,3.8,4.3,5]);
- assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARENA.dmgMult)')),[1,1.1,1.2,1.3,1.4,1.6,1.7,1.8,2,2.1,2.3,2.5]);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ARENA.dmgPct)')),[0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.155,0.17,0.185,0.2]);assert.equal(run('CANAAN_ARENA.hitCap'),0.9);
  const audit=JSON.parse(run('JSON.stringify(CANAAN_ARENA.audit())'));
  assert.equal(audit.waves,12);assert.deepEqual(audit.missingMoves,[]);assert.equal(audit.ordered,true);assert.equal(audit.phases[11],3);
  // Aucun iLvl minimum : on entre avec iLvl 0, dans le colisée.
@@ -207,7 +207,7 @@ test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relev
  assert.equal(run('CANAAN_ARENA.run().phase'),'fight');
  assert.equal(run('CANAAN_ARENA.run().group'),3);
  assert.equal(run('CANAAN_ARENA.run().boss.mhp'),Math.round(run('CANAAN_ARENA.base.hp*CANAAN_ARENA.hpMult[0]*CANAAN_ARENA.group[3].hp')));
- assert.ok(Math.abs(run('CANAAN_ARENA.run().dmgMult')-run('CANAAN_ARENA.dmgMult[0]*1.05'))<1e-9);
+ assert.ok(Math.abs(run('CANAAN_ARENA.run().dmgMult')-run('CANAAN_ARENA.dmgPct[0]*1.05'))<1e-9);
  // Frappe de zone autour du boss : chaque héros dans le cercle est touché.
  run('{const b=CANAAN_ARENA.run().boss;game.heroes.forEach((h,k)=>{h.player.x=b.x+(k-1)*40;h.player.y=b.y+50});globalThis.hp0=game.heroes.map(h=>h.player.hp)}');
  run('CANAAN_ARENA.playMove("slam")');for(let i=0;i<80;i++)run('time++;simulateStep()');
@@ -328,7 +328,8 @@ test('Arène : les cercles au sol ne touchent que les héros qui sont dedans',()
  // Avant la correction, chaque cercle touchait tous les héros, où qu'ils soient.
  const spot='{const L=arenaLayout();P.x=L.x+300;P.y=L.y;lina.player.x=L.x-400;lina.player.y=L.y;CANAAN_ARENA.run().boss.target=game.hero}';
  for(const move of ['quake','rocks','poison','lightning','meteors']){
-  run('CANAAN_ARENA.run().fx.length=0;CANAAN_ARENA.run().hazards.length=0;CANAAN_ARENA.run().dots.length=0;'+spot);
+  // Dégâts en part des PV : chaque attaque repart de PV pleins (sinon l'hôte tombe et le boss vise l'alliée).
+  run('CANAAN_ARENA.run().fx.length=0;CANAAN_ARENA.run().hazards.length=0;CANAAN_ARENA.run().dots.length=0;for(const h of game.heroes)h.player.hp=h.player.mhp;'+spot);
   run('time++;simulateStep();'+spot+';globalThis.lina0=lina.player.hp;globalThis.host0=P.hp;CANAAN_ARENA.playMove("'+move+'")');
   for(let i=0;i<200;i++)run('time++;'+spot+';simulateStep()');
   assert.equal(run('lina.player.hp'),run('lina0'),move+' : l’alliée hors des cercles n’est pas touchée');

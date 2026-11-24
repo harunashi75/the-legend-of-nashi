@@ -76,3 +76,6 @@ export const ZONE_LEVELS = deepFreeze([
 ]);
 // Courbe d'XP : multiplicateur par tranche de 10 niveaux (1–10 très rapide … 51–60 plus exigeant).
 export const XP_BRACKETS = Object.freeze([1, 1.15, 1.35, 1.6, 1.9, 2.3]);
+// Rythme de progression : un niveau demande ×1,5 l'XP de la courbe de référence ; toutes les récompenses
+// (monstres, boss, quêtes, donjons, hauts faits) restent celles de la référence, d'où ≈ 50 % de temps en plus.
+export const XP_PACE = 1.5;

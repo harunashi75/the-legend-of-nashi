@@ -5,7 +5,8 @@
   // Données partagées (shared/data/arena.js) ; la simulation et l'affichage restent ici.
   const WAVES = ARENA_WAVES,
     HP_MULT = ARENA_HP_MULT,
-    DMG_MULT = ARENA_DMG_MULT,
+    DMG_PCT = ARENA_DMG_PCT,
+    HIT_CAP = ARENA_HIT_CAP,
     GROUP = ARENA_GROUP,
     BASE = ARENA_BASE,
     tempo = arenaTempo,
@@ -66,7 +67,8 @@
   // Tentative en cours : seulement dans le colisée (un chargement de partie ramène toujours au monde).
   const active = () => !!run && !!game.world.instance?.arena;
   const alive = () => active() && run.phase === 'fight' && !!run.boss && run.boss.hp > 0;
-  const h = () => BASE.hit * run.dmgMult;
+  // Coup de base contre ce héros : une part de ses PV maximum (calculée en %, affichée en chiffres).
+  const h = hero => Math.max(1, Number(hero.player.mhp) || 1) * run.dmgMult;
   function insideArena(x = P.x, y = P.y, margin = 30) {
     const L = layout();
     return Math.hypot(x - L.x, y - L.y) < L.r - margin;
@@ -130,7 +132,7 @@
   function strike(mult, opts = {}, hero = game.hero) {
     const p = hero.player;
     if (!run?.boss || p.dead) return 0;
-    const raw = h() * mult,
+    const raw = Math.min(h(hero) * mult, p.mhp * HIT_CAP),
       n = CANAAN_COMBAT.hurt(
         CANAAN_COMBAT.incoming(run.boss, raw, { magic: !!opts.magic }, hero),
         run.boss,
@@ -155,7 +157,7 @@
   }
   // Dégâts sur la durée et sols dangereux : seule la Défense les réduit, la roulade ne les évite pas.
   function tickDamage(mult, hero = game.hero) {
-    const n = Math.max(1, Math.round(h() * mult * canaanDamageTaken(hero)));
+    const n = Math.max(1, Math.round(h(hero) * mult * canaanDamageTaken(hero)));
     return CANAAN_COMBAT.hurt(n, run.boss, hero);
   }
   function addDot(kind, mult, sec, hero = game.hero) {
@@ -761,7 +763,7 @@
       L = layout(),
       group = GROUP[players()] || GROUP[1],
       hp = Math.round(BASE.hp * HP_MULT[run.wave - 1] * group.hp);
-    run.dmgMult = DMG_MULT[run.wave - 1] * group.dmg;
+    run.dmgMult = DMG_PCT[run.wave - 1] * group.dmg;
     const b = {
       x: L.x,
       y: L.y - L.r * 0.45,
@@ -1819,7 +1821,8 @@
     bosses: BOSSES.map(b => b.name),
     hpMult: HP_MULT,
     tempo,
-    dmgMult: DMG_MULT,
+    dmgPct: DMG_PCT,
+    hitCap: HIT_CAP,
     group: GROUP,
     base: BASE,
     fighting: () => active() && run.phase === 'fight',

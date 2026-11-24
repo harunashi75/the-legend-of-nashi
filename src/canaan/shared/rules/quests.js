@@ -11,7 +11,7 @@ import {
   TRADE_CHAIN
 } from '../data/quests.js';
 import { GUILD_BOARD_SIZE, GUILD_RANKS, GUILD_REFRESH_MS } from '../data/guild.js';
-import { clampLevel, xpToNext } from './stats.js';
+import { clampLevel, levelXpShare } from './stats.js';
 
 /**
  * Une étape : sa mécanique (k), son texte et les réglages propres à cette mécanique (voir shared/data/quests.js).
@@ -58,7 +58,8 @@ export const questById = id => ALL.find(q => q.id === id) || null;
 // Niveau d'une quête pour un héros : le sien pour une quête à tout niveau (Interlude), sinon le niveau conseillé.
 /** @type {(quest: Quest | null | undefined, heroLevel?: number) => number} */
 export const questLevel = (quest, heroLevel = 1) => clampLevel(quest?.scaled ? heroLevel : quest?.level);
-// XP d'une quête : une part de son niveau (80 % pour une principale, 45 % pour une secondaire).
+// XP d'une quête : une part de son niveau de référence (80 % pour une principale, 45 % pour une secondaire),
+// soit ≈ 53 % et 30 % d'un niveau réel (XP_PACE).
 // Un bon coup de pouce, jamais nécessaire pour monter jusqu'au niveau 60.
 /**
  * @param {Quest | null | undefined} quest
@@ -68,7 +69,7 @@ export const questLevel = (quest, heroLevel = 1) => clampLevel(quest?.scaled ? h
 export function questXp(quest, heroLevel = 1) {
   const level = Math.min(59, questLevel(quest, heroLevel));
   const rank = contractRank(quest);
-  return Math.round(xpToNext(level) * (rank ? rank.xpShare : quest?.main ? 0.8 : 0.45));
+  return Math.round(levelXpShare(level) * (rank ? rank.xpShare : quest?.main ? 0.8 : 0.45));
 }
 // Or d'une quête : celui de sa récompense ; à tout niveau, il suit le héros comme celui des quêtes de la surface.
 /** @type {(quest: Quest | null | undefined, heroLevel?: number) => number} */

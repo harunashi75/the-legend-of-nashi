@@ -11,6 +11,7 @@ import {
   SECONDARY_KEYS,
   SLOT_PROFILE,
   XP_BRACKETS,
+  XP_PACE,
   ZONE_LEVELS
 } from '../data/stats.js';
 /** @typedef {import('../types.js').Item} Item */
@@ -243,17 +244,25 @@ export function levelGapFactor(heroLevel, mobLevel) {
   return Math.max(0.5, Math.min(1.25, 1 - 0.05 * (clampLevel(mobLevel) - clampLevel(heroLevel))));
 }
 // ---------------------------------------------------------------- Expérience
-// XP pour passer du niveau level au suivant (0 au niveau maximum).
+// Courbe de référence : base des récompenses données en « part d'un niveau » (boss, quêtes, donjons, hauts faits).
 /**
  * @param {number} level
  * @returns {number}
  */
-export function xpToNext(level) {
+export function levelXpShare(level) {
   const lv = clampLevel(level);
   if (lv >= MAX_LEVEL) return 0;
   return Math.round(
     (35 * Math.pow(lv, 1.65) + 25) * XP_BRACKETS[Math.min(XP_BRACKETS.length - 1, Math.floor((lv - 1) / 10))]
   );
+}
+// XP pour passer du niveau level au suivant (0 au niveau maximum) : la référence × XP_PACE.
+/**
+ * @param {number} level
+ * @returns {number}
+ */
+export function xpToNext(level) {
+  return Math.round(levelXpShare(level) * XP_PACE);
 }
 // XP d'un monstre vaincu ; un monstre bien plus faible que le héros n'en donne presque plus.
 /**
@@ -294,7 +303,7 @@ const bossGap = (foeLevel, heroLevel) =>
 const BOSS_XP_SHARE = Object.freeze({ dungeon: 0.12, raid: 0.08 });
 const WORLD_BOSS_XP = 12;
 /** @param {number} level */
-const levelShare = level => xpToNext(Math.min(MAX_LEVEL - 1, clampLevel(level)));
+const levelShare = level => levelXpShare(Math.min(MAX_LEVEL - 1, clampLevel(level)));
 // heroLevel (facultatif) : un héros plus fort que le boss ou l'instance reçoit moins, comme pour les monstres.
 /**
  * @param {number} level

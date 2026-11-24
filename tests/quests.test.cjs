@@ -144,7 +144,7 @@ test('Interlude des Tréfonds : 16 quêtes à tout niveau, quatre voix dans l’
   const gold0 = run('P.gold');
   assert.equal(run('play(31)'), 'ok');
   assert.equal(run('P.gold-' + gold0), 50 + 9 * 7, 'or au niveau du héros');
-  assert.equal(run('questXp(questById(31),7)'), Math.round(run('xpToNext(7)') * 0.8));
+  assert.equal(run('questXp(questById(31),7)'), Math.round(run('levelXpShare(7)') * 0.8));
   assert.ok(run('questXp(questById(31),50)>questXp(questById(31),7)'));
   assert.equal(run('take(36)'), false, 'le chœur attend les voix');
   for (const id of [35, 33, 34, 32]) assert.equal(run('play(' + id + ')'), 'ok', 'voix ' + id);

@@ -160,6 +160,7 @@ test('Règles partagées dans Node : objets, statistiques, niveaux, XP, économi
  assert.ok(stats.bossHealth(30,'raid')>stats.bossHealth(30,'dungeon'));
  assert.ok(stats.xpToNext(55)/stats.mobXp(55,55)>5*stats.xpToNext(5)/stats.mobXp(5,5),'plus exigeant en fin de parcours');
  assert.ok(stats.mobXp(10,30)<stats.mobXp(30,30)*0.2);
+ assert.equal(stats.xpToNext(10),Math.round(stats.levelXpShare(10)*1.5),"un niveau demande ×1,5 l’XP de référence");
  const hero={level:1,exp:0};assert.equal(stats.addXp(hero,stats.xpToNext(1)+stats.xpToNext(2)),2);assert.deepEqual(hero,{level:3,exp:0});
  const top={level:59,exp:0};stats.addXp(top,1e9);assert.deepEqual(top,{level:60,exp:0},'niveau 60 au maximum');
  assert.equal(stats.levelFromIlvl(190),60);assert.equal(stats.levelFromIlvl(1),1);

@@ -54,7 +54,7 @@ test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances,
  // Le coffre d'un donjon rapporte un quart d'un niveau de l'instance (les boss en donnent autant chacun ou presque),
  // sans en faire gagner plusieurs d'un coup.
  assert.ok(run('game.hero.level>10||game.hero.exp===clearXp(9,false,10)'),'un donjon fini rapporte un quart de niveau');
- assert.ok(run('clearXp(9,false)>xpToNext(9)*0.2'));assert.ok(run('game.hero.level')<=11,'mais pas plusieurs niveaux');
+ assert.ok(run('clearXp(9,false)>levelXpShare(9)*0.2'));assert.ok(run('game.hero.level')<=11,'mais pas plusieurs niveaux');
  // Un héros bien plus fort que le boss ou l'instance ne farme plus : même pénalité d'écart que les monstres.
  run('game.hero.level=40;game.hero.exp=0;kill(10,{worldBoss:true,worldBossId:"fenrir",t:"Fenrir"})');
  assert.equal(run('game.hero.exp'),run('Math.round(bossXp(10,"world")*0.1)'));

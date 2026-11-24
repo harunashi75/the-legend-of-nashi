@@ -1156,7 +1156,7 @@
     const r = a.reward,
       p = hero.player;
     if (r.gold) p.gold += r.gold;
-    if (r.exp) canaanGrantXp(hero, Math.round(xpToNext(lvl(hero)) * r.exp));
+    if (r.exp) canaanGrantXp(hero, Math.round(levelXpShare(lvl(hero)) * r.exp));
     // Objet de récompense : de ton niveau (pas celui de l'instance), annoncé comme récompense de succès.
     if (r.gear) {
       const item = giveGear(lvl(hero), 'normal', r.gear, hero);
