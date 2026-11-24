@@ -14,14 +14,14 @@ Ce que le jeu fait déjà, et ce qu’il reste à régler sur le site [Steamwork
 
 ### 1. Succès (Stats & Achievements)
 
-`steam/achievements.csv` contient les 100 succès : nom d’API, titre, description. Les icônes (256 × 256, obtenue et non obtenue) se produisent avec :
+`steam/achievements_en.csv` (anglais) et `steam/achievements.csv` (français) contiennent les 100 succès : nom d’API, titre, description. Les deux listes sont tirées du jeu (l’anglais vient du même dictionnaire que le jeu, `client/i18n/en.js`) ; l’outil s’arrête si un succès n’a pas de traduction. Les icônes (256 × 256, obtenue et non obtenue) se produisent avec :
 
 ```sh
 npm run build
 node tools/steam_achievements.cjs --icons     # steam/icons/ACH_C1.png, ACH_C1_locked.png…
 ```
 
-Pour chaque ligne : *New Achievement*, recopier le nom d’API (exactement, `ACH_C1`), le titre et la description (langue : français), téléverser les deux icônes, puis **Publish** les changements. Un succès absent sur Steam est simplement ignoré par le jeu ; un succès ajouté plus tard est envoyé au lancement suivant.
+Pour chaque succès : *New Achievement*, recopier le nom d’API (exactement, `ACH_C1`), puis le titre et la description en **anglais** (`achievements_en.csv`), choisir **French** dans la liste des langues du même formulaire et recopier le titre et la description français (`achievements.csv`), téléverser les deux icônes, et enfin **Publish** les changements. L’anglais d’abord : Steam l’affiche aux joueurs dont la langue n’a pas de traduction (allemand, espagnol…), les francophones voient le français. Un succès absent sur Steam est simplement ignoré par le jeu ; un succès ajouté plus tard est envoyé au lancement suivant.
 
 ### 2. Steam Cloud (Auto-Cloud)
 

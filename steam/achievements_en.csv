@@ -1,0 +1,101 @@
+API name,Name,Description,Category,Achieved icon,Unachieved icon
+ACH_C1,Bloody first steps,Defeat your very first monster.,Combat & weapons,ACH_C1.png,ACH_C1_locked.png
+ACH_C2,The Plains massacre,Defeat 100 monsters.,Combat & weapons,ACH_C2.png,ACH_C2_locked.png
+ACH_C3,Scourge of darkness,"Defeat 1,000 monsters.",Combat & weapons,ACH_C3.png,ACH_C3_locked.png
+ACH_C4,Legendary slaughter,"Defeat 10,000 monsters.",Combat & weapons,ACH_C4.png,ACH_C4_locked.png
+ACH_C5,Elite hunter,Defeat 25 elite monsters.,Combat & weapons,ACH_C5.png,ACH_C5_locked.png
+ACH_C6,Scourge of elites,Defeat 250 elite monsters.,Combat & weapons,ACH_C6.png,ACH_C6_locked.png
+ACH_C7,Eye of the tiger,Land 500 critical hits.,Combat & weapons,ACH_C7.png,ACH_C7_locked.png
+ACH_C8,Devastating strike,"Deal 1,000 damage in a single hit.",Combat & weapons,ACH_C8.png,ACH_C8_locked.png
+ACH_C9,The Devastator,"Deal 5,000 damage in a single hit.",Combat & weapons,ACH_C9.png,ACH_C9_locked.png
+ACH_C10,Dodge artist,Perform 500 dodge rolls.,Combat & weapons,ACH_C10.png,ACH_C10_locked.png
+ACH_C11,Steel storm,"Cast 1,000 weapon skills.",Combat & weapons,ACH_C11.png,ACH_C11_locked.png
+ACH_C12,Class power,Cast your class spell 100 times (F key).,Combat & weapons,ACH_C12.png,ACH_C12_locked.png
+ACH_C13,Weapon master,Defeat 50 enemies with each of the nine weapon families.,Combat & weapons,ACH_C13.png,ACH_C13_locked.png
+ACH_C14,Sharpshooter,Defeat 200 enemies with a weapon of the Bow family.,Combat & weapons,ACH_C14.png,ACH_C14_locked.png
+ACH_C15,Silent executioner,Defeat 200 enemies with a weapon of the Twin daggers family.,Combat & weapons,ACH_C15.png,ACH_C15_locked.png
+ACH_C16,Soul woodcutter,Defeat 200 enemies with a weapon of the Axe family.,Combat & weapons,ACH_C16.png,ACH_C16_locked.png
+ACH_C17,Atomic mace,Defeat 200 enemies with a weapon of the Mace family.,Combat & weapons,ACH_C17.png,ACH_C17_locked.png
+ACH_C18,Arcane overload,Defeat 200 enemies with a weapon of the Arcane staff family.,Combat & weapons,ACH_C18.png,ACH_C18_locked.png
+ACH_C19,Sovereign’s resilience,Survive a fatal blow thanks to the Sovereign’s Crown.,Combat & weapons,ACH_C19.png,ACH_C19_locked.png
+ACH_C20,Heartbreaker,Defeat a world boss less than 30 seconds after the first hit.,Combat & weapons,ACH_C20.png,ACH_C20_locked.png
+ACH_E1,The great departure,Leave the Dawn Camp for the first time.,Exploration & adventure,ACH_E1.png,ACH_E1_locked.png
+ACH_E2,Lone walker,Walk 10 km in the open world (one tile = 1 m).,Exploration & adventure,ACH_E2.png,ACH_E2_locked.png
+ACH_E3,Globetrotter,Walk 50 km in the open world.,Exploration & adventure,ACH_E3.png,ACH_E3_locked.png
+ACH_E4,Biome tourist,Visit the six regions of the island.,Exploration & adventure,ACH_E4.png,ACH_E4_locked.png
+ACH_E5,Treasure hunter,Open your first secret chest.,Exploration & adventure,ACH_E5.png,ACH_E5_locked.png
+ACH_E6,Tomb raider,Open 25 secret chests.,Exploration & adventure,ACH_E6.png,ACH_E6_locked.png
+ACH_E7,Royal cartographer,Open every secret chest on the island.,Exploration & adventure,ACH_E7.png,ACH_E7_locked.png
+ACH_E8,First portal,Enter a dungeon or a raid.,Exploration & adventure,ACH_E8.png,ACH_E8_locked.png
+ACH_E9,Portal collector,"Enter every dungeon and raid, on the island and in the Depths.",Exploration & adventure,ACH_E9.png,ACH_E9_locked.png
+ACH_E10,A stroll through hell,Enter the Blazescale Forge.,Exploration & adventure,ACH_E10.png,ACH_E10_locked.png
+ACH_E11,Celestial pilgrimage,Reach the Needle of the Continuum.,Exploration & adventure,ACH_E11.png,ACH_E11_locked.png
+ACH_E12,Heart of darkness,"Stay 5 minutes in a row in a region stronger than you, without falling.",Exploration & adventure,ACH_E12.png,ACH_E12_locked.png
+ACH_E13,Lost tourist,Fall in the Enchanted Forest (level 50+) while level 10 or lower.,Exploration & adventure,ACH_E13.png,ACH_E13_locked.png
+ACH_E14,First fall,Fall in combat for the first time.,Exploration & adventure,ACH_E14.png,ACH_E14_locked.png
+ACH_E15,Unkillable,Fall 100 times and get back up every time.,Exploration & adventure,ACH_E15.png,ACH_E15_locked.png
+ACH_E16,Legend hunter,Discover the eight world bosses.,Exploration & adventure,ACH_E16.png,ACH_E16_locked.png
+ACH_E17,First chapter,Complete a quest.,Exploration & adventure,ACH_E17.png,ACH_E17_locked.png
+ACH_E18,Seasoned adventurer,Complete 15 quests.,Exploration & adventure,ACH_E18.png,ACH_E18_locked.png
+ACH_E19,Chronicler of the Dawn,Complete every quest.,Exploration & adventure,ACH_E19.png,ACH_E19_locked.png
+ACH_E20,Living legend,Complete the story “The Echoes of Dawn”.,Exploration & adventure,ACH_E20.png,ACH_E20_locked.png
+ACH_P1,First nest egg,Earn your first 100 gold coins.,Economy & professions,ACH_P1.png,ACH_P1_locked.png
+ACH_P2,Gold magnate,"Earn 100,000 gold coins in total.",Economy & professions,ACH_P2.png,ACH_P2_locked.png
+ACH_P3,Fat wallet,Enlarge your bag to 100 slots.,Economy & professions,ACH_P3.png,ACH_P3_locked.png
+ACH_P4,Master artisan,Reach level 40 in a profession.,Economy & professions,ACH_P4.png,ACH_P4_locked.png
+ACH_P5,Savvy trader,"Earn 10,000 gold coins selling to merchants.",Economy & professions,ACH_P5.png,ACH_P5_locked.png
+ACH_P6,Strongbox,Store 50 slots in the bank.,Economy & professions,ACH_P6.png,ACH_P6_locked.png
+ACH_P7,Deep miner,Mine 100 ores.,Economy & professions,ACH_P7.png,ACH_P7_locked.png
+ACH_P8,Pure gold seeker,Mine a gold nugget.,Economy & professions,ACH_P8.png,ACH_P8_locked.png
+ACH_P9,Woodland herbalist,Gather 100 herbs.,Economy & professions,ACH_P9.png,ACH_P9_locked.png
+ACH_P10,Green thumb,Gather an aloe or a star lily.,Economy & professions,ACH_P10.png,ACH_P10_locked.png
+ACH_P11,Apprentice cook,Cook 10 different recipes.,Economy & professions,ACH_P11.png,ACH_P11_locked.png
+ACH_P12,Master cook,Cook every recipe in the game.,Economy & professions,ACH_P12.png,ACH_P12_locked.png
+ACH_P13,Royal feast,Cook a meal of Mythic quality.,Economy & professions,ACH_P13.png,ACH_P13_locked.png
+ACH_P14,Sunday angler,Catch your very first fish.,Economy & professions,ACH_P14.png,ACH_P14_locked.png
+ACH_P15,Big fish,Catch a swordfish or an astral moonfish.,Economy & professions,ACH_P15.png,ACH_P15_locked.png
+ACH_P16,Master of the deep,Complete the fish collection.,Economy & professions,ACH_P16.png,ACH_P16_locked.png
+ACH_P17,Novice enchanter,Own an enchanted piece of gear.,Economy & professions,ACH_P17.png,ACH_P17_locked.png
+ACH_P18,Mystic runes,Wear eight enchanted pieces.,Economy & professions,ACH_P18.png,ACH_P18_locked.png
+ACH_P19,Meat hunter,Hunt 50 animals.,Economy & professions,ACH_P19.png,ACH_P19_locked.png
+ACH_P20,The Philanthropist,Trade with another player.,Economy & professions,ACH_P20.png,ACH_P20_locked.png
+ACH_M1,Awakening of powers,Reach level 10.,"Magic, artifacts & progression",ACH_M1.png,ACH_M1_locked.png
+ACH_M2,In your prime,Reach level 30.,"Magic, artifacts & progression",ACH_M2.png,ACH_M2_locked.png
+ACH_M3,Total transcendence,Reach the maximum level (60).,"Magic, artifacts & progression",ACH_M3.png,ACH_M3_locked.png
+ACH_M4,First artifact,Equip your first Arena artifact.,"Magic, artifacts & progression",ACH_M4.png,ACH_M4_locked.png
+ACH_M5,Artifact collector,Own 6 different artifacts.,"Magic, artifacts & progression",ACH_M5.png,ACH_M5_locked.png
+ACH_M6,Artifact master,Own all 12 Arena artifacts.,"Magic, artifacts & progression",ACH_M6.png,ACH_M6_locked.png
+ACH_M7,Perfect artifact,Raise an artifact to rank 5.,"Magic, artifacts & progression",ACH_M7.png,ACH_M7_locked.png
+ACH_M8,Four relics,Fill your four artifact slots.,"Magic, artifacts & progression",ACH_M8.png,ACH_M8_locked.png
+ACH_M9,Sovereign’s arsenal,Raise four artifacts to rank 5.,"Magic, artifacts & progression",ACH_M9.png,ACH_M9_locked.png
+ACH_M10,Sovereign’s immortality,Be saved by the Sovereign’s Crown in the middle of a boss fight.,"Magic, artifacts & progression",ACH_M10.png,ACH_M10_locked.png
+ACH_M11,Class specialization,Choose ta classe.,"Magic, artifacts & progression",ACH_M11.png,ACH_M11_locked.png
+ACH_M12,Master Druid,Fill the five talent slots as a Druid.,"Magic, artifacts & progression",ACH_M12.png,ACH_M12_locked.png
+ACH_M13,Eternal Paladin,Fill the five talent slots as a Paladin.,"Magic, artifacts & progression",ACH_M13.png,ACH_M13_locked.png
+ACH_M14,Deadly shadow,Fill the five talent slots as an Assassin.,"Magic, artifacts & progression",ACH_M14.png,ACH_M14_locked.png
+ACH_M15,Lord of the Elements,Fill the five talent slots as an Elementalist.,"Magic, artifacts & progression",ACH_M15.png,ACH_M15_locked.png
+ACH_M16,All paths,Play the four classes.,"Magic, artifacts & progression",ACH_M16.png,ACH_M16_locked.png
+ACH_M17,Legendary gleam,Obtain a Legendary item.,"Magic, artifacts & progression",ACH_M17.png,ACH_M17_locked.png
+ACH_M18,Living myth,Obtain a Mythic item.,"Magic, artifacts & progression",ACH_M18.png,ACH_M18_locked.png
+ACH_M19,Epic set,Wear eight Epic or better pieces.,"Magic, artifacts & progression",ACH_M19.png,ACH_M19_locked.png
+ACH_M20,Mythic collector,Wear eight Mythic pieces.,"Magic, artifacts & progression",ACH_M20.png,ACH_M20_locked.png
+ACH_D1,Into the Arena,Attempt the Arena of Trials.,Challenges & Arena,ACH_D1.png,ACH_D1_locked.png
+ACH_D2,Gladiator,Reach wave 6 of the Arena.,Challenges & Arena,ACH_D2.png,ACH_D2_locked.png
+ACH_D3,Champion of champions,Defeat all 12 waves of the Arena.,Challenges & Arena,ACH_D3.png,ACH_D3_locked.png
+ACH_D4,Heroic triumph,Complete the Judgment of Celestia in Heroic mode.,Challenges & Arena,ACH_D4.png,ACH_D4_locked.png
+ACH_D5,Deity hunter,Defeat the Avatar of Judgment.,Challenges & Arena,ACH_D5.png,ACH_D5_locked.png
+ACH_D6,First world boss,Defeat a world boss.,Challenges & Arena,ACH_D6.png,ACH_D6_locked.png
+ACH_D7,Slayer of ancient gods,Defeat the eight world bosses.,Challenges & Arena,ACH_D7.png,ACH_D7_locked.png
+ACH_D8,The dragon awakens,"Defeat Pyrrhax, Blazescale Wyrm.",Challenges & Arena,ACH_D8.png,ACH_D8_locked.png
+ACH_D9,Silver nightmare,Defeat the Blood King in the Bastion.,Challenges & Arena,ACH_D9.png,ACH_D9_locked.png
+ACH_D10,Time traveler,Defeat the Stellar Devourer in the Needle of the Continuum.,Challenges & Arena,ACH_D10.png,ACH_D10_locked.png
+ACH_D11,Last judgment,Defeat the Avatar of Judgment less than 3 minutes after the first hit.,Challenges & Arena,ACH_D11.png,ACH_D11_locked.png
+ACH_D12,Solo challenge,"Complete a dungeon or raid alone, without falling.",Challenges & Arena,ACH_D12.png,ACH_D12_locked.png
+ACH_D13,The price of blood,Defeat a boss while below 5% of your HP.,Challenges & Arena,ACH_D13.png,ACH_D13_locked.png
+ACH_D14,Lightning speed,Complete a dungeon or raid in under 5 minutes.,Challenges & Arena,ACH_D14.png,ACH_D14_locked.png
+ACH_D15,Dungeon conqueror,Complete the six dungeons of the island.,Challenges & Arena,ACH_D15.png,ACH_D15_locked.png
+ACH_D16,Scourge of raids,Complete the four raids.,Challenges & Arena,ACH_D16.png,ACH_D16_locked.png
+ACH_D17,Supreme endurance,"Take 1,000,000 damage in total.",Challenges & Arena,ACH_D17.png,ACH_D17_locked.png
+ACH_D18,Complete bestiary,"Defeat every species of the world, dungeons and raids.",Challenges & Arena,ACH_D18.png,ACH_D18_locked.png
+ACH_D19,Absolute perfectionist,Unlock 99 achievements.,Challenges & Arena,ACH_D19.png,ACH_D19_locked.png
+ACH_D20,The Legend of Nashi,Unlock all the other achievements.,Challenges & Arena,ACH_D20.png,ACH_D20_locked.png
