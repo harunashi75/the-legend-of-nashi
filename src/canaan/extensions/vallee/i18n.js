@@ -94,7 +94,7 @@ CANAAN_I18N.extend('en', {
   'Aldric le Brave': 'Aldric the Brave',
   'Seul sur le pont de pierre, il retint la horde des Cendres jusqu’à l’aube. Le pont tient encore ; on dit qu’il n’a jamais cédé depuis.':
     'Alone on the stone bridge, he held back the Ashen horde until dawn. The bridge still stands; they say it has never given way since.',
-  'Sigrun Lance-d’Aube': 'Sigrun Dawnspear',
+  'Ragna Lance-d’Aube': 'Ragna Dawnspear',
   'Elle chevaucha trois jours sans dormir pour prévenir la vallée. Sa lance plantée au sommet du col servit de phare aux réfugiés.':
     'She rode three days without sleep to warn the valley. Her spear, planted atop the pass, became a beacon for the refugees.',
   'Elara Œil-de-Faucon': 'Elara Hawkeye',
@@ -106,10 +106,10 @@ CANAAN_I18N.extend('en', {
   'Brann Fend-Montagne': 'Brann Mountaincleaver',
   'Il ouvrit à la hache le passage du Col des Héros, pierre après pierre, pour que les familles puissent fuir.':
     'He hewed the Heroes’ Pass open with his axe, stone after stone, so the families could flee.',
-  'Dame Ysolde': 'Lady Ysolde',
+  'Dame Aveline': 'Lady Aveline',
   'Son bouclier ne connut jamais la défaite : elle protégea l’enfant-roi pendant toute la bataille des Moissons.':
     'Her shield never knew defeat: she shielded the child-king through the whole Battle of the Harvest.',
-  'Liora la Chanteuse': 'Liora the Singer',
+  'Mélisande la Chanteuse': 'Melisande the Singer',
   'Sa ballade rendit courage à une armée vaincue. On la chante encore à la fin des moissons.':
     'Her ballad gave courage back to a defeated army. It is still sung at the end of every harvest.',
   'Nyx Pas-d’Ombre': 'Nyx Shadowstep',

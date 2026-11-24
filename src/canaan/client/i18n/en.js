@@ -3292,12 +3292,12 @@ export default {
     'Mushroom beer, moss mead or rock water? Choose wisely, surface dweller.',
   'Dorn dit que c’est sa taverne. Moi, je dis que c’est ma bière.':
     'Dorn says it’s his tavern. I say it’s my beer.',
-  'Oin le Buveur': 'Oin the Drinker',
+  'Ulfar le Buveur': 'Ulfar the Drinker',
   'Hic ! Les gargouilles… elles m’ont souri. Je le jure sur ma barbe.':
     'Hic! The gargoyles… they smiled at me. I swear on my beard.',
   'Frida Chope-Pleine': 'Frida Fullmug',
-  'Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.':
-    'A dwarf woman who drinks more than Oin? That’s me. And I sing better, too.',
+  'Une naine qui boit plus qu’Ulfar ? C’est moi. Et je chante mieux, aussi.':
+    'A dwarf woman who drinks more than Ulfar? That’s me. And I sing better, too.',
   'Gardien Thror': 'Warden Thror',
   'L’or de Durgrim dort ici. Gimra compte, moi je garde. Chacun son métier.':
     'Durgrim’s gold sleeps here. Gimra counts, I guard. To each their trade.',
@@ -3694,8 +3694,8 @@ export default {
   'Fragment : « À l’est se lève le printemps. »': 'Fragment: “In the east rises spring.”',
   'Fragment : « Au sud brûle l’été. »': 'Fragment: “In the south burns summer.”',
   'Fragment : « À l’ouest tombe l’automne. »': 'Fragment: “In the west falls autumn.”',
-  'Hector : « Il s’est caché près d’une grosse citrouille, j’en suis sûr. »':
-    'Hector: “He hid near a big pumpkin, I’m sure of it.”',
+  'Barnabé : « Il s’est caché près d’une grosse citrouille, j’en suis sûr. »':
+    'Barnabé: “He hid near a big pumpkin, I’m sure of it.”',
   'Mila : « Il déteste l’eau. Il ne va jamais près du ruisseau. »':
     'Mila: “He hates water. He never goes near the stream.”',
   'Gaspard : « Moi je l’ai vu sous le pont du ruisseau ! Enfin… je crois. »':

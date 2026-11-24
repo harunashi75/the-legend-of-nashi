@@ -3041,11 +3041,11 @@
           y,
           {
             sex: o.who === 'Mila' ? 'f' : 'm',
-            race: o.who === 'Hector' ? 'orc' : 'humain',
+            race: o.who === 'Barnabé' ? 'orc' : 'humain',
             hair: '#5a3a20',
             outfit: o.who === 'Gaspard' ? 'rose' : 'foret'
           },
-          o.who === 'Hector' ? 'spear' : 'none'
+          o.who === 'Barnabé' ? 'spear' : 'none'
         );
         if (Math.hypot(P.x - x, P.y - y) < 4 * T) nameTag(c, x, y - 48, o.who);
         return;

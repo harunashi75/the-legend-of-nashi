@@ -1963,8 +1963,8 @@ export const TRAVELERS = deepFreeze([
   {
     id: 't1',
     at: [-2, 4],
-    who: 'Hector',
-    what: 'Hector : « Il s’est caché près d’une grosse citrouille, j’en suis sûr. »'
+    who: 'Barnabé',
+    what: 'Barnabé : « Il s’est caché près d’une grosse citrouille, j’en suis sûr. »'
   },
   {
     id: 't2',

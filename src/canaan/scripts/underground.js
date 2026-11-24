@@ -1278,7 +1278,7 @@
       room: 'dur_taverne',
       lx: 3.4,
       ly: 5.4,
-      name: 'Oin le Buveur',
+      name: 'Ulfar le Buveur',
       role: 'buveur',
       beard: '#c8642a',
       helm: '#8a8e96',
@@ -1297,7 +1297,7 @@
       tunic: '#6a2a3a',
       tool: 'mug',
       fem: true,
-      lines: ['Une naine qui boit plus que Oin ? C’est moi. Et je chante mieux, aussi.']
+      lines: ['Une naine qui boit plus qu’Ulfar ? C’est moi. Et je chante mieux, aussi.']
     },
     {
       room: 'dur_coffre',

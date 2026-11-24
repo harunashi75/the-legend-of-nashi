@@ -1269,10 +1269,11 @@
     'La nuit, le sable chante sous le vent.',
     'Les fées sauvages ne sont pas aussi gentilles qu’elles en ont l’air.'
   ];
+  // Prénoms des habitants : chacun tiré une seule fois (aucun doublon), et aucun n'est déjà porté par un PNJ nommé
+  // (quêtes, guilde, Durgrim, Sylvaëlle, statues des légendes).
   const NAMES = {
     f: [
       'Mira',
-      'Elwen',
       'Sacha',
       'Lorna',
       'Isaure',
@@ -1280,23 +1281,64 @@
       'Brune',
       'Talia',
       'Nora',
-      'Zelie',
+      'Zélie',
       'Anouk',
-      'Ondine'
+      'Ondine',
+      'Capucine',
+      'Margaux',
+      'Léonie',
+      'Rosalie',
+      'Agathe',
+      'Clémence',
+      'Ninon',
+      'Apolline',
+      'Héloïse',
+      'Romane',
+      'Suzon',
+      'Violette',
+      'Albane',
+      'Bérénice',
+      'Coline',
+      'Faustine',
+      'Gisèle',
+      'Eugénie',
+      'Philippine',
+      'Clotilde',
+      'Mahaut'
     ],
     m: [
-      'Aldric',
-      'Brann',
       'Tobin',
-      'Gaspard',
-      'Oren',
-      'Milo',
       'Rurik',
       'Corentin',
       'Hugo',
       'Basile',
       'Fenwick',
-      'Tom'
+      'Anselme',
+      'Clovis',
+      'Désiré',
+      'Edmond',
+      'Gauvain',
+      'Lazare',
+      'Octave',
+      'Paulin',
+      'Quentin',
+      'Valentin',
+      'Tancrède',
+      'Ulysse',
+      'Cyprien',
+      'Firmin',
+      'Léandre',
+      'Joachim',
+      'Aubin',
+      'Bertrand',
+      'Colin',
+      'Damien',
+      'Évrard',
+      'Fulbert',
+      'Gérald',
+      'Hippolyte',
+      'Jasper',
+      'Lucien'
     ]
   };
   const TITLES = {
@@ -1313,12 +1355,16 @@
   function settle() {
     settled = true;
     const rng = seeded(777);
+    const free = { f: [...NAMES.f], m: [...NAMES.m] };
     const add = (role, tx, ty, extra = [], exact = false) => {
       const r = ROLES[role],
         look = randomLook(rng);
       look.outfit = r.outfits[Math.floor(rng() * r.outfits.length)];
       if (role === 'eclaireuse') look.sex = 'f';
-      const first = NAMES[look.sex][Math.floor(rng() * NAMES[look.sex].length)],
+      const pool = free[look.sex],
+        first = pool.length
+          ? pool.splice(Math.floor(rng() * pool.length), 1)[0]
+          : NAMES[look.sex][Math.floor(rng() * NAMES[look.sex].length)],
         title = TITLES[role]
           ? (role === 'enfant'
               ? look.sex === 'f'

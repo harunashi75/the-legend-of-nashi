@@ -29,7 +29,7 @@
       text: 'Seul sur le pont de pierre, il retint la horde des Cendres jusqu’à l’aube. Le pont tient encore ; on dit qu’il n’a jamais cédé depuis.'
     },
     {
-      name: 'Sigrun Lance-d’Aube',
+      name: 'Ragna Lance-d’Aube',
       text: 'Elle chevaucha trois jours sans dormir pour prévenir la vallée. Sa lance plantée au sommet du col servit de phare aux réfugiés.'
     },
     {
@@ -45,11 +45,11 @@
       text: 'Il ouvrit à la hache le passage du Col des Héros, pierre après pierre, pour que les familles puissent fuir.'
     },
     {
-      name: 'Dame Ysolde',
+      name: 'Dame Aveline',
       text: 'Son bouclier ne connut jamais la défaite : elle protégea l’enfant-roi pendant toute la bataille des Moissons.'
     },
     {
-      name: 'Liora la Chanteuse',
+      name: 'Mélisande la Chanteuse',
       text: 'Sa ballade rendit courage à une armée vaincue. On la chante encore à la fin des moissons.'
     },
     {
