@@ -201,6 +201,8 @@
   }
   function flash(x, y, r, color, life = 0.35, bolt = false) {
     run.flashes.push({ x, y, r, color, life, max: life, bolt });
+    // Une vraie explosion de la matière du boss (flammes, givre, foudre…), vue aussi par les invités.
+    if (game.mode !== 'guest') CANAAN_VFX.bossImpact(x, y, r, color, r >= 150);
   }
   function swing(b) {
     b.cd = (b.cd || 0) + 1;
@@ -1307,12 +1309,6 @@
   };
 
   // ---------------------------------------------------------------- Rendu
-  function wedge(c, x, y, a, w, r) {
-    c.beginPath();
-    c.moveTo(x, y);
-    c.arc(x, y, r, a - w / 2, a + w / 2);
-    c.closePath();
-  }
   function drawGround(c) {
     if (!run) return;
     c.save();
@@ -1331,99 +1327,38 @@
       c.stroke();
     }
     c.globalAlpha = 1;
-    // Sols dangereux.
+    // Sols dangereux : une matière vivante (flammes, bulles, néant, éclairs) plutôt qu'un disque plat.
     for (const hz of run.hazards) {
-      const pulse = 0.5 + Math.sin(time * 0.15 + hz.x) * 0.15,
-        fade = Math.min(1, (hz.until - run.clock) / 0.6);
-      c.globalAlpha = 0.32 * pulse * fade + 0.12;
-      c.fillStyle = hz.color;
-      c.beginPath();
-      c.ellipse(hz.x, hz.y, hz.r, hz.r, 0, 0, Math.PI * 2);
-      c.fill();
-      c.globalAlpha = 0.75 * fade;
-      c.strokeStyle = hz.color;
-      c.lineWidth = 3;
-      c.stroke();
-      c.fillStyle = '#ffffff';
-      for (let k = 0; k < 5; k++) {
-        const a = time * 0.05 + k * 1.3 + hz.y,
-          rr = (hz.r * (0.25 + ((k * 37 + time) % 60) / 100)) % hz.r;
-        if (hz.kind === 'storm') c.fillRect(hz.x + Math.cos(a) * rr - 6, hz.y + Math.sin(a) * rr, 12, 2);
-        else c.fillRect(hz.x + Math.cos(a) * rr - 2, hz.y + Math.sin(a) * rr - 2, 4, 4);
-      }
+      CANAAN_VFX.hazard(c, hz, time, Math.min(1, (hz.until - run.clock) / 0.6));
       canaanLight(hz.x, hz.y, hz.r * 1.4, hz.color);
     }
-    // Annonces : contour franc, remplissage qui grandit jusqu'à l'impact.
+    // Annonces : le sol se fissure et rougeoit de la matière du boss jusqu'à l'impact ; météores et cristaux tombent.
     for (const fx of run.fx) {
-      const k = Math.min(1, fx.t / fx.delay),
-        col = fx.color,
-        danger = k > 0.75;
-      c.lineWidth = fx.auto ? 2 : 3;
-      if (fx.shape === 'circle' || fx.shape === 'mark') {
-        const ry = fx.r;
-        c.globalAlpha = fx.auto ? 0.1 : 0.16;
-        c.fillStyle = col;
-        c.beginPath();
-        c.ellipse(fx.x, fx.y, fx.r, ry, 0, 0, Math.PI * 2);
-        c.fill();
-        c.globalAlpha = 0.34;
-        c.beginPath();
-        c.ellipse(fx.x, fx.y, fx.r * k, ry * k, 0, 0, Math.PI * 2);
-        c.fill();
-        c.globalAlpha = danger ? 0.95 : 0.7;
-        c.strokeStyle = danger ? '#ffffff' : col;
-        c.beginPath();
-        c.ellipse(fx.x, fx.y, fx.r, ry, 0, 0, Math.PI * 2);
-        c.stroke();
-        if (fx.shape === 'mark') {
-          const locked = fx.t >= fx.delay - fx.lock;
-          c.strokeStyle = locked ? '#ff3a3a' : col;
-          c.lineWidth = 4;
-          c.beginPath();
-          c.moveTo(fx.x - fx.r * 0.5, fx.y);
-          c.lineTo(fx.x + fx.r * 0.5, fx.y);
-          c.moveTo(fx.x, fx.y - ry * 0.5);
-          c.lineTo(fx.x, fx.y + ry * 0.5);
-          c.stroke();
-        }
-        if (fx.meteor || fx.crystal) {
-          // Objet qui tombe du ciel vers sa zone.
-          const fall = (1 - k) * 420;
-          c.globalAlpha = 0.9;
-          c.fillStyle = fx.crystal ? '#e0c0ff' : '#ffb040';
-          c.fillRect(fx.x - 9, fx.y - 40 - fall, 18, 18);
-          c.fillStyle = '#ffffff';
-          c.fillRect(fx.x - 4, fx.y - 36 - fall, 6, 6);
-        }
-      } else if (fx.shape === 'cone') {
-        c.globalAlpha = fx.auto ? 0.1 : 0.16;
-        c.fillStyle = col;
-        wedge(c, fx.x, fx.y, fx.a, fx.w, fx.r);
-        c.fill();
-        c.globalAlpha = 0.34;
-        wedge(c, fx.x, fx.y, fx.a, fx.w, fx.r * k);
-        c.fill();
-        c.globalAlpha = danger ? 0.95 : 0.7;
-        c.strokeStyle = danger ? '#ffffff' : col;
-        wedge(c, fx.x, fx.y, fx.a, fx.w, fx.r);
-        c.stroke();
-      } else if (fx.shape === 'line') {
+      const k = Math.min(1, fx.t / fx.delay);
+      CANAAN_VFX.telegraph(c, fx.shape, fx, k, fx.color, time);
+      if (fx.shape === 'mark' && fx.t >= fx.delay - fx.lock) {
         c.save();
-        c.translate(fx.x, fx.y);
-        c.rotate(fx.a);
-        c.globalAlpha = 0.16;
-        c.fillStyle = col;
-        c.fillRect(0, -fx.w / 2, fx.len, fx.w);
-        c.globalAlpha = 0.34;
-        c.fillRect(0, -fx.w / 2, fx.len * k, fx.w);
-        c.globalAlpha = danger ? 0.95 : 0.7;
-        c.strokeStyle = danger ? '#ffffff' : col;
-        c.strokeRect(0, -fx.w / 2, fx.len, fx.w);
+        c.strokeStyle = '#ff3a3a';
+        c.lineWidth = 3;
+        c.beginPath();
+        c.ellipse(fx.x, fx.y, fx.r * 0.5, fx.r * 0.3, 0, 0, Math.PI * 2);
+        c.stroke();
         c.restore();
       }
+      if (fx.meteor || fx.crystal) CANAAN_VFX.falling(c, fx.x, fx.y, k, !!fx.crystal);
     }
-    // Ondes de choc.
+    // Ondes de choc : un anneau de terre soulevée.
     for (const ring of run.rings) {
+      if (time % 2 === 0) {
+        const a = Math.random() * Math.PI * 2;
+        CANAAN_VFX.emit('dust', ring.x + Math.cos(a) * ring.r, ring.y + Math.sin(a) * ring.r * 0.62, {
+          vy: -20,
+          life: 0.6,
+          size: 10,
+          grow: 14,
+          c: '#8a7458'
+        });
+      }
       c.globalAlpha = 0.7;
       c.strokeStyle = ring.color;
       c.lineWidth = ring.w;
@@ -1441,19 +1376,10 @@
     if (!run) return;
     c.save();
     const b = run.boss;
-    // Rayons tournants.
+    // Rayons tournants : rayon d'énergie de la matière du boss.
     for (const sw of run.sweeps) {
       if (!b) break;
-      c.save();
-      c.translate(b.x, b.y - 30);
-      c.rotate(sw.a);
-      c.globalAlpha = 0.45;
-      c.fillStyle = sw.color;
-      c.fillRect(0, -sw.w / 2, sw.len, sw.w);
-      c.globalAlpha = 0.9;
-      c.fillStyle = '#ffffff';
-      c.fillRect(0, -sw.w / 6, sw.len, sw.w / 3);
-      c.restore();
+      CANAAN_VFX.energyBeam(c, b.x, b.y - 30, sw.a, sw.len, sw.w / 2, sw.color, time);
       canaanLight(b.x + Math.cos(sw.a) * 200, b.y + Math.sin(sw.a) * 200, 200, sw.color);
     }
     // Bouclier de cristal et garde du chevalier.
@@ -1480,45 +1406,17 @@
       c.ellipse(b.x, b.y - 60, 80, 100, 0, 0, Math.PI * 2);
       c.stroke();
     }
-    // Projectiles : orbe lumineux et traînée.
+    // Projectiles : orbe de la matière du boss et son sillage.
     for (const s of run.shots) {
-      c.globalAlpha = 0.35;
-      c.fillStyle = s.color;
-      c.beginPath();
-      c.arc(s.x - s.vx * 2, s.y - s.vy * 2, s.r * 0.8, 0, Math.PI * 2);
-      c.fill();
-      c.globalAlpha = 1;
-      c.beginPath();
-      c.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      c.fill();
-      c.fillStyle = '#ffffff';
-      c.beginPath();
-      c.arc(s.x, s.y, s.r * 0.45, 0, Math.PI * 2);
-      c.fill();
+      CANAAN_VFX.orb(c, s, time);
       canaanLight(s.x, s.y, 70, s.color);
     }
     // Éclairs et impacts.
     for (const f of run.flashes) {
       const k = f.life / f.max;
       c.globalAlpha = k * 0.8;
-      if (f.bolt) {
-        c.strokeStyle = '#ffffff';
-        c.lineWidth = 4;
-        c.beginPath();
-        let x = f.x,
-          y = f.y - 420;
-        c.moveTo(x, y);
-        for (let s = 1; s <= 7; s++) {
-          x = f.x + (s < 7 ? Math.sin(s * 3.1 + f.x) * 26 : 0);
-          y = f.y - 420 + s * 60;
-          c.lineTo(x, y);
-        }
-        c.stroke();
-        c.strokeStyle = f.color;
-        c.lineWidth = 9;
-        c.globalAlpha = k * 0.35;
-        c.stroke();
-      }
+      if (f.bolt)
+        CANAAN_VFX.bolt(c, f.x + 30, f.y - 420, f.x, f.y, f.color, 4 * k + 1, Math.round(f.x * 7 + f.y), 3);
       canaanLight(f.x, f.y, f.r * 1.6, f.color);
       c.globalAlpha = k * 0.5;
       c.fillStyle = f.color;

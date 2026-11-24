@@ -36,7 +36,15 @@
       const talents = window.CANAAN_CLASS_ATTACK;
       const context = talents.before(target, damage, options, hero);
       damage = context.damage;
-      const result = this.rawAttack(target, damage, hero);
+      // Coup critique garanti (Pas de l'ombre, Tir de précision, Instinct du fauve…) : pour ce coup seulement.
+      const forced = !!(options.forceCrit || context.forceCrit);
+      if (forced) hero._forceCrit = true;
+      let result;
+      try {
+        result = this.rawAttack(target, damage, hero);
+      } finally {
+        if (forced) hero._forceCrit = false;
+      }
       context.dealt = result || 0;
       talents.after(target, context, hero);
       CANAAN_ARTEFACTS.attackAfter(target, result || 0, options, hero);
@@ -124,7 +132,8 @@
       }
       const len = Math.hypot(dx, dy) || 1;
       roll = { dx: dx / len, dy: dy / len, left: DODGE.duration };
-      dodgeReady = t + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor();
+      dodgeReady =
+        t + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor() * window.CANAAN_CLASS_DODGE_FACTOR();
       CANAAN_ARTEFACTS.onDodge();
       window.CANAAN_CLASS_ON_DODGE();
       CANAAN_SOUND.cue('dodge');
@@ -148,7 +157,9 @@
       }
       const len = Math.hypot(dx, dy) || 1;
       p.roll = { dx: dx / len, dy: dy / len, left: DODGE.duration };
-      p.dodgeReady = clock() + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero);
+      p.dodgeReady =
+        clock() +
+        DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero) * window.CANAAN_CLASS_DODGE_FACTOR(hero);
       CANAAN_ARTEFACTS.onDodge(hero);
       window.CANAAN_CLASS_ON_DODGE(hero);
       canaanAchieve(hero, 'dodge');
@@ -160,12 +171,15 @@
         return {
           rolling: !!hero.player.roll,
           ready: Math.max(0, (hero.player.dodgeReady || 0) - t),
-          cooldown: DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero)
+          cooldown:
+            DODGE.cooldown *
+            CANAAN_ARTEFACTS.dodgeCooldownFactor(hero) *
+            window.CANAAN_CLASS_DODGE_FACTOR(hero)
         };
       return {
         rolling: !!roll,
         ready: Math.max(0, dodgeReady - t),
-        cooldown: DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor()
+        cooldown: DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor() * window.CANAAN_CLASS_DODGE_FACTOR()
       };
     },
     heal(amount, kind = 'direct', hero = game.hero) {
@@ -232,7 +246,7 @@
     if (!started || P.dead) return;
     const t = clock(),
       left = dodgeReady - t,
-      total = DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor();
+      total = DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor() * window.CANAAN_CLASS_DODGE_FACTOR();
     if (left <= 0 && !roll) return;
     ctx.save();
     ctx.translate(Math.round(-camX), Math.round(-camY));

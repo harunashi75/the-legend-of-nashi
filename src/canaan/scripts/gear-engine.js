@@ -37,14 +37,9 @@
     // Les noms choisis sont des propriétés persistantes.
     if (weapon && knownWeapon(item, originalType)) item.weaponType = originalType;
     applyItemName(item);
-    // Une arme liée prend le nom de son palier (il change en grandissant).
-    if (
-      weapon &&
-      !isBoundItem(item) &&
-      WEAPONS.has(originalType) &&
-      originalName &&
-      !/^Lame\s/.test(originalName)
-    )
+    // Une arme de classe prend le nom de son palier (il change en grandissant).
+    // Ancienne arme du butin (rendue en or au prochain accord de l'arme de classe) : elle garde son nom.
+    if (weapon && !isBoundItem(item) && originalName && !/^Lame\s/.test(originalName))
       item.name = originalName;
     window.CANAAN_STATS_PREPARE(item);
     // Enchantement enregistré : vérifié (sinon retiré).

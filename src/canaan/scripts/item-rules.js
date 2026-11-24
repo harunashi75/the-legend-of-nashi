@@ -6,12 +6,9 @@ function rarityRoll(level) {
 let playerStun = 0,
   bossStunImmunity = 0;
 
-// weapon est toujours l'arme active; weapon2 reste équipée mais ne fournit aucun bonus.
-gearSlots.weapon = '⟦slot_weapon⟧ Arme 1 · active';
-gearSlots.weapon2 = '⟦w_dualsword⟧ Arme 2 · réserve';
-itemIcon.weapon2 = '⟦w_dualsword⟧';
+// Une seule arme : celle de la classe (plus d'arme de réserve).
+gearSlots.weapon = '⟦slot_weapon⟧ Arme de classe';
 // Deux bagues : la seconde reçoit aussi un objet d'emplacement « ring » et compte comme la première.
 gearSlots.ring = '⟦slot_ring⟧ Bague 1';
 gearSlots.ring2 = '⟦slot_ring⟧ Bague 2';
 itemIcon.ring2 = '⟦slot_ring⟧';
-if (!Object.prototype.hasOwnProperty.call(game.hero.equipment, 'weapon2')) game.hero.equipment.weapon2 = null;

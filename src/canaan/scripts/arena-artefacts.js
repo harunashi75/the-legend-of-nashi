@@ -65,17 +65,43 @@
     if (!r)
       runtimes.set(
         hero,
-        (r = { lastCombat: -1e9, shield: 0, prismReady: 0, crownReady: 0, voidUntil: 0, regenClock: 0 })
+        (r = {
+          lastCombat: -1e9,
+          shield: 0,
+          prismReady: 0,
+          crownReady: 0,
+          invulnUntil: 0,
+          voidUntil: 0,
+          echoes: [],
+          embers: [],
+          emberAt: -1,
+          plates: 0,
+          platesUntil: 0,
+          stoneReady: 0,
+          mistReady: 0,
+          mistUntil: 0,
+          mistTick: 0,
+          parryBoost: false,
+          stormHits: 0,
+          hydraAt: -1
+        })
       );
     return r;
   }
   function inCombat(hero = game.hero) {
     return now() - rt(hero).lastCombat < 5 || CANAAN_ARENA.fighting();
   }
-  // Dégâts secondaires (brûlure, saignement, éclair, riposte) : ils ne redéclenchent aucun effet.
+  const fx = (shape, x, y, r, c, d = 0.5, a = 0) => CANAAN_SKILLS.fx(shape, x, y, a, r, 0, c, d);
+  const attackOf = hero => characterStats(hero).attack || 0;
+  // Dégâts secondaires (brûlure, saignement, éclair, onde) : ils ne redéclenchent aucun effet.
   function secondary(m, amount, hero) {
     if (!m || m.hp <= 0) return 0;
     return window.CANAAN_COMBAT.rawAttack(m, Math.max(1, Math.round(amount)), hero) || 0;
+  }
+  // Dégâts secondaires autour d'un point.
+  function around(x, y, tiles, amount, hero) {
+    for (const o of game.world.monsters.slice())
+      if (o.hp > 0 && canaanBodyGap(o, x, y) < tiles * TS) secondary(o, amount, hero);
   }
   // Brûlure ou saignement d'un héros sur un monstre : un seul de chaque par héros, le plus fort gardé.
   function dot(m, kind, total, hero) {
@@ -89,6 +115,11 @@
       old.until = t + 4;
     } else list.push({ kind, by: hero, dps, until: t + 4, tick: t + 1 });
   }
+  const nearest = (m, tiles, n) =>
+    game.world.monsters
+      .filter(o => o !== m && o.hp > 0 && Math.hypot(o.x - m.x, o.y - m.y) < tiles * TS)
+      .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))
+      .slice(0, n);
 
   // ---------------------------------------------------------------- Points d'accroche du combat
   // Statistiques : appelé à la fin de characterStats.
@@ -110,26 +141,89 @@
     let v,
       mult = 1;
     if ((v = worn(hero, 'sceau_executeur')) && m.mhp > 0 && m.hp / m.mhp < 0.35) mult *= 1 + v.n / 100;
-    if ((v = worn(hero, 'voile_neant')) && now() < r.voidUntil) mult *= 1 + v.m / 100;
+    if (worn(hero, 'voile_neant') && now() < r.voidUntil) mult *= 1.25;
+    // Écu du Déchu : la compétence qui suit une parade fait +30 %.
+    if (r.parryBoost && options.skill && options.offensive) {
+      r.parryBoost = false;
+      mult *= 1.3;
+    }
     return damage * mult;
   }
   function attackAfter(m, done, options = {}, hero = game.hero) {
-    rt(hero).lastCombat = now();
+    const r = rt(hero),
+      t = now(),
+      p = hero.player;
+    r.lastCombat = t;
     if (!m || !(done > 0)) return;
+    const skill = !!options.skill && !!options.offensive;
     let v;
+    // Cœur de Fer : à 5 plaques, l'onde de choc part du héros.
+    if ((v = worn(hero, 'coeur_fer')) && r.plates >= 5 && t < r.platesUntil) {
+      r.plates = 0;
+      float(p.x, p.y - 62, '⚙️ ONDE DE FER', '#d6dbe2');
+      fx('groundSmash', p.x, p.y, TS * 3, '#d6dbe2', 0.7);
+      around(p.x, p.y, 3, (attackOf(hero) * v.m) / 100, hero);
+    }
+    const wasBleeding = (m._artDots || []).some(d => d.kind === 'bleed' && d.until > t) || m.v1746_bleed > 0;
     if ((v = worn(hero, 'croc_ombres')) && m._lastCrit && m.hp > 0) dot(m, 'bleed', (done * v.m) / 100, hero);
-    if ((v = worn(hero, 'ecaille_ecarlate')) && m.hp > 0) dot(m, 'burn', (done * v.n) / 100, hero);
-    if ((v = worn(hero, 'oeil_tempetes')) && Math.random() < v.n / 100) {
-      const bolt = (done * v.m) / 100,
-        others = game.world.monsters
-          .filter(o => o !== m && o.hp > 0 && Math.hypot(o.x - m.x, o.y - m.y) < 4 * TS)
-          .sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y))
-          .slice(0, 2);
-      for (const o of [m, ...others]) {
-        secondary(o, bolt, hero);
-        burst(o.x, o.y - 20, '#bfe8ff', 8);
+    if ((v = worn(hero, 'ecaille_ecarlate'))) {
+      if (m.hp > 0) dot(m, 'burn', (done * v.m) / 100, hero);
+      // Les têtes de l'Hydre : une fois par compétence (0,5 s), sur la cible et deux ennemis proches.
+      if (skill && t - r.hydraAt >= 0.5) {
+        r.hydraAt = t;
+        for (const o of [m, ...nearest(m, 4, 2)]) {
+          if (o.hp <= 0) continue;
+          CANAAN_SKILLS.fx(
+            'lightning',
+            p.x,
+            p.y - 20,
+            Math.atan2(o.y - p.y, o.x - p.x),
+            Math.hypot(o.x - p.x, o.y - p.y),
+            0,
+            '#ff7a2a',
+            0.3
+          );
+          fx('flames', o.x, o.y - 10, 34, '#ff7a2a', 0.5);
+          secondary(o, (done * v.n) / 100, hero);
+        }
       }
+    }
+    // Œil des Tempêtes : tous les 5 coups, la foudre du ciel et trois rebonds qui ralentissent.
+    if ((v = worn(hero, 'oeil_tempetes')) && ++r.stormHits >= 5) {
+      r.stormHits = 0;
+      const bolt = (attackOf(hero) * v.n) / 100;
+      fx('skybolt', m.x, m.y, 40, '#bfe8ff', 0.45);
       float(m.x, m.y - 70, '⚡', '#bfe8ff');
+      let from = m;
+      for (const o of [m, ...nearest(m, 5, 3)]) {
+        if (o !== m)
+          CANAAN_SKILLS.fx(
+            'lightning',
+            from.x,
+            from.y - 16,
+            Math.atan2(o.y - from.y, o.x - from.x),
+            Math.hypot(o.x - from.x, o.y - from.y),
+            0,
+            '#bfe8ff',
+            0.3
+          );
+        secondary(o, bolt, hero);
+        if (o.hp > 0) CANAAN_CLASS.slow(hero, o, v.m / 100, 2, 'lightning');
+        from = o;
+      }
+    }
+    // Cœur de Cendres : le sol s'embrase sous la cible d'une compétence.
+    if (worn(hero, 'coeur_cendres') && skill && t - r.emberAt >= 0.8) {
+      r.emberAt = t;
+      r.embers.push({ x: m.x, y: m.y, until: t + 3, tick: t + 1 });
+      fx('fireGround', m.x, m.y, TS * 1.5, '#ff7a2a', 3);
+    }
+    if (m.hp <= 0) {
+      if ((v = worn(hero, 'croc_ombres')) && wasBleeding) {
+        p.hp = Math.min(p.mhp, p.hp + p.mhp * 0.04);
+        float(p.x, p.y - 40, '🩸 +' + Math.round(p.mhp * 0.04) + ' PV', '#d8b0ff');
+      }
+      if ((v = worn(hero, 'sceau_executeur'))) CANAAN_SKILLS.hasten(hero, v.m);
     }
   }
   // Compétences : Cœur de Cendres renforce leurs dégâts.
@@ -146,77 +240,110 @@
     const v = worn(hero, 'voile_neant');
     return v ? 1 - v.n / 100 : 1;
   };
+  // Roulade : Voile du Néant (écho qui explose 1 s plus tard, +25 % de dégâts pendant 3 s).
   function onDodge(hero = game.hero) {
-    if (worn(hero, 'voile_neant')) rt(hero).voidUntil = now() + 3;
+    if (!worn(hero, 'voile_neant')) return;
+    const r = rt(hero),
+      p = hero.player;
+    r.voidUntil = now() + 3;
+    r.echoes.push({ x: p.x, y: p.y, at: now() + 1 });
+    fx('voidPool', p.x, p.y, TS * 1.2, '#9a40e0', 1);
   }
   // Soins reçus (Fiole des Brumes) ; target : le héros soigné.
   function healFactor(periodic, target = game.hero) {
     const v = worn(target, 'fiole_brumes');
     return v ? 1 + v.n / 100 : 1;
   }
-  // Coup direct reçu, après la Défense, les armes et les talents : parade, réduction, bouclier.
+  // Coup direct reçu, après la Défense, les armes et les talents : invulnérabilité, parade, plaques, peau de pierre,
+  // bouclier de cristal.
   function defense(source, damage, options = {}, hero = game.hero) {
     const r = rt(hero),
-      p = hero.player;
-    r.lastCombat = now();
+      p = hero.player,
+      t = now();
+    r.lastCombat = t;
+    if (t < r.invulnUntil) return 0;
     if (!(damage > 0)) return damage;
     let v,
       d = damage;
     if ((v = worn(hero, 'ecu_dechu')) && Math.random() < v.n / 100) {
       float(p.x, p.y - 56, '🛡️ PARADE', '#a4caff');
+      fx('shieldBash', p.x, p.y, 60, '#a4caff', 0.4, source ? Math.atan2(source.y - p.y, source.x - p.x) : 0);
+      r.parryBoost = true;
       if (source && source.hp > 0 && Number.isFinite(source.mhp))
-        secondary(source, (characterStats(hero).attack * v.m) / 100, hero);
+        secondary(source, (attackOf(hero) * v.m) / 100, hero);
       return 0;
     }
-    if ((v = worn(hero, 'coeur_fer'))) d *= 1 - v.n / 100;
+    if ((v = worn(hero, 'coeur_fer'))) {
+      const plates = t < r.platesUntil ? r.plates : 0;
+      d *= 1 - (plates * v.n) / 100;
+      r.plates = Math.min(5, plates + 1);
+      r.platesUntil = t + 6;
+      if (r.plates === 5 && plates < 5) float(p.x, p.y - 62, '⚙️ ×5', '#d6dbe2');
+    }
+    if ((v = worn(hero, 'pierre_colosse')) && t >= r.stoneReady) {
+      r.stoneReady = t + 8;
+      d *= 1 - v.m / 100;
+      float(p.x, p.y - 52, '🪨 −' + v.m + ' %', '#e2d4b8');
+    }
     if (r.shield > 0) {
       const absorbed = Math.min(r.shield, d);
       r.shield -= absorbed;
       d -= absorbed;
       if (absorbed > 0) float(p.x, p.y - 48, '💎 −' + Math.round(absorbed), '#e8c8ff');
+      // Prisme de Cristal : le bouclier brisé éclate.
+      if (r.shield <= 0 && (v = worn(hero, 'prisme_cristal'))) {
+        fx('shatter', p.x, p.y - 10, TS * 3, '#e8c8ff', 0.7);
+        around(p.x, p.y, 3, (attackOf(hero) * v.m) / 100, hero);
+      }
     }
     return Math.max(0, d);
   }
   // Juste avant la perte de PV : Couronne du Souverain contre un coup fatal.
   function beforeHurt(n, source, hero = game.hero) {
     const p = hero.player,
-      r = rt(hero);
-    if (p.hp - n > 0 || !worn(hero, 'couronne_souverain') || now() < r.crownReady) return n;
+      r = rt(hero),
+      v = worn(hero, 'couronne_souverain');
+    if (now() < r.invulnUntil) return 0;
+    if (p.hp - n > 0 || !v || now() < r.crownReady) return n;
     r.crownReady = now() + 90;
-    p.hp = Math.max(1, Math.round(p.mhp * 0.2));
+    r.invulnUntil = now() + 2;
+    p.hp = Math.max(1, Math.round(p.mhp * (v.m / 100)));
     canaanAchieve(hero, 'phoenix');
     float(p.x, p.y - 64, '👑 SOUVERAIN', '#ffe08a');
-    burst(p.x, p.y, '#ffd36d', 28);
+    fx('holyPillar', p.x, p.y, 70, '#ffe08a', 1.2);
     return 0;
   }
   // Nouvelle vague de l'Arène : le bouclier du Prisme se recharge.
   function newCombat(hero = game.hero) {
     rt(hero).prismReady = 0;
   }
-  // Effets passagers en cours (barre des effets) : bouclier, élan du Néant, recharge de la Couronne.
+  // Effets passagers en cours (barre des effets).
   function auras(hero = game.hero) {
     const r = rt(hero),
       t = now(),
       out = [],
-      add = (id, left, text) => {
+      add = (id, left, text, stacks = 0) => {
         const a = BY_ID.get(id);
-        if (left > 0) out.push({ id, icon: a.icon, name: a.name, text, left });
+        if (left > 0) out.push({ id, icon: a.icon, name: a.name, text, left, stacks });
       };
+    let v;
     if (r.shield > 0 && worn(hero, 'prisme_cristal'))
       add(
         'prisme_cristal',
         Math.max(0.1, r.prismReady - t),
         'Bouclier : absorbe ' + Math.round(r.shield) + ' dégâts.'
       );
-    const v = worn(hero, 'voile_neant');
-    if (v) add('voile_neant', r.voidUntil - t, 'Dégâts +' + v.m + ' %.');
+    if ((v = worn(hero, 'coeur_fer')) && r.plates > 0)
+      add('coeur_fer', r.platesUntil - t, 'Dégâts subis −' + r.plates * v.n + ' %.', r.plates);
+    if (worn(hero, 'voile_neant')) add('voile_neant', r.voidUntil - t, 'Dégâts +25 %.');
+    if (worn(hero, 'fiole_brumes')) add('fiole_brumes', r.mistUntil - t, 'Brume guérisseuse.');
     if (worn(hero, 'couronne_souverain'))
       add('couronne_souverain', r.crownReady - t, 'Protection contre un coup fatal en recharge.');
     return out;
   }
 
   // ---------------------------------------------------------------- Étape de simulation
-  // Pour chaque héros : bouclier du Prisme, régénération de la Fiole, brûlures et saignements qu'il a posés.
+  // Pour chaque héros : bouclier du Prisme, brume de la Fiole, échos du Néant, braises, brûlures et saignements.
   window.CanaanStages.artefacts = {
     after() {
       for (const hero of game.heroes) stepHero(hero);
@@ -225,23 +352,47 @@
   function stepHero(hero) {
     const p = hero.player,
       r = rt(hero),
-      t = now(),
-      dt = 1 / 60;
+      t = now();
     if (p.dead) return;
     let v;
     if ((v = worn(hero, 'prisme_cristal')) && t >= r.prismReady) {
-      r.prismReady = t + 20;
+      r.prismReady = t + 15;
       r.shield = (p.mhp * v.n) / 100;
       if (inCombat(hero)) float(p.x, p.y - 58, '💎 Bouclier', '#e8c8ff');
     } else if (!worn(hero, 'prisme_cristal')) r.shield = 0;
-    if (
-      (v = worn(hero, 'fiole_brumes')) &&
-      !inCombat(hero) &&
-      p.hp < p.mhp &&
-      (r.regenClock += dt) >= 1 - 1e-9
-    ) {
-      r.regenClock = 0;
-      p.hp = Math.min(p.mhp, p.hp + (p.mhp * v.m) / 100);
+    // Fiole des Brumes : sous 35 % de PV, une brume rend m % des PV max en 5 s.
+    if ((v = worn(hero, 'fiole_brumes'))) {
+      if (p.hp < p.mhp * 0.35 && t >= r.mistReady) {
+        r.mistReady = t + 45;
+        r.mistUntil = t + 5;
+        r.mistTick = t;
+        fx('healSong', p.x, p.y, 60, '#a8f2bc', 1);
+      }
+      if (t + 1e-9 < r.mistUntil && t + 1e-9 >= r.mistTick) {
+        r.mistTick += 1;
+        const gain = Math.min(p.mhp - p.hp, (p.mhp * v.m) / 500);
+        if (gain > 0) {
+          p.hp += gain;
+          float(p.x, p.y - 40, '+' + Math.round(gain) + ' PV', '#a8f2bc');
+        }
+      }
+    }
+    // Voile du Néant : les échos explosent.
+    if ((v = worn(hero, 'voile_neant')))
+      for (const e of r.echoes.slice())
+        if (t >= e.at) {
+          r.echoes.splice(r.echoes.indexOf(e), 1);
+          fx('elemBurst', e.x, e.y, TS * 2.5, '#c48cff', 0.6);
+          around(e.x, e.y, 2.5, (attackOf(hero) * v.m) / 100, hero);
+        }
+    if (!worn(hero, 'voile_neant')) r.echoes.length = 0;
+    // Cœur de Cendres : le sol embrasé brûle chaque seconde.
+    for (const e of r.embers.slice()) {
+      if (t + 1e-9 >= e.tick && e.tick <= e.until + 1e-9) {
+        e.tick += 1;
+        around(e.x, e.y, 1.5, attackOf(hero) * 0.3, hero);
+      }
+      if (t >= e.until) r.embers.splice(r.embers.indexOf(e), 1);
     }
     for (const m of game.world.monsters.slice()) {
       if (!m._artDots) continue;

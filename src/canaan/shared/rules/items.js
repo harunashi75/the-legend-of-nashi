@@ -5,6 +5,8 @@
 import {
   ACTIVE_GEAR_SLOTS,
   BOUND_RARITY,
+  CLASS_WEAPON_FREE,
+  CLASS_WEAPON_UPGRADES,
   GEAR_RARITIES,
   LEGACY_RARITY,
   JEWEL_ICON,
@@ -87,13 +89,15 @@ export function weaponIcon(item) {
 export function applyItemName(item) {
   if (!item?.slot) return item;
   const rarity = rarityInfo(item).name;
-  if (item.slot === 'weapon' && rarity === BOUND_RARITY.name) {
+  // Arme de classe : le nom de son palier de niveau, quelle que soit sa qualité.
+  if (item.slot === 'weapon' && (rarity === BOUND_RARITY.name || isBoundItem(item))) {
     item.name = relicName(item.weaponType ?? '', item.level);
     return item;
   }
   if (item.slot === 'weapon') {
+    // Ancienne arme du butin (remboursée en or au chargement) : son ancien nom.
     ensureWeaponType(item);
-    item.name = WEAPON_NAMES[rarity][item.weaponType ?? 'sword'];
+    item.name = WEAPON_NAMES[rarity]?.[item.weaponType ?? 'sword'] || item.name || 'Arme';
   } else {
     const entry = GEAR_NAMES[rarity];
     if (entry[item.slot]) item.name = entry[item.slot];
@@ -116,7 +120,7 @@ export function relicName(type, level) {
   for (const [from, label] of tiers) if (lv >= from) name = label;
   return name;
 }
-// Un objet lié à une classe (le Grimoire) : il ne quitte jamais l'emplacement de l'arme.
+// Une arme de classe : elle ne quitte jamais l'emplacement de l'arme.
 /**
  * @param {(Item & { bound?: string }) | null | undefined} item
  * @returns {boolean}
@@ -124,26 +128,55 @@ export function relicName(type, level) {
 export function isBoundItem(item) {
   return !!item && typeof item.bound === 'string' && item.bound.length > 0;
 }
-// Arme liée d'une classe au niveau du héros : identité fixe, Relique, et deux secondaires fixes (Maîtrise et
-// Célérité, aux deux tiers de leur plage) qui grandissent avec elle.
+// Rang de qualité (0 Commun … 5 Mythique) de l'arme d'une classe : celui gagné avec les essences, et au moins Peu
+// commun à partir du niveau 10.
+/**
+ * @param {unknown} level niveau du héros
+ * @param {unknown} earned rang gagné (hero.weaponTiers[classe])
+ * @returns {number}
+ */
+export function classWeaponTier(level, earned) {
+  const top = GEAR_RARITIES.length - 1,
+    got = Math.max(0, Math.min(top, Math.floor(Number(earned) || 0))),
+    free = clampLevel(level) >= CLASS_WEAPON_FREE.level ? CLASS_WEAPON_FREE.tier : 0;
+  return Math.max(got, free);
+}
+// Prochaine marche de qualité de l'arme de classe (ou null au Mythique) : niveau, essences et or demandés.
+/**
+ * @param {number} tier rang actuel
+ */
+export function nextWeaponUpgrade(tier) {
+  return CLASS_WEAPON_UPGRADES.find(u => u.tier === tier + 1) || null;
+}
+// Arme d'une classe au niveau du héros : identité fixe et deux secondaires fixes (celles de la classe, aux deux tiers
+// de leur plage), qui grandissent avec elle. rarity : qualité Relique (Invocateur, Berserker) ou celle de son rang.
 /**
  * @param {string} classId classe propriétaire
  * @param {string} type famille d'arme
  * @param {unknown} level niveau du héros
+ * @param {string} [rarity] qualité (Relique par défaut)
+ * @param {readonly string[]} [stats] deux statistiques secondaires
  * @returns {Item & { bound: string }}
  */
-export function makeBoundWeapon(classId, type, level) {
+export function makeBoundWeapon(
+  classId,
+  type,
+  level,
+  rarity = BOUND_RARITY.name,
+  stats = ['mastery', 'haste']
+) {
   const lv = clampLevel(level),
-    [lo, hi] = secondaryRange(lv, BOUND_RARITY.name),
-    value = Math.round(lo + (hi - lo) * 0.66);
+    [lo, hi] = secondaryRange(lv, rarity),
+    value = Math.round(lo + (hi - lo) * 0.66),
+    keys = stats.length === 2 && stats[0] !== stats[1] ? stats : ['mastery', 'haste'];
   return {
     id: 'lie-' + classId,
     slot: 'weapon',
     weaponType: type,
-    rarity: BOUND_RARITY.name,
+    rarity,
     level: lv,
     bound: classId,
     name: relicName(type, lv),
-    sec: { mastery: value, haste: value }
+    sec: { [keys[0]]: value, [keys[1]]: value }
   };
 }

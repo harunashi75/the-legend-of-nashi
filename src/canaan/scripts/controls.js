@@ -154,11 +154,6 @@
     },
     sellInventoryCell: (element, event) =>
       sellInventoryCell(actionInteger(element, 'index'), element.dataset.itemId, event),
-    equipReserve: (element, event) => {
-      const index = actionInteger(element, 'index');
-      event.stopPropagation();
-      equipReserveWeapon(index);
-    },
     sellAllCommon: () => sellAllCommon(),
     // Sac unifié et boutique : utiliser une pile (repas, enchantement), acheter au marchand, vendre une pile.
     useBagStack: element => CANAAN_BAG.use(element.dataset.token),
@@ -289,7 +284,7 @@
       aimTouchAttack();
       canaanBasicAttack(false);
     } else if (button.dataset.touchAction === 'interact') interact();
-    else if (button.dataset.touchAction === 'switch') switchWeapon();
+    else if (button.dataset.touchAction === 'special') canaanUseSpecial();
     else if (button.dataset.touchAction === 'dodge') {
       const dx = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0),
         dy = (keys.arrowdown ? 1 : 0) - (keys.arrowup ? 1 : 0);

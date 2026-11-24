@@ -17,7 +17,6 @@
     ['skill3', 'Compétence 3', ['3'], 'Combat'],
     ['skill4', 'Compétence 4', ['4'], 'Combat'],
     ['special', 'Sort de classe', ['f'], 'Combat'],
-    ['switchWeapon', 'Changer d’arme', ['q'], 'Combat'],
     ['interact', 'Interagir', ['e'], 'Combat'],
     ['talents', 'Classe et talents', ['t'], 'Menus'],
     ['inventory', 'Inventaire', ['i'], 'Menus'],

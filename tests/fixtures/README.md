@@ -11,3 +11,7 @@ Avec la suppression de l’iLvl et de Ratings52, les parties `instances`, `rarit
 ## Tréfonds réorganisés
 
 Les Tréfonds sont devenus des cavernes reliées par des galeries : les quatre portails des donjons souterrains (`under`) ont changé de place. Seuls leurs `x` et `y` ont été repris depuis le jeu.
+
+## Armes de classe
+
+Les armes ne se trouvent plus au butin ni chez les marchands : chaque classe a la sienne. Les parties `weapons`, `craft` (vide) et `spells` ont été reprises une fois, volontairement, depuis le jeu : les dix jeux de compétences des armes de classe (dont les griffes de la forme féline du Druide).

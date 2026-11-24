@@ -10,22 +10,22 @@ const {
 test('Noms : table officielle complète appliquée directement, identité et points inchangés',async()=>{
   // Règle pure de shared/rules/items.js, chargée directement dans Node avec les vraies données de shared/.
   const shared=f=>import(require('node:url').pathToFileURL(require('node:path').join(__dirname,'..','src','canaan','shared',f)).href);
-  const {applyItemName}=await shared('rules/items.js'),{WEAPON_NAMES,GEAR_NAMES}=await shared('data/item-names.js');
-  for(const [rarity,types] of Object.entries(WEAPON_NAMES)){
-    for(const [type,name] of Object.entries(types)){
-      const sec={power:42,crit:7},item={id:'identity',slot:'weapon',name:'Ancien nom',rarity,weaponType:type,level:30,sec};
+  const {applyItemName}=await shared('rules/items.js'),{GEAR_NAMES,RELIC_NAMES}=await shared('data/item-names.js');
+  // Arme de classe : le nom de son palier de niveau, quelle que soit sa qualité ; identité et points inchangés.
+  for(const [type,tiers] of Object.entries(RELIC_NAMES)){
+    for(const [lv,name] of tiers)for(const rarity of ['Commun','Épique','Relique']){
+      const sec={power:42,crit:7},item={id:'identity',slot:'weapon',name:'Ancien nom',rarity,weaponType:type,level:lv,sec,bound:'x'};
       assert.equal(applyItemName(item),item);assert.equal(item.name,name);
-      assert.equal(item.level,30);assert.equal(item.weaponType,type);assert.equal(item.id,'identity');assert.equal(item.sec,sec);
+      assert.equal(item.level,lv);assert.equal(item.weaponType,type);assert.equal(item.id,'identity');assert.equal(item.sec,sec);
     }
   }
   // Pièces : le nom de leur emplacement à leur qualité (plus d'emplacement artéfact).
   for(const slot of ['helm','ring','neck']){const item={slot,rarity:'Rare',level:30};applyItemName(item);assert.equal(item.name,GEAR_NAMES.Rare[slot])}
   assert.ok(Object.values(GEAR_NAMES).every(entry=>!('artifact' in entry)));
-  // Famille d'arme inconnue : une épée ; pièce sans emplacement : inchangée.
-  const odd={slot:'weapon',rarity:'Épique',weaponType:'lance-pierre'};assert.equal(applyItemName(odd).name,WEAPON_NAMES['Épique'].sword);
+  // Pièce sans emplacement : inchangée.
   const none={name:'Caillou'};assert.equal(applyItemName(none).name,'Caillou');
   // Le jeu utilise la même règle (exposée par le pont).
-  const g=game();assert.equal(vm.runInContext('applyItemName({slot:"weapon",rarity:"Rare",weaponType:"bow"}).name',g),WEAPON_NAMES.Rare.bow);
+  const g=game();assert.equal(vm.runInContext('applyItemName({slot:"weapon",rarity:"Rare",weaponType:"bow",bound:"chasseur",level:30}).name',g),'Arc du faucon');
 });
 
 test('Progression : niveaux 1 à 60, XP des monstres, des boss et des instances, montée de niveau, niveau requis, sauvegarde et anciennes aventures',()=>{
@@ -196,17 +196,17 @@ test('Sac unifié, boutique à deux fenêtres et échange de piles : poissons, v
  assert.ok(at(/Équipement/)<at(/Utilitaire/)&&at(/Utilitaire/)<at(/key:secret/)&&at(/key:secret/)<at(/meal:soupe/)&&at(/meal:soupe/)<at(/Autre/)&&at(/Autre/)<at(/treasure:perle/)&&at(/treasure:perle/)<at(/Matériaux/)&&at(/Matériaux/)<at(/fish:gardon/),'rubriques dans l’ordre');
  assert.match(inv,/Matériaux <small>4 \/ 100/);assert.match(inv,/Libres <small>17</);assert.match(inv,/data-action="sortBag"[^>]*disabled/);
  run('delete game.hero.prof.treasure["perle:0"];game.hero.player.keys=0');
- // Trier : l'équipement par emplacement (armes d'abord), puis la meilleure qualité, puis le plus haut niveau.
- run('game.hero.inventory=[{id:"a",slot:"ring",rarity:"Commun",level:5},{id:"b",slot:"helm",rarity:"Rare",level:3},{id:"c",slot:"helm",rarity:"Épique",level:2},{id:"d",slot:"weapon",weaponType:"sword",rarity:"Commun",level:1},{id:"e",slot:"helm",rarity:"Rare",level:9}];renderInventory()');
+ // Trier : l'équipement par emplacement, puis la meilleure qualité, puis le plus haut niveau.
+ run('game.hero.inventory=[{id:"a",slot:"ring",rarity:"Commun",level:5},{id:"b",slot:"helm",rarity:"Rare",level:3},{id:"c",slot:"helm",rarity:"Épique",level:2},{id:"d",slot:"armor",rarity:"Commun",level:1},{id:"e",slot:"helm",rarity:"Rare",level:9}];renderInventory()');
  assert.doesNotMatch(run('document.getElementById("window").innerHTML'),/data-action="sortBag"[^>]*disabled/);
- run('canaanSortBag()');assert.equal(run('game.hero.inventory.map(i=>i.id).join("")'),'dceba');
+ run('canaanSortBag()');assert.equal(run('game.hero.inventory.map(i=>i.id).join("")'),'cebda');
  assert.deepEqual(n.sanitizeAction({op:'bag-sort',x:1}),{op:'bag-sort'});
  run('game.hero.inventory=[]');
- // Boutique : un objet Peu commun du niveau du héros par emplacement et par famille d'arme, à choisir.
+ // Boutique : un objet Peu commun du niveau du héros par emplacement, à choisir (plus d'armes : chaque classe a la sienne).
  run('const m=game.world.npcs.find(n=>n.type==="shop");P.x=m.x;P.y=m.y+30;openShop(m)');
- assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),17);
- assert.ok(run('CANAAN_SHOP.stock(game.hero).every(i=>i.rarity==="Peu commun"&&i.level===20)'));
- assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.weaponType||i.slot))])')).length,17);
+ assert.equal(run('CANAAN_SHOP.stock(game.hero).length'),7);
+ assert.ok(run('CANAAN_SHOP.stock(game.hero).every(i=>i.rarity==="Peu commun"&&i.level===20&&i.slot!=="weapon")'));
+ assert.deepEqual(JSON.parse(run('JSON.stringify([...new Set(CANAAN_SHOP.stock(game.hero).map(i=>i.slot))])')).length,7);
  const panel=run('document.getElementById("window").innerHTML');assert.match(panel,/class="shop-panel shop-columns[ "]/);assert.match(panel,/shop-side bag-side/);
  const want=run('CANAAN_SHOP.stock(game.hero)[2].slot'),gold0=run('P.gold');
  assert.equal(run('CANAAN_SHOP.buy(game.hero,2)'),true);assert.equal(run('game.hero.inventory.at(-1).slot'),want);assert.equal(run('P.gold'),gold0-run('shopPriceAt(20)'));
@@ -303,16 +303,15 @@ test('Démantèlement, poudres et sacoche de butin : rien n’est perdu ni chang
  run('renderInventory()');const html=run('document.getElementById("window").innerHTML');
  assert.match(html,/data-menu="gear" data-index="0"/);assert.match(html,/Sacoche de butin <small>9 \/ 10/);assert.match(html,/data-action="satchelTake" data-menu="satchel"/);
  assert.doesNotMatch(html,/bag-salvage|weapon-reserve/,'plus de petits boutons dans les coins des cases');
- // Menu du clic droit : équiper et démanteler ; une arme a aussi « Arme 2 », une bague « Bague 2 » ; vendre seulement
- // près d'un marchand.
+ // Menu du clic droit : équiper et démanteler ; une bague a aussi « Bague 2 » ; vendre seulement près d'un marchand.
  const entries=menu=>JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:'+JSON.stringify(menu)+'}))'));
  assert.equal(run('game.hero.inventory[0].slot'),'ring');
  assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper (Bague 1)','Équiper en Bague 2','Démanteler']);
  assert.deepEqual(entries({menu:'satchel',id:run('game.hero.satchel[0].id')}),['Reprendre dans le sac','Démanteler']);
- run('globalThis.ring=game.hero.inventory[0];game.hero.inventory[0]={id:"w1",slot:"weapon",weaponType:"sword",level:1,rarity:"Commun"}');
- assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper (Arme 1)','Équiper en Arme 2','Démanteler']);
+ run('globalThis.ring=game.hero.inventory[0];game.hero.inventory[0]={id:"w1",slot:"helm",level:1,rarity:"Commun"}');
+ assert.deepEqual(entries({menu:'gear',index:'0'}),['Équiper','Démanteler']);
  run('globalThis.nearMerchantWas=nearMerchant;nearMerchant=()=>true');
- assert.deepEqual(entries({menu:'gear',index:'0'}).map(e=>e.replace(/· \d+ or/,'· N or')),['Équiper (Arme 1)','Équiper en Arme 2','Vendre · N or','Démanteler']);
+ assert.deepEqual(entries({menu:'gear',index:'0'}).map(e=>e.replace(/· \d+ or/,'· N or')),['Équiper','Vendre · N or','Démanteler']);
  run('nearMerchant=nearMerchantWas;game.hero.inventory[0]=ring');
  // Choisir « Démanteler » dans le menu réduit la pièce en poudre.
  run('CANAAN_ITEM_MENU.open({dataset:{menu:"gear",index:"1"}},10,10)');assert.equal(run('CANAAN_ITEM_MENU.isOpen()'),true);

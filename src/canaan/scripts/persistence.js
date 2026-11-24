@@ -162,6 +162,8 @@ window.CANAAN_PERSISTENCE = {
       ...(CANAAN_SALVAGE.of(hero).length ? { sacoche: CANAAN_SALVAGE.export(hero) } : {}),
       bagLevel: window.CANAAN_BAG_STATE.export(),
       classe: window.CANAAN_CLASS_STATE.export(),
+      // Arme de classe : rangs de qualité gagnés et essences des boss.
+      armeClasse: CANAAN_CLASS_WEAPON.export(hero),
       artefacts: window.CANAAN_ARTEFACTS_STATE.export(),
       arena: window.CANAAN_ARENA_STATE.export(),
       prof: CANAAN_PROF.sanitize(hero.prof),
@@ -400,6 +402,9 @@ window.CANAAN_PERSISTENCE = {
       Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
       Number(it.level ?? it.ilvl ?? 1) > 0;
     game.hero.inventory = Array.isArray(h.inventory) ? h.inventory.filter(validItem) : [];
+    // Ancienne arme de réserve : rangée dans le sac, où elle est rendue en or avec les autres armes (summons.js).
+    if (validItem(h.equipment?.weapon2) && h.equipment.weapon2.slot === 'weapon')
+      game.hero.inventory.push(h.equipment.weapon2);
     game.hero.bank = CANAAN_BANK.sanitize(h.bank);
     game.hero.satchel = CANAAN_SALVAGE.sanitize(h.sacoche);
     game.hero.equipment = Object.fromEntries(
@@ -454,7 +459,9 @@ window.CANAAN_PERSISTENCE = {
           game.hero.level +
           ', celui de ton meilleur équipement.'
       );
-    // Classe et talents ; une aventure d'avant les classes (anciennes voies) choisit sa classe en arrivant.
+    // Classe et talents ; une aventure d'avant les classes (anciennes voies) choisit sa classe en arrivant. L'arme de
+    // classe se règle sur la qualité gagnée (lue avant) ; les anciennes armes sont rendues en or.
+    CANAAN_CLASS_WEAPON.import(game.hero, h.armeClasse);
     window.CANAAN_CLASS_STATE.import(h.classe);
     if (h.ways && !h.classe)
       chat('Système', 'Les voies sont remplacées par les classes : choisis ta classe et tes talents (T).');

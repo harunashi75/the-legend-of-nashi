@@ -17,7 +17,18 @@
     HISTORY_TICKS = 180,
     FX_LIMIT = 120;
   // Formes des projectiles dans l'instantané (k) : l'indice dans cette liste.
-  const PROJECTILE_KINDS = Object.freeze(['orb', 'arrow', 'comet', 'plague', 'note']);
+  const PROJECTILE_KINDS = Object.freeze([
+    'orb',
+    'arrow',
+    'comet',
+    'plague',
+    'note',
+    'fireball',
+    'ember',
+    'thorn',
+    'dagger',
+    'heavyArrow'
+  ]);
   const net = {
     socket: null,
     relay: DEFAULT_RELAY,
@@ -281,7 +292,7 @@
       heroes: game.heroes.map(hero => ({
         ...heroSnapshot(hero === game.hero ? 'host' : hero.id, hero),
         // Arme tenue et visée (centièmes de radian), pour dessiner l'arme et son attaque chez chacun.
-        wpn: hero.equipment?.weapon?.weaponType || 'sword',
+        wpn: hero.equipment?.weapon?.weaponType || '',
         aim: Math.round(CANAAN_WEAPON_LOOK.aimOf(hero, hero.player) * 100),
         // Travail en cours (miner, cueillir, forger, cuisiner) : animation vue par les autres.
         act: (w => (w ? [w.kind, w.p, w.tx, w.ty, w.node] : 0))(CANAAN_GATHER.workView(hero)),
@@ -378,15 +389,15 @@
         stance: (st =>
           Object.fromEntries(
             [
-              'arcane',
-              'parryReady',
-              'combo',
-              'fastBow',
-              'focus',
-              'shadow',
               'berserk',
-              'flurry',
-              'shieldGuard'
+              'roar',
+              'combo',
+              'shadow',
+              'shieldGuard',
+              'huntMark',
+              'bloom',
+              'falcon',
+              'rollShot'
             ].map(k => [k, Math.round((st[k] || 0) * 10) / 10])
           ))(CANAAN_SKILLS.state(hero)),
         dodge: Math.round(CANAAN_COMBAT.dodgeState(hero).ready * 10) / 10,
@@ -399,6 +410,7 @@
       limit: canaanBagLimit(hero),
       bagLevel: canaanBagLevel(hero),
       classe: { id: hero.classe.id, talents: hero.classe.talents },
+      armeClasse: CANAAN_CLASS_WEAPON.export(hero),
       quetes: hero.quetes,
       artefacts: CANAAN_ARTEFACTS.clean(hero.artefacts),
       arena: hero.arena,
@@ -463,6 +475,7 @@
     if (action.op === 'talent-equip') return CANAAN_CLASS.equip(action.talent, hero);
     if (action.op === 'talent-unequip') return CANAAN_CLASS.unequip(action.talent, hero);
     if (action.op === 'class-special') return CANAAN_CLASS.special(hero);
+    if (action.op === 'weapon-upgrade') return CANAAN_CLASS_WEAPON.upgrade(hero);
     if (action.op === 'artefact-equip') return CANAAN_ARTEFACTS.equipFor(hero, action.artefact);
     if (action.op === 'artefact-unequip') return CANAAN_ARTEFACTS.unequipFor(hero, action.slot);
     if (action.op === 'open-chest') return openNearbyChest(hero);
@@ -663,9 +676,7 @@
             ? { spot: h.fish[0], bite: !!h.fish[1] }
             : null;
         hero.netWeapon =
-          typeof WEAPON_DEFINITIONS !== 'undefined' && Object.hasOwn(WEAPON_DEFINITIONS, h.wpn)
-            ? h.wpn
-            : 'sword';
+          typeof WEAPON_DEFINITIONS !== 'undefined' && Object.hasOwn(WEAPON_DEFINITIONS, h.wpn) ? h.wpn : '';
         hero.netAim = Number.isFinite(h.aim) ? h.aim / 100 : null;
         hero.netAct =
           Array.isArray(h.act) &&
@@ -835,6 +846,8 @@
     }
     if (bag.artefacts && typeof bag.artefacts === 'object')
       game.hero.artefacts = CANAAN_ARTEFACTS.clean(bag.artefacts);
+    if (bag.armeClasse && typeof bag.armeClasse === 'object')
+      CANAAN_CLASS_WEAPON.import(game.hero, bag.armeClasse);
   }
   // Réconciliation : la position confirmée par l'hôte est comparée à celle que l'invité avait prédite au même moment.
   function correct(me) {

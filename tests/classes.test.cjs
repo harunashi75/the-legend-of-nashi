@@ -9,175 +9,240 @@ const {
   basicHit
 } = require('./helpers/context.cjs');
 
-test('Classes : sept classes de dix talents, cinq emplacements selon le niveau, état vérifié',()=>{
+test('Classes : neuf classes de dix talents, chacune son arme, cinq emplacements selon le niveau, état vérifié',()=>{
   const g=game();
-  assert.equal(g.CLASSES.length,7);same(g.CLASSES.map(c=>c.name),['Druide','Paladin','Assassin','Élémentaliste','Invocateur','Barde','Berserker']);
-  for(const c of g.CLASSES){assert.equal(c.talents.length,10,c.id);assert.ok(c.special.name&&c.passive.name,c.id)}
+  assert.equal(g.CLASSES.length,9);
+  same(g.CLASSES.map(c=>c.name),['Druide','Paladin','Assassin','Élémentaliste','Invocateur','Barde','Berserker','Chasseur','Guerrier']);
+  for(const c of g.CLASSES){
+    assert.equal(c.talents.length,10,c.id);assert.ok(c.special.name&&c.passive.name,c.id);
+    // Chaque classe a son arme, liée à elle, avec quatre compétences et deux secondaires fixes.
+    const w=g.WEAPON_DEFINITIONS[c.weapon];assert.ok(w,c.id);assert.equal(w.bound,c.id);assert.equal(w.sp.length,4);
+    assert.equal(c.weaponStats.length,2);
+  }
+  same(g.CLASSES.filter(c=>c.relic).map(c=>c.id),['invocateur','berserker'],'seuls le Grimoire et la Grande hache sont des Reliques');
+  assert.equal(g.WEAPON_DEFINITIONS.feline.form,true,'les griffes du félin sont une forme, pas un objet');
+  assert.equal(g.CRAFT_WEAPONS.length,0,'plus aucune arme au butin ni chez les marchands');
   same([1,9,10,19,20,30,40,60].map(g.talentSlotsAt),[1,1,2,2,3,4,5,5]);
   // Classe inconnue, doublons, numéros invalides et emplacements en trop sont retirés.
   g.CANAAN_CLASS_STATE.import({id:'druide',talents:[0,0,1,2,99,-1,'3',3,4,5,6]});
   same(g.CANAAN_CLASS.audit().talents,[0,1],'niveau 10 : deux emplacements');
   g.game.hero.level=60;g.CANAAN_CLASS_STATE.import({id:'druide',talents:[0,0,1,2,99,3,4,5]});
   same(g.CANAAN_CLASS.audit().talents,[0,1,2,3,4]);
-  g.CANAAN_CLASS_STATE.import({id:'guerrier',talents:[0]});assert.equal(g.CANAAN_CLASS.audit().id,null);
+  g.CANAAN_CLASS_STATE.import({id:'necromancien',talents:[0]});assert.equal(g.CANAAN_CLASS.audit().id,null);
   same(g.CANAAN_CLASS_STATE.export(),{id:null,talents:[]});
   // Équiper : dans la limite des emplacements, jamais deux fois, jamais en combat.
-  g.game.hero.level=10;g.CANAAN_CLASS_STATE.import({id:'paladin',talents:[]});
+  g.game.hero.level=10;g.CANAAN_CLASS_STATE.import({id:'guerrier',talents:[]});
   assert.equal(g.CANAAN_CLASS.equip(1),true);assert.equal(g.CANAAN_CLASS.equip(1),false);
   assert.equal(g.CANAAN_CLASS.equip(6),true);assert.equal(g.CANAAN_CLASS.equip(7),false,'deux emplacements au niveau 10');
   assert.equal(g.CANAAN_CLASS.unequip(1),true);
   g.hit(mob(1000),1);assert.equal(g.CANAAN_CLASS.equip(7),false,'en combat');assert.equal(g.CANAAN_CLASS.unequip(6),false);
   g.advance(301);assert.equal(g.CANAAN_CLASS.equip(7),true);
-  same(g.CANAAN_CLASS_STATE.export(),{id:'paladin',talents:[6,7]});
-  // Compétences offensives et éléments.
-  assert.equal(g.isOffensiveSkill('sword',2),false);assert.equal(g.isOffensiveSkill('sword',3),true);assert.equal(g.isOffensiveSkill('staff',2),false);
+  same(g.CANAAN_CLASS_STATE.export(),{id:'guerrier',talents:[6,7]});
+  // Compétences offensives et utilitaires, éléments.
+  assert.equal(g.isOffensiveSkill('wildstaff',1),false);assert.equal(g.isOffensiveSkill('wildstaff',0),true);
+  assert.equal(g.isOffensiveSkill('aegis',2),false);assert.equal(g.isOffensiveSkill('bow',1),false);
+  assert.equal(g.isOffensiveSkill('feline',2),false);assert.equal(g.isOffensiveSkill('dualsword',2),true);
   same([0,1,2,3].map(i=>g.skillElement('elementaliste',i)),['fire','ice','lightning','fire']);
-  assert.equal(g.skillElement('druide',2),'nature');assert.equal(g.skillElement(null,0),null);
-  const cast=g.CANAAN_CLASS_CAST('sword',0);assert.equal(cast.element,'holy');assert.equal(cast.offensive,true);assert.equal(cast.skill,true);
+  assert.equal(g.skillElement('chasseur',0),'wild');assert.equal(g.skillElement('guerrier',3),'steel');
+  assert.equal(g.skillElement(null,0),null);
+  const cast=g.CANAAN_CLASS_CAST('dualsword',0);assert.equal(cast.element,'steel');assert.equal(cast.offensive,true);
+  assert.equal(cast.weapon,'dualsword');
 });
 
-test('Druide : ronces, poison et racines non cumulables, Fureur sauvage, régénération et Sève vitale',()=>{
-  const g=game();g.setClass('druide',[0,1,4,6,8]);predictable(g,0);
-  const m=mob(100000);g.monsters=[m];
-  const before=m.hp;g.CANAAN_COMBAT.attack(m,100,skillHit('nature'));const dealt=before-m.hp;
-  const dots=m._clsDots.filter(d=>d.by===g.game.hero);
-  same(dots.map(d=>d.kind).sort(),['poison','sap','thorns']);
-  assert.ok(Math.abs(dots.find(d=>d.kind==='thorns').dps-dealt*.3/5)<1e-9);
-  // Empreinte du Druide : toute compétence offensive empoisonne de 25 % des dégâts sur 4 s.
-  assert.ok(Math.abs(dots.find(d=>d.kind==='sap').dps-dealt*.25/4)<1e-9);
-  assert.ok(Math.abs(dots.find(d=>d.kind==='poison').dps-dealt*.4/6)<1e-9,'le coup critique empoisonne');
-  assert.equal(m._clsSlow.pct,.3);assert.equal(m._clsSlow.element,'nature');
-  // Une deuxième application ne s'empile pas : un seul effet par type, la plus forte valeur.
-  g.CANAAN_COMBAT.attack(m,10,skillHit('nature'));assert.equal(m._clsDots.length,3);
-  assert.ok(Math.abs(m._clsDots.find(d=>d.kind==='thorns').dps-dealt*.3/5)<1e-9);
-  // Fureur sauvage : +12 % contre une cible marquée par la nature.
-  const marked=g.CANAAN_CLASS_ATTACK.before(m,100,{}).damage,clean=g.CANAAN_CLASS_ATTACK.before(mob(100),100,{}).damage;
-  assert.ok(Math.abs(marked/clean-1.12)<1e-9);
-  // Les ronces et le poison font leurs dégâts une fois par seconde, puis s'arrêtent.
-  const hp=m.hp;g.advance(60);assert.ok(m.hp<hp);g.advance(400);assert.equal(m._clsDots.length,0);
-  const done=m.hp;g.advance(120);assert.equal(m.hp,done);
-  // Régénération naturelle : 1 % des PV max toutes les 5 s, seulement en combat.
-  const h=game();h.setClass('druide',[1]);h.P.hp=20;h.P.mhp=100;h.advance(301);assert.equal(h.P.hp,20,'hors combat');
-  h.hit(mob(100000),1);h.advance(299);for(let i=0;i<3;i++){h.hit(mob(100000),1);h.advance(100)}
-  assert.ok(Math.abs(h.P.hp-21)<1e-9,String(h.P.hp));
-  // Sève vitale : une compétence offensive rend 5 % des dégâts infligés.
-  const s=game();s.setClass('druide',[]);s.P.hp=20;s.P.mhp=1000;const target=mob(100000);
-  s.CANAAN_COMBAT.attack(target,100,skillHit('nature'));const healed=s.P.hp-20;assert.ok(healed>0);
-  assert.ok(Math.abs(healed-(100000-target.hp)*.05)<1,'5 % des dégâts réels');
-  const hp2=s.P.hp;s.CANAAN_COMBAT.attack(target,100,basicHit);assert.equal(s.P.hp,hp2,'pas sur les attaques normales');
+test('Arme de classe : donnée avec la classe, au niveau du héros, Commun puis Peu commun au niveau 10, Relique pour deux classes',()=>{
+  const g=game();
+  g.game.hero.level=5;g.CANAAN_CLASS_STATE.import({id:'chasseur',talents:[]});
+  let w=g.equipment.weapon;assert.equal(w.weaponType,'bow');assert.equal(w.bound,'chasseur');assert.equal(w.rarity,'Commun');
+  assert.equal(w.level,5);assert.equal(w.name,'Arc de chasse');same(Object.keys(w.sec),['crit','mastery']);
+  g.game.hero.level=12;g.CANAAN_SUMMONS.syncPact(g.game.hero);w=g.equipment.weapon;
+  assert.equal(w.rarity,'Peu commun','Peu commun d’office au niveau 10');assert.equal(w.name,'Arc du pisteur');
+  // Qualité gagnée avec les essences : gardée par classe.
+  g.game.hero.weaponTiers={chasseur:3};g.CANAAN_SUMMONS.syncPact(g.game.hero);assert.equal(g.equipment.weapon.rarity,'Épique');
+  g.CANAAN_CLASS_STATE.import({id:'invocateur',talents:[]});
+  assert.equal(g.equipment.weapon.weaponType,'grimoire');assert.equal(g.equipment.weapon.rarity,'Relique');
+  g.CANAAN_CLASS_STATE.import({id:'chasseur',talents:[]});assert.equal(g.equipment.weapon.rarity,'Épique','la qualité est gardée');
+  // Une ancienne arme (sac, réserve, main) est rendue en or, une seule fois.
+  g.game.hero.player.gold=0;g.inventory.push({id:'old',slot:'weapon',weaponType:'sword',level:20,rarity:'Rare'});
+  g.equipment.weapon2={id:'old2',slot:'weapon',weaponType:'axe',level:20,rarity:'Commun'};
+  g.CANAAN_SUMMONS.syncPact(g.game.hero);
+  assert.equal(g.inventory.filter(it=>it.slot==='weapon').length,0);assert.equal(g.equipment.weapon2,undefined);
+  assert.equal(g.equipment.weapon.bound,'chasseur');
 });
 
-test('Druide : Forme féline (F), bonus, attaques de base plus rapides et soins réduits',()=>{
-  const g=game();g.setClass('druide',[]);g.P.mp=100;g.P.hp=20;g.P.mhp=1000;
-  const base=g.characterStats();
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,'feral');assert.equal(g.P.mp,76,'15 de mana, +1 % par niveau (niv. 60)');
+test('Montée en qualité : essences des boss, niveau, or, et chaque marche jusqu’au Mythique',()=>{
+  const g=game();g.game.hero.level=20;g.CANAAN_CLASS_STATE.import({id:'guerrier',talents:[]});
+  const W=g.CANAAN_CLASS_WEAPON,hero=g.game.hero;hero.player.gold=0;
+  let st=W.status(hero);assert.equal(st.tier,1);assert.equal(st.next.tier,2);assert.equal(st.next.essence,'shard');
+  assert.equal(W.upgrade(hero),false,'il manque les éclats et l’or');
+  W.grant(hero,{shard:8});hero.player.gold=400;
+  assert.equal(W.upgrade(hero),true);assert.equal(g.equipment.weapon.rarity,'Rare');same(W.essences(hero),{});
+  assert.equal(hero.player.gold,0);
+  // Épique : niveau 40 et 10 sceaux ; Légendaire et Mythique : fragments d'Aurore, niveaux 58 et 60.
+  W.grant(hero,{seal:10});hero.player.gold=1500;assert.equal(W.upgrade(hero),false,'niveau 40 requis');
+  hero.level=40;assert.equal(W.upgrade(hero),true);assert.equal(g.equipment.weapon.rarity,'Épique');
+  hero.level=60;W.grant(hero,{aurora:35});hero.player.gold=14000;
+  assert.equal(W.upgrade(hero),true);assert.equal(W.upgrade(hero),true);assert.equal(g.equipment.weapon.rarity,'Mythique');
+  assert.equal(W.status(hero).next,null);assert.equal(W.upgrade(hero),false);
+  // Sauvegarde : rangs et essences nettoyés.
+  same(W.export(hero),{tiers:{guerrier:5},essences:{}});
+  W.import(hero,{tiers:{guerrier:9,invocateur:3,inconnu:2},essences:{shard:-4,seal:2.7,aurora:'x'}});
+  same(W.export(hero),{tiers:{guerrier:5},essences:{seal:2}});
+  // Les Reliques ne montent pas de qualité.
+  g.CANAAN_CLASS_STATE.import({id:'berserker',talents:[]});assert.equal(W.status(hero).relic,true);assert.equal(W.upgrade(hero),false);
+});
+
+test('Druide : Sève vitale, forme féline (F) avec ses quatre compétences, Instinct du fauve et Équilibre sauvage',()=>{
+  const g=game();g.setClass('druide',[]);predictable(g,.99);g.P.hp=20;g.P.mhp=1000;
+  // Sève vitale : une compétence offensive rend 5 % des dégâts et empoisonne (25 % sur 4 s).
+  const m=mob(1e6);g.CANAAN_COMBAT.attack(m,100,skillHit('nature'));const dealt=1e6-m.hp;
+  assert.ok(Math.abs(g.P.hp-20-dealt*.05)<1);assert.ok(Math.abs(m._clsDots.find(d=>d.kind==='sap').dps-dealt*.25/4)<1e-9);
+  // Forme féline : la barre passe du bâton aux griffes.
+  g.P.mp=1000;const base=g.characterStats();assert.equal(g.currentWeaponType(),'wildstaff');
+  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,'feral');assert.equal(g.currentWeaponType(),'feline');
+  same(g.SKILLS.map(s=>s.n),['Lacération','Bond du prédateur','Rugissement sauvage','Morsure féroce']);
   const feral=g.characterStats();assert.equal(feral.speed,base.speed+20);assert.equal(feral.crit,base.crit+8);
-  assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),.8);
-  assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(mob(100),100,{}).damage-115)<1e-9);
-  // Pas de Sève vitale et soins réduits de 30 % en forme féline.
-  const m=mob(100000);g.CANAAN_COMBAT.attack(m,100,skillHit('nature'));assert.equal(g.P.hp,20);
-  assert.equal(g.canaanApplyHeal(100),70);
-  // Sortir est gratuit, après la petite recharge.
-  assert.equal(g.CANAAN_CLASS.special(),false);g.advance(91);
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,null);assert.equal(g.P.mp,76);
-  assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),1);
-  // Basic lock réel de l'arme.
-  g.advance(91);g.CANAAN_CLASS.special();g.canaanBasicAttack(false);
-  assert.ok(Math.abs(g.CANAAN_BASIC_ATTACK.lock()-.55*.8*(1-Math.min(60,g.characterStats().haste)/100))<1e-9);
-  // Sans mana, pas de transformation.
-  const h=game();h.setClass('druide',[]);h.P.mp=5;assert.equal(h.CANAAN_CLASS.special(),false);assert.equal(h.P.form,null);
+  assert.equal(g.CANAAN_CLASS_BASIC_LOCK(),.8);assert.equal(g.canaanApplyHeal(100),70,'soins −30 %');
+  // En forme féline, les critiques font saigner au lieu de soigner.
+  predictable(g,0);const hp=g.P.hp,t=mob(1e6);g.CANAAN_COMBAT.attack(t,100,skillHit('nature'));
+  assert.equal(g.P.hp,hp);assert.ok(t._clsDots.some(d=>d.kind==='bleed'));
+  // Rugissement sauvage : 8 % des PV et attaques de base plus rapides.
+  g.P.hp=100;g.useSkill(2);assert.equal(g.P.hp,212,'8 % du Rugissement et 8 % de l’utilitaire du Druide, −30 % en forme féline');assert.equal(g.CANAAN_SKILLS.state(g.game.hero).roar,6);
+  g.advance(91);assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.form,null);assert.equal(g.currentWeaponType(),'wildstaff');
+  // Instinct du fauve : gratuit, 0,5 s de recharge, compétence féline suivante critique.
+  const i=game();i.setClass('druide',[4]);i.P.mp=0;assert.equal(i.CANAAN_CLASS.special(),true);
+  assert.equal(i.CANAAN_CLASS_CAST('feline',0).forceCrit,true);assert.equal(i.CANAAN_CLASS_CAST('feline',0).forceCrit,undefined);
+  i.advance(31);assert.equal(i.CANAAN_CLASS.special(),true,'recharge de 0,5 s');
+  // Équilibre sauvage : 3 compétences de nature, puis la forme féline donne +25 % pendant 8 s.
+  const b=game();b.setClass('druide',[9]);b.P.mp=1000;for(let k=0;k<3;k++)b.CANAAN_CLASS_CAST('wildstaff',0);
+  b.CANAAN_CLASS.special();assert.ok(Math.abs(b.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-115*1.25)<1e-6);
+  // Écorce de fer : sous 40 % de PV, bouclier de 20 % et renvoi de 30 % des dégâts.
+  const e=game();e.setClass('druide',[8]);e.P.hp=30;e.P.mhp=100;e.advance(1);
+  assert.equal(e.CANAAN_CLASS.audit().shield,20);const foe=mob(1e6);e.CANAAN_CLASS_DEFENSE(foe,10);assert.ok(foe.hp<1e6);
 });
 
-test('Paladin : Armure bénie, Jugement, Foi inébranlable, Volonté sacrée et Intervention divine',()=>{
-  const g=game();g.setClass(null);const base=g.characterStats();g.setClass('paladin',[1,6,2,8,9]);
-  assert.equal(g.characterStats().defense,Math.round(base.defense*1.12));
-  const low=mob(100);low.hp=29;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(low,100,{}).damage-115)<1e-9);
-  assert.equal(g.CANAAN_CLASS_ATTACK.before(mob(100),100,{}).damage,100);
-  // Foi inébranlable : sous 35 % de PV, +20 de Garde pendant 5 s, recharge 45 s.
-  g.P.mhp=100;g.P.hp=30;const guard=g.characterStats().guard;g.advance(1);assert.equal(g.characterStats().guard,guard+20);
-  g.advance(301);assert.equal(g.characterStats().guard,guard);g.advance(600);assert.equal(g.characterStats().guard,guard,'en recharge');
-  // Volonté sacrée : un critique subi rend 5 % des PV max, puis 20 s de recharge.
-  g.P.hp=50;g.CANAAN_CLASS_ON_CRIT_TAKEN();assert.equal(g.P.hp,55);g.CANAAN_CLASS_ON_CRIT_TAKEN();assert.equal(g.P.hp,55);
-  // Intervention divine : un coup fatal laisse 1 PV et un bouclier de 25 %, une fois par combat.
-  g.P.hp=10;assert.equal(g.CANAAN_COMBAT.hurt(500,mob(10)),9);assert.equal(g.P.hp,1);
-  assert.equal(g.CANAAN_CLASS.audit().shield,25);
-  assert.equal(g.CANAAN_CLASS_DEFENSE(mob(10),30),5,'le bouclier absorbe 25');
-  g.P.hp=10;g.CANAAN_COMBAT.hurt(500,mob(10));assert.ok(g.P.hp<=0,'une seule fois par combat');
-  g.P.hp=10;g.advance(400);g.CANAAN_COMBAT.hurt(500,mob(10));assert.equal(g.P.hp,1,'nouveau combat');
+test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, Aura de dévotion et Intervention divine',()=>{
+  const g=game();g.setClass('paladin',[0]);predictable(g,.99);g.P.mp=100;g.P.hp=10;g.P.mhp=1000;
+  const m=mob(1e6);g.monsters=[m];
+  // Frappe du croisé : cône de masse, 3 % des PV max rendus (6 % à la troisième en 10 s, avec une onde).
+  g.useSkill(0);assert.ok(m.hp<1e6);assert.equal(g.P.hp,40);
+  g.weaponCooldowns['aegis:0']=0;g.useSkill(0);g.weaponCooldowns['aegis:0']=0;const before=g.P.hp;g.useSkill(0);
+  assert.equal(g.P.hp-before,60,'Croisade : 6 %');
+  // Rempart sacré : −35 % de dégâts reçus, bouclier de 12 % au groupe.
+  g.P.mp=100;g.useSkill(2);assert.equal(g.CANAAN_SKILLS.state(g.game.hero).shieldGuard,6);
+  assert.equal(g.CANAAN_WEAPON_DEFENSE(mob(1),100),65);
+  // Ferveur ardente : chaque coup reçu donne 4 de plus ; à 100, Exaltation (moitié prix, +15 %).
+  const z=game();z.setClass('paladin',[5]);z.P.mp=0;z.P.mmp=100;z.P.mhp=1000;z.CANAAN_CLASS_DEFENSE(mob(1),1);
+  assert.ok(Math.abs(z.P.mp-7.15)<1e-9,'3 + 0,15 + 4');z.P.mp=100;z.advance(1);
+  assert.equal(z.CANAAN_CLASS_MANA_COST('aegis',0,12),12);assert.ok(Math.abs(z.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-115)<1e-9);
+  // Aura de dévotion : 8 de Garde.
+  const a=game();a.setClass(null);const guard=a.characterStats().guard;a.setClass('paladin',[6]);assert.equal(a.characterStats().guard,guard+8);
+  // Intervention divine : un coup fatal laisse 1 PV, 3 s d'invulnérabilité et un bouclier de 25 %, une fois par combat.
+  const d=game();d.setClass('paladin',[9]);d.P.mhp=100;d.P.hp=10;assert.equal(d.CANAAN_COMBAT.hurt(500,mob(10)),9);assert.equal(d.P.hp,1);
+  assert.equal(d.CANAAN_CLASS.audit().shield,25);assert.equal(d.CANAAN_CLASS_DEFENSE(mob(10),30),0,'invulnérable');
+  assert.equal(d.CANAAN_COMBAT.hurt(500,mob(10)),0,'pendant l’invulnérabilité');
+  d.advance(181);d.P.hp=10;d.CANAAN_COMBAT.hurt(500,mob(10));assert.equal(d.P.hp,1,'hors combat, elle revient pour le combat suivant');
+  // Lumière divine (F) : 20 % des PV max et −20 % de dégâts pendant 6 s.
+  const l=game();l.setClass('paladin',[]);l.P.mp=100;l.P.hp=10;l.P.mhp=100;const g0=l.characterStats().guard;
+  assert.equal(l.CANAAN_CLASS.special(),true);assert.equal(l.P.hp,30);assert.equal(l.P.mp,50,'Ferveur : le double du prix en mana');
+  assert.equal(l.characterStats().guard,g0+20);
 });
 
-test('Paladin : Consécration après trois compétences offensives, Lumière divine (F)',()=>{
-  const g=game();g.setClass('paladin',[4]);predictable(g,.99);const m=mob(100000);g.monsters=[m];
-  g.CANAAN_CLASS_CAST('sword',0);g.CANAAN_CLASS_CAST('sword',2);g.CANAAN_CLASS_CAST('sword',1);
-  g.advance(1);assert.equal(m.hp,100000,'la parade ne compte pas');
-  g.CANAAN_CLASS_CAST('sword',3);g.advance(1);assert.ok(m.hp<100000);
-  const tick=100000-m.hp;g.advance(60);assert.ok(Math.abs((100000-m.hp)-2*tick)<=2);
-  g.advance(400);const after=m.hp;g.advance(120);assert.equal(m.hp,after,'zone finie après 5 s');
-  // Lumière divine : soin de 20 % des PV max et −20 % de dégâts pendant 6 s.
-  g.P.mp=100;g.P.hp=10;g.P.mhp=100;const guard=g.characterStats().guard;
-  assert.equal(g.CANAAN_CLASS.special(),true);assert.equal(g.P.hp,30);assert.equal(g.P.mp,50,'Ferveur : le double du prix en mana (25)');
-  assert.equal(g.characterStats().guard,guard+20);g.advance(361);assert.equal(g.characterStats().guard,guard);
-  assert.equal(g.CANAAN_CLASS.special(),false,'recharge de 45 s');
-});
-
-test('Assassin : Précision, Exécuteur, Assaut implacable, Hémorragie, Ombre meurtrière et Voile d’ombre',()=>{
-  const g=game();g.setClass(null);const base=g.characterStats();g.setClass('assassin',[1,4,5,3,9]);
-  const st=g.characterStats();assert.equal(st.crit,base.crit+8);assert.equal(st.speed,base.speed+5);assert.equal(st.critPower,base.critPower+10);
-  const low=mob(100);low.hp=24;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(low,100,{}).damage-120)<1e-9);
-  // Assaut implacable : +2 % par coup consécutif sur la même cible, 10 % au plus, remis à zéro après 4 s.
-  predictable(g,.99);const m=mob(1e7),dmg=()=>g.CANAAN_CLASS_ATTACK.before(m,100,{}).damage;
-  assert.equal(dmg(),100);for(let i=0;i<8;i++)g.CANAAN_COMBAT.attack(m,1,basicHit);
-  assert.ok(Math.abs(dmg()-110)<1e-9);g.advance(241);assert.equal(dmg(),100);
-  // Hémorragie : un critique pose un saignement de 30 % du coup sur 4 s.
-  predictable(g,0);const t=mob(1e6);const before=t.hp;g.CANAAN_COMBAT.attack(t,100,basicHit);
-  const bleed=t._clsDots.find(d=>d.kind==='bleed');assert.ok(Math.abs(bleed.dps-(before-t.hp)*.3/4)<1e-9);
-  // Ombre meurtrière : après 3 critiques, la prochaine compétence offensive fait +30 % (sur tout le lancement).
+test('Assassin : Précision mortelle, Exécuteur, Hémorragie, Ombre meurtrière, Pas de l’ombre et Voile d’ombre',()=>{
+  const g=game();g.setClass('assassin',[]);const base={...g.characterStats(),crit:g.characterStats().crit,critPower:g.characterStats().critPower-10,speed:g.characterStats().speed-5};g.setClass('assassin',[5,4,3,9]);
+  const st=g.characterStats();assert.equal(st.crit,base.crit+10);assert.equal(st.critPower,base.critPower+30);assert.equal(st.speed,base.speed+5);
+  const low=mob(100);low.hp=29;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(low,100,{}).damage-125)<1e-9);
+  // Hémorragie : un critique fait saigner (35 % du coup sur 4 s).
+  predictable(g,0);const t=mob(1e6);g.CANAAN_COMBAT.attack(t,100,basicHit);
+  assert.ok(Math.abs(t._clsDots.find(d=>d.kind==='bleed').dps-(1e6-t.hp)*.35/4)<1e-9);
+  // Ombre meurtrière : après 3 critiques, la prochaine compétence offensive fait +40 % et ne coûte rien.
   g.CANAAN_COMBAT.attack(t,1,basicHit);g.CANAAN_COMBAT.attack(t,1,basicHit);
-  assert.equal(g.CANAAN_CLASS_CAST('dualdagger',2).multiplier,1,'une ruée ne consomme rien');
-  assert.ok(Math.abs(g.CANAAN_CLASS_CAST('dualdagger',0).multiplier-1.3)<1e-9);
-  assert.equal(g.CANAAN_CLASS_CAST('dualdagger',0).multiplier,1);
+  assert.equal(g.CANAAN_CLASS_MANA_COST('dualdagger',0,11),0);
+  assert.equal(g.CANAAN_CLASS_CAST('dualdagger',1).multiplier,1,'une utilitaire ne consomme rien');
+  assert.ok(Math.abs(g.CANAAN_CLASS_CAST('dualdagger',0).multiplier-1.4)<1e-9,'Ombre meurtrière');
+  // Pas de l'ombre : dans le dos de la cible la plus proche de la souris, prochain coup +60 % et critique.
+  const s=game();s.setClass('assassin',[]);s.P.mp=100;const prey=mob(1e6);prey.x=150;s.monsters=[prey];
+  s.mouseWorldX=150;s.mouseWorldY=0;s.useSkill(1);assert.ok(s.P.x>150,'derrière la cible');
+  assert.equal(s.CANAAN_SKILLS.state(s.game.hero).shadow,4);
   // Voile d'ombre : invisible 4 s, +30 % de vitesse ; la prochaine compétence offensive fait +40 % et le lève.
   const h=game();h.setClass('assassin',[]);h.P.mp=100;const speed=h.characterStats().speed;
   assert.equal(h.CANAAN_CLASS.special(),true);assert.equal(h.P.veiled,true);assert.equal(h.characterStats().speed,speed+30);
-  assert.ok(Math.abs(h.CANAAN_CLASS_CAST('bow',0).multiplier-1.4)<1e-9);assert.equal(h.P.veiled,false);
-  h.advance(1801);h.CANAAN_CLASS.special();h.advance(241);assert.equal(h.P.veiled,false,'fin du voile après 4 s');
+  assert.ok(Math.abs(h.CANAAN_CLASS_CAST('dualdagger',0).multiplier-1.4)<1e-9);assert.equal(h.P.veiled,false);
 });
 
-test('Élémentaliste : glace, Gel profond, Concentration arcanique, Tempête, Explosion ardente et Barrière de givre',()=>{
-  const g=game();g.setClass('elementaliste',[7,8,9,4,5]);g.TS=48;predictable(g,.99);
-  // Compétence de glace : ralentit de 30 % pendant 2,5 s ; Gel profond : +15 % contre une cible gelée.
-  const m=mob(1e6);g.monsters=[m];g.CANAAN_COMBAT.attack(m,100,skillHit('ice'));
+test('Élémentaliste : feu, glace, Éclats de glace, Électricité statique, Fusion élémentaire et Barrière de givre',()=>{
+  const g=game();g.setClass('elementaliste',[3]);predictable(g,.99);
+  // Glace : ralentit de 30 % pendant 2,5 s ; Éclats de glace : le feu sur une cible gelée fait +50 % et brise.
+  const m=mob(1e6),near=mob(1e6);near.x=80;g.monsters=[m,near];g.CANAAN_COMBAT.attack(m,100,skillHit('ice'));
   assert.equal(m._clsSlow.pct,.3);assert.equal(m._clsSlow.element,'ice');
-  assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(m,100,{}).damage-115)<1e-9);
-  g.update=()=>{m.x+=4};const x=m.x;g.advance(1);assert.ok(Math.abs(m.x-x-2.8)<1e-9,'ralentissement de 30 %');
-  g.advance(151);const y=m.x;g.advance(1);assert.equal(m.x-y,4);g.update=()=>{};
-  // Concentration arcanique : chaque 3e compétence offensive coûte moitié prix.
-  const costs=[];for(let i=0;i<6;i++){costs.push(g.CANAAN_CLASS_MANA_COST('staff',0,10));g.CANAAN_CLASS_CAST('staff',0)}
-  // Coût en mana au niveau 60 : +59 % (10 → 16).
-  same(costs,[16,16,8,16,16,8]);assert.equal(g.CANAAN_CLASS_MANA_COST('staff',2,10),16);
-  // Tempête élémentaire : la 5e compétence offensive explose (80 % de l'Attaque, 4 cases), puis 12 s de recharge.
-  const n=game();n.setClass('elementaliste',[9]);n.TS=48;predictable(n,.99);const near=mob(1e6),far=mob(1e6);far.x=1000;n.monsters=[near,far];
-  for(let i=0;i<4;i++)n.CANAAN_CLASS_CAST('staff',0);assert.equal(near.hp,1e6);
-  n.CANAAN_CLASS_CAST('staff',0);assert.ok(near.hp<1e6);assert.equal(far.hp,1e6);
-  const hp=near.hp;for(let i=0;i<5;i++)n.CANAAN_CLASS_CAST('staff',0);assert.equal(near.hp,hp,'recharge');
-  // Explosion ardente : un ennemi brûlé qui meurt explose une fois.
-  const e=game();e.setClass('elementaliste',[0,4]);e.TS=48;predictable(e,0);
-  const burned=mob(1e6),other=mob(1e6);other.x=80;e.monsters=[burned,other];
-  e.CANAAN_COMBAT.attack(burned,10,skillHit('fire'));assert.ok(burned._clsDots.some(d=>d.kind==='burn'));
-  burned.hp=1;e.CANAAN_COMBAT.attack(burned,10,basicHit);assert.ok(other.hp<1e6,'explosion sur l’ennemi proche');
-  // Barrière de givre : sous 40 % de PV, bouclier de 15 % des PV max, 40 s de recharge.
-  const b=game();b.setClass('elementaliste',[5]);b.P.hp=30;b.P.mhp=100;b.advance(1);
-  assert.equal(b.CANAAN_CLASS.audit().shield,15);assert.equal(b.CANAAN_CLASS_DEFENSE(mob(1),10),0);
-  assert.equal(b.CANAAN_CLASS_DEFENSE(mob(1),10),5);b.advance(400);assert.equal(b.CANAAN_CLASS.audit().shield,0);
-  // Avatar élémentaire (F) : +20 % de dégâts et −30 % de mana pendant 10 s.
+  assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(m,100,{element:'fire'}).damage-150)<1e-9);
+  g.CANAAN_COMBAT.attack(m,100,skillHit('fire'));assert.ok(near.hp<1e6,'les éclats frappent autour');
+  assert.ok(m._clsDots.some(d=>d.kind==='burn'),'le feu brûle');
+  // Électricité statique : le cinquième coup de foudre appelle la foudre céleste.
+  const s=game();s.setClass('elementaliste',[5]);predictable(s,.99);const t=mob(1e7);s.monsters=[t];
+  for(let k=0;k<4;k++)s.CANAAN_COMBAT.attack(t,1,skillHit('lightning'));const hp=t.hp;
+  s.CANAAN_COMBAT.attack(t,1,skillHit('lightning'));assert.ok(hp-t.hp>s.characterStats().attack*2,'foudre céleste');
+  // Fusion élémentaire : feu, glace, foudre en 8 s, puis une compétence gratuite à +50 %.
+  const f=game();f.setClass('elementaliste',[6]);f.CANAAN_CLASS_CAST('staff',0);f.CANAAN_CLASS_CAST('staff',1);
+  assert.ok(f.CANAAN_CLASS_MANA_COST('staff',2,16)>0);f.CANAAN_CLASS_CAST('staff',2);
+  assert.equal(f.CANAAN_CLASS_MANA_COST('staff',3,28),0);assert.ok(Math.abs(f.CANAAN_CLASS_CAST('staff',3).multiplier-1.5)<1e-9);
+  // Barrière de givre : sous 40 % de PV, bouclier de 20 % et gel des ennemis proches.
+  const b=game();b.setClass('elementaliste',[7]);const foe=mob(1e6);foe.x=60;b.monsters=[foe];b.P.hp=30;b.P.mhp=100;b.advance(1);
+  assert.equal(b.CANAAN_CLASS.audit().shield,20);assert.ok(foe.spell_stun>0,'gelé');
+  // Avatar élémentaire (F) : +20 % de dégâts et −30 % de mana pendant 10 s (14 s avec Avatar primordial).
   const a=game();a.setClass('elementaliste',[]);a.P.mp=100;assert.equal(a.CANAAN_CLASS.special(),true);
-  assert.ok(Math.abs(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120)<1e-9);assert.ok(Math.abs(a.CANAAN_CLASS_MANA_COST('staff',0,10)-16*0.7)<1e-9);
+  assert.ok(Math.abs(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120)<1e-9);
   a.advance(601);assert.equal(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage,100);
 });
 
-test('Compétences d’armes : élément et couleur de la classe, sans classe la couleur de l’arme',()=>{
-  const g=game();g.setClass('elementaliste',[]);const m=mob(1e6);g.monsters=[m];predictable(g,.99);
-  g.equipment.weapon.weaponType='mace';g.refreshWeaponBar();g.useSkill(1);
-  assert.equal(m._clsSlow.element,'ice','Onde de choc de glace');
-  g.useSkill(0);assert.ok(m.hp<1e6);
+test('Chasseur : Instinct du traqueur, Concentration, Marque du chasseur, Œil du faucon et Instinct de survie',()=>{
+  const g=game();g.setClass('chasseur',[]);
+  // Instinct du traqueur : +1 % de dégâts par case de distance, 15 % au plus.
+  const far=mob(100);far.x=48*10;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(far,100,{}).damage-110)<1e-9);
+  far.x=48*40;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(far,100,{}).damage-115)<1e-9);
+  // Concentration : 100, rechargée de 10 par seconde ; une compétence coûte le double de son prix en mana.
+  assert.equal(g.resourceMax('focus',60),100);assert.equal(g.resourceRegen('focus',100,true),10);
+  assert.equal(g.CANAAN_CLASS_MANA_COST('bow',0,10),20);
+  // Marque du chasseur : la proie la plus proche de la souris subit +15 % de tout le groupe (+20 % des flèches).
+  g.P.mp=100;const prey=mob(1e6);prey.x=48*3;g.monsters=[prey];g.mouseWorldX=prey.x;g.useSkill(1);
+  assert.ok(prey._huntMark);assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(prey,100,{}).damage-103*1.15*1.2)<1e-6);
+  // Œil du faucon (F) : +20 % de dégâts, +10 de critique, attaques de base 30 % plus rapides pendant 10 s.
+  const h=game();h.setClass('chasseur',[]);h.P.mp=100;const crit=h.characterStats().crit;
+  assert.equal(h.CANAAN_CLASS.special(),true);assert.equal(h.characterStats().crit,crit+10);
+  assert.ok(Math.abs(h.CANAAN_CLASS_BASIC_LOCK()-.7)<1e-9);assert.ok(Math.abs(h.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120*1.01)<1e-9,'+20 %, et 1 case de distance');
+  h.advance(601);assert.equal(h.CANAAN_CLASS_BASIC_LOCK(),1);
+  // Instinct de survie : sous 35 % de PV, +30 % de vitesse et 20 de Garde pendant 5 s.
+  const s=game();s.setClass('chasseur',[8]);const st=s.characterStats();s.P.hp=30;s.P.mhp=100;s.advance(1);
+  assert.equal(s.characterStats().speed,st.speed+30);assert.equal(s.characterStats().guard,st.guard+20);
+  // Repli tactique : la roulade se recharge 30 % plus vite.
+  const r=game();r.setClass('chasseur',[4]);assert.ok(Math.abs(r.CANAAN_CLASS_DODGE_FACTOR()-.7)<1e-9);
+});
+
+test('Guerrier : Élan (Maître d’armes), Rage, Volonté de fer, Riposte, Fureur martiale et Seigneur de guerre',()=>{
+  const g=game();g.setClass('guerrier',[6,9]);predictable(g,.99);const crit=g.characterStats().crit;
+  // Chaque coup qui touche donne un Élan (5 au plus) : +3 % de dégâts et attaques de base 4 % plus rapides chacun.
+  const m=mob(1e7);for(let k=0;k<7;k++){g.CANAAN_COMBAT.attack(m,1,basicHit);g.advance(10)}
+  assert.equal(g.CANAAN_CLASS.momentum(),5);assert.ok(Math.abs(g.CANAAN_CLASS_BASIC_LOCK()-.8)<1e-9);
+  assert.equal(g.characterStats().crit,crit+10,'Seigneur de guerre : +2 de critique par Élan');
+  // Fureur martiale : à 5 Élans, 30 % de Rage en moins (Rage : le double du prix en mana).
+  assert.ok(Math.abs(g.CANAAN_CLASS_MANA_COST('dualsword',0,12)-24*.7)<1e-9);
+  g.advance(241);assert.equal(g.CANAAN_CLASS.momentum(),0,'l’Élan retombe après 4 s');
+  // Rage : part de zéro, monte avec les attaques de base et les coups reçus.
+  assert.equal(g.resourceMax('rage',60),100);assert.equal(g.resourceGain('rage','basic'),7);
+  // Volonté de fer (F) : 30 de Garde, +15 % de dégâts, +30 de Rage.
+  const v=game();v.setClass('guerrier',[]);v.P.mp=0;v.P.mmp=100;const guard=v.characterStats().guard;
+  assert.equal(v.CANAAN_CLASS.special(),true);assert.equal(v.P.mp,30);assert.equal(v.characterStats().guard,guard+30);
+  assert.ok(Math.abs(v.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-115)<1e-9);
+  // Riposte : 15 % de chances de parer (aucun dégât) et de contre-attaquer.
+  const r=game();r.setClass('guerrier',[7]);predictable(r,0);const foe=mob(1e6);
+  assert.equal(r.CANAAN_CLASS_DEFENSE(foe,50),0);assert.ok(foe.hp<1e6);
+});
+
+test('Compétences des armes de classe : les 40 compétences se lancent, avec leur coût et leur recharge',()=>{
+  for(const c of ['druide','paladin','assassin','elementaliste','barde','berserker','chasseur','guerrier']){
+    const g=game();g.setClass(c,[]);predictable(g,.99);g.P.hp=g.P.mhp=1e6;const m=mob(1e7);m.x=60;g.monsters=[m];g.mouseWorldX=60;
+    const type=g.currentWeaponType();
+    for(let i=0;i<4;i++){g.P.mp=g.P.mmp=1000;g.useSkill(i);assert.ok(g.weaponCooldowns[type+':'+i]>0,c+' '+type+':'+i);g.advance(30)}
+    if(c==='druide'){g.P.mp=1000;g.CANAAN_CLASS.special();for(let i=0;i<4;i++){g.P.mp=1000;g.useSkill(i);assert.ok(g.weaponCooldowns['feline:'+i]>0,'feline:'+i);g.advance(30)}}
+    assert.ok(m.hp<1e7,c+' : les compétences frappent');
+  }
 });

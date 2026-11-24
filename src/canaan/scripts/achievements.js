@@ -36,8 +36,11 @@
   const artefactsAtMax = h => artefactRanks(h).filter(r => r >= ARTEFACT_MAX_RANK).length;
   const talentsFull = cls => h =>
     h.classe?.id === cls && (h.classe.talents || []).length >= TALENT_SLOT_LEVELS.length ? 1 : 0;
+  // Armes de classe (pas les formes, comme le félin du Druide) avec au moins 50 victoires.
   const weaponKills = h =>
-    Object.keys(WEAPON_DEFINITIONS).filter(t => num(stateOf(h).s['w_' + t]) >= 50).length;
+    Object.keys(WEAPON_DEFINITIONS).filter(
+      t => !WEAPON_DEFINITIONS[t].form && num(stateOf(h).s['w_' + t]) >= 50
+    ).length;
 
   // ---------------------------------------------------------------- Bestiaire
   let beasts = null;
@@ -173,7 +176,7 @@
       id,
       WEAPON_TYPES[type].icon,
       name,
-      'Vaincre 200 ennemis avec une arme de la famille ' + WEAPON_TYPES[type].name + '.',
+      'Vaincre 200 ennemis avec l’arme ' + WEAPON_TYPES[type].name + '.',
       200,
       S('w_' + type),
       reward,
@@ -282,7 +285,7 @@
       'c13',
       '⚔️',
       'Maître d’armes',
-      'Vaincre 50 ennemis avec chacune des neuf familles d’arme.',
+      'Vaincre 50 ennemis avec l’arme de chacune des neuf classes.',
       9,
       weaponKills,
       { title: 'Maître d’armes', gear: 'Épique' },
@@ -290,8 +293,8 @@
     ),
     W('c14', 'bow', 'Tireur d’élite', { gear: 'Rare' }),
     W('c15', 'dualdagger', 'Exécuteur silencieux', { gear: 'Rare' }),
-    W('c16', 'axe', 'Bûcheron des âmes', { gear: 'Rare' }),
-    W('c17', 'mace', 'Masse atomique', { gear: 'Rare' }),
+    W('c16', 'dualsword', 'Danse des lames', { gear: 'Rare' }),
+    W('c17', 'aegis', 'Rempart inébranlable', { gear: 'Rare' }),
     W('c18', 'staff', 'Surcharge arcanique', { gear: 'Rare' }),
     A(
       'combat',

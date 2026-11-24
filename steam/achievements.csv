@@ -11,12 +11,12 @@ ACH_C9,Le Dévastateur,Infliger 5 000 dégâts en un seul coup.,Combat & armes,A
 ACH_C10,Artiste de l’esquive,Faire 500 roulades d’esquive.,Combat & armes,ACH_C10.png,ACH_C10_locked.png
 ACH_C11,Tempête d’acier,Lancer 1 000 compétences d’arme.,Combat & armes,ACH_C11.png,ACH_C11_locked.png
 ACH_C12,Pouvoir de classe,Lancer 100 fois le sort de ta classe (touche F).,Combat & armes,ACH_C12.png,ACH_C12_locked.png
-ACH_C13,Maître d’armes,Vaincre 50 ennemis avec chacune des neuf familles d’arme.,Combat & armes,ACH_C13.png,ACH_C13_locked.png
-ACH_C14,Tireur d’élite,Vaincre 200 ennemis avec une arme de la famille Arc.,Combat & armes,ACH_C14.png,ACH_C14_locked.png
-ACH_C15,Exécuteur silencieux,Vaincre 200 ennemis avec une arme de la famille Dagues doubles.,Combat & armes,ACH_C15.png,ACH_C15_locked.png
-ACH_C16,Bûcheron des âmes,Vaincre 200 ennemis avec une arme de la famille Hache.,Combat & armes,ACH_C16.png,ACH_C16_locked.png
-ACH_C17,Masse atomique,Vaincre 200 ennemis avec une arme de la famille Masse.,Combat & armes,ACH_C17.png,ACH_C17_locked.png
-ACH_C18,Surcharge arcanique,Vaincre 200 ennemis avec une arme de la famille Bâton arcanique.,Combat & armes,ACH_C18.png,ACH_C18_locked.png
+ACH_C13,Maître d’armes,Vaincre 50 ennemis avec l’arme de chacune des neuf classes.,Combat & armes,ACH_C13.png,ACH_C13_locked.png
+ACH_C14,Tireur d’élite,Vaincre 200 ennemis avec l’arme Arc long.,Combat & armes,ACH_C14.png,ACH_C14_locked.png
+ACH_C15,Exécuteur silencieux,Vaincre 200 ennemis avec l’arme Dagues jumelles.,Combat & armes,ACH_C15.png,ACH_C15_locked.png
+ACH_C16,Danse des lames,Vaincre 200 ennemis avec l’arme Épées jumelles.,Combat & armes,ACH_C16.png,ACH_C16_locked.png
+ACH_C17,Rempart inébranlable,Vaincre 200 ennemis avec l’arme Masse et égide.,Combat & armes,ACH_C17.png,ACH_C17_locked.png
+ACH_C18,Surcharge arcanique,Vaincre 200 ennemis avec l’arme Bâton élémentaire.,Combat & armes,ACH_C18.png,ACH_C18_locked.png
 ACH_C19,Résilience du Souverain,Survivre à un coup fatal grâce à la Couronne du Souverain.,Combat & armes,ACH_C19.png,ACH_C19_locked.png
 ACH_C20,Bourreau des cœurs,Vaincre un boss mondial moins de 30 secondes après le premier coup.,Combat & armes,ACH_C20.png,ACH_C20_locked.png
 ACH_E1,Le grand départ,Quitter le Camp de l’Aurore pour la première fois.,Exploration & aventure,ACH_E1.png,ACH_E1_locked.png

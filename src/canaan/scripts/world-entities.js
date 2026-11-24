@@ -122,7 +122,8 @@ function safeGearText(v) {
 // Fabrique de l'objet brut. giveGear, installée par canaan-gear-engine, le normalise puis le dépose.
 // forcedSlot : pièce choisie (armurerie de la cité elfique), sinon au hasard.
 function createRawGear(level, source = 'normal', guaranteed = null, forcedSlot = null) {
-  const slots = Object.keys(gearSlots).filter(k => !SECOND_SLOT_OF[k]),
+  // Plus d'armes au butin : chaque classe a la sienne.
+  const slots = Object.keys(gearSlots).filter(k => !SECOND_SLOT_OF[k] && k !== 'weapon'),
     slot = slots.includes(forcedSlot) ? forcedSlot : slots[Math.floor(rnd() * slots.length)];
   const rarity = guaranteed
     ? GEAR_RARITIES.find(r => r.name === guaranteed) || rarityRoll(level)

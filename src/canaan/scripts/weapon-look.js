@@ -1,15 +1,17 @@
-// Armes tenues en main : chaque héros porte la vraie arme équipée (épée, épées doubles, hache, masse, lance,
-// dagues, arc, égide, bâton, luth, Grimoire, Grande hache), dessinée en pixels et tournée vers sa mire, avec une animation d'attaque propre à
-// chaque famille : taille en arc (épée, hache, masse), double taille (épées doubles), estocs (lance, dagues),
-// tir (arc : corde tirée puis relâchée), coup de bouclier (égide), poussée et éclat (bâton), cordes pincées et notes
-// (luth), livre ouvert vers la mire et lueur de peste (Grimoire), grand coup à deux mains par-dessus la tête
-// (Grande hache du Berserker).
+// Armes tenues en main : chaque héros porte l'arme de sa classe (bâton sylvestre, masse et égide, dagues jumelles,
+// bâton élémentaire, luth, arc long, épées jumelles, Grimoire, Grande hache), dessinée en pixels et tournée vers sa
+// mire, avec une animation d'attaque propre à chacune : taille en arc (masse), double taille (épées jumelles), estocs
+// (dagues), tir (arc : corde tirée puis relâchée), égide levée au bras (Paladin), poussée et éclat (bâtons), cordes
+// pincées (luth), livre ouvert vers la mire (Grimoire), grand coup à deux mains (Grande hache). Le Druide en forme
+// féline n'a pas d'arme : la panthère bondit et griffe (lunge, clawSwipe).
 // Le héros se tourne vers sa mire à l'arrêt et pendant une attaque. Rien n'est sauvegardé ni simulé ici.
 (() => {
   'use strict';
   const SCALE = 2;
   // Couleur de la traînée d'une attaque (comme les effets des compétences).
   const TRAIL = {
+    wildstaff: '#9be36a',
+    aegis: '#ffe4a2',
     sword: '#c9f1ff',
     dualsword: '#b2d8ff',
     axe: '#ffb078',
@@ -17,7 +19,7 @@
     spear: '#9ce6d5',
     dualdagger: '#e5a7ff',
     bow: '#a7e8a0',
-    staff: '#b38aff',
+    staff: '#ff9a4a',
     shield: '#ffe4a2',
     lute: '#ff9ad5',
     grimoire: '#a4e83c',
@@ -170,9 +172,33 @@
         R(24, 3, 3, 6, GO);
         R(26, 1, 2, 3, GO);
         R(26, 8, 2, 3, GO);
-        R(28, 3, 6, 6, '#b38aff');
-        R(29, 4, 4, 4, '#d9c2ff');
+        R(28, 3, 6, 6, '#ff7a2a');
+        R(29, 4, 4, 4, '#ffd27a');
         R(29, 4, 2, 2, '#ffffff');
+      }
+    },
+    // Bâton sylvestre du Druide : bois noueux, feuilles et cristal de sève au sommet.
+    wildstaff: {
+      w: 34,
+      h: 14,
+      px: 6,
+      py: 7,
+      draw(R) {
+        R(0, 6, 25, 2, '#6a4a2a');
+        R(0, 7, 25, 1, '#4a3018');
+        R(6, 5, 2, 1, '#6a4a2a');
+        R(12, 8, 2, 1, '#6a4a2a');
+        R(18, 5, 2, 1, '#6a4a2a');
+        R(9, 4, 3, 2, '#5fae3a');
+        R(16, 8, 3, 2, '#7ee36a');
+        R(23, 3, 3, 8, '#6a4a2a');
+        R(25, 1, 2, 3, '#6a4a2a');
+        R(25, 10, 2, 3, '#6a4a2a');
+        R(27, 4, 6, 6, '#58c84a');
+        R(28, 5, 4, 4, '#b8ff8a');
+        R(28, 5, 2, 2, '#ffffff');
+        R(26, 0, 3, 2, '#7ee36a');
+        R(26, 12, 3, 2, '#7ee36a');
       }
     },
     // Luth : caisse en poire au pivot (rosace, chevalet), manche à frettes vers +x, chevillier coudé, ruban rose.
@@ -428,7 +454,42 @@
   }
   // Type d'arme et visée d'un héros : son équipement (ou ce que l'hôte en envoie), sa souris ou son intention.
   function weaponOf(hero) {
-    return hero?.equipment?.weapon?.weaponType || hero?.netWeapon || 'sword';
+    return hero?.equipment?.weapon?.weaponType || hero?.netWeapon || '';
+  }
+  // Félin du Druide : bond en avant pendant une attaque (décalage du sprite vers la mire).
+  function lunge(hero, body) {
+    const k = progress(body);
+    if (k < 0) return { dx: 0, dy: 0 };
+    const a = aimOf(hero, body),
+      d = Math.sin(clamp01(k * 1.6) * Math.PI) * 14;
+    return { dx: Math.cos(a) * d, dy: Math.sin(a) * d * 0.7 };
+  }
+  // Félin du Druide : trois griffes lumineuses qui lacèrent devant lui pendant l'attaque.
+  function clawSwipe(c, hero, body, x, y) {
+    const k = progress(body);
+    if (k < 0 || k > 0.7) return;
+    const a = aimOf(hero, body),
+      e = ease(k / 0.5),
+      fade = 1 - k / 0.7,
+      cx = x + Math.cos(a) * 30,
+      cy = y - 4 + Math.sin(a) * 20;
+    c.save();
+    c.translate(cx, cy);
+    c.rotate(a + Math.PI / 2);
+    c.globalCompositeOperation = 'lighter';
+    c.lineCap = 'round';
+    for (let s = -1; s <= 1; s++) {
+      c.strokeStyle = 'rgba(200,245,154,' + (0.6 * fade).toFixed(3) + ')';
+      c.lineWidth = 6 * fade + 1;
+      c.beginPath();
+      c.moveTo(-16 + s * 2, s * 8 - 12);
+      c.quadraticCurveTo(0, s * 8 + 4, -16 + 32 * e + s * 2, s * 8 - 12 + 24 * e);
+      c.stroke();
+      c.strokeStyle = 'rgba(255,255,255,' + fade.toFixed(3) + ')';
+      c.lineWidth = 1.5;
+      c.stroke();
+    }
+    c.restore();
   }
   function aimOf(hero, body) {
     // Pendant un travail (miner, cueillir, forger, cuisiner), le héros regarde ce qu'il travaille.
@@ -544,7 +605,11 @@
     }
   }
   function draw(c, hero, body, x, y, layer) {
-    if (!body || body.form === 'feral') return;
+    if (!body) return;
+    if (body.form === 'feral') {
+      if (layer === 'front') clawSwipe(c, hero, body, x, y);
+      return;
+    }
     const work = typeof CANAAN_GATHER === 'object' ? CANAAN_GATHER.workOf(hero) : null;
     if (work) return drawWork(c, body, x, y, layer, work);
     const type = weaponOf(hero),
@@ -573,6 +638,25 @@
         trail(c, hx, hy, len, a0, rot, color, 1 - k);
         piece(c, 'greataxe', hx, hy, rot, side);
       } else piece(c, 'greataxe', hx - side * 2, hy, -Math.PI / 2 + side * 0.3, side);
+      return;
+    }
+    // Paladin : la masse dans la main, l'égide au bras de l'autre côté (levée pendant le coup).
+    if (type === 'aegis') {
+      const len = 22 * SCALE;
+      if (layer === 'front' || (layer === 'back' && up)) {
+        const sx = x - side * 10 + Math.cos(aim) * (attacking ? 6 : 2),
+          sy = y + 6 + Math.sin(aim) * 4;
+        if ((layer === 'front') !== up) piece(c, 'shield', sx, sy, attacking ? -side * 0.15 : 0, 1, 0.95);
+      }
+      if (layer !== behind) return;
+      if (attacking) {
+        const a0 = aim - side * 1.8,
+          a1 = aim + side * 1.2,
+          e = ease(k * 1.4),
+          rot = a0 + (a1 - a0) * e;
+        trail(c, hx, hy, len, a0, rot, color, 1 - k);
+        piece(c, 'mace', hx, hy, rot, side);
+      } else piece(c, 'mace', hx, hy, -Math.PI / 2 + side * 0.55, side);
       return;
     }
     if (type === 'sword' || type === 'axe' || type === 'mace') {
@@ -646,14 +730,14 @@
       } else piece(c, 'spear', hx, hy, -Math.PI / 2 + side * 0.25, side);
       return;
     }
-    if (type === 'staff') {
+    if (type === 'staff' || type === 'wildstaff') {
       if (layer !== behind) return;
       const rot = attacking ? aim - side * 0.25 * (1 - ease(k)) : -Math.PI / 2 + side * 0.15,
         d = attacking ? Math.sin(k * Math.PI) * 10 : 0,
         px = hx + Math.cos(aim) * d,
         py = hy + Math.sin(aim) * d;
-      piece(c, 'staff', px, py, rot, side);
-      // Orbe : lueur permanente, éclat au lancer.
+      piece(c, type, px, py, rot, side);
+      // Orbe : lueur permanente (flamme du bâton élémentaire, sève du bâton sylvestre), éclat au lancer.
       const tipX = px + Math.cos(rot) * 28 * SCALE,
         tipY = py + Math.sin(rot) * 28 * SCALE,
         glow = attacking
@@ -662,8 +746,8 @@
       c.save();
       c.globalCompositeOperation = 'lighter';
       const g = c.createRadialGradient(tipX, tipY, 0, tipX, tipY, glow);
-      g.addColorStop(0, 'rgba(230,210,255,.9)');
-      g.addColorStop(1, 'rgba(179,138,255,0)');
+      g.addColorStop(0, type === 'wildstaff' ? 'rgba(220,255,190,.9)' : 'rgba(255,230,180,.95)');
+      g.addColorStop(1, type === 'wildstaff' ? 'rgba(126,227,106,0)' : 'rgba(255,122,42,0)');
       c.fillStyle = g;
       c.beginPath();
       c.arc(tipX, tipY, glow, 0, Math.PI * 2);
@@ -801,6 +885,8 @@
       ca = Math.cos(a),
       sa = Math.sin(a),
       col = p.c || '#ffffff';
+    // Projectiles des classes (boule de feu, épine, dague, flèche lourde…) : vfx-art.js.
+    if (CANAAN_VFX.projectile(c, p)) return;
     c.save();
     if (p.kind === 'arrow') {
       c.globalAlpha = 0.35;
@@ -938,6 +1024,7 @@
     faceFromAim,
     aimOf,
     weaponOf,
+    lunge,
     kinds: () => Object.keys(ART)
   });
 })();

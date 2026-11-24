@@ -12,10 +12,7 @@ const game = {
     level: 1,
     exp: 0,
     // Inventaire et équipement de départ.
-    inventory: [
-      { id: 'sword1', name: 'Épée de recrue', slot: 'weapon', level: 1, rarity: 'Commun' },
-      { id: 'armor1', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }
-    ],
+    inventory: [{ id: 'armor1', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }],
     equipment: {
       weapon: null,
       armor: null,
@@ -103,7 +100,6 @@ function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
     inventory: [],
     equipment: {
       weapon: null,
-      weapon2: null,
       armor: null,
       helm: null,
       boots: null,

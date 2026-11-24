@@ -337,94 +337,123 @@
       }
     }
   };
-  // ---------------------------------------------------------------- Arme liée (le Grimoire, la Grande hache)
-  // Messages propres à chaque arme liée : icône, départ (en quittant la classe) et palier atteint.
-  const PACT_TEXT = Object.freeze({
-    grimoire: {
-      icon: '📕',
-      leave: 'Le Grimoire retourne aux ombres. Il reviendra si tu redeviens Invocateur.',
-      grow: 'Ton Grimoire grandit : '
-    },
-    greataxe: {
-      icon: '🪓',
-      leave: 'La Grande hache retourne au sang. Elle reviendra si tu redeviens Berserker.',
-      grow: 'Ta Grande hache grandit : '
-    }
-  });
-  const pactText = type => PACT_TEXT[type] || PACT_TEXT.grimoire;
-  const bagRoom = hero =>
-    typeof canaanBagUsed === 'function' ? canaanBagLimit(hero) - canaanBagUsed(hero) : Infinity;
+  // ---------------------------------------------------------------- Arme de classe
+  // Chaque classe a son arme (shared/data/classes.js, weapon) : elle prend le niveau du héros et ne quitte jamais sa
+  // main. Le Grimoire et la Grande hache sont des Reliques ; les autres montent de qualité avec les essences des boss
+  // (hero.weaponTiers : rang gagné par classe, gardé même en changeant de classe).
+  const classOf = id => CLASSES.find(c => c.id === id) || null;
+  const weaponDef = type => WEAPON_DEFINITIONS[type] || null;
+  const weaponIconOf = type => weaponDef(type)?.icon || '⚔️';
+  // Rangs gagnés par classe, nettoyés (0 à 5).
+  function tiersOf(hero) {
+    const raw = hero.weaponTiers && typeof hero.weaponTiers === 'object' ? hero.weaponTiers : {},
+      clean = {};
+    for (const c of CLASSES)
+      if (!c.relic && Number.isInteger(raw[c.id]) && raw[c.id] > 0)
+        clean[c.id] = Math.min(GEAR_RARITIES.length - 1, raw[c.id]);
+    return (hero.weaponTiers = clean);
+  }
+  // Rang de qualité actuel de l'arme d'une classe (Peu commun d'office au niveau 10).
+  const tierOf = (hero, classId) => classWeaponTier(hero.level, tiersOf(hero)[classId] || 0);
+  // Qualité de l'arme d'une classe pour ce héros : Relique, ou celle de son rang.
+  function rarityFor(hero, classId) {
+    const c = classOf(classId);
+    return c?.relic ? BOUND_RARITY.name : GEAR_RARITIES[tierOf(hero, classId)].name;
+  }
   const notify = (hero, text) =>
     typeof canaanLootNotice === 'function' ? canaanLootNotice(hero, text) : toast(text);
-  // Devenir une classe à arme liée : les armes portées vont dans le sac ; il faut la place.
-  function canSwitch(hero, classId) {
-    if (!boundWeaponOf(classId) || isBoundItem(hero.equipment?.weapon)) return true;
-    const need = ['weapon', 'weapon2'].filter(slot => hero.equipment?.[slot]).length,
-      room = bagRoom(hero);
-    if (need <= room) return true;
-    notify(hero, '🎒 Libère ' + (need - room) + ' place(s) dans ton sac : tes armes y seront rangées.');
-    return false;
+  // Les armes ne se trouvent plus : toute ancienne arme (sac, réserve, banque, sacoche, main) est rendue en or, une
+  // seule fois. Renvoie l'or rendu.
+  function retireLegacyWeapons(hero) {
+    const loose = it => it && typeof it === 'object' && it.slot === 'weapon' && !isBoundItem(it),
+      price = it =>
+        Math.max(1, Math.round(Number(typeof gearSellValue === 'function' ? gearSellValue(it) : 0) || 0));
+    let gold = 0,
+      count = 0;
+    const sweep = list => {
+      if (!Array.isArray(list)) return;
+      for (let i = list.length - 1; i >= 0; i--)
+        if (loose(list[i])) {
+          gold += price(list[i]);
+          count++;
+          list.splice(i, 1);
+        }
+    };
+    sweep(hero.inventory);
+    sweep(hero.bank?.items);
+    sweep(hero.satchel);
+    const eq = hero.equipment;
+    for (const slot of ['weapon', 'weapon2'])
+      if (eq && eq[slot] && (slot === 'weapon2' || loose(eq[slot]))) {
+        if (!isBoundItem(eq[slot])) {
+          gold += price(eq[slot]);
+          count++;
+        }
+        eq[slot] = null;
+      }
+    if (eq && 'weapon2' in eq) delete eq.weapon2;
+    if (gold > 0) {
+      hero.player.gold = (hero.player.gold || 0) + gold;
+      notify(
+        hero,
+        '⚔️ ' +
+          tt(
+            'Chaque classe a désormais sa propre arme : {n} ancienne(s) arme(s) échangée(s) contre {or} or.',
+            {
+              n: count,
+              or: gold
+            }
+          )
+      );
+    }
+    return gold;
   }
-  // Meilleure arme du sac à son niveau (en quittant l'Invocateur) : elle revient dans la main.
-  function equipBestWeapon(hero) {
-    const lv = clampLevel(hero.level),
-      score = it => (typeof gearScore === 'function' ? gearScore(it) : itemLevel(it)),
-      best = hero.inventory
-        .filter(it => it && it.slot === 'weapon' && !isBoundItem(it) && requiredLevel(it) <= lv)
-        .sort((a, b) => score(b) - score(a))[0];
-    if (!best) return;
-    hero.inventory.splice(hero.inventory.indexOf(best), 1);
-    hero.equipment.weapon = best;
+  // La classe peut toujours être choisie : son arme remplace la main (les anciennes armes sont rendues en or).
+  function canSwitch() {
+    return true;
   }
-  // Accorde l'arme liée à la classe et au niveau du héros. Renvoie true si l'équipement a changé.
+  // Accorde l'arme de la classe au niveau, à la qualité et à la classe du héros. Renvoie true si l'équipement a changé.
   function syncPact(hero) {
     const eq = hero?.equipment;
     if (!eq || !Array.isArray(hero.inventory)) return false;
     const classId = hero.classe?.id || null,
+      c = classOf(classId),
       type = boundWeaponOf(classId);
-    let changed = false;
-    // Une arme liée ne quitte jamais la main : ni la réserve, ni le sac ; celle d'une autre classe disparaît.
-    for (let i = hero.inventory.length - 1; i >= 0; i--)
-      if (isBoundItem(hero.inventory[i])) {
-        hero.inventory.splice(i, 1);
-        changed = true;
-      }
-    if (isBoundItem(eq.weapon2)) {
-      eq.weapon2 = null;
-      changed = true;
-    }
+    let changed = retireLegacyWeapons(hero) > 0;
+    // Une arme de classe ne quitte jamais la main : ni le sac, ni la banque ; celle d'une autre classe disparaît.
+    for (const list of [hero.inventory, hero.bank?.items, hero.satchel])
+      if (Array.isArray(list))
+        for (let i = list.length - 1; i >= 0; i--)
+          if (isBoundItem(list[i])) {
+            list.splice(i, 1);
+            changed = true;
+          }
     if (isBoundItem(eq.weapon) && eq.weapon.bound !== classId) {
-      const text = pactText(eq.weapon.weaponType);
       eq.weapon = null;
       changed = true;
-      notify(hero, text.icon + ' ' + text.leave);
-      equipBestWeapon(hero);
     }
     if (classId !== 'invocateur') dismiss(hero);
-    if (type) {
-      const fresh = makeBoundWeapon(classId, type, hero.level);
+    if (type && c) {
+      const fresh = makeBoundWeapon(classId, type, hero.level, rarityFor(hero, classId), c.weaponStats);
       if (!isBoundItem(eq.weapon)) {
-        for (const slot of ['weapon', 'weapon2'])
-          if (eq[slot]) {
-            hero.inventory.push(eq[slot]);
-            eq[slot] = null;
-          }
         eq.weapon = fresh;
         changed = true;
         notify(
           hero,
-          pactText(type).icon +
+          weaponIconOf(type) +
             ' ' +
-            fresh.name +
-            ' : ton arme liée, de qualité Relique. Elle grandira avec toi.'
+            tt('{nom} : l’arme de ta classe. Elle grandira avec toi.', { nom: tt(fresh.name) })
         );
       } else if (
         eq.weapon.level !== fresh.level ||
         eq.weapon.name !== fresh.name ||
+        eq.weapon.rarity !== fresh.rarity ||
+        eq.weapon.weaponType !== type ||
         JSON.stringify(eq.weapon.sec) !== JSON.stringify(fresh.sec)
       ) {
-        const renamed = eq.weapon.name !== fresh.name;
-        // L'enchantement reste ; niveau, nom et secondaires suivent le héros.
+        const renamed = eq.weapon.name !== fresh.name,
+          better = eq.weapon.rarity !== fresh.rarity;
+        // L'enchantement reste ; niveau, nom, qualité et secondaires suivent le héros.
         Object.assign(eq.weapon, {
           level: fresh.level,
           name: fresh.name,
@@ -433,7 +462,13 @@
           weaponType: type
         });
         changed = true;
-        if (renamed) notify(hero, pactText(type).icon + ' ' + pactText(type).grow + fresh.name + ' !');
+        if (renamed || better)
+          notify(
+            hero,
+            weaponIconOf(type) +
+              ' ' +
+              tt('Ton arme grandit : {nom} ({qualite}) !', { nom: tt(fresh.name), qualite: tt(fresh.rarity) })
+          );
       }
     }
     if (!changed) return false;
@@ -710,6 +745,9 @@
     dismiss,
     syncPact,
     canSwitch,
+    tierOf,
+    tiersOf,
+    rarityFor,
     view,
     applyView,
     count: owner => mine(owner).length,

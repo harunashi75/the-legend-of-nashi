@@ -1,5 +1,5 @@
 // Ressources des classes (shared/rules/resources.js) : mana qui grandit avec le niveau, Énergie de l'Assassin,
-// Ferveur du Paladin, Rythme du Barde, et PV du Berserker (pas de barre).
+// Ferveur du Paladin, Rythme du Barde, Concentration du Chasseur, Rage du Guerrier et PV du Berserker (pas de barre).
 const { test } = require('node:test');
 const { assert, game, mob, same, basicHit, source } = require('./helpers/context.cjs');
 
@@ -14,7 +14,9 @@ test('Ressources : une par classe, maximum et coût selon le niveau', () => {
       ['elementaliste', 'mana'],
       ['invocateur', 'mana'],
       ['barde', 'rhythm'],
-      ['berserker', 'blood']
+      ['berserker', 'blood'],
+      ['chasseur', 'focus'],
+      ['guerrier', 'rage']
     ]
   );
   assert.equal(g.classResource(null), 'mana', 'sans classe : du mana');
@@ -22,8 +24,12 @@ test('Ressources : une par classe, maximum et coût selon le niveau', () => {
   same([1, 30, 60].map(lv => g.resourceMax('mana', lv)), [250, 395, 545]);
   same([1, 30, 60].map(lv => g.resourceCost('mana', 20, lv)), [20, 26, 32]);
   // Énergie, Ferveur, Rythme : 100 à tout niveau, le double du prix en mana ; pas de barre pour le Berserker.
-  same(['energy', 'fervor', 'rhythm', 'blood'].map(k => g.resourceMax(k, 60)), [100, 100, 100, 0]);
-  same(['energy', 'fervor', 'rhythm'].map(k => g.resourceCost(k, 12, 1)), [24, 24, 24]);
+  same(['energy', 'fervor', 'rhythm', 'focus', 'rage', 'blood'].map(k => g.resourceMax(k, 60)), [100, 100, 100, 100, 100, 0]);
+  same(['energy', 'fervor', 'rhythm', 'focus', 'rage'].map(k => g.resourceCost(k, 12, 1)), [24, 24, 24, 24, 24]);
+  // Concentration : rechargée de 10 par seconde, +3 par attaque de base ; Rage : comme la Ferveur, +7 par attaque.
+  same([g.resourceRegen('focus', 100, true), g.resourceRegen('rage', 100, true), g.resourceRegen('rage', 100, false)], [10, 2, -8]);
+  same([g.resourceGain('focus', 'basic'), g.resourceGain('rage', 'basic')], [3, 7]);
+  assert.equal(g.resourceBuildsUp('rage'), true);
   // Régénération : le mana selon son maximum, l'Énergie toujours, la Ferveur et le Rythme retombent hors combat.
   same(
     [

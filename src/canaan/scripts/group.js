@@ -15,16 +15,9 @@
   const present = () => game.heroes.filter(h => h !== game.hero);
 
   // ---------------------------------------------------------------- Création, arrivée, départ
+  // Équipement de départ : une tunique ; l'arme vient de la classe (summons.js, syncPact).
   function starterGear(id) {
     return {
-      weapon: {
-        id: id + '-epee',
-        name: 'Épée de recrue',
-        slot: 'weapon',
-        level: 1,
-        rarity: 'Commun',
-        weaponType: 'sword'
-      },
       armor: { id: id + '-tunique', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }
     };
   }
@@ -56,6 +49,7 @@
   function giveClass(hero) {
     hero.classe = { id: CLASS_IDS[Math.floor(Math.random() * CLASS_IDS.length)], talents: [] };
     CANAAN_CLASS.autoTalents(hero);
+    CANAAN_SUMMONS.syncPact(hero);
   }
   // Héros d'un invité en ligne qui arrive pour la première fois : équipement de départ, identifiant de son application.
   function createRemote(id, pseudo, look = null) {
@@ -180,6 +174,7 @@
         // Version du niveau de sac : sans elle, un niveau 3 venait du départ à 40 places (ancienne règle).
         bagVersion: 2,
         classe: { id: hero.classe.id, talents: [...hero.classe.talents] },
+        armeClasse: CANAAN_CLASS_WEAPON.export(hero),
         artefacts: CANAAN_ARTEFACTS.clean(hero.artefacts),
         arena: { ...hero.arena },
         prof: CANAAN_PROF.sanitize(hero.prof),
@@ -224,6 +219,9 @@
       hero.quetes = sanitizeQuests(d.quetes);
       hero.ext = canaanSanitizeExt(d.ext);
       hero.inventory = Array.isArray(d.inventory) ? d.inventory.filter(validItem) : [];
+      // Ancienne arme de réserve : rendue en or avec les autres armes (summons.js).
+      if (validItem(d.equipment?.weapon2) && d.equipment.weapon2.slot === 'weapon')
+        hero.inventory.push(d.equipment.weapon2);
       hero.bank = CANAAN_BANK.sanitize(d.bank);
       hero.satchel = CANAAN_SALVAGE.sanitize(d.sacoche);
       for (const slot of Object.keys(hero.equipment)) {
@@ -253,8 +251,11 @@
       // Classe et artéfacts agissent en combat : mêmes vérifications que pour l'hôte (classe connue, talents
       // différents dans la limite des emplacements, artéfacts connus, possédés et jamais deux fois).
       CANAAN_CLASS.setClasse(hero, d.classe);
+      CANAAN_CLASS_WEAPON.import(hero, d.armeClasse);
       // Compagnon d'avant les classes : il en reçoit une, avec ses talents.
       if (hero.local && !hero.classe.id) giveClass(hero);
+      // Arme de classe au niveau et à la qualité du héros ; ses anciennes armes sont rendues en or.
+      CANAAN_SUMMONS.syncPact(hero);
       hero.artefacts = CANAAN_ARTEFACTS.clean(d.artefacts);
       // PV maximum avec sa classe et ses artéfacts, une fois ceux-ci vérifiés.
       hero.player.mhp = characterStats(hero).maxHp;
@@ -324,8 +325,8 @@
     hero.intent.dy = Math.abs(wy - p.y) > 4 ? Math.sign(wy - p.y) : 0;
   }
   function reach(hero) {
-    const type = hero.equipment.weapon?.weaponType || 'sword';
-    return type === 'bow' || type === 'staff' ? 300 : type === 'spear' ? 145 : 92;
+    const type = CANAAN_CLASS.weaponType(hero);
+    return ['bow', 'staff', 'wildstaff', 'lute', 'grimoire'].includes(type) ? 300 : 92;
   }
   // Un héros à terre (compagnon ou invité en ligne) se relève près de l'hôte au bout de 10 secondes, à 50 % de ses PV.
   function revive(hero) {

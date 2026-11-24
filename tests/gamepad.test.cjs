@@ -112,10 +112,10 @@ test('Manette en jeu : déplacement, compétences, attaques, roulade, pause, san
   run('globalThis.__dodge = []; canaanDodge = (x, y) => __dodge.push([x, y]); __pad.axes[0] = 0; __pad.axes[1] = 1; padPress(' + B.B + '); padPress(' + B.B + ', false)');
   assert.deepEqual(value(run, '__dodge'), [[0, 1]]);
   run('padStickTo(0, 0, 0)');
-  // Croix : ↓ change d'arme, A interagit.
-  run('globalThis.__calls = []; switchWeapon = () => __calls.push("arme"); interact = () => __calls.push("parler")');
+  // Croix : ↓ ouvre la classe et les talents, A interagit.
+  run('globalThis.__calls = []; toggleTalents = () => __calls.push("talents"); interact = () => __calls.push("parler")');
   run(`padPress(${B.DOWN}); padPress(${B.DOWN}, false); padPress(${B.A}); padPress(${B.A}, false)`);
-  assert.deepEqual(value(run, '__calls'), ['arme', 'parler']);
+  assert.deepEqual(value(run, '__calls'), ['talents', 'parler']);
   // Start : pause.
   run(`padPress(${B.START}); padPress(${B.START}, false)`);
   assert.equal(run('paused'), true);

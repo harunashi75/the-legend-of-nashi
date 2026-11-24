@@ -90,17 +90,16 @@ test('Sylvaëlle, la cité elfique : palissade sans trou, porte au niveau 60, Gr
  near('elfe_armurerie');run('P.gold=10000;game.hero.inventory=[]');
  assert.equal(run('CANAAN_CITY.nearArmorer(game.hero)&&nearMerchant()'),true,'Thalion achète aussi le butin');
  const view=JSON.parse(run('JSON.stringify(CANAAN_SHOP.view(game.hero))'));
- assert.equal(view.kind,'elfe');assert.equal(view.items.length,34,'(7 pièces + 10 armes) × 2 qualités');
+ assert.equal(view.kind,'elfe');assert.equal(view.items.length,14,'7 pièces × 2 qualités (plus d’armes : chaque classe a la sienne)');
  assert.deepEqual([...new Set(view.items.map(i=>i.rarity))],['Rare','Épique']);assert.deepEqual([...new Set(view.prices)],[2500,7500]);
  assert.ok(view.items.every(i=>i.level===60&&i.origin==='elfique'));
- const weapons=view.items.filter(i=>i.slot==='weapon'&&i.rarity==='Épique').map(i=>i.weaponType);
- assert.deepEqual(weapons,JSON.parse(run('JSON.stringify(CANAAN_GEAR_ENGINE.weaponTypes)')),'une arme de chaque famille');
+ assert.ok(view.items.every(i=>i.slot!=='weapon'),'aucune arme');
  assert.ok(view.items.every(i=>i.slot!=='artifact'),'plus d’objet artéfact');
- const bow=view.items.findIndex(i=>i.weaponType==='bow'&&i.rarity==='Épique'),id=view.items[bow].id;
- assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+bow+'})'),true);
- assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.inventory.map(i=>[i.id,i.slot,i.weaponType,i.rarity,i.level,i.origin]))')),[[id,'weapon','bow','Épique',60,'elfique']]);assert.equal(run('P.gold'),2500);
- assert.equal(run('CANAAN_SHOP.view(game.hero).items['+bow+'].weaponType'),'bow','remplacé par un autre arc');
- assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+bow+'})'),false,'pas assez d’or');
+ const helm=view.items.findIndex(i=>i.slot==='helm'&&i.rarity==='Épique'),id=view.items[helm].id;
+ assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+helm+'})'),true);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(game.hero.inventory.map(i=>[i.id,i.slot,i.rarity,i.level,i.origin]))')),[[id,'helm','Épique',60,'elfique']]);assert.equal(run('P.gold'),2500);
+ assert.equal(run('CANAAN_SHOP.view(game.hero).items['+helm+'].slot'),'helm','remplacé par un autre heaume');
+ assert.equal(run('CANAAN_SHOP.handle(game.hero,{op:"shop-buy",index:'+helm+'})'),false,'pas assez d’or');
  // La fenêtre est celle du marchand du camp : marchandise à gauche, sac à vendre à droite.
  run('globalThis.__html="";showPanel=h=>{__html=h;document.getElementById("overlay").style.display="flex"};CANAAN_CITY.interact()');
  assert.match(run('__html'),/Thalion/);assert.match(run('__html'),/shop-columns/);assert.match(run('__html'),/data-action="shopBuy"/);assert.match(run('__html'),/Ton sac/);

@@ -45,7 +45,7 @@ function game() {
   const g = {
     P: {x: 0, y: 0, hp: 20, mhp: 100, mp: 1000, mmp: 1000, dead: false},
     started: true, paused: false, playerStun: 0, time: 0, TS: 48, shake: 0,
-    inventory: [], equipment: {weapon: {id:'weapon',slot:'weapon',level:10,weaponType:'sword'}},
+    inventory: [], equipment: {weapon: null},
     SKILLS: [], weaponCooldowns: {}, activeWeaponType: '',
     spellZones: [], spellHits: [], projectiles: [],
     monsters: [], drops: [], kills: 0, recorded: 0,
@@ -54,6 +54,8 @@ function game() {
     CANAAN_SOUND: {floatText() {}, effect() {}, cue() {}},
     // Succès (achievements.js, testé à part) : événements ignorés.
     canaanAchieve() {}, CANAAN_ACHIEVEMENTS: {draw() {}},
+    // Sauvegarde différée (persistence.js, testée à part).
+    CANAAN_PERSISTENCE: {requestSave() {}},
     // Tréfonds (underground.js, testé à part) : l'île seulement.
     canaanUnder: () => false, canaanHere: o => o?.layer !== 'under',
     CANAAN_PROF: {damageMult: () => 1, armorMult: () => 1, speedMult: () => 1, sanitize: p => p || {fishing: {level: 1, exp: 0}, cooking: {level: 1, exp: 0}, hunting: {level: 1, exp: 0}, fish: {}, meat: {}, meals: {}, codex: {}}},
@@ -85,10 +87,12 @@ function game() {
   vm.runInContext(script('canaan-modules'),g);
   vm.runInContext(section('function currentWeaponType()', "// Étape du pipeline : effets des sorts d'armes sur les monstres."), g);
   vm.runInContext(section("// Étape du pipeline : effets des sorts d'armes sur les monstres.", "// Fin des effets d'armes. Les PV des monstres viennent de leur niveau (monster-scaling.js)."), g);
+  vm.runInContext(script('canaan-vfx-art'), g);
   vm.runInContext(script('canaan-weapon-actions'), g);
   vm.runInContext(script('canaan-stats'), g);
   vm.runInContext(script('canaan-class-talents'), g);
-  vm.runInContext(script('canaan-summons'), g);g.refreshWeaponBar();
+  vm.runInContext(script('canaan-summons'), g);
+  vm.runInContext(script('canaan-class-weapons'), g);g.refreshWeaponBar();
   vm.runInContext(script('canaan-combat'), g);
   vm.runInContext(script('canaan-artefacts'), g);
   vm.runInContext(script('canaan-arena'), g);
@@ -98,8 +102,9 @@ function game() {
   g.saveGame = () => true;
   g.modernPanel = () => {};
   g.advance = (ticks) => {for(let i=0;i<ticks;i++){g.time++;g.runUpdatePipeline()}};
-  // Classe et talents au niveau 60 (cinq emplacements) ; arme aux secondaires fixes (sans Soin ni Célérité).
-  g.setClass = (id,talents=[]) => {g.game.hero.level=60;g.equipment.weapon.sec={crit:1,power:1};g.CANAAN_CLASS_STATE.import({id,talents})};
+  // Classe et talents au niveau 60 (cinq emplacements) ; l'arme de la classe, aux secondaires fixes (sans Soin ni
+  // Célérité) pour des valeurs simples.
+  g.setClass = (id,talents=[]) => {g.game.hero.level=60;g.CANAAN_CLASS_STATE.import({id,talents});if(g.equipment.weapon)g.equipment.weapon.sec={crit:1,power:1}};
   return g;
 }
 function modifiers(g, recovery = 0, healing = 0) {
@@ -154,15 +159,17 @@ const same=(a,b,msg)=>assert.equal(JSON.stringify(a),JSON.stringify(b),msg);
 const skillHit=(el=null)=>({skill:true,offensive:true,element:el,multiplier:1});
 const basicHit={basic:true,magic:false};
 function PIXEL_PLACES_COUNT(run){return run('PIXEL_PLACES.length')}
-// Groupe de quatre héros (hôte à l'épée, alliés à la lance, à l'arc et à la hache), équipés au même niveau.
-// Groupe de quatre héros du niveau donné, chacun équipé d'objets de ce niveau et de cette qualité.
+// Groupe de quatre héros du niveau donné, chacun équipé d'objets de ce niveau et de cette qualité, avec sa classe
+// (hôte Guerrier, alliés Paladin, Chasseur et Berserker) et l'arme de sa classe à la même qualité.
 function groupInDungeon(level,rarity){
  const boot=require('./canaan-runtime.cjs')(source),{run}=boot;
  run(fs.readFileSync(path.join(__dirname,'group-bot.js'),'utf8'));
- const gear=(w,tag)=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:'+level+',rarity:"'+rarity+'",weaponType:"'+w+'"}').join(',')+'}';
+ const gear=tag=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:'+level+',rarity:"'+rarity+'"}').join(',')+'}';
+ const tier='Math.max(0,GEAR_RARITIES.findIndex(r=>r.name==="'+rarity+'"))';
+ const arm=(h,cls)=>h+'.weaponTiers={'+cls+':'+tier+'};'+h+'.classe={id:"'+cls+'",talents:[]};CANAAN_CLASS.autoTalents('+h+');CANAAN_SUMMONS.syncPact('+h+');';
  run('started=true;paused=false;P.dead=false;game.view={notify:()=>{},chat:()=>{}}');
- run('game.hero.level='+level+';game.hero.equipment={...game.hero.equipment,...'+gear('sword','h')+'};recomputeStats();P.hp=P.mhp');
- for(const [n,w] of [['Lina','spear'],['Oren','bow'],['Maë','axe']])run('{const h=canaanCreateHero({name:"'+n+'",x:P.x,y:P.y,equipment:'+gear(w,n)+'});h.level='+level+';recomputeHeroStats(h);h.player.hp=h.player.mhp;game.heroes.push(h)}');
+ run('game.hero.level='+level+';game.hero.equipment={...game.hero.equipment,...'+gear('h')+'};'+arm('game.hero','guerrier')+'recomputeStats();refreshWeaponBar();P.hp=P.mhp');
+ for(const [n,cls] of [['Lina','paladin'],['Oren','chasseur'],['Maë','berserker']])run('{const h=canaanCreateHero({name:"'+n+'",x:P.x,y:P.y,equipment:'+gear(n)+'});h.level='+level+';'+arm('h',cls)+'recomputeHeroStats(h);h.player.hp=h.player.mhp;game.heroes.push(h)}');
  return boot;
 }
 function playInstance(run,index,maxSeconds,prep=''){

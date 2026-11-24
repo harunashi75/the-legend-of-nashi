@@ -12,8 +12,11 @@ test('Objets : normalisation unique, butin de chaque instance à son niveau, anc
   const tracked={id:'old-armor',name:'Armure ancienne',slot:'armor',rarity:'Rare',level:30};
   assert.equal(g.CANAAN_GEAR.normalize(tracked),tracked);const sec=JSON.stringify(tracked.sec);
   g.CANAAN_GEAR.normalize(tracked);assert.equal(JSON.stringify(tracked.sec),sec,'secondaires tirées une seule fois');
-  const weapon={id:'identity',name:'Arc personnel',slot:'weapon',weaponType:'bow',rarity:'Épique',level:40};
-  g.CANAAN_GEAR.normalize(weapon);assert.equal(weapon.name,'Arc personnel');assert.equal(weapon.weaponType,'bow');assert.equal(weapon.level,40);
+  // Arme de classe : le nom de son palier, sa famille et son niveau.
+  const weapon={id:'identity',name:'Arc personnel',slot:'weapon',weaponType:'bow',rarity:'Épique',level:40,bound:'chasseur'};
+  g.CANAAN_GEAR.normalize(weapon);assert.equal(weapon.name,'Arc des vents sauvages');assert.equal(weapon.weaponType,'bow');assert.equal(weapon.level,40);
+  // Plus aucune arme dans le butin des instances.
+  assert.equal(run('CANAAN_GEAR_ENGINE.weaponTypes.length'),0);
   assert.equal(typeof g.CANAAN_GEAR.grant,'function');assert.equal(typeof g.CANAAN_LOOT.grant,'function');
   assert.equal(run('typeof rebalanceItem'), 'undefined');assert.equal(run('typeof rebalanceAllGear'),'undefined');
   g.Math=Object.create(Math);

@@ -30,6 +30,20 @@ export const RESOURCE_RULES = Object.freeze({
   }),
   // Rythme (Barde) : chaque attaque de base est une note qui le fait monter ; retombe hors combat.
   rhythm: Object.freeze({ max: 100, costFactor: 2, combat: 3, decay: 8, basic: 8 }),
+  // Concentration (Chasseur) : 100, rechargée de 10 par seconde, en combat comme ailleurs ; chaque attaque de base qui
+  // touche en rend 3 de plus.
+  focus: Object.freeze({ max: 100, costFactor: 2, regen: 10, basic: 3 }),
+  // Rage (Guerrier) : part de zéro ; monte quand il frappe et quand il est frappé, retombe hors combat.
+  rage: Object.freeze({
+    max: 100,
+    costFactor: 2,
+    combat: 2,
+    decay: 8,
+    basic: 7,
+    hurt: 3,
+    hurtPerHp: 120,
+    hurtMax: 15
+  }),
   // PV (Berserker) : chaque point de mana coûte 0,6 % des PV max au niveau 1, jusqu'à 1 % au niveau 60.
   blood: Object.freeze({ perMana: 0.006, perManaMax: 0.01 })
 });
@@ -44,9 +58,9 @@ export function classResource(classId) {
   const kind = CLASSES.find(c => c.id === classId)?.resource;
   return kind && kind in RESOURCES ? /** @type {ResourceKind} */ (kind) : 'mana';
 }
-// Ressource qui part de zéro et se gagne en combat (Ferveur, Rythme).
+// Ressource qui part de zéro et se gagne en combat (Ferveur, Rythme, Rage).
 /** @param {ResourceKind} kind */
-export const resourceBuildsUp = kind => kind === 'fervor' || kind === 'rhythm';
+export const resourceBuildsUp = kind => kind === 'fervor' || kind === 'rhythm' || kind === 'rage';
 
 // Maximum de la ressource ; 0 pour le Berserker, qui n'a pas de barre.
 /**
@@ -89,9 +103,11 @@ export function resourceRegen(kind, max, fighting) {
     case 'mana':
       return max * (fighting ? RESOURCE_RULES.mana.regenCombat : RESOURCE_RULES.mana.regen);
     case 'energy':
-      return RESOURCE_RULES.energy.regen;
+    case 'focus':
+      return RESOURCE_RULES[kind].regen;
     case 'fervor':
     case 'rhythm':
+    case 'rage':
       return fighting ? RESOURCE_RULES[kind].combat : -RESOURCE_RULES[kind].decay;
     default:
       return 0;
@@ -105,13 +121,13 @@ export function resourceRegen(kind, max, fighting) {
  * @returns {number}
  */
 export function resourceGain(kind, event, info = {}) {
-  if (kind === 'fervor') {
-    const r = RESOURCE_RULES.fervor;
+  if (kind === 'fervor' || kind === 'rage') {
+    const r = RESOURCE_RULES[kind];
     if (event === 'basic') return r.basic;
     const share = info.maxHp ? Math.max(0, Number(info.damage) || 0) / info.maxHp : 0;
     return Math.min(r.hurtMax, r.hurt + r.hurtPerHp * share);
   }
-  if (kind === 'rhythm' && event === 'basic') return RESOURCE_RULES.rhythm.basic;
+  if ((kind === 'rhythm' || kind === 'focus') && event === 'basic') return RESOURCE_RULES[kind].basic;
   return 0;
 }
 // Part des PV max que coûte un point de mana au Berserker : elle monte avec le niveau.

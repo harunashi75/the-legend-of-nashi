@@ -12,13 +12,14 @@ const kinds = g => summons(g).map(s => s.kind);
 test('Invocateur : Grimoire lié de qualité Relique, au niveau du héros, qui grandit et disparaît avec la classe', () => {
   const g = game();
   g.setClass('invocateur', []);
+  // Les secondaires fixes de la classe (setClass les simplifie pour les autres tests).
+  g.CANAAN_SUMMONS.syncPact(g.game.hero);
   const w = g.equipment.weapon;
   same([w.weaponType, w.rarity, w.level, w.bound, w.name], ['grimoire', 'Relique', 60, 'invocateur', 'Évangile du Fléau éternel']);
   assert.equal(g.isBoundItem(w), true);
   assert.equal(g.rarityInfo(w).color, g.BOUND_RARITY.color, 'couleur de qualité propre à la Relique');
   same(Object.keys(w.sec).sort(), ['haste', 'mastery']);
-  // L'épée portée est rangée dans le sac ; la barre montre les quatre invocations.
-  same(g.inventory.map(i => i.weaponType), ['sword']);
+  // La barre montre les quatre invocations.
   same(g.SKILLS.map(s => s.n), ['Squelette putride', 'Nuée de corbeaux', 'Totem de peste', 'Abomination']);
   // Le Grimoire suit le niveau : nom par palier de 10 niveaux, statistiques qui montent avec lui.
   const stats = lv => {
@@ -36,11 +37,11 @@ test('Invocateur : Grimoire lié de qualité Relique, au niveau du héros, qui g
   assert.equal(g.qualityFactor('Relique', 60), g.QUALITY_FACTOR.Légendaire);
   // Jamais dans le butin ni chez les marchands.
   assert.equal(g.CRAFT_WEAPONS.includes('grimoire'), false);
-  // Une autre classe : le Grimoire disparaît, la meilleure arme du sac revient dans la main.
+  // Une autre classe : le Grimoire disparaît, l'arme de la nouvelle classe le remplace.
   g.CANAAN_CLASS_STATE.import({ id: 'druide', talents: [] });
-  assert.equal(g.equipment.weapon.weaponType, 'sword');
+  assert.equal(g.equipment.weapon.weaponType, 'wildstaff');
   assert.equal(g.inventory.length, 0);
-  assert.equal(g.CANAAN_SUMMONS.syncPact(g.game.hero), false, 'rien à faire sans arme liée');
+  assert.equal(g.CANAAN_SUMMONS.syncPact(g.game.hero), false, 'rien à faire quand l’arme est à jour');
 });
 
 test('Peste noire : charges cumulables (8, ou 12 avec Virulence), dégâts chaque seconde, Nécrose et fin de l’effet', () => {
@@ -276,7 +277,7 @@ test('Contagion (F) : 4 charges de Peste à 7 cases et invocations 30 % plus rap
   assert.ok(g.CANAAN_CLASS.skillRider('grimoire', 0, g.game.hero).includes('Peste'));
 });
 
-test('Arme liée en jeu : rien ne l’enlève ni ne la remplace, sac plein refusé, brillance Relique et choix des classes en pages', () => {
+test('Arme de classe en jeu : rien ne l’enlève ni ne la remplace, anciennes armes rendues en or, brillance Relique et choix des classes en pages', () => {
   const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
   assert.equal(errors.length, 0, errors.join('\n'));
   run('globalThis.__panels=[];modernPanel=h=>__panels.push(h);started=true;paused=false;game.hero.level=20');
@@ -285,31 +286,28 @@ test('Arme liée en jeu : rien ne l’enlève ni ne la remplace, sac plein refus
   let html = run('__panels.at(-1)');
   assert.equal((html.match(/class="class-page"/g) || []).length, 1);
   assert.equal((html.match(/data-action="classPage"/g) || []).length, 2);
-  assert.equal((html.match(/data-action="classPageTo"/g) || []).length, 7);
-  assert.ok(html.includes('Druide') && html.includes('1 / 7'));
+  assert.equal((html.match(/data-action="classPageTo"/g) || []).length, 9);
+  assert.ok(html.includes('Druide') && html.includes('1 / 9'));
+  // La page du Druide montre aussi les compétences de la forme féline.
+  assert.ok(html.includes('Griffes du félin') && html.includes('Lacération'));
   run('classPage(-1)');
-  assert.ok(run('__panels.at(-1)').includes('Choisir Berserker'), 'la flèche gauche boucle sur la dernière classe');
+  assert.ok(run('__panels.at(-1)').includes('Choisir Guerrier'), 'la flèche gauche boucle sur la dernière classe');
   run('classPageTo(4)');
   html = run('__panels.at(-1)');
-  assert.ok(html.includes('Choisir Invocateur') && html.includes('Arme liée') && html.includes('Relique'));
-  run('classPage(1);classPageTo(2)');
-  assert.ok(run('__panels.at(-1)').includes('Choisir Assassin'));
-  // Sac plein : il faut de la place pour ranger l'arme portée.
+  assert.ok(html.includes('Choisir Invocateur') && html.includes('Arme de classe') && html.includes('Relique'));
+  run('classPage(1);classPageTo(7)');
+  assert.ok(run('__panels.at(-1)').includes('Choisir Chasseur'));
+  // Une ancienne arme portée et une dans le sac : rendues en or quand la classe donne son arme.
   run('equipment.weapon={id:"epee",slot:"weapon",level:1,rarity:"Commun",weaponType:"sword"};CANAAN_GEAR.normalize(equipment.weapon)');
-  run('globalThis.__bag=inventory.slice();while(canaanBagUsed(game.hero)<canaanBagLimit(game.hero))inventory.push({id:"f"+inventory.length,slot:"ring",level:1,rarity:"Commun"})');
-  run('chooseClass("invocateur")');
-  assert.equal(run('game.hero.classe.id'), null);
-  run('inventory.length=0;inventory.push(...__bag)');
-  // Devenir Invocateur : le Grimoire en main, l'ancienne arme dans le sac.
+  run('inventory.push({id:"arc",slot:"weapon",level:1,rarity:"Rare",weaponType:"bow"});globalThis.__gold=P.gold');
   run('chooseClass("invocateur")');
   same(JSON.parse(run('JSON.stringify([game.hero.classe.id,equipment.weapon.weaponType,equipment.weapon.level,equipment.weapon.rarity])')), ['invocateur', 'grimoire', 20, 'Relique']);
-  assert.ok(run('inventory.some(i=>i.id==="epee")'), 'l’épée est rangée dans le sac');
-  // Rien ne l'enlève : retirer, équiper une autre arme, la réserve, changer d'arme.
-  run('inventory.push({id:"arc",slot:"weapon",level:1,rarity:"Rare",weaponType:"bow"})');
+  assert.ok(!run('inventory.some(i=>i.slot==="weapon")'), 'plus aucune arme dans le sac');
+  assert.ok(run('P.gold') > run('__gold'), 'les anciennes armes sont rendues en or');
+  // Rien ne l'enlève : retirer, équiper une autre arme.
+  run('inventory.push({id:"arc2",slot:"weapon",level:1,rarity:"Rare",weaponType:"bow"})');
   assert.equal(run('unequip("weapon")'), false);
-  assert.equal(run('equipItem("arc")'), false);
-  assert.equal(run('equipReserveWeapon(inventory.findIndex(i=>i.id==="arc"))'), false);
-  assert.equal(run('CANAAN_EQUIPMENT.switchHero(game.hero)'), false);
+  assert.equal(run('equipItem("arc2")'), false);
   assert.equal(run('equipment.weapon.weaponType'), 'grimoire');
   // Fiche du personnage : la case brille comme une Relique ; info-bulle d'arme liée.
   run('renderCharacter()');

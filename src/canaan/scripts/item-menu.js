@@ -1,4 +1,4 @@
-// Menu contextuel des objets (clic droit, ou bouton X de la manette) : équiper, Arme 2, vendre chez un marchand,
+// Menu contextuel des objets (clic droit, ou bouton X de la manette) : équiper, Bague 2, vendre chez un marchand,
 // démanteler, manger… Remplace les petits boutons posés dans les coins des cases.
 // Une case le demande par data-menu :
 //   gear    (data-index)   pièce du sac (hero.inventory)
@@ -29,12 +29,11 @@
     const id = String(item.id),
       // Le sac a pu changer entre l'ouverture du menu et le choix : on retrouve la pièce par son identifiant.
       at = () => game.hero.inventory.findIndex(it => String(it.id) === id),
-      weapon = item.slot === 'weapon',
       ring = item.slot === 'ring',
       list = [
         {
           icon: '⚔️',
-          label: weapon ? 'Équiper (Arme 1)' : ring ? 'Équiper (Bague 1)' : 'Équiper',
+          label: ring ? 'Équiper (Bague 1)' : 'Équiper',
           run: () => at() >= 0 && equipBagIndex(at(), ring ? 'ring' : null)
         }
       ];
@@ -43,12 +42,6 @@
         icon: '⟦slot_ring⟧',
         label: 'Équiper en Bague 2',
         run: () => at() >= 0 && equipBagIndex(at(), 'ring2')
-      });
-    if (weapon)
-      list.push({
-        icon: '⟦w_dualsword⟧',
-        label: 'Équiper en Arme 2',
-        run: () => at() >= 0 && equipReserveWeapon(at())
       });
     if (merchant())
       list.push({

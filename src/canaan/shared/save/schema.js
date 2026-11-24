@@ -21,7 +21,7 @@ export const HERO_FIELDS = Object.freeze([
   'arena'
 ]);
 // Emplacements sauvegardés : les emplacements actifs et l'arme de réserve.
-export const SAVED_GEAR_SLOTS = Object.freeze([...ACTIVE_GEAR_SLOTS, 'weapon2']);
+export const SAVED_GEAR_SLOTS = Object.freeze([...ACTIVE_GEAR_SLOTS]);
 
 /**
  * @param {unknown} slot
@@ -85,10 +85,7 @@ export function freshHero({ spawn, baseMana, look, classe = null, name = '' }) {
     level: 1,
     exp: 0,
     kills: 0,
-    inventory: [
-      { id: 'sword1', name: 'Épée de recrue', slot: 'weapon', level: 1, rarity: 'Commun' },
-      { id: 'armor1', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }
-    ],
+    inventory: [{ id: 'armor1', name: 'Tunique du voyageur', slot: 'armor', level: 1, rarity: 'Commun' }],
     equipment: Object.fromEntries(SAVED_GEAR_SLOTS.map(slot => [slot, null])),
     bagLevel: 0,
     // Classe et talents équipés (5 au plus, selon le niveau).

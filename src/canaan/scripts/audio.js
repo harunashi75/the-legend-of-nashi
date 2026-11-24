@@ -1092,7 +1092,10 @@
     const t = ac.currentTime,
       { dest, vol: v } = placed(x, y, vol);
     if (v < 0.01) return;
-    (WEAPON_SOUNDS[type] || WEAPON_SOUNDS.sword)(dest, t, v, heavy);
+    // Armes de classe : le bâton sylvestre sonne comme un bâton, les griffes comme des lames légères, la masse et
+    // l'égide comme une masse.
+    const alias = { wildstaff: 'staff', feline: 'dualdagger', aegis: 'mace' }[type] || type;
+    (WEAPON_SOUNDS[alias] || WEAPON_SOUNDS.sword)(dest, t, v, heavy);
   }
   let hitBudget = 0,
     hitClock = 0;
@@ -1187,7 +1190,7 @@
     const { dest, vol } = placed(x, y, 1);
     if (vol < 0.01) return;
     const h = hue(c);
-    if (shape === 'beam' && (h < 0 || (h > 40 && h < 70))) {
+    if (shape === 'lightning' || shape === 'skybolt' || (shape === 'beam' && (h < 0 || (h > 40 && h < 70)))) {
       // Foudre : craquement aigu.
       const n = noiseSource(t, 0.3),
         f = filter('highpass', 2500, 0.7),
@@ -1353,7 +1356,7 @@
       const p = hero.player,
         before = watch.atk.get(p) || 0;
       if ((p.atk || 0) > before + 0.1 && (p.atk || 0) > 0.2) {
-        const type = hero.equipment?.weapon?.weaponType || 'sword',
+        const type = CANAAN_CLASS.weaponType(hero),
           heavy = hero === game.hero ? game.hero.intent?.attack === 'heavy' : hero.intent?.attack === 'heavy';
         attackSound(type, heavy, p.x, p.y, hero === game.hero ? 1 : 0.6);
       }
@@ -1402,7 +1405,21 @@
     },
     effect(shape, x, y, c, r, w) {
       if (!ac || !settings.on || !started || paused) return;
-      if (shape === 'arc' || shape === 'spark') return;
+      // Effets muets : tailles (l'arme a son propre son), étincelles, départs de projectiles, effets qui durent.
+      if (
+        [
+          'arc',
+          'spark',
+          'muzzle',
+          'bleedDrip',
+          'rooted',
+          'frozen',
+          'markCast',
+          'rainMark',
+          'crater'
+        ].includes(shape)
+      )
+        return;
       spellSound(shape, x, y, c, r, w);
     },
     // Un personnage parle : seed (son nom) fixe sa voix ; kind : 'f', 'm' ou 'dwarf' (sinon tiré du nom).

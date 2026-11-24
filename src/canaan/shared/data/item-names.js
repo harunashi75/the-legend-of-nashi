@@ -170,9 +170,80 @@ export const GEAR_NAMES = {
     'ring': 'Anneau de la singularité'
   }
 };
-// Noms d'une arme liée (qualité Relique) : elle change de nom en grandissant, à partir de chacun de ces niveaux.
+// Noms des armes de classe selon le niveau du héros : un palier tous les 10 niveaux. Le Grimoire et la Grande hache
+// (Relique) comme les armes des autres classes (qui montent aussi en qualité).
 /** @type {Readonly<Record<string, ReadonlyArray<readonly [number, string]>>>} */
 export const RELIC_NAMES = Object.freeze({
+  wildstaff: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Bâton de saule'],
+      [10, 'Bâton des ronces'],
+      [20, 'Crosse du cerf blanc'],
+      [30, 'Sceptre des chênes anciens'],
+      [40, 'Bâton du Grand Sylve'],
+      [50, 'Cœur-de-Forêt']
+    ])
+  ),
+  aegis: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Masse et écu de l’écuyer'],
+      [10, 'Masse bénie et pavois'],
+      [20, 'Marteau-écu de l’Aube'],
+      [30, 'Masse et rempart du croisé'],
+      [40, 'Lumière du Bastion'],
+      [50, 'Jugement de l’Aurore']
+    ])
+  ),
+  dualdagger: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Dagues du coupe-jarret'],
+      [10, 'Crocs du crépuscule'],
+      [20, 'Lames de la nuit'],
+      [30, 'Murmures d’ombre'],
+      [40, 'Dagues du Néant'],
+      [50, 'Éclipse jumelle']
+    ])
+  ),
+  staff: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Bâton de l’apprenti'],
+      [10, 'Bâton des braises'],
+      [20, 'Sceptre des trois vents'],
+      [30, 'Bâton de l’orage'],
+      [40, 'Sceptre des Primordiaux'],
+      [50, 'Cœur des Éléments']
+    ])
+  ),
+  lute: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Luth de taverne'],
+      [10, 'Luth du ménestrel'],
+      [20, 'Luth des troubadours'],
+      [30, 'Luth des sirènes'],
+      [40, 'Luth de l’Aurore chantante'],
+      [50, 'Luth des échos éternels']
+    ])
+  ),
+  bow: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Arc de chasse'],
+      [10, 'Arc du pisteur'],
+      [20, 'Arc des sentiers'],
+      [30, 'Arc du faucon'],
+      [40, 'Arc des vents sauvages'],
+      [50, 'Arc de la Traque éternelle']
+    ])
+  ),
+  dualsword: Object.freeze(
+    /** @type {Array<[number, string]>} */ ([
+      [1, 'Épées du mercenaire'],
+      [10, 'Lames du duelliste'],
+      [20, 'Épées du champion'],
+      [30, 'Lames de la tempête d’acier'],
+      [40, 'Épées du seigneur de guerre'],
+      [50, 'Lames de l’Aurore']
+    ])
+  ),
   grimoire: Object.freeze(
     /** @type {Array<[number, string]>} */ ([
       [1, 'Grimoire de l’apprenti'],

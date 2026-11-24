@@ -320,11 +320,6 @@ addEventListener('keydown', e => {
     canaanDodge(dx, dy);
     return;
   }
-  if (action === 'switchWeapon') {
-    e.preventDefault();
-    switchWeapon();
-    return;
-  }
   if (action === 'interact') return interact();
   if (action === 'chat') {
     e.preventDefault();
@@ -608,7 +603,7 @@ function startGame() {
   mouseWorldY = P.y;
   chat(
     'Système',
-    'Clic gauche : attaque rapide · clic droit : attaque lourde (sans mana). Touches 1-4 : compétences · F : sort de classe. WASD/ZASD : déplacement · Maj/Espace : roulade · Q : changer d’arme · T : classe et talents · L : journal de quêtes.'
+    'Clic gauche : attaque rapide · clic droit : attaque lourde (sans mana). Touches 1-4 : compétences · F : sort de classe. WASD/ZASD : déplacement · Maj/Espace : roulade · T : classe et talents · L : journal de quêtes.'
   );
   CanaanStages.restartMusic();
   // Un héros sans classe (aventure d'avant les classes) la choisit en arrivant.
@@ -944,13 +939,17 @@ function hurtAlly(hero, m) {
   return CANAAN_COMBAT.hurt(CANAAN_COMBAT.incoming(m, null, {}, hero), m, hero);
 }
 // Coup d'un projectile : celui d'un allié frappe avec ses statistiques ; celui de l'hôte passe par le moteur de combat.
+// p.scale(m) : multiplicateur selon la cible (Marque du chasseur…) ; p.onHit(m) : effet du sort à l'impact.
 function projectileStrike(p, m, value) {
-  if (p.owner && p.owner !== game.hero) CANAAN_COMBAT.attack(m, value, p.combatContext || {}, p.owner);
-  else hit(m, value, p.combatContext);
+  const amount = Math.max(1, Math.round(value * (typeof p.scale === 'function' ? p.scale(m) : 1))),
+    context = typeof p.contextFor === 'function' ? p.contextFor(m) : p.combatContext;
+  if (p.owner && p.owner !== game.hero) CANAAN_COMBAT.attack(m, amount, context || {}, p.owner);
+  else hit(m, amount, context);
+  if (typeof p.onHit === 'function') p.onHit(m);
 }
 // Explosion à l'impact (comète du bâton) : la moitié des dégâts aux autres ennemis dans le rayon.
 function projectileBlast(p, first) {
-  CANAAN_SKILLS.fx('ring', p.x, p.y, 0, p.splash, 0, p.c, 0.45);
+  CANAAN_SKILLS.fx(p.blast || 'ring', p.x, p.y, 0, p.splash, 0, p.c, p.blast ? 0.7 : 0.45);
   for (const o of game.world.monsters.slice())
     if (o !== first && o.hp > 0 && canaanBodyGap(o, p.x, p.y) < p.splash)
       projectileStrike(p, o, Math.max(1, Math.round(p.dmg * 0.5)));
@@ -978,7 +977,9 @@ function projectileTrail(p) {
       c: Math.random() < 0.5 ? p.c : '#3d5a1a',
       r: 4
     });
-  else particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 12, c: p.c, r: 3 });
+  // Les projectiles des classes ont leur propre sillage (vfx-art.js).
+  else if (!['fireball', 'ember', 'thorn', 'dagger', 'heavyArrow'].includes(p.kind))
+    particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 12, c: p.c, r: 3 });
 }
 // Un pas de simulation des héros, des monstres, des projectiles et des butins.
 // Aucun accès à l'écran : les messages passent par game.view, l'affichage se fait dans updateView().
@@ -1084,6 +1085,13 @@ function update() {
     projectileTrail(p);
     game.world.monsters.slice().forEach(m => {
       if (p.life > 0 && m.hp > 0 && canaanBodyGap(m, p.x, p.y) < (p.size || 8)) {
+        // Un tir perçant traverse : chaque ennemi n'est touché qu'une fois.
+        if (p.pierce) {
+          if ((p.struck ??= new Set()).has(m)) return;
+          p.struck.add(m);
+          projectileStrike(p, m, p.dmg);
+          return;
+        }
         projectileStrike(p, m, p.dmg);
         if (p.splash) projectileBlast(p, m);
         p.life = 0;

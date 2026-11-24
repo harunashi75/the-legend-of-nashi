@@ -1,4 +1,4 @@
-// Équipement : équiper, retirer, arme de réserve et changement d'arme.
+// Équipement : équiper et retirer. L'arme vient de la classe (summons.js) : elle ne se retire ni ne se change.
 (function () {
   'use strict';
   // Fin d'un changement : statistiques, mana conservé, barre d'arme et sauvegarde. Pour un invité en ligne,
@@ -36,17 +36,17 @@
     canaanLootNotice(hero, '🔒 Niveau ' + need + ' requis pour ' + gearDisplayName(item) + '.');
     return true;
   }
-  // Arme liée (Grimoire de l'Invocateur, Grande hache du Berserker) : elle ne quitte jamais sa main, et aucune
-  // autre arme ne s'équipe.
+  // Arme de classe : elle ne quitte jamais la main, et aucune autre arme ne s'équipe.
   function boundLock(hero, slot) {
-    if (slot !== 'weapon' && slot !== 'weapon2') return false;
+    if (slot !== 'weapon') return false;
     const pact = hero.equipment.weapon;
-    if (!isBoundItem(pact)) return false;
     canaanLootNotice(
       hero,
-      (pact.weaponType === 'greataxe' ? '🪓 ' : '📕 ') +
-        gearDisplayName(pact) +
-        ' est lié à ton âme : aucune autre arme.'
+      pact
+        ? weaponIcon(pact) +
+            ' ' +
+            tt('{nom} est l’arme de ta classe : aucune autre arme.', { nom: tt(gearDisplayName(pact)) })
+        : tt('Ton arme vient de ta classe (T).')
     );
     return true;
   }
@@ -91,51 +91,6 @@
     finishChange(hero, mana, slot === 'weapon');
     return true;
   }
-  function equipReserveWeapon(index, hero = game.hero) {
-    if (hero === game.hero && game.mode === 'guest') {
-      const id = hero.inventory[index]?.id;
-      return id !== undefined && remote({ op: 'reserve', id: String(id) });
-    }
-    if (locked(hero)) return false;
-    const item = hero.inventory[index];
-    if (!item || item.slot !== 'weapon' || boundLock(hero, 'weapon2') || tooHigh(item, hero)) return false;
-    const mana = hero.player.mp,
-      previous = hero.equipment.weapon2;
-    hero.inventory.splice(index, 1);
-    if (previous) hero.inventory.splice(index, 0, previous);
-    hero.equipment.weapon2 = item;
-    finishChange(hero, mana, false);
-    canaanLootNotice(hero, '🔁 Arme 2 équipée : ' + gearDisplayName(item));
-    return true;
-  }
-  // Changement d'arme de l'hôte (touche) ; pour un invité en ligne, l'hôte l'exécute avec switchHeroWeapon.
-  function switchWeapon() {
-    if (
-      !started ||
-      paused ||
-      P.dead ||
-      playerStun > 0 ||
-      document.getElementById('dialog').style.display === 'block'
-    )
-      return false;
-    if (!game.hero.equipment.weapon2) {
-      toast('🔁 Équipe une deuxième arme depuis ton inventaire !');
-      return false;
-    }
-    if (remote({ op: 'switch' })) return true;
-    return switchHeroWeapon(game.hero);
-  }
-  function switchHeroWeapon(hero) {
-    if (hero.player.dead || !hero.equipment.weapon2 || boundLock(hero, 'weapon')) return false;
-    const mana = hero.player.mp,
-      previous = hero.equipment.weapon;
-    hero.equipment.weapon = hero.equipment.weapon2;
-    hero.equipment.weapon2 = previous;
-    finishChange(hero, mana, true, false);
-    canaanLootNotice(hero, '⚔️ Arme active : ' + gearDisplayName(hero.equipment.weapon));
-    burst(hero.player.x, hero.player.y, '#9de7ff', 14);
-    return true;
-  }
   // Action d'équipement d'un invité en ligne, déjà mise en forme par sanitizeAction : exécutée sur son héros.
   function heroAction(hero, action) {
     if (!hero || !action) return false;
@@ -145,12 +100,6 @@
     }
     if (action.op === 'unequip')
       return Object.hasOwn(hero.equipment, action.slot) && unequip(action.slot, hero);
-    if (action.op === 'reserve')
-      return equipReserveWeapon(
-        hero.inventory.findIndex(it => String(it.id) === action.id),
-        hero
-      );
-    if (action.op === 'switch') return switchHeroWeapon(hero);
     return false;
   }
   window.sellInventoryCell = function (index, id, event) {
@@ -196,9 +145,6 @@
     equip: equipItem,
     slotFor: equipSlotFor,
     unequip,
-    reserve: equipReserveWeapon,
-    switchWeapon: switchWeapon,
-    switchHero: switchHeroWeapon,
     heroAction
   });
   // Pièce portée à laquelle comparer un objet (info-bulles) : celle qu'il remplacerait.
@@ -214,5 +160,5 @@
     if (item.slot === 'weapon' && (isBoundItem(worn) || worn.weaponType !== item.weaponType)) return false;
     return statBase(item.level ?? 1, item.rarity) > statBase(worn.level ?? 1, worn.rarity) + 1e-6;
   }
-  Object.assign(window, { equipItem, unequip, equipReserveWeapon, switchWeapon, wornAgainst, gearUpgrade });
+  Object.assign(window, { equipItem, unequip, wornAgainst, gearUpgrade });
 })();

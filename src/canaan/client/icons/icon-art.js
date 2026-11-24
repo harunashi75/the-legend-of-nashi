@@ -266,6 +266,45 @@ const A = {
       hi('M14 6 C14.5 5 15.2 4.4 16 4.2', 1.2) +
       r(13.5, 20, 5, 2, GO, 0.8)
   ),
+  // Bâton sylvestre du Druide : bois noueux, feuilles et cristal de sève.
+  w_wildstaff: g(
+    'rotate(30 16 16)',
+    r(14.8, 10, 2.4, 21, '#7a5230', 1) +
+      s('M16 10 L17.2 10 L17.2 31 L16 31 Z', WOD) +
+      p('M12 11 C9 8 10 4 13 3 C13 6 14.5 8 16 9 C17.5 8 19 6 19 3 C22 4 23 8 20 11 Z', '#7a5230') +
+      c(16, 6.5, 3.4, '#7ee36a') +
+      c(15, 5.6, 1.1, '#e8ffd8') +
+      p('M17.2 18 C20 16 23 17 24 19 C21 20.5 19 20 17.2 19 Z', GR) +
+      p('M14.8 23 C12 21.5 9 22.5 8 24.5 C11 25.5 13 25 14.8 24 Z', '#8ae07a')
+  ),
+  // Griffes du félin (forme féline du Druide) : trois griffures vertes.
+  w_feline:
+    [0, 1, 2]
+      .map(k =>
+        L(
+          'M' + (7 + k * 6) + ' 5 C' + (11 + k * 6) + ' 12 ' + (11 + k * 6) + ' 20 ' + (7 + k * 6) + ' 27',
+          k === 1 ? '#c8f59a' : '#7ee36a',
+          2.6
+        )
+      )
+      .join('') + hi('M9 7 C10.5 10 11 13 11 15'),
+  // Masse et égide du Paladin : écu doré derrière une masse d'acier.
+  w_aegis:
+    g(
+      'translate(-3 1) scale(.82)',
+      p(
+        'M16 3 C19.5 4.5 23 4.5 26 5 C26 16 22.5 23.5 16 28 C9.5 23.5 6 16 6 5 C9 4.5 12.5 4.5 16 3 Z',
+        '#3f63b0'
+      ) +
+        s('M16 3 C19.5 4.5 23 4.5 26 5 C26 16 22.5 23.5 16 28 Z', '#2c4a8c') +
+        l('M16 6 L16 25 M9 12 L23 12', GO, 2.6)
+    ) +
+    g(
+      'translate(5 2) rotate(-30 16 16) scale(.8)',
+      r(14.5, 13, 3.2, 17, WO, 1) +
+        c(16, 9, 6.5, STM) +
+        s('M16 2.5 C20 2.5 22.5 5.5 22.5 9 C22.5 12.5 20 15.5 16 15.5 C19 13 19.5 5 16 2.5 Z', STD)
+    ),
   // Luth : caisse en poire (rosace, chevalet), manche à frettes, chevillier, cordes et ruban rose.
   w_lute: g(
     'translate(16 16) scale(.86) translate(-16 -16) rotate(32 16 16)',
@@ -546,6 +585,38 @@ const A = {
       RE
     ) +
     hi('M9.5 13 C10 11 11.5 9.5 13.5 8.6'),
+  // Chasseur : capuche de rôdeur, plume de faucon et arc en travers.
+  cls_chasseur:
+    L('M6 29 C14 22 22 12 27 3', WO, 2.6) +
+    p('M6 29 C6 18 9 8 16 4 C23 8 26 18 26 29 Z', '#4a6a3a') +
+    s('M16 4 C23 8 26 18 26 29 L16 29 Z', '#34502a') +
+    p('M10 16 C11.5 12 20.5 12 22 16 L21 21 C19 23 13 23 11 21 Z', '#1e2a18') +
+    c(13.4, 17, 1.2, '#e8b65a') +
+    c(18.6, 17, 1.2, '#e8b65a') +
+    p('M22 7 C25 3 29 2 31 2 C30 5 27 8 23.5 9.5 Z', '#e8c27a') +
+    l('M22.8 8.6 C25.5 6 28 4 30.5 2.5', '#a07a3a', 0.9) +
+    hi('M10 12 C11 9 12.5 7 14.5 5.8'),
+  // Guerrier : heaume d'acier et deux épées croisées.
+  cls_guerrier:
+    g(
+      'translate(16 16) scale(.9) translate(-16 -16)',
+      blade('rotate(42 16 16)') + blade('rotate(-42 16 16)')
+    ) +
+    p('M9 27 L9 15 C9 10 12 7.5 16 7.5 C20 7.5 23 10 23 15 L23 27 Z', '#8a96a8') +
+    s('M16 7.5 C20 7.5 23 10 23 15 L23 27 L16 27 Z', '#626e80') +
+    r(11, 15.5, 10, 2.6, '#1a1c22', 1) +
+    l('M16 8.5 L16 14 M16 19 L16 26', '#4a5260', 1.2) +
+    hi('M11 12 C11.5 10.5 12.8 9.3 14.5 8.7'),
+  // Élément Sauvage (Chasseur) : plume de faucon dorée.
+  el_wild:
+    p('M8 28 C8 18 14 8 25 4 C25 14 19 24 8 28 Z', '#e8b65a') +
+    s('M25 4 C25 14 19 24 8 28 C15 21 21 13 25 4 Z', '#a8782a') +
+    l('M8 28 C13 21 18 14 24 6', '#5a3a14', 1.1) +
+    l('M13 19 L10.5 17.5 M16 15 L13.5 13 M19 11 L17 9', '#5a3a14', 0.9),
+  // Élément Acier (Guerrier) : lame claire et éclat.
+  el_steel:
+    g('translate(16 16) scale(1.1) translate(-16 -16)', blade('rotate(35 16 16)')) +
+    p(star(4, 5, 1.4, 24, 8), '#ffffff'),
   el_blood:
     p(
       'M16 3 C21 10.5 25.5 15 25.5 20.5 C25.5 25.8 21.3 29 16 29 C10.7 29 6.5 25.8 6.5 20.5 C6.5 15 11 10.5 16 3 Z',

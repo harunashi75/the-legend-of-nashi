@@ -19,7 +19,9 @@ test('Protocole du coopératif : codes de salon, intentions vérifiées, pseudos
  // Actions d'équipement : seulement quatre opérations, avec des arguments bien formés ; le reste est ignoré.
  assert.deepEqual(n.sanitizeAction({op:'equip',id:'gear12',gold:1e9}),{op:'equip',id:'gear12'});
  assert.deepEqual(n.sanitizeAction({op:'unequip',slot:'weapon'}),{op:'unequip',slot:'weapon'});
- assert.deepEqual(n.sanitizeAction({op:'switch',id:'x'}),{op:'switch'});
+ assert.equal(n.sanitizeAction({op:'switch',id:'x'}),null,'plus d’arme de réserve');
+ assert.equal(n.sanitizeAction({op:'reserve',id:'x'}),null);
+ assert.deepEqual(n.sanitizeAction({op:'weapon-upgrade',x:1}),{op:'weapon-upgrade'});
  assert.deepEqual(n.sanitizeAction({op:'sell',id:'g1',gold:9e9}),{op:'sell',id:'g1'});assert.deepEqual(n.sanitizeAction({op:'bag-upgrade',level:9}),{op:'bag-upgrade'});
  // Plus de forge : les anciennes actions d'amélioration et de passif sont refusées.
  assert.equal(n.sanitizeAction({op:'passive',id:'g1',passive:'lifesteal'}),null);assert.equal(n.sanitizeAction({op:'upgrade',id:'g1'}),null);

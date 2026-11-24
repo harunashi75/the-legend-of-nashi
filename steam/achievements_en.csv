@@ -11,12 +11,12 @@ ACH_C9,The Devastator,"Deal 5,000 damage in a single hit.",Combat & weapons,ACH_
 ACH_C10,Dodge artist,Perform 500 dodge rolls.,Combat & weapons,ACH_C10.png,ACH_C10_locked.png
 ACH_C11,Steel storm,"Cast 1,000 weapon skills.",Combat & weapons,ACH_C11.png,ACH_C11_locked.png
 ACH_C12,Class power,Cast your class spell 100 times (F key).,Combat & weapons,ACH_C12.png,ACH_C12_locked.png
-ACH_C13,Weapon master,Defeat 50 enemies with each of the nine weapon families.,Combat & weapons,ACH_C13.png,ACH_C13_locked.png
-ACH_C14,Sharpshooter,Defeat 200 enemies with a weapon of the Bow family.,Combat & weapons,ACH_C14.png,ACH_C14_locked.png
-ACH_C15,Silent executioner,Defeat 200 enemies with a weapon of the Twin daggers family.,Combat & weapons,ACH_C15.png,ACH_C15_locked.png
-ACH_C16,Soul woodcutter,Defeat 200 enemies with a weapon of the Axe family.,Combat & weapons,ACH_C16.png,ACH_C16_locked.png
-ACH_C17,Atomic mace,Defeat 200 enemies with a weapon of the Mace family.,Combat & weapons,ACH_C17.png,ACH_C17_locked.png
-ACH_C18,Arcane overload,Defeat 200 enemies with a weapon of the Arcane staff family.,Combat & weapons,ACH_C18.png,ACH_C18_locked.png
+ACH_C13,Weapon master,Defeat 50 enemies with the weapon of each of the nine classes.,Combat & weapons,ACH_C13.png,ACH_C13_locked.png
+ACH_C14,Sharpshooter,Defeat 200 enemies with the Longbow.,Combat & weapons,ACH_C14.png,ACH_C14_locked.png
+ACH_C15,Silent executioner,Defeat 200 enemies with the Twin daggers.,Combat & weapons,ACH_C15.png,ACH_C15_locked.png
+ACH_C16,Blade dance,Defeat 200 enemies with the Twin swords.,Combat & weapons,ACH_C16.png,ACH_C16_locked.png
+ACH_C17,Unshakable rampart,Defeat 200 enemies with the Mace and aegis.,Combat & weapons,ACH_C17.png,ACH_C17_locked.png
+ACH_C18,Arcane overload,Defeat 200 enemies with the Elemental staff.,Combat & weapons,ACH_C18.png,ACH_C18_locked.png
 ACH_C19,Sovereign’s resilience,Survive a fatal blow thanks to the Sovereign’s Crown.,Combat & weapons,ACH_C19.png,ACH_C19_locked.png
 ACH_C20,Heartbreaker,Defeat a world boss less than 30 seconds after the first hit.,Combat & weapons,ACH_C20.png,ACH_C20_locked.png
 ACH_E1,The great departure,Leave the Dawn Camp for the first time.,Exploration & adventure,ACH_E1.png,ACH_E1_locked.png

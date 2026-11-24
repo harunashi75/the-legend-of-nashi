@@ -43,84 +43,49 @@
           w.shieldUntil - t
         )
       );
+    // Effets à durée des talents et des sorts de classe : [champ, icône, nom, texte].
     const timed = [
-      ['barkUntil', '🌿', 'druide', 2, 'Dégâts reçus −15 %.'],
-      ['faithUntil', '✨', 'paladin', 2, 'Dégâts reçus −20 %.'],
-      ['instinctUntil', '🎯', 'assassin', 6, 'Instinct de survie actif.'],
-      ['natureAvatarUntil', '🌱', 'druide', 9, 'Dégâts +15 %, régénération renforcée.'],
-      ['danceUntil', '💨', 'assassin', 2, 'Vitesse +20 %.']
+      ['barkUntil', '🌳', 'Écorce de fer', 'Les ennemis qui te frappent subissent 30 % de leurs dégâts.'],
+      ['balanceUntil', '🌿', 'Équilibre sauvage', 'Dégâts +25 %.'],
+      ['symbiosisUntil', '🌿', 'Symbiose', 'Dégâts +10 %.'],
+      ['divineUntil', '✨', 'Lumière divine', 'Dégâts reçus −20 %.'],
+      ['exaltUntil', '☀', 'Exaltation', 'Compétences à moitié prix, dégâts +15 %.'],
+      ['invulnUntil', '✨', 'Intervention divine', 'Invulnérable.'],
+      ['veilUntil', '🌑', 'Voile d’ombre', 'Invisible, vitesse +30 %.'],
+      ['elemAvatarUntil', '🌋', 'Avatar élémentaire', 'Dégâts +20 %, mana des compétences −30 %.'],
+      ['contagionUntil', '☣', 'Contagion', 'Tes invocations frappent 30 % plus vite.'],
+      ['hymnUntil', '🎶', 'Hymne de l’Aurore', 'Soigne 3 % des PV max par seconde, dégâts +10 %.'],
+      ['vivifyUntil', '🎵', 'Mélodie vivifiante', 'Vitesse +15 %, dégâts +8 %.'],
+      [
+        'rageUntil',
+        '🩸',
+        'Rage écarlate',
+        'Impossible de tomber sous 1 PV, attaques de base +25 %, soins doublés.'
+      ],
+      ['frenzyUntil', '🔥', 'Frénésie', 'Attaques de base 15 % plus rapides.'],
+      ['hawkUntil', '🦅', 'Œil du faucon', 'Dégâts +20 %, critique +10, attaques de base 30 % plus rapides.'],
+      ['survivalUntil', '🐾', 'Instinct de survie', 'Vitesse +30 %, dégâts reçus −20 %.'],
+      ['ironUntil', '🛡', 'Volonté de fer', 'Dégâts reçus −30 %, dégâts +15 %.'],
+      ['rallyUntil', '🛡', 'Cri de ralliement', 'Dégâts reçus −15 %.'],
+      ['windUntil', '💨', 'Second souffle', '5 % des PV max rendus chaque seconde.']
     ];
-    for (const [k, ic, cls, i, text] of timed)
-      if (c.id === cls && on(w[k])) out.push(E('cls-' + k, ic, tal(i)[0], text, 'buff', w[k] - t));
-    if (on(w.divineUntil))
-      out.push(E('cls-divine', '✨', 'Lumière divine', 'Dégâts reçus −20 %.', 'buff', w.divineUntil - t));
-    if (on(w.veilUntil))
-      out.push(E('cls-veil', '🌑', 'Voile d’ombre', 'Invisible, vitesse +30 %.', 'buff', w.veilUntil - t));
-    if (on(w.elemAvatarUntil))
-      out.push(
-        E(
-          'cls-avatar',
-          '🌋',
-          'Avatar élémentaire',
-          'Dégâts +20 %, mana des compétences −30 %.',
-          'buff',
-          w.elemAvatarUntil - t
-        )
-      );
-    if (on(w.contagionUntil))
-      out.push(
-        E(
-          'cls-contagion',
-          '☣',
-          'Contagion',
-          'Tes invocations frappent 30 % plus vite.',
-          'buff',
-          w.contagionUntil - t
-        )
-      );
-    // Barde : Hymne de l'Aurore et Mélodie vivifiante reçus, Crescendo.
-    if (on(w.hymnUntil))
-      out.push(
-        E(
-          'cls-hymn',
-          '🎶',
-          'Hymne de l’Aurore',
-          'Soigne 3 % des PV max par seconde, dégâts +10 %.',
-          'buff',
-          w.hymnUntil - t
-        )
-      );
-    if (on(w.vivifyUntil))
-      out.push(
-        E('cls-vivify', '🎵', 'Mélodie vivifiante', 'Vitesse +10 %, dégâts +5 %.', 'buff', w.vivifyUntil - t)
-      );
+    for (const [k, ic, name, text] of timed)
+      if (on(w[k])) out.push(E('cls-' + k, ic, name, text, 'buff', w[k] - t));
     if (c.id === 'barde' && on(w.crescendoUntil) && w.crescendo > 0)
       out.push(
         E(
           'cls-crescendo',
           '🎵',
           tal(0)[0],
-          'Dégâts +' + 3 * w.crescendo + ' %.',
+          'Dégâts et soins +' + 4 * w.crescendo + ' %.',
           'buff',
           w.crescendoUntil - t,
           w.crescendo
         )
       );
-    // Berserker : Rage écarlate, Cicatrices, Soif de sang doublée prête ; Cri de guerre reçu.
-    if (c.id === 'berserker' && on(w.rageUntil))
-      out.push(
-        E(
-          'cls-rage',
-          '🩸',
-          'Rage écarlate',
-          'Impossible de tomber sous 1 PV, attaques de base +25 %, soins doublés.',
-          'buff',
-          w.rageUntil - t
-        )
-      );
     if (c.id === 'berserker' && on(w.scarsUntil) && w.scars > 0)
       out.push(
-        E('cls-scars', '💢', tal(1)[0], 'Dégâts +' + 2 * w.scars + ' %.', 'buff', w.scarsUntil - t, w.scars)
+        E('cls-scars', '💢', tal(1)[0], 'Dégâts +' + 3 * w.scars + ' %.', 'buff', w.scarsUntil - t, w.scars)
       );
     if (c.id === 'berserker' && w.thirst)
       out.push(
@@ -132,38 +97,50 @@
           'buff'
         )
       );
-    if (on(w.warcryUntil))
-      out.push(E('cls-warcry', '💢', 'Cri de guerre', 'Dégâts +10 %.', 'buff', w.warcryUntil - t));
+    // Guerrier : Élan (charges).
+    const elan = CANAAN_CLASS.momentum(hero);
+    if (elan > 0)
+      out.push(
+        E(
+          'cls-momentum',
+          '⚔',
+          'Élan',
+          'Dégâts +' + 3 * elan + ' %, attaques de base ' + 4 * elan + ' % plus rapides.',
+          'buff',
+          w.momentumUntil - t,
+          elan
+        )
+      );
+    if (w.shadowPending)
+      out.push(
+        E(
+          'cls-shadow',
+          '🗡',
+          'Ombre meurtrière',
+          'Prochaine compétence offensive +40 %, sans Énergie.',
+          'buff'
+        )
+      );
+    if (w.fusionReady)
+      out.push(E('cls-fusion', '🌈', 'Fusion élémentaire', 'Prochaine compétence +50 %, sans mana.', 'buff'));
     if (hero.player.form === 'feral') out.push(E('cls-feral', '🐆', 'Forme féline', c.special.desc, 'buff'));
   }
   const STANCES = [
-    ['guard', '🛡', 'Garde', 'Parade prête : les coups sont bloqués.'],
-    ['parryReady', '⚔', 'Riposte prête', 'Ta prochaine Riposte inflige 600 %.'],
-    ['berserk', '😡', 'Rage', 'Dégâts +25 %, dégâts reçus +15 %.'],
-    ['flurry', '🌀', 'Déchaînement', 'Dégâts +15 %, attaques 30 % plus rapides, dégâts reçus +10 %.'],
-    ['combo', '💥', 'Combo', 'L’enchaînement suivant est prêt.'],
-    ['shadow', '💨', 'Pas de l’ombre', 'Ton prochain coup fait +60 %.'],
-    ['fastBow', '🏹', 'Repli tactique', 'Ton prochain Tir puissant inflige 360 %.'],
-    ['shieldGuard', '✨', 'Serment du gardien', 'Dégâts reçus −35 %.'],
-    ['focus', '✨', 'Concentration', 'Ta prochaine compétence offensive fait +40 %.']
+    ['berserk', '😡', 'Hurlement sanguinaire', 'Dégâts +25 %, dégâts reçus +15 %.'],
+    ['roar', '🐆', 'Rugissement sauvage', 'Attaques de base 30 % plus rapides et +15 % de dégâts.'],
+    ['combo', '💥', 'Combo', 'Exécution croisée renforcée.'],
+    ['shadow', '💨', 'Pas de l’ombre', 'Ton prochain coup est renforcé et critique.'],
+    ['shieldGuard', '🏰', 'Rempart sacré', 'Dégâts reçus −35 %.'],
+    ['huntMark', '🎯', 'Marque du chasseur', 'Ta proie subit plus de dégâts.'],
+    ['bloom', '🌸', 'Floraison', 'Ta fleur de vie soigne ton groupe.'],
+    ['falcon', '🦅', 'Fauconnier', 'Ton faucon chasse à tes côtés.'],
+    ['rollShot', '🏹', 'Repli tactique', 'Ta prochaine flèche fait +60 %.']
   ];
   function stanceEffects(out) {
     if (typeof canaanStanceOf !== 'function') return;
     const st = canaanStanceOf() || {};
     for (const [k, ic, name, text] of STANCES)
       if (st[k] > 0) out.push(E('st-' + k, ic, name, text, 'buff', st[k]));
-    if ((st.arcane | 0) > 0)
-      out.push(
-        E(
-          'st-arcane',
-          '🔮',
-          'Charges arcaniques',
-          'La Surcharge libère les charges (3 au maximum).',
-          'buff',
-          Infinity,
-          st.arcane | 0
-        )
-      );
   }
   function foodEffects(hero, out) {
     if (!window.CANAAN_PROF) return;

@@ -159,6 +159,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-vfx-art",
+      "file": "scripts/vfx-art.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-weapon-look",
       "file": "scripts/weapon-look.js"
     },
@@ -246,6 +251,11 @@
       "kind": "script",
       "id": "canaan-summons",
       "file": "scripts/summons.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-class-weapons",
+      "file": "scripts/class-weapons.js"
     },
     {
       "kind": "script",

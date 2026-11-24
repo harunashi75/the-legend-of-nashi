@@ -1,5 +1,5 @@
-// Icônes des compétences en SVG (à la place des émojis) : une par compétence d'arme (10 armes, le Grimoire et la
-// Grande hache × 4)
+// Icônes des compétences en SVG (à la place des émojis) : une par compétence des armes de classe (et des griffes
+// de la forme féline du Druide)
 // et par sort de classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur
 // propre à l'arme, halo doux. CANAAN_SKILL_ICONS.weapon(type, i) et .special(id) renvoient le balisage SVG.
 // Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).
@@ -18,15 +18,18 @@ const K = {
   white: '#ffffff'
 };
 const ACCENT = {
+  wildstaff: '#7ee36a',
+  feline: '#c8f59a',
+  aegis: '#ffe08a',
   sword: '#9fdcff',
   dualsword: '#8fc4ff',
   axe: '#ff9a5a',
   mace: '#f0c27a',
   spear: '#7fe6cf',
   dualdagger: '#e38cff',
-  bow: '#9be38e',
+  bow: '#e8c27a',
   shield: '#ffe08a',
-  staff: '#b98cff',
+  staff: '#ff9a4a',
   lute: '#ff9ad5',
   grimoire: '#a4e83c',
   greataxe: '#e0404f'
@@ -461,45 +464,31 @@ function frame(accent, inner) {
     '</g></svg>'
   );
 }
-// ---------------------------------------------------------------- Les 36 compétences
+// ---------------------------------------------------------------- Les compétences des armes de classe
 const ICONS = {
-  sword: [
-    a => at(1, 1, 45, 1.05, P.sword()) + at(0, 0, 0, 1, E.slash(a, 13, -150, -60, 2.6)),
-    a => E.swirl(a) + at(0, 0, 30, 0.8, P.sword()),
-    a =>
-      at(-3, 0, -20, 0.95, P.sword()) +
-      at(5, 3, 0, 0.55, P.shield('#4a6fa8')) +
-      E.slash(a, 13, -160, -100, 2.2),
-    a => at(-2, 0, 35, 1, P.sword()) + at(7, 7, 0, 0.75, E.heart('#5cf08a')) + E.slash(a, 13, -120, -40, 2.2)
-  ],
+  // Guerrier : rafale de lames, tempête d'acier, charge héroïque, exécution croisée.
   dualsword: [
     a => at(0, 1, 35, 0.9, P.sword()) + at(0, 1, -35, 0.9, P.sword()) + at(4, -2, 0, 1, E.speed(a)),
-    a => E.swirl(a) + at(0, 0, 45, 0.7, P.sword()) + at(0, 0, -45, 0.7, P.sword()),
-    a => at(0, 2, 0, 1, E.flame('#ff8a3d')) + at(0, -6, 0, 0.7, E.chevrons('#ffe07a')),
-    a => at(0, 2, 40, 0.85, P.sword()) + at(0, 2, -40, 0.85, P.sword()) + at(0, -8, 0, 0.75, E.burst(a, 7))
+    a =>
+      E.swirl(a) +
+      at(0, 0, 45, 0.7, P.sword()) +
+      at(0, 0, -45, 0.7, P.sword()) +
+      at(0, 0, 0, 0.5, E.burst('#fff', 9, 8)),
+    a => at(3, 0, 70, 0.9, P.sword()) + at(-5, 3, 0, 1, E.speed(a)) + at(-6, 9, 0, 0.6, E.crack('#a08460')),
+    a =>
+      at(0, 0, 45, 1, P.sword()) +
+      at(0, 0, -45, 1, P.sword()) +
+      E.slash('#ffffff', 13, -135, -45, 2.2) +
+      at(7, 8, 0, 0.55, E.skull())
   ],
-  axe: [
-    a => at(2, 2, 25, 1, P.axe()) + at(-2, 10, 0, 0.9, E.crack(a)),
-    a => at(-2, 2, 40, 0.95, P.axe()) + E.slash(a, 14, -170, -20, 2.6),
-    () => at(0, 3, 0, 1.05, E.flame('#ff4a2a', '#ffb070')) + at(0, -7, 0, 0.6, E.burst('#ffd27a', 7, 6)),
-    a => at(-3, 1, 20, 0.95, P.axe()) + at(6, 7, 0, 0.7, E.skull()) + E.slash(a, 13, -140, -80, 2)
-  ],
-  mace: [
-    a => at(2, 1, 30, 1, P.mace()) + at(-6, 7, 0, 0.5, P.shield('#6a6a7a')) + at(-6, 7, 0, 0.8, E.crack(a)),
-    a => at(0, -3, 0, 0.85, P.mace()) + at(0, 9, 0, 1, E.waves(a)),
-    a => at(-1, 3, 0, 1.05, E.hand()) + at(0, -6, 0, 1, E.stars('#ffe07a')),
-    a => at(-2, 2, 35, 1, P.mace()) + at(6, -6, 0, 0.8, E.burst(a, 8))
-  ],
-  spear: [
-    a => at(0, 0, 90, 1.05, P.spear()) + at(-1, -3, 0, 1, E.speed(a, 2)),
-    a => at(0, 2, 60, 0.95, P.spear()) + E.slash(a, 13, 180, 360, 2.4),
-    a => at(2, 0, 70, 1, P.spear()) + at(0, 4, 0, 1, E.speed(a)),
-    a => at(-6, 6, 45, 0.85, P.spear()) + at(6, -6, 0, 0.7, E.target(a))
-  ],
+  // Assassin : entaille, pas de l'ombre, éventail de lames, mille coupures.
   dualdagger: [
     a => at(-3, 0, 30, 1, P.dagger()) + at(3, 0, -30, 1, P.dagger()) + at(7, 8, 0, 0.7, E.drop('#e03a4a')),
-    a => E.swirl(a) + at(0, 0, 0, 0.8, P.dagger()),
-    a => at(2, 0, 0, 1.05, E.moon(a)) + at(-2, 2, 0, 1, E.speed('#c48cff')),
+    a =>
+      at(2, 0, 0, 1.05, E.moon(a)) +
+      at(-4, 4, 0, 0.8, E.eye('#e5b0ff')) +
+      at(-2, 2, 0, 1, E.speed('#c48cff')),
+    a => [-40, -20, 0, 20, 40].map(r => at(0, 4, r, 0.75, at(0, -6, 0, 1, P.dagger(a)))).join(''),
     a =>
       [-8, -2, 4]
         .map((x, k) =>
@@ -517,8 +506,10 @@ const ICONS = {
         )
         .join('') + at(7, 8, 0, 0.6, E.drop('#e03a4a'))
   ],
+  // Chasseur : tir perçant, marque du chasseur, volée de flèches, assaut du faucon.
   bow: [
-    () => at(-2, 0, 0, 1, P.bow()) + at(1, 0, 90, 0.95, P.arrow()),
+    a => at(-4, 0, 0, 1, P.bow()) + at(2, 0, 90, 1, P.arrow(a)) + at(8, 0, 0, 0.7, E.speed(a, 2)),
+    a => at(0, 0, 0, 1.1, E.target(a)) + at(6, -7, 0, 0.5, E.sparkle('#fff4c0')),
     a =>
       [-7, 0, 7].map((x, k) => at(x, -2 + (k % 2) * 4, 180, 0.6, P.arrow(a))).join('') +
       at(
@@ -528,48 +519,95 @@ const ICONS = {
         0.8,
         '<path d="M-10 0 L10 0" stroke="' + a + '" stroke-width="1.6" stroke-dasharray="2 2"/>'
       ),
-    a => at(2, 2, 0, 1, E.web(a)) + at(-1, -1, 45, 0.85, P.arrow()),
-    a => at(4, 0, 90, 0.9, P.arrow()) + at(-6, 0, 0, 0.9, E.chevrons(a, false))
+    a =>
+      '<path d="M-11 -2 C-6 -10 -1 -9 2 -4 L6 -8 L11 -7 L7 -2 C8 4 3 8 -2 7 C-6 6 -9 3 -11 -2 Z" fill="' +
+      a +
+      '" ' +
+      st +
+      '/><path d="M-6 -3 C-4 -8 0 -8 2 -5 L0 0 Z" fill="#fff3d0" ' +
+      st +
+      '/>' +
+      at(4, 9, 0, 0.7, E.claw('#fff3d0'))
   ],
-  shield: [
-    a => E.swirl(a) + at(0, 0, 0, 0.75, P.shield()),
-    () =>
-      at(
-        0,
-        8,
-        0,
-        1,
-        '<ellipse rx="12" ry="4" fill="#ffe08a" opacity=".35" stroke="#ffe08a" stroke-width="1.4"/>'
-      ) + at(0, -3, 0, 1, E.sun('#ffd76a')),
-    a => at(4, 0, 0, 0.85, P.shield()) + at(-4, 0, 0, 1, E.speed(a)),
-    () => at(0, 1, 0, 0.95, P.shield('#3f63a8')) + at(7, -8, 0, 0.6, E.sparkle('#fff4b0'))
-  ],
+  // Élémentaliste : boule de feu, nova de givre, chaîne d'éclairs, météore.
   staff: [
+    () =>
+      at(2, -2, 0, 1.15, E.flame('#ff6a1a', '#ffe07a')) +
+      at(-1, 1, 45, 1, '<path d="M-3 0 L-11 0" stroke="#ff9a4a" stroke-width="2.4" opacity=".6"/>'),
+    () => at(0, 0, 0, 1.2, E.snow('#bfeaff')) + E.rings('#8fdcff'),
+    () =>
+      at(-6, -4, 0, 0.7, E.bolt('#f4f07a')) +
+      at(2, 2, 20, 0.7, E.bolt('#f4f07a')) +
+      at(8, -6, -20, 0.55, E.bolt('#fffbb0')),
+    () =>
+      '<circle cx="4" cy="4" r="6" fill="#5a2a1a" ' +
+      st +
+      '/><circle cx="2.5" cy="2.5" r="2.4" fill="#ff8a2a"/>' +
+      at(-5, -5, 45, 1, '<path d="M0 0 L-9 0" stroke="#ff9a4a" stroke-width="5" opacity=".7"/>') +
+      at(4, 11, 0, 0.8, E.crack('#ff7a2a'))
+  ],
+  // Druide : fouet de ronces, floraison, spores toxiques, courroux de la forêt.
+  wildstaff: [
     a =>
-      at(-6, 6, 45, 0.8, P.staff(a)) +
-      at(
-        5,
-        -5,
-        0,
-        1,
-        '<circle r="5" fill="' + a + '" ' + st + '/><circle cx="-1.5" cy="-1.5" r="1.6" fill="#fff"/>'
-      ) +
-      at(-1, 1, 45, 1, '<path d="M-3 0 L-9 0" stroke="' + a + '" stroke-width="2" opacity=".6"/>'),
-    a => E.rings(a) + '<circle r="2.6" fill="' + a + '" ' + st + '/>',
-    a => at(0, 1, 0, 1, E.eye(a)) + at(8, -8, 0, 0.5, E.sparkle('#fff')),
-    a =>
-      at(0, 0, 0, 1, E.burst(a, 11, 8)) +
-      at(0, 0, 0, 1, '<circle r="3.5" fill="#fff"/>') +
-      [-6, 0, 6]
-        .map(
-          x =>
-            '<circle cx="' +
-            x +
-            '" cy="12" r="1.8" fill="#ffd76a" stroke="' +
-            K.ink +
-            '" stroke-width="0.8"/>'
+      '<path d="M-11 6 C-5 -4 3 6 11 -6" stroke="#3e6a22" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M-11 6 C-5 -4 3 6 11 -6" stroke="' +
+      a +
+      '" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      [-6, 0, 6].map(x => at(x, 1 - x / 6, 0, 1, '<path d="M0 -2 L2 -6 L1 -1 Z" fill="#e8ffd0"/>')).join(''),
+    () =>
+      [0, 72, 144, 216, 288]
+        .map(r => at(0, 0, r, 1, '<ellipse cx="0" cy="-6" rx="3.4" ry="6" fill="#ffc8e8" ' + st + '/>'))
+        .join('') +
+      '<circle r="3" fill="#fff4a0" ' +
+      st +
+      '/>',
+    () =>
+      '<circle cx="-4" cy="2" r="6" fill="#7aa82a" opacity=".85"/><circle cx="4" cy="-2" r="6" fill="#a8c84a" opacity=".85"/>' +
+      [
+        [-6, -7],
+        [7, 6],
+        [0, 8],
+        [-8, 7]
+      ]
+        .map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="1.4" fill="#e8ff7a"/>')
+        .join(''),
+    () =>
+      [-7, 0, 7]
+        .map((x, k) =>
+          at(
+            x,
+            8,
+            0,
+            1,
+            '<path d="M-3 0 C-2 -6 0 -' +
+              (10 + k * 3) +
+              ' 1 -' +
+              (12 + k * 3) +
+              ' C2 -8 3 -4 3 0 Z" fill="#6a4a2a" ' +
+              st +
+              '/>'
+          )
         )
-        .join('')
+        .join('') + '<ellipse cx="0" cy="9" rx="12" ry="2.5" fill="#3a2a18" opacity=".6"/>'
+  ],
+  // Forme féline : lacération, bond du prédateur, rugissement sauvage, morsure féroce.
+  feline: [
+    a => at(0, 0, 0, 1.1, E.claw(a)) + at(8, 8, 0, 0.6, E.drop('#e03a4a')),
+    a => at(0, -3, 0, 0.9, E.claw(a)) + at(0, 7, 180, 0.6, E.chevrons(a)),
+    a => E.rings(a) + at(0, 0, 0, 0.9, E.burst('#ffffff', 8, 8)),
+    a =>
+      '<path d="M-10 -4 C-4 -9 4 -9 10 -4 L7 -1 L4 -4 L1 -1 L-2 -4 L-5 -1 L-8 -4 Z" fill="#fff" ' +
+      st +
+      '/><path d="M-10 4 C-4 9 4 9 10 4 L7 1 L4 4 L1 1 L-2 4 L-5 1 L-8 4 Z" fill="#fff" ' +
+      st +
+      '/>' +
+      at(8, 9, 0, 0.6, E.drop('#e03a4a'))
+  ],
+  // Paladin : frappe du croisé, charge du bouclier, rempart sacré, marteau du jugement.
+  aegis: [
+    a => at(2, 1, 30, 1, P.mace()) + at(-6, -6, 0, 0.6, E.sun(a)),
+    a => at(4, 0, 0, 0.85, P.shield()) + at(-5, 0, 0, 1, E.speed(a)),
+    () => at(0, 1, 0, 1, P.shield('#3f63a8')) + E.rings('#ffe08a') + at(7, -8, 0, 0.55, E.sparkle('#fff4b0')),
+    a => at(0, -3, 0, 0.9, P.mace()) + at(0, 9, 0, 1, E.waves(a)) + at(-8, -8, 0, 0.5, E.sparkle('#fff'))
   ]
 };
 // Invocations du Grimoire : corbeau, rat, totem d'os, tête d'abomination (repère centré, tête en haut).
@@ -671,6 +709,18 @@ const SPECIALS = {
     frame(
       '#e0404f',
       E.rings('#e0404f') + at(0, 0, 0, 1.05, E.claw('#ff8a96')) + at(0, 1, 0, 1.1, E.drop('#e0404f'))
+    ),
+  // Œil du faucon : un œil doré entre deux plumes.
+  hawkeye: () =>
+    frame(
+      '#e8b65a',
+      E.rings('#e8b65a') + at(0, 0, 0, 1.1, E.eye('#ffd27a')) + at(7, -7, 0, 0.5, E.sparkle('#fff'))
+    ),
+  // Volonté de fer : bouclier d'acier entre deux épées.
+  ironwill: () =>
+    frame(
+      '#cfdcea',
+      at(0, 1, 40, 0.8, P.sword()) + at(0, 1, -40, 0.8, P.sword()) + at(0, 2, 0, 0.75, P.shield('#626e80'))
     ),
   // Hymne de l'Aurore : soleil levant et notes roses dans une onde.
   hymn: () =>

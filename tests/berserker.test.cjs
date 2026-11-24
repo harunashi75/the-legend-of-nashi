@@ -34,10 +34,6 @@ test('Berserker : Grande hache liée de qualité Relique, élément Sang, qui gr
   );
   assert.equal(g.isBoundItem(w), true);
   same(
-    g.inventory.map(i => i.weaponType),
-    ['sword']
-  );
-  same(
     g.SKILLS.map(s => s.n),
     ['Fendoir', 'Bond du boucher', 'Hurlement sanguinaire', 'Châtiment du sang']
   );
@@ -55,9 +51,9 @@ test('Berserker : Grande hache liée de qualité Relique, élément Sang, qui gr
       'Faucheuse des mille batailles'
     ]
   );
-  // Une autre classe : la hache disparaît, l'épée du sac revient dans la main.
+  // Une autre classe : la hache disparaît, l'arme de la nouvelle classe la remplace.
   g.CANAAN_CLASS_STATE.import({ id: 'druide', talents: [] });
-  assert.equal(g.equipment.weapon.weaponType, 'sword');
+  assert.equal(g.equipment.weapon.weaponType, 'wildstaff');
   assert.equal(g.inventory.length, 0);
 });
 
@@ -180,22 +176,22 @@ test('Berserker : Peau de fer, Cicatrices, Saignée, Curée et Dernier carré', 
   g.setClass('berserker', [3]);
   g.P.mhp = 1000;
   g.P.hp = 500;
-  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 90, '50 % des PV perdus : −10 %');
+  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 88, '50 % des PV perdus : −12 %');
   g.P.hp = 1;
-  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 82, '18 % au plus');
-  // Cicatrices : +2 % par coup subi (10 au plus), 3 pour un critique, 6 s.
+  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 76, 'à 1 PV : −24 % (25 % au plus)');
+  // Cicatrices : +3 % par coup subi (10 au plus), 3 pour un critique, 6 s.
   const s = game();
   s.setClass('berserker', [1]);
   s.P.mhp = s.P.hp = 1000;
   for (let i = 0; i < 3; i++) s.CANAAN_CLASS_DEFENSE(null, 10);
-  assert.ok(near(hit100(s), 106, 1e-9));
+  assert.ok(near(hit100(s), 109, 1e-9));
   s.CANAAN_CLASS_ON_CRIT_TAKEN();
   assert.equal(s.CANAAN_CLASS.audit().scars, 5);
   for (let i = 0; i < 10; i++) s.CANAAN_CLASS_DEFENSE(null, 10);
   assert.equal(s.CANAAN_CLASS.audit().scars, 10);
   s.advance(6 * 60 + 1);
   assert.equal(hit100(s), 100);
-  // Saignée et Curée : la compétence fait saigner ; une cible qui saigne subit +15 %.
+  // Saignée et Curée : la compétence fait saigner ; une cible qui saigne subit +20 %.
   const b = game();
   b.setClass('berserker', [4, 5]);
   predictable(b, 0.99);
@@ -204,11 +200,11 @@ test('Berserker : Peau de fer, Cicatrices, Saignée, Curée et Dernier carré', 
   b.monsters = [m];
   b.CANAAN_COMBAT.attack(m, 100, skillHit('blood'));
   assert.ok(m._clsDots.some(d => d.kind === 'bleed' && d.element === 'blood'));
-  assert.ok(near(hit100(b, m) / hit100(b), 1.15, 1e-9));
+  assert.ok(near(hit100(b, m) / hit100(b), 1.2, 1e-9));
   const hp = m.hp;
   b.advance(61);
   assert.ok(m.hp < hp, 'le saignement ronge la cible');
-  // Dernier carré : sous 15 % de PV, 45 % des dégâts rendus.
+  // Dernier carré : sous 20 % de PV, 50 % des dégâts rendus et 20 de Garde.
   const l = game();
   l.setClass('berserker', [2]);
   predictable(l, 0.99);
@@ -218,10 +214,13 @@ test('Berserker : Peau de fer, Cicatrices, Saignée, Curée et Dernier carré', 
     before = t.hp,
     life = l.P.hp;
   l.CANAAN_COMBAT.attack(t, 100, skillHit('blood'));
-  assert.ok(near(l.P.hp - life, (before - t.hp) * 0.45));
+  assert.ok(near(l.P.hp - life, (before - t.hp) * 0.5));
+  const guard = l.characterStats().guard;
+  l.P.hp = 50000;
+  assert.equal(l.characterStats().guard, guard - 20);
 });
 
-test('Berserker : Frénésie, Carnage, Sang bouillant, Cri de guerre et Immortel', () => {
+test('Berserker : Frénésie, Carnage, Sang bouillant, Boucherie et Immortel', () => {
   const g = game();
   g.setClass('berserker', [0, 8]);
   predictable(g, 0.99);
@@ -233,15 +232,16 @@ test('Berserker : Frénésie, Carnage, Sang bouillant, Cri de guerre et Immortel
   g.monsters = [m];
   g.CANAAN_COMBAT.attack(m, 1000, skillHit('blood'));
   assert.ok(m.hp <= 0);
-  // Frénésie : recharges −2 s ; Carnage : 4 % des PV max (en plus du vol de vie).
-  assert.ok(near(g.weaponCooldowns['greataxe:0'], 3, 1e-9));
+  // Frénésie : recharges −3 s et attaques de base plus rapides ; Carnage : 6 % des PV max (en plus du vol de vie).
+  assert.ok(near(g.weaponCooldowns['greataxe:0'], 2, 1e-9));
   assert.equal(g.weaponCooldowns['greataxe:3'], 0);
-  assert.ok(g.P.hp - 500 >= 40);
+  assert.ok(g.P.hp - 500 >= 60);
+  assert.ok(near(g.CANAAN_CLASS_BASIC_LOCK(), 0.85, 1e-9));
   // Une seule fois par ennemi.
   const hp = g.P.hp;
   g.CANAAN_COMBAT.attack(m, 1000, skillHit('blood'));
-  assert.ok(g.P.hp - hp < 40);
-  // Sang bouillant : 25 % des PV max dépensés font exploser le sang autour du Berserker.
+  assert.ok(g.P.hp - hp < 60);
+  // Sang bouillant : 20 % des PV max dépensés font exploser le sang autour du Berserker.
   const b = game();
   b.setClass('berserker', [6]);
   b.P.mhp = b.P.hp = 1000;
@@ -249,23 +249,21 @@ test('Berserker : Frénésie, Carnage, Sang bouillant, Cri de guerre et Immortel
   b.monsters = [foe];
   b.CANAAN_CLASS_PAY(10);
   assert.equal(foe.hp, 1e7, '100 PV dépensés : pas encore');
-  b.CANAAN_CLASS_PAY(15);
-  assert.ok(foe.hp < 1e7, '250 PV dépensés : explosion');
-  // Cri de guerre : sous 50 % de PV en combat, +10 % de dégâts pendant 6 s ; recharge 30 s.
+  b.CANAAN_CLASS_PAY(10);
+  assert.ok(foe.hp < 1e7, '200 PV dépensés : explosion');
+  // Boucherie : le Bond du boucher laisse une mare de sang qui ronge les ennemis.
   const w = game();
   w.setClass('berserker', [7]);
   predictable(w, 0.99);
-  w.P.mhp = 1000;
-  w.P.hp = 1000;
-  const target = mob(1e7);
+  w.P.mhp = w.P.hp = 100000;
+  const target = mob(1e9);
+  target.x = 40;
   w.monsters = [target];
-  w.CANAAN_COMBAT.attack(target, 10, basicHit);
-  w.P.hp = 400;
-  const plain = hit100(w);
-  w.advance(1);
-  assert.ok(near(hit100(w) / plain, 1.1, 1e-9));
-  w.advance(6 * 60 + 1);
-  assert.ok(near(hit100(w), plain, 1e-9));
+  w.mouseWorldX = 0;
+  w.useSkill(1);
+  const pool = target.hp;
+  w.advance(61);
+  assert.ok(target.hp < pool, 'la mare de sang frappe chaque seconde');
   // Immortel : un coup fatal laisse 1 PV et lance une Rage de 4 s, sans perte de PV à la fin ; recharge 90 s.
   const u = game();
   u.setClass('berserker', [9]);

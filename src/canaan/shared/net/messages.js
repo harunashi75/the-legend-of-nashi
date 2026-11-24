@@ -173,10 +173,9 @@ export function sanitizeAction(raw) {
   // Équiper : une bague peut viser la première ou la seconde bague (ring, ring2).
   if (r.op === 'equip' && id && (r.slot === 'ring' || r.slot === 'ring2'))
     return { op: r.op, id, slot: r.slot };
-  if (r.op === 'equip' || r.op === 'reserve') return id ? { op: r.op, id } : null;
+  if (r.op === 'equip') return id ? { op: r.op, id } : null;
   if (r.op === 'unequip')
     return typeof r.slot === 'string' && GEAR_SLOT.test(r.slot) ? { op: 'unequip', slot: r.slot } : null;
-  if (r.op === 'switch') return { op: 'switch' };
   // Classe, talents et artéfacts : identifiants courts ; l'hôte vérifie ensuite qu'ils existent et que le héros y a droit.
   const word = /** @param {unknown} v */ v =>
     typeof v === 'string' && /^[a-z][a-z_]{1,31}$/.test(v) ? v : null;
@@ -185,7 +184,7 @@ export function sanitizeAction(raw) {
     return Number.isInteger(r.talent) && r.talent >= 0 && r.talent <= 9
       ? { op: r.op, talent: r.talent }
       : null;
-  if (r.op === 'class-special') return { op: r.op };
+  if (r.op === 'class-special' || r.op === 'weapon-upgrade') return { op: r.op };
   // Quêtes : numéro de quête, objet d'un lieu ; l'hôte vérifie la distance, l'étape et l'objet.
   const questId = /** @param {unknown} v */ v =>
     typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 199 ? v : null;

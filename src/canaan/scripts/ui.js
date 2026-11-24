@@ -36,7 +36,7 @@
       '</section>'
     );
   }
-  // Case d'une pièce du sac : clic pour l'équiper ; clic droit pour le menu (Arme 2, vendre près d'un marchand,
+  // Case d'une pièce du sac : clic pour l'équiper ; clic droit pour le menu (Bague 2, vendre près d'un marchand,
   // démanteler : item-menu.js).
   function bagCell(item, index) {
     if (!item)
@@ -136,7 +136,7 @@
           '>⇅ Trier</button>'
       ) +
       // Une ligne d'aide ; le détail au survol.
-      '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic droit : Arme 2 (réserve, Q pour changer en combat), vendre chez un marchand, démanteler. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
+      '<p class="bag-hint muted" title="Survole un objet pour afficher son comparatif. Clique pour l’équiper (un repas se mange). Clic droit : Bague 2, vendre chez un marchand, démanteler. Démanteler : la pièce devient de la poudre d’enchantement, même en donjon.">' +
       'Clic : équiper · Clic droit : options · ' +
       (merchant ? '💰 Marchand proche : vente disponible.' : '💰 Vente chez un marchand (E).') +
       '</p>' +
@@ -202,11 +202,7 @@
           ' — ' +
           (item
             ? gearDisplayName(item) +
-              (isBoundItem(item)
-                ? ' · arme liée, elle grandit avec toi'
-                : slot === 'weapon2'
-                  ? ' · Q pour changer'
-                  : ' · cliquer pour retirer')
+              (isBoundItem(item) ? ' · arme de classe, elle grandit avec toi' : ' · cliquer pour retirer')
             : 'emplacement libre')
       ) +
       '">' +
@@ -275,9 +271,9 @@
       '</div>' +
       '<div class="doll-center"><canvas id="heroPreview" width="170" height="250"></canvas><p class="muted">⚔️ ' +
       count +
-      '/10 équipés</p></div>' +
+      '/9 équipés</p></div>' +
       '<div class="doll-column">' +
-      ['neck', 'ring', 'ring2', 'weapon', 'weapon2'].map(charSlot).join('') +
+      ['neck', 'ring', 'ring2', 'weapon'].map(charSlot).join('') +
       '</div></div></div>' +
       CANAAN_ARTEFACTS.section() +
       '</div>' +

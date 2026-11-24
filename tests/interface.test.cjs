@@ -81,7 +81,7 @@ test('Carte M zoomable et mini-carte qui suit le héros, sur l’île comme en d
 
 test('Commandes : délégation, multitouch, annulation, pause et visée',()=>{
  const listeners={},rootListeners={},skillListeners={},calls=[];
- const names=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','interact','switchWeapon','useSkill'];
+ const names=['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','toggleJournal','buyGear','closePanels','interact','useSkill','canaanUseSpecial'];
  const g={Map,keys:{},started:true,paused:false,P:{dead:false,x:10,y:20,face:-1},monsters:[],mouseWorldX:0,mouseWorldY:0,CanaanStages:{},modalOpen:()=>false,
   CANAAN_PERSISTENCE:{restartFresh:()=>calls.push(['restart'])},
   document:{hidden:false,addEventListener:(name,fn)=>listeners[name]=fn,getElementById:id=>id==='touchControls'?{addEventListener:(name,fn)=>rootListeners[name]=fn}:id==='skills'?{addEventListener:(name,fn)=>skillListeners[name]=fn}:{style:{display:'none'}}},
@@ -93,8 +93,7 @@ test('Commandes : délégation, multitouch, annulation, pause et visée',()=>{
  assert.deepEqual(calls.splice(0),[['hideGearTooltip'],['unequip','weapon2']]);
  g.dispatchCanaanAction({dataset:{action:'sellInventoryCell',index:'2',itemId:'test-id'}},event);
  assert.deepEqual(calls.shift(),['sellInventoryCell',2,'test-id',event]);
- g.dispatchCanaanAction({dataset:{action:'equipReserve',index:'3'}},event);
- assert.deepEqual(calls.splice(0),[['stop'],['equipReserveWeapon',3]]);
+ assert.throws(()=>g.dispatchCanaanAction({dataset:{action:'equipReserve',index:'3'}},event),/Action inconnue/,'plus d’arme de réserve');
  g.dispatchCanaanAction({dataset:{action:'resume'}},event);assert.deepEqual(calls.shift(),['togglePause',false]);
  g.dispatchCanaanAction({dataset:{action:'togglePause'}},event);assert.deepEqual(calls.shift(),['togglePause']);
  g.dispatchCanaanAction({dataset:{action:'restartFresh'}},event);assert.deepEqual(calls.shift(),['restart']);
@@ -155,13 +154,13 @@ test('Interface générée : actions autorisées, catalogue officiel, musique et
 
  // Exécuter chaque action réelle avec ses attributs, sur des doublures des fonctions du jeu.
  const actionCalls=[];g.actionCalls=actionCalls;
- const stubbed=['togglePause','pauseOpenPanel','pauseToTitle','startGame','toggleMap','enterInstance','renderInventory','renderCharacter','unequip','equipReserveWeapon','buyGear'];
+ const stubbed=['togglePause','pauseOpenPanel','pauseToTitle','startGame','toggleMap','enterInstance','renderInventory','renderCharacter','unequip','buyGear'];
  run('globalThis.realActions={'+stubbed.join(',')+',restartFresh:CANAAN_PERSISTENCE.restartFresh}');
- run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','equipReserveWeapon','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','classPage','classPageTo','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','settingsTab','keybindReset','quitGame'])
+ run(`for(const name of ['togglePause','pauseSave','pauseOpenPanel','pauseToTitle','startGame','toggleTalents','toggleInventory','toggleCharacter','toggleWardrobe','toggleMap','toggleGroup','toggleTrade','toggleProfessions','enterInstance','buyBagUpgrade','hideGearTooltip','equipBagIndex','sellInventoryCell','sellAllCommon','unequip','renderInventory','renderCharacter','chooseClass','equipTalent','unequipTalent','pickClass','classPage','classPageTo','toggleJournal','buyGear','closePanels','openSettings','closeSettings','settingsToggle','settingsStep','settingsRestart','settingsTab','keybindReset','quitGame'])
   globalThis[name]=(...args)=>actionCalls.push([name,...args]);
   togglePause=globalThis.togglePause;pauseOpenPanel=globalThis.pauseOpenPanel;pauseToTitle=globalThis.pauseToTitle;startGame=globalThis.startGame;
   toggleMap=globalThis.toggleMap;enterInstance=globalThis.enterInstance;renderInventory=globalThis.renderInventory;
-  renderCharacter=globalThis.renderCharacter;unequip=globalThis.unequip;equipReserveWeapon=globalThis.equipReserveWeapon;buyGear=globalThis.buyGear;
+  renderCharacter=globalThis.renderCharacter;unequip=globalThis.unequip;buyGear=globalThis.buyGear;
   CANAAN_PERSISTENCE.restartFresh=()=>actionCalls.push(['restartFresh'])`);
  const html=source.slice(source.indexOf('<body'),source.indexOf('<script',source.indexOf('<body')));
  const dataset=tag=>Object.fromEntries([...tag.matchAll(/\bdata-([a-z-]+)="([^"]*)"/g)].map(([,key,value])=>[key.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()),value]));

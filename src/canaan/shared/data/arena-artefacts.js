@@ -22,9 +22,9 @@ const LIST = [
     '⟦artefact_coeur_fer⟧',
     '#8a9098',
     '#d6dbe2',
-    'Dégâts reçus −{n} %.',
-    [15, 17, 19, 21, 24],
-    []
+    'Chaque coup subi forge une plaque de fer (5 au plus, 6 s) : −{n} % de dégâts subis par plaque. À 5 plaques, ton prochain coup libère une onde de choc ({m} % de ton Attaque autour de toi) et brise les plaques.',
+    [3, 3.5, 4, 4.5, 5],
+    [200, 240, 280, 330, 400]
   ],
   [
     'croc_ombres',
@@ -33,9 +33,9 @@ const LIST = [
     '⟦artefact_croc_ombres⟧',
     '#8a50c8',
     '#d8b0ff',
-    'Chance critique +{n} points ; tes coups critiques font saigner ({m} % du coup en 4 s).',
-    [12, 13, 15, 17, 19],
-    [30, 34, 38, 43, 48]
+    'Chance critique +{n} points ; tes critiques déchirent ({m} % du coup en saignement sur 4 s), et achever un ennemi qui saigne te rend 4 % de tes PV maximum.',
+    [10, 11, 12, 14, 16],
+    [40, 46, 52, 58, 65]
   ],
   [
     'pierre_colosse',
@@ -44,9 +44,9 @@ const LIST = [
     '⟦artefact_pierre_colosse⟧',
     '#9a8a70',
     '#e2d4b8',
-    'PV maximum +{n} %.',
-    [25, 28, 32, 36, 40],
-    []
+    'PV maximum +{n} % ; toutes les 8 s, ta peau de pierre réduit de {m} % le prochain coup reçu.',
+    [20, 22, 25, 28, 32],
+    [50, 55, 60, 65, 70]
   ],
   [
     'fiole_brumes',
@@ -55,9 +55,9 @@ const LIST = [
     '⟦artefact_fiole_brumes⟧',
     '#4aa85a',
     '#a8f2bc',
-    'Soins reçus +{n} % ; hors combat, tu récupères {m} % de tes PV maximum par seconde.',
-    [30, 34, 38, 43, 48],
-    [3, 3, 4, 4, 5]
+    'Soins reçus +{n} % ; sous 35 % de PV, une brume guérisseuse te rend {m} % de tes PV maximum en 5 s (recharge 45 s).',
+    [25, 28, 32, 36, 40],
+    [25, 28, 32, 36, 40]
   ],
   [
     'ecu_dechu',
@@ -66,9 +66,9 @@ const LIST = [
     '⟦artefact_ecu_dechu⟧',
     '#4a7ab8',
     '#a4caff',
-    '{n} % de chances de parer un coup (aucun dégât) et de riposter ({m} % de ton Attaque).',
+    '{n} % de chances de parer un coup (aucun dégât) et de riposter ({m} % de ton Attaque) ; ta compétence suivante fait +30 %.',
     [15, 17, 19, 21, 24],
-    [100, 115, 130, 150, 170]
+    [150, 175, 200, 230, 260]
   ],
   [
     'ecaille_ecarlate',
@@ -77,9 +77,9 @@ const LIST = [
     '⟦artefact_ecaille_ecarlate⟧',
     '#d8413a',
     '#ff9c86',
-    'Tes coups enflamment l’ennemi : {n} % des dégâts infligés en brûlure sur 4 s.',
-    [20, 23, 26, 29, 32],
-    []
+    'Tes compétences réveillent l’Hydre : trois têtes de feu crachent sur ta cible et les ennemis proches ({n} % des dégâts chacune). Tes coups brûlent ({m} % des dégâts en 4 s).',
+    [25, 29, 33, 38, 44],
+    [10, 12, 14, 17, 20]
   ],
   [
     'oeil_tempetes',
@@ -88,9 +88,9 @@ const LIST = [
     '⟦artefact_oeil_tempetes⟧',
     '#3a9ad8',
     '#a8e0ff',
-    '{n} % de chances qu’un coup lance un éclair en chaîne : {m} % des dégâts sur la cible et deux ennemis proches.',
-    [20, 22, 25, 28, 30],
-    [50, 55, 60, 68, 75]
+    'Tous les 5 coups, la foudre tombe sur ta cible et rebondit sur 3 ennemis proches : {n} % de ton Attaque, et ils sont ralentis de {m} % pendant 2 s.',
+    [120, 140, 160, 185, 220],
+    [20, 22, 25, 28, 30]
   ],
   [
     'sceau_executeur',
@@ -99,9 +99,9 @@ const LIST = [
     '⟦artefact_sceau_executeur⟧',
     '#7a6ae0',
     '#c8bcff',
-    '+{n} % de dégâts contre les ennemis sous 35 % de leurs PV.',
-    [40, 45, 50, 56, 64],
-    []
+    '+{n} % de dégâts contre les ennemis sous 35 % de leurs PV ; achever un ennemi réduit toutes tes recharges de {m} s.',
+    [30, 34, 38, 43, 50],
+    [1, 1.5, 2, 2.5, 3]
   ],
   [
     'prisme_cristal',
@@ -110,9 +110,9 @@ const LIST = [
     '⟦artefact_prisme_cristal⟧',
     '#b070e0',
     '#e8c8ff',
-    'Toutes les 20 s, un bouclier absorbe {n} % de tes PV maximum.',
-    [15, 17, 19, 21, 24],
-    []
+    'Toutes les 15 s, un bouclier de cristal absorbe {n} % de tes PV maximum ; quand il se brise, il éclate ({m} % de ton Attaque autour de toi).',
+    [12, 14, 16, 18, 21],
+    [150, 175, 200, 230, 260]
   ],
   [
     'coeur_cendres',
@@ -121,9 +121,9 @@ const LIST = [
     '⟦artefact_coeur_cendres⟧',
     '#e0702a',
     '#ffc890',
-    'Compétences +{n} % de dégâts ; leurs recharges −{m} %.',
-    [20, 23, 26, 29, 32],
-    [15, 16, 17, 18, 20]
+    'Compétences +{n} % de dégâts et recharges −{m} % ; tes compétences offensives embrasent le sol sous leur cible (30 % de ton Attaque par seconde pendant 3 s).',
+    [16, 18, 21, 24, 28],
+    [10, 12, 14, 16, 18]
   ],
   [
     'voile_neant',
@@ -132,9 +132,9 @@ const LIST = [
     '⟦artefact_voile_neant⟧',
     '#9a40e0',
     '#e0a8ff',
-    'Recharge de la roulade −{n} % ; après une roulade, +{m} % de dégâts pendant 3 s.',
-    [40, 42, 45, 48, 50],
-    [30, 34, 38, 43, 48]
+    'Recharge de la roulade −{n} % ; chaque roulade laisse un écho du Néant qui explose 1 s plus tard ({m} % de ton Attaque autour de lui) et te donne +25 % de dégâts pendant 3 s.',
+    [35, 38, 41, 45, 50],
+    [150, 180, 210, 250, 300]
   ],
   [
     'couronne_souverain',
@@ -143,9 +143,9 @@ const LIST = [
     '⟦artefact_couronne_souverain⟧',
     '#e0b030',
     '#ffe8a0',
-    'Attaque, Défense et PV maximum +{n} % ; une fois toutes les 90 s, un coup fatal te laisse à 20 % de tes PV.',
+    'Attaque, Défense et PV maximum +{n} % ; une fois toutes les 90 s, un coup fatal te rend {m} % de tes PV et 2 s d’invulnérabilité.',
     [10, 11, 12, 14, 16],
-    []
+    [30, 35, 40, 45, 50]
   ]
 ];
 
@@ -178,5 +178,7 @@ export const artefactRank = rank => Math.max(0, Math.min(ARTEFACT_MAX_RANK, Math
  */
 export function artefactText(a, rank) {
   const k = Math.max(1, Math.min(ARTEFACT_MAX_RANK, rank || 1)) - 1;
-  return a.desc.replace('{n}', String(a.n[k])).replace('{m}', String(a.m[k] ?? ''));
+  // Nombres à la française (virgule décimale) : « −4,5 % ».
+  const fr = /** @param {number | undefined} v */ v => (v === undefined ? '' : String(v).replace('.', ','));
+  return a.desc.replace('{n}', fr(a.n[k])).replace('{m}', fr(a.m[k]));
 }

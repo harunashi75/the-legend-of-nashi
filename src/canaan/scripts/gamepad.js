@@ -23,7 +23,7 @@
     [B.LB]: 'skill3',
     [B.RB]: 'skill4',
     [B.UP]: 'special',
-    [B.DOWN]: 'switchWeapon',
+    [B.DOWN]: 'talents',
     [B.LEFT]: 'map',
     [B.RIGHT]: 'inventory',
     [B.START]: 'escape'
@@ -316,7 +316,7 @@
       if (b === B.A && focus) activate(focus);
       else if (b === B.B && scope.id === 'itemMenu') CANAAN_ITEM_MENU.close();
       else if (b === B.B) back(scope);
-      // X : le menu du clic droit de l'objet choisi (équiper en Arme 2, vendre, démanteler…).
+      // X : le menu du clic droit de l'objet choisi (équiper, vendre, démanteler…).
       else if (b === B.X && focus?.dataset?.menu) CANAAN_ITEM_MENU.openFor(focus);
       // LB / RB : onglet précédent ou suivant (Paramètres).
       else if ((b === B.LB || b === B.RB) && scope.querySelector?.('.settings-tabs'))

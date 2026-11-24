@@ -23,9 +23,9 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
  const host=boot(),guests=[boot(),boot(),boot()];
  try{
   host.run(fs.readFileSync(path.join(__dirname,'helpers','group-bot.js'),'utf8'));
-  const gear=(w,tag)=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:10,rarity:"Épique",weaponType:"'+w+'"}').join(',')+'}';
+  const gear=tag=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring'].map(k=>k+':{id:"'+tag+k+'",slot:"'+k+'",level:10,rarity:"Épique"}').join(',')+'}';
   host.run('started=true;paused=false;P.dead=false;game.world.monsters=[];game.view.notify=()=>{};game.view.chat=()=>{}');
-  host.run('game.hero.level=10;game.hero.equipment={...game.hero.equipment,...'+gear('sword','h')+'};recomputeStats();P.hp=P.mhp');
+  host.run('game.hero.level=10;game.hero.equipment={...game.hero.equipment,...'+gear('h')+'};recomputeStats();P.hp=P.mhp');
   host.run('CANAAN_NET.openRoom("'+url+'")');for(let i=0;i<1000&&!host.run('CANAAN_NET.state().code');i++)await wait(10);
   const code=host.run('CANAAN_NET.state().code'),ids=[];
   for(const [k,g] of guests.entries()){
@@ -35,9 +35,10 @@ test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble
   }
   assert.equal(host.run('game.heroes.length'),4,'quatre héros dans le groupe');assert.equal(host.run('CANAAN_NET.state().peers'),3);
   // Chaque invité reçoit un équipement d'aventurier (chez l'hôte : c'est lui qui garde les héros).
-  ids.forEach((id,k)=>host.run('{const h=game.guests["'+id+'"];h.level=10;h.equipment={...h.equipment,...'+gear(['spear','bow','axe'][k],'g'+k)+'};recomputeHeroStats(h);h.player.hp=h.player.mhp}'));
-  // Un vrai groupe : chacun sa classe et ses talents (deux emplacements au niveau 10).
-  host.run('const C=[["paladin",[2,9]],["druide",[1,3]],["elementaliste",[0,5]],["assassin",[1,4]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();P.hp=P.mhp');
+  ids.forEach((id,k)=>host.run('{const h=game.guests["'+id+'"];h.level=10;h.equipment={...h.equipment,...'+gear('g'+k)+'};recomputeHeroStats(h);h.player.hp=h.player.mhp}'));
+  // Un vrai groupe : chacun sa classe, ses talents (deux emplacements au niveau 10) et l'arme de sa classe, Épique
+  // comme le reste de son équipement.
+  host.run('const C=[["paladin",[2,9]],["druide",[1,3]],["elementaliste",[0,5]],["assassin",[1,4]]];game.heroes.forEach((h,i)=>{h.classe={id:C[i][0],talents:C[i][1]};h.weaponTiers={[C[i][0]]:3};CANAAN_SUMMONS.syncPact(h);recomputeHeroStats(h);h.player.hp=h.player.mhp});recomputeStats();refreshWeaponBar();P.hp=P.mhp');
   // Débit de l'hôte : octets envoyés au relais.
   host.run('{const s=CANAAN_NET.debug.socket,o=s.send.bind(s);globalThis.__bytes=0;s.send=d=>{__bytes+=d.length;o(d)}}');
   // Le relais est un vrai WebSocket : avant que l'hôte avance, chaque intention envoyée par un invité doit lui être

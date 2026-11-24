@@ -31,17 +31,17 @@ test('Soin partagé : bonus appliqués une fois, plafond PV et mort respectés',
   g.P.hp=0;g.P.dead=true;assert.equal(g.canaanApplyHeal(100),0);
 });
 
-test('Épée : riposte avec vol de vie sur une cible survivante', () => {
-  const g=game();g.monsters.push({hp:1000,mhp:1000,x:50,y:0,g:1,r:14});
-  g.useSkill(3);assert.ok(g.P.hp>20);assert.equal(g.P.mp,976,'22 de mana, +9 % au niveau 10');
+test('Sans classe : aucune compétence, l’attaque de base frappe à mains nues', () => {
+  const g=game();assert.equal(g.equipment.weapon,null);assert.equal(g.currentWeaponType(),'');assert.equal(g.SKILLS.length,0);
+  const m={hp:1000,mhp:1000,x:50,y:0,g:1,r:14};g.monsters.push(m);g.useSkill(0);assert.equal(g.P.mp,1000);
+  assert.equal(g.canaanBasicAttack(false),true);assert.ok(m.hp<1000);
 });
 
-test('Bouclier : soin immédiat et soin périodique du sol consacré', () => {
-  const g=game();g.equipment.weapon.weaponType='shield';
-  g.useSkill(3);assert.equal(g.P.hp,35);
-  g.useSkill(1);
-  for(let i=0;i<12;i++)g.runUpdatePipeline();
-  assert.ok(g.P.hp>35);
+test('Paladin : Marteau du Jugement, puis un sol consacré qui frappe et soigne', () => {
+  const g=game();g.setClass('paladin',[]);g.P.mp=100;g.P.mhp=1000;g.P.hp=100;
+  const m=mob(1e7);m.x=g.mouseWorldX;m.y=g.mouseWorldY;g.monsters=[m];g.P.x=g.mouseWorldX;g.P.y=g.mouseWorldY;
+  g.useSkill(3);g.advance(25);assert.ok(m.hp<1e7,'le marteau tombe');
+  const hp=g.P.hp,mhp=m.hp;g.advance(130);assert.ok(g.P.hp>hp,'le sol consacré soigne');assert.ok(m.hp<mhp,'et brûle les ennemis');
 });
 
 test('Le moteur de combat utilise également le soin et ses bonus', () => {
@@ -50,25 +50,25 @@ test('Le moteur de combat utilise également le soin et ses bonus', () => {
 });
 
 test('Récupération : vrai verrou réduit, pas de double réduction, nouvelle utilisation après expiration', () => {
-  const g=game();modifiers(g,30);
-  g.useSkill(2);assert.ok(Math.abs(g.weaponCooldowns['sword:2']-8.4)<1e-9);
-  assert.equal(g.SKILLS[2].cd,g.weaponCooldowns['sword:2']);
+  const g=game();g.setClass('paladin',[]);modifiers(g,30);g.P.mp=1000;
+  g.useSkill(2);assert.ok(Math.abs(g.weaponCooldowns['aegis:2']-14)<1e-9);
+  assert.equal(g.SKILLS[2].cd,g.weaponCooldowns['aegis:2']);
   const mp=g.P.mp;g.useSkill(2);assert.equal(g.P.mp,mp);
-  for(let i=0;i<505;i++)g.runUpdatePipeline();
-  assert.equal(g.weaponCooldowns['sword:2'],0);
-  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-13);
+  for(let i=0;i<845;i++)g.runUpdatePipeline();
+  assert.equal(g.weaponCooldowns['aegis:2'],0);
+  assert.equal(g.SKILLS[2].cd,0);g.useSkill(2);assert.equal(g.P.mp,mp-40,'Ferveur : le double des 20 de mana');
 });
 
-test('Recharge conservée après changement de famille d’arme et retour', () => {
-  const g=game();modifiers(g,30);g.useSkill(2);
-  g.equipment.weapon.weaponType='shield';g.refreshWeaponBar();
-  g.equipment.weapon.weaponType='sword';g.refreshWeaponBar();
-  assert.ok(Math.abs(g.SKILLS[2].cd-8.4)<1e-9);
+test('Recharge conservée en changeant de forme (Druide) et en revenant', () => {
+  const g=game();g.setClass('druide',[]);modifiers(g,30);g.P.mp=1000;g.useSkill(1);
+  g.CANAAN_CLASS.special();assert.equal(g.currentWeaponType(),'feline');
+  g.advance(91);g.CANAAN_CLASS.special();assert.equal(g.currentWeaponType(),'wildstaff');
+  assert.ok(Math.abs(g.SKILLS[1].cd-(14*0.7-91/60))<1e-6);
 });
 
-test('Sans Récupération, recharge normale ; pas de consommation si mana insuffisant', () => {
-  const g=game();modifiers(g);g.useSkill(2);assert.equal(g.weaponCooldowns['sword:2'],12);
-  g.P.mp=0;g.useSkill(1);assert.equal(g.weaponCooldowns['sword:1'],undefined);
+test('Sans Récupération, recharge normale ; pas de consommation sans ressource', () => {
+  const g=game();g.setClass('paladin',[]);modifiers(g);g.P.mp=1000;g.useSkill(2);assert.equal(g.weaponCooldowns['aegis:2'],20);
+  g.P.mp=0;g.useSkill(1);assert.equal(g.weaponCooldowns['aegis:1'],undefined);
 });
 
 test('Statistiques d’un objet : trois principales selon niveau et qualité, deux secondaires tirées une fois et stables',()=>{
@@ -98,7 +98,7 @@ test('Deux bagues comptées ; statistiques du héros recalculées quand l’équ
   delete g.equipment.ring;delete g.equipment.ring2;
   const armor={id:'armor',slot:'armor',level:5,rarity:'Commun'};g.equipment.armor=armor;const before=g.characterStats().primary.defense;
   armor.level=10;const after=g.characterStats().primary.defense;
-  assert.ok(after>before);assert.equal(after,g.itemStats(armor).primary.defense+g.itemStats(g.equipment.weapon).primary.defense);
+  assert.ok(after>before);assert.equal(after,g.itemStats(armor).primary.defense,'sans classe, pas d’arme');
 });
 
 test('Déviation : esquive totale puis second jet indépendant pour diviser les dégâts',()=>{
@@ -122,17 +122,18 @@ test('Déviation : esquive totale puis second jet indépendant pour diviser les 
 });
 
 test('Une esquive ne consomme pas le bouclier, garde zéro dégât et déclenche la Danse des ombres',()=>{
-  const g=game(),base=g.characterStats;g.setClass('elementaliste',[5]);g.P.hp=20;g.P.mhp=100;g.advance(1);
+  const g=game(),base=g.characterStats;g.setClass('elementaliste',[7]);g.P.hp=20;g.P.mhp=100;g.advance(1);
   g.characterStats=()=>{const s=base();s.dodge=100;return s};predictable(g,0);
   for(let i=0;i<5;i++)assert.equal(g.monsterDamage(mob(100)),0);
-  // Le bouclier de la Barrière de givre (15 PV) est intact.
-  assert.equal(g.CANAAN_CLASS.audit().shield,15);
+  // Le bouclier de la Barrière de givre (20 PV) est intact.
+  assert.equal(g.CANAAN_CLASS.audit().shield,20);
   assert.equal(g.CANAAN_CLASS_DEFENSE(mob(100),10),0);
-  assert.equal(g.CANAAN_CLASS_DEFENSE(mob(100),100),95);
-  // Danse des ombres : une esquive donne +20 % de vitesse pendant 3 s.
-  const h=game(),hb=h.characterStats;h.setClass('assassin',[2]);const speed=h.characterStats().speed;
+  assert.equal(g.CANAAN_CLASS_DEFENSE(mob(100),100),90);
+  // Danse des ombres : une esquive rend invisible 1,5 s et le coup suivant est critique.
+  const h=game(),hb=h.characterStats;h.setClass('assassin',[6]);
   h.characterStats=()=>{const s=hb();s.dodge=100;return s};predictable(h,0);h.monsterDamage(mob(100));
-  h.characterStats=hb;assert.equal(h.characterStats().speed,speed+20);h.advance(181);assert.equal(h.characterStats().speed,speed);
+  h.characterStats=hb;assert.equal(h.P.veiled,true);assert.equal(h.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).forceCrit,true);
+  h.advance(91);assert.equal(h.P.veiled,false);
 });
 
 test('IA : le coup esquivé n’enlève aucun PV, ne secoue pas l’écran et n’étourdit pas',()=>{
@@ -147,15 +148,11 @@ test('IA : le coup esquivé n’enlève aucun PV, ne secoue pas l’écran et n�
   assert.ok(labels.includes('ESQUIVE !'));assert.ok(!labels.includes('-0'));
 });
 
-test('Compétences : les 40 actions restent lançables par les dix familles',()=>{
-  for(const type of ['sword','dualsword','axe','mace','spear','dualdagger','bow','staff','shield','lute']){
-    for(let index=0;index<4;index++){
-      const g=game();g.equipment.weapon.weaponType=type;g.refreshWeaponBar();
-      const cost=g.SKILLS[index].mp;
-      assert.doesNotThrow(()=>g.useSkill(index),type+':'+index);
-      assert.equal(g.P.mp,1000-g.resourceCost('mana',cost,g.game.hero.level));assert.ok(g.weaponCooldowns[type+':'+index]>0);
-      assert.doesNotThrow(()=>g.advance(120),type+':'+index+' différé');
-    }
+test('Attaques de base : chaque arme de classe (et les griffes du félin) frappe sans erreur',()=>{
+  for(const c of ['druide','paladin','assassin','elementaliste','invocateur','barde','berserker','chasseur','guerrier']){
+    const g=game();g.setClass(c,[]);const m=mob(1e7);m.x=60;g.monsters=[m];g.mouseWorldX=60;
+    for(const heavy of [false,true]){assert.doesNotThrow(()=>g.canaanBasicAttack(heavy),c);g.advance(80)}
+    if(c==='druide'){g.CANAAN_CLASS.special();for(const heavy of [false,true]){assert.doesNotThrow(()=>g.canaanBasicAttack(heavy),'félin');g.advance(80)}}
   }
 });
 
@@ -171,7 +168,7 @@ test('Roulade d’esquive : invulnérable pendant le roulé, recharge de 4 s, r�
  assert.equal(run('canaanDodge(1,0)'),false);
  assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-4)<1e-9);
  run("CANAAN_ARTEFACTS_STATE.import({ranks:{voile_neant:1},equipped:['voile_neant']})");
- assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-2.4)<1e-9);
+ assert.ok(Math.abs(run('CANAAN_COMBAT.dodgeState().cooldown')-2.6)<1e-9);
  for(let i=0;i<240;i++)run('time++;runUpdatePipeline()');
  assert.equal(run('canaanDodge(0,1)'),true);
 });
@@ -181,7 +178,7 @@ test('Attaque de base : clic gauche rapide, clic droit lourd, sans mana, maintie
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;time=1000;P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;CANAAN_ARTEFACTS_STATE.import({})');
  // Secondaires fixées sans Célérité : les verrous gardent leur durée de base (0,55 s et 1,15 s).
- run('equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"sword",rarity:"Commun",sec:{power:1,crit:1}};refreshWeaponBar()');
+ run('CANAAN_CLASS_STATE.import({id:"berserker",talents:[]});equipment.weapon.sec={power:1,crit:1};refreshWeaponBar()');
  run('monsters.length=0;monsters.push({x:P.x+60,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"});mouseWorldX=P.x+60;mouseWorldY=P.y;P.mp=0');
  // Sans mana : l'attaque de base frappe quand même, et ne consomme rien.
  assert.equal(run('canaanBasicAttack(false)'),true);assert.ok(run('monsters[0].hp')<1e6);assert.equal(run('P.mp'),0);
@@ -244,71 +241,64 @@ test('Règle partagée des coups infligés : Puissance, écart de niveau, armure
  assert.ok(c.canaanBodyGap(boss,0,80)>20);assert.equal(c.canaanBodyPoints({x:0,y:0,r:16}).length,5);
 });
 
-test('Compétences : attaques de base renforcées, info-bulles claires, charges du bâton visibles, postures utiles',()=>{
+test('Compétences : attaques de base renforcées, info-bulles claires, badges et postures utiles',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;toast=()=>{};game.view.chat=()=>{};Math.random=()=>0.5');
- const gear=w=>'{'+['helm','shoulders','armor','gloves','boots','neck','ring','weapon'].map(k=>k+':{id:"g'+k+'",slot:"'+k+'",level:30,rarity:"Rare",weaponType:"'+w+'",sec:{power:1,crit:1}}').join(',')+'}';
- run('game.hero.level=30;game.hero.equipment={...game.hero.equipment,...'+gear('sword')+'};recomputeStats();refreshWeaponBar()');
+ const gear='{'+['helm','shoulders','armor','gloves','boots','neck','ring'].map(k=>k+':{id:"g'+k+'",slot:"'+k+'",level:30,rarity:"Rare",sec:{power:1,crit:1}}').join(',')+'}';
+ run('game.hero.level=30;game.hero.equipment={...game.hero.equipment,...'+gear+'};CANAAN_CLASS_STATE.import({id:"paladin",talents:[]});equipment.weapon.sec={power:1,crit:1};recomputeStats();refreshWeaponBar()');
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_BASIC_ATTACK.spec)')),{quick:{mult:0.75,lock:0.55},heavy:{mult:1.6,lock:1.15}});
- // Le bâton a la même puissance que les autres armes (plus d'Intelligence).
+ // Les bâtons ont la même puissance que les autres armes (plus d'Intelligence).
  assert.equal(run('CANAAN_SKILLS.power(game.hero,true)'),run('CANAAN_SKILLS.power(game.hero,false)'));
- // Info-bulle : explication, dégâts estimés avec la puissance actuelle, recharge, mana, effet de classe.
+ // Info-bulle : explication, dégâts estimés avec la puissance actuelle, recharge, ressource, effet de classe.
  const tip=run('canaanSkillTooltip(0)'),power=run('CANAAN_SKILLS.power(game.hero,false)');
- assert.ok(tip.includes('Un coup puissant devant toi')&&tip.includes('≈ '+Math.round(power*2.6)+' dégâts')&&tip.includes('Recharge 4 s')&&tip.includes('Mana 10'),tip);
- assert.ok(tip.includes('Sans classe'),'sans classe : invitation à en choisir une');
- for(const [id,word] of [['druide','empoisonne'],['paladin','bouclier'],['assassin','+12 %'],['elementaliste','brûle']]){
-  run('game.hero.classe={id:"'+id+'",talents:[]}');assert.ok(run('canaanSkillTooltip(0)').includes(word),id);
+ assert.ok(tip.includes('Un coup de masse sacré')&&tip.includes('≈ '+Math.round(power*2.8)+' dégâts')&&tip.includes('Recharge 5 s')&&tip.includes('Ferveur 24'),tip);
+ assert.ok(tip.includes('Paladin'),'empreinte de la classe');
+ for(const [id,word] of [['druide','empoisonne'],['assassin','+12 %'],['elementaliste','brûle'],['chasseur','distance'],['guerrier','Élan']]){
+  run('CANAAN_CLASS_STATE.import({id:"'+id+'",talents:[]});refreshWeaponBar()');assert.ok(run('canaanSkillTooltip(0)').includes(word),id);
  }
- assert.ok(run('canaanSkillTooltip(2)').includes('décharge'),'utilitaire de l’Élémentaliste');
- assert.ok(run('canaanSkillTooltip("special")').includes('Avatar élémentaire'));
+ assert.ok(run('canaanSkillTooltip("special")').includes('Volonté de fer'));
  assert.ok(run('SKILLS.every(s=>s.el.dataset.tooltipSkill!==undefined)'),'survol des cases');
  // Chaque catalogue de compétence a sa puissance et son explication.
  assert.ok(run('Object.values(WEAPON_DEFINITIONS).every(w=>w.role&&w.sp.every(s=>s.length===7&&typeof s[5]==="number"&&s[6].length>20))'));
- // Bâton : les charges s'affichent (badge de la compétence 4) et la Surcharge les consomme.
- run('game.hero.classe={id:null,talents:[]};game.hero.equipment={...game.hero.equipment,...'+gear('staff')+'};recomputeStats();refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+100;mouseWorldY=P.y');
- const cast=i=>run('for(const k in weaponCooldowns)weaponCooldowns[k]=0;P.mp=P.mmp;useSkill('+i+')');
- cast(0);cast(0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),2);
- run('canaanUpdateSkillBadges()');assert.equal(run('SKILLS[3].el.querySelector(".skill-badge").textContent'),'🔮 2/3');
- assert.ok(run('canaanSkillTooltip(3)').includes('Charges arcaniques : <b>2 / 3</b>'));
- // Concentration : une attaque de base ne la gaspille pas, la compétence suivante la consomme.
- cast(2);assert.ok(run('CANAAN_SKILLS.state(game.hero).focus')>0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),3);
- run('canaanBasicAttack(false)');assert.ok(run('CANAAN_SKILLS.state(game.hero).focus')>0,'pas consommée par l’attaque de base');
- run('game.world.monsters=[{t:"Cible",x:P.x+100,y:P.y,hp:1e7,mhp:1e7,r:14,cd:1e9,g:0,level:30,_levelHp:true}]');
- cast(3);assert.equal(run('CANAAN_SKILLS.state(game.hero).focus'),0);assert.equal(run('CANAAN_SKILLS.state(game.hero).arcane'),0);
- const surge=run('1e7-game.world.monsters[0].hp');assert.ok(surge>power*7.4*1.2,'Surcharge à 3 charges et Concentration : '+surge);
- // Élan offensif (épées doubles) : les attaques de base sont vraiment plus rapides.
- run('game.hero.equipment={...game.hero.equipment,...'+gear('dualsword')+'};recomputeStats();refreshWeaponBar()');
+ // Druide : le Rugissement sauvage rend les attaques de base vraiment plus rapides, et son badge compte les secondes.
+ run('CANAAN_CLASS_STATE.import({id:"druide",talents:[]});P.mp=P.mmp;CANAAN_CLASS.special();refreshWeaponBar();mouseWorldX=P.x+100;mouseWorldY=P.y');
  run('for(let i=0;i<120;i++){time++;simulateStep()}canaanBasicAttack(false)');const slow=run('CANAAN_BASIC_ATTACK.lock()');
- cast(2);run('for(let i=0;i<70;i++){time++;simulateStep()}canaanBasicAttack(false)');
- assert.ok(Math.abs(run('CANAAN_BASIC_ATTACK.lock()')/slow-0.7)<1e-9,'verrou ×0,7 pendant l’Élan');
+ run('for(const k in weaponCooldowns)weaponCooldowns[k]=0;P.mp=P.mmp;useSkill(2)');
+ run('canaanUpdateSkillBadges()');assert.equal(run('SKILLS[2].el.querySelector(".skill-badge").textContent'),'6 s');
+ run('for(let i=0;i<70;i++){time++;simulateStep()}canaanBasicAttack(false)');
+ assert.ok(Math.abs(run('CANAAN_BASIC_ATTACK.lock()')/slow-0.7)<1e-9,'verrou ×0,7 pendant le Rugissement');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
-test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque famille, icônes SVG des 52 sorts',()=>{
+test('Armes en main et icônes : plus de cercle à 360°, arme tenue et animée pour chaque classe, félin qui griffe, icônes SVG des sorts',()=>{
  const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Le cercle autour du héros à chaque attaque n'existe plus.
  assert.doesNotMatch(script('canaan-game-core'),/ctx\.arc\(P\.x, P\.y, 65/);
- // Icônes : une par compétence (10 armes, le Grimoire et la Grande hache × 4) et par sort de classe, en SVG.
+ // Icônes : une par compétence (les neuf armes de classe et les griffes du félin × 4) et par sort de classe, en SVG.
  const audit=JSON.parse(run('JSON.stringify(CANAAN_SKILL_ICONS.audit())'));
- assert.equal(audit.weapons,12);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','contagion','divine','feral','hymn','rage','veil']);
+ assert.equal(audit.weapons,10);assert.deepEqual(audit.missing,[]);assert.deepEqual(audit.specials.sort(),['avatar','contagion','divine','feral','hawkeye','hymn','ironwill','rage','veil']);
  assert.equal(run('Object.keys(WEAPON_DEFINITIONS).every(t=>[0,1,2,3].every(i=>CANAAN_SKILL_ICONS.weapon(t,i).startsWith("<svg")))'),true);
  assert.equal(run('CLASSES.every(c=>CANAAN_SKILL_ICONS.special(c.special.id).startsWith("<svg"))'),true);
- run('started=true;paused=false;refreshWeaponBar()');assert.ok(run('SKILLS[0].el.innerHTML').startsWith('<svg'),'la barre affiche l’icône SVG');
+ run('started=true;paused=false;CANAAN_CLASS_STATE.import({id:"guerrier",talents:[]});refreshWeaponBar()');assert.ok(run('SKILLS[0].el.innerHTML').startsWith('<svg'),'la barre affiche l’icône SVG');
  // Arme tenue : chaque famille se dessine au repos et à chaque instant de son attaque, derrière ou devant le corps.
  run('globalThis.__drawn=0;const c=new Proxy({},{get:(o,k)=>k==="drawImage"?()=>__drawn++:k==="createRadialGradient"?()=>({addColorStop(){}}):()=>{} ,set:()=>true});globalThis.__c=c');
- for(const type of run('JSON.stringify(Object.keys(WEAPON_DEFINITIONS))')&&JSON.parse(run('JSON.stringify(Object.keys(WEAPON_DEFINITIONS))'))){
+ for(const type of JSON.parse(run('JSON.stringify(Object.keys(WEAPON_DEFINITIONS).filter(t=>!WEAPON_DEFINITIONS[t].form))'))){
   run('game.hero.equipment.weapon={id:"w",slot:"weapon",level:1,weaponType:"'+type+'"};__drawn=0;P.atk=0;for(const l of ["back","front"])CANAAN_WEAPON_LOOK.draw(__c,game.hero,P,P.x,P.y,l)');
   assert.ok(run('__drawn')>=1,type+' au repos');
   for(const atk of [0.28,0.2,0.1,0.02]){run('__drawn=0;P.atk='+atk+';for(const l of ["back","front"])CANAAN_WEAPON_LOOK.draw(__c,game.hero,P,P.x,P.y,l)');assert.ok(run('__drawn')>=1,type+' en attaque '+atk)}
  }
  run('P.atk=0');
+ // Félin : il bondit vers sa mire et ses griffes lacèrent pendant l'attaque.
+ run('P.form="feral";P.atk=0.28;CANAAN_WEAPON_LOOK.draw(__c,game.hero,P,P.x,P.y,"front")');
+ assert.ok(Math.hypot(...Object.values(JSON.parse(run('JSON.stringify(CANAAN_WEAPON_LOOK.lunge(game.hero,{...P,atk:0.15,_atkPeak:0.28,_atkSeen:0.15}))'))))>0,'bond en avant');
+ run('P.form=null;P.atk=0');
  // Le héros se tourne vers sa mire : à droite, à gauche, vers le haut, vers le bas.
  assert.deepEqual([0,Math.PI,-Math.PI/2,Math.PI/2].map(a=>run('CANAAN_WEAPON_LOOK.faceFromAim('+a+')')),[1,3,2,0]);
- // Projectiles : flèche orientée pour l'arc, orbe pour le bâton.
- run('equipment.weapon={id:"b",slot:"weapon",level:1,weaponType:"bow"};refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+200;mouseWorldY=P.y;game.world.projectiles.length=0;useSkill(0)');
- assert.equal(run('game.world.projectiles.at(-1).kind'),'arrow');
+ // Projectiles : flèche lourde qui traverse pour le Tir perçant ; chaque forme se dessine.
+ run('CANAAN_CLASS_STATE.import({id:"chasseur",talents:[]});refreshWeaponBar();P.mp=P.mmp;mouseWorldX=P.x+200;mouseWorldY=P.y;game.world.projectiles.length=0;useSkill(0)');
+ assert.equal(run('game.world.projectiles.at(-1).kind'),'heavyArrow');assert.equal(run('game.world.projectiles.at(-1).pierce'),true);
  run('canaanDrawProjectile(ctx,game.world.projectiles.at(-1));canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"orb"})');
- for(const kind of ['comet','plague','note'])run('canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"'+kind+'"})');
+ for(const kind of ['comet','plague','note','fireball','ember','thorn','dagger','arrow'])run('canaanDrawProjectile(ctx,{x:0,y:0,vx:1,vy:0,c:"#fff",kind:"'+kind+'"})');
  assert.equal(errors.length,0,errors.join('\n'));
 });
 
@@ -327,16 +317,16 @@ test('Attaque lourde : une animation propre à chaque arme, et les armes à dist
  // Portée : une flèche rapide atteint un monstre à 800 px.
  wait(120);run('game.world.projectiles.length=0;monsters.push({x:P.x+800,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"});mouseWorldX=P.x+800');
  run('canaanBasicAttack(false)');wait(70);assert.ok(run('monsters[0].hp')<1e6,'flèche à 800 px');
- // Bâton : la lourde est une grosse comète qui explose à l'impact et touche aussi le voisin.
+ // Bâton élémentaire : la lourde est une boule de feu qui explose à l'impact et touche aussi le voisin.
  equip('staff');wait(120);
  run('monsters.push({x:P.x+300,y:P.y,hp:1e6,mhp:1e6,r:14,t:"Cible"},{x:P.x+340,y:P.y+30,hp:1e6,mhp:1e6,r:14,t:"Voisin"});mouseWorldX=P.x+300;mouseWorldY=P.y');
- run('canaanBasicAttack(true)');assert.equal(run('game.world.projectiles[0].kind'),'comet');
+ run('canaanBasicAttack(true)');assert.equal(run('game.world.projectiles[0].kind'),'fireball');
  wait(60);assert.ok(run('monsters[0].hp')<1e6&&run('monsters[1].hp')<1e6,'explosion de la comète');
  // Grimoire : rafale de peste en cinq crachats.
  equip('grimoire');wait(120);run('mouseWorldX=P.x+300;mouseWorldY=P.y;canaanBasicAttack(true)');wait(20);
  assert.equal(run('game.world.projectiles.filter(p=>p.kind==="plague").length'),5);
  // Mêlée : chaque arme lourde dessine sa forme (croix, fracas, percée), sans erreur.
- for(const type of ['sword','mace','spear','dualsword','dualdagger','lute','axe','shield']){equip(type);wait(120);run('canaanBasicAttack(true)');wait(30)}
+ for(const type of ['aegis','wildstaff','dualsword','dualdagger','lute','greataxe']){equip(type);wait(120);run('canaanBasicAttack(true)');wait(30)}
  run('CanaanStages.drawWeaponEffects()');
  assert.equal(errors.length,0,errors.join('\n'));
 });

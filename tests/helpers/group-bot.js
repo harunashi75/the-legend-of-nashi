@@ -55,8 +55,8 @@ globalThis.canaanGroupBot = (() => {
     hero.intent.attack = null;
   }
   function reach(hero) {
-    const type = hero.equipment.weapon?.weaponType || 'sword';
-    return type === 'bow' || type === 'staff' ? 330 : type === 'spear' ? 150 : 95;
+    const type = CANAAN_CLASS.weaponType(hero);
+    return ['bow', 'staff', 'wildstaff', 'lute', 'grimoire'].includes(type) ? 330 : 95;
   }
   // Comme un joueur : lance ses compétences dès qu'elles sont prêtes (une par pas, mana suffisant).
   function useSkills(hero) {

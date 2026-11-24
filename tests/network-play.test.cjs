@@ -30,7 +30,8 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   const step=async n=>{for(let i=0;i<n;i++){host.run('time++;readInput();simulateStep();updateWorld();CANAAN_NET.tick()');guest.run('time++;readInput();CANAAN_NET.tick()');await wait(2)}};
   await step(20);
   // Sac et équipement : l'invité voit son propre héros, tel que l'hôte le garde.
-  assert.equal(guest.run('game.hero.equipment.weapon.name'),'Épée de recrue');
+  assert.equal(guest.run('game.hero.equipment.weapon'),null,'pas d’arme avant de choisir une classe');
+  assert.equal(guest.run('game.hero.equipment.armor.name'),'Tunique du voyageur');
   assert.equal(guest.run('updateCapacity(),BAG_LIMIT'),20,'capacité du sac donnée par l’hôte : 20 places au départ, comme l’hôte');assert.equal(guest.run('game.hero.name'),'Lina');
   assert.ok(guest.run('CANAAN_NET.debug.speed')>0,'vitesse donnée par l’hôte');
   // Prédiction : l'invité avance dès le premier pas, sans attendre l'hôte ; ensuite les deux positions coïncident.
@@ -41,18 +42,18 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.ok(Math.abs(guest.run('P.y')-host.run(G+'.player.y'))<3,'position prédite = position de l’hôte : '+guest.run('P.y')+' / '+host.run(G+'.player.y'));
   assert.ok(Math.abs(guest.run('P.x')-host.run(G+'.player.x'))<3);
   // Un objet obtenu chez l'hôte arrive dans le sac de l'invité ; l'invité l'équipe, l'hôte vérifie et exécute.
-  host.run(G+'.inventory.push({id:"lance-lina",name:"Lance d’essai",slot:"weapon",level:1,rarity:"Épique",weaponType:"spear"})');
+  host.run(G+'.inventory.push({id:"casque-lina",name:"Casque d’essai",slot:"helm",level:1,rarity:"Épique"})');
   await step(8);
-  assert.equal(guest.run('game.hero.inventory.some(i=>i.id==="lance-lina")'),true,'objet visible dans le sac de l’invité');
-  const weapon0=guest.run('game.hero.equipment.weapon.id');guest.run('equipItem("lance-lina")');
-  assert.equal(guest.run('game.hero.equipment.weapon.id'),weapon0,'rien ne change chez l’invité avant la réponse de l’hôte');
+  assert.equal(guest.run('game.hero.inventory.some(i=>i.id==="casque-lina")'),true,'objet visible dans le sac de l’invité');
+  guest.run('equipItem("casque-lina")');
+  assert.equal(guest.run('game.hero.equipment.helm'),null,'rien ne change chez l’invité avant la réponse de l’hôte');
   await step(10);
-  assert.equal(host.run(G+'.equipment.weapon.id'),'lance-lina','l’hôte a équipé la lance');
-  assert.equal(guest.run('game.hero.equipment.weapon.id'),'lance-lina','l’invité voit sa lance équipée');
-  assert.equal(guest.run('game.hero.inventory.some(i=>i.id==="lance-lina")'),false);
+  assert.equal(host.run(G+'.equipment.helm.id'),'casque-lina','l’hôte a équipé le casque');
+  assert.equal(guest.run('game.hero.equipment.helm.id'),'casque-lina','l’invité voit son casque équipé');
+  assert.equal(guest.run('game.hero.inventory.some(i=>i.id==="casque-lina")'),false);
   // Un objet que l'invité n'a pas ne peut pas être équipé (demande trafiquée).
   guest.run('CANAAN_NET.requestAction({op:"equip",id:"objet-inexistant"})');guest.run('CANAAN_NET.requestAction({op:"unequip",slot:"__proto__"})');await step(6);
-  assert.equal(host.run(G+'.equipment.weapon.id'),'lance-lina');
+  assert.equal(host.run(G+'.equipment.helm.id'),'casque-lina');
   // Combat partagé : un monstre de l'hôte, frappé par l'invité ; chiffres et éclats chez l'invité, butin et victime pour lui.
   // Ce jalon vérifie le réseau : la règle « chaque héros à son niveau » (testée à part) est neutralisée. Une élite
   // lâche toujours un objet (un monstre ordinaire, 38 % du temps).
@@ -72,11 +73,6 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.ok(guest.run('__toasts.some(t=>t.startsWith("🎁"))'),'objet obtenu annoncé à l’invité');
   assert.equal(guest.run('game.hero.inventory.length'),host.run(G+'.inventory.length'));
   assert.equal(host.run('game.hero.inventory.some(i=>i.id==='+JSON.stringify(host.run(G+'.inventory.at(-1).id'))+')'),false,'rien dans le sac de l’hôte');
-  // Compétence : mana dépensé chez l'hôte, recharge affichée sur la barre de l'invité, effet visuel rejoué.
-  host.run(G+'.player.mp='+G+'.player.mmp');const mp0=host.run(G+'.player.mp');
-  guest.run('useSkill(0)');await step(10);
-  assert.ok(host.run(G+'.player.mp')<mp0,'mana de l’invité dépensé chez l’hôte');
-  assert.ok(guest.run('SKILLS[0].cd')>0,'recharge visible chez l’invité');
   // Roulade : prédite chez l’invité, exécutée chez l’hôte avec sa recharge ; invulnérable pendant le roulé.
   const x0=guest.run('P.x');guest.run('canaanDodge(1,0)');
   await step(1);assert.ok(guest.run('P.x')>x0+5,'roulade prédite');
@@ -122,6 +118,13 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   host.run(G+'.player.mp='+G+'.player.mmp');guest.run('canaanUseSpecial()');await step(8);
   assert.equal(host.run(G+'.player.veiled'),true,'voile chez l’hôte');assert.equal(guest.run('P.veiled'),true,'voile vu par l’invité');
   assert.ok(guest.run('CANAAN_CLASS.specialLeft()')>20,'recharge du sort spécial chez l’invité');
+  // L'invité a reçu les dagues jumelles de l'Assassin ; une compétence dépense son Énergie chez l'hôte, la recharge
+  // s'affiche sur sa barre.
+  assert.equal(guest.run('game.hero.equipment.weapon.weaponType'),'dualdagger');
+  host.run(G+'.player.mp='+G+'.player.mmp');const mp0=host.run(G+'.player.mp');
+  guest.run('mouseWorldX=P.x+70;mouseWorldY=P.y;useSkill(0)');await step(10);
+  assert.ok(host.run(G+'.player.mp')<mp0,'Énergie de l’invité dépensée chez l’hôte');
+  assert.ok(guest.run('SKILLS[0].cd')>0,'recharge visible chez l’invité');
   // Quête de l'invité : il l'accepte depuis son écran, l'hôte vérifie qu'il est près de Liora et la lui donne.
   host.run('globalThis.liora=CANAAN_QUESTS.npcs().liora;'+G+'.player.x=liora.x+30;'+G+'.player.y=liora.y');await step(8);
   guest.run('questAccept(1)');await step(8);

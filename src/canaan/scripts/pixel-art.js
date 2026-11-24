@@ -1163,6 +1163,12 @@
     // Pas plus doux : environ neuf images par seconde (anim avance de 0,25 par pas de simulation).
     const frame = moving ? Math.floor(Math.abs(phase) * 0.6) % 4 : 0;
     const feral = body.form === 'feral';
+    // Félin : il bondit vers sa mire pendant une attaque.
+    if (feral && hero) {
+      const l = CANAAN_WEAPON_LOOK.lunge(hero, body);
+      x += l.dx;
+      y += l.dy;
+    }
     const spr = feral
       ? canaanFeralSprite(face, frame)
       : canaanHeroSprite(look, face, frame, hero ? { tool: 'none' } : {});

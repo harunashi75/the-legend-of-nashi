@@ -24,7 +24,7 @@
   // ses talents de classe et ses artéfacts de l'Arène.
   function characterStats(hero = game.hero) {
     const gear = hero.equipment,
-      pieces = Object.values(gear).filter(item => item && item !== gear.weapon2);
+      pieces = Object.values(gear).filter(Boolean);
     for (const item of pieces) prepare(item);
     // Ressource de la classe (shared/rules/resources.js) : le mana grandit avec le niveau, le Berserker n'en a pas.
     const result = heroStats(
@@ -42,8 +42,9 @@
   function heroStrike(m, d, hero = game.hero) {
     if (!m || m.hp <= 0) return;
     canaanMobLevel(m);
-    const st = characterStats(hero),
-      blow = resolveOutgoing(d, st, m, Math.random);
+    const st = characterStats(hero);
+    if (hero._forceCrit) st.crit = 1000;
+    const blow = resolveOutgoing(d, st, m, Math.random);
     m._lastCrit = blow.crit;
     canaanAchieve(hero, 'hit', m, blow.damage, blow.crit);
     if (blow.crit) float(m.x, m.y - 44, 'CRITIQUE !', '#ffdf77');
@@ -248,14 +249,21 @@
         ' ' +
         label(st.enchant.stat) +
         ' <small>(enchantement)</small></div>';
-    // Arme liée (Relique) : elle suit le niveau du héros et ne le quitte pas.
-    if (isBoundItem(item))
+    // Arme de classe : elle suit le niveau du héros et ne le quitte pas ; sa qualité monte avec les essences.
+    if (isBoundItem(item)) {
+      const c = classById(item.bound);
       html +=
         '<div class="tooltip-relic">' +
-        (item.bound === 'berserker'
-          ? '🪓 Arme liée au Berserker : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.'
-          : '📕 Arme liée à l’Invocateur : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.') +
+        weaponIcon(item) +
+        ' ' +
+        tt(
+          c?.relic
+            ? 'Arme de classe ({classe}) : elle prend ton niveau et grandit avec toi. Impossible à retirer, vendre ou échanger.'
+            : 'Arme de classe ({classe}) : elle prend ton niveau, et sa qualité monte avec les essences des boss (panneau T). Impossible à retirer, vendre ou échanger.',
+          { classe: tt(c?.name || '') }
+        ) +
         '</div>';
+    }
     return html + requirement(item);
   }
   // Ce que fait une statistique (fiche du personnage).

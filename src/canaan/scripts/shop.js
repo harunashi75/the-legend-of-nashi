@@ -14,7 +14,6 @@
   const esc = text => safeGearText(text);
   const say = (hero, text) => (hero === game.hero ? toast(text) : canaanLootNotice(hero, text));
   const guest = () => game.mode === 'guest';
-  const weapons = () => CANAAN_GEAR_ENGINE.weaponTypes;
   // Un objet de la marchandise : emplacement (et famille d'arme) imposés.
   function make(offer, level, slot, weaponType = null) {
     let item;
@@ -72,7 +71,6 @@
       s = { key, items: [], offers: [] };
       for (const offer of offers) {
         for (const slot of shop.slots) (s.items.push(make(offer, level, slot)), s.offers.push(offer));
-        for (const t of weapons()) (s.items.push(make(offer, level, 'weapon', t)), s.offers.push(offer));
       }
       all[kind] = s;
     }

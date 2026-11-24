@@ -60,9 +60,9 @@ test('Artéfacts de l’Arène : douze artéfacts, un par boss, rangs 1 à 5, qu
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_ITEM_MENU.entriesFor({dataset:{menu:"artefact",artefact:"pierre_colosse"}}))')),['Équiper']);
  // Info-bulle : effet au rang actuel et au rang suivant.
  run("showArtefactTooltip('coeur_fer',{clientX:0,clientY:0})");
- assert.match(run('gearTooltip.innerHTML'),/Rang III[\s\S]*Dégâts reçus −19 %[\s\S]*Rang IV :<\/b> Dégâts reçus −21 %/);
+ assert.match(run('gearTooltip.innerHTML'),/Rang III[\s\S]*−4 % de dégâts subis par plaque[\s\S]*Rang IV :<\/b>[^<]*−4,5 % de dégâts subis/);
  // Barre des effets : chaque artéfact équipé, avec son effet au rang du héros.
- assert.ok(run('CANAAN_BUFF_BAR.list().some(e=>e.name==="Cœur de Fer"&&e.text.includes("−19 %"))'));
+ assert.ok(run('CANAAN_BUFF_BAR.list().some(e=>e.name==="Cœur de Fer"&&e.text.includes("−4 %"))'));
  // Plus aucune Rune : ni dans le sac, ni dans les piles reconnues.
  assert.equal(run('CANAAN_BAG.parse("rubis:phenix:0*1")'),null);
  // Sauvegarde : artéfacts et records de l'Arène dans l'instantané, plus de Runes.
@@ -86,47 +86,64 @@ test('Artéfacts : effets en combat, au rang du héros',()=>{
  const near=(a,b,msg)=>assert.ok(Math.abs(a-b)<1e-6,(msg||'')+' '+a+' ≠ '+b);
  wear([]);const st0=JSON.parse(run('JSON.stringify(characterStats())'));
  // Statistiques : Pierre du Colosse, Croc des Ombres, Couronne du Souverain ; le rang les renforce.
- wear(['pierre_colosse']);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.25));
- wear(['pierre_colosse'],5);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.4));
- wear(['croc_ombres']);near(run('characterStats().crit'),st0.crit+12);
+ wear(['pierre_colosse']);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.2));
+ wear(['pierre_colosse'],5);assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.32));
+ wear(['croc_ombres']);near(run('characterStats().crit'),st0.crit+10);
  wear(['couronne_souverain']);assert.equal(run('characterStats().attack'),Math.round(st0.attack*1.1));
  assert.equal(run('characterStats().defense'),Math.round(st0.defense*1.1));assert.equal(run('characterStats().maxHp'),Math.round(st0.maxHp*1.1));
- // Dégâts reçus : Cœur de Fer.
- wear(['coeur_fer']);near(run('CANAAN_ARTEFACTS.defense({},100)'),85);wear(['coeur_fer'],5);near(run('CANAAN_ARTEFACTS.defense({},100)'),76);
- // Écu du Déchu : une parade annule le coup et riposte.
- run('globalThis.__m={t:"Cible",hp:100000,mhp:100000,x:P.x+30,y:P.y,level:1,r:14};monsters.push(__m)');
- wear(['ecu_dechu']);run('Math.random=()=>0.1');assert.equal(run('CANAAN_ARTEFACTS.defense(__m,100)'),0);assert.ok(run('__m.hp')<100000,'riposte');
+ // Pierre du Colosse : la peau de pierre réduit de moitié le premier coup, puis toutes les 8 s.
+ wear(['pierre_colosse']);run('time+=1000');near(run('CANAAN_ARTEFACTS.defense({},100)'),50);near(run('CANAAN_ARTEFACTS.defense({},100)'),100);
+ run('time+=481');near(run('CANAAN_ARTEFACTS.defense({},100)'),50);
+ // Cœur de Fer : chaque coup forge une plaque (−3 % par plaque) ; à 5 plaques, une onde de choc part du héros.
+ run('globalThis.__m={t:"Cible",hp:100000,mhp:100000,x:P.x+30,y:P.y,level:1,r:14};monsters.length=0;monsters.push(__m)');
+ wear(['coeur_fer']);run('time+=1000');near(run('CANAAN_ARTEFACTS.defense({},100)'),100);near(run('CANAAN_ARTEFACTS.defense({},100)'),97);
+ run('for(let i=0;i<3;i++)CANAAN_ARTEFACTS.defense({},100)');near(run('CANAAN_ARTEFACTS.defense({},100)'),85,'5 plaques : −15 %');
+ run('CANAAN_ARTEFACTS.attackAfter(__m,10)');assert.ok(run('__m.hp')<100000,'onde de fer');
+ // Écu du Déchu : une parade annule le coup, riposte, et la compétence suivante fait +30 %.
+ run('__m.hp=100000');wear(['ecu_dechu']);run('Math.random=()=>0.1');assert.equal(run('CANAAN_ARTEFACTS.defense(__m,100)'),0);assert.ok(run('__m.hp')<100000,'riposte');
+ near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100,{skill:true,offensive:true})'),130);
+ near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100,{skill:true,offensive:true})'),100);
  run('Math.random=()=>0.9');assert.equal(run('CANAAN_ARTEFACTS.defense(__m,100)'),100);
- // Sceau de l'Exécuteur : +40 % sous 35 % des PV de la cible.
- wear(['sceau_executeur']);near(run('CANAAN_ARTEFACTS.attackBefore({hp:30,mhp:100},100)'),140);near(run('CANAAN_ARTEFACTS.attackBefore({hp:50,mhp:100},100)'),100);
- // Voile du Néant : roulade plus courte, puis +30 % de dégâts pendant 3 s.
- wear(['voile_neant']);near(run('CANAAN_ARTEFACTS.dodgeCooldownFactor()'),0.6);
- run('CANAAN_ARTEFACTS.onDodge()');near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100)'),130);
+ // Sceau de l'Exécuteur : +30 % sous 35 % des PV de la cible ; achever un ennemi réduit les recharges.
+ wear(['sceau_executeur']);near(run('CANAAN_ARTEFACTS.attackBefore({hp:30,mhp:100},100)'),130);near(run('CANAAN_ARTEFACTS.attackBefore({hp:50,mhp:100},100)'),100);
+ run('weaponCooldowns["aegis:3"]=5;CANAAN_ARTEFACTS.attackAfter({hp:0,mhp:100,x:0,y:0},10)');near(run('weaponCooldowns["aegis:3"]'),4);
+ // Voile du Néant : roulade plus courte, +25 % de dégâts pendant 3 s, et l'écho explose 1 s plus tard.
+ run('__m.hp=100000;__m.x=P.x;__m.y=P.y');wear(['voile_neant']);near(run('CANAAN_ARTEFACTS.dodgeCooldownFactor()'),0.65);
+ run('CANAAN_ARTEFACTS.onDodge()');near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100)'),125);
+ for(let i=0;i<62;i++)run('time++;CanaanStages.artefacts.after()');assert.ok(run('__m.hp')<100000,'l’écho explose');
  run('time+=200');near(run('CANAAN_ARTEFACTS.attackBefore({hp:90,mhp:100},100)'),100);
- // Cœur de Cendres : compétences plus fortes et recharges plus courtes.
- wear(['coeur_cendres']);near(run('CANAAN_ARTEFACTS.cooldownFactor()'),0.85);near(run('CANAAN_ARTEFACTS.onCast("sword",0,"sword:0",{multiplier:1}).multiplier'),1.2);
- // Fiole des Brumes : soins reçus +30 % ; hors combat, 3 % des PV max par seconde.
- wear(['fiole_brumes']);near(run('CANAAN_ARTEFACTS.healFactor(false)'),1.3);
- run('time+=600;P.hp=1');for(let i=0;i<60;i++)run('time++;CanaanStages.artefacts.after()');
- near(run('P.hp'),1+run('P.mhp')*0.03,'régénération');
- // Prisme de Cristal : un bouclier de 15 % des PV max, rechargé toutes les 20 s.
- wear(['prisme_cristal']);run('time++;CanaanStages.artefacts.after()');const shield=run('P.mhp*0.15');
+ // Cœur de Cendres : compétences plus fortes, recharges plus courtes, sol embrasé sous la cible.
+ run('__m.hp=100000');wear(['coeur_cendres']);near(run('CANAAN_ARTEFACTS.cooldownFactor()'),0.9);near(run('CANAAN_ARTEFACTS.onCast("aegis",0,"aegis:0",{multiplier:1}).multiplier'),1.16);
+ run('CANAAN_ARTEFACTS.attackAfter(__m,100,{skill:true,offensive:true})');const ember=run('__m.hp');
+ for(let i=0;i<70;i++)run('time++;CanaanStages.artefacts.after()');assert.ok(run('__m.hp')<ember,'le sol brûle');
+ // Fiole des Brumes : soins reçus +25 % ; sous 35 % de PV, une brume rend 25 % des PV max en 5 s.
+ wear(['fiole_brumes']);near(run('CANAAN_ARTEFACTS.healFactor(false)'),1.25);
+ run('time+=600;P.hp=1');for(let i=0;i<5*60+5;i++)run('time++;CanaanStages.artefacts.after()');
+ near(run('P.hp'),1+run('P.mhp')*0.25,'brume');
+ // Prisme de Cristal : un bouclier de 12 % des PV max, rechargé toutes les 15 s, qui éclate en se brisant.
+ run('__m.hp=100000');wear(['prisme_cristal']);run('time++;CanaanStages.artefacts.after()');const shield=run('P.mhp*0.12');
  near(run('CANAAN_ARTEFACTS.defense({},1e6)'),1e6-shield);near(run('CANAAN_ARTEFACTS.defense({},100)'),100);
+ assert.ok(run('__m.hp')<100000,'le cristal éclate');
  assert.ok(run('CANAAN_ARTEFACTS.auras().every(a=>a.id!=="prisme_cristal")'),'bouclier épuisé');
  // Écaille Écarlate et Croc des Ombres : brûlure et saignement, réglés par le héros qui les pose, en 4 s.
  run('monsters.length=0;globalThis.__m={t:"Cible",hp:100000,mhp:100000,x:P.x+30,y:P.y,level:1,r:14};monsters.push(__m)');
  wear(['ecaille_ecarlate','croc_ombres']);run('__m._lastCrit=true;CANAAN_ARTEFACTS.attackAfter(__m,100)');
- assert.deepEqual(JSON.parse(run('JSON.stringify(__m._artDots.map(d=>[d.kind,d.dps]))')),[['bleed',7.5],['burn',5]]);
+ assert.deepEqual(JSON.parse(run('JSON.stringify(__m._artDots.map(d=>[d.kind,d.dps]))')),[['bleed',10],['burn',2.5]]);
  const hp1=run('__m.hp');for(let i=0;i<60*4+2;i++)run('time++;CanaanStages.artefacts.after()');
  assert.ok(run('__m.hp')<hp1,'les effets blessent');assert.equal(run('__m._artDots.length'),0,'puis s’arrêtent');
- // Œil des Tempêtes : un éclair frappe la cible et deux ennemis proches.
+ // Les têtes de l'Hydre : une compétence crache sur la cible et deux ennemis proches.
  run('monsters.length=0;globalThis.__ms=[0,1,2,3].map(k=>({t:"Cible",hp:100000,mhp:100000,x:P.x+30+k*20,y:P.y,level:1,r:14}));monsters.push(...__ms)');
- wear(['oeil_tempetes']);run('Math.random=()=>0;CANAAN_ARTEFACTS.attackAfter(__ms[0],1000);Math.random=()=>0.9');
- assert.equal(run('__ms.filter(m=>m.hp<100000).length'),3,'cible et deux voisins');
- // Couronne du Souverain : un coup fatal laisse à 20 % des PV, une fois toutes les 90 s.
+ wear(['ecaille_ecarlate']);run('CANAAN_ARTEFACTS.attackAfter(__ms[0],1000,{skill:true,offensive:true})');
+ assert.equal(run('__ms.filter(m=>m.hp<100000).length'),3,'trois têtes');
+ // Œil des Tempêtes : tous les 5 coups, la foudre frappe la cible et trois ennemis proches.
+ run('for(const m of __ms)m.hp=100000');wear(['oeil_tempetes']);
+ run('for(let i=0;i<4;i++)CANAAN_ARTEFACTS.attackAfter(__ms[0],1)');assert.equal(run('__ms.filter(m=>m.hp<100000).length'),0);
+ run('CANAAN_ARTEFACTS.attackAfter(__ms[0],1)');assert.equal(run('__ms.filter(m=>m.hp<100000).length'),4,'cible et trois voisins');
+ // Couronne du Souverain : un coup fatal rend 30 % des PV et 2 s d'invulnérabilité, une fois toutes les 90 s.
  wear(['couronne_souverain']);run('P.hp=50');
- assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.2)));
- assert.ok(run('canaanHurtPlayer(9999,null)')>0);assert.ok(run('P.hp')<=0);
+ assert.equal(run('canaanHurtPlayer(9999,null)'),0);assert.equal(run('P.hp'),Math.max(1,Math.round(run('P.mhp')*0.3)));
+ assert.equal(run('canaanHurtPlayer(9999,null)'),0,'invulnérable 2 s');
+ run('time+=130');assert.ok(run('canaanHurtPlayer(9999,null)')>0);assert.ok(run('P.hp')<=0);
 });
 
 test('Arène des Épreuves : portail près du camp, douze boss, vagues, récompenses, records et sortie',()=>{

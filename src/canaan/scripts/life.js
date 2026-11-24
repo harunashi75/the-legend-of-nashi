@@ -1657,8 +1657,8 @@
       start = atk > lastAtk + 0.1 && atk > 0.2;
     lastAtk = atk;
     if (!start || P.dead || game.world.instance) return null;
-    const type = game.hero.equipment?.weapon?.weaponType || 'sword',
-      ranged = type === 'bow' || type === 'staff',
+    const type = CANAAN_CLASS.weaponType(game.hero),
+      ranged = ['bow', 'staff', 'wildstaff', 'lute', 'grimoire'].includes(type),
       a = Math.atan2(mouseWorldY - P.y, mouseWorldX - P.x),
       cos = Math.cos(a),
       sin = Math.sin(a);
@@ -1673,9 +1673,9 @@
         const along = dx * cos + dy * sin;
         if (d > 460 || along < 0 || Math.abs(-dx * sin + dy * cos) > 28) continue;
       } else {
-        const range = type === 'spear' ? 200 : 165,
+        const range = 165,
           diff = Math.atan2(Math.sin(Math.atan2(dy, dx) - a), Math.cos(Math.atan2(dy, dx) - a));
-        if (d > range || Math.abs(diff) > (type === 'spear' ? 0.4 : 1.1)) continue;
+        if (d > range || Math.abs(diff) > 1.1) continue;
       }
       if (d < bd) {
         bd = d;

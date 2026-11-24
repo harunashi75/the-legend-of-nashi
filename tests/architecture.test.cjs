@@ -18,7 +18,7 @@ test('Les blocs JavaScript compilent ensemble et séparément', () => {
 });
 
 test('Consolidation : une seule implémentation pour chaque fonction des systèmes migrés',()=>{
-  for(const name of ['renderInventory','renderCharacter','charSlot','showGearTooltip','showEquippedTooltip','gearStat','gearScore','gearComparison','equipItem','unequip','equipReserveWeapon','switchWeapon']){
+  for(const name of ['renderInventory','renderCharacter','charSlot','showGearTooltip','showEquippedTooltip','gearStat','gearScore','gearComparison','equipItem','unequip']){
     const bodies=[...source.matchAll(new RegExp('(?:\\bfunction\\s+'+name+'\\s*\\(|\\b'+name+'\\s*=\\s*function\\s*\\()','g'))];
     assert.equal(bodies.length,1,name);
     assert.equal(new RegExp('\\bconst\\s+\\w+\\s*=\\s*'+name+'\\s*;').test(source),false,'capture de '+name);
@@ -38,8 +38,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
       renderInventory:'canaan-ui',renderCharacter:'canaan-ui',charSlot:'canaan-ui',
       showGearTooltip:'canaan-ui',showEquippedTooltip:'canaan-ui',
       gearStat:'canaan-stats',gearScore:'canaan-stats',gearComparison:'canaan-stats',
-      equipItem:'canaan-equipment',unequip:'canaan-equipment',
-      equipReserveWeapon:'canaan-equipment',switchWeapon:'canaan-equipment'
+      equipItem:'canaan-equipment',unequip:'canaan-equipment'
     };
     // Règle partagée (shared/rules/items.js) : disponible dès le départ, avant tous les scripts classiques.
     assert.equal(run('typeof applyItemName'),'function');
@@ -50,7 +49,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
       earlyChecks++;
     }
   }}),{g,nodes,run}=runtime;
-  assert.equal(earlyChecks,17);
+  assert.equal(earlyChecks,15);
   assert.equal(runtime.errors.length,0,runtime.errors.join('\n'));
   assert.equal(g.CANAAN_READY,true);assert.equal(g.CANAAN_BOOTSTRAP.validate(),true);
   // Un export manquant est refusé par la validation, puis accepté une fois rétabli.
@@ -66,19 +65,19 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   // Les panneaux sont construits directement, y compris les contrôles de réserve et de vente.
   g.CANAAN_UI.openInventory();
   let html=nodes.get('window').innerHTML;
-  assert.ok(!html.includes('bag-upgrade'),'l’agrandissement du sac s’achète chez le marchand');assert.ok(html.includes('Arme 2'));
+  assert.ok(!html.includes('bag-upgrade'),'l’agrandissement du sac s’achète chez le marchand');assert.ok(!html.includes('Arme 2'),'plus d’arme de réserve');
   // La vente se fait chez le marchand : plus de bouton 🪙 dans le sac ; chaque pièce a son menu du clic droit (démanteler…).
-  assert.equal((html.match(/class="bag-sale"/g)||[]).length,0);assert.equal((html.match(/data-menu="gear"/g)||[]).length,2);
-  assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,18);
+  assert.equal((html.match(/class="bag-sale"/g)||[]).length,0);assert.equal((html.match(/data-menu="gear"/g)||[]).length,1);
+  assert.equal((html.match(/class="bag-cell empty"/g)||[]).length,19);
   assert.equal(g.CANAAN_UI.inspect().panel,'inventory');
   run("inventory[0].name='<img src=x onerror=alert(1)>';inventory[0].weaponType='bow'");
   g.CANAAN_UI.openInventory();html=nodes.get('window').innerHTML;
   assert.ok(!html.includes('<img src=x'));
   // Une opération produit une sauvegarde et un recalcul, sans rendre de mana.
   run('P.mp=7;equipItem(inventory[0].id)');
-  assert.equal(counters.saves,1);assert.equal(counters.stats,1);assert.equal(counters.bars,1);
-  assert.equal(run('P.mp'),7);assert.equal(run('inventory.length'),1);
-  assert.equal(run('equipment.weapon.weaponType'),'bow');
+  assert.equal(counters.saves,1);assert.equal(counters.stats,1);assert.equal(counters.bars,0,'une armure ne change pas la barre');
+  assert.equal(run('P.mp'),7);assert.equal(run('inventory.length'),0);
+  assert.equal(run('equipment.armor.slot'),'armor');
   g.CANAAN_UI.openCharacter();html=nodes.get('window').innerHTML;
   // Fiche : deux tableaux (3 principales, 6 secondaires), en points, sans pourcentage.
   assert.equal((html.match(/class="stat-table"/g)||[]).length,2);assert.equal((html.match(/class="stat-desc"/g)||[]).length,9);
@@ -86,17 +85,14 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   assert.ok(html.includes('Augmente les PV maximum.')&&html.includes('Augmente la vitesse d’attaque et réduit les temps de recharge.')&&!html.includes('title="Réduit les dégâts reçus."'));
   assert.ok(html.includes('Statistiques principales')&&html.includes('Statistiques secondaires'));
   assert.ok(!/stats-panel[\s\S]*%/.test(html),'aucun pourcentage dans les tableaux');
-  assert.equal((html.match(/class="equip-square/g)||[]).length,10);
-  assert.ok(html.includes('Arme 2'));assert.ok(html.includes('active-weapon'));
+  assert.equal((html.match(/class="equip-square/g)||[]).length,9);
+  assert.ok(!html.includes('Arme 2'));assert.ok(html.includes('Arme de classe'));
   assert.ok(!html.includes('undefined'));assert.equal(g.CANAAN_UI.inspect().panel,'character');
-  // Réserve, échange et retrait : même identité d'objet, une écriture par action.
-  run("inventory.push({id:'reserve',name:'Bâton',slot:'weapon',weaponType:'staff',rarity:'Commun',ilvl:1});equipReserveWeapon(inventory.length-1)");
-  assert.equal(counters.saves,2);assert.equal(counters.stats,2);assert.equal(counters.bars,1);
-  run('closePanels();started=true;switchWeapon()');
-  assert.equal(run('equipment.weapon.id'),'reserve');assert.equal(run('equipment.weapon2.weaponType'),'bow');
-  assert.equal(counters.saves,3);assert.equal(counters.stats,3);assert.equal(counters.bars,2);assert.equal(run('P.mp'),7);
-  run("unequip('weapon')");assert.equal(counters.saves,4);assert.equal(counters.stats,4);assert.equal(counters.bars,3);
-  assert.equal(run('equipment.weapon'),null);
+  // Retrait : même identité d'objet, une écriture par action ; l'arme de classe ne se retire pas.
+  run("closePanels();started=true;unequip('armor')");assert.equal(counters.saves,2);assert.equal(counters.stats,2);
+  assert.equal(run('equipment.armor'),null);assert.equal(run('P.mp'),7);
+  run('CANAAN_CLASS_STATE.import({id:"guerrier",talents:[]})');assert.equal(run("unequip('weapon')"),false);
+  assert.equal(run('equipment.weapon.weaponType'),'dualsword');
   // Deux bagues : la première va dans la Bague 1, la suivante dans la Bague 2 ; l'info-bulle compare une nouvelle bague
   // à celle qu'elle remplacerait.
   run("inventory.push({id:'ring-a',name:'A',slot:'ring',rarity:'Commun',level:1},{id:'ring-b',name:'B',slot:'ring',rarity:'Commun',level:1},{id:'ring-c',name:'C',slot:'ring',rarity:'Rare',level:1})");
@@ -143,7 +139,7 @@ test('Chargement complet : modules, panneaux et équipement sans chaîne histori
   assert.equal(g.localStorage.getItem(persistence.lastBackupKey),broken);
   assert.equal(nodes.get('saveRecovery').hidden,true);
   assert.equal(run('loadGame()'),true);assert.equal(run('saveGame()'),true);
-  assert.equal(run('inventory.length'),2);assert.equal(run('P.gold'),0);assert.equal(run('BAG_LIMIT'),20);
+  assert.equal(run('inventory.length'),1,'une tunique : l’arme vient de la classe');assert.equal(run('P.gold'),0);assert.equal(run('BAG_LIMIT'),20);
   assert.equal(run('characterStats().level'),1);assert.equal(run('P.mhp'),104);
   assert.equal(run('inventory.every(item=>Object.keys(item.sec).length===2&&item.level===1)'),true);
   assert.equal(runtime.errors.length,1); // L'erreur de lecture volontaire est signalée.
@@ -311,9 +307,8 @@ test('Surcharges consolidées : une seule définition et comportements fusionné
  assert.equal(run("ARTEFACTS.map(a=>a.wave).join()"),'1,2,3,4,5,6,7,8,9,10,11,12');
  // Un marchand par village, et le dialogue ouvre la boutique.
  assert.equal(run("villages.every(v=>npcs.filter(n=>n.type==='shop'&&n.village===v.name).length===1)"),true);
- // L'arme de réserve ne compte pas dans les statistiques.
- run("for(const k of Object.keys(gearSlots))equipment[k]={id:'t'+k,slot:k,level:10,rarity:'Commun'};globalThis.__def=characterStats().primary.defense;equipment.weapon2={id:'reserve',slot:'weapon',level:60,rarity:'Céleste'}");
- assert.equal(run('characterStats().primary.defense'),run('__def'));
+ // Plus d'arme de réserve : une seule arme, celle de la classe.
+ assert.equal(run("'weapon2' in gearSlots"),false);
  // Boss mondiaux mis à l'échelle dès leur apparition.
  run('monsters=[];worldBossTimers={};instanceState=null;spawnWorldBosses()');
  assert.ok(run('monsters.filter(m=>m.worldBoss).length')>0);
@@ -388,7 +383,10 @@ test('Préférences : stockage centralisé, valeurs illisibles ignorées et écr
  const boot=require('./helpers/canaan-runtime.cjs');
  const {run,errors}=boot(source,{beforeScript(part,run){if(part[1].includes('id="canaan-modules"'))run("localStorage.setItem('canaan_audio_v1729','{\"on\":false,\"music\":61,\"fx\":12}')")}});
  assert.equal(errors.length,0,errors.join('\n'));
- assert.equal(run('JSON.stringify(Array.from(skEl.children,el=>el.dataset.skill))'),'[0,1,2,3]');
+ assert.equal(run('JSON.stringify(Array.from(skEl.children,el=>el.dataset.skill))'),'[]','sans classe, aucune compétence');
+ // Une classe : ses quatre compétences, puis la case du sort de classe (F).
+ run('CANAAN_CLASS_STATE.import({id:"guerrier",talents:[]})');
+ assert.equal(run('JSON.stringify(Array.from(skEl.children,el=>el.dataset.skill))'),'[0,1,2,3,null]');
  assert.equal(run("document.getElementById('musicVolume').value"),61);
  assert.equal(run("document.getElementById('sfxVolume').value"),12);
 });

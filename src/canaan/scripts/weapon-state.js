@@ -2,15 +2,19 @@ const weaponCooldowns = {};
 let activeWeaponType = '';
 let spellZones = [];
 let spellHits = [];
+// Jeu de compétences actif du héros de l'hôte : celui de l'arme de sa classe, ou du félin quand le Druide est en
+// forme féline ; '' sans classe (aucune compétence, l'attaque de base frappe à mains nues).
 function currentWeaponType() {
-  return game.hero.equipment.weapon?.weaponType || 'sword';
+  return typeof CANAAN_CLASS === 'undefined'
+    ? game.hero.equipment.weapon?.weaponType || ''
+    : CANAAN_CLASS.weaponType(game.hero);
 }
 function refreshWeaponBar() {
   const type = currentWeaponType();
   activeWeaponType = type;
   skEl.innerHTML = '';
   SKILLS.length = 0;
-  WEAPON_SPELLS[type].forEach((spec, i) => {
+  (WEAPON_SPELLS[type] || []).forEach((spec, i) => {
     const key = type + ':' + i;
     const skill = {
       n: spec[1],
@@ -52,21 +56,13 @@ function canaanStanceOf() {
 // Petit badge d'une case de compétence : posture en cours (secondes), bonus prêt, ou charges arcaniques.
 function canaanSkillBadge(type, i, st) {
   const sec = v => (v > 0 ? Math.ceil(v) + ' s' : '');
-  const posture = {
-    sword: 'parryReady',
-    dualsword: 'flurry',
-    axe: 'berserk',
-    greataxe: 'berserk',
-    dualdagger: 'shadow',
-    staff: 'focus'
-  }[type];
+  // Postures en cours sur la compétence qui les lance.
+  const posture = { greataxe: 'berserk', feline: 'roar', aegis: 'shieldGuard' }[type];
   if (i === 2 && posture && st[posture] > 0) return { text: sec(st[posture]), on: true };
-  if (type === 'shield' && i === 3 && st.shieldGuard > 0) return { text: sec(st.shieldGuard), on: true };
-  if (type === 'sword' && i === 3 && st.parryReady > 0) return { text: '600 %', on: true };
+  if (type === 'dualdagger' && i === 1 && st.shadow > 0) return { text: sec(st.shadow), on: true };
   if (type === 'dualsword' && i === 3 && st.combo > 0) return { text: 'COMBO', on: true };
-  if (type === 'bow' && i === 0 && st.fastBow > 0) return { text: '360 %', on: true };
-  if (type === 'staff' && i === 3)
-    return { text: '🔮 ' + (st.arcane | 0) + '/3', on: (st.arcane | 0) >= 3, always: true };
+  if (type === 'bow' && i === 1 && st.huntMark > 0) return { text: sec(st.huntMark), on: true };
+  if (type === 'wildstaff' && i === 1 && st.bloom > 0) return { text: sec(st.bloom), on: true };
   return null;
 }
 function canaanUpdateSkillBadges() {
@@ -145,7 +141,7 @@ function canaanSkillTooltip(i) {
     '</div>';
   if (mult > 0 && typeof CANAAN_SKILLS !== 'undefined') {
     const power = CANAAN_SKILLS.power(game.hero, magic),
-      extra = type === 'staff' && i === 3 ? 1.4 * (st.arcane | 0) : 0;
+      extra = 0;
     lines +=
       '<div class="skill-tip-dmg">≈ ' +
       // Chaque morceau est une entrée du dictionnaire : la phrase change selon l'arme, les charges et la magie.
@@ -173,10 +169,8 @@ function canaanSkillTooltip(i) {
     '</div>';
   const rider = CANAAN_CLASS.skillRider(type, i, game.hero);
   if (rider) lines += '<div class="skill-tip-class">' + esc(rider) + '</div>';
-  if (type === 'staff')
-    lines += '<div class="skill-tip-state">🔮 Charges arcaniques : <b>' + (st.arcane | 0) + ' / 3</b></div>';
   const badge = canaanSkillBadge(type, i, st);
-  if (badge?.on && type !== 'staff')
+  if (badge?.on)
     lines +=
       '<div class="skill-tip-state">✦ ' + esc(tt('Bonus prêt : {nom}', { nom: tt(badge.text) })) + '</div>';
   return lines;

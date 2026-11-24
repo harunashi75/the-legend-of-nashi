@@ -73,11 +73,11 @@ test('Repartir à neuf : schéma ancien et JSON corrompu archivés avant une par
     assert.ok(p.lastBackupKey.startsWith(key+'_backup_'));assert.equal(g.db.get(p.lastBackupKey),raw);
     assert.equal(writes[0],p.lastBackupKey);assert.equal(writes[1],key);
     const fresh=JSON.parse(g.db.get(key));assert.equal(fresh.schema,10);assert.equal(fresh.heros.hote.player.gold,0);
-    assert.equal(fresh.heros.hote.inventory.length,2);assert.deepEqual(fresh.heros.hote.classe,{id:null,talents:[]});assert.equal(fresh.nom,'Aventure 1');
+    assert.equal(fresh.heros.hote.inventory.length,1,'une tunique : l’arme vient de la classe');assert.deepEqual(fresh.heros.hote.classe,{id:null,talents:[]});assert.equal(fresh.nom,'Aventure 1');
     assert.equal(g.recoveryNodes.get('saveRecovery').hidden,true);
     // Simuler le rechargement de page puis les sauvegardes manuelle et différée.
     assert.equal(g.loadGame(),true);assert.equal(g.P.gold,0);
-    assert.equal(g.inventory.length,2);assert.equal(JSON.stringify(g.CANAAN_CLASS.audit().talents),'[]');
+    assert.equal(g.inventory.length,1);assert.equal(JSON.stringify(g.CANAAN_CLASS.audit().talents),'[]');
     assert.equal(Object.values(g.equipment).filter(Boolean).length,0);
     assert.equal(g.saveGame(),true);
     g.started=true;g.P.gold=17;p.requestSave();

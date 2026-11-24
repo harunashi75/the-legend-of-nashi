@@ -65,9 +65,46 @@
   }
   // Héros visés par une zone : debout, dans la salle du boss.
   const roomHeroes = m => game.heroes.filter(h => alive(h) && CANAAN_DUNGEON_EXPLORE.inBossRoom(m, h.player));
+  // Matière des attaques des boss de l'instance : la couleur de sa fiche (feu, glace, ombre, lumière…).
+  const themeColor = () => instances[game.world.instance?.index]?.color || '#ff6a3a';
+  // Impact d'une zone : une vraie explosion de la matière du boss (vfx-art.js), à la forme de la zone.
+  function impact(z) {
+    const col = z.kind === 'soak' ? '#ffd34a' : z.kind === 'mark' ? '#c86aff' : themeColor();
+    if (z.kind === 'line') {
+      const n = Math.min(7, Math.max(2, Math.round(z.len / 90)));
+      for (let k = 0; k <= n; k++)
+        CANAAN_VFX.bossImpact(
+          z.x + (Math.cos(z.a) * (z.len * k)) / n,
+          z.y + (Math.sin(z.a) * (z.len * k)) / n,
+          z.w * 1.4,
+          col
+        );
+      return;
+    }
+    if (z.kind === 'donut') {
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2,
+          d = (z.r + z.r0) / 2;
+        CANAAN_VFX.bossImpact(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, (z.r - z.r0) * 0.6, col);
+      }
+      return;
+    }
+    if (z.kind === 'safe') {
+      // Toute la salle explose, sauf la zone sûre (qui reçoit un pilier de lumière verte).
+      CANAAN_SKILLS.fx('holyPillar', z.x, z.y, 0, z.r, 0, '#5aff8a', 1);
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2 + Math.random() * 0.5,
+          d = z.r + T * (2 + Math.random() * 4);
+        CANAAN_VFX.bossImpact(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, 2 * T, col, true);
+      }
+      return;
+    }
+    CANAAN_VFX.bossImpact(z.x, z.y, z.r, col, z.r >= 2.5 * T);
+  }
   function strike(z) {
     const m = z.m;
     if (!m || m.hp <= 0) return;
+    impact(z);
     const heroes = roomHeroes(m),
       already = z.vol ? volleyHits.get(z.vol) || new Set() : null,
       touched = heroes.filter(h => inside(z, h.player.x, h.player.y) && !already?.has(h));
@@ -134,7 +171,8 @@
           r: 1.3 * T,
           at: now() + 80,
           mult: raid ? 1.3 : 1.1,
-          vol
+          vol,
+          fall: true
         });
       say(m, '⚠️ ' + tt('Pluie d’éclats !'));
     },
@@ -274,6 +312,7 @@
     },
     pull(m, tg, raid) {
       m.mech.pullUntil = now() + 90;
+      CANAAN_SKILLS.fx('roar', m.x, m.y, 0, 6 * T, 0, '#a0c8ff', 1.5);
       add({ kind: 'circle', m, x: m.x, y: m.y, r: 3 * T, at: now() + 120, mult: raid ? 2.4 : 2 });
       root(m, 120);
       say(m, '🌪️ ' + tt('Attraction : résistez !'), '#a0c8ff');
@@ -281,10 +320,10 @@
     blink(m, tg, raid) {
       const to = CANAAN_DUNGEON_EXPLORE.bossRoomSpot(m, 4);
       if (!to) return CAST.slam(m, tg, raid);
-      burst(m.x, m.y, '#b070ff', 24);
+      CANAAN_SKILLS.fx('shadowStep', m.x, m.y, 0, 50, 0, '#b070ff', 0.7);
       m.x = to.x;
       m.y = to.y;
-      burst(m.x, m.y, '#b070ff', 24);
+      CANAAN_SKILLS.fx('shadowStep', m.x, m.y, 0, 50, 0, '#b070ff', 0.7);
       add({ kind: 'circle', m, x: m.x, y: m.y, r: 2.7 * T, at: now() + 60, mult: raid ? 2 : 1.7 });
       root(m, 60);
       say(m, '✨ ' + tt('Il disparaît… et retombe !'), '#d8a0ff');
@@ -462,7 +501,17 @@
         z.x = z.m.x;
         z.y = z.m.y;
       }
+      // Pluie d'éclats et impact partagé : le projectile tombe du ciel pour arriver pile à l'impact.
+      if ((z.fall || z.kind === 'soak') && !z.pre && z.at - now() <= 48) {
+        z.pre = true;
+        CANAAN_SKILLS.fx('meteor', z.x, z.y, 0, z.r, 0, z.kind === 'soak' ? '#ffd34a' : themeColor(), 0.8);
+      }
       if (now() < z.at) continue;
+      // Flaques : la matière corrompue apparaît au sol au moment où elles se forment.
+      if (z.kind === 'pool' && !z.pre) {
+        z.pre = true;
+        CANAAN_SKILLS.fx('poisonPool', z.x, z.y, 0, z.r, 0, '#7ad040', Math.max(1, (z.until - now()) / 60));
+      }
       if (z.until) {
         // Zones persistantes : elles blessent par à-coups tant qu'on y reste.
         if (now() >= z.until) {
@@ -492,85 +541,39 @@
     }
   };
   // ------------------------------------------------------------ Dessin (hôte et invités)
+  // Annonces au sol (vfx-art.js) : le sol se fissure et rougeoit de la matière de l'instance jusqu'à l'impact ; le
+  // rayon actif est un rayon d'énergie ; les flaques bouillonnent.
   const COLOR = { soak: '#ffd34a', safe: '#5aff8a', mark: '#c86aff', pool: '#7ad040' };
   function drawZone(c, z, k) {
-    const col = COLOR[z.kind] || '#ff2a1a';
-    c.fillStyle = col;
-    c.strokeStyle = col === '#ff2a1a' ? '#ff6a4a' : col;
-    c.lineWidth = 3;
-    if (z.kind === 'line' || z.kind === 'beam') {
-      const a = z.kind === 'beam' ? angleNow(z) : z.a;
-      c.save();
-      c.translate(z.x, z.y);
-      c.rotate(a);
-      if (z.kind === 'beam' && now() >= z.at) {
-        // Rayon actif : cœur blanc et gaine dorée.
-        c.globalAlpha = 0.75;
-        c.fillStyle = '#ffd36a';
-        c.fillRect(0, -z.w, z.len, z.w * 2);
-        c.globalAlpha = 0.9;
-        c.fillStyle = '#ffffff';
-        c.fillRect(0, -z.w * 0.3, z.len, z.w * 0.6);
-      } else {
-        c.globalAlpha = 0.15 + 0.3 * k;
-        c.fillRect(-z.w, -z.w, (z.len + z.w) * k, z.w * 2);
-        c.globalAlpha = 0.8;
-        c.strokeRect(-z.w, -z.w, z.len + z.w, z.w * 2);
-      }
-      c.restore();
+    const col = COLOR[z.kind] || themeColor();
+    if (z.kind === 'beam') {
+      const a = angleNow(z);
+      if (now() >= z.at) CANAAN_VFX.energyBeam(c, z.x, z.y, a, z.len, z.w, '#ffd36a', time);
+      else CANAAN_VFX.telegraph(c, 'line', { ...z, a, w: z.w * 2 }, k, '#ffd36a', time);
       return;
     }
-    if (z.kind === 'donut') {
-      c.globalAlpha = 0.14 + 0.24 * k;
-      c.beginPath();
-      c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
-      c.arc(z.x, z.y, z.r0, 0, Math.PI * 2, true);
-      c.fill();
-      c.globalAlpha = 0.9;
-      c.strokeStyle = '#5aff8a';
-      c.beginPath();
-      c.arc(z.x, z.y, z.r0, 0, Math.PI * 2);
-      c.stroke();
-      return;
+    if (z.kind === 'line')
+      return CANAAN_VFX.telegraph(
+        c,
+        'line',
+        { ...z, x: z.x - Math.cos(z.a) * z.w, y: z.y - Math.sin(z.a) * z.w, len: z.len + z.w, w: z.w * 2 },
+        k,
+        col,
+        time
+      );
+    if (z.kind === 'pool') {
+      if (now() < z.at) return CANAAN_VFX.telegraph(c, 'circle', z, k, col, time);
+      return CANAAN_VFX.hazard(c, { x: z.x, y: z.y, r: z.r, color: col }, time);
     }
     if (z.kind === 'safe') {
       // Toute la salle rougeoie ; le cercle vert pulse.
-      c.globalAlpha = 0.1 + 0.2 * k;
-      c.fillStyle = '#ff2a1a';
+      c.save();
+      c.globalAlpha = 0.08 + 0.16 * k;
+      c.fillStyle = themeColor();
       c.fillRect(camX, camY, W, H);
-      c.globalAlpha = 0.35 + 0.2 * Math.sin(now() * 0.2);
-      c.fillStyle = '#5aff8a';
-      c.beginPath();
-      c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
-      c.fill();
-      c.globalAlpha = 0.95;
-      c.strokeStyle = '#d8ffe0';
-      c.beginPath();
-      c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
-      c.stroke();
-      return;
+      c.restore();
     }
-    if (z.kind === 'pool') {
-      c.globalAlpha = now() < z.at ? 0.2 + 0.2 * k : 0.38 + 0.08 * Math.sin(now() * 0.1 + z.x);
-      c.beginPath();
-      c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
-      c.fill();
-      return;
-    }
-    c.globalAlpha = 0.18 + 0.25 * k;
-    c.beginPath();
-    c.arc(z.x, z.y, z.r * (z.kind === 'soak' || z.kind === 'mark' ? 1 : k), 0, Math.PI * 2);
-    c.fill();
-    c.globalAlpha = 0.85;
-    c.beginPath();
-    c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
-    c.stroke();
-    if (z.kind === 'soak') {
-      // Impact partagé : l'anneau se resserre jusqu'à l'impact.
-      c.beginPath();
-      c.arc(z.x, z.y, z.r * (1 - k * 0.8), 0, Math.PI * 2);
-      c.stroke();
-    }
+    CANAAN_VFX.telegraph(c, z.kind === 'circle' ? 'circle' : z.kind, z, k, col, time);
   }
   window.CanaanStages.drawBossMechanics = function () {
     const list = game.mode === 'guest' ? shown : zones;

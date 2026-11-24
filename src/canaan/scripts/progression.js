@@ -22,7 +22,7 @@
     return gained;
   }
   function levelUp(hero) {
-    // Arme liée (Grimoire de l'Invocateur) : elle prend le nouveau niveau avant le calcul des statistiques.
+    // Arme de classe : elle prend le nouveau niveau (et Peu commun au niveau 10) avant le calcul des statistiques.
     CANAAN_SUMMONS.syncPact(hero);
     recomputeHeroStats(hero);
     hero.player.hp = hero.player.mhp;
@@ -43,8 +43,11 @@
   // le monstre, le boss ou l'instance reçoit moins).
   function killXp(m, killer = game.hero) {
     if (!m || game.world.instance?.arena) return;
-    const level = canaanMobLevel(m);
-    for (const hero of sharers(m, killer)) {
+    const level = canaanMobLevel(m),
+      heroes = sharers(m, killer);
+    // Boss de donjon ou de raid : essences pour l'arme de classe de chaque héros présent.
+    CANAAN_CLASS_WEAPON.onBossKill(m, heroes);
+    for (const hero of heroes) {
       const lv = clampLevel(hero.level),
         amount = m.worldBoss
           ? bossXp(level, 'world', lv)
@@ -61,6 +64,7 @@
     if (!d) return 0;
     const mode = instanceDifficulty(),
       level = game.world.instance?.scaledLevel || mode?.mobLevel || d.mobLevel || 1;
+    CANAAN_CLASS_WEAPON.onClear(hero);
     return grantXp(hero, clearXp(level, !!d.raid, clampLevel(hero.level)), hero.player);
   }
   // Barre d'XP et niveau de l'affichage tête haute.

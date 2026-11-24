@@ -423,3 +423,74 @@
   width: 100%;
   height: 100%;
 }
+/* Arme de classe (panneau T) : nom et qualité, échelle des qualités, essences des boss et amélioration. */
+#window .class-weapon {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--weapon-color) 55%, transparent);
+  border-radius: 10px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--weapon-color) 14%, #120c16), #120c16cc);
+}
+#window .class-weapon-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: calc(16px * var(--font-scale));
+}
+#window .class-weapon-head svg.ico {
+  width: 34px;
+  height: 34px;
+}
+#window .class-weapon-head small {
+  display: block;
+  opacity: 0.75;
+  font-size: calc(12px * var(--font-scale));
+}
+#window .class-weapon-ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0 6px;
+}
+#window .class-weapon-ladder .rung {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px dashed #ffffff22;
+  color: #ffffff55;
+  font-size: calc(11px * var(--font-scale));
+}
+#window .class-weapon-ladder .rung.done {
+  border: 1px solid var(--rung);
+  color: var(--rung);
+  background: color-mix(in srgb, var(--rung) 16%, transparent);
+}
+#window .class-weapon-ladder .rung.next {
+  border: 1px dashed var(--rung);
+  color: color-mix(in srgb, var(--rung) 80%, #fff);
+}
+#window .class-weapon-essences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-weight: 700;
+}
+#window .class-weapon-essences small {
+  font-weight: 400;
+  opacity: 0.8;
+  font-size: calc(11px * var(--font-scale));
+}
+#window .class-weapon-note,
+#window .class-weapon-hint {
+  margin: 6px 0;
+  font-size: calc(12.5px * var(--font-scale));
+}
+#window .class-weapon-hint {
+  opacity: 0.7;
+}
+#window .class-weapon-up {
+  width: 100%;
+}
+#window .class-form-title {
+  display: block;
+  margin-top: 6px;
+}
