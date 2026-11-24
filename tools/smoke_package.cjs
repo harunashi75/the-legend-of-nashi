@@ -129,7 +129,7 @@ async function main() {
     'Steam : bibliothèque chargée, inactive hors de Steam',
     steam?.reason
   );
-  // Relais du coopératif (relay/server.cjs et règles partagées, livrés dans l'archive).
+  // Relais du coopératif (online/ et règles partagées, livrés dans l'archive).
   const lan = await run('canaanDesktop.hosting.startLan().then(s => s, e => ({ error: e.message }))');
   check(
     lan && !lan.error,

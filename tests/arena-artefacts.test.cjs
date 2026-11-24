@@ -245,7 +245,7 @@ test('Arène à plusieurs : boss selon le groupe, zones sur chaque héros, relev
 });
 
 test('Arène en ligne : l’invité entre avec l’hôte, voit le colisée, le boss et ses annonces, encaisse les zones et gagne son artéfact',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const bootWithSocket=()=>require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run,){if(part[1].includes('canaan-runtime-config'))run('0')}});

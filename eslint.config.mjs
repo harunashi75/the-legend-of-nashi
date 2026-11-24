@@ -57,9 +57,9 @@ export default [
     files: ['src/canaan/bridge.js'],
     languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { globalThis: 'readonly' } }
   },
-  // Node.js (CommonJS) : application de bureau, relais, outils et tests.
+  // Node.js (CommonJS) : application de bureau, jeu en ligne (relais, transports), outils et tests.
   {
-    files: ['app/**/*.js', 'relay/**/*.cjs', 'tools/**/*.cjs', 'tests/**/*.cjs'],
+    files: ['app/**/*.js', 'online/**/*.cjs', 'tools/**/*.cjs', 'tests/**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',

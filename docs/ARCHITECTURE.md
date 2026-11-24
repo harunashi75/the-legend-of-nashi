@@ -91,6 +91,19 @@ npm run app      # ouvre la fenêtre sans réassembler
 - Les données de l’application sont dans `~/.config/The Legend of Nashi` sous Linux (dossier de données propre à chaque utilisateur). Au premier lancement, les sauvegardes et réglages de l’ancien dossier `~/.config/Canaan Online` y sont copiés (l’ancien dossier n’est pas modifié).
 - **Huit aventures** (slots) sur l’écran titre : Continuer, Nouvelle aventure (avec un nom) ou Supprimer, avec une confirmation qui liste les héros invités perdus. Dans l’application, chaque aventure est un fichier `saves/slot-1.json` à `slot-8.json` du dossier de données, avec un bouton « Ouvrir le dossier des sauvegardes ». Le build HTML garde les mêmes huit slots dans le stockage du navigateur. Détails dans [docs/SAVES.md](SAVES.md).
 
+## Jeu en ligne (online/)
+
+Le coopératif est **hébergé par un joueur** : son jeu simule le monde et garde la sauvegarde, ses amis envoient leurs intentions et affichent ce que l’hôte leur renvoie (`scripts/net.js`, protocole vérifié dans `shared/net/messages.js`). Tout ce qui sert à **se connecter** est rangé dans `online/`, chargé par l’application de bureau (processus principal) :
+
+- `online/relay.cjs` : le relais. Il met en relation l’hôte et ses invités par un code de salon et transmet les messages (taille et fréquence limitées), sans rien simuler ni stocker. `npm run relay` le lance seul (port 8787).
+- `online/hosting.cjs` : héberger depuis l’application. Il ouvre le relais chez l’hôte (port 8787, puis 8788 à 8791 si pris), le referme, et renvoie son état au jeu (`net:host-*` dans `app/main.js`). Toute erreur devient un état « error » avec un message pour l’hôte.
+- `online/transports/` : **un fichier par façon de se connecter**. Chaque transport donne `prepare()` (où ouvrir le relais, ou pourquoi c’est impossible) et `opened({ port, firewalls, … })` (adresses à donner aux amis, commandes de pare-feu, message).
+  - `lan.cjs` : réseau local, ouvert aux appareils de la maison ;
+  - `tailscale.cjs` : réseau privé Tailscale, relais sur l’adresse Tailscale seulement.
+- `online/firewall.cjs` : pare-feux actifs sous Linux (firewalld, ufw), pour proposer les bonnes commandes.
+
+Le jeu ne voit qu’un WebSocket vers un relais : ajouter une façon de se connecter (Steam, par exemple) consiste à ajouter un transport, sans toucher à la synchronisation.
+
 ## Fluidité
 
 **Démarrage** : un écran de chargement (`#bootLoader`, `styles/boot-loader.css`, dans l’en-tête de la page) s’affiche dès la première image, avant tout script : titre doré, cercle de runes qui tourne, barre lumineuse, étape en cours et astuces qui se relaient. Il cache le jeu jusqu’à ce que le menu des aventures soit prêt, revient dès qu’on ouvre une aventure (le rechargement se fait dessous), et ne s’efface en fondu qu’une fois le monde placé et dessiné autour du héros (`canaanBootLoader`, `bootstrap.js`). Plus d’ancien écran titre violet au démarrage. La caméra se pose directement sur le héros quand le saut est trop grand (début de partie, entrée ou sortie d’instance) au lieu de traverser la carte depuis son angle, où sont rangés les intérieurs des maisons.

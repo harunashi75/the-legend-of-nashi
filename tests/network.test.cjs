@@ -37,7 +37,7 @@ test('Protocole du coopératif : codes de salon, intentions vérifiées, pseudos
 });
 
 test('Relais : salon et code, routage hôte ↔ invités, identité imposée, salon complet et fermeture',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const open=()=>new Promise(r=>{const s=new WebSocket(url);s.got=[];s.onmessage=e=>s.got.push(JSON.parse(e.data));s.onopen=()=>r(s)});
@@ -63,7 +63,7 @@ test('Relais : salon et code, routage hôte ↔ invités, identité imposée, sa
 });
 
 test('Jalon de la phase 4 : un hôte et un invité, reliés par le relais, se voient bouger',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const bootWithSocket=()=>require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run,){if(part[1].includes('canaan-runtime-config'))run('0')}});
@@ -112,7 +112,7 @@ test('Jalon de la phase 4 : un hôte et un invité, reliés par le relais, se vo
 });
 
 test('Échange entre joueurs : demande, offres, validations, vérifications de l’hôte et sacs à jour',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const boot=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;return side};
@@ -199,7 +199,7 @@ test('Adresses du relais et invitations : adresses Tailscale et locales, préfix
 });
 
 test('Hébergement (application de bureau) : relais sur l’adresse Tailscale, Tailscale absent ou arrêté, réseau local, sans Pinggy',async()=>{
- const H=require('../app/hosting.js');
+ const H={...require('../online/hosting.cjs'),...require('../online/transports/lan.cjs'),...require('../online/transports/tailscale.cjs')};
  // Plage Tailscale 100.64.0.0/10 seulement.
  for(const ip of ['100.64.0.1','100.120.239.59','100.127.255.254'])assert.ok(H.isTailscaleIp(ip),ip);
  for(const ip of ['100.63.0.1','100.128.0.1','10.0.0.5','192.168.1.2','pas une ip'])assert.ok(!H.isTailscaleIp(ip),ip);
@@ -234,12 +234,12 @@ test('Hébergement (application de bureau) : relais sur l’adresse Tailscale, T
   const off=await hosting.startTailscale();assert.equal(off.state,'error');assert.match(off.message,/arrêté/);
   await assert.rejects(()=>new Promise((resolve,reject)=>{const ws=new WebSocket(st.local);ws.onopen=()=>{ws.close();resolve()};ws.onerror=reject}));
   // Réseau local : relais ouvert au réseau, port de repli si 8787 est pris.
-  const blocker=require('node:net').createServer();const busy=await new Promise(r=>blocker.once('error',()=>r(false)).listen(H.LAN_PORTS[0],'0.0.0.0',()=>r(true)));
+  const blocker=require('node:net').createServer();const busy=await new Promise(r=>blocker.once('error',()=>r(false)).listen(H.RELAY_PORTS[0],'0.0.0.0',()=>r(true)));
   try{
    const lan=await hosting.startLan();
    if(lan.state==='online'){
     assert.equal(lan.kind,'lan');assert.match(lan.relay,/^ws:\/\/[\d.]+:\d+$/);
-    if(busy)assert.equal(+lan.relay.split(':').pop(),H.LAN_PORTS[1],'port de repli quand 8787 est pris');
+    if(busy)assert.equal(+lan.relay.split(':').pop(),H.RELAY_PORTS[1],'port de repli quand 8787 est pris');
     const code2=await new Promise((resolve,reject)=>{const ws=new WebSocket(lan.relay);ws.onopen=()=>ws.send(JSON.stringify({t:'host'}));ws.onmessage=e=>{ws.close();resolve(JSON.parse(e.data).code)};ws.onerror=reject});
     assert.match(code2,/^[A-Z2-9]{6}$/);
    }else assert.match(lan.message,/réseau local/,'sans réseau : message clair');
@@ -247,12 +247,12 @@ test('Hébergement (application de bureau) : relais sur l’adresse Tailscale, T
  }finally{await hosting.stop()}
  assert.equal(statuses.at(-1).state,'off');
  // Plus aucune trace de Pinggy ni de tunnel ssh dans l'application ni dans le jeu.
- for(const f of ['app/hosting.js','app/main.js','app/preload.js'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'..',f),'utf8'),/pinggy|ssh/i,f);
+ for(const f of ['online/hosting.cjs','online/relay.cjs','online/transports/lan.cjs','online/transports/tailscale.cjs','app/main.js','app/preload.js'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'..',f),'utf8'),/pinggy|ssh/i,f);
  assert.doesNotMatch(source.replace(/Anciens réglages Pinggy[^\n]*\n[^\n]*/,''),/pinggy/i);
 });
 
 test('Connexion impossible : l’invité voit « Relais injoignable » et quoi vérifier ; l’hôte voit les commandes de son pare-feu',async()=>{
- const {firewallCommands,linuxFirewalls}=require('../app/hosting.js');
+ const {firewallCommands}=require('../online/transports/lan.cjs'),{linuxFirewalls}=require('../online/firewall.cjs');
  assert.deepEqual(firewallCommands(['firewalld','ufw'],8787),['sudo firewall-cmd --permanent --add-port=8787/tcp && sudo firewall-cmd --reload','sudo ufw allow 8787/tcp']);
  if(process.platform==='linux'){
   const fake=(cmd,args)=>{if(args[1]==='ufw')return 'active\n';throw new Error('inactive')};

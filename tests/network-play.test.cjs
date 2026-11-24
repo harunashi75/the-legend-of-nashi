@@ -5,7 +5,7 @@ const {
 } = require('./helpers/context.cjs');
 
 test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lui-même (sac, équipement, recharges, effets, butin, roulade)',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  // Le test avance le temps bien plus vite que le jeu : limite de fréquence relevée pour ce relais.
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -159,7 +159,7 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
 });
 
 test('Place réservée : un invité déconnecté garde son héros 2 minutes, immobile et protégé, et le reprend sur place',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const bootWithSocket=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run,){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;side.run('globalThis.__toasts=[];{const t0=toast;toast=m=>{__toasts.push(m);t0(m)}}');return side};
@@ -211,7 +211,7 @@ test('Place réservée : un invité déconnecté garde son héros 2 minutes, imm
 });
 
 test('Jouer avec Tailscale dans le jeu : l’hôte ouvre le salon, copie l’invitation ; l’invité la colle et rejoint',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,host:'127.0.0.1',rate:2000});await relay.ready;const local='ws://127.0.0.1:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  // Pont de l'application de bureau simulé : le relais « Tailscale » est le relais local du test.

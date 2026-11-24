@@ -32,7 +32,7 @@ test('Chacun à son niveau : monstres à niveau fixe, chacun frappe et encaisse 
   assert.deepEqual([run('game.guests["local-a"].bagLevel'),run('game.guests["local-b"].bagLevel'),run('game.guests["local-c"].bagLevel')],[0,2,2]);
   assert.equal(run('CANAAN_GROUP.exportGuests(h=>h.player)["local-c"].bagVersion'),2);}
  // En ligne : l'invité ouvre un coffre caché près de lui (E) ; l'hôte vérifie, l'ouvre pour lui ; tout le monde le voit ouvert.
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const boot=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;return side};

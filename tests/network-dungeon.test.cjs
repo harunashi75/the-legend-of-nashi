@@ -7,7 +7,7 @@ const {
 } = require('./helpers/context.cjs');
 
 test('Jalon de la phase 6 : quatre joueurs en ligne finissent un donjon ensemble, chacun avec son butin',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  // Le test avance le temps bien plus vite que le jeu : limite de fréquence relevée pour ce relais.
  const relay=createRelay({port:0,rate:100000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms)),turn=()=>new Promise(r=>setImmediate(r));

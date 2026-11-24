@@ -13,13 +13,13 @@
     "test": "node --test --test-timeout=120000 \"tests/*.test.cjs\"",
     "lint": "eslint .",
     "typecheck": "tsc -p src/canaan/shared/jsconfig.json",
-    "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
-    "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"relay/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
+    "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"online/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
+    "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"online/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "start": "node tools/build.cjs --extensions && node tools/run_app.cjs",
     "app": "node tools/run_app.cjs",
     "dist:linux": "node tools/build.cjs && electron-builder --linux",
     "dist:win": "node tools/build.cjs && electron-builder --win",
-    "relay": "node relay/server.cjs"
+    "relay": "node online/relay.cjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

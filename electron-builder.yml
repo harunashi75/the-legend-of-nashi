@@ -11,13 +11,13 @@ directories:
   output: dist
   buildResources: build
 
-# Contenu du jeu livré : l'application, le HTML assemblé, le relais du coopératif (héberger une partie) et les règles
+# Contenu du jeu livré : l'application, le HTML assemblé, le jeu en ligne (relais et transports, online/) et les règles
 # partagées qu'il utilise. Les sources du jeu, les tests et les outils ne sont pas livrés.
 files:
   - package.json
   - app/**
   - CANAAN_ONLINE_V*.html
-  - relay/server.cjs
+  - online/**
   - src/canaan/shared/**
   - '!src/canaan/shared/jsconfig.json'
 asar: true

@@ -79,7 +79,7 @@ test('Quêtes : devant chaque objet et chaque personnage de l’île, le texte [
 });
 
 test('Chaumière des Glycines : maison de PNJ meublée dans les Plaines, habitants, aucun meuble sauvegardé, porte en ligne',async()=>{
- const {createRelay}=require('../relay/server.cjs');
+ const {createRelay}=require('../online/relay.cjs');
  const relay=createRelay({port:0,rate:2000});await relay.ready;const url='ws://localhost:'+relay.port;
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  const boot=()=>{const side=require('./helpers/canaan-runtime.cjs')(source,{beforeScript(part,run){if(part[1].includes('canaan-runtime-config'))run('0')}});side.g.WebSocket=WebSocket;side.g.Event=Event;return side};

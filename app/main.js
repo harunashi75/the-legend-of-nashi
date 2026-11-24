@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { createSaveStore } = require('./saves.js');
-const { createHosting } = require('./hosting.js');
+const { createHosting } = require('../online/hosting.cjs');
 const { createSteam } = require('./steam.js');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -164,7 +164,7 @@ ipcMain.on('saves:open-folder', event => {
   if (mainWindow && event.sender === mainWindow.webContents) shell.openPath(store.dir);
 });
 
-// Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local (hosting.js). L'état est renvoyé à la page.
+// Jouer à plusieurs : relais de l'hôte sur Tailscale ou sur le réseau local (online/hosting.cjs). L'état est renvoyé à la page.
 let hosting = null;
 const fromGame = event =>
   !!mainWindow &&
