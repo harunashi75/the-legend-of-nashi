@@ -337,6 +337,9 @@
     if ((v = worn(hero, 'coeur_fer')) && r.plates > 0)
       add('coeur_fer', r.platesUntil - t, 'Dégâts subis −' + r.plates * v.n + ' %.', r.plates);
     if (worn(hero, 'voile_neant')) add('voile_neant', r.voidUntil - t, 'Dégâts +25 %.');
+    if (r.parryBoost && worn(hero, 'ecu_dechu'))
+      add('ecu_dechu', Infinity, 'Prochaine compétence offensive : +30 % de dégâts.');
+    if (worn(hero, 'couronne_souverain')) add('couronne_souverain', r.invulnUntil - t, 'Invulnérable.');
     if (worn(hero, 'fiole_brumes')) add('fiole_brumes', r.mistUntil - t, 'Brume guérisseuse.');
     if (worn(hero, 'couronne_souverain'))
       add('couronne_souverain', r.crownReady - t, 'Protection contre un coup fatal en recharge.');

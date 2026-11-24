@@ -30,6 +30,11 @@ test('Classes : neuf classes de dix talents, chacune son arme, cinq emplacements
   same(g.CANAAN_CLASS.audit().talents,[0,1,2,3,4]);
   g.CANAAN_CLASS_STATE.import({id:'necromancien',talents:[0]});assert.equal(g.CANAAN_CLASS.audit().id,null);
   same(g.CANAAN_CLASS_STATE.export(),{id:null,talents:[]});
+  // Les choix de la version à huit sorts sont ignorés au chargement de la sauvegarde.
+  g.CANAAN_CLASS_STATE.import({id:'paladin',talents:[],spells:{aegis:[7,0,null,5]}});
+  g.refreshWeaponBar();
+  same(g.CANAAN_CLASS_STATE.export(),{id:'paladin',talents:[]});
+  same(g.SKILLS.map(s=>s.n),['Frappe du croisé','Sceau de lumière','Rempart sacré','Marteau du Jugement']);
   // Équiper : dans la limite des emplacements, jamais deux fois, jamais en combat.
   g.game.hero.level=10;g.CANAAN_CLASS_STATE.import({id:'guerrier',talents:[]});
   assert.equal(g.CANAAN_CLASS.equip(1),true);assert.equal(g.CANAAN_CLASS.equip(1),false);

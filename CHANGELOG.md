@@ -12,6 +12,8 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - **De vrais effets visuels** ✨ : les sorts et les mécaniques des boss ne sont plus des cercles de couleur. Le feu est fait de flammes, de braises et de fumée, la glace d’éclats et de brume, la foudre d’éclairs ramifiés qui crépitent, la nature de lianes, de racines qui jaillissent, de feuilles et de pétales, le sacré de piliers de lumière et de cercles runiques, le sang de gouttes. Un météore tombe vraiment du ciel, un marteau de lumière s’abat, un faucon plonge sur sa proie. Les attaques annoncées des boss fissurent le sol dans la matière du boss (braises, givre, néant…), leurs sols dangereux bouillonnent ou brûlent, leurs projectiles laissent un sillage et leurs impacts explosent pour de bon.
 
 ### Modifié
+- **Icône de la Masse et égide**. L’écu et sa masse sont centrés et redessinés.
+- **Effets de combat**. Les marques, protections et cumuls apparaissent dans la barre des effets. Les boss et boss mondiaux affichent plusieurs lignes d’effets au besoin. Les invités voient les effets de leur héros fournis par l’hôte.
 - **Tous les talents refaits** (sauf ceux de l’Invocateur) : chaque talent est centré sur sa classe et change vraiment sa façon de jouer, souvent en transformant une compétence (Météore jumeau, Lames jumelles, Croisade, Proie désignée, Élan imparable…).
 - **Sceau de lumière du Paladin**. La deuxième compétence marque une cible pendant 6 s et rend 3 % des PV max du Paladin à chaque coup direct sur elle. Sceau rayonnant ajoute une onde sacrée tous les trois coups.
 - **Indicateur de combat** sous les barres du héros, synchronisé avec l’hôte en ligne.

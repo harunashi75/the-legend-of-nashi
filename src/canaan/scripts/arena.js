@@ -1730,9 +1730,9 @@
     healFactor: (hero = game.hero) =>
       active() && run.curse instanceof Map && (run.curse.get(hero) || 0) > run.clock ? 0.4 : 1,
     // Malus subis dans l'Arène (barre des effets) : secondes restantes de la malédiction et des effets sur la durée.
-    effects() {
+    effects(hero = game.hero) {
       if (!run || (!run.remote && !active())) return { curse: 0, dots: [] };
-      const s = myStatus(),
+      const s = run.remote ? myStatus() : statusOf(hero),
         c = run.clock || 0;
       return {
         curse: Math.max(0, (s.curse || 0) - c),

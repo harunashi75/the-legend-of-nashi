@@ -330,3 +330,15 @@ test('Attaque lourde : une animation propre à chaque arme, et les armes à dist
  run('CanaanStages.drawWeaponEffects()');
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('HUD : les effets du héros et du boss incluent les marques et les cumuls, même sur plusieurs lignes',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ assert.equal(errors.length,0,errors.join('\n'));
+ run('CANAAN_CLASS_STATE.import({id:"paladin",talents:[]});globalThis.warden={x:P.x+40,y:P.y,hp:1000,mhp:1000,worldBoss:true};game.world.monsters=[warden]');
+ run('CANAAN_CLASS.markHolySeal(game.hero,warden)');
+ assert.equal(run('CANAAN_BUFF_BAR.list().some(e=>e.id==="cls-seal" && e.left>0)'),true);
+ run('Object.assign(warden,{_huntMark:{until:time/60+5},_dissonant:time/60+4,_plague:[{stacks:5,until:time/60+3}],enraged:true,_chill:{until:time/60+2,shattered:false}})');
+ assert.equal(run('CANAAN_BUFF_BAR.monsterCodes(warden).find(([id])=>id==="plague")[2]'),5);
+ assert.equal(run('CANAAN_BUFF_BAR.monsterCodes(warden).length'),6);
+ assert.equal(run('CANAAN_BUFF_BAR.drawMonster(ctx,warden,0,0,84)'),82,'les six effets occupent deux lignes');
+});

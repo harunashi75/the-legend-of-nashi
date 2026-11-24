@@ -30,8 +30,6 @@
       w = CANAAN_CLASS.runtime(hero),
       on = until => until > t,
       tal = i => c.talents[i] || ['', ''];
-    out.push(E('cls-passive', c.icon, c.passive.name, c.passive.desc, 'passive'));
-    for (const i of hero.classe.talents) out.push(E('tal-' + i, c.icon, tal(i)[0], tal(i)[1], 'passive'));
     if (w.shield > 0 && on(w.shieldUntil))
       out.push(
         E(
@@ -114,6 +112,28 @@
           elan
         )
       );
+    if (w.holySeal?.target.hp > 0 && on(w.holySeal.until))
+      out.push(
+        E(
+          'cls-seal',
+          '✨',
+          'Sceau de lumière',
+          'Tes coups sur la cible te soignent.',
+          'buff',
+          w.holySeal.until - t,
+          w.holySeal.hits
+        )
+      );
+    if (w.umbra)
+      out.push(
+        E('cls-umbra', '🌑', 'Embuscade', 'Prochaine compétence offensive : +25 % de dégâts.', 'buff')
+      );
+    if (w.danceCrit)
+      out.push(E('cls-dance', '🗡', 'Danse des ombres', 'Ton prochain coup est critique.', 'buff'));
+    if (w.instinctCrit && hero.player.form === 'feral')
+      out.push(
+        E('cls-instinct', '🐆', 'Instinct du fauve', 'Ta prochaine compétence féline est critique.', 'buff')
+      );
     if (w.shadowPending)
       out.push(
         E(
@@ -139,9 +159,8 @@
     ['falcon', '🦅', 'Fauconnier', 'Ton faucon chasse à tes côtés.'],
     ['rollShot', '🏹', 'Repli tactique', 'Ta prochaine flèche fait +60 %.']
   ];
-  function stanceEffects(out) {
-    if (typeof canaanStanceOf !== 'function') return;
-    const st = canaanStanceOf() || {};
+  function stanceEffects(hero, out) {
+    const st = CANAAN_SKILLS.state(hero);
     for (const [k, ic, name, text] of STANCES)
       if (st[k] > 0) out.push(E('st-' + k, ic, name, text, 'buff', st[k]));
   }
@@ -170,21 +189,30 @@
         )
       );
   }
-  // Artéfacts de l'Arène équipés (passifs, avec leur effet au rang du héros) et leurs effets passagers.
-  function artefactEffects(hero, out) {
+  function passiveEffects(hero, out) {
+    const c = classById(hero.classe?.id);
+    if (c) {
+      out.push(E('cls-passive', c.icon, c.passive.name, c.passive.desc, 'passive'));
+      for (const i of hero.classe.talents) {
+        const [name, text] = c.talents[i];
+        out.push(E('tal-' + i, c.icon, name, text, 'passive'));
+      }
+    }
     if (!window.CANAAN_ARTEFACTS) return;
     for (const id of CANAAN_ARTEFACTS.equipped(hero)) {
       const a = id && CANAAN_ARTEFACTS.get(id);
       if (a)
         out.push(E('art-' + id, a.icon, a.name, artefactText(a, CANAAN_ARTEFACTS.rank(id, hero)), 'passive'));
     }
-    for (const a of CANAAN_ARTEFACTS.auras(hero))
-      out.push(E('arta-' + a.id, a.icon, a.name, a.text, 'buff', a.left));
   }
-  function debuffs(out) {
-    if (game.mode !== 'guest' && typeof playerStun === 'number' && playerStun > 0)
+  function artefactEffects(hero, out) {
+    for (const a of CANAAN_ARTEFACTS.auras(hero))
+      out.push(E('arta-' + a.id, a.icon, a.name, a.text, 'buff', a.left, a.stacks));
+  }
+  function debuffs(hero, out) {
+    if (hero === game.hero && typeof playerStun === 'number' && playerStun > 0)
       out.push(E('stun', '💫', 'Étourdi', 'Impossible de bouger.', 'debuff', playerStun));
-    const a = window.CANAAN_ARENA && CANAAN_ARENA.effects ? CANAAN_ARENA.effects() : null;
+    const a = CANAAN_ARENA.effects(hero);
     if (!a) return;
     if (a.curse > 0) out.push(E('ar-curse', '☠', 'Malédiction', 'Soins reçus −60 %.', 'debuff', a.curse));
     a.dots.forEach(([kind, left], i) => {
@@ -201,23 +229,45 @@
         );
     });
   }
-  // Tous les effets du héros de cette application.
-  function list(hero = game.hero) {
+  function activeEffects(hero) {
     const out = [];
-    if (!hero || !hero.player) return out;
-    for (const f of [
-      () => blessingEffects(hero, out),
-      () => foodEffects(hero, out),
-      () => classEffects(hero, out),
-      () => stanceEffects(out),
-      () => artefactEffects(hero, out),
-      () => debuffs(out)
-    ])
-      try {
-        f();
-      } catch (e) {
-        // Une source absente (tests, invité) ne bloque pas les autres.
-      }
+    classEffects(hero, out);
+    stanceEffects(hero, out);
+    artefactEffects(hero, out);
+    if (CANAAN_COMBAT.invulnerable(hero))
+      out.push(E('dodge', '💨', 'Esquive', 'Invulnérable pendant la roulade.', 'buff'));
+    debuffs(hero, out);
+    return out.filter(e => e.left > 0);
+  }
+  let remote = [];
+  function view(hero) {
+    return activeEffects(hero).map(e => ({ ...e, left: Number.isFinite(e.left) ? e.left : null }));
+  }
+  function applyView(list) {
+    remote = Array.isArray(list)
+      ? list
+          .slice(0, 100)
+          .filter(
+            e =>
+              e &&
+              typeof e.id === 'string' &&
+              /^[\w-]{1,64}$/.test(e.id) &&
+              typeof e.icon === 'string' &&
+              typeof e.name === 'string' &&
+              typeof e.text === 'string' &&
+              ['buff', 'debuff'].includes(e.kind) &&
+              (e.left === null || (Number.isFinite(e.left) && e.left > 0))
+          )
+          .map(e => E(e.id, e.icon, e.name, e.text, e.kind, e.left ?? Infinity, Math.max(0, e.stacks | 0)))
+      : [];
+  }
+  // Les passifs et les repas sont déjà connus de l'invité. L'hôte fournit les effets du combat.
+  function list(hero = game.hero) {
+    if (!hero?.player) return [];
+    const out = game.mode === 'guest' && hero === game.hero ? [...remote] : activeEffects(hero);
+    passiveEffects(hero, out);
+    blessingEffects(hero, out);
+    foodEffects(hero, out);
     return out.filter(e => e.left > 0);
   }
 
@@ -371,6 +421,14 @@
     armor: ['🛡', 'Armure brisée', 'debuff'],
     weak: ['⬇', 'Affaibli', 'debuff'],
     mark: ['🎯', 'Marqué', 'debuff'],
+    hunt: ['🏹', 'Marque du chasseur', 'debuff'],
+    holySeal: ['✨', 'Sceau de lumière', 'debuff'],
+    dissonance: ['🎵', 'Dissonance', 'debuff'],
+    venom: ['☠', 'Venin mortel', 'debuff'],
+    chill: ['❄', 'Givre', 'debuff'],
+    static: ['⚡', 'Électricité statique', 'debuff'],
+    assassinate: ['🗡', 'Assassinat', 'debuff'],
+    exposed: ['💥', 'Exposé', 'debuff'],
     enraged: ['😡', 'Rage', 'buff'],
     berserk: ['🔥', 'Frénésie', 'buff'],
     shield: ['🛡', 'Bouclier', 'buff'],
@@ -381,18 +439,33 @@
   // Effets en cours d'un monstre : liste de [code, secondes restantes] (−1 : sans fin), arrondies au dixième.
   function monsterCodes(m) {
     if (game.mode === 'guest')
-      return Array.isArray(m.fx) ? m.fx.filter(f => Array.isArray(f) && MON[f[0]]) : [];
+      return Array.isArray(m.fx) ? m.fx.filter(f => Array.isArray(f) && Object.hasOwn(MON, f[0])) : [];
     const t = sec(),
       left = new Map(),
-      add = (code, l) => {
-        if (l > 0) left.set(code, Math.max(left.get(code) || 0, l));
+      add = (code, l, count = 0) => {
+        if (!(l > 0)) return;
+        const previous = left.get(code) || [0, 0];
+        left.set(code, [Math.max(previous[0], l), Math.max(previous[1], count)]);
       };
     for (const k of ['stun', 'root', 'slow', 'bleed', 'vulnerable']) add(k, m['spell_' + k] || 0);
     for (const k of ['armor', 'slow', 'weak', 'mark', 'bleed']) add(k, m['v1746_' + k] || 0);
     for (const d of m._clsDots || []) add(MON[d.kind] ? d.kind : 'poison', d.until - t);
     // Peste de l'Invocateur (charges cumulables).
-    for (const p of m._plague || []) add('plague', p.until - t);
+    for (const p of m._plague || []) add('plague', p.until - t, p.stacks);
     if (m._clsSlow) add('slow', m._clsSlow.until - t);
+    if (!m._chill?.shattered) add('chill', (m._chill?.until || 0) - t);
+    for (const [hero, charges] of m._static || [])
+      if (charges > 0 && !hero.away && game.heroes.includes(hero)) add('static', Infinity, charges);
+    add('hunt', (m._huntMark?.until || 0) - t);
+    add('dissonance', (m._dissonant || 0) - t);
+    add('venom', (m._venomUntil || 0) - t);
+    add('assassinate', (m._assassinBy?.until || 0) - t);
+    add('exposed', ((m.exposedUntil || 0) - time) / 60);
+    for (const hero of game.heroes) {
+      if (hero.player.dead || hero.away || hero.classe?.id !== 'paladin') continue;
+      const seal = CANAAN_CLASS.runtime(hero).holySeal;
+      if (seal?.target === m) add('holySeal', seal.until - t, seal.hits);
+    }
     // Brûlures et saignements des artéfacts de l'Arène.
     for (const d of m._artDots || []) add(d.kind, d.until - t);
     const run = window.CANAAN_ARENA && CANAAN_ARENA.run ? CANAAN_ARENA.run() : null;
@@ -401,13 +474,13 @@
       add('stun', (m.stunUntil || 0) - c);
       add('parry', (m.parryUntil || 0) - c);
       add('immune', (m.immuneUntil || 0) - c);
-    }
-    if (m.shieldHp > 0) add('shield', Infinity);
-    if (m.enraged) add('enraged', Infinity);
+      if (m.shieldHp > 0) add('shield', (m.shieldUntil || Infinity) - c);
+    } else if (m.shieldHp > 0) add('shield', Infinity);
+    if (m.enraged || m.fight?.enraged) add('enraged', Infinity);
     if (m.berserk) add('berserk', Infinity);
     if (m.bossShield) add('immune', Infinity);
     return [...left]
-      .map(([code, l]) => [code, Number.isFinite(l) ? Math.round(l * 10) / 10 : -1])
+      .map(([code, [l, count]]) => [code, Number.isFinite(l) ? Math.ceil(l * 10) / 10 : -1, count])
       .sort((a, b) => MON_CODES.indexOf(a[0]) - MON_CODES.indexOf(b[0]));
   }
   // Rangée d'icônes sous la barre de boss : bonus (cadre vert) puis malus (cadre rouge), temps restant dessous.
@@ -421,28 +494,32 @@
     c.save();
     c.textAlign = 'center';
     c.textBaseline = 'middle';
-    list.slice(0, fit).forEach(([code, l], i) => {
+    list.forEach(([code, l, count], i) => {
       const [ic, , kind] = MON[code],
-        bx = x + i * (S + gap),
+        row = Math.floor(i / fit),
+        n = Math.min(fit, list.length - row * fit),
+        bx = x + (w - n * (S + gap) + gap) / 2 + (i % fit) * (S + gap),
+        by = y + row * (S + 17),
         ending = l >= 0 && l < 3;
       c.globalAlpha = ending ? 0.55 + 0.45 * Math.abs(Math.sin(time * 0.15)) : 1;
       c.fillStyle = kind === 'buff' ? '#13241a' : '#2a1012';
-      c.fillRect(bx, y, S, S);
+      c.fillRect(bx, by, S, S);
       c.strokeStyle = kind === 'buff' ? '#6fd38a' : '#e5484d';
       c.lineWidth = 2;
-      c.strokeRect(bx + 1, y + 1, S - 2, S - 2);
+      c.strokeRect(bx + 1, by + 1, S - 2, S - 2);
       c.font = canaanGlyphFont(15);
       c.fillStyle = '#ffffff';
-      c.fillText(ic, bx + S / 2, y + S / 2 + 1);
+      c.fillText(ic, bx + S / 2, by + S / 2 + 1);
+      if (count > 0) canaanText(c, String(count), bx + S - 4, by + S - 4, 9, '#fff');
       if (l >= 0) {
         const txt = l < 10 ? l.toFixed(1) : String(Math.ceil(l));
-        canaanText(c, txt, bx + S / 2, y + S + 7, 10, kind === 'buff' ? '#c8f8d0' : '#ffc0b0', {
+        canaanText(c, txt, bx + S / 2, by + S + 7, 10, kind === 'buff' ? '#c8f8d0' : '#ffc0b0', {
           baseline: 'middle'
         });
       }
     });
     c.restore();
-    return S + 14;
+    return Math.ceil(list.length / fit) * (S + 17);
   }
-  window.CANAAN_BUFF_BAR = Object.freeze({ list, render, MON, monsterCodes, drawMonster });
+  window.CANAAN_BUFF_BAR = Object.freeze({ list, render, view, applyView, MON, monsterCodes, drawMonster });
 })();

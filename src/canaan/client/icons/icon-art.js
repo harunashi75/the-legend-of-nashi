@@ -288,22 +288,25 @@ const A = {
         )
       )
       .join('') + hi('M9 7 C10.5 10 11 13 11 15'),
-  // Masse et égide du Paladin : écu doré derrière une masse d'acier.
+  // Écu centré, en émail bleu bordé d'or, avec une masse diagonale en relief.
   w_aegis:
-    g(
-      'translate(-3 1) scale(.82)',
-      p(
-        'M16 3 C19.5 4.5 23 4.5 26 5 C26 16 22.5 23.5 16 28 C9.5 23.5 6 16 6 5 C9 4.5 12.5 4.5 16 3 Z',
-        '#3f63b0'
-      ) +
-        s('M16 3 C19.5 4.5 23 4.5 26 5 C26 16 22.5 23.5 16 28 Z', '#2c4a8c') +
-        l('M16 6 L16 25 M9 12 L23 12', GO, 2.6)
+    p(
+      'M16 2.5 C20 5.1 24 5.4 27.7 5.7 V13 C27.7 21.2 23.5 26.1 16 29.5 C8.5 26.1 4.3 21.2 4.3 13 V5.7 C8 5.4 12 5.1 16 2.5 Z',
+      GO
     ) +
+    p(
+      'M16 5.4 C19.4 7.1 22.1 7.5 25 8 V13 C25 19.6 21.6 23.8 16 26.6 C10.4 23.8 7 19.6 7 13 V8 C9.9 7.5 12.6 7.1 16 5.4 Z',
+      '#3865a9'
+    ) +
+    s('M16 5.4 C19.4 7.1 22.1 7.5 25 8 V13 C25 19.6 21.6 23.8 16 26.6 Z', '#213e71') +
+    l('M7.7 10 L7.7 13 C7.7 19 10 22 13.2 24', '#9fc7ef', 1) +
     g(
-      'translate(5 2) rotate(-30 16 16) scale(.8)',
-      r(14.5, 13, 3.2, 17, WO, 1) +
-        c(16, 9, 6.5, STM) +
-        s('M16 2.5 C20 2.5 22.5 5.5 22.5 9 C22.5 12.5 20 15.5 16 15.5 C19 13 19.5 5 16 2.5 Z', STD)
+      'rotate(42 16 16)',
+      r(14.6, 11, 2.8, 14, WO, 1) +
+        r(14, 21, 4, 4.5, GO, 1) +
+        p('M12 8 L14 5.5 H18 L20 8 V12 L18 14 H14 L12 12 Z', STM) +
+        s('M16 6.2 H17.8 L19.4 8.4 V11.7 L17.8 13.4 H16 Z', STD) +
+        l('M13.2 8.5 L14.7 6.8', '#ffffff', 1.25)
     ),
   // Luth : caisse en poire (rosace, chevalet), manche à frettes, chevillier, cordes et ruban rose.
   w_lute: g(

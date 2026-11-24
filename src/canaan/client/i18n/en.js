@@ -6115,5 +6115,11 @@ export default {
   '{n} dégâts de base si tous les coups touchent': '{n} base damage if every hit lands',
   '{n} dégâts de base sur toute la durée': '{n} base damage over the full duration',
   '{n} dégâts de base par dague': '{n} base damage per dagger',
-  '{n} dégâts de base sur la cible principale': '{n} base damage to the primary target'
+  '{n} dégâts de base sur la cible principale': '{n} base damage to the primary target',
+  'Ton prochain coup est critique.': 'Your next hit is a critical hit.',
+  'Tes coups sur la cible te soignent.': 'Your hits on the target heal you.',
+  'Prochaine compétence offensive : +25 % de dégâts.': 'Your next offensive skill deals 25% more damage.',
+  'Prochaine compétence offensive : +30 % de dégâts.': 'Your next offensive skill deals 30% more damage.',
+  'Ta prochaine compétence féline est critique.': 'Your next cat skill is a critical hit.',
+  'Invulnérable pendant la roulade.': 'Invulnerable during the dodge roll.'
 };

@@ -404,6 +404,7 @@
             ].map(k => [k, Math.round((st[k] || 0) * 10) / 10])
           ))(CANAAN_SKILLS.state(hero)),
         dodge: Math.round(CANAAN_COMBAT.dodgeState(hero).ready * 10) / 10,
+        effects: CANAAN_BUFF_BAR.view(hero),
         inCombat: CANAAN_ARTEFACTS.inCombat(hero),
         revive: p.dead && hero.reviveAt ? Math.max(0, Math.ceil((hero.reviveAt - time) / 60)) : 0
       };
@@ -570,6 +571,7 @@
     game.mode = 'guest';
     net.heroId = message.heroId;
     net.inCombat = false;
+    CANAAN_BUFF_BAR.applyView(null);
     game.hero.name = cleanPseudo(message.name);
     game.hero.look = decodeLook(settings().look);
     net.remote.clear();
@@ -805,6 +807,7 @@
       );
     net.revive = Number.isFinite(me.revive) ? me.revive : 0;
     net.inCombat = me.inCombat === true;
+    CANAAN_BUFF_BAR.applyView(me.effects);
     if (Number.isInteger(me.level) && Number.isInteger(me.exp)) {
       game.hero.level = clampLevel(me.level);
       game.hero.exp = Math.max(0, me.exp);

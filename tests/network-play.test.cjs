@@ -168,11 +168,13 @@ test('Jalon de la phase 5 : l’invité combat chez l’hôte et voit tout de lu
   assert.equal(guest.run('game.hero.classe.id'),'paladin');
   guest.run('mouseWorldX=P.x+40;mouseWorldY=P.y;useSkill(1)');await step(18);
   assert.equal(guest.run('game.world.monsters.some(m=>m.holySeal===1)'),true,'marque visible chez l’invité');
+  assert.ok(guest.run('CANAAN_BUFF_BAR.list().some(e=>e.id==="cls-seal" && e.left>0)'),'effet local reçu de l’hôte');
   const hpBeforeSealHit=guest.run('P.hp');
   host.run('CANAAN_COMBAT.attack(sealTarget,100,{basic:true},'+G+')');await step(12);
   assert.ok(guest.run('P.hp')>hpBeforeSealHit,'soin du sceau visible chez le Paladin');
   host.run('time+=360');await step(12);
   assert.equal(guest.run('game.world.monsters.some(m=>m.holySeal===1)'),false,'marque retirée chez l’invité');
+  assert.equal(guest.run('CANAAN_BUFF_BAR.list().some(e=>e.id==="cls-seal")'),false,'effet local retiré chez l’invité');
   assert.equal(host.errors.length+guest.errors.length,0,host.errors.concat(guest.errors).join('\n'));
  }finally{host.run('CANAAN_NET.closeRoom()');await relay.close()}
 });
