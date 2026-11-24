@@ -379,8 +379,9 @@ test('Aventure : grand troc, coquillages chantants, gardiens de l’Ombre et Cœ
   );
   assert.equal(run('Q.act(HR,"q2","gseal")'), false, 'un seul gardien à la fois');
   // Ses attaques : un cercle annoncé, puis des dégâts à qui reste dedans ; renforts à 66 %.
+  // Le coup doit toucher : pas de jet d'esquive heureux (Math.random haut) pendant qu'il tombe.
   run('P.hp=P.mhp;tick(181)');
-  run('tick(90)');
+  run('{const r=Math.random;Math.random=()=>0.99;try{tick(90)}finally{Math.random=r}}');
   assert.ok(run('P.hp<P.mhp'), 'coup de l’Ombre');
   run('(m=>{m.hp=m.mhp*0.6})(game.world.monsters.find(m=>m.questGuardian==="q2"));tick(1)');
   assert.equal(run('game.world.monsters.filter(m=>m.questAdd==="q2").length'), 2, 'renforts');
