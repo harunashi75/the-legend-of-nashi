@@ -192,6 +192,7 @@
     chooseClass: element => chooseClass(actionText(element, 'class')),
     equipTalent: element => equipTalent(actionInteger(element, 'talent')),
     unequipTalent: element => unequipTalent(actionInteger(element, 'talent')),
+    upgradeClassWeapon: () => upgradeClassWeapon(),
     pickClass: element => pickClass(actionInteger(element, 'open')),
     classPage: element => classPage(actionInteger(element, 'step')),
     classPageTo: element => classPageTo(actionInteger(element, 'page')),
