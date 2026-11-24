@@ -7,6 +7,7 @@ Ce que le jeu fait déjà, et ce qu’il reste à régler sur le site [Steamwork
 - **Succès** : les 100 succès du jeu sont reportés sur le compte Steam du joueur dès qu’il les débloque, ceux d’une ancienne aventure compris (`app/steam.js`, `steamworks.js`). Chaque succès du jeu a un nom d’API `ACH_` + son identifiant (`c1` → `ACH_C1`). En coopératif, l’invité reçoit aussi les siens.
 - **Sans Steam** (navigateur, itch.io, `npm start`, client Steam fermé), le jeu tourne normalement : Steam n’est utilisé que si le jeu est lancé par Steam, qui fournit son App ID au lancement. Aucun fichier `steam_appid.txt` n’est nécessaire.
 - **Superposition Steam** (Maj+Tab) activée quand le jeu est lancé par Steam. En cas de souci d’affichage, la variable `NASHI_STEAM_OVERLAY=0` la coupe (options de lancement Steam : `NASHI_STEAM_OVERLAY=0 %command%`).
+- **Linux (Ubuntu 24.04 et suivantes)** : ces systèmes interdisent le bac à sable de Chromium aux applications sans profil AppArmor ; le script de lancement `legend-of-nashi` (créé par `tools/after_pack.cjs`) le détecte et démarre alors le jeu (`legend-of-nashi.bin`) avec `--no-sandbox`. Ailleurs (SteamOS, Arch, Fedora…), le bac à sable reste actif. `NASHI_NO_SANDBOX=1 %command%` le coupe de force si un autre système refusait de démarrer.
 - **Manette** : prise en charge native (disposition standard) ; Steam Input peut rester sur « disposition par défaut ».
 
 ## Sur le site Steamworks

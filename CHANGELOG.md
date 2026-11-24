@@ -42,6 +42,7 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 - **Plus d’anciens dessins « de secours »** 🌳 : les décors de l’île, les entrées des donjons et les décors des Tréfonds avaient encore leur premier dessin derrière le pixel art actuel, et les décors de l’île étaient même peints deux fois au démarrage avant d’être remplacés. Ces anciens dessins sont retirés (environ 1 300 lignes, dont l’ancien camp jamais affiché) ; des tests vérifient que chaque décor et chaque entrée a son pixel art.
 
 ### Corrigé
+- **Le jeu Linux ne démarrait pas sous Ubuntu 24.04 et suivantes** 🐧 : ces systèmes refusent le bac à sable de Chromium aux applications installées hors paquet système (dossier du jeu, AppImage, Steam), et le jeu s’arrêtait aussitôt. Le lancement le détecte maintenant et démarre le jeu sans ce bac à sable dans ce cas seulement ; ailleurs (SteamOS, Arch, Fedora…), il reste actif.
 - **Gardiens de quête sans barre de vie** : les gardiens affrontés dehors ou dans les Tréfonds ont maintenant, eux aussi, la barre des boss.
 - **Monstres dans le Camp de l’Aurore** : la zone sûre était restée un cercle autour du feu alors que le camp avait grandi (jardin, ferme, champs, verger, quai). Elle couvre maintenant tout le camp et son port ; aucun monstre n’y apparaît, et ceux qui s’y attardaient disparaissent.
 

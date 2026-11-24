@@ -65,5 +65,9 @@ linux:
     - target: tar.gz
       arch: [x64]
 
+# Linux : l'exécutable devient un script de lancement qui coupe le bac à sable de Chromium là où il ne peut pas
+# démarrer (Ubuntu 24.04 et suivantes) ; voir tools/after_pack.cjs.
+afterPack: tools/after_pack.cjs
+
 # Aucune publication automatique : la release GitHub joint elle-même les fichiers (release.yml).
 publish: null
