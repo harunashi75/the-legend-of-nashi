@@ -830,8 +830,6 @@ export default {
   'Rafale de lames': 'Blade flurry',
   '{n} coups rapides': '{n} quick hits',
   '{n} % chacun ({max} %)': '{n}% each ({max}%)',
-  '4 coups en cône devant toi en moins d’une demi-seconde. Active le combo pendant 4 s.':
-    '4 hits in a cone in front of you in under half a second. Activates the combo for 4 s.',
   'Danse des lames': 'Blade dance',
   '{n} tours': '{n} spins',
   '3 frappes circulaires autour de toi. Active le combo pendant 4 s.':
@@ -909,8 +907,6 @@ export default {
   'Entaille rapide': 'Quick slash',
   '{n} coups': '{n} hits',
   'saignement 5 s': 'bleed 5 s',
-  '2 coups devant toi. Le second fait saigner : 35 % de ta Puissance par seconde pendant 5 s (175 % en tout).':
-    '2 hits in front of you. The second causes bleeding: 35% of your Power per second for 5 s (175% in total).',
   'Lames tournoyantes': 'Spinning blades',
   'saignements +3 s': 'bleeds +3 s',
   'Frappe tous les ennemis autour de toi et prolonge de 3 s leurs saignements.':
@@ -922,8 +918,6 @@ export default {
   'Mille coupures': 'Thousand cuts',
   '85 % (425 %)': '85% (425%)',
   'consume les saignements': 'consumes the bleeds',
-  '5 coups en cône. Chaque saignement touché explose aussitôt : il inflige d’un coup 150 % de ce qu’il lui restait à faire.':
-    '5 hits in a cone. Each bleed hit bursts at once: it instantly deals 150% of the damage it had left to do.',
   'Arc': 'Bow',
   'Distance : tirs puissants, zone au sol et repli.': 'Ranged: powerful shots, ground area and retreat.',
   'Tir puissant': 'Power shot',
@@ -934,8 +928,6 @@ export default {
   'Pluie de flèches': 'Rain of arrows',
   'Zone sous la souris': 'Area under the mouse',
   '4 salves de 90 % (360 %)': '4 volleys of 90% (360%)',
-  'Une pluie de flèches tombe là où tu vises : 4 salves en 2 s sur tous les ennemis de la zone.':
-    'A rain of arrows falls where you aim: 4 volleys in 2 s on every enemy in the area.',
   'Tir entravant': 'Hobbling shot',
   'ralentit 4 s (boss : marqué)': 'slows 4 s (bosses: marked)',
   'Une flèche qui ralentit les monstres sur sa ligne pendant 4 s. Un boss est marqué : son prochain coup reçu fait +30 % de dégâts.':
@@ -992,65 +984,40 @@ export default {
   '{n} au maximum': '{n} at most',
   '{n} % par coup': '{n}% per hit',
   'sans limite': 'no limit',
-  'Un squelette sort de terre près de toi et attaque tes ennemis pendant 30 s (60 % de ta Puissance magique toutes les 1,2 s). Aucune limite : chaque lancer lève un squelette de plus.':
-    'A skeleton rises from the ground near you and attacks your enemies for 30 s (60% of your magic Power every 1.2 s). No limit: every cast raises one more skeleton.',
   'Nuée de corbeaux': 'Crow swarm',
   '4 corbeaux nécrosés': '4 necrotic crows',
   '{n} % par coup de bec': '{n}% per peck',
-  '4 corbeaux nécrosés fondent sur la souris en volant par-dessus les obstacles, puis harcèlent tes ennemis pendant 8 s (45 % toutes les 0,6 s).':
-    '4 necrotic crows swoop toward the mouse, flying over obstacles, then harass your enemies for 8 s (45% every 0.6 s).',
   'Totem de peste': 'Plague totem',
   'Totem 10 s sous la souris': 'Totem 10 s under the mouse',
   '50 %/s en zone': '50%/s in an area',
   'rats pestiférés': 'plague rats',
-  'Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Toutes les 2,5 s, un rat pestiféré sort de terre à ses pieds : il mord les ennemis (35 % toutes les 0,6 s) puis éclate au bout de 6 s en un nuage toxique (90 % autour de lui). Tes invocations proches du totem frappent 25 % plus vite.':
-    'A bone totem rises where you aim for 10 s: each second, it breathes plague on enemies within 3 tiles (50%). Every 2.5 s, a plague rat crawls out of the ground at its feet: it bites enemies (35% every 0.6 s), then bursts after 6 s into a toxic cloud (90% around it). Your summons near the totem strike 25% faster.',
   'Abomination': 'Abomination',
   '{n} % en zone': '{n}% in an area',
-  'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).':
-    'A stitched-together abomination rises for 15 s: every 1.6 s, it crushes the enemies around it (160%, 2-tile radius).',
   'Luth': 'Lute',
   'Musique : notes à distance, soins de groupe et symphonie qui frappe et soigne.':
     'Music: ranged notes, group healing and a symphony that strikes and heals.',
   'Note éclatante': 'Bursting note',
   'soigne {n} % PV': 'heals {n}% HP',
-  'Une note vibrante file vers la souris : 240 % au premier ennemi touché. L’allié le plus blessé à moins de 8 cases (toi compris) récupère 4 % de ses PV max.':
-    'A vibrating note flies toward the mouse: 240% to the first enemy hit. The most wounded ally within 8 tiles (you included) recovers 4% of their max HP.',
   'Accord dissonant': 'Dissonant chord',
-  'Un accord violent frappe tous les ennemis autour de toi et repousse les monstres (pas les boss).':
-    'A violent chord strikes every enemy around you and pushes monsters back (not bosses).',
   'Chant de guérison': 'Healing song',
-  'Soigne le groupe de 12 % PV, puis 2 %/s pendant 5 s': 'Heals the group for 12% HP, then 2%/s for 5 s',
-  'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max, puis 2 % par seconde pendant 5 s.':
-    'You and your allies within 6 tiles recover 12% of your max HP, then 2% per second for 5 s.',
   'Symphonie': 'Symphony',
   '5 ondes de 100 % (500 %)': '5 waves of 100% (500%)',
   'soigne': 'heals',
-  'Une symphonie résonne là où tu vises : 5 ondes en 2 s, 100 % chacune aux ennemis à moins de 3 cases. Chaque onde soigne de 2 % de leurs PV max les héros dans la zone.':
-    'A symphony rings out where you aim: 5 waves over 2 s, 100% each to enemies within 3 tiles. Each wave heals the heroes in the area for 2% of their max HP.',
   'CHANT DE GUÉRISON': 'HEALING SONG',
   'SYMPHONIE': 'SYMPHONY',
   'Grande hache': 'Great axe',
   'Hache à deux mains : larges coups, bond écrasant et hurlement de rage, payés avec ton sang.':
     'Two-handed axe: wide blows, a crushing leap and a howl of rage, paid for with your blood.',
   'Grand cône': 'Wide cone',
-  'Un coup de hache très large devant toi, qui fend le sol et touche tous les ennemis du cône.':
-    'A very wide axe blow in front of you that splits the ground and hits every enemy in the cone.',
   'Bond du boucher': 'Butcher’s leap',
   'Bond vers la souris': 'Leap toward the mouse',
   '240 % autour de toi': '240% around you',
   'étourdit 1 s': 'stuns 1 s',
-  'Tu bondis jusqu’à la souris (4 cases au plus) et t’écrases au sol : 240 % aux ennemis autour du point d’arrivée, et les monstres (pas les boss) sont étourdis 1 s.':
-    'You leap to the mouse (4 tiles at most) and crash into the ground: 240% to enemies around the landing point, and monsters (not bosses) are stunned for 1 s.',
   'Hurlement sanguinaire': 'Bloodthirsty howl',
   'Rage 6 s : dégâts +25 %': 'Rage 6 s: damage +25%',
   'affaiblit autour de toi': 'weakens around you',
-  'Tu hurles : pendant 6 s, tes coups infligent 25 % de dégâts en plus, mais tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases sont affaiblis pendant 4 s.':
-    'You howl: for 6 s, your blows deal 25% more damage, but you take 15% more damage. Enemies within 4 tiles are weakened for 4 s.',
   'Châtiment du sang': 'Blood punishment',
   '450 %, ou 700 % sous 30 % de tes PV': '450%, or 700% below 30% of your HP',
-  'Un coup terrible devant toi. Si tes PV sont sous 30 % de leur maximum, il inflige 700 %.':
-    'A terrible blow in front of you. If your HP is below 30% of its maximum, it deals 700%.',
   'HURLEMENT : DÉGÂTS +25 %': 'HOWL: DAMAGE +25%',
   'CHÂTIMENT 700 %': 'PUNISHMENT 700%',
   // ------------------------------------------------------------ Classes et talents (shared/data/classes.js)
@@ -1286,10 +1253,6 @@ export default {
     'Every 6 offensive skills, a final chord deals 120% of Attack to enemies within 4 tiles and heals your nearby group for 8% of their max HP. Cooldown: 12 s.',
   'Berserker': 'Berserker',
   'Corps à corps sauvage, sang versé et vol de vie': 'Savage melee, spilled blood and life steal',
-  'Il paie ses compétences avec ses PV : plus il est blessé, plus il frappe fort':
-    'Pays for skills with HP: the more wounded, the harder he strikes',
-  'Tes compétences coûtent des PV au lieu du mana, sans jamais pouvoir te tuer. +1 % de dégâts par tranche de 2 % de PV perdus (jusqu’à +50 %). Tes compétences offensives te rendent 15 % des dégâts infligés ; une compétence utilitaire double ce vol de vie pour ta compétence offensive suivante. Tu ne manies que ta Grande hache, qui grandit avec toi.':
-    'Your skills cost HP instead of mana, and can never kill you. +1% damage per 2% of HP lost (up to +50%). Your offensive skills return 15% of the damage dealt to you; a utility skill doubles this life steal for your next offensive skill. You wield only your Great axe, which grows with you.',
   'Pendant 8 secondes, tu ne peux pas descendre sous 1 PV, tes attaques de base sont 25 % plus rapides et tes soins sont doublés. À la fin, tu perds 20 % de tes PV maximum (sans pouvoir en mourir).':
     'For 8 seconds, you cannot drop below 1 HP, your basic attacks are 25% faster and your healing is doubled. At the end, you lose 20% of your maximum HP (it cannot kill you).',
   'Tuer un ennemi réduit de 2 secondes les recharges de tes compétences.':
@@ -5693,8 +5656,6 @@ export default {
     'In cat form, each critical hit heals you for 2% of max HP and reduces Predator’s leap cooldown by 1 s.',
   'Soigner un allié te rend 25 % du soin et lui donne +10 % de dégâts pendant 4 s.':
     'Healing an ally gives you 25% of the heal and grants them +10% damage for 4 s.',
-  'Sous 40 % de PV, une écorce t’entoure : bouclier de 20 % de tes PV max pendant 6 s, et les ennemis qui te frappent subissent 30 % de leurs dégâts. Recharge : 40 s.':
-    'Below 40% HP, bark surrounds you: a shield of 20% of your max HP for 6 s, and enemies that hit you take 30% of their damage. Cooldown: 40 s.',
   'Après 3 compétences de nature, entrer en forme féline donne +25 % de dégâts pendant 8 s ; après 3 compétences félines, reprendre forme normale soigne ton groupe proche de 15 % des PV max.':
     'After 3 nature skills, entering cat form grants +25% damage for 8 s; after 3 cat skills, returning to normal form heals your nearby group for 15% of max HP.',
   'Masse et bouclier : défense, protection des alliés et lumière sacrée':
@@ -5710,11 +5671,7 @@ export default {
   'Rempart sacré dure 2 s de plus ; pendant ce temps, 40 % des dégâts que tu évites sont renvoyés à l’attaquant en lumière sacrée.':
     'Holy rampart lasts 2 s longer; meanwhile, 40% of the damage you avoid is sent back to the attacker as holy light.',
   'Bouclier vengeur': 'Avenging shield',
-  'Après la Charge du bouclier, ton égide rebondit sur 3 ennemis proches : 150 % à chacun.':
-    'After Shield charge, your aegis bounces to 3 nearby enemies: 150% to each.',
   'Sentence': 'Sentence',
-  'Marteau du Jugement inflige 60 % de plus aux ennemis sous 35 % de leurs PV et achève les monstres (pas les boss) sous 10 %.':
-    'Hammer of judgement deals 60% more to enemies below 35% HP and finishes off monsters (not bosses) below 10%.',
   'Terre sainte': 'Holy ground',
   'Tes sols consacrés durent 3 s de plus et réduisent de 15 % les dégâts subis par les héros qui s’y tiennent.':
     'Your consecrated ground lasts 3 s longer and reduces damage taken by heroes standing in it by 15%.',
@@ -5740,15 +5697,11 @@ export default {
   'Tes saignements infligent 40 % de dégâts en plus et réduisent de 10 % les dégâts de leur cible.':
     'Your bleeds deal 40% more damage and reduce their target’s damage by 10%.',
   'Lames jumelles': 'Twin blades',
-  'Éventail de lames lance 8 dagues, et chacune revient vers toi en frappant une seconde fois (50 %).':
-    'Fan of blades throws 8 daggers, and each one returns to you, striking a second time (50%).',
   'Assassinat': 'Assassination',
   'Le coup qui suit Pas de l’ombre fait +100 % au lieu de +60 % ; si sa cible meurt dans les 3 s, Pas de l’ombre est aussitôt rechargé.':
     'The hit after Shadow step deals +100% instead of +60%; if its target dies within 3 s, Shadow step is recharged at once.',
   'Tes coups critiques font saigner : 35 % des dégâts du coup sur 4 s.':
     'Your critical hits cause bleeding: 35% of the hit’s damage over 4 s.',
-  'Tu infliges 25 % de dégâts en plus aux ennemis sous 30 % de leurs PV ; Mille coupures achève les monstres (pas les boss) sous 15 %.':
-    'You deal 25% more damage to enemies below 30% HP; Thousand cuts finishes off monsters (not bosses) below 15%.',
   '+10 points de critique et +20 % de dégâts critiques.': '+10 crit and +20% critical damage.',
   'Après une roulade, tu deviens invisible 1,5 s (comme le Voile d’ombre) et ton prochain coup est critique.':
     'After a dodge roll, you turn invisible for 1.5 s (like Shadow veil) and your next hit is critical.',
@@ -5764,8 +5717,6 @@ export default {
   'Tes sorts sont élémentaires : le feu brûle (30 % des dégâts en plus sur 4 s), la glace ralentit de 30 % pendant 2,5 s, la foudre rebondit sur 2 ennemis proches (35 %).':
     'Your spells are elemental: fire burns (30% extra damage over 4 s), ice slows by 30% for 2.5 s, lightning bounces to 2 nearby enemies (35%).',
   'Combustion': 'Combustion',
-  'Boule de feu se divise à l’impact en 3 flammèches (60 % chacune) qui filent vers les ennemis proches ; tes brûlures infligent 30 % de plus.':
-    'Fireball splits on impact into 3 embers (60% each) that fly to nearby enemies; your burns deal 30% more.',
   'Météore jumeau': 'Twin meteor',
   'Un second météore tombe 0,6 s après le premier, à côté de lui (60 % des dégâts).':
     'A second meteor falls 0.6 s after the first, next to it (60% of the damage).',
@@ -5781,10 +5732,6 @@ export default {
   'Électricité statique': 'Static electricity',
   'Chaque coup de foudre pose une charge statique ; à 5 charges, la cible est frappée par la foudre céleste : 300 % de l’Attaque.':
     'Each lightning hit applies a static charge; at 5 charges, the target is struck by celestial lightning: 300% of Attack.',
-  'Lancer du feu, de la glace et de la foudre en moins de 8 s : ta prochaine compétence fait +50 % et ne coûte pas de mana.':
-    'Cast fire, ice and lightning within 8 s: your next skill deals +50% and costs no mana.',
-  'Sous 40 % de PV : bouclier de 20 % de tes PV max pendant 6 s, et les ennemis à moins de 3 cases sont gelés 2 s (pas les boss). Recharge : 40 s.':
-    'Below 40% HP: a shield of 20% of your max HP for 6 s, and enemies within 3 tiles are frozen for 2 s (not bosses). Cooldown: 40 s.',
   'Un ennemi brûlé qui meurt explose : 80 % de l’Attaque aux ennemis à moins de 3 cases, et sa brûlure se propage à eux.':
     'A burning enemy that dies explodes: 80% of Attack to enemies within 3 tiles, and its burn spreads to them.',
   'Avatar primordial': 'Primordial avatar',
@@ -5796,8 +5743,6 @@ export default {
     'Each offensive skill increases your damage and healing by 4%, up to 20%, for 8 seconds.',
   'Tes soins sont augmentés de 20 % et Chant de guérison dure 3 s de plus.':
     'Your healing is increased by 20% and Healing song lasts 3 s longer.',
-  'Sous 40 % de PV, tu récupères 15 % de tes PV max et gagnes un bouclier de 15 % pendant 5 s. Recharge : 40 s.':
-    'Below 40% HP, you recover 15% of your max HP and gain a 15% shield for 5 s. Cooldown: 40 s.',
   'Tes soins donnent à leur cible (toi compris) +15 % de vitesse et +8 % de dégâts pendant 5 s.':
     'Your heals grant their target (you included) +15% speed and +8% damage for 5 s.',
   'Les ennemis touchés par tes compétences offensives subissent 10 % de dégâts en plus, de toi et de ton groupe, pendant 6 s.':
@@ -5811,16 +5756,8 @@ export default {
     'Every time you spend 20 Rhythm, your skill cooldowns drop by 1 s.',
   'Les soins qui dépassent les PV maximum deviennent un bouclier, jusqu’à 15 % des PV maximum de la cible pendant 6 secondes.':
     'Healing beyond max HP becomes a shield, up to 15% of the target’s max HP for 6 seconds.',
-  'Symphonie se termine par un accord final : 300 % aux ennemis de la zone, et 15 % des PV max à ton groupe proche.':
-    'Symphony ends with a final chord: 300% to enemies in the area, and 15% of max HP to your nearby group.',
   'Tuer un ennemi réduit de 3 s les recharges de tes compétences, et tes attaques de base sont 15 % plus rapides pendant 5 s.':
     'Killing an enemy reduces your skill cooldowns by 3 s, and your basic attacks are 15% faster for 5 s.',
-  'Chaque coup subi te donne une Cicatrice : +3 % de dégâts par Cicatrice, 10 au maximum, pendant 6 secondes (durée renouvelée). Un coup critique ennemi en donne 3.':
-    'Each hit taken gives you a Scar: +3% damage per Scar, up to 10, for 6 seconds (duration refreshed). An enemy critical hit gives 3.',
-  'Sous 20 % de PV, ta Soif de sang te rend 50 % des dégâts infligés et tu subis 20 % de dégâts en moins.':
-    'Below 20% HP, your Bloodthirst returns 50% of the damage dealt and you take 20% less damage.',
-  'Tu subis 1 % de dégâts en moins par tranche de 4 % de PV perdus (jusqu’à 25 %).':
-    'You take 1% less damage per 4% of HP lost (up to 25%).',
   'Tes compétences offensives font saigner leurs cibles : 40 % des dégâts infligés, en plus, sur 4 secondes.':
     'Your offensive skills make their targets bleed: 40% of the damage dealt, extra, over 4 seconds.',
   'Tu infliges 20 % de dégâts en plus aux ennemis qui saignent ; Châtiment du sang consume leurs saignements (150 % de ce qu’il leur restait à faire).':
@@ -5847,8 +5784,6 @@ export default {
   'Pluie torrentielle': 'Torrential rain',
   'Volée de flèches tire 6 salves au lieu de 4, et ralentit les ennemis touchés de 40 %.':
     'Arrow volley fires 6 salvoes instead of 4, and slows enemies hit by 40%.',
-  'Après son assaut, le faucon reste 8 s à tes côtés : il fond sur la cible de ta Marque (ou l’ennemi le plus proche) toutes les 0,8 s, 60 % par serre.':
-    'After its assault, the falcon stays at your side for 8 s: it swoops on your Mark’s target (or the nearest enemy) every 0.8 s, 60% per talon.',
   'Proie désignée': 'Designated prey',
   'Ta Marque fait subir 25 % de dégâts en plus au lieu de 15 % ; quand sa cible meurt, la Marque saute sur l’ennemi le plus proche.':
     'Your Mark makes its target take 25% more damage instead of 15%; when its target dies, the Mark jumps to the nearest enemy.',
@@ -5863,8 +5798,6 @@ export default {
   'Piège de givre': 'Frost trap',
   'Quand un ennemi arrive à moins de 2 cases de toi, un piège de givre le gèle 2 s (un boss est ralenti). Recharge : 15 s.':
     'When an enemy comes within 2 tiles of you, a frost trap freezes it for 2 s (a boss is slowed). Cooldown: 15 s.',
-  'Sous 35 % de PV, tu gagnes +30 % de vitesse et subis 20 % de dégâts en moins pendant 5 s. Recharge : 40 s.':
-    'Below 35% HP, you gain +30% speed and take 20% less damage for 5 s. Cooldown: 40 s.',
   'Maître de la traque': 'Master of the hunt',
   'Œil du faucon dure 5 s de plus ; pendant l’Œil, chaque ennemi tué réduit toutes tes recharges de 2 s.':
     'Hawk eye lasts 5 s longer; during the Eye, each enemy killed reduces all your cooldowns by 2 s.',
@@ -5892,8 +5825,6 @@ export default {
   'Ambidextrie': 'Ambidexterity',
   'Tes attaques de base frappent deux fois : la seconde lame fait 40 % de la première.':
     'Your basic attacks strike twice: the second blade deals 40% of the first.',
-  'Sous 35 % de PV, tu récupères 25 % de tes PV max en 5 s. Recharge : 45 s.':
-    'Below 35% HP, you recover 25% of your max HP over 5 s. Cooldown: 45 s.',
   'Fureur martiale': 'Martial fury',
   'À 5 Élans, tes compétences coûtent 30 % de Rage en moins et tes coups critiques font +25 % de dégâts.':
     'At 5 Momentum, your skills cost 30% less Rage and your critical hits deal +25% damage.',
@@ -5903,124 +5834,45 @@ export default {
   'Volonté de fer protège aussi tes alliés à moins de 6 cases (15 % de dégâts en moins) et te donne 30 de Rage de plus.':
     'Iron will also protects your allies within 6 tiles (15% less damage) and grants you 30 more Rage.',
   'Seigneur de guerre': 'Warlord',
-  'Chaque Élan donne aussi +2 points de critique ; à 5 Élans, tes attaques de base libèrent une onde d’acier (60 % autour de la cible, 2 cases).':
-    'Each Momentum also grants +2 crit; at 5 Momentum, your basic attacks release a steel wave (60% around the target, 2 tiles).',
   'Bâton sylvestre': 'Sylvan staff',
   'Nature : lianes, spores, fleur de vie et racines géantes.':
     'Nature: vines, spores, flower of life and giant roots.',
   'Fouet de ronces': 'Bramble lash',
-  'Ligne · 240 % · ralentit 40 % 2 s': 'Line · 240% · slows 40% for 2 s',
-  'Une liane hérissée d’épines fouette tout ce qui est aligné devant toi (6 cases) et ralentit les ennemis touchés de 40 % pendant 2 s.':
-    'A thorny vine lashes everything lined up in front of you (6 tiles) and slows enemies hit by 40% for 2 s.',
-  'Fleur de vie 8 s sous la souris · soigne 3 % PV/s':
-    'Flower of life for 8 s under the mouse · heals 3% HP/s',
-  'Une fleur de vie éclot là où tu vises pendant 8 s : chaque seconde, les héros à moins de 3 cases récupèrent 3 % de leurs PV max (24 % en tout).':
-    'A flower of life blooms where you aim for 8 s: each second, heroes within 3 tiles recover 3% of their max HP (24% in total).',
   'Spores toxiques': 'Toxic spores',
-  'Nuage 5 s sous la souris · 70 %/s · ralentit': 'Cloud for 5 s under the mouse · 70%/s · slows',
-  'Un nuage de spores s’élève là où tu vises pendant 5 s : chaque seconde, les ennemis dedans subissent 70 % de dégâts de nature et sont ralentis de 20 %.':
-    'A cloud of spores rises where you aim for 5 s: each second, enemies in it take 70% nature damage and are slowed by 20%.',
   'Courroux de la forêt': 'Forest’s wrath',
-  '3 vagues de racines · 170 % chacune (510 %) · immobilise': '3 waves of roots · 170% each (510%) · roots',
-  'Trois vagues de racines géantes jaillissent du sol devant toi, de plus en plus loin : 170 % chacune, et les monstres touchés (pas les boss) sont immobilisés 1,5 s.':
-    'Three waves of giant roots burst from the ground in front of you, further and further: 170% each, and monsters hit (not bosses) are rooted for 1.5 s.',
   'Forme féline : griffures, bonds et morsures qui font saigner.':
     'Cat form: scratches, leaps and bites that cause bleeding.',
   'Lacération': 'Laceration',
-  'Cône · 2 griffures de 120 % · saignement 5 s': 'Cone · 2 claws of 120% · bleed 5 s',
-  'Deux coups de griffes devant toi. Le second fait saigner : 30 % de ta Puissance par seconde pendant 5 s (150 % en tout).':
-    'Two claw swipes in front of you. The second causes bleeding: 30% of your Power per second for 5 s (150% in total).',
   'Bond du prédateur': 'Predator’s leap',
-  'Bond vers la souris · 220 % autour · étourdit 1 s': 'Leap to the mouse · 220% around · stuns 1 s',
-  'Tu bondis jusqu’à la souris (5 cases au plus) et retombes toutes griffes dehors : 220 % aux ennemis autour de toi ; les monstres (pas les boss) sont étourdis 1 s.':
-    'You leap to the mouse (5 tiles at most) and land with claws out: 220% to enemies around you; monsters (not bosses) are stunned for 1 s.',
-  'Soigne 8 % PV · attaques de base +30 % de vitesse 6 s': 'Heals 8% HP · basic attacks +30% speed for 6 s',
-  'Tu rugis : tu récupères 8 % de tes PV max et, pendant 6 s, tes attaques de base sont 30 % plus rapides et font +15 % de dégâts.':
-    'You roar: you recover 8% of your max HP and, for 6 s, your basic attacks are 30% faster and deal +15% damage.',
   'Morsure féroce': 'Ferocious bite',
-  'Cône · 450 %, ou 650 % sur une cible qui saigne': 'Cone · 450%, or 650% on a bleeding target',
-  'Une morsure à la gorge devant toi. Contre une cible qui saigne, elle inflige 650 %.':
-    'A bite to the throat in front of you. Against a bleeding target, it deals 650%.',
   'Masse et égide': 'Mace and aegis',
   'Masse sacrée et bouclier : frappes qui soignent, charge, rempart et marteau du jugement.':
     'Holy mace and shield: healing strikes, charge, rampart and hammer of judgement.',
   'Frappe du croisé': 'Crusader strike',
-  'Cône · 280 % · te soigne de 3 % PV': 'Cone · 280% · heals you 3% HP',
-  'Un coup de masse sacré devant toi ; tu récupères 3 % de tes PV max.':
-    'A holy mace blow in front of you; you recover 3% of your max HP.',
   'Charge du bouclier': 'Shield charge',
-  'Ruée de 5 cases · 220 % · étourdit 1,2 s (boss : affaibli)':
-    '5-tile rush · 220% · stuns 1.2 s (boss: weakened)',
-  'Tu fonces bouclier en avant vers la souris : 220 % à tout ce qui se trouve sur ton chemin. Les monstres touchés sont étourdis 1,2 s ; un boss est affaibli (−5 % de dégâts) 4 s.':
-    'You charge shield-first towards the mouse: 220% to everything in your path. Monsters hit are stunned for 1.2 s; a boss is weakened (−5% damage) for 4 s.',
-  '−35 % de dégâts reçus 6 s · bouclier de groupe 12 %': '−35% damage taken for 6 s · 12% group shield',
-  'Tu lèves ton égide : pendant 6 s, tu subis 35 % de dégâts en moins, et toi et tes alliés à moins de 6 cases gagnez un bouclier de 12 % de vos PV max.':
-    'You raise your aegis: for 6 s, you take 35% less damage, and you and your allies within 6 tiles gain a shield of 12% of your max HP.',
   'Marteau du Jugement': 'Hammer of judgement',
-  'Zone sous la souris · 500 % · sol consacré 5 s': 'Area under the mouse · 500% · consecrated ground 5 s',
-  'Un marteau de lumière s’abat là où tu vises : 500 % aux ennemis à moins de 2,5 cases, puis le sol reste consacré 5 s (50 % par seconde aux ennemis, 3 % des PV max par seconde aux héros dedans).':
-    'A hammer of light crashes down where you aim: 500% to enemies within 2.5 tiles, then the ground stays consecrated for 5 s (50% per second to enemies, 3% of max HP per second to heroes in it).',
   'Dagues jumelles': 'Twin daggers',
   'Saignement : fais saigner, disparais dans l’ombre, puis consume les saignements.':
     'Bleeding: make them bleed, vanish into the shadows, then consume the bleeds.',
   'Entaille': 'Gash',
-  '2 coups · 120 % chacun · saignement 5 s': '2 hits · 120% each · bleed 5 s',
-  'Téléportation dans le dos · prochain coup +60 % et critique':
-    'Teleport behind · next hit +60% and critical',
-  'Tu disparais et réapparais dans le dos de l’ennemi le plus proche de la souris (6 cases au plus ; sinon vers la souris). Ton prochain coup, dans les 4 s, fait +60 % de dégâts et est critique.':
-    'You vanish and reappear behind the enemy closest to the mouse (6 tiles at most; otherwise towards the mouse). Your next hit, within 4 s, deals +60% damage and is critical.',
   'Éventail de lames': 'Fan of blades',
-  '5 dagues en éventail · 90 % chacune · saignement': '5 daggers in a fan · 90% each · bleed',
-  'Tu lances 5 dagues en éventail vers la souris : 90 % au premier ennemi touché par chacune, et chaque dague fait saigner (20 % de ta Puissance par seconde pendant 4 s).':
-    'You throw 5 daggers in a fan towards the mouse: 90% to the first enemy hit by each, and each dagger causes bleeding (20% of your Power per second for 4 s).',
   'Bâton élémentaire': 'Elemental staff',
   'Éléments : boule de feu, nova de givre, chaîne d’éclairs et météore.':
     'Elements: fireball, frost nova, chain lightning and meteor.',
   'Boule de feu': 'Fireball',
-  'Projectile · 260 % · explose': 'Projectile · 260% · explodes',
-  'Une boule de feu file vers la souris et explose au premier ennemi touché : 260 % à la cible, la moitié aux ennemis à moins de 1,5 case.':
-    'A fireball flies towards the mouse and explodes on the first enemy hit: 260% to the target, half to enemies within 1.5 tiles.',
   'Nova de givre': 'Frost nova',
-  'Cercle de 3 cases · 190 % · gèle 1,5 s': '3-tile circle · 190% · freezes 1.5 s',
-  'Une explosion de givre autour de toi : 190 % aux ennemis à moins de 3 cases. Les monstres sont gelés 1,5 s ; un boss est ralenti.':
-    'A burst of frost around you: 190% to enemies within 3 tiles. Monsters are frozen for 1.5 s; a boss is slowed.',
-  'Éclair · 260 % · rebondit 4 fois': 'Lightning · 260% · bounces 4 times',
-  'Un éclair frappe l’ennemi le plus proche de la souris (9 cases au plus) puis rebondit sur 4 autres ennemis, en perdant 15 % à chaque rebond.':
-    'A bolt strikes the enemy closest to the mouse (9 tiles at most) then bounces to 4 other enemies, losing 15% on each bounce.',
   'Météore': 'Meteor',
-  'Zone sous la souris · 600 % · sol brûlant 4 s': 'Area under the mouse · 600% · burning ground 4 s',
-  'Un météore tombe du ciel là où tu vises : 0,8 s plus tard, 600 % aux ennemis à moins de 2,5 cases, puis le sol brûle 4 s (40 % par seconde).':
-    'A meteor falls from the sky where you aim: 0.8 s later, 600% to enemies within 2.5 tiles, then the ground burns for 4 s (40% per second).',
   'Arc long': 'Longbow',
   'Distance : flèches perçantes, marque de proie, volées et faucon spectral.':
     'Range: piercing arrows, prey mark, volleys and spectral falcon.',
   'Tir perçant': 'Piercing shot',
-  'Flèche qui traverse · 300 %': 'Piercing arrow · 300%',
-  'Une flèche lourde file vers la souris et traverse tous les ennemis sur sa ligne (14 cases).':
-    'A heavy arrow flies towards the mouse and pierces every enemy on its line (14 tiles).',
-  'Marque 12 s · +15 % de dégâts reçus': 'Mark 12 s · +15% damage taken',
-  'Tu marques l’ennemi le plus proche de la souris pendant 12 s : il subit 15 % de dégâts en plus, de toi et de ton groupe, et tes flèches lui font encore +20 %.':
-    'You mark the enemy closest to the mouse for 12 s: it takes 15% more damage from you and your group, and your arrows deal +20% more to it.',
   'Volée de flèches': 'Arrow volley',
   'Assaut du faucon': 'Falcon assault',
-  'Faucon spectral · 5 serres de 100 % (500 %)': 'Spectral falcon · 5 talons of 100% (500%)',
-  'Un faucon spectral fond sur l’ennemi le plus proche de la souris et le lacère 5 fois en 2 s (100 % par serre). Si la cible meurt, il passe à l’ennemi le plus proche.':
-    'A spectral falcon swoops on the enemy closest to the mouse and rakes it 5 times in 2 s (100% per talon). If the target dies, it moves on to the nearest enemy.',
   'Épées jumelles': 'Twin swords',
   'Combos : rafales, tempête d’acier, charge et exécution croisée.':
     'Combos: flurries, steel storm, charge and cross execution.',
-  '4 coups rapides · 80 % chacun (320 %)': '4 quick hits · 80% each (320%)',
-  '6 tours autour de toi · 60 % chacun (360 %)': '6 spins around you · 60% each (360%)',
-  'Tu tournoies 1,5 s, lames tendues : 6 frappes de 60 % sur tous les ennemis autour de toi. Tu peux te déplacer pendant la tempête. Active le combo pendant 4 s.':
-    'You whirl for 1.5 s, blades outstretched: 6 strikes of 60% on all enemies around you. You can move during the storm. Activates the combo for 4 s.',
   'Charge héroïque': 'Heroic charge',
-  'Bond de 5 cases · 200 % sur la trajectoire · +20 Rage': '5-tile leap · 200% along the path · +20 Rage',
-  'Tu charges vers la souris en traversant les ennemis : 200 % à tous ceux sur ton chemin, et tu gagnes 20 de Rage.':
-    'You charge towards the mouse through enemies: 200% to everyone in your path, and you gain 20 Rage.',
   'Exécution croisée': 'Cross execution',
-  'Cône · 500 % (600 % en combo) · ×1,5 sous 35 %': 'Cone · 500% (600% in combo) · ×1.5 below 35%',
-  'Deux lames se croisent devant toi : 500 %, ou 600 % si le combo est actif (Rafale ou Tempête dans les 4 s). Contre une cible sous 35 % de ses PV, les dégâts sont multipliés par 1,5.':
-    'Two blades cross in front of you: 500%, or 600% if the combo is active (Flurry or Storm within 4 s). Against a target below 35% HP, the damage is multiplied by 1.5.',
   'Éclat des profondeurs': 'Shard of the Depths',
   'Sceau des conquérants': 'Conqueror’s Seal',
   'Fragment d’Aurore': 'Dawn Fragment',
@@ -6085,5 +5937,180 @@ export default {
   'Recharge de la roulade −{n} % ; chaque roulade laisse un écho du Néant qui explose 1 s plus tard ({m} % de ton Attaque autour de lui) et te donne +25 % de dégâts pendant 3 s.':
     'Dodge roll cooldown −{n}%; each roll leaves a Void echo that explodes 1 s later ({m}% of your Attack around it) and grants you +25% damage for 3 s.',
   'Attaque, Défense et PV maximum +{n} % ; une fois toutes les 90 s, un coup fatal te rend {m} % de tes PV et 2 s d’invulnérabilité.':
-    'Attack, Defence and max HP +{n}%; once every 90 s, a fatal blow restores {m}% of your HP and grants 2 s of invulnerability.'
+    'Attack, Defence and max HP +{n}%; once every 90 s, a fatal blow restores {m}% of your HP and grants 2 s of invulnerability.',
+  'Dégâts de nature en ligne · ralentissement': 'Nature damage in a line · slow',
+  'Frappe les ennemis sur une ligne de 6 cases dans la direction visée. Inflige à chacun des dégâts de nature égaux à 240 % de ta Puissance magique et le ralentit de 40 % pendant 2 s.':
+    'Hits enemies in a 6-tile line in the aimed direction. Deals nature damage equal to 240% of your Spell Power to each and slows them by 40% for 2 s.',
+  'Zone de soin · 3 % des PV max par seconde': 'Healing area · 3% of max HP per second',
+  'Fais éclore une fleur au point visé pendant 8 s. Chaque seconde, les membres du groupe à moins de 3 cases de la fleur récupèrent 3 % de leurs PV max.':
+    'Grows a flower at the aimed point for 8 s. Each second, party members within 3 tiles of the flower recover 3% of their max HP.',
+  'Nuage de nature · dégâts sur 5 s · ralentissement': 'Nature cloud · damage over 5 s · slow',
+  'Crée un nuage de 2,5 cases de rayon au point visé pendant 5 s. Chaque seconde, les ennemis dans le nuage subissent des dégâts de nature égaux à 70 % de ta Puissance magique et sont ralentis de 20 %.':
+    'Creates a cloud with a 2.5-tile radius at the aimed point for 5 s. Each second, enemies in it take nature damage equal to 70% of your Spell Power and are slowed by 20%.',
+  '3 vagues de dégâts de nature · immobilisation': '3 waves of nature damage · root',
+  'Trois vagues de racines jaillissent de plus en plus loin dans la direction visée. Chaque vague inflige des dégâts de nature égaux à 170 % de ta Puissance magique. Les monstres touchés sont immobilisés 1,5 s. Les boss sont ralentis de 40 % à la place.':
+    'Three waves of roots erupt progressively farther in the aimed direction. Each deals nature damage equal to 170% of your Spell Power. Monsters hit are rooted for 1.5 s. Bosses are slowed by 40% instead.',
+  '2 griffures · saignement sur 5 s': '2 claw strikes · bleed over 5 s',
+  'Griffe deux fois en cône dans la direction visée. Chaque griffure inflige des dégâts égaux à 120 % de ta Puissance. La seconde fait saigner la cible et lui inflige 30 % de ta Puissance en dégâts par seconde pendant 5 s.':
+    'Claws twice in a cone in the aimed direction. Each strike deals damage equal to 120% of your Power. The second applies a bleed that deals 30% of your Power as damage per second for 5 s.',
+  'Bond de 5 cases au plus · dégâts à l’arrivée': 'Leap up to 5 tiles · landing damage',
+  'Bondis jusqu’à 5 cases vers le point visé. À l’arrivée, tu infliges l’équivalent de 220 % de ta Puissance en dégâts aux ennemis à moins de 1,8 case. Les monstres touchés sont étourdis 1 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.':
+    'Leaps up to 5 tiles toward the aimed point. On landing, deals damage equal to 220% of your Power to enemies within 1.8 tiles. Monsters hit are stunned for 1 s. Bosses deal 5% less damage for 4 s instead.',
+  'Soin personnel · renforce les attaques de base': 'Self-heal · empowers basic attacks',
+  'Récupère 8 % de tes PV max en soin de base. Pendant 6 s, tes attaques de base infligent 15 % de dégâts en plus et leur délai est réduit de 30 %.':
+    'Restores 8% of your max HP as base healing. For 6 s, your basic attacks deal 15% more damage and their delay is reduced by 30%.',
+  'Dégâts en cône · plus forte sur une cible qui saigne': 'Cone damage · stronger against bleeding targets',
+  'Mords les ennemis en cône dans la direction visée. La morsure leur inflige des dégâts égaux à 450 % de ta Puissance, ou 650 % si la cible saigne.':
+    'Bites enemies in a cone in the aimed direction. The bite deals damage equal to 450% of your Power, or 650% if the target is bleeding.',
+  'Dégâts sacrés en cône · soin personnel': 'Holy cone damage · self-heal',
+  'Frappe les ennemis en cône dans la direction visée et inflige des dégâts sacrés égaux à 280 % de ta Puissance à chacun. Tu récupères 3 % de tes PV max.':
+    'Strikes enemies in a cone in the aimed direction and deals holy damage equal to 280% of your Power to each. Restores 3% of your max HP.',
+  'Ruée de 5 cases · dégâts sacrés · étourdissement': '5-tile charge · holy damage · stun',
+  'Charge jusqu’à 5 cases dans la direction visée. Les ennemis sur ta trajectoire subissent des dégâts sacrés égaux à 220 % de ta Puissance. Les monstres touchés sont étourdis 1,2 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.':
+    'Charges up to 5 tiles in the aimed direction. Enemies in your path take holy damage equal to 220% of your Power. Monsters hit are stunned for 1.2 s. Bosses deal 5% less damage for 4 s instead.',
+  'Réduit les dégâts reçus · bouclier de groupe': 'Reduces damage taken · party shield',
+  'Tu subis 35 % de dégâts en moins pendant 6 s. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier qui absorbe l’équivalent de 12 % de vos PV max pendant 6 s.':
+    'You take 35% less damage for 6 s. You and allies within 6 tiles each gain a shield that absorbs damage equal to 12% of your max HP for 6 s.',
+  'Impact sacré · sol qui blesse et soigne': 'Holy impact · ground damage and healing',
+  'Un marteau frappe au point visé. Il inflige des dégâts sacrés égaux à 500 % de ta Puissance aux ennemis à moins de 2,5 cases. Pendant 5 s, le sol inflige 50 % de ta Puissance en dégâts sacrés par seconde aux ennemis et rend aux alliés dans la zone 3 % de leurs PV max par seconde.':
+    'A hammer strikes the aimed point. It deals holy damage equal to 500% of your Power to enemies within 2.5 tiles. For 5 s, the ground deals 50% of your Power as holy damage per second to enemies and restores 3% of max HP per second to allies in the area.',
+  '2 coups de dague · saignement sur 5 s': '2 dagger strikes · bleed over 5 s',
+  'Entaille deux fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 120 % de ta Puissance. Le second fait saigner la cible et lui inflige 35 % de ta Puissance en dégâts par seconde pendant 5 s.':
+    'Slashes twice in a cone in the aimed direction. Each hit deals damage equal to 120% of your Power. The second applies a bleed that deals 35% of your Power as damage per second for 5 s.',
+  'Téléportation · prochain coup critique et renforcé': 'Teleport · next hit is critical and empowered',
+  'Téléporte-toi derrière l’ennemi le plus proche du point visé parmi ceux à 6 cases ou moins de toi. Si tu ne peux pas te téléporter, fais une ruée de 5 cases dans la direction visée. Ton prochain coup dans les 4 s est critique et inflige 60 % de dégâts en plus.':
+    'Teleports you behind the enemy closest to the aimed point among those within 6 tiles of you. If you cannot teleport, dash 5 tiles in the aimed direction. Your next hit within 4 s is critical and deals 60% more damage.',
+  '5 dagues en éventail · saignement sur 4 s': '5 daggers in a fan · bleed over 4 s',
+  'Lance 5 dagues en éventail dans la direction visée. Chaque dague inflige des dégâts égaux à 90 % de ta Puissance au premier ennemi touché et lui inflige un saignement de 20 % de ta Puissance par seconde pendant 4 s.':
+    'Throws 5 daggers in a fan in the aimed direction. Each dagger deals damage equal to 90% of your Power to the first enemy hit and applies a bleed for 20% of your Power per second for 4 s.',
+  '5 coups en cône · consume les saignements d’arme': '5 cone strikes · consumes weapon bleeds',
+  'Frappe 5 fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 85 % de ta Puissance. Un saignement d’arme sur une cible touchée est consumé et inflige aussitôt 150 % des dégâts qu’il lui restait à infliger.':
+    'Strikes 5 times in a cone in the aimed direction. Each hit deals damage equal to 85% of your Power. A weapon bleed on an enemy hit is consumed and instantly deals 150% of its remaining damage.',
+  'Projectile de feu · explosion à l’impact': 'Fire projectile · explodes on impact',
+  'Lance une boule de feu dans la direction visée. Elle inflige des dégâts de feu égaux à 260 % de ta Puissance magique au premier ennemi touché et à 130 % aux autres ennemis à moins de 1,5 case de l’impact.':
+    'Launches a fireball in the aimed direction. It deals fire damage equal to 260% of your Spell Power to the first enemy hit and 130% to other enemies within 1.5 tiles of impact.',
+  'Dégâts de glace autour de toi · gel': 'Frost damage around you · freeze',
+  'Inflige des dégâts de glace égaux à 190 % de ta Puissance magique aux ennemis à moins de 3 cases de toi. Les monstres sont gelés 1,5 s. Les boss sont ralentis de 40 % à la place.':
+    'Deals frost damage equal to 190% of your Spell Power to enemies within 3 tiles of you. Monsters are frozen for 1.5 s. Bosses are slowed by 40% instead.',
+  'Dégâts de foudre · jusqu’à 4 rebonds': 'Lightning damage · up to 4 bounces',
+  'Frappe l’ennemi le plus proche du point visé parmi ceux à 9 cases ou moins de toi. Le premier éclair inflige des dégâts de foudre égaux à 260 % de ta Puissance magique. Il peut rebondir sur 4 autres ennemis et perd 15 % de ses dégâts à chaque rebond.':
+    'Strikes the enemy closest to the aimed point among those within 9 tiles of you. The first bolt deals lightning damage equal to 260% of your Spell Power. It can bounce to 4 more enemies, losing 15% of its damage per bounce.',
+  'Impact de feu · sol brûlant sur 4 s': 'Fire impact · burning ground over 4 s',
+  'Après 0,8 s, un météore frappe au point visé. Il inflige des dégâts de feu égaux à 600 % de ta Puissance magique aux ennemis à moins de 2,5 cases. Le sol brûle ensuite pendant 4 s et inflige 40 % de ta Puissance magique en dégâts de feu par seconde aux ennemis dans la zone brûlante.':
+    'After 0.8 s, a meteor strikes the aimed point. It deals fire damage equal to 600% of your Spell Power to enemies within 2.5 tiles. The ground then burns for 4 s, dealing 40% of your Spell Power as fire damage per second to enemies standing in it.',
+  'Projectile d’harmonie · soin d’un allié': 'Harmony projectile · single ally heal',
+  'Lance une note dans la direction visée. Elle inflige des dégâts d’harmonie égaux à 240 % de ta Puissance magique au premier ennemi touché. Au lancement, le membre du groupe le plus blessé dans un rayon de 8 cases récupère 4 % de ses PV max. Tu peux recevoir ce soin.':
+    'Launches a note in the aimed direction. It deals harmony damage equal to 240% of your Spell Power to the first enemy hit. On cast, the most wounded party member within 8 tiles recovers 4% of their max HP. You can receive this heal.',
+  'Dégâts d’harmonie autour de toi · repoussement': 'Harmony damage around you · knockback',
+  'Inflige aux ennemis proches des dégâts d’harmonie égaux à 190 % de ta Puissance magique et repousse les monstres. Les boss subissent les dégâts mais restent en place.':
+    'Deals harmony damage equal to 190% of your Spell Power to nearby enemies and knocks monsters back. Bosses take the damage but stay in place.',
+  'Soin de groupe immédiat puis sur 5 s': 'Immediate party heal then healing over 5 s',
+  'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max immédiatement, puis 2 % de vos PV max à chaque pulsation du chant pendant 5 s.':
+    'You and allies within 6 tiles immediately recover 12% of your max HP, then 2% of your max HP with each pulse of the song over 5 s.',
+  '5 ondes · dégâts et soins de zone': '5 waves · area damage and healing',
+  'Fais résonner 5 ondes autour du point visé dans un rayon de 3 cases. Chaque onde inflige des dégâts d’harmonie égaux à 100 % de ta Puissance magique à chaque ennemi dans la zone et rend à chaque allié dans la zone 2 % de ses PV max.':
+    'Sends 5 waves around the aimed point in a 3-tile radius. Each wave deals harmony damage equal to 100% of your Spell Power to each enemy in the area and restores 2% of max HP to each ally in the area.',
+  'Flèche qui traverse les ennemis · portée de 14 cases': 'Piercing arrow · 14-tile range',
+  'Décoche une flèche dans la direction visée jusqu’à 14 cases. Elle traverse les ennemis et inflige à chacun des dégâts égaux à 300 % de ta Puissance.':
+    'Fires an arrow up to 14 tiles in the aimed direction. It pierces enemies and deals damage equal to 300% of your Power to each.',
+  'Marque de 12 s · augmente les dégâts reçus par la cible':
+    '12 s mark · increases damage taken by the target',
+  'Marque pendant 12 s l’ennemi le plus proche du point visé parmi ceux à 14 cases ou moins de toi. La cible subit 15 % de dégâts en plus de tout le groupe. Tes flèches lui infligent 20 % de dégâts supplémentaires.':
+    'Marks for 12 s the enemy closest to the aimed point among those within 14 tiles of you. The target takes 15% more damage from the party. Your arrows deal an additional 20% damage to it.',
+  '4 salves de dégâts de zone': '4 volleys of area damage',
+  'Tire 4 salves au point visé, espacées de 0,5 s. Chaque salve inflige des dégâts égaux à 90 % de ta Puissance à chaque ennemi dans la zone.':
+    'Fires 4 volleys at the aimed point, 0.5 s apart. Each volley deals damage equal to 90% of your Power to every enemy in the area.',
+  'Faucon spectral · 5 coups de serre': 'Spectral falcon · 5 talon strikes',
+  'Ton faucon attaque l’ennemi le plus proche du point visé parmi ceux à 14 cases ou moins de toi. Chaque coup de serre inflige des dégâts égaux à 100 % de ta Puissance. Si la cible tombe, le faucon cherche un autre ennemi à portée pour les coups restants.':
+    'Your falcon attacks the enemy closest to the aimed point among those within 14 tiles of you. Each talon strike deals damage equal to 100% of your Power. If the target falls, the falcon seeks another enemy in range for the remaining strikes.',
+  '4 coups en cône · active le combo': '4 cone strikes · activates the combo',
+  'Frappe 4 fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 80 % de ta Puissance. Active pendant 4 s le combo qui renforce Exécution croisée.':
+    'Strikes 4 times in a cone in the aimed direction. Each hit deals damage equal to 80% of your Power. Activates the combo that empowers Cross execution for 4 s.',
+  '6 frappes autour de toi · active le combo': '6 strikes around you · activates the combo',
+  'Tournoie 1,5 s et touche les ennemis proches 6 fois. Chaque frappe inflige des dégâts égaux à 60 % de ta Puissance. Tu peux te déplacer pendant la tempête. Active pendant 4 s le combo qui renforce Exécution croisée.':
+    'Spins for 1.5 s and hits nearby enemies 6 times. Each strike deals damage equal to 60% of your Power. You can move during the storm. Activates the combo that empowers Cross execution for 4 s.',
+  'Ruée de 5 cases · dégâts sur le trajet · +20 Rage': '5-tile charge · damage along the path · +20 Rage',
+  'Charge jusqu’à 5 cases dans la direction visée. Inflige des dégâts égaux à 200 % de ta Puissance à chaque ennemi sur ta trajectoire et te donne 20 points de Rage.':
+    'Charges up to 5 tiles in the aimed direction. Deals damage equal to 200% of your Power to each enemy in your path and grants you 20 Rage.',
+  'Dégâts en cône · renforcée par le combo': 'Cone damage · empowered by the combo',
+  'Frappe les ennemis en cône dans la direction visée. Les dégâts valent 500 % de ta Puissance, ou 600 % si le combo de Rafale de lames ou de Tempête d’acier est actif. Les dégâts sont multipliés par 1,5 si la cible a moins de 35 % de ses PV max.':
+    'Strikes enemies in a cone in the aimed direction. Deals damage equal to 500% of your Power, or 600% with the combo from Blade flurry or Steel storm active. Damage is multiplied by 1.5 if the target has less than 35% of its max HP.',
+  'Invocation de 30 s · dégâts de poison par coup': '30 s summon · poison damage per hit',
+  'Lève un squelette près de toi pendant 30 s. Il attaque toutes les 1,2 s et chaque coup inflige des dégâts de poison égaux à 60 % de ta Puissance magique. Chaque lancer ajoute un squelette sans limite de nombre.':
+    'Raises a skeleton near you for 30 s. It attacks every 1.2 s, dealing poison damage equal to 60% of your Spell Power per hit. Each cast adds a skeleton with no cap on their number.',
+  '4 invocations de 8 s · dégâts de poison par bec': '4 summons for 8 s · poison damage per peck',
+  'Envoie 4 corbeaux vers le point visé par-dessus les obstacles. Ils chassent pendant 8 s. Chaque corbeau attaque toutes les 0,6 s et inflige des dégâts de poison égaux à 45 % de ta Puissance magique par coup de bec.':
+    'Sends 4 crows toward the aimed point over obstacles. They hunt for 8 s. Each crow attacks every 0.6 s, dealing poison damage equal to 45% of your Spell Power per peck.',
+  'Totem de 10 s · poison de zone · invoque des rats': '10 s totem · area poison damage · summons rats',
+  'Au point visé (portée 8 cases), pose un totem pour 10 s. Il inflige chaque seconde 50 % de ta Puissance magique en dégâts de poison aux ennemis à 3 cases. Toutes les 2,5 s, un rat apparaît. Ses dégâts de poison valent 35 % de ta Puissance magique par morsure (0,6 s) et 90 % à son explosion (après 6 s). Un seul totem, qui accélère les attaques des invocations proches de 25 %.':
+    'Place one totem for 10 s at the aimed point (8-tile range). Each second it deals 50% of your Spell Power as poison damage to enemies within 3 tiles. A rat appears every 2.5 s. Its poison damage is 35% of your Spell Power per bite (every 0.6 s) and 90% when it explodes after 6 s. Nearby summons attack 25% faster.',
+  'Invocation de 15 s · dégâts de poison de zone': '15 s summon · area poison damage',
+  'Lève une abomination pendant 15 s. Toutes les 1,6 s, elle écrase les ennemis dans un rayon de 2 cases autour d’elle et leur inflige des dégâts de poison égaux à 160 % de ta Puissance magique. Tu peux avoir une seule abomination à la fois.':
+    'Raises an abomination for 15 s. Every 1.6 s, it crushes enemies in a 2-tile radius around itself and deals poison damage equal to 160% of your Spell Power to each. You can have one abomination at a time.',
+  'Dégâts dans un large cône': 'Damage in a wide cone',
+  'Frappe tous les ennemis dans un large cône dans la direction visée et inflige à chacun des dégâts égaux à 300 % de ta Puissance.':
+    'Strikes every enemy in a wide cone in the aimed direction, dealing damage equal to 300% of your Power to each.',
+  'Bond d’environ 4 cases · dégâts à l’arrivée': 'Leap about 4 tiles · landing damage',
+  'Bondis d’environ 4 cases au plus vers le point visé. À l’arrivée, tu infliges l’équivalent de 240 % de ta Puissance en dégâts aux ennemis proches. Les monstres touchés sont étourdis 1 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.':
+    'Leaps up to about 4 tiles toward the aimed point. On landing, deals damage equal to 240% of your Power to nearby enemies. Monsters hit are stunned for 1 s. Bosses deal 5% less damage for 4 s instead.',
+  'Plus de dégâts infligés et reçus · affaiblit les ennemis': 'More damage dealt and taken · weakens enemies',
+  'Pendant 6 s, tes coups infligent 25 % de dégâts en plus et tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases de toi infligent 5 % de dégâts en moins pendant 4 s.':
+    'For 6 s, your hits deal 25% more damage and you take 15% more damage. Enemies within 4 tiles of you deal 5% less damage for 4 s.',
+  'Dégâts en cône · renforcé par Hurlement sanguinaire': 'Cone damage · empowered by Bloodthirsty roar',
+  'Frappe les ennemis en cône dans la direction visée. Les dégâts de base valent 450 % de ta Puissance, ou 600 % pendant Hurlement sanguinaire avant ses autres bonus de dégâts.':
+    'Strikes enemies in a cone in the aimed direction. Base damage is 450% of your Power, or 600% during Bloodthirsty roar before its other damage bonuses.',
+  'Floraison ou Rugissement sauvage te donne un bouclier de 20 % de tes PV max pendant 6 s. Durant cette période, les ennemis qui te frappent subissent 30 % des dégâts de leur coup. Recharge du talent de 20 s.':
+    'Bloom or Savage roar gives you a shield for 20% of your max HP for 6 s. During that time, enemies that hit you take 30% of the damage from their hit. Talent cooldown is 20 s.',
+  'Pendant Rempart sacré, l’impact de Marteau du Jugement inflige 60 % de dégâts sacrés en plus, soit 800 % de ta Puissance au total.':
+    'During Holy rampart, Hammer of judgement’s impact deals 60% more holy damage, for a total of 800% of your Power.',
+  'Lames déchirantes': 'Rending blades',
+  'Tes compétences offensives infligent 25 % de dégâts en plus aux cibles qui saignent. Mille coupures libère 200 % des dégâts restants des saignements d’arme qu’il consume, au lieu de 150 %.':
+    'Your offensive skills deal 25% more damage to bleeding targets. Thousand cuts releases 200% of the remaining damage of weapon bleeds it consumes, up from 150%.',
+  'Nova de givre te donne un bouclier qui absorbe l’équivalent de 20 % de tes PV max pendant 6 s. Si tu lances un sort de feu dans ce délai, il inflige 40 % de dégâts en plus.':
+    'Frost nova gives you a shield that absorbs damage equal to 20% of your max HP for 6 s. If you cast a fire spell within that time, it deals 40% more damage.',
+  'Accord dissonant protège aussi ton groupe. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier de 15 % de vos PV max pendant 5 s.':
+    'Dissonant chord also protects your party. You and allies within 6 tiles each gain a shield for 15% of your max HP for 5 s.',
+  'Il paie ses compétences avec ses PV et les récupère en frappant':
+    'Spends HP to use skills and recovers it by attacking',
+  'Tes compétences coûtent des PV et ne peuvent pas te tuer. Tes compétences offensives te rendent 15 % des dégâts infligés. Après Hurlement sanguinaire, ta prochaine compétence offensive inflige 20 % de dégâts en plus et te rend 30 % des dégâts infligés. Tu ne manies que ta Grande hache, qui grandit avec toi.':
+    'Your skills cost HP and cannot kill you. Your offensive skills heal you for 15% of the damage dealt. After Bloodthirsty roar, your next offensive skill deals 20% more damage and heals you for 30% of the damage dealt. You wield only your Great axe, which grows with you.',
+  'Tes attaques de base et compétences offensives te donnent une Cicatrice en touchant, ou 3 sur un critique, au plus toutes les 0,25 s. Chaque Cicatrice donne 3 % de dégâts en plus pendant 6 s, jusqu’à 10 charges. Chaque nouvelle charge renouvelle la durée.':
+    'Your basic attacks and offensive skills grant a Scar on hit, or 3 on a critical hit, at most every 0.25 s. Each Scar grants 3% more damage for 6 s, up to 10 stacks. Each new stack refreshes the duration.',
+  'Hurlement sanguinaire te donne aussi 20 points de Garde pendant 6 s. La compétence offensive qui suit te rend 50 % des dégâts infligés au lieu de 30 %.':
+    'Bloodthirsty roar also grants 20 Guard for 6 s. Your next offensive skill heals you for 50% of the damage dealt instead of 30%.',
+  'Gagne 10 points de Garde en permanence. Tes compétences coûtent 20 % de PV en moins.':
+    'Permanently gain 10 Guard. Your skills cost 20% less HP.',
+  'Ta roulade te donne 30 % de vitesse de déplacement et 20 points de Garde pendant 5 s. Recharge du talent de 15 s.':
+    'Your dodge roll grants 30% movement speed and 20 Guard for 5 s. Talent cooldown is 15 s.',
+  'Volonté de fer te donne aussi un bouclier de 15 % de tes PV max et te rend 5 % de tes PV max par seconde pendant 5 s.':
+    'Iron will also grants a shield for 15% of your max HP and restores 5% of your max HP per second for 5 s.',
+  'Après Charge du bouclier, ton égide frappe jusqu’à 3 ennemis proches et inflige à chacun des dégâts sacrés égaux à 150 % de ta Puissance.':
+    'After Shield charge, your aegis hits up to 3 nearby enemies and deals holy damage equal to 150% of your Power to each.',
+  'Éventail de lames lance 8 dagues. Au retour, une dague qui a touché frappe de nouveau pour la moitié de ses dégâts de base à l’aller.':
+    'Fan of blades throws 8 daggers. On its way back, a dagger that hit strikes again for half its base outgoing damage.',
+  'À l’impact, Boule de feu libère jusqu’à 3 flammèches vers les ennemis proches. Chacune inflige des dégâts de feu égaux à 60 % de ta Puissance magique. Tes brûlures infligent 30 % de dégâts en plus.':
+    'On impact, Fireball releases up to 3 embers toward nearby enemies. Each deals fire damage equal to 60% of your Spell Power. Your burns deal 30% more damage.',
+  'Lance un sort de feu, de glace et de foudre en moins de 8 s. Ton prochain sort inflige 50 % de dégâts en plus et ne coûte pas de mana.':
+    'Cast a fire, frost and lightning spell within 8 s. Your next spell deals 50% more damage and costs no mana.',
+  'Symphonie se termine par un accord qui inflige des dégâts d’harmonie égaux à 300 % de ta Puissance magique aux ennemis dans la zone et rend à ton groupe proche 15 % de ses PV max.':
+    'Symphony ends with a chord that deals harmony damage equal to 300% of your Spell Power to enemies in the area and restores 15% of max HP to your nearby party.',
+  'Après son assaut, le faucon reste à tes côtés pendant 8 s. Toutes les 0,8 s, il attaque la cible de ta Marque ou l’ennemi le plus proche et inflige des dégâts égaux à 60 % de ta Puissance par coup de serre.':
+    'After its assault, the falcon stays at your side for 8 s. Every 0.8 s, it attacks your marked target or the nearest enemy and deals damage equal to 60% of your Power per talon strike.',
+  'Chaque Élan donne aussi 2 points de critique. À 5 Élans, tes attaques de base libèrent une onde qui inflige 60 % de ton Attaque en dégâts d’acier aux autres ennemis à moins de 2 cases de la cible.':
+    'Each Momentum also grants 2 critical chance points. At 5 Momentum, your basic attacks release a wave that deals 60% of your Attack as steel damage to other enemies within 2 tiles of the target.',
+  'Berserker : se paie en PV ; ta prochaine compétence offensive inflige 20 % de dégâts en plus et te rend 30 % des dégâts infligés.':
+    'Berserker: paid with HP. Your next offensive skill deals 20% more damage and heals you for 30% of the damage dealt.',
+  '💀 CHÂTIMENT RENFORCÉ': '💀 EMPOWERED PUNISHMENT',
+  '🩸 SOIF DE SANG': '🩸 BLOODTHIRST',
+  'Prochain sort de feu : +40 % de dégâts.': 'Next fire spell: +40% damage.',
+  'Vitesse +30 %, Garde +20.': 'Speed +30%, Guard +20.',
+  'Prochaine compétence offensive : +20 % de dégâts et 50 % des dégâts infligés rendus en PV.':
+    'Next offensive skill: +20% damage and 50% of damage dealt restored as HP.',
+  'Prochaine compétence offensive : +20 % de dégâts et 30 % des dégâts infligés rendus en PV.':
+    'Next offensive skill: +20% damage and 30% of damage dealt restored as HP.',
+  '{n} dégâts de base par cible': '{n} base damage per target',
+  '{n} dégâts de base si tous les coups touchent': '{n} base damage if every hit lands',
+  '{n} dégâts de base sur toute la durée': '{n} base damage over the full duration',
+  '{n} dégâts de base par dague': '{n} base damage per dagger',
+  '{n} dégâts de base sur la cible principale': '{n} base damage to the primary target'
 };

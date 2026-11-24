@@ -224,12 +224,17 @@ test('Classes et artéfacts pour tous les héros : chaque allié a sa classe, se
  run('ally.player.dead=false;ally.player.hp=ally.player.mhp');
  // État des effets propre à chaque héros : le Second souffle du Guerrier allié ne profite pas à l'hôte.
  run('CANAAN_CLASS.setClasse(ally,{id:"guerrier",talents:[5]})');
- run('ally.player.hp=ally.player.mhp*0.3;wolf.hp=wolf.mhp');run('time++;simulateStep()');
+ run('ally.player.hp=ally.player.mhp;wolf.hp=wolf.mhp');assert.equal(run('CANAAN_CLASS.special(ally)'),true);
+ assert.ok(run('CANAAN_CLASS.runtime(ally).shield')>0,'Volonté de fer protège à pleine vie');
+ assert.equal(run('CANAAN_CLASS.runtime(game.hero).shield'),0,'le bouclier est personnel');
+ run('ally.player.hp=ally.player.mhp*0.5');
  assert.ok(run('__chat.some(m=>m.includes("Second souffle"))'),'message de l’allié dans le chat');assert.equal(run('__toasts.some(m=>m.includes("Second souffle"))'),false,'pas à l’écran de l’hôte');
  const hp1=run('ally.player.hp');for(let t=0;t<130;t++)run('time++;simulateStep()');assert.ok(run('ally.player.hp')>hp1,'il récupère ses PV');
- // Exécuteur de l'Assassin allié : +25 % sous 30 % des PV de la cible, pour lui seul.
- run('CANAAN_CLASS.setClasse(ally,{id:"assassin",talents:[4]});wolf.hp=wolf.mhp*0.2');
- assert.ok(Math.abs(run('CANAAN_CLASS_ATTACK.before(wolf,100,{},ally).damage')-125)<1e-9,'Exécuteur de l’allié');
+ // Lames déchirantes renforce les compétences de l'Assassin allié contre un boss qui saigne, même à pleine vie.
+ run('CANAAN_CLASS.setClasse(ally,{id:"assassin",talents:[4]});wolf.boss=true;wolf.hp=wolf.mhp');
+ const unmarked=run('CANAAN_CLASS_ATTACK.before(wolf,100,{skill:true,offensive:true},ally).damage');
+ run('wolf.v1746_bleed=4');
+ assert.ok(Math.abs(run('CANAAN_CLASS_ATTACK.before(wolf,100,{skill:true,offensive:true},ally).damage')-unmarked*1.25)<1e-9,'Lames déchirantes de l’allié');
  assert.equal(run('CANAAN_CLASS_ATTACK.before(wolf,100,{}).damage'),100,'l’hôte n’a pas de classe');
  // Soins entre héros : un Druide allié (Symbiose) soigne l'hôte, récupère 25 % du soin et donne +10 % de dégâts.
  run('CANAAN_CLASS.setClasse(ally,{id:"druide",talents:[7]});globalThis.hb=1+Math.max(0,characterStats(ally).healingBonus||0)/100');

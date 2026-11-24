@@ -139,7 +139,7 @@ export const CLASSES = deepFreeze([
       ['Symbiose', 'Soigner un allié te rend 25 % du soin et lui donne +10 % de dégâts pendant 4 s.'],
       [
         'Écorce de fer',
-        'Sous 40 % de PV, une écorce t’entoure : bouclier de 20 % de tes PV max pendant 6 s, et les ennemis qui te frappent subissent 30 % de leurs dégâts. Recharge : 40 s.'
+        'Floraison ou Rugissement sauvage te donne un bouclier de 20 % de tes PV max pendant 6 s. Durant cette période, les ennemis qui te frappent subissent 30 % des dégâts de leur coup. Recharge du talent de 20 s.'
       ],
       [
         'Équilibre sauvage',
@@ -181,11 +181,11 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Bouclier vengeur',
-        'Après la Charge du bouclier, ton égide rebondit sur 3 ennemis proches : 150 % à chacun.'
+        'Après Charge du bouclier, ton égide frappe jusqu’à 3 ennemis proches et inflige à chacun des dégâts sacrés égaux à 150 % de ta Puissance.'
       ],
       [
         'Sentence',
-        'Marteau du Jugement inflige 60 % de plus aux ennemis sous 35 % de leurs PV et achève les monstres (pas les boss) sous 10 %.'
+        'Pendant Rempart sacré, l’impact de Marteau du Jugement inflige 60 % de dégâts sacrés en plus, soit 800 % de ta Puissance au total.'
       ],
       [
         'Terre sainte',
@@ -243,7 +243,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Lames jumelles',
-        'Éventail de lames lance 8 dagues, et chacune revient vers toi en frappant une seconde fois (50 %).'
+        'Éventail de lames lance 8 dagues. Au retour, une dague qui a touché frappe de nouveau pour la moitié de ses dégâts de base à l’aller.'
       ],
       [
         'Assassinat',
@@ -251,8 +251,8 @@ export const CLASSES = deepFreeze([
       ],
       ['Hémorragie', 'Tes coups critiques font saigner : 35 % des dégâts du coup sur 4 s.'],
       [
-        'Exécuteur',
-        'Tu infliges 25 % de dégâts en plus aux ennemis sous 30 % de leurs PV ; Mille coupures achève les monstres (pas les boss) sous 15 %.'
+        'Lames déchirantes',
+        'Tes compétences offensives infligent 25 % de dégâts en plus aux cibles qui saignent. Mille coupures libère 200 % des dégâts restants des saignements d’arme qu’il consume, au lieu de 150 %.'
       ],
       ['Précision mortelle', '+10 points de critique et +20 % de dégâts critiques.'],
       [
@@ -300,7 +300,7 @@ export const CLASSES = deepFreeze([
     talents: [
       [
         'Combustion',
-        'Boule de feu se divise à l’impact en 3 flammèches (60 % chacune) qui filent vers les ennemis proches ; tes brûlures infligent 30 % de plus.'
+        'À l’impact, Boule de feu libère jusqu’à 3 flammèches vers les ennemis proches. Chacune inflige des dégâts de feu égaux à 60 % de ta Puissance magique. Tes brûlures infligent 30 % de dégâts en plus.'
       ],
       ['Météore jumeau', 'Un second météore tombe 0,6 s après le premier, à côté de lui (60 % des dégâts).'],
       [
@@ -318,11 +318,11 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Fusion élémentaire',
-        'Lancer du feu, de la glace et de la foudre en moins de 8 s : ta prochaine compétence fait +50 % et ne coûte pas de mana.'
+        'Lance un sort de feu, de glace et de foudre en moins de 8 s. Ton prochain sort inflige 50 % de dégâts en plus et ne coûte pas de mana.'
       ],
       [
         'Barrière de givre',
-        'Sous 40 % de PV : bouclier de 20 % de tes PV max pendant 6 s, et les ennemis à moins de 3 cases sont gelés 2 s (pas les boss). Recharge : 40 s.'
+        'Nova de givre te donne un bouclier qui absorbe l’équivalent de 20 % de tes PV max pendant 6 s. Si tu lances un sort de feu dans ce délai, il inflige 40 % de dégâts en plus.'
       ],
       [
         'Explosion ardente',
@@ -421,7 +421,7 @@ export const CLASSES = deepFreeze([
       ['Ballade réparatrice', 'Tes soins sont augmentés de 20 % et Chant de guérison dure 3 s de plus.'],
       [
         'Contre-chant',
-        'Sous 40 % de PV, tu récupères 15 % de tes PV max et gagnes un bouclier de 15 % pendant 5 s. Recharge : 40 s.'
+        'Accord dissonant protège aussi ton groupe. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier de 15 % de vos PV max pendant 5 s.'
       ],
       [
         'Mélodie vivifiante',
@@ -446,7 +446,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Grand final',
-        'Symphonie se termine par un accord final : 300 % aux ennemis de la zone, et 15 % des PV max à ton groupe proche.'
+        'Symphonie se termine par un accord qui inflige des dégâts d’harmonie égaux à 300 % de ta Puissance magique aux ennemis dans la zone et rend à ton groupe proche 15 % de ses PV max.'
       ]
     ]
   },
@@ -456,7 +456,7 @@ export const CLASSES = deepFreeze([
     icon: '⟦cls_berserker⟧',
     name: 'Berserker',
     style: 'Corps à corps sauvage, sang versé et vol de vie',
-    spec: 'Il paie ses compétences avec ses PV : plus il est blessé, plus il frappe fort',
+    spec: 'Il paie ses compétences avec ses PV et les récupère en frappant',
     color: '#e0404f',
     // Arme de qualité Relique : la Grande hache.
     weapon: 'greataxe',
@@ -465,7 +465,7 @@ export const CLASSES = deepFreeze([
     elements: ['blood', 'blood', 'blood', 'blood'],
     passive: {
       name: 'Soif de sang',
-      desc: 'Tes compétences coûtent des PV au lieu du mana, sans jamais pouvoir te tuer. +1 % de dégâts par tranche de 2 % de PV perdus (jusqu’à +50 %). Tes compétences offensives te rendent 15 % des dégâts infligés ; une compétence utilitaire double ce vol de vie pour ta compétence offensive suivante. Tu ne manies que ta Grande hache, qui grandit avec toi.'
+      desc: 'Tes compétences coûtent des PV et ne peuvent pas te tuer. Tes compétences offensives te rendent 15 % des dégâts infligés. Après Hurlement sanguinaire, ta prochaine compétence offensive inflige 20 % de dégâts en plus et te rend 30 % des dégâts infligés. Tu ne manies que ta Grande hache, qui grandit avec toi.'
     },
     special: {
       id: 'rage',
@@ -482,13 +482,13 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Cicatrices',
-        'Chaque coup subi te donne une Cicatrice : +3 % de dégâts par Cicatrice, 10 au maximum, pendant 6 secondes (durée renouvelée). Un coup critique ennemi en donne 3.'
+        'Tes attaques de base et compétences offensives te donnent une Cicatrice en touchant, ou 3 sur un critique, au plus toutes les 0,25 s. Chaque Cicatrice donne 3 % de dégâts en plus pendant 6 s, jusqu’à 10 charges. Chaque nouvelle charge renouvelle la durée.'
       ],
       [
         'Dernier carré',
-        'Sous 20 % de PV, ta Soif de sang te rend 50 % des dégâts infligés et tu subis 20 % de dégâts en moins.'
+        'Hurlement sanguinaire te donne aussi 20 points de Garde pendant 6 s. La compétence offensive qui suit te rend 50 % des dégâts infligés au lieu de 30 %.'
       ],
-      ['Peau de fer', 'Tu subis 1 % de dégâts en moins par tranche de 4 % de PV perdus (jusqu’à 25 %).'],
+      ['Peau de fer', 'Gagne 10 points de Garde en permanence. Tes compétences coûtent 20 % de PV en moins.'],
       [
         'Saignée',
         'Tes compétences offensives font saigner leurs cibles : 40 % des dégâts infligés, en plus, sur 4 secondes.'
@@ -546,7 +546,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Fauconnier',
-        'Après son assaut, le faucon reste 8 s à tes côtés : il fond sur la cible de ta Marque (ou l’ennemi le plus proche) toutes les 0,8 s, 60 % par serre.'
+        'Après son assaut, le faucon reste à tes côtés pendant 8 s. Toutes les 0,8 s, il attaque la cible de ta Marque ou l’ennemi le plus proche et inflige des dégâts égaux à 60 % de ta Puissance par coup de serre.'
       ],
       [
         'Proie désignée',
@@ -567,7 +567,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Instinct de survie',
-        'Sous 35 % de PV, tu gagnes +30 % de vitesse et subis 20 % de dégâts en moins pendant 5 s. Recharge : 40 s.'
+        'Ta roulade te donne 30 % de vitesse de déplacement et 20 points de Garde pendant 5 s. Recharge du talent de 15 s.'
       ],
       [
         'Maître de la traque',
@@ -613,7 +613,10 @@ export const CLASSES = deepFreeze([
       ],
       ['Coup de grâce', 'Si Exécution croisée tue un ennemi, sa recharge est aussitôt remise à zéro.'],
       ['Ambidextrie', 'Tes attaques de base frappent deux fois : la seconde lame fait 40 % de la première.'],
-      ['Second souffle', 'Sous 35 % de PV, tu récupères 25 % de tes PV max en 5 s. Recharge : 45 s.'],
+      [
+        'Second souffle',
+        'Volonté de fer te donne aussi un bouclier de 15 % de tes PV max et te rend 5 % de tes PV max par seconde pendant 5 s.'
+      ],
       [
         'Fureur martiale',
         'À 5 Élans, tes compétences coûtent 30 % de Rage en moins et tes coups critiques font +25 % de dégâts.'
@@ -628,7 +631,7 @@ export const CLASSES = deepFreeze([
       ],
       [
         'Seigneur de guerre',
-        'Chaque Élan donne aussi +2 points de critique ; à 5 Élans, tes attaques de base libèrent une onde d’acier (60 % autour de la cible, 2 cases).'
+        'Chaque Élan donne aussi 2 points de critique. À 5 Élans, tes attaques de base libèrent une onde qui inflige 60 % de ton Attaque en dégâts d’acier aux autres ennemis à moins de 2 cases de la cible.'
       ]
     ]
   }

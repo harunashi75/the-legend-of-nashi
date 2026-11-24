@@ -1163,20 +1163,12 @@
         if (i === 3) {
           // Marteau du Jugement : marteau de lumière sous la souris, puis sol consacré (Sentence, Terre sainte).
           const { x, y } = groundTarget(),
-            sentence = talent('paladin', 'sentence'),
+            impact = talent('paladin', 'sentence') && S.shieldGuard > 0 ? 8 : 5,
             life = talent('paladin', 'holyground') ? 8 : 5,
             r = TS * 2.5;
           effect('holyHammer', x, y, 0, r, 0, '#ffe08a', 0.75);
           later(0.35, () => {
-            for (const m of around(x, y, r)) {
-              const low = m.hp / m.mhp < 0.35;
-              if (sentence && !isBoss(m) && m.hp / m.mhp < 0.1) {
-                float(m.x, m.y - 60, '⚖️', '#ffd76a');
-                strike(m, m.hp * 10, { ...castContext, effect: true });
-                continue;
-              }
-              dmg(m, 5 * (sentence && low ? 1.6 : 1));
-            }
+            for (const m of around(x, y, r)) dmg(m, impact);
             addZone(
               'consecrated',
               x,
@@ -1278,8 +1270,8 @@
             });
         }
         if (i === 3) {
-          // Mille coupures : 5 coups qui consument les saignements (Exécuteur : achève sous 15 % ; Lame fantôme).
-          const execute = talent('assassin', 'executioner');
+          // Mille coupures : cinq coups qui consument les saignements des armes (Lame fantôme : un double).
+          const bleedBurst = talent('assassin', 'rending') ? 2 : 1.5;
           const cuts = (mult, shape) =>
             rep(5, 0.1, j =>
               cone(
@@ -1288,17 +1280,12 @@
                 0.85 * mult,
                 m => {
                   if (m.hp <= 0) return;
-                  if (execute && !isBoss(m) && m.hp / m.mhp < 0.15) {
-                    float(m.x, m.y - 60, '💀', '#c48cff');
-                    strike(m, m.hp * 10, { ...castContext, effect: true });
-                    return;
-                  }
                   if (m.v1746_bleed > 0) {
                     const remaining = m.v1746_bleed,
                       pw = m.v1746_bleedPower || 2,
                       by = m.v1746_bleedBy;
                     m.v1746_bleed = 0;
-                    const burstDmg = Math.round(remaining * pw * 1.5);
+                    const burstDmg = Math.round(remaining * pw * bleedBurst);
                     if (by && by !== game.hero && game.heroes.includes(by)) canaanHeroStrike(m, burstDmg, by);
                     else hit(m, burstDmg);
                     effect('bloodSplash', m.x, m.y - 10, 0, 40, 0, '#d0303f', 0.5);
@@ -1652,15 +1639,15 @@
           for (const m of around(AP.x, AP.y, TS * 4)) debuff(m, 'weak', 4);
         }
         if (i === 3) {
-          // Châtiment du sang : 700 % sous 30 % de PV (Curée : consume les saignements).
-          const low = AP.hp < AP.mhp * 0.3,
+          // Châtiment du sang : renforcé pendant le Hurlement (Curée : consume les saignements).
+          const empowered = S.berserk > 0,
             hunger = talent('berserker', 'hunger');
           arc(155, a, Math.PI / 2, fxColor(), 'heavySlash');
           for (const m of targets(155, a, Math.PI / 2)) {
-            dmg(m, low ? 7 : 4.5);
+            dmg(m, empowered ? 6 : 4.5);
             if (hunger && m.hp > 0) CANAAN_CLASS.consumeBleeds(actor, m, 1.5);
           }
-          if (low) float(AP.x, AP.y - 60, '💀 CHÂTIMENT 700 %', '#e0404f');
+          if (empowered) float(AP.x, AP.y - 60, '💀 CHÂTIMENT RENFORCÉ', '#e0404f');
         }
         break;
       case 'grimoire':

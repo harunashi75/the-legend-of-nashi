@@ -135,7 +135,7 @@
       dodgeReady =
         t + DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor() * window.CANAAN_CLASS_DODGE_FACTOR();
       CANAAN_ARTEFACTS.onDodge();
-      window.CANAAN_CLASS_ON_DODGE();
+      window.CANAAN_CLASS_ON_DODGE(game.hero, true);
       CANAAN_SOUND.cue('dodge');
       canaanAchieve(game.hero, 'dodge');
       return true;
@@ -161,7 +161,7 @@
         clock() +
         DODGE.cooldown * CANAAN_ARTEFACTS.dodgeCooldownFactor(hero) * window.CANAAN_CLASS_DODGE_FACTOR(hero);
       CANAAN_ARTEFACTS.onDodge(hero);
-      window.CANAAN_CLASS_ON_DODGE(hero);
+      window.CANAAN_CLASS_ON_DODGE(hero, true);
       canaanAchieve(hero, 'dodge');
       return true;
     },

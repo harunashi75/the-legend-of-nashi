@@ -39,8 +39,9 @@ export const GEAR_RARITIES = [
 export const BOUND_RARITY = Object.freeze({ name: 'Relique', color: '#b8f040', mult: 1.3 });
 // Il n'y a plus d'armes au butin ni chez les marchands : chaque classe a la sienne (shared/data/classes.js, weapon),
 // au niveau du héros. Les compétences : [icône, nom, résumé, recharge (s), mana, puissance, explication].
-// puissance : dégâts totaux sur une cible, en multiple de la Puissance d'attaque (0 = pas de dégâts directs) ;
-// l'info-bulle l'affiche en dégâts estimés. Les attaques de base font 75 % (clic gauche) et 160 % (clic droit).
+// puissance : coefficient de base utilisé pour l'estimation de l'info-bulle (0 = pas de dégâts).
+// L'estimation précise si le coefficient vaut par coup, pour la cible principale ou pour une série de coups.
+// Les attaques de base font 75 % (clic gauche) et 160 % (clic droit).
 // bound : la classe de l'arme ; form : jeu de compétences d'une forme (le félin du Druide), sans objet.
 export const WEAPON_DEFINITIONS = {
   // Druide : bâton de nature, sorts à distance et soins.
@@ -53,38 +54,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🌿',
         'Fouet de ronces',
-        'Ligne · 240 % · ralentit 40 % 2 s',
+        'Dégâts de nature en ligne · ralentissement',
         4,
         10,
         2.4,
-        'Une liane hérissée d’épines fouette tout ce qui est aligné devant toi (6 cases) et ralentit les ennemis touchés de 40 % pendant 2 s.'
+        'Frappe les ennemis sur une ligne de 6 cases dans la direction visée. Inflige à chacun des dégâts de nature égaux à 240 % de ta Puissance magique et le ralentit de 40 % pendant 2 s.'
       ],
       [
         '🌸',
         'Floraison',
-        'Fleur de vie 8 s sous la souris · soigne 3 % PV/s',
+        'Zone de soin · 3 % des PV max par seconde',
         14,
         18,
         0,
-        'Une fleur de vie éclot là où tu vises pendant 8 s : chaque seconde, les héros à moins de 3 cases récupèrent 3 % de leurs PV max (24 % en tout).'
+        'Fais éclore une fleur au point visé pendant 8 s. Chaque seconde, les membres du groupe à moins de 3 cases de la fleur récupèrent 3 % de leurs PV max.'
       ],
       [
         '🍄',
         'Spores toxiques',
-        'Nuage 5 s sous la souris · 70 %/s · ralentit',
+        'Nuage de nature · dégâts sur 5 s · ralentissement',
         10,
         18,
         3.5,
-        'Un nuage de spores s’élève là où tu vises pendant 5 s : chaque seconde, les ennemis dedans subissent 70 % de dégâts de nature et sont ralentis de 20 %.'
+        'Crée un nuage de 2,5 cases de rayon au point visé pendant 5 s. Chaque seconde, les ennemis dans le nuage subissent des dégâts de nature égaux à 70 % de ta Puissance magique et sont ralentis de 20 %.'
       ],
       [
         '🌳',
         'Courroux de la forêt',
-        '3 vagues de racines · 170 % chacune (510 %) · immobilise',
+        '3 vagues de dégâts de nature · immobilisation',
         14,
         26,
         5.1,
-        'Trois vagues de racines géantes jaillissent du sol devant toi, de plus en plus loin : 170 % chacune, et les monstres touchés (pas les boss) sont immobilisés 1,5 s.'
+        'Trois vagues de racines jaillissent de plus en plus loin dans la direction visée. Chaque vague inflige des dégâts de nature égaux à 170 % de ta Puissance magique. Les monstres touchés sont immobilisés 1,5 s. Les boss sont ralentis de 40 % à la place.'
       ]
     ]
   },
@@ -99,38 +100,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🐾',
         'Lacération',
-        'Cône · 2 griffures de 120 % · saignement 5 s',
+        '2 griffures · saignement sur 5 s',
         4,
         10,
         2.4,
-        'Deux coups de griffes devant toi. Le second fait saigner : 30 % de ta Puissance par seconde pendant 5 s (150 % en tout).'
+        'Griffe deux fois en cône dans la direction visée. Chaque griffure inflige des dégâts égaux à 120 % de ta Puissance. La seconde fait saigner la cible et lui inflige 30 % de ta Puissance en dégâts par seconde pendant 5 s.'
       ],
       [
         '🐆',
         'Bond du prédateur',
-        'Bond vers la souris · 220 % autour · étourdit 1 s',
+        'Bond de 5 cases au plus · dégâts à l’arrivée',
         9,
         14,
         2.2,
-        'Tu bondis jusqu’à la souris (5 cases au plus) et retombes toutes griffes dehors : 220 % aux ennemis autour de toi ; les monstres (pas les boss) sont étourdis 1 s.'
+        'Bondis jusqu’à 5 cases vers le point visé. À l’arrivée, tu infliges l’équivalent de 220 % de ta Puissance en dégâts aux ennemis à moins de 1,8 case. Les monstres touchés sont étourdis 1 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.'
       ],
       [
         '🌀',
         'Rugissement sauvage',
-        'Soigne 8 % PV · attaques de base +30 % de vitesse 6 s',
+        'Soin personnel · renforce les attaques de base',
         16,
         14,
         0,
-        'Tu rugis : tu récupères 8 % de tes PV max et, pendant 6 s, tes attaques de base sont 30 % plus rapides et font +15 % de dégâts.'
+        'Récupère 8 % de tes PV max en soin de base. Pendant 6 s, tes attaques de base infligent 15 % de dégâts en plus et leur délai est réduit de 30 %.'
       ],
       [
         '🩸',
         'Morsure féroce',
-        'Cône · 450 %, ou 650 % sur une cible qui saigne',
+        'Dégâts en cône · plus forte sur une cible qui saigne',
         12,
         22,
         4.5,
-        'Une morsure à la gorge devant toi. Contre une cible qui saigne, elle inflige 650 %.'
+        'Mords les ennemis en cône dans la direction visée. La morsure leur inflige des dégâts égaux à 450 % de ta Puissance, ou 650 % si la cible saigne.'
       ]
     ]
   },
@@ -144,38 +145,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '✨',
         'Frappe du croisé',
-        'Cône · 280 % · te soigne de 3 % PV',
+        'Dégâts sacrés en cône · soin personnel',
         5,
         12,
         2.8,
-        'Un coup de masse sacré devant toi ; tu récupères 3 % de tes PV max.'
+        'Frappe les ennemis en cône dans la direction visée et inflige des dégâts sacrés égaux à 280 % de ta Puissance à chacun. Tu récupères 3 % de tes PV max.'
       ],
       [
         '🛡️',
         'Charge du bouclier',
-        'Ruée de 5 cases · 220 % · étourdit 1,2 s (boss : affaibli)',
+        'Ruée de 5 cases · dégâts sacrés · étourdissement',
         10,
         16,
         2.2,
-        'Tu fonces bouclier en avant vers la souris : 220 % à tout ce qui se trouve sur ton chemin. Les monstres touchés sont étourdis 1,2 s ; un boss est affaibli (−5 % de dégâts) 4 s.'
+        'Charge jusqu’à 5 cases dans la direction visée. Les ennemis sur ta trajectoire subissent des dégâts sacrés égaux à 220 % de ta Puissance. Les monstres touchés sont étourdis 1,2 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.'
       ],
       [
         '🏰',
         'Rempart sacré',
-        '−35 % de dégâts reçus 6 s · bouclier de groupe 12 %',
+        'Réduit les dégâts reçus · bouclier de groupe',
         20,
         20,
         0,
-        'Tu lèves ton égide : pendant 6 s, tu subis 35 % de dégâts en moins, et toi et tes alliés à moins de 6 cases gagnez un bouclier de 12 % de vos PV max.'
+        'Tu subis 35 % de dégâts en moins pendant 6 s. Toi et tes alliés à moins de 6 cases gagnez chacun un bouclier qui absorbe l’équivalent de 12 % de vos PV max pendant 6 s.'
       ],
       [
         '⚖️',
         'Marteau du Jugement',
-        'Zone sous la souris · 500 % · sol consacré 5 s',
+        'Impact sacré · sol qui blesse et soigne',
         15,
         26,
         5,
-        'Un marteau de lumière s’abat là où tu vises : 500 % aux ennemis à moins de 2,5 cases, puis le sol reste consacré 5 s (50 % par seconde aux ennemis, 3 % des PV max par seconde aux héros dedans).'
+        'Un marteau frappe au point visé. Il inflige des dégâts sacrés égaux à 500 % de ta Puissance aux ennemis à moins de 2,5 cases. Pendant 5 s, le sol inflige 50 % de ta Puissance en dégâts sacrés par seconde aux ennemis et rend aux alliés dans la zone 3 % de leurs PV max par seconde.'
       ]
     ]
   },
@@ -189,38 +190,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🩸',
         'Entaille',
-        '2 coups · 120 % chacun · saignement 5 s',
+        '2 coups de dague · saignement sur 5 s',
         5,
         11,
         2.4,
-        '2 coups devant toi. Le second fait saigner : 35 % de ta Puissance par seconde pendant 5 s (175 % en tout).'
+        'Entaille deux fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 120 % de ta Puissance. Le second fait saigner la cible et lui inflige 35 % de ta Puissance en dégâts par seconde pendant 5 s.'
       ],
       [
         '🌑',
         'Pas de l’ombre',
-        'Téléportation dans le dos · prochain coup +60 % et critique',
+        'Téléportation · prochain coup critique et renforcé',
         10,
         12,
         0,
-        'Tu disparais et réapparais dans le dos de l’ennemi le plus proche de la souris (6 cases au plus ; sinon vers la souris). Ton prochain coup, dans les 4 s, fait +60 % de dégâts et est critique.'
+        'Téléporte-toi derrière l’ennemi le plus proche du point visé parmi ceux à 6 cases ou moins de toi. Si tu ne peux pas te téléporter, fais une ruée de 5 cases dans la direction visée. Ton prochain coup dans les 4 s est critique et inflige 60 % de dégâts en plus.'
       ],
       [
         '🗡️',
         'Éventail de lames',
-        '5 dagues en éventail · 90 % chacune · saignement',
+        '5 dagues en éventail · saignement sur 4 s',
         8,
         14,
         0.9,
-        'Tu lances 5 dagues en éventail vers la souris : 90 % au premier ennemi touché par chacune, et chaque dague fait saigner (20 % de ta Puissance par seconde pendant 4 s).'
+        'Lance 5 dagues en éventail dans la direction visée. Chaque dague inflige des dégâts égaux à 90 % de ta Puissance au premier ennemi touché et lui inflige un saignement de 20 % de ta Puissance par seconde pendant 4 s.'
       ],
       [
         '💀',
         'Mille coupures',
-        '5 coups · 85 % (425 %) · consume les saignements',
+        '5 coups en cône · consume les saignements d’arme',
         13,
         24,
         4.25,
-        '5 coups en cône. Chaque saignement touché explose aussitôt : il inflige d’un coup 150 % de ce qu’il lui restait à faire.'
+        'Frappe 5 fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 85 % de ta Puissance. Un saignement d’arme sur une cible touchée est consumé et inflige aussitôt 150 % des dégâts qu’il lui restait à infliger.'
       ]
     ]
   },
@@ -234,38 +235,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🔥',
         'Boule de feu',
-        'Projectile · 260 % · explose',
+        'Projectile de feu · explosion à l’impact',
         3,
         10,
         2.6,
-        'Une boule de feu file vers la souris et explose au premier ennemi touché : 260 % à la cible, la moitié aux ennemis à moins de 1,5 case.'
+        'Lance une boule de feu dans la direction visée. Elle inflige des dégâts de feu égaux à 260 % de ta Puissance magique au premier ennemi touché et à 130 % aux autres ennemis à moins de 1,5 case de l’impact.'
       ],
       [
         '❄️',
         'Nova de givre',
-        'Cercle de 3 cases · 190 % · gèle 1,5 s',
+        'Dégâts de glace autour de toi · gel',
         10,
         18,
         1.9,
-        'Une explosion de givre autour de toi : 190 % aux ennemis à moins de 3 cases. Les monstres sont gelés 1,5 s ; un boss est ralenti.'
+        'Inflige des dégâts de glace égaux à 190 % de ta Puissance magique aux ennemis à moins de 3 cases de toi. Les monstres sont gelés 1,5 s. Les boss sont ralentis de 40 % à la place.'
       ],
       [
         '⚡',
         'Chaîne d’éclairs',
-        'Éclair · 260 % · rebondit 4 fois',
+        'Dégâts de foudre · jusqu’à 4 rebonds',
         7,
         16,
         2.6,
-        'Un éclair frappe l’ennemi le plus proche de la souris (9 cases au plus) puis rebondit sur 4 autres ennemis, en perdant 15 % à chaque rebond.'
+        'Frappe l’ennemi le plus proche du point visé parmi ceux à 9 cases ou moins de toi. Le premier éclair inflige des dégâts de foudre égaux à 260 % de ta Puissance magique. Il peut rebondir sur 4 autres ennemis et perd 15 % de ses dégâts à chaque rebond.'
       ],
       [
         '☄️',
         'Météore',
-        'Zone sous la souris · 600 % · sol brûlant 4 s',
+        'Impact de feu · sol brûlant sur 4 s',
         16,
         28,
         6,
-        'Un météore tombe du ciel là où tu vises : 0,8 s plus tard, 600 % aux ennemis à moins de 2,5 cases, puis le sol brûle 4 s (40 % par seconde).'
+        'Après 0,8 s, un météore frappe au point visé. Il inflige des dégâts de feu égaux à 600 % de ta Puissance magique aux ennemis à moins de 2,5 cases. Le sol brûle ensuite pendant 4 s et inflige 40 % de ta Puissance magique en dégâts de feu par seconde aux ennemis dans la zone brûlante.'
       ]
     ]
   },
@@ -279,38 +280,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🎵',
         'Note éclatante',
-        'Projectile magique · 240 % · soigne 4 % PV',
+        'Projectile d’harmonie · soin d’un allié',
         4,
         10,
         2.4,
-        'Une note vibrante file vers la souris : 240 % au premier ennemi touché. L’allié le plus blessé à moins de 8 cases (toi compris) récupère 4 % de ses PV max.'
+        'Lance une note dans la direction visée. Elle inflige des dégâts d’harmonie égaux à 240 % de ta Puissance magique au premier ennemi touché. Au lancement, le membre du groupe le plus blessé dans un rayon de 8 cases récupère 4 % de ses PV max. Tu peux recevoir ce soin.'
       ],
       [
         '💢',
         'Accord dissonant',
-        'Cercle autour de toi · 190 % · repousse',
+        'Dégâts d’harmonie autour de toi · repoussement',
         8,
         16,
         1.9,
-        'Un accord violent frappe tous les ennemis autour de toi et repousse les monstres (pas les boss).'
+        'Inflige aux ennemis proches des dégâts d’harmonie égaux à 190 % de ta Puissance magique et repousse les monstres. Les boss subissent les dégâts mais restent en place.'
       ],
       [
         '💗',
         'Chant de guérison',
-        'Soigne le groupe de 12 % PV, puis 2 %/s pendant 5 s',
+        'Soin de groupe immédiat puis sur 5 s',
         14,
         20,
         0,
-        'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max, puis 2 % par seconde pendant 5 s.'
+        'Toi et tes alliés à moins de 6 cases récupérez 12 % de vos PV max immédiatement, puis 2 % de vos PV max à chaque pulsation du chant pendant 5 s.'
       ],
       [
         '🎶',
         'Symphonie',
-        'Zone sous la souris · 5 ondes de 100 % (500 %) · soigne',
+        '5 ondes · dégâts et soins de zone',
         15,
         26,
         5,
-        'Une symphonie résonne là où tu vises : 5 ondes en 2 s, 100 % chacune aux ennemis à moins de 3 cases. Chaque onde soigne de 2 % de leurs PV max les héros dans la zone.'
+        'Fais résonner 5 ondes autour du point visé dans un rayon de 3 cases. Chaque onde inflige des dégâts d’harmonie égaux à 100 % de ta Puissance magique à chaque ennemi dans la zone et rend à chaque allié dans la zone 2 % de ses PV max.'
       ]
     ]
   },
@@ -324,38 +325,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🏹',
         'Tir perçant',
-        'Flèche qui traverse · 300 %',
+        'Flèche qui traverse les ennemis · portée de 14 cases',
         4,
         10,
         3,
-        'Une flèche lourde file vers la souris et traverse tous les ennemis sur sa ligne (14 cases).'
+        'Décoche une flèche dans la direction visée jusqu’à 14 cases. Elle traverse les ennemis et inflige à chacun des dégâts égaux à 300 % de ta Puissance.'
       ],
       [
         '🎯',
         'Marque du chasseur',
-        'Marque 12 s · +15 % de dégâts reçus',
+        'Marque de 12 s · augmente les dégâts reçus par la cible',
         12,
         10,
         0,
-        'Tu marques l’ennemi le plus proche de la souris pendant 12 s : il subit 15 % de dégâts en plus, de toi et de ton groupe, et tes flèches lui font encore +20 %.'
+        'Marque pendant 12 s l’ennemi le plus proche du point visé parmi ceux à 14 cases ou moins de toi. La cible subit 15 % de dégâts en plus de tout le groupe. Tes flèches lui infligent 20 % de dégâts supplémentaires.'
       ],
       [
         '🌧️',
         'Volée de flèches',
-        'Zone sous la souris · 4 salves de 90 % (360 %)',
+        '4 salves de dégâts de zone',
         11,
         20,
         3.6,
-        'Une pluie de flèches tombe là où tu vises : 4 salves en 2 s sur tous les ennemis de la zone.'
+        'Tire 4 salves au point visé, espacées de 0,5 s. Chaque salve inflige des dégâts égaux à 90 % de ta Puissance à chaque ennemi dans la zone.'
       ],
       [
         '🦅',
         'Assaut du faucon',
-        'Faucon spectral · 5 serres de 100 % (500 %)',
+        'Faucon spectral · 5 coups de serre',
         15,
         24,
         5,
-        'Un faucon spectral fond sur l’ennemi le plus proche de la souris et le lacère 5 fois en 2 s (100 % par serre). Si la cible meurt, il passe à l’ennemi le plus proche.'
+        'Ton faucon attaque l’ennemi le plus proche du point visé parmi ceux à 14 cases ou moins de toi. Chaque coup de serre inflige des dégâts égaux à 100 % de ta Puissance. Si la cible tombe, le faucon cherche un autre ennemi à portée pour les coups restants.'
       ]
     ]
   },
@@ -369,38 +370,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '⚔️',
         'Rafale de lames',
-        '4 coups rapides · 80 % chacun (320 %)',
+        '4 coups en cône · active le combo',
         5,
         12,
         3.2,
-        '4 coups en cône devant toi en moins d’une demi-seconde. Active le combo pendant 4 s.'
+        'Frappe 4 fois en cône dans la direction visée. Chaque coup inflige des dégâts égaux à 80 % de ta Puissance. Active pendant 4 s le combo qui renforce Exécution croisée.'
       ],
       [
         '🌪️',
         'Tempête d’acier',
-        '6 tours autour de toi · 60 % chacun (360 %)',
+        '6 frappes autour de toi · active le combo',
         10,
         18,
         3.6,
-        'Tu tournoies 1,5 s, lames tendues : 6 frappes de 60 % sur tous les ennemis autour de toi. Tu peux te déplacer pendant la tempête. Active le combo pendant 4 s.'
+        'Tournoie 1,5 s et touche les ennemis proches 6 fois. Chaque frappe inflige des dégâts égaux à 60 % de ta Puissance. Tu peux te déplacer pendant la tempête. Active pendant 4 s le combo qui renforce Exécution croisée.'
       ],
       [
         '💨',
         'Charge héroïque',
-        'Bond de 5 cases · 200 % sur la trajectoire · +20 Rage',
+        'Ruée de 5 cases · dégâts sur le trajet · +20 Rage',
         10,
         0,
         2,
-        'Tu charges vers la souris en traversant les ennemis : 200 % à tous ceux sur ton chemin, et tu gagnes 20 de Rage.'
+        'Charge jusqu’à 5 cases dans la direction visée. Inflige des dégâts égaux à 200 % de ta Puissance à chaque ennemi sur ta trajectoire et te donne 20 points de Rage.'
       ],
       [
         '✖️',
         'Exécution croisée',
-        'Cône · 500 % (600 % en combo) · ×1,5 sous 35 %',
+        'Dégâts en cône · renforcée par le combo',
         13,
         26,
         5,
-        'Deux lames se croisent devant toi : 500 %, ou 600 % si le combo est actif (Rafale ou Tempête dans les 4 s). Contre une cible sous 35 % de ses PV, les dégâts sont multipliés par 1,5.'
+        'Frappe les ennemis en cône dans la direction visée. Les dégâts valent 500 % de ta Puissance, ou 600 % si le combo de Rafale de lames ou de Tempête d’acier est actif. Les dégâts sont multipliés par 1,5 si la cible a moins de 35 % de ses PV max.'
       ]
     ]
   },
@@ -415,38 +416,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '💀',
         'Squelette putride',
-        'Invocation · sans limite · 30 s · 60 % par coup',
+        'Invocation de 30 s · dégâts de poison par coup',
         4,
         14,
         0.6,
-        'Un squelette sort de terre près de toi et attaque tes ennemis pendant 30 s (60 % de ta Puissance magique toutes les 1,2 s). Aucune limite : chaque lancer lève un squelette de plus.'
+        'Lève un squelette près de toi pendant 30 s. Il attaque toutes les 1,2 s et chaque coup inflige des dégâts de poison égaux à 60 % de ta Puissance magique. Chaque lancer ajoute un squelette sans limite de nombre.'
       ],
       [
         '🐦‍⬛',
         'Nuée de corbeaux',
-        '4 corbeaux nécrosés · 8 s · 45 % par coup de bec',
+        '4 invocations de 8 s · dégâts de poison par bec',
         10,
         20,
         0.45,
-        '4 corbeaux nécrosés fondent sur la souris en volant par-dessus les obstacles, puis harcèlent tes ennemis pendant 8 s (45 % toutes les 0,6 s).'
+        'Envoie 4 corbeaux vers le point visé par-dessus les obstacles. Ils chassent pendant 8 s. Chaque corbeau attaque toutes les 0,6 s et inflige des dégâts de poison égaux à 45 % de ta Puissance magique par coup de bec.'
       ],
       [
         '🪦',
         'Totem de peste',
-        'Totem 10 s sous la souris · 50 %/s en zone · rats pestiférés',
+        'Totem de 10 s · poison de zone · invoque des rats',
         16,
         22,
         0.5,
-        'Un totem d’os se dresse là où tu vises pendant 10 s : chaque seconde, il souffle la peste sur les ennemis à moins de 3 cases (50 %). Toutes les 2,5 s, un rat pestiféré sort de terre à ses pieds : il mord les ennemis (35 % toutes les 0,6 s) puis éclate au bout de 6 s en un nuage toxique (90 % autour de lui). Tes invocations proches du totem frappent 25 % plus vite.'
+        'Au point visé (portée 8 cases), pose un totem pour 10 s. Il inflige chaque seconde 50 % de ta Puissance magique en dégâts de poison aux ennemis à 3 cases. Toutes les 2,5 s, un rat apparaît. Ses dégâts de poison valent 35 % de ta Puissance magique par morsure (0,6 s) et 90 % à son explosion (après 6 s). Un seul totem, qui accélère les attaques des invocations proches de 25 %.'
       ],
       [
         '🧟',
         'Abomination',
-        'Invocation · 1 au maximum · 15 s · 160 % en zone',
+        'Invocation de 15 s · dégâts de poison de zone',
         28,
         32,
         1.6,
-        'Une abomination recousue se lève pendant 15 s : toutes les 1,6 s, elle écrase les ennemis autour d’elle (160 %, rayon 2 cases).'
+        'Lève une abomination pendant 15 s. Toutes les 1,6 s, elle écrase les ennemis dans un rayon de 2 cases autour d’elle et leur inflige des dégâts de poison égaux à 160 % de ta Puissance magique. Tu peux avoir une seule abomination à la fois.'
       ]
     ]
   },
@@ -460,38 +461,38 @@ export const WEAPON_DEFINITIONS = {
       [
         '🪓',
         'Fendoir',
-        'Grand cône · 300 %',
+        'Dégâts dans un large cône',
         5,
         10,
         3,
-        'Un coup de hache très large devant toi, qui fend le sol et touche tous les ennemis du cône.'
+        'Frappe tous les ennemis dans un large cône dans la direction visée et inflige à chacun des dégâts égaux à 300 % de ta Puissance.'
       ],
       [
         '🩸',
         'Bond du boucher',
-        'Bond vers la souris · 240 % autour de toi · étourdit 1 s',
+        'Bond d’environ 4 cases · dégâts à l’arrivée',
         11,
         14,
         2.4,
-        'Tu bondis jusqu’à la souris (4 cases au plus) et t’écrases au sol : 240 % aux ennemis autour du point d’arrivée, et les monstres (pas les boss) sont étourdis 1 s.'
+        'Bondis d’environ 4 cases au plus vers le point visé. À l’arrivée, tu infliges l’équivalent de 240 % de ta Puissance en dégâts aux ennemis proches. Les monstres touchés sont étourdis 1 s. Les boss infligent 5 % de dégâts en moins pendant 4 s à la place.'
       ],
       [
         '💢',
         'Hurlement sanguinaire',
-        'Rage 6 s : dégâts +25 % · affaiblit autour de toi',
+        'Plus de dégâts infligés et reçus · affaiblit les ennemis',
         16,
         8,
         0,
-        'Tu hurles : pendant 6 s, tes coups infligent 25 % de dégâts en plus, mais tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases sont affaiblis pendant 4 s.'
+        'Pendant 6 s, tes coups infligent 25 % de dégâts en plus et tu subis 15 % de dégâts en plus. Les ennemis à moins de 4 cases de toi infligent 5 % de dégâts en moins pendant 4 s.'
       ],
       [
         '💀',
         'Châtiment du sang',
-        'Cône · 450 %, ou 700 % sous 30 % de tes PV',
+        'Dégâts en cône · renforcé par Hurlement sanguinaire',
         14,
         24,
         4.5,
-        'Un coup terrible devant toi. Si tes PV sont sous 30 % de leur maximum, il inflige 700 %.'
+        'Frappe les ennemis en cône dans la direction visée. Les dégâts de base valent 450 % de ta Puissance, ou 600 % pendant Hurlement sanguinaire avant ses autres bonus de dégâts.'
       ]
     ]
   }

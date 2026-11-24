@@ -53,6 +53,7 @@
       ['invulnUntil', '✨', 'Intervention divine', 'Invulnérable.'],
       ['veilUntil', '🌑', 'Voile d’ombre', 'Invisible, vitesse +30 %.'],
       ['elemAvatarUntil', '🌋', 'Avatar élémentaire', 'Dégâts +20 %, mana des compétences −30 %.'],
+      ['frostUntil', '❄️', 'Barrière de givre', 'Prochain sort de feu : +40 % de dégâts.'],
       ['contagionUntil', '☣', 'Contagion', 'Tes invocations frappent 30 % plus vite.'],
       ['hymnUntil', '🎶', 'Hymne de l’Aurore', 'Soigne 3 % des PV max par seconde, dégâts +10 %.'],
       ['vivifyUntil', '🎵', 'Mélodie vivifiante', 'Vitesse +15 %, dégâts +8 %.'],
@@ -64,7 +65,7 @@
       ],
       ['frenzyUntil', '🔥', 'Frénésie', 'Attaques de base 15 % plus rapides.'],
       ['hawkUntil', '🦅', 'Œil du faucon', 'Dégâts +20 %, critique +10, attaques de base 30 % plus rapides.'],
-      ['survivalUntil', '🐾', 'Instinct de survie', 'Vitesse +30 %, dégâts reçus −20 %.'],
+      ['survivalUntil', '🐾', 'Instinct de survie', 'Vitesse +30 %, Garde +20.'],
       ['ironUntil', '🛡', 'Volonté de fer', 'Dégâts reçus −30 %, dégâts +15 %.'],
       ['rallyUntil', '🛡', 'Cri de ralliement', 'Dégâts reçus −15 %.'],
       ['windUntil', '💨', 'Second souffle', '5 % des PV max rendus chaque seconde.']
@@ -93,7 +94,9 @@
           'cls-thirst',
           '🩸',
           'Soif de sang',
-          'Ta prochaine compétence offensive te rend 30 % des dégâts infligés.',
+          CANAAN_CLASS.talent(hero, 'berserker', 'lastStand')
+            ? 'Prochaine compétence offensive : +20 % de dégâts et 50 % des dégâts infligés rendus en PV.'
+            : 'Prochaine compétence offensive : +20 % de dégâts et 30 % des dégâts infligés rendus en PV.',
           'buff'
         )
       );

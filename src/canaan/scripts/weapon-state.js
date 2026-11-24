@@ -56,9 +56,10 @@ function canaanStanceOf() {
 // Petit badge d'une case de compétence : posture en cours (secondes), bonus prêt, ou charges arcaniques.
 function canaanSkillBadge(type, i, st) {
   const sec = v => (v > 0 ? Math.ceil(v) + ' s' : '');
-  // Postures en cours sur la compétence qui les lance.
+  // Postures en cours sur la compétence qui les lance et sur la frappe qu'elles renforcent.
   const posture = { greataxe: 'berserk', feline: 'roar', aegis: 'shieldGuard' }[type];
   if (i === 2 && posture && st[posture] > 0) return { text: sec(st[posture]), on: true };
+  if (type === 'greataxe' && i === 3 && st.berserk > 0) return { text: sec(st.berserk), on: true };
   if (type === 'dualdagger' && i === 1 && st.shadow > 0) return { text: sec(st.shadow), on: true };
   if (type === 'dualsword' && i === 3 && st.combo > 0) return { text: 'COMBO', on: true };
   if (type === 'bow' && i === 1 && st.huntMark > 0) return { text: sec(st.huntMark), on: true };
@@ -140,18 +141,28 @@ function canaanSkillTooltip(i) {
     esc(detail || summary) +
     '</div>';
   if (mult > 0 && typeof CANAAN_SKILLS !== 'undefined') {
-    const power = CANAAN_SKILLS.power(game.hero, magic),
-      extra = 0;
+    const power = CANAAN_SKILLS.power(game.hero, magic);
+    let estimate = '{n} dégâts de base par cible';
+    if (summon) estimate = i === 2 ? '{n} dégâts par seconde' : '{n} dégâts par coup';
+    else if (type === 'dualdagger' && i === 2) estimate = '{n} dégâts de base par dague';
+    else if (type === 'staff' && (i === 0 || i === 2))
+      estimate = '{n} dégâts de base sur la cible principale';
+    else if (type === 'wildstaff' && i === 2) estimate = '{n} dégâts de base sur toute la durée';
+    else if (
+      (type === 'wildstaff' && i === 3) ||
+      (type === 'feline' && i === 0) ||
+      (type === 'dualdagger' && (i === 0 || i === 3)) ||
+      (type === 'lute' && i === 3) ||
+      (type === 'bow' && i >= 2) ||
+      (type === 'dualsword' && i <= 1)
+    )
+      estimate = '{n} dégâts de base si tous les coups touchent';
     lines +=
       '<div class="skill-tip-dmg">≈ ' +
-      // Chaque morceau est une entrée du dictionnaire : la phrase change selon l'arme, les charges et la magie.
-      tt(summon ? (i === 2 ? '{n} dégâts par seconde' : '{n} dégâts par coup') : '{n} dégâts par cible', {
-        n: Math.round(power * (mult + extra))
-      }) +
-      (extra ? ' ' + tt('(avec {n} charge(s))', { n: st.arcane | 0 }) : '') +
+      tt(estimate, { n: Math.round(power * mult) }) +
       ' · ' +
       tt(magic ? '{n} % de ta Puissance magique ({m})' : '{n} % de ta Puissance ({m})', {
-        n: Math.round((mult + extra) * 100),
+        n: Math.round(mult * 100),
         m: power
       }) +
       '</div>';

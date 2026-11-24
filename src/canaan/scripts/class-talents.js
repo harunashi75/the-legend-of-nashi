@@ -48,28 +48,28 @@
       fusion: { fire: -99, ice: -99, lightning: -99 },
       fusionReady: false,
       primordial: false,
-      frostReady: 0,
+      frostUntil: 0,
       // Invocateur : Contagion, Pacte de sang et Moisson d'âmes.
       contagionUntil: 0,
       bloodReady: 0,
       harvest: 0,
       harvestReady: 0,
-      // Barde : Hymne de l'Aurore reçu, Mélodie vivifiante reçue, Crescendo, Contre-chant, Tempo.
+      // Barde : Hymne de l'Aurore reçu, Mélodie vivifiante reçue, Crescendo, Tempo.
       hymnUntil: 0,
       hymnTick: 0,
       hymnBy: null,
       vivifyUntil: 0,
       crescendo: 0,
       crescendoUntil: 0,
-      counterReady: 0,
       tempo: 0,
-      // Berserker : Rage écarlate, Soif de sang doublée après une utilitaire, Cicatrices, Frénésie, Immortel et PV
+      // Berserker : Rage écarlate, Soif de sang renforcée après une utilitaire, Cicatrices, Frénésie, Immortel et PV
       // dépensés (Sang bouillant).
       rageUntil: 0,
       ragePenalty: false,
       thirst: false,
       scars: 0,
       scarsUntil: 0,
+      scarsAt: -1,
       frenzyUntil: 0,
       undyingReady: 0,
       spent: 0,
@@ -87,7 +87,6 @@
       rallyUntil: 0,
       windUntil: 0,
       windTick: 0,
-      windReady: 0,
       warlordAt: -1,
       // Ritournelle : un seul message de bouclier par allié toutes les 3 s.
       refrain: new WeakMap()
@@ -147,7 +146,7 @@
       fan: 1,
       assassinate: 2,
       hemorrhage: 3,
-      executioner: 4,
+      rending: 4,
       precision: 5,
       dance: 6,
       phantom: 7,
@@ -277,8 +276,7 @@
   // Les réductions de dégâts s'ajoutent à la Garde (guard, en %) : elles comptent aussi contre les dégâts sur la durée.
   window.CANAAN_CLASS_STATS = forHero(function (s) {
     const t = now(),
-      id = classe().id,
-      ratio = HP && HP.mhp ? HP.hp / HP.mhp : 1;
+      id = classe().id;
     if (id === 'assassin') {
       s.speed += 5;
       s.critPower += 10;
@@ -305,8 +303,8 @@
     if (on('invocateur', 'carapace') && CANAAN_SUMMONS.count(me()) >= 2) s.guard += 10;
     // Mélodie vivifiante reçue (d'un Barde, soi compris).
     if (t < w.vivifyUntil) s.speed += 15;
-    // Berserker : Dernier carré sous 20 % de PV.
-    if (on('berserker', 'lastStand') && ratio < 0.2) s.guard += 20;
+    if (on('berserker', 'ironSkin')) s.guard += 10;
+    if (on('berserker', 'lastStand') && CANAAN_SKILLS.state(me()).berserk > 0) s.guard += 20;
     // Chasseur : Œil du faucon, Instinct de survie.
     if (t < w.hawkUntil) s.crit += 10;
     if (t < w.survivalUntil) {
@@ -572,7 +570,8 @@
   // au niveau 60 (shared/rules/resources.js). Une compétence ne peut jamais le tuer (il lui faut garder au moins
   // 1 PV) ; un compagnon garde 25 % de ses PV.
   const BLOOD = Object.freeze({ boil: 0.2, companionFloor: 0.25 });
-  const bloodPrice = (hero, mana) => resourceBloodCost(hero.player.mhp, mana, hero.level);
+  const bloodPrice = (hero, mana) =>
+    resourceBloodCost(hero.player.mhp, mana * (on('berserker', 'ironSkin', hero) ? 0.8 : 1), hero.level);
   function canBleed(price) {
     const floor = me() !== game.hero && me().local ? HP.mhp * BLOOD.companionFloor : 0;
     return HP.hp - price >= Math.max(1, floor);
@@ -700,6 +699,10 @@
     }
     // Fusion élémentaire (Élémentaliste) : d'abord la fusion prête (+50 %, gratuite), puis l'élément compté.
     if (isClass('elementaliste')) {
+      if (element === 'fire' && on('elementaliste', 'frost') && t < w.frostUntil) {
+        w.frostUntil = 0;
+        context.multiplier *= 1.4;
+      }
       if (w.fusionReady) {
         w.fusionReady = false;
         context.multiplier *= 1.5;
@@ -720,7 +723,9 @@
     if (w.thirst) {
       w.thirst = false;
       context.thirst = true;
-      float(HP.x, HP.y - 74, '🩸 SOIF DE SANG ×2', '#e0404f');
+      context.multiplier *= 1.2;
+      context.bloodFury = on('berserker', 'lastStand');
+      float(HP.x, HP.y - 74, '🩸 SOIF DE SANG', '#e0404f');
     }
     // Empreinte de l'Assassin : une compétence utilitaire renforce la prochaine compétence offensive.
     if (w.umbra) {
@@ -750,16 +755,30 @@
     const id = classe().id;
     if (!id) return;
     const offensive = isOffensiveSkill(type, i),
-      group = groupAround(6);
+      group = groupAround(6),
+      t = now();
+    if (type === 'staff' && i === 1 && on('elementaliste', 'frost')) {
+      w.frostUntil = t + 6;
+      giveShield(me(), HP.mhp * 0.2, 6, '❄️ BARRIÈRE DE GIVRE');
+    }
+    if (type === 'lute' && i === 1 && on('barde', 'counter'))
+      for (const h of group) giveShield(h, h.player.mhp * 0.15, 5, '🎵 CONTRE-CHANT');
     if (offensive) {
       if (id === 'paladin') giveShield(me(), HP.mhp * 0.05, 4, '☀️ Bouclier');
       return;
     }
-    if (id === 'druide')
+    if (id === 'druide') {
+      if (on('druide', 'bark') && t >= w.barkReady) {
+        w.barkUntil = t + 6;
+        w.barkReady = t + 20;
+        giveShield(me(), HP.mhp * 0.2, 6, '🌳 ÉCORCE DE FER');
+        fx('barkSkin', HP.x, HP.y, 40, '#8a6a3a', 6);
+      }
       for (const h of group) {
         const n = applyHeal(h.player.mhp * 0.08, false, h, me(), true);
         if (n > 0) float(h.player.x, h.player.y - 40, '+' + Math.round(n) + ' PV', '#7ee36a');
       }
+    }
     if (id === 'paladin') for (const h of group) giveShield(h, h.player.mhp * 0.1, 5, '☀️ Bouclier');
     // Écho mélodieux (Barde) : une compétence utilitaire soigne le groupe proche de 10 % des PV max.
     if (id === 'barde') for (const h of group) healFloat(h, h.player.mhp * 0.1);
@@ -802,7 +821,7 @@
     if (id === 'berserker')
       return offensive
         ? '🩸 Berserker : se paie en PV au lieu du mana, et te rend 15 % des dégâts infligés.'
-        : '🩸 Berserker : se paie en PV ; ta prochaine compétence offensive te rend 30 % des dégâts infligés.';
+        : '🩸 Berserker : se paie en PV ; ta prochaine compétence offensive inflige 20 % de dégâts en plus et te rend 30 % des dégâts infligés.';
     if (id === 'invocateur')
       return '☠️ Invocateur : chaque coup pose une charge de Peste (8 au maximum, 8 % de ton Attaque par charge et par seconde).';
     if (id === 'chasseur')
@@ -840,7 +859,7 @@
     if (t < w.balanceUntil) mult *= 1.25;
     if (t < w.symbiosisUntil) mult *= 1.1;
     if (t < w.exaltUntil) mult *= 1.15;
-    if (on('assassin', 'executioner') && ratio < 0.3) mult *= 1.25;
+    if (options.skill && options.offensive && on('assassin', 'rending') && bleeding(m)) mult *= 1.25;
     if (on('assassin', 'crippling') && slowedBy(m)) mult *= 1.12;
     // Danse des ombres : le coup après une roulade est critique.
     if (w.danceCrit) {
@@ -867,11 +886,6 @@
     if (t < w.vivifyUntil) mult *= 1.08;
     if (on('barde', 'crescendo') && t < w.crescendoUntil) mult *= 1 + 0.04 * w.crescendo;
     if (m._dissonant > t) mult *= 1.1;
-    // Berserker : Soif de sang (+1 % par tranche de 2 % de PV perdus, 50 % au plus), Cicatrices, Curée.
-    if (isClass('berserker')) {
-      const lost = HP.mhp ? Math.max(0, 1 - HP.hp / HP.mhp) : 0;
-      mult *= 1 + Math.min(50, Math.floor(lost * 50 + 1e-9)) / 100;
-    }
     if (on('berserker', 'scars') && t < w.scarsUntil) mult *= 1 + 0.03 * w.scars;
     if (on('berserker', 'hunger') && bleeding(m)) mult *= 1.2;
     // Empreinte de l'Assassin : compétences offensives +12 %, finition (4) +30 % sur une cible sous 50 %.
@@ -920,6 +934,10 @@
       w.warlordAt = t;
       blast(m.x, m.y, 2, characterStats(me()).attack * 0.6, 'steel', m);
     }
+    if (dealt > 0 && (basic || skill) && on('berserker', 'scars') && t - w.scarsAt >= 0.25) {
+      w.scarsAt = t;
+      addScars(crit ? 3 : 1);
+    }
     if (crit && on('assassin', 'shadow') && t >= w.shadowReady && !w.shadowPending && ++w.crits >= 3) {
       w.crits = 0;
       w.shadowPending = true;
@@ -938,11 +956,9 @@
         .slice(0, choir ? 2 : 1))
         healFloat(hero, dealt * (choir ? 0.25 : 0.2));
     }
-    // Soif de sang (Berserker) : 15 % des dégâts rendus (50 % sous 20 % de PV avec Dernier carré), doublés après une
-    // compétence utilitaire.
+    // Soif de sang (Berserker) : 15 % des dégâts rendus, doublés après une compétence utilitaire (50 % avec Dernier carré).
     if (skill && dealt > 0 && id === 'berserker') {
-      const rate =
-          (on('berserker', 'lastStand') && HP.hp < HP.mhp * 0.2 ? 0.5 : 0.15) * (options.thirst ? 2 : 1),
+      const rate = options.bloodFury ? 0.5 : options.thirst ? 0.3 : 0.15,
         h = applyHeal(dealt * rate, false, me(), me(), true);
       if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#ff8a96');
     }
@@ -1046,12 +1062,6 @@
       if (source && alive(source)) reflect(source, characterStats(me()).attack * 1.5, 'steel');
       return 0;
     }
-    // Berserker : Peau de fer (−1 % par tranche de 4 % de PV perdus, 25 % au plus) et Cicatrices (une par coup).
-    if (on('berserker', 'ironSkin')) {
-      const lost = HP.mhp ? Math.max(0, 1 - HP.hp / HP.mhp) : 0;
-      d *= 1 - Math.min(25, Math.floor(lost * 25 + 1e-9)) / 100;
-    }
-    if (on('berserker', 'scars') && damage > 0) addScars(1);
     // Ferveur (Paladin) et Rage (Guerrier) : chaque coup reçu les fait monter, d'autant plus qu'il fait mal.
     if (damage > 0) gainResource('hurt', { damage, maxHp: HP.mhp });
     // Écorce de fer (Druide) : les ennemis qui frappent le Druide subissent 30 % de leurs dégâts.
@@ -1086,17 +1096,19 @@
     return Math.max(0, Math.round(d));
   }, 2);
   // Esquive (roulade, esquive ou déviation) : Danse des ombres (Assassin), Repli tactique (Chasseur).
-  window.CANAAN_CLASS_ON_DODGE = forHero(function () {
+  window.CANAAN_CLASS_ON_DODGE = forHero(function (_hero, rolled) {
+    const t = now();
+    if (rolled && on('chasseur', 'survival') && t >= w.survivalReady) {
+      w.survivalUntil = t + 5;
+      w.survivalReady = t + 15;
+      notice('🐾 Instinct de survie !');
+    }
     if (on('assassin', 'dance')) {
-      w.veilUntil = Math.max(w.veilUntil, now() + 1.5);
+      w.veilUntil = Math.max(w.veilUntil, t + 1.5);
       HP.veiled = true;
       w.danceCrit = true;
     }
     CANAAN_SKILLS.onDodge(me());
-  }, 0);
-  // Coup critique ennemi subi : Cicatrices (deux de plus que pour un coup normal).
-  window.CANAAN_CLASS_ON_CRIT_TAKEN = forHero(function () {
-    if (on('berserker', 'scars')) addScars(2);
   }, 0);
   // Coup fatal : la Rage écarlate et Immortel (Berserker) gardent 1 PV ; Intervention divine (une fois par combat)
   // laisse le Paladin à 1 PV, invulnérable 3 s, avec un bouclier, et soigne son groupe proche.
@@ -1231,6 +1243,12 @@
       fx('ironWill', HP.x, HP.y, rally ? TILES(6) : 70, '#cfdcea', 0.9);
       float(HP.x, HP.y - 62, '🛡️ VOLONTÉ DE FER', '#cfdcea');
       if (rally) for (const h of groupAround(6)) if (h !== me()) runtime(h).rallyUntil = t + 8;
+      if (on('guerrier', 'secondwind')) {
+        w.windUntil = t + 5;
+        w.windTick = t + 1;
+        giveShield(me(), HP.mhp * 0.15, 5, '');
+        notice('💨 Second souffle !');
+      }
     }
     recompute();
     return true;
@@ -1268,12 +1286,6 @@
       : Math.max(0, runtime(hero).specialReady - now());
 
   // ---------------------------------------------------------------- Étape de simulation
-  // Déclencheurs sous un seuil de PV : test, recharge, effet.
-  function lowHp(ratio, below, readyKey, cooldown, fn) {
-    if (ratio >= below || now() < w[readyKey]) return;
-    w[readyKey] = now() + cooldown;
-    fn();
-  }
   function stepHero(t) {
     if (HP.dead || me().away) return;
     const ratio = HP.mhp ? HP.hp / HP.mhp : 1,
@@ -1294,13 +1306,6 @@
     }
     if (w.scars > 0 && t >= w.scarsUntil) w.scars = 0;
     if (w.momentum > 0 && t >= w.momentumUntil) w.momentum = 0;
-    // Druide : Écorce de fer sous 40 % de PV.
-    if (on('druide', 'bark'))
-      lowHp(ratio, 0.4, 'barkReady', 40, () => {
-        w.barkUntil = t + 6;
-        giveShield(me(), HP.mhp * 0.2, 6, '🌳 ÉCORCE DE FER');
-        fx('barkSkin', HP.x, HP.y, 40, '#8a6a3a', 6);
-      });
     // Paladin : Ferveur ardente (Exaltation à 100 de Ferveur) et Aura de dévotion (1 % des PV toutes les 2 s).
     if (on('paladin', 'zeal') && HP.mp >= HP.mmp && HP.mmp > 0 && t >= w.exaltReady) {
       w.exaltUntil = t + 6;
@@ -1312,19 +1317,6 @@
       w.devotionNext = t + 2;
       for (const h of groupAround(6)) applyHeal(h.player.mhp * 0.01, true, h, me());
     }
-    // Élémentaliste : Barrière de givre sous 40 % de PV (bouclier, gel des ennemis proches).
-    if (on('elementaliste', 'frost'))
-      lowHp(ratio, 0.4, 'frostReady', 40, () => {
-        giveShield(me(), HP.mhp * 0.2, 6, '❄️ BARRIÈRE DE GIVRE');
-        fx('frostNova', HP.x, HP.y, TILES(3), '#bfeaff', 0.6);
-        for (const m of game.world.monsters.slice())
-          if (alive(m) && near(m, HP, 3) && !isBoss(m)) {
-            m.cd = Math.max(m.cd, 2);
-            applyEffect(m, 'stun', 2);
-            chill(m, 2);
-            fx('frozen', m.x, m.y, 30, '#bfeaff', 2);
-          }
-      });
     // Pacte de sang : sous 35 % de PV, la plus ancienne invocation est sacrifiée pour 15 % des PV max.
     if (
       on('invocateur', 'bloodPact') &&
@@ -1336,12 +1328,6 @@
       const h = applyHeal(HP.mhp * 0.15, false, me(), me(), true);
       notice('🩸 Pacte de sang !' + (h > 0 ? ' +' + Math.round(h) + ' PV' : ''));
     }
-    // Barde : Contre-chant sous 40 % de PV.
-    if (on('barde', 'counter'))
-      lowHp(ratio, 0.4, 'counterReady', 40, () => {
-        applyHeal(HP.mhp * 0.15, false, me(), me(), true);
-        giveShield(me(), HP.mhp * 0.15, 5, '🎵 CONTRE-CHANT');
-      });
     // Hymne de l'Aurore reçu : 3 % des PV max par seconde, par le Barde qui l'a chanté.
     if (w.hymnUntil > 0 && t + 1e-9 >= w.hymnTick && w.hymnTick <= w.hymnUntil + 1e-9) {
       w.hymnTick += 1;
@@ -1349,12 +1335,6 @@
         h = applyHeal(HP.mhp * 0.03, false, me(), by, true);
       if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#ffc2e4');
     }
-    // Chasseur : Instinct de survie sous 35 % ; Piège de givre quand un ennemi arrive à 2 cases.
-    if (on('chasseur', 'survival'))
-      lowHp(ratio, 0.35, 'survivalReady', 40, () => {
-        w.survivalUntil = t + 5;
-        notice('🐾 Instinct de survie !');
-      });
     if (on('chasseur', 'frosttrap') && fighting && t >= w.trapReady) {
       const prey = game.world.monsters.find(m => alive(m) && near(m, HP, 2));
       if (prey) {
@@ -1368,14 +1348,7 @@
         }
       }
     }
-    // Guerrier : Second souffle sous 35 % (25 % des PV max en 5 s).
-    if (on('guerrier', 'secondwind'))
-      lowHp(ratio, 0.35, 'windReady', 45, () => {
-        w.windUntil = t + 5;
-        w.windTick = t;
-        notice('💨 Second souffle !');
-      });
-    if (t + 1e-9 < w.windUntil && t + 1e-9 >= w.windTick) {
+    if (w.windUntil > 0 && t + 1e-9 >= w.windTick && w.windTick <= w.windUntil + 1e-9) {
       w.windTick += 1;
       const h = applyHeal(HP.mhp * 0.05, false, me(), me(), true);
       if (h > 0) float(HP.x, HP.y - 40, '+' + Math.round(h) + ' PV', '#e8f0ff');

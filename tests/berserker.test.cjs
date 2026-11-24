@@ -105,7 +105,7 @@ test('Soif de sang : les compétences coûtent des PV (0,6 % des PV max par poin
   assert.match(g.CANAAN_CLASS.skillRider('greataxe', 2), /30 % des dégâts/);
 });
 
-test('Soif de sang : +1 % de dégâts par tranche de 2 % de PV perdus, vol de vie des compétences offensives, doublé après une utilitaire', () => {
+test('Soif de sang : les dégâts ne varient pas avec les PV, Hurlement renforce la compétence offensive suivante', () => {
   const g = game();
   g.setClass('berserker', []);
   predictable(g, 0.99);
@@ -113,9 +113,9 @@ test('Soif de sang : +1 % de dégâts par tranche de 2 % de PV perdus, vol de vi
   g.P.hp = 1000;
   assert.equal(hit100(g), 100);
   g.P.hp = 500;
-  assert.ok(near(hit100(g), 125, 1e-9));
+  assert.equal(hit100(g), 100);
   g.P.hp = 1;
-  assert.ok(near(hit100(g), 149, 1e-9), '50 % au plus');
+  assert.equal(hit100(g), 100);
   // Vol de vie : 15 % des dégâts d'une compétence offensive.
   g.P.mhp = 100000;
   g.P.hp = 50000;
@@ -134,6 +134,7 @@ test('Soif de sang : +1 % de dégâts par tranche de 2 % de PV perdus, vol de vi
   g.CANAAN_CLASS_AFTER_CAST('greataxe', 2);
   const context = g.CANAAN_CLASS_CAST('greataxe', 0);
   assert.equal(context.thirst, true);
+  assert.equal(context.multiplier, 1.2);
   assert.equal(g.CANAAN_CLASS_CAST('greataxe', 0).thirst, undefined);
   before = m.hp;
   hp = g.P.hp;
@@ -174,20 +175,32 @@ test('Rage écarlate (F) : pas sous 1 PV, attaques de base plus rapides, soins d
 test('Berserker : Peau de fer, Cicatrices, Saignée, Curée et Dernier carré', () => {
   const g = game();
   g.setClass('berserker', [3]);
-  g.P.mhp = 1000;
-  g.P.hp = 500;
-  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 88, '50 % des PV perdus : −12 %');
+  g.P.mhp = g.P.hp = 1000;
+  const guardWithSkin = g.characterStats().guard;
+  assert.equal(g.CANAAN_CLASS.bloodCost(g.game.hero, 10), 80);
   g.P.hp = 1;
-  assert.equal(g.CANAAN_CLASS_DEFENSE(null, 100), 76, 'à 1 PV : −24 % (25 % au plus)');
-  // Cicatrices : +3 % par coup subi (10 au plus), 3 pour un critique, 6 s.
+  assert.equal(g.characterStats().guard, guardWithSkin);
+  g.setClass('berserker', []);
+  assert.equal(g.characterStats().guard, guardWithSkin - 10);
+  // Cicatrices : les attaques qui touchent génèrent les charges, même sans dégâts subis.
   const s = game();
+  const target = mob(1e6);
   s.setClass('berserker', [1]);
   s.P.mhp = s.P.hp = 1000;
-  for (let i = 0; i < 3; i++) s.CANAAN_CLASS_DEFENSE(null, 10);
-  assert.ok(near(hit100(s), 109, 1e-9));
-  s.CANAAN_CLASS_ON_CRIT_TAKEN();
-  assert.equal(s.CANAAN_CLASS.audit().scars, 5);
-  for (let i = 0; i < 10; i++) s.CANAAN_CLASS_DEFENSE(null, 10);
+  predictable(s, 0.99);
+  s.CANAAN_CLASS_DEFENSE(null, 10);
+  assert.equal(s.CANAAN_CLASS.audit().scars, 0);
+  s.CANAAN_COMBAT.attack(target, 100, basicHit);
+  s.CANAAN_COMBAT.attack(target, 100, basicHit);
+  assert.equal(s.CANAAN_CLASS.audit().scars, 1, 'pas deux charges pendant le même impact de zone');
+  s.advance(15);
+  s.CANAAN_COMBAT.attack(target, 100, { ...basicHit, forceCrit: true });
+  assert.equal(s.CANAAN_CLASS.audit().scars, 4);
+  assert.ok(near(hit100(s), 112, 1e-9));
+  for (let i = 0; i < 10; i++) {
+    s.advance(15);
+    s.CANAAN_COMBAT.attack(target, 100, basicHit);
+  }
   assert.equal(s.CANAAN_CLASS.audit().scars, 10);
   s.advance(6 * 60 + 1);
   assert.equal(hit100(s), 100);
@@ -204,20 +217,22 @@ test('Berserker : Peau de fer, Cicatrices, Saignée, Curée et Dernier carré', 
   const hp = m.hp;
   b.advance(61);
   assert.ok(m.hp < hp, 'le saignement ronge la cible');
-  // Dernier carré : sous 20 % de PV, 50 % des dégâts rendus et 20 de Garde.
+  // Dernier carré renforce le Hurlement, même lancé à pleine vie.
   const l = game();
   l.setClass('berserker', [2]);
   predictable(l, 0.99);
-  l.P.mhp = 100000;
-  l.P.hp = 1000;
+  l.P.mhp = l.P.hp = 100000;
+  const guard = l.characterStats().guard;
+  l.useSkill(2);
+  assert.equal(l.characterStats().guard, guard + 20);
   const t = mob(1e7),
     before = t.hp,
     life = l.P.hp;
-  l.CANAAN_COMBAT.attack(t, 100, skillHit('blood'));
+  l.CANAAN_COMBAT.attack(t, 100, l.CANAAN_CLASS_CAST('greataxe', 0));
   assert.ok(near(l.P.hp - life, (before - t.hp) * 0.5));
-  const guard = l.characterStats().guard;
-  l.P.hp = 50000;
-  assert.equal(l.characterStats().guard, guard - 20);
+  assert.equal(l.CANAAN_CLASS_CAST('greataxe', 0).bloodFury, undefined);
+  l.advance(361);
+  assert.equal(l.characterStats().guard, guard);
 });
 
 test('Berserker : Frénésie, Carnage, Sang bouillant, Boucherie et Immortel', () => {
@@ -280,7 +295,7 @@ test('Berserker : Frénésie, Carnage, Sang bouillant, Boucherie et Immortel', (
   assert.ok(u.P.hp <= 0, 'une seule fois toutes les 90 s');
 });
 
-test('Grande hache : Fendoir, Bond du boucher qui étourdit, Hurlement (Rage +25 %) et Châtiment à 700 % sous 30 % de PV', () => {
+test('Grande hache : Fendoir, Bond du boucher qui étourdit, Hurlement (Rage +25 %) et Châtiment renforcé par le Hurlement', () => {
   const g = game();
   g.setClass('berserker', []);
   predictable(g, 0.99);
@@ -307,10 +322,7 @@ test('Grande hache : Fendoir, Bond du boucher qui étourdit, Hurlement (Rage +25
   g.useSkill(2);
   assert.equal(g.CANAAN_SKILLS.state(g.game.hero).berserk, 6);
   assert.ok(m.v1746_weak > 0);
-  // Châtiment : 450 %, ou 700 % sous 30 % de PV (même Rage, même cible).
-  // Les PV sont payés avant le coup : la Soif de sang compte avec les PV restants.
-  const price = g.CANAAN_CLASS.bloodCost(g.game.hero, 24),
-    thirst = life => 1 + Math.floor((1 - (life - price) / 100000) * 50 + 1e-9) / 100;
+  // Châtiment passe de 450 % à 600 % de base sous Hurlement, avant les deux bonus de dégâts du Hurlement.
   const strike = life => {
     const t = mob(1e9);
     g.monsters = [t];
@@ -319,12 +331,13 @@ test('Grande hache : Fendoir, Bond du boucher qui étourdit, Hurlement (Rage +25
     g.P.hp = life;
     ready(g);
     g.useSkill(3);
-    return (1e9 - t.hp) / thirst(life);
+    return 1e9 - t.hp;
   };
-  // Le Châtiment coûte 24 000 PV (1 % des PV max par point de mana) : 50 000 PV en laissent 26 000 (sous 30 %).
-  const full = strike(100000),
-    low = strike(50000);
-  assert.ok(near(low / full, 7 / 4.5, 0.02));
+  const empowered = strike(100000);
+  g.advance(361);
+  const full = strike(100000);
+  assert.equal(strike(50000), full);
+  assert.ok(near(empowered / full, (6 / 4.5) * 1.25 * 1.2, 0.02));
 });
 
 test('Berserker en jeu : choix de la classe, Grande hache en main, coûts en PV dans les info-bulles', () => {

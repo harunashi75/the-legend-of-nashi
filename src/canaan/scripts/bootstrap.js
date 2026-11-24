@@ -92,7 +92,6 @@
         CANAAN_CLASS_CAST: 'function',
         CANAAN_CLASS_BASIC_LOCK: 'function',
         CANAAN_CLASS_ON_DODGE: 'function',
-        CANAAN_CLASS_ON_CRIT_TAKEN: 'function',
         CANAAN_CLASS_FATAL: 'function',
         CANAAN_CLASS_PAY: 'function',
         CANAAN_CLASS_CAN_PAY: 'function',

@@ -122,7 +122,7 @@ test('Déviation : esquive totale puis second jet indépendant pour diviser les 
 });
 
 test('Une esquive ne consomme pas le bouclier, garde zéro dégât et déclenche la Danse des ombres',()=>{
-  const g=game(),base=g.characterStats;g.setClass('elementaliste',[7]);g.P.hp=20;g.P.mhp=100;g.advance(1);
+  const g=game(),base=g.characterStats;g.setClass('elementaliste',[7]);g.P.hp=g.P.mhp=100;g.P.mp=100;g.useSkill(1);
   g.characterStats=()=>{const s=base();s.dodge=100;return s};predictable(g,0);
   for(let i=0;i<5;i++)assert.equal(g.monsterDamage(mob(100)),0);
   // Le bouclier de la Barrière de givre (20 PV) est intact.
@@ -251,15 +251,15 @@ test('Compétences : attaques de base renforcées, info-bulles claires, badges e
  assert.equal(run('CANAAN_SKILLS.power(game.hero,true)'),run('CANAAN_SKILLS.power(game.hero,false)'));
  // Info-bulle : explication, dégâts estimés avec la puissance actuelle, recharge, ressource, effet de classe.
  const tip=run('canaanSkillTooltip(0)'),power=run('CANAAN_SKILLS.power(game.hero,false)');
- assert.ok(tip.includes('Un coup de masse sacré')&&tip.includes('≈ '+Math.round(power*2.8)+' dégâts')&&tip.includes('Recharge 5 s')&&tip.includes('Ferveur 24'),tip);
+ assert.ok(tip.includes('dégâts sacrés égaux à 280 % de ta Puissance')&&tip.includes('≈ '+Math.round(power*2.8)+' dégâts')&&tip.includes('Recharge 5 s')&&tip.includes('Ferveur 24'),tip);
  assert.ok(tip.includes('Paladin'),'empreinte de la classe');
  for(const [id,word] of [['druide','empoisonne'],['assassin','+12 %'],['elementaliste','brûle'],['chasseur','distance'],['guerrier','Élan']]){
   run('CANAAN_CLASS_STATE.import({id:"'+id+'",talents:[]});refreshWeaponBar()');assert.ok(run('canaanSkillTooltip(0)').includes(word),id);
  }
  assert.ok(run('canaanSkillTooltip("special")').includes('Volonté de fer'));
  assert.ok(run('SKILLS.every(s=>s.el.dataset.tooltipSkill!==undefined)'),'survol des cases');
- // Chaque catalogue de compétence a sa puissance et son explication.
- assert.ok(run('Object.values(WEAPON_DEFINITIONS).every(w=>w.role&&w.sp.every(s=>s.length===7&&typeof s[5]==="number"&&s[6].length>20))'));
+ // Chaque catalogue de compétence indique le rôle, la puissance et une visée indépendante de la souris.
+ assert.ok(run('Object.values(WEAPON_DEFINITIONS).every(w=>w.role&&w.sp.every(s=>s.length===7&&typeof s[5]==="number"&&s[6].length>20&&!/souris/i.test(s[2]+s[6])))'));
  // Druide : le Rugissement sauvage rend les attaques de base vraiment plus rapides, et son badge compte les secondes.
  run('CANAAN_CLASS_STATE.import({id:"druide",talents:[]});P.mp=P.mmp;CANAAN_CLASS.special();refreshWeaponBar();mouseWorldX=P.x+100;mouseWorldY=P.y');
  run('for(let i=0;i<120;i++){time++;simulateStep()}canaanBasicAttack(false)');const slow=run('CANAAN_BASIC_ATTACK.lock()');

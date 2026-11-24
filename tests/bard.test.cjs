@@ -133,17 +133,15 @@ test('Barde : Ritournelle (soin en trop en bouclier), Contre-chant, Note perçan
   g.P.hp = 100;
   g.canaanApplyHeal(50);
   assert.equal(g.CANAAN_CLASS.audit().shield, 15, 'bouclier plafonné à 15 % des PV max');
-  // Contre-chant : sous 40 % de PV, +15 % des PV max et un bouclier de 15 %, recharge 40 s.
+  // Contre-chant : Accord dissonant protège le groupe même à pleine vie.
   const c = game();
   c.setClass('barde', [2]);
-  c.P.mhp = 100;
-  c.P.hp = 30;
-  c.advance(1);
-  assert.equal(c.P.hp, 47, '15 % des PV max, +10 %, arrondi');
+  c.P.mhp = c.P.hp = 100;
+  c.P.mp = 100;
+  c.useSkill(1);
   assert.equal(c.CANAAN_CLASS.audit().shield, 15);
-  c.P.hp = 30;
-  c.advance(60);
-  assert.equal(c.P.hp, 30, 'en recharge');
+  c.advance(301);
+  assert.equal(c.CANAAN_CLASS.audit().shield, 0, 'le bouclier expire au bout de 5 s');
   // Note perçante : la note traverse et soigne 6 % des PV max.
   const n = game();
   n.setClass('barde', [6]);

@@ -115,9 +115,13 @@ test('Druide : Sève vitale, forme féline (F) avec ses quatre compétences, Ins
   // Équilibre sauvage : 3 compétences de nature, puis la forme féline donne +25 % pendant 8 s.
   const b=game();b.setClass('druide',[9]);b.P.mp=1000;for(let k=0;k<3;k++)b.CANAAN_CLASS_CAST('wildstaff',0);
   b.CANAAN_CLASS.special();assert.ok(Math.abs(b.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-115*1.25)<1e-6);
-  // Écorce de fer : sous 40 % de PV, bouclier de 20 % et renvoi de 30 % des dégâts.
-  const e=game();e.setClass('druide',[8]);e.P.hp=30;e.P.mhp=100;e.advance(1);
+  // Écorce de fer se déclenche sur Floraison même à pleine vie.
+  const e=game();e.setClass('druide',[8]);e.P.mhp=100;e.P.hp=30;e.advance(1);
+  assert.equal(e.CANAAN_CLASS.audit().shield,0);
+  e.P.hp=100;e.P.mp=100;e.useSkill(1);
   assert.equal(e.CANAAN_CLASS.audit().shield,20);const foe=mob(1e6);e.CANAAN_CLASS_DEFENSE(foe,10);assert.ok(foe.hp<1e6);
+  e.weaponCooldowns['wildstaff:1']=0;e.useSkill(1);
+  assert.equal(e.CANAAN_CLASS.audit().shield,10,'la recharge du talent est indépendante de Floraison');
 });
 
 test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, Aura de dévotion et Intervention divine',()=>{
@@ -130,6 +134,16 @@ test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, 
   // Rempart sacré : −35 % de dégâts reçus, bouclier de 12 % au groupe.
   g.P.mp=100;g.useSkill(2);assert.equal(g.CANAAN_SKILLS.state(g.game.hero).shieldGuard,6);
   assert.equal(g.CANAAN_WEAPON_DEFENSE(mob(1),100),65);
+  // Sentence renforce l'impact du Marteau pendant le Rempart, même contre un boss à pleine vie.
+  const hammerImpact=guarding=>{
+    const p=game();p.setClass('paladin',[3]);predictable(p,.99);p.P.mp=100;
+    const boss={...mob(1e6),boss:true};p.monsters=[boss];
+    if(guarding)p.useSkill(2);
+    p.useSkill(3);p.advance(22);
+    return boss.mhp-boss.hp;
+  };
+  const impact=hammerImpact(false);
+  assert.ok(impact>0 && Math.abs(hammerImpact(true)/impact-1.6)<.03);
   // Ferveur ardente : chaque coup reçu donne 4 de plus ; à 100, Exaltation (moitié prix, +15 %).
   const z=game();z.setClass('paladin',[5]);z.P.mp=0;z.P.mmp=100;z.P.mhp=1000;z.CANAAN_CLASS_DEFENSE(mob(1),1);
   assert.ok(Math.abs(z.P.mp-7.15)<1e-9,'3 + 0,15 + 4');z.P.mp=100;z.advance(1);
@@ -147,10 +161,14 @@ test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente, 
   assert.equal(l.characterStats().guard,g0+20);
 });
 
-test('Assassin : Précision mortelle, Exécuteur, Hémorragie, Ombre meurtrière, Pas de l’ombre et Voile d’ombre',()=>{
+test('Assassin : Précision mortelle, Lames déchirantes, Hémorragie, Ombre meurtrière, Pas de l’ombre et Voile d’ombre',()=>{
   const g=game();g.setClass('assassin',[]);const base={...g.characterStats(),crit:g.characterStats().crit,critPower:g.characterStats().critPower-10,speed:g.characterStats().speed-5};g.setClass('assassin',[5,4,3,9]);
   const st=g.characterStats();assert.equal(st.crit,base.crit+10);assert.equal(st.critPower,base.critPower+30);assert.equal(st.speed,base.speed+5);
-  const low=mob(100);low.hp=29;assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(low,100,{}).damage-125)<1e-9);
+  const full=mob(100),offense=skillHit('shadow');
+  const normal=g.CANAAN_CLASS_ATTACK.before(full,100,offense).damage;
+  full.v1746_bleed=4;
+  assert.ok(Math.abs(g.CANAAN_CLASS_ATTACK.before(full,100,offense).damage-normal*1.25)<1e-9);
+  assert.equal(g.CANAAN_CLASS_ATTACK.before(full,100,basicHit).damage,100);
   // Hémorragie : un critique fait saigner (35 % du coup sur 4 s).
   predictable(g,0);const t=mob(1e6);g.CANAAN_COMBAT.attack(t,100,basicHit);
   assert.ok(Math.abs(t._clsDots.find(d=>d.kind==='bleed').dps-(1e6-t.hp)*.35/4)<1e-9);
@@ -185,9 +203,15 @@ test('Élémentaliste : feu, glace, Éclats de glace, Électricité statique, Fu
   const f=game();f.setClass('elementaliste',[6]);f.CANAAN_CLASS_CAST('staff',0);f.CANAAN_CLASS_CAST('staff',1);
   assert.ok(f.CANAAN_CLASS_MANA_COST('staff',2,16)>0);f.CANAAN_CLASS_CAST('staff',2);
   assert.equal(f.CANAAN_CLASS_MANA_COST('staff',3,28),0);assert.ok(Math.abs(f.CANAAN_CLASS_CAST('staff',3).multiplier-1.5)<1e-9);
-  // Barrière de givre : sous 40 % de PV, bouclier de 20 % et gel des ennemis proches.
-  const b=game();b.setClass('elementaliste',[7]);const foe=mob(1e6);foe.x=60;b.monsters=[foe];b.P.hp=30;b.P.mhp=100;b.advance(1);
+  // Barrière de givre : la Nova protège à pleine vie et renforce uniquement le prochain sort de feu.
+  const b=game();b.setClass('elementaliste',[7]);const foe=mob(1e6);foe.x=60;b.monsters=[foe];b.P.hp=b.P.mhp=100;b.P.mp=100;
+  b.useSkill(1);
   assert.equal(b.CANAAN_CLASS.audit().shield,20);assert.ok(foe.spell_stun>0,'gelé');
+  assert.equal(b.CANAAN_CLASS_CAST('staff',2).multiplier,1,'la foudre ne consomme pas le bonus');
+  assert.equal(b.CANAAN_CLASS_CAST('staff',3).multiplier,1.4);
+  assert.equal(b.CANAAN_CLASS_CAST('staff',0).multiplier,1);
+  b.weaponCooldowns['staff:1']=0;b.useSkill(1);b.advance(361);
+  assert.equal(b.CANAAN_CLASS_CAST('staff',0).multiplier,1,'le bonus expire après 6 s');
   // Avatar élémentaire (F) : +20 % de dégâts et −30 % de mana pendant 10 s (14 s avec Avatar primordial).
   const a=game();a.setClass('elementaliste',[]);a.P.mp=100;assert.equal(a.CANAAN_CLASS.special(),true);
   assert.ok(Math.abs(a.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120)<1e-9);
@@ -210,9 +234,14 @@ test('Chasseur : Instinct du traqueur, Concentration, Marque du chasseur, Œil d
   assert.equal(h.CANAAN_CLASS.special(),true);assert.equal(h.characterStats().crit,crit+10);
   assert.ok(Math.abs(h.CANAAN_CLASS_BASIC_LOCK()-.7)<1e-9);assert.ok(Math.abs(h.CANAAN_CLASS_ATTACK.before(mob(10),100,{}).damage-120*1.01)<1e-9,'+20 %, et 1 case de distance');
   h.advance(601);assert.equal(h.CANAAN_CLASS_BASIC_LOCK(),1);
-  // Instinct de survie : sous 35 % de PV, +30 % de vitesse et 20 de Garde pendant 5 s.
-  const s=game();s.setClass('chasseur',[8]);const st=s.characterStats();s.P.hp=30;s.P.mhp=100;s.advance(1);
+  // Instinct de survie : seule la roulade active le bonus, même à pleine vie.
+  const s=game();s.setClass('chasseur',[8]);const st=s.characterStats();s.P.mhp=s.P.hp=100;
+  s.CANAAN_CLASS_ON_DODGE(s.game.hero);
+  assert.equal(s.characterStats().guard,st.guard,'une déviation ne déclenche rien');
+  s.particles=[];assert.equal(s.CANAAN_COMBAT.dodge(1,0),true);
   assert.equal(s.characterStats().speed,st.speed+30);assert.equal(s.characterStats().guard,st.guard+20);
+  s.advance(301);
+  assert.equal(s.characterStats().guard,st.guard);
   // Repli tactique : la roulade se recharge 30 % plus vite.
   const r=game();r.setClass('chasseur',[4]);assert.ok(Math.abs(r.CANAAN_CLASS_DODGE_FACTOR()-.7)<1e-9);
 });
