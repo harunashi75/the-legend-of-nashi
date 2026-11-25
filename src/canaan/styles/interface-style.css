@@ -165,15 +165,23 @@ svg.ico.solo {
 .mp i {
   background: linear-gradient(180deg, #4a8ae8, #1e4aa8 70%, #12306e);
 }
-/* Ressources des classes (shared/data/classes.js, RESOURCES) : Énergie (Assassin), Ferveur (Paladin), Rythme (Barde). */
-.mp.res-energy i {
-  background: linear-gradient(180deg, #f2d24a, #b8901a 70%, #7a5c0c);
-}
+/* Ressources des classes (shared/data/classes.js, RESOURCES) : une couleur par ressource. Mana bleu (défaut),
+   Ferveur jaune (Paladin), Concentration orange (Chasseur), Énergie verte (Assassin), Rythme rose (Barde),
+   Rage cramoisie (Guerrier, plus sombre que les PV). */
 .mp.res-fervor i {
+  background: linear-gradient(180deg, #f6d84a, #b8901a 70%, #7a5c0c);
+}
+.mp.res-focus i {
   background: linear-gradient(180deg, #ff9f3a, #c25a12 70%, #7e340a);
+}
+.mp.res-energy i {
+  background: linear-gradient(180deg, #7ee07a, #2f9a3a 70%, #17602a);
 }
 .mp.res-rhythm i {
   background: linear-gradient(180deg, #ff7ac8, #b8338a 70%, #761c58);
+}
+.mp.res-rage i {
+  background: linear-gradient(180deg, #d42a4e, #8a1030 70%, #520a1e);
 }
 /* Barre d'expérience : fine, violette, sous le mana. */
 .bar.exp {

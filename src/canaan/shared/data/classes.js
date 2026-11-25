@@ -40,14 +40,14 @@ export const RESOURCES = deepFreeze({
   energy: {
     name: 'Énergie',
     icon: '⚡',
-    color: '#f2d24a',
+    color: '#7ee07a',
     lack: 'Énergie insuffisante',
     desc: '100 points qui se rechargent très vite, même en plein combat.'
   },
   fervor: {
     name: 'Ferveur',
     icon: '✨',
-    color: '#ff9f3a',
+    color: '#f6d84a',
     lack: 'Ferveur insuffisante',
     desc: 'Part de zéro : monte quand tu frappes, et surtout quand tu es frappé ; retombe hors combat.'
   },
@@ -61,14 +61,14 @@ export const RESOURCES = deepFreeze({
   focus: {
     name: 'Concentration',
     icon: '🎯',
-    color: '#7fd7a0',
+    color: '#ff9f3a',
     lack: 'Concentration insuffisante',
     desc: '100 points qui se rechargent vite, même en combat ; chaque attaque de base qui touche en rend un peu plus.'
   },
   rage: {
     name: 'Rage',
     icon: '💢',
-    color: '#e8643a',
+    color: '#d42a4e',
     lack: 'Rage insuffisante',
     desc: 'Part de zéro : monte quand tu frappes et quand tu es frappé ; retombe hors combat.'
   },
