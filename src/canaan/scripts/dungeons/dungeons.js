@@ -1855,10 +1855,19 @@
         }
         trapHits.set(k, touched);
       });
-    // Éboulements : une pierre annoncée près d'un héros, dans les salles d'énigme, les annexes et les couloirs.
+    // Éboulements : une pierre annoncée près d'un héros qui marche, dans les salles d'énigme, les annexes et les
+    // couloirs. Un héros immobile (repas, repos, réflexion devant une énigme) n'en reçoit jamais.
     if (th.trap === 'falling')
       for (const h of heroes) {
-        const r = roomOf(plan, h.player.x / TS, h.player.y / TS);
+        const p = h.player,
+          moved = h._rockPos && Math.hypot(p.x - h._rockPos.x, p.y - h._rockPos.y) > 0.5;
+        h._rockPos = { x: p.x, y: p.y };
+        h._rockStill = moved ? 0 : (h._rockStill || 0) + 1;
+        if (h._rockStill > 30) {
+          h._rockAt = 0;
+          continue;
+        }
+        const r = roomOf(plan, p.x / TS, p.y / TS);
         if (r && (r.kind === 'boss' || r.kind === 'entry' || r.kind === 'secret')) continue;
         if ((h._rockAt ||= time + 120 + Math.random() * 200) > time) continue;
         h._rockAt = time + 260 + Math.random() * 180;

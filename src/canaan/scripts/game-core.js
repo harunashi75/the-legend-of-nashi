@@ -1314,6 +1314,8 @@ function draw() {
   if (!game.world.instance) drawWaterRipples(ctx);
   // Arène : zones annoncées et dangers au sol, sous les combattants.
   if (game.world.instance?.arena) CANAAN_ARENA.drawGround(ctx);
+  // Donjons et raids : cercles, lignes et flaques des boss, sous les combattants qui s'y tiennent.
+  CANAAN_BOSS_MECHANICS.drawGround(ctx);
   // Monstres ; leurs plaques sont dessinées plus bas, au-dessus des personnages et du décor.
   const plates = [];
   game.world.monsters.forEach(m => {

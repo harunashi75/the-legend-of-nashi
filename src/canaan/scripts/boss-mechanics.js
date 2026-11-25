@@ -570,18 +570,30 @@
       c.save();
       c.globalAlpha = 0.08 + 0.16 * k;
       c.fillStyle = themeColor();
-      c.fillRect(camX, camY, W, H);
+      c.fillRect(camX - 40, camY - 40, W + 80, H + 80);
       c.restore();
     }
     CANAAN_VFX.telegraph(c, z.kind === 'circle' ? 'circle' : z.kind, z, k, col, time);
   }
+  // Le rayon actif est un faisceau d'énergie dans les airs ; tout le reste (annonces, flaques) est peint au sol.
+  const airborne = z => z.kind === 'beam' && now() >= z.at;
+  function drawList(c, air) {
+    const list = game.mode === 'guest' ? shown : zones;
+    if (!started) return;
+    for (const z of list)
+      if (airborne(z) === air)
+        drawZone(c, z, Math.min(1, Math.max(0, (now() - z.start) / Math.max(1, z.at - z.start))));
+  }
+  // Couche du sol (game-core.js) : sous les monstres et les héros, qui se tiennent DANS la zone.
+  function drawGround(c) {
+    if (game.world.instance && !game.world.instance.arena) drawList(c, false);
+  }
   window.CanaanStages.drawBossMechanics = function () {
     const list = game.mode === 'guest' ? shown : zones;
-    if (!started || !list.length) return;
+    if (!started || !list.some(airborne)) return;
     ctx.save();
     ctx.translate(Math.round(-camX), Math.round(-camY));
-    for (const z of list)
-      drawZone(ctx, z, Math.min(1, Math.max(0, (now() - z.start) / Math.max(1, z.at - z.start))));
+    drawList(ctx, true);
     ctx.restore();
   };
   // Zones pour les invités : [forme, x, y, r, r0, angle (centièmes), longueur, largeur, frappe, fin, rotation].
@@ -666,6 +678,7 @@
   }
   window.CANAAN_BOSS_MECHANICS = Object.freeze({
     zones: () => zones,
+    drawGround,
     clear: () => (zones.length = 0),
     cast: (m, kind) => {
       m.mech ??= { next: now() + 150, k: 0, adds: 0, totems: false, fight: now() };
