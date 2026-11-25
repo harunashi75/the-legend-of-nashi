@@ -389,3 +389,52 @@ test('Salon de coiffure du camp : pour 100 or, Sélène change l’apparence du 
  assert.equal(n.sanitizeAction({op:'barber-look',look:7}),null);
  assert.equal(errors.length,0,errors.join('\n'));
 });
+
+test('Habitats des créatures : trois territoires par espèce, habillés dans le décor, bêtes libres autour de leur point, objectifs qui y mènent',()=>{
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ // Chaque espèce de chaque biome ouvert a ses trois territoires, dans son biome, accessibles et bien séparés.
+ const lairs=JSON.parse(run('JSON.stringify(CANAAN_LAIRS.all().map(l=>({id:l.id,mob:l.mob,zone:l.zone,x:l.x,y:l.y,in:canaanZoneIndexAt(l.x,l.y),spots:l.spots})))'));
+ const species=JSON.parse(run('JSON.stringify(ZONES.filter(z=>!z.locked).flatMap(z=>z.mobs.map(m=>ZONES.indexOf(z)+":"+m)))'));
+ for(const s of species)assert.equal(lairs.filter(l=>l.zone+':'+l.mob===s).length,3,s);
+ assert.ok(lairs.every(l=>l.in===l.zone),'chaque territoire est dans son biome');
+ assert.ok(lairs.every((a,i)=>lairs.slice(i+1).every(b=>Math.hypot(a.x-b.x,a.y-b.y)>=19)),'territoires séparés');
+ assert.ok(lairs.every(l=>Math.hypot(l.x-run('villages[0].x'),l.y-run('villages[0].y'))>=26),'loin du camp');
+ assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_WORLD_AUDIT().unreachable)')),[]);
+ assert.ok(run('Object.keys(CANAAN_LAIRS.THEMES).every(m=>canaanMobTypes().some(t=>t.name===m))'),'thèmes : espèces existantes');
+ // Habillage : dans la grille de décor de l'île (pas de dessin à part), avec des décors connus du rendu.
+ const dressing=JSON.parse(run(`JSON.stringify(CANAAN_LAIRS.all().map(l=>{const out=[];for(let y=l.y-11;y<=l.y+11;y++)for(let x=l.x-11;x<=l.x+11;x++){const d=game.world.decor[y][x];if(String(d).startsWith('lair_')&&Math.hypot(x-l.x,y-l.y)<11)out.push(d)}return out}))`));
+ assert.ok(dressing.every(list=>list.length>=2),'chaque territoire est habillé');
+ assert.ok(run(`[...new Set(game.world.decor.flat().filter(d=>String(d).startsWith('lair_')))].every(d=>CANAAN_LAIR_DECOR.trees[d]||CANAAN_LAIR_DECOR.tall.includes(d)||Object.values(CANAAN_LAIRS.THEMES).some(t=>JSON.stringify(t).includes('"'+d+'"')))`),'décors déclarés');
+ assert.ok(run(`game.world.decor.flat().some(d=>String(d).startsWith('lair_web_'))`),'des arbres envahis par les toiles');
+ // Points d'apparition étalés dans le territoire.
+ assert.ok(lairs.every(l=>l.spots.length===run('CANAAN_LAIRS.POP')&&l.spots.every((a,i)=>l.spots.slice(i+1).every(b=>Math.hypot(a[0]-b[0],a[1]-b[1])>=2))),'points étalés');
+ // Près d'une tanière : une bête à chacun de ses points, libres dans le territoire ; rien n'apparaît au hasard.
+ run('globalThis.den=CANAAN_LAIRS.all().find(l=>l.mob==="Loup");game.world.monsters=[];P.x=(den.x+0.5)*TS;P.y=(den.y+12)*TS;spawnMonsters(12)');
+ assert.equal(run('game.world.monsters.filter(m=>m.lair===den.id).length'),run('CANAAN_LAIRS.POP'));
+ assert.ok(run('game.world.monsters.every(m=>m.lair&&m.t===CANAAN_LAIRS.all().find(l=>l.id===m.lair).mob)'));
+ assert.ok(run('game.world.monsters.filter(m=>m.lair===den.id).every(m=>m.t==="Loup"&&Math.hypot(m.x-m.hx,m.y-m.hy)<1.5*TS&&canWalk(m.x,m.y))'));
+ assert.equal(run('new Set(game.world.monsters.filter(m=>m.lair===den.id).map(m=>m.spot)).size'),run('CANAAN_LAIRS.POP'));
+ run('globalThis.far=CANAAN_LAIRS.all().reduce((a,l)=>Math.hypot(l.x-den.x,l.y-den.y)>Math.hypot(a.x-den.x,a.y-den.y)?l:a)');
+ assert.equal(run('game.world.monsters.some(m=>m.lair===far.id)'),false,'un territoire lointain dort');
+ // Sous-zone : on entre dans la Tanière des loups.
+ run('P.x=(den.x+0.5)*TS;P.y=(den.y+0.5)*TS');assert.equal(run('currentZoneName()'),'Tanière des loups');
+ // Entraînée trop loin, une bête rentre à son point et reprend ses PV ; au repos, elle flâne autour.
+ run('started=true;paused=false;P.x=(den.x+0.5)*TS;P.y=(den.y+60)*TS;globalThis.w=game.world.monsters.find(m=>m.lair===den.id);w.x=w.hx+16*TS;w.hp=1;for(let i=0;i<900;i++){time++;update()}');
+ assert.ok(run('Math.hypot(w.x-w.hx,w.y-w.hy)<4*TS'),'revenue');
+ assert.equal(run('w.hp===w.mhp&&!w.homing'),true);
+ // Vaincues, les bêtes reviennent une à une à leur point ; loin de tout héros, la troupe intacte s'en va.
+ run('P.y=(den.y+12)*TS;for(let i=0;i<60;i++){time++;CANAAN_LAIRS.update()}game.world.monsters.filter(m=>m.lair===den.id).slice(0,3).forEach(m=>m.hp=0);game.world.monsters=game.world.monsters.filter(m=>m.hp>0);for(let i=0;i<60*11;i++){time++;CANAAN_LAIRS.update()}');
+ assert.equal(run('game.world.monsters.filter(m=>m.lair===den.id).length'),4);
+ run('P.x=(far.x+0.5)*TS;P.y=(far.y+0.5)*TS;for(let i=0;i<60;i++){time++;CANAAN_LAIRS.update()}');
+ assert.equal(run('game.world.monsters.some(m=>m.lair===den.id)'),false);
+ assert.equal(run('game.world.monsters.filter(m=>m.lair===far.id).length'),run('CANAAN_LAIRS.POP'));
+ // Quête « Éloigner les loups » et contrat « créatures de ton niveau » : l'objectif suivi est le territoire le plus proche.
+ run('P.x=CANAAN_SPAWN.x;P.y=CANAAN_SPAWN.y;globalThis.Q=CANAAN_QUESTS;const st=Q.state(game.hero);st.active[3]={step:QUESTS.find(q=>q.id===3).steps.findIndex(s=>s.k==="kill"),got:[],n:0};st.track=3');
+ const wolf=JSON.parse(run('JSON.stringify(Q.target(game.hero))'));
+ const near=JSON.parse(run('JSON.stringify((({x,y})=>({x,y}))(CANAAN_LAIRS.nearest(P.x/TS,P.y/TS,["Loup"])))'));
+ assert.equal(wolf.x,(near.x+0.5)*48);assert.match(wolf.text,/Tanière des loups/);
+ assert.equal(run('CANAAN_LAIRS.nearest(P.x/TS,P.y/TS,"*",{level:30}).zone>=1'),true,'niveau 30 : pas les Plaines');
+ // Dessin des territoires et de leurs repères sur la carte, sans erreur.
+ run('P.x=(den.x+0.5)*TS;P.y=(den.y+3)*TS;camX=P.x-W/2;camY=P.y-H/2;draw()');
+ assert.equal(errors.length,0,errors.join('\n'));
+});

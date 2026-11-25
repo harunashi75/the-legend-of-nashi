@@ -189,7 +189,9 @@
     if (room) return room.name;
     if (canaanUnder()) return CANAAN_UNDER.zoneName(x, y);
     if (inCity(Math.floor(x), Math.floor(y))) return 'Sylvaëlle, la Cité des Elfes';
-    return canaanInCamp(x, y, 1) ? CANAAN_CAMP.name : regionAt(x, y).name;
+    if (canaanInCamp(x, y, 1)) return CANAAN_CAMP.name;
+    // Territoire d'une espèce (mob-lairs.js) : sous-zone, comme dans un MMO.
+    return canaanLairAt(x, y)?.name || regionAt(x, y).name;
   }
   // Titre de région affiché en haut de l'écran lors des changements de zone.
   const regionBanner = document.createElement('div');
@@ -205,14 +207,6 @@
     }
     regionBanner.textContent = previousZone;
   }
-  // Créature d'une case : une espèce tirée parmi celles de sa région. (L'ancien tirage recommençait à chaque espèce du
-  // catalogue et retombait souvent sur le Slime, qui apparaissait alors dans toutes les régions.)
-  function worldMobAt(x, y) {
-    const list = regionAt(x, y).mobs,
-      name = list[Math.floor(rnd() * list.length)];
-    return canaanMobTypes().find(m => m.name === name) || MOB_TYPES[0];
-  }
-
   // Région « parente » d'une zone, pour les systèmes qui ne connaissent que les six biomes de l'île (poissons,
   // herbes, minerais, trésors, gibier, musique, chaussée) : la terre du sud-ouest prend ceux de la Forêt enchantée.
   function zoneKin(index) {
@@ -786,6 +780,48 @@
     cityLayout();
     // Extensions présentes : leurs lieux, dans leurs terres déjà générées.
     CANAAN_EXT.afterWorld();
+    // Habitats des créatures (mob-lairs.js), en dernier : à l'écart de tout ce qui est déjà posé. Au tout premier
+    // passage, le module n'est pas encore chargé : il se pose lui-même à son chargement, après les autres lieux.
+    canaanLairsWorld();
+  }
+  // Habitats des créatures : sur la terre ferme accessible depuis le camp, hors route, à l'écart du camp, des lieux
+  // de l'île, des lieux des quêtes, des bâtiments, des entrées des Tréfonds et des lieux des extensions.
+  function placeLairs() {
+    const camp = villages[0],
+      reach = reachableFrom(camp.x, camp.y),
+      taken = [...instances.filter(d => !d.under), CANAAN_ARENA_PORTAL, ...WORLD_BOSSES, ...PIXEL_PLACES];
+    CANAAN_LAIRS.place({
+      center: CENTER,
+      zones: ZONES.map((z, index) => ({
+        index,
+        mobs: z.mobs,
+        lairs: z.lairs,
+        angle: z.angle,
+        x: z.x,
+        y: z.y,
+        ring: index < 6
+      })).filter(z => z.mobs.length && !ZONES[z.index].locked),
+      biomeAt: (x, y) => (valid(x, y) ? BIOME_MAP[y * MAPW + x] : -1),
+      ok: (x, y) =>
+        walkableLand(x, y) &&
+        reach[y * MAPW + x] === 1 &&
+        !isSafe(x, y) &&
+        game.world.tiles[y][x] !== 2 &&
+        !canaanCampLife.farm(x, y),
+      land: (x, y) => walkableLand(x, y) && game.world.tiles[y][x] !== 2 && !isSafe(x, y),
+      soil: (x, y) => valid(x, y) && (walkableLand(x, y) || game.world.tiles[y][x] === 15),
+      avoid: [
+        { x: camp.x, y: camp.y, r: 26 },
+        ...taken.map(p => ({ x: p.x, y: p.y, r: 9 })),
+        ...hiddenChestSpots.map(c => ({ x: c.x, y: c.y, r: 4 })),
+        ...Object.values(CANAAN_QUESTS.sites())
+          .filter(s => !s.under)
+          .map(s => ({ x: s.x, y: s.y, r: (s.r || 4) + 6 })),
+        ...CANAAN_HOUSE.buildings().map(b => ({ x: b.x + b.w / 2, y: b.y + b.h / 2, r: 9 })),
+        ...CANAAN_UNDER.ENTRANCES.map(e => ({ x: e.x, y: e.y, r: 7 })),
+        ...CANAAN_EXT.markers().map(m => ({ x: m.x, y: m.y, r: 10 }))
+      ]
+    });
   }
   // ---------------------------------------------------------------- Cité elfique de Sylvaëlle
   // Plan de la cité, dans la palissade : porte cachée au sud-ouest (derrière le lac), place et fontaine de lune au
@@ -1095,7 +1131,8 @@
       ['portail', CANAAN_ARENA_NAME, CANAAN_ARENA_PORTAL.x, CANAAN_ARENA_PORTAL.y],
       ...WORLD_BOSSES.map(b => ['boss', b.name, b.x, b.y]),
       ...hiddenChestSpots.map(c => ['coffre', c.id, c.x, c.y]),
-      ...PIXEL_PLACES.map(p => ['lieu', p.name, p.x, p.y])
+      ...PIXEL_PLACES.map(p => ['lieu', p.name, p.x, p.y]),
+      ...CANAAN_LAIRS.all().map(l => ['habitat', l.name + ' (' + l.id + ')', l.x, l.y])
     ];
     return {
       unreachable: places
@@ -1110,7 +1147,8 @@
     };
   }
 
-  // Remplacement des spawns : créatures propres à leur biome, densité locale.
+  // Créatures de la surface : elles vivent dans leurs habitats (mob-lairs.js), plus au hasard autour du héros. Ici, les
+  // habitats proches se peuplent tout de suite (entrée dans le monde, retour d'un donjon ou des Tréfonds).
   function spawnMonsters(count = 100) {
     // Tréfonds : leurs créatures, au niveau du héros (underground.js).
     if (canaanUnder()) return CANAAN_UNDER.spawn(count);
@@ -1118,68 +1156,30 @@
       game.world.monsters.forEach(canaanSetupMob);
       return;
     }
-    let cx = P.x / TS,
-      cy = P.y / TS;
-    for (let i = 0; i < count; i++) {
-      let x,
-        y,
-        tries = 0;
-      do {
-        let a = rnd() * Math.PI * 2,
-          rad = 12 + rnd() * 18;
-        x = Math.round(cx + Math.cos(a) * rad);
-        y = Math.round(cy + Math.sin(a) * rad);
-        tries++;
-      } while (
-        (x < 5 ||
-          y < 5 ||
-          x >= MAPW - 5 ||
-          y >= MAPH - 5 ||
-          SOLID.includes(tileAt(x, y)) ||
-          isSafe(x, y) ||
-          canaanLockedTile(x, y) ||
-          canaanCampLife.farm(x, y) ||
-          game.world.monsters.some(m => Math.hypot(m.x / TS - x, m.y / TS - y) < 3.5)) &&
-        tries < 80
-      );
-      if (tries >= 80) continue;
-      // Niveau du héros, borné à la plage de la zone (canaanZoneMobLevel) ; PV et or en découlent.
-      let type = worldMobAt(x, y),
-        elite = rnd() < 0.07,
-        level = canaanZoneMobLevel(x, y),
-        hp = mobHealth(level, elite, type.hp);
-      game.world.monsters.push({
-        x: (x + 0.5) * TS,
-        y: (y + 0.5) * TS,
-        hp,
-        mhp: hp,
-        level,
-        t: type.name,
-        r: elite ? 19 : 16,
-        cd: 0,
-        g: mobGold(level, elite),
-        mobColor: type.color,
-        elite,
-        zoneMob: true,
-        _levelHp: true
-      });
-    }
+    CANAAN_LAIRS.update(true);
   }
   function updateWorld() {
     game.world.clock++;
     if (game.world.clock % 420 === 0 && !game.world.instance) {
-      // Les monstres trop loin disparaissent, et ceux qui traînent dans une zone sûre (Camp de l'Aurore) aussi.
+      // Les monstres égarés loin de tout héros disparaissent, et ceux qui traînent dans une zone sûre (Camp de
+      // l'Aurore) aussi ; ceux des habitats vont et viennent avec leur habitat.
+      const far = m => game.heroes.every(h => Math.hypot(m.x - h.player.x, m.y - h.player.y) >= TS * 34);
       game.world.monsters = game.world.monsters.filter(
         m =>
           m.worldBoss ||
-          (Math.hypot(m.x - P.x, m.y - P.y) < TS * 34 &&
-            !(m.zoneMob && m.hp >= m.mhp && isSafe(m.x / TS, m.y / TS)))
+          (m.lair
+            ? !(m.hp >= m.mhp && isSafe(m.x / TS, m.y / TS))
+            : !far(m) && !(m.zoneMob && m.hp >= m.mhp && isSafe(m.x / TS, m.y / TS)))
       );
-      let nearby = game.world.monsters.filter(
-        m => !m.worldBoss && Math.hypot(m.x - P.x, m.y - P.y) < TS * 25
-      ).length;
-      if (nearby < 10) spawnMonsters(Math.min(3, 12 - nearby));
+      // Tréfonds : leurs créatures apparaissent encore autour du héros (underground.js).
+      if (canaanUnder()) {
+        const nearby = game.world.monsters.filter(
+          m => !m.worldBoss && Math.hypot(m.x - P.x, m.y - P.y) < TS * 25
+        ).length;
+        if (nearby < 10) spawnMonsters(Math.min(3, 12 - nearby));
+      }
     }
+    CANAAN_LAIRS.update();
     updateWorldBosses();
     if (
       game.world.instance &&
@@ -1214,6 +1214,7 @@
     canaanValleyStrait: valleyStrait,
     // Outils de placement pour les lieux posés après la génération (quêtes) : mêmes règles que les portails.
     CANAAN_WORLD_TOOLS: Object.freeze({
+      placeLairs,
       polar,
       nearestSpot,
       clearArea,

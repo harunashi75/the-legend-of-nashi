@@ -114,6 +114,11 @@
     },
     {
       "kind": "script",
+      "id": "canaan-lair-art",
+      "file": "scripts/lair-art.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-world-look",
       "file": "scripts/world-look.js"
     },
@@ -574,6 +579,11 @@
       "id": "canaan-ext-vallee",
       "file": "extensions/vallee/vallee.js",
       "extension": "vallee"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-mob-lairs",
+      "file": "scripts/mob-lairs.js"
     },
     {
       "kind": "script",

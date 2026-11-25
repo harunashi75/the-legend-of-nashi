@@ -525,6 +525,13 @@
     elftree: '#bfffee',
     elfwillow: '#d8ffb0'
   };
+  // Décors des habitats des créatures (lair-art.js) : un arbre envahi ploie et luit comme l'arbre d'origine.
+  for (const [name, base] of Object.entries(CANAAN_LAIR_DECOR.trees)) {
+    if (SWAY[base]) SWAY[name] = SWAY[base];
+    if (GLOWING[base]) GLOWING[name] = GLOWING[base];
+  }
+  Object.assign(SWAY, CANAAN_LAIR_DECOR.sway);
+  Object.assign(GLOWING, CANAAN_LAIR_DECOR.glow);
   // Dessin d'une case de l'île : sol, débords des voisins, falaise, détails animés et décor.
   // Sol d'une case : texture (ou falaise), bords, ombre au pied d'une falaise. L'eau, animée, est à part (water).
   // Case de roche : face de falaise au bord inférieur d'un massif, dessus éclairé ailleurs.
@@ -1103,7 +1110,8 @@
     'peak',
     'palisade',
     'palisade2',
-    'palisade3'
+    'palisade3',
+    ...CANAAN_LAIR_DECOR.tall
   ]);
   function occlusionEntities() {
     const out = [];

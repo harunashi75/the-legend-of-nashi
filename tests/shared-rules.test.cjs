@@ -12,7 +12,7 @@ const {
 test('Portée des modules : modules encapsulés, noms privés inaccessibles et noms publics exportés',()=>{
  const encapsulated={
   'canaan-world-settlements':{private:['campTent','campFire','campBench','campStall'],public:['drawCampAurore']},
-  'canaan-world-generation':{private:['CENTER','PORTAL_SPOTS','BOSS_SPOTS','BIOME_MAP','terrain','worldMobAt'],public:['ZONES','PIXEL_PLACES','BRIDGE_TILES','regionAt','spawnMonsters','updateWorld','updateZoneDisplay','CANAAN_WORLD_AUDIT']},
+  'canaan-world-generation':{private:['CENTER','PORTAL_SPOTS','BOSS_SPOTS','BIOME_MAP','terrain'],public:['ZONES','PIXEL_PLACES','BRIDGE_TILES','regionAt','spawnMonsters','updateWorld','updateZoneDisplay','CANAAN_WORLD_AUDIT']},
   'canaan-map-panel':{private:['biomeLevelRange','instanceLine'],public:['toggleMap']},
   'canaan-sprite-kit':{private:['actor','WORLD_LOOKS','resolveLook','drawParticles','lightCanvas'],public:['canaanOutline','canaanActorSprite','drawCanaanActor','canaanLight','drawCanaanLighting','drawCanaanBossFrame']},
   'canaan-dungeons':{private:['THEMES','PLANS','planDungeon','drawFloorProp'],public:['makeDungeon','spawnInstanceBoss','onInstanceBossDown','drawDungeonTile','dungeonAmbience','arenaLayout','CANAAN_DUNGEON_AUDIT']},

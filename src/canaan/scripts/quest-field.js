@@ -647,13 +647,23 @@
         if (left) return { x: left.x, y: left.y, vague: s.k === 'pick' && !s.caverns && !s.at };
       }
       if (s.k === 'kill' || s.k === 'loot') {
-        // Dans la bonne région, les proies sont partout : pas de flèche.
         const tx = p.x / T,
-          ty = p.y / T,
-          there = site.under
-            ? canaanUnder() &&
-              canaanMobTypes().some(t => s.mobs.includes(t.name) && t.under === CANAAN_UNDER.biomeAt(tx, ty))
-            : !canaanUnder() && (ZONES[canaanZoneIndexAt(tx, ty)]?.mobs || []).some(n => s.mobs.includes(n));
+          ty = p.y / T;
+        // À la surface, les proies vivent dans leurs habitats : le plus proche (mob-lairs.js).
+        const lair = !site.under && CANAAN_LAIRS.nearest(tx, ty, s.mobs, hero);
+        if (lair)
+          return {
+            x: (lair.x + 0.5) * T,
+            y: (lair.y + 0.5) * T,
+            area: CANAAN_LAIRS.inside(lair, tx, ty),
+            vague: true,
+            lair
+          };
+        // Tréfonds : dans la bonne région, les proies sont partout : pas de flèche.
+        const there = site.under
+          ? canaanUnder() &&
+            canaanMobTypes().some(t => s.mobs.includes(t.name) && t.under === CANAAN_UNDER.biomeAt(tx, ty))
+          : !canaanUnder() && (ZONES[canaanZoneIndexAt(tx, ty)]?.mobs || []).some(n => s.mobs.includes(n));
         const biome =
           site.under && canaanMobTypes().find(t => s.mobs.includes(t.name) && t.under !== undefined);
         const hub = !there && biome ? CANAAN_UNDER.hub(biome.under) : null;

@@ -822,6 +822,24 @@
         R(-3, -6, 7, 1, '#c8b890');
         R(-3, -2, 7, 1, '#c8b890');
         break;
+      case 'lair':
+        // Habitat d'une espèce : empreinte de patte rousse sur un disque sombre.
+        c.fillStyle = '#22160e';
+        c.beginPath();
+        c.arc(0, 0, 7, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#e08a4a';
+        c.beginPath();
+        c.ellipse(0, 2, 3.2, 2.6, 0, 0, Math.PI * 2);
+        c.fill();
+        for (const [dx, dy] of [
+          [-3.5, -2],
+          [-1.2, -4],
+          [1.2, -4],
+          [3.5, -2]
+        ])
+          R(dx - 0.8, dy - 0.8, 1.6, 1.6, '#e08a4a');
+        break;
       case 'ruins':
         for (const dx of [-6, 2]) {
           R(dx - 1, -8, 6, 15, '#22160e');
@@ -1082,6 +1100,10 @@
         });
     } else {
       for (const p of PIXEL_PLACES) put(p.type === 'camp' ? 'refuge' : p.type, p.x, p.y, {}, p.name);
+      // Habitats des créatures (mob-lairs.js) : une patte par gîte, son nom et son espèce de près.
+      if (!v.mini || v.scale >= 4)
+        for (const l of CANAAN_LAIRS.all())
+          if (!ZONES[l.zone]?.locked) put('lair', l.x, l.y, {}, v.scale >= 6 ? l.name + ' · ' + l.mob : null);
       // Entrées des Tréfonds.
       for (const e of CANAAN_UNDER.ENTRANCES) put('stairs', e.x, e.y, {}, e.name);
       if (!v.mini && v.scale >= 8)

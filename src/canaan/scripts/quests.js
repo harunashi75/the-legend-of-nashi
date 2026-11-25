@@ -3547,6 +3547,22 @@
       return door && { ...door, text: 'Retourne voir ' + whoTo(q), q };
     }
     const site = SITES[step?.site || q.site];
+    // Créatures à vaincre n'importe où : à la surface, l'habitat le plus proche de l'espèce demandée (ou, pour un
+    // contrat de la guilde, d'une créature à la mesure du héros), mob-lairs.js.
+    if (!site && step && (step.k === 'kill' || step.k === 'loot') && !step.boss && !canaanUnder()) {
+      const p = hero.player,
+        lair = CANAAN_LAIRS.nearest(p.x / T, p.y / T, step.mobs, hero);
+      if (lair)
+        return {
+          x: (lair.x + 0.5) * T,
+          y: (lair.y + 0.5) * T,
+          text: step.text + ' — ' + lair.name,
+          count: FIELD.progress(step, a),
+          q,
+          area: CANAAN_LAIRS.inside(lair, p.x / T, p.y / T),
+          vague: true
+        };
+    }
     if (!site)
       return step
         ? {
@@ -3579,7 +3595,7 @@
     }
     if (npc) return { x: npc.x, y: npc.y, text, q };
     const spot = FIELD.target(hero, site, q, step, a);
-    if (spot) return { ...spot, text, count, q };
+    if (spot) return { ...spot, text: spot.lair ? text + ' — ' + spot.lair.name : text, count, q };
     if (step.k === 'guardian') {
       const seal = site.objs.find(o => o.kind === 'gseal');
       if (seal) return { x: seal.x, y: seal.y, text, q };

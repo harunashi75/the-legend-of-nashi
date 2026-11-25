@@ -851,6 +851,10 @@ let canaanHouseBlocked = () => false;
 let canaanQuestWalk = () => null;
 // Lieux des quêtes reposés sur une île régénérée (remplacé par quests.js).
 let canaanQuestWorld = () => {};
+// Habitats des créatures sur une île régénérée : remplacé par mob-lairs.js, chargé après tous les autres lieux.
+let canaanLairsWorld = () => {};
+// Territoire d'une espèce à une case (sous-zone affichée en y entrant) : remplacé par mob-lairs.js.
+let canaanLairAt = () => null;
 // Vie du Camp de l'Aurore (ferme, enclos, champs, verger, jardin, fontaine, ruisseau) : remplacé par camp-life.js.
 // place : pose sur l'île ; blocked : objets qui bloquent ; farm : cases sans monstres ; animals / fliers : bêtes de la
 // ferme pour life.js ; drawGround : eau, pavés, champs et fleurs (sous tout le reste) ; draw : bâtiments et objets.
@@ -994,6 +998,11 @@ function update() {
     if (m.arenaBoss || m.arenaClone) return;
     // Cristaux de garde immobiles ; un boss qui incante reste sur place sans frapper (boss-mechanics.js).
     if (m.still || m.castUntil > time) {
+      m.cd -= 1 / 60;
+      return;
+    }
+    // Bête d'un habitat : flâne chez elle et y rentre si on l'entraîne trop loin (mob-lairs.js).
+    if (m.lair && CANAAN_LAIRS.steer(m)) {
       m.cd -= 1 / 60;
       return;
     }

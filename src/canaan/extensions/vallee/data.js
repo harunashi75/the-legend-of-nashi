@@ -197,6 +197,39 @@
       name: 'Vallée des Héros',
       t: 50,
       mobs: ['Fauve des Moissons', 'Écho de héros', 'Aigle des Cimes'],
+      // Habitats de ses créatures (scripts/mob-lairs.js) : nom et habillage du territoire (voir THEMES).
+      lairs: {
+        'Fauve des Moissons': {
+          name: 'Tanière des fauves',
+          center: 'lair_den_prowler',
+          features: ['lair_ribcage', 'lair_bones'],
+          scatter: [
+            ['lair_bones', 2],
+            ['rock', 2],
+            ['wheat', 2]
+          ],
+          density: 0.12
+        },
+        'Écho de héros': {
+          name: 'Champ des échos',
+          features: ['lair_statue', 'lair_statue', 'lair_banner'],
+          scatter: [
+            ['lair_statue', 2],
+            ['ruin', 2],
+            ['lair_grave', 1]
+          ],
+          density: 0.14
+        },
+        'Aigle des Cimes': {
+          name: 'Aire des aigles',
+          center: 'lair_nest_eagle',
+          scatter: [
+            ['rock', 3],
+            ['lair_bones', 1]
+          ],
+          density: 0.12
+        }
+      },
       description:
         'Champs de blé, arbres aux feuilles d’or, ruisseaux et statues des anciens héros. Zone de niveau 60.'
     },

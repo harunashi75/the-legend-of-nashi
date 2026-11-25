@@ -11,6 +11,10 @@ CANAAN_I18N.extend('en', {
   'Écho de champion': 'Champion’s Echo',
   'Aigle des Cimes': 'Summit Eagle',
   'Aigle royal': 'Royal Eagle',
+  // Habitats de ses créatures.
+  'Tanière des fauves': 'Prowler Den',
+  'Champ des échos': 'Field of Echoes',
+  'Aire des aigles': 'Eagle Aerie',
   'Valérion, le Dernier Champion': 'Valerion, the Last Champion',
   // Montures.
   'Destrier des Plaines': 'Plains Charger',
