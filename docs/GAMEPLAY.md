@@ -83,7 +83,7 @@ Le garde, un villageois, un enfant et un voyageur restent dehors, autour du feu 
 
 ## Vie dans l'eau
 
-`scripts/sea-life.js` : bancs de poissons sous la surface (mer et lacs), dauphins qui sautent, baleines qui remontent souffler puis plongent en levant la queue.
+`scripts/sea-life.js` (`CANAAN_SEA`) : vie aquatique en pixel art, dans la facture des décors (grille de gros pixels, contour sombre, 2 ou 3 images d'animation, sprites tournés au pixel près dans 16 directions et cuits à la première vue). Chaque eau a sa faune : en mer, bancs de sardines (poissons tropicaux au large du désert), groupes de dauphins qui sautent chacun leur tour, baleines qui remontent souffler puis plongent queue levée, tortues de mer, méduses près des côtes et raies manta ; dans les lacs, un poisson selon le biome (truites, perches, silures, carpes dorées, koïs) qui saute de temps en temps, et des feuilles mortes qui dérivent sur les lacs d'automne ; dans les lacs lumineux, poissons-esprits et méduses qui luisent, poussières de lumière ; au marais, têtards, gerris et bulles ; des libellules près des rives. Sous la surface, une créature prend la teinte de l'eau et devient translucide ; ce qui en sort (sauts, dos de la baleine, libellules, feuilles) est net. Les remous des bancs de pêche (`spotFx`) sont en anneaux de gros pixels, avec un poisson de l'eau du banc qui saute. Décoratif, calculé chez chaque joueur autour de l'écran.
 
 ## Vie du monde
 

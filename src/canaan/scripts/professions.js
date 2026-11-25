@@ -504,37 +504,8 @@
     allSpots().forEach((s, i) => {
       if (!canaanHere(s)) return;
       if (Math.abs(s.x - camX - W / 2) > W / 2 + 80 || Math.abs(s.y - camY - H / 2) > H / 2 + 80) return;
-      // Remous : cercles qui s'élargissent, bulles, et un petit poisson qui saute de temps en temps.
-      for (let k = 0; k < 3; k++) {
-        const age = ((time + k * 30 + i * 17) % 90) / 90;
-        c.globalAlpha = (1 - age) * 0.5;
-        c.strokeStyle = s.kind === 'glow' ? '#c8f0ff' : '#e8f6ff';
-        c.lineWidth = 2;
-        c.beginPath();
-        c.ellipse(s.x, s.y, 6 + age * 22, 3 + age * 9, 0, 0, Math.PI * 2);
-        c.stroke();
-      }
-      c.globalAlpha = 0.8;
-      c.fillStyle = '#ffffff';
-      for (let k = 0; k < 3; k++)
-        c.fillRect(
-          Math.round(s.x - 8 + ((i * 7 + k * 9) % 16)),
-          Math.round(s.y - 4 - ((time * 0.4 + k * 13) % 10)),
-          2,
-          2
-        );
-      const jump = (time + i * 97) % 300;
-      if (jump < 26) {
-        const t = jump / 26;
-        c.globalAlpha = 1;
-        c.fillStyle = s.kind === 'sea' ? '#8aa8c0' : s.kind === 'glow' ? '#c8b0ff' : '#c0a060';
-        c.save();
-        c.translate(s.x - 12 + t * 24, s.y - Math.sin(t * Math.PI) * 18);
-        c.rotate(-0.8 + t * 1.6);
-        c.fillRect(-5, -2, 10, 4);
-        c.fillRect(-8, -3, 3, 6);
-        c.restore();
-      }
+      // Remous en gros pixels, bulles, et un poisson de son eau qui saute de temps en temps (sea-life.js).
+      CANAAN_SEA.spotFx(c, s, i);
       if (i === near && !busy) {
         c.globalAlpha = 1;
         drawCanaanPrompt(c, '[E] Pêcher', s.x, s.y - 26);
