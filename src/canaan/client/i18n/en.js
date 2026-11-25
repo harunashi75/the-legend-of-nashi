@@ -5665,8 +5665,8 @@ export default {
   'Chaque compétence offensive te donne un bouclier de 5 % des PV max, chaque compétence utilitaire un bouclier de 10 % à ton groupe proche. Tes soins sur toi-même soignent aussi tes alliés à moins de 6 cases, à 50 %.':
     'Each offensive skill grants you a shield of 5% of max HP, each utility skill a 10% shield to your nearby group. Your self-heals also heal allies within 6 tiles, at 50%.',
   'Croisade': 'Crusade',
-  'Trois Frappes du croisé en 10 s : la troisième libère une onde de lumière (200 % de l’Attaque aux ennemis à moins de 3 cases) et te soigne de 6 % au lieu de 3 %.':
-    'Three Crusader strikes within 10 s: the third releases a wave of light (200% of Attack to enemies within 3 tiles) and heals you for 6% instead of 3%.',
+  'Toutes les trois Frappes du croisé, tu libères une onde de lumière qui inflige des dégâts sacrés égaux à 200 % de ton Attaque aux ennemis à moins de 3 cases et te rend 6 % de tes PV max au lieu de 3 %.':
+    'Every three Crusader strikes, you release a wave of light that deals holy damage equal to 200% of your Attack to enemies within 3 tiles and restores 6% of your max HP instead of 3%.',
   'Bastion': 'Bastion',
   'Rempart sacré dure 2 s de plus ; pendant ce temps, 40 % des dégâts que tu évites sont renvoyés à l’attaquant en lumière sacrée.':
     'Holy rampart lasts 2 s longer; meanwhile, 40% of the damage you avoid is sent back to the attacker as holy light.',

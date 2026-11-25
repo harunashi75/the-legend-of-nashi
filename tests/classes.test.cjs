@@ -132,11 +132,16 @@ test('Druide : Sève vitale, forme féline (F) avec ses quatre compétences, Ins
 
 test('Paladin : Frappe du croisé et Croisade, Rempart sacré, Ferveur ardente et Intervention divine',()=>{
   const g=game();g.setClass('paladin',[0]);predictable(g,.99);g.P.mp=100;g.P.hp=10;g.P.mhp=1000;
-  const m=mob(1e6);g.monsters=[m];
-  // Frappe du croisé : cône de masse, 3 % des PV max rendus (6 % à la troisième en 10 s, avec une onde).
+  const m=mob(1e6),side={...mob(1e6),x:0,y:100};g.monsters=[m,side];
+  // Les charges restent en place entre des lancers espacés de 12 s et au-delà de la sortie de combat.
   g.useSkill(0);assert.ok(m.hp<1e6);assert.equal(g.P.hp,40);
-  g.weaponCooldowns['aegis:0']=0;g.useSkill(0);g.weaponCooldowns['aegis:0']=0;const before=g.P.hp;g.useSkill(0);
-  assert.equal(g.P.hp-before,60,'Croisade : 6 %');
+  g.advance(720);g.useSkill(0);assert.equal(g.P.hp,70);assert.equal(side.hp,1e6);
+  g.advance(720);g.useSkill(0);
+  assert.equal(g.P.hp,130,'Croisade : 6 % des PV max');assert.ok(side.hp<1e6,'onde de lumière');
+  const hpAfterWave=side.hp;
+  g.advance(720);g.P.mp=100;g.useSkill(0);
+  assert.equal(g.P.hp,160,'la Frappe suivante recommence le cycle');
+  assert.equal(side.hp,hpAfterWave,'une seule onde par série de trois Frappes');
   // Rempart sacré : −35 % de dégâts reçus, bouclier de 12 % au groupe.
   g.P.mp=100;g.useSkill(2);assert.equal(g.CANAAN_SKILLS.state(g.game.hero).shieldGuard,6);
   assert.equal(g.CANAAN_WEAPON_DEFENSE(mob(1),100),65);

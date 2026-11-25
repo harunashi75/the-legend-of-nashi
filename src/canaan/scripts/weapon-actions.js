@@ -46,7 +46,6 @@
     'falcon',
     'falconTick',
     'crusade',
-    'crusadeUntil',
     'rollShot'
   ];
   const TIMED_STATES = ['berserk', 'combo', 'shadow', 'roar', 'shieldGuard', 'huntMark', 'bloom', 'rollShot'];
@@ -1137,19 +1136,14 @@
       // ------------------------------------------------------------ Paladin : masse et égide
       case 'aegis':
         if (i === 0) {
-          // Frappe du croisé : coup de masse sacré qui soigne (Croisade : la 3e en 10 s libère une onde).
+          // Frappe du croisé : coup de masse sacré qui soigne (Croisade : une onde toutes les trois Frappes).
           cone(130, Math.PI / 2, 2.8, null, a, 'holySmite');
           let rate = 0.03;
-          if (talent('paladin', 'crusade')) {
-            const t = time / 60;
-            S.crusade = t < S.crusadeUntil ? S.crusade + 1 : 1;
-            S.crusadeUntil = t + 10;
-            if (S.crusade >= 3) {
-              S.crusade = 0;
-              rate = 0.06;
-              float(AP.x, AP.y - 64, '☀️ CROISADE', '#ffd76a');
-              CANAAN_CLASS.blast(actor, AP.x, AP.y, 3, stats().attack * 2, 'holy');
-            }
+          if (talent('paladin', 'crusade') && ++S.crusade >= 3) {
+            S.crusade = 0;
+            rate = 0.06;
+            float(AP.x, AP.y - 64, '☀️ CROISADE', '#ffd76a');
+            CANAAN_CLASS.blast(actor, AP.x, AP.y, 3, stats().attack * 2, 'holy');
           }
           const h = healActor(AP.mhp * rate);
           if (h > 0) float(AP.x, AP.y - 40, '+' + h + ' PV', '#ffe9a0');

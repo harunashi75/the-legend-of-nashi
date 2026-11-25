@@ -173,7 +173,7 @@ export const CLASSES = deepFreeze([
     talents: [
       [
         'Croisade',
-        'Trois Frappes du croisé en 10 s : la troisième libère une onde de lumière (200 % de l’Attaque aux ennemis à moins de 3 cases) et te soigne de 6 % au lieu de 3 %.'
+        'Toutes les trois Frappes du croisé, tu libères une onde de lumière qui inflige des dégâts sacrés égaux à 200 % de ton Attaque aux ennemis à moins de 3 cases et te rend 6 % de tes PV max au lieu de 3 %.'
       ],
       [
         'Bastion',
