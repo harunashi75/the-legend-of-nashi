@@ -44,7 +44,7 @@ const MECHANICS = [
   'beam',
   'berserk'
 ];
-const TRAPS = [null, 'spikes', 'jets', 'pulse', 'falling', 'spores'];
+const TRAPS = [null, 'spikes', 'jets', 'pulse', 'spores'];
 const TRIGGERS = ['wall', 'torch', 'statue'];
 
 /**

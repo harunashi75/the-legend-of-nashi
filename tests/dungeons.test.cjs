@@ -215,16 +215,12 @@ test('Pièges : pointes en rythme, éboulements annoncés, et les invités reço
  assert.ok(run('P.hp<__hp'),'piétiné');assert.ok(run('__hp-P.hp')<=Math.ceil(run('P.mhp')*0.07)+1,'une seule fois');
  const out=JSON.parse(run('JSON.stringify(CANAAN_DUNGEON_EXPLORE.stateOut())'));assert.equal(typeof out.tk,'number');assert.ok(Array.isArray(out.z));
  run('leaveInstance()');
- // Éboulements (La Mine) : un cercle annoncé près du héros, en dehors des salles de boss.
+ // Plus d'éboulements (La Mine) : aucun cercle ni dégât, même en marchant dans une salle d'énigme.
  run('game.hero.level=15;recomputeStats();P.hp=P.mhp;enterInstance(1)');
  const hall=JSON.parse(run('JSON.stringify(CANAAN_DUNGEON_EXPLORE.plan(1).rooms.find(r=>r.kind==="hall"))'));
- // Immobile (repas, repos, énigme) : aucune pierre.
- run('P.x=('+hall.cx+'+0.5)*TS;P.y=('+hall.cy+'+0.5)*TS;game.world.monsters=[];for(let k=0;k<800;k++){time++;CanaanStages.dungeonPuzzles.after()}');
- assert.equal(run('P.hp'),run('P.mhp'),'pas de pierre sur un héros immobile');
- // En marche : les pierres tombent.
- run('const __x=P.x;for(let k=0;k<400;k++){time++;P.x=__x+Math.sin(k/20)*20;CanaanStages.dungeonPuzzles.after()}');
- assert.ok(Array.isArray(JSON.parse(run('JSON.stringify(CANAAN_DUNGEON_EXPLORE.stateOut())')).tz));
- assert.ok(run('P.hp<P.mhp'),'une pierre est tombée');
+ run('P.x=('+hall.cx+'+0.5)*TS;P.y=('+hall.cy+'+0.5)*TS;game.world.monsters=[];const __x=P.x;for(let k=0;k<800;k++){time++;P.x=__x+Math.sin(k/20)*20;CanaanStages.dungeonPuzzles.after()}');
+ assert.equal(JSON.parse(run('JSON.stringify(CANAAN_DUNGEON_EXPLORE.stateOut())')).tz.length,0,'aucune pierre annoncée');
+ assert.equal(run('P.hp'),run('P.mhp'),'aucune pierre tombée');
  run('leaveInstance()');
  assert.equal(errors.length,0,errors.join('\n'));
 });

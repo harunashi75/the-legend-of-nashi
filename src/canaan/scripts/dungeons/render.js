@@ -2380,26 +2380,21 @@
           }
         }
       for (const p of plan.puffs) if (view(p.x, p.y)) drawPuffball(c, p);
-      // Éboulements et spores annoncés.
+      // Spores annoncées.
       for (const z of trapZones()) {
         const k = Math.min(1, Math.max(0, (time - z.start) / Math.max(1, z.at - z.start)));
         c.globalAlpha = 0.18 + 0.3 * k;
-        c.fillStyle = z.kind === 'spore' ? '#8ad040' : '#a0603a';
+        c.fillStyle = '#8ad040';
         c.beginPath();
         c.arc(z.x, z.y, z.r * k, 0, Math.PI * 2);
         c.fill();
         c.globalAlpha = 0.8;
-        c.strokeStyle = z.kind === 'spore' ? '#c8f080' : '#ffb070';
+        c.strokeStyle = '#c8f080';
         c.lineWidth = 2;
         c.beginPath();
         c.arc(z.x, z.y, z.r, 0, Math.PI * 2);
         c.stroke();
         c.globalAlpha = 1;
-        if (z.kind === 'rock') {
-          // La pierre tombe du plafond.
-          const h = (1 - k) * 160;
-          block(c, z.x - 9, z.y - 12 - h, 6, 5, '#7a6a5a');
-        }
       }
     }
     // Écho joué par la pierre : quel cristal brille à cet instant (ou -1).

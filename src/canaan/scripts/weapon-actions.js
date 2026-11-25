@@ -599,12 +599,17 @@
       if (m._huntMark?.until > t) CANAAN_VFX.drawMark(ctx, m, time);
       if (holySeals ? holySeals.has(m) : m.holySeal === 1) CANAAN_VFX.drawHolySeal(ctx, m, time);
     }
-    // Sols persistants (en dessous), puis effets, puis particules.
-    for (const e of vfx) if (CANAAN_VFX.isGround(e.shape)) CANAAN_VFX.draw(ctx, e);
+    // Les sols persistants sont peints dans la couche du sol (drawGroundEffects) ; ici, effets puis particules.
     for (const e of vfx) if (!CANAAN_VFX.isGround(e.shape)) CANAAN_VFX.draw(ctx, e);
     CANAAN_VFX.drawParticles(ctx);
     ctx.restore();
   };
+  // Couche du sol (game-core.js) : flaques, brasiers, givre, sol consacré… sous les monstres et les héros.
+  function drawGroundEffects(c) {
+    if (!started) return;
+    for (const e of vfx) if (CANAAN_VFX.isGround(e.shape)) CANAAN_VFX.draw(c, e);
+    CANAAN_VFX.drawParticles(c, true);
+  }
   function holySealTarget() {
     const { x, y } = groundTarget();
     return nearestTo(x, y, TS * 6);
@@ -1721,6 +1726,7 @@
       remoteEffect,
       ageEffects,
       fx: effect,
+      drawGround: drawGroundEffects,
       hasten,
       resetCooldown,
       onDodge,

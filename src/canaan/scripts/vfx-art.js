@@ -4,7 +4,7 @@
 // Chaque effet ({ shape, x, y, a, r, w, c, life, max } : weapon-actions.js, boss-mechanics.js, arena.js) est dessiné
 // par sa forme ; start() et tick() émettent ses particules. Les particules ne sont que de l'affichage (rien n'est
 // simulé, rien n'est envoyé) : un invité qui reçoit l'effet en fait naître les siennes.
-// CANAAN_VFX.draw(ctx, e), start(e), tick(e, dt), step(dt), drawParticles(ctx), isGround(shape), drawMark, drawShield,
+// CANAAN_VFX.draw(ctx, e), start(e), tick(e, dt), step(dt), drawParticles(ctx, ground), isGround(shape), drawMark, drawShield,
 // aura, telegraph (annonces des boss), projectile (formes des projectiles).
 (() => {
   'use strict';
@@ -80,6 +80,8 @@
   // ---------------------------------------------------------------- Particules
   // kind : flame, ember, smoke, spark, shard, snow, mist, leaf, petal, spore, drop, feather, note, rune, dust, rock,
   // bubble, wisp, glint, motes.
+  // Particules d'un sol (flaque, brasier, givre…) : dessinées avec lui, sous les personnages.
+  let emitGround = false;
   function emit(kind, x, y, o = {}) {
     if (parts.length >= MAX_PARTICLES) parts.shift();
     const life = o.life ?? 0.6;
@@ -101,7 +103,8 @@
       rot: o.rot ?? R() * TAU,
       vr: o.vr ?? (R() - 0.5) * 6,
       alpha: o.alpha ?? 1,
-      z: o.z ?? 0
+      z: o.z ?? 0,
+      ground: emitGround
     });
   }
   // Gerbe : n particules depuis (x, y), vitesse speed dans un angle (a ± spread).
@@ -255,10 +258,12 @@
     c.arc(x, y, r, 0, TAU);
     c.fill();
   }
-  function drawParticles(c) {
+  // ground : seulement les particules des sols (couche du sol) ; sinon, toutes les autres.
+  function drawParticles(c, ground = false) {
     if (!parts.length) return;
     c.save();
     for (const p of parts) {
+      if (p.ground !== ground) continue;
       const t = p.life / p.max,
         age = 1 - t,
         s = p.size;
@@ -784,6 +789,14 @@
   ]);
   // Particules à la naissance d'un effet.
   function start(e) {
+    emitGround = GROUND.has(e.shape);
+    try {
+      startBody(e);
+    } finally {
+      emitGround = false;
+    }
+  }
+  function startBody(e) {
     const { x, y, a, r, c } = e;
     seedOf(e);
     switch (e.shape) {
@@ -990,6 +1003,14 @@
   }
   // Vie d'un effet : particules continues (sols, nuages, flammes) ; dt en secondes.
   function tick(e, dt) {
+    emitGround = GROUND.has(e.shape);
+    try {
+      tickBody(e, dt);
+    } finally {
+      emitGround = false;
+    }
+  }
+  function tickBody(e, dt) {
     const { x, y, r } = e,
       t = e.life / e.max;
     const chance = rate => R() < rate * dt;

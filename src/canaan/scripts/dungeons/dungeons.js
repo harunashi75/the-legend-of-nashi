@@ -1823,7 +1823,7 @@
     const c = (((hostTime() + trap.phase) % TRAP_CYCLE.period) + TRAP_CYCLE.period) % TRAP_CYCLE.period;
     return c < TRAP_CYCLE.warn ? 1 : c < TRAP_CYCLE.warn + TRAP_CYCLE.active ? 2 : 0;
   }
-  // Éboulements et spores : cercles annoncés (centre, rayon, explosion), envoyés aux invités.
+  // Spores : cercles annoncés (centre, rayon, explosion), envoyés aux invités.
   let trapZones = [];
   const trapHits = new Map();
   function trapHurt(hero, pct, label) {
@@ -1855,31 +1855,6 @@
         }
         trapHits.set(k, touched);
       });
-    // Éboulements : une pierre annoncée près d'un héros qui marche, dans les salles d'énigme, les annexes et les
-    // couloirs. Un héros immobile (repas, repos, réflexion devant une énigme) n'en reçoit jamais.
-    if (th.trap === 'falling')
-      for (const h of heroes) {
-        const p = h.player,
-          moved = h._rockPos && Math.hypot(p.x - h._rockPos.x, p.y - h._rockPos.y) > 0.5;
-        h._rockPos = { x: p.x, y: p.y };
-        h._rockStill = moved ? 0 : (h._rockStill || 0) + 1;
-        if (h._rockStill > 30) {
-          h._rockAt = 0;
-          continue;
-        }
-        const r = roomOf(plan, p.x / TS, p.y / TS);
-        if (r && (r.kind === 'boss' || r.kind === 'entry' || r.kind === 'secret')) continue;
-        if ((h._rockAt ||= time + 120 + Math.random() * 200) > time) continue;
-        h._rockAt = time + 260 + Math.random() * 180;
-        trapZones.push({
-          x: h.player.x + (Math.random() - 0.5) * 70,
-          y: h.player.y + (Math.random() - 0.5) * 70,
-          r: 1.3 * TS,
-          at: time + 70,
-          start: time,
-          kind: 'rock'
-        });
-      }
     if (th.trap === 'spores')
       for (const p of plan.puffs) {
         const px = (p.x + 0.5) * TS,
@@ -1894,10 +1869,9 @@
     for (let k = trapZones.length - 1; k >= 0; k--) {
       const z = trapZones[k];
       if (time < z.at) continue;
-      burst(z.x, z.y, z.kind === 'spore' ? '#a8e060' : '#a08a70', 16);
+      burst(z.x, z.y, '#a8e060', 16);
       for (const h of heroes)
-        if (Math.hypot(h.player.x - z.x, h.player.y - z.y) < z.r)
-          trapHurt(h, z.kind === 'spore' ? 0.06 : 0.09, z.kind === 'spore' ? '☣' : '🪨');
+        if (Math.hypot(h.player.x - z.x, h.player.y - z.y) < z.r) trapHurt(h, 0.06, '☣');
       trapZones.splice(k, 1);
     }
   }
@@ -2073,7 +2047,7 @@
           r: int(z[2]),
           at: time + int(z[3]),
           start: time + int(z[3]) - 70,
-          kind: z[4] ? 'spore' : 'rock'
+          kind: 'spore'
         }))
       : [];
     if (window.CANAAN_BOSS_MECHANICS && Array.isArray(raw.z)) CANAAN_BOSS_MECHANICS.apply(raw.z);

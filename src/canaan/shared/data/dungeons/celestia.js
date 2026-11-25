@@ -79,10 +79,10 @@ export default {
     wallProps: [],
     floorProps: ['pillarlight', 'orb', 'pillar', 'crystal', 'statue'],
     centerpiece: 'scales',
-    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; falling : éboulements ; spores : vesses ;
+    // Pièges (spikes, jets, pulse : bandes qui s'arment en rythme ; spores : vesses ;
     // null : aucun), déclencheur des passages secrets (wall : fissure vue de près ; torch : torche d'une autre couleur ;
     // statue : statue de travers) et obscurité (1 : celle du thème).
-    trap: 'falling',
+    trap: null,
     secret: 'statue',
     dark: 1.1,
     gate: 'barrier'
