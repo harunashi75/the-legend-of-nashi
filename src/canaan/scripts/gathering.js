@@ -167,8 +167,7 @@
   // ---------------------------------------------------------------- Hôte : enchanteur
   // Fabriquer : 3 minerais d'un métal (les moins bons d'abord) pour un enchantement de la statistique choisie.
   function craft(hero, stat, tier, count = 1) {
-    const metal = METALS[tier],
-      prof = CANAAN_PROF.profOf(hero);
+    const metal = METALS[tier];
     if (!ENCHANTS[stat] || !metal) return false;
     if (!nearForge(hero))
       return (
@@ -369,7 +368,6 @@
   }
   function startCraft(hero, stat, tier, count) {
     const metal = METALS[tier],
-      prof = CANAAN_PROF.profOf(hero),
       f = forgeSpot();
     if (!ENCHANTS[stat] || !metal) return false;
     if (!nearForge(hero))

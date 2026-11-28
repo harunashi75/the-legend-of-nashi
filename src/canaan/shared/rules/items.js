@@ -3,7 +3,6 @@
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Chaque fonction reçoit ses données en paramètres ; aucune ne lit l'état d'une partie.
 import {
-  ACTIVE_GEAR_SLOTS,
   BOUND_RARITY,
   CLASS_WEAPON_FREE,
   CLASS_WEAPON_UPGRADES,

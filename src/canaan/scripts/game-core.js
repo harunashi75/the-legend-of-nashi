@@ -1227,7 +1227,6 @@ function draw() {
     x1 = Math.min(MAPW, Math.ceil((camX + W) / TS) + 1);
   let y0 = Math.max(0, Math.floor(camY / TS) - 1),
     y1 = Math.min(MAPH, Math.ceil((camY + H) / TS) + 1);
-  const cols = BIOME_COLORS;
   // Sol : par blocs gardés sur l'île (world-look.js), dans les Tréfonds et en donjon (under-look.js).
   if (game.world.instance) {
     forgetWorldGround();

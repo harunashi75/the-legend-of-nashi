@@ -17,7 +17,7 @@
       [cD, cM, cL] = sk.cape,
       trim = sk.trim,
       acc = sk.accent,
-      { back, side, right, female, broad, walk, tx, tw, ax, bx, pw } = v;
+      { back, side, right, walk, tx, tw, ax, bx, pw } = v;
     // Polygone plein sur la grille (balayage par lignes) et trait en escalier.
     const poly = (pts, col) => {
       let y0 = Infinity,

@@ -146,7 +146,7 @@ test('Survols délégués : objet, emplacement, mouvement et transitions entre e
 });
 
 test('Interface générée : actions autorisées, catalogue officiel, musique et accès aux instances',()=>{
- const {g,nodes,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  const report=g.CANAAN_DEV.selfTest();assert.equal(report.passed,report.total);
  const panels=[];g.capture=h=>panels.push(h);

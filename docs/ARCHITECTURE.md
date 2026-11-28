@@ -78,7 +78,7 @@ Le code passe progressivement en modules ES (`import`/`export`), comme prévu pa
 - `src/canaan/bridge.js` est le point d’entrée des modules. L’entrée `"kind": "module"` du manifeste le fait regrouper par esbuild (version épinglée dans `package.json`) en un seul bloc `canaan-modules` du HTML. C’est aussi un **pont transitoire** : il expose les exports des modules partagés en variables globales pour les anciens scripts de `scripts/`. Il disparaîtra quand plus aucun ancien script n’en dépendra.
 - Pour convertir un catalogue : déplacer ses données dans `shared/data/` avec `export`, l’importer dans `bridge.js`, puis retirer l’ancienne déclaration. Un test vérifie les règles de `shared/` et que chaque export arrive dans le jeu.
 
-L’assemblage (`npm run build`, `tools/build.cjs`) demande seulement Node et `npm install` une fois (esbuild, Electron) : il insère chaque entrée du manifeste à son marqueur du template, dans le même ordre, et regroupe le pont (`bridge.js`) et ses modules avec esbuild.
+ESLint ne tolère aucun avertissement (`--max-warnings 0` dans `npm run lint`, la CI et `npm run check`). L’assemblage (`npm run build`, `tools/build.cjs`) retire les HTML des versions précédentes à la racine ; `npm run clean` supprime aussi les paquets d’electron-builder (`dist/`, `release/`, `out/`). Il demande seulement Node et `npm install` une fois (esbuild, Electron) : il insère chaque entrée du manifeste à son marqueur du template, dans le même ordre, et regroupe le pont (`bridge.js`) et ses modules avec esbuild.
 
 ## Application de bureau
 

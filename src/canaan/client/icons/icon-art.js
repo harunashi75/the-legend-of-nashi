@@ -47,7 +47,6 @@ const ST = '#e3ebf2',
   GR = '#5fcf5a',
   GRD = '#2f8a3a',
   PU = '#9b6ae0',
-  PUD = '#6040a8',
   TE = '#3fc0b8',
   OR = '#ff9a3a',
   SK = '#f0c7a0',
@@ -1192,20 +1191,6 @@ function enchArt(col, glyph) {
     glyph +
     l('M9 25 L12 26.5 M23 25 L20 26.5', '#c8a8ff', 1.2)
   );
-}
-// Maillon de chaîne cerné (Volonté de fer).
-function link(x, y, col) {
-  const rect = (stroke, w) =>
-    '<rect x="' +
-    x +
-    '" y="' +
-    y +
-    '" width="7" height="4.4" rx="2.2" fill="none" stroke="' +
-    stroke +
-    '" stroke-width="' +
-    w +
-    '"/>';
-  return rect(INK, 3.4) + rect(col, 1.6);
 }
 function STONE() {
   return '#9aa0aa';

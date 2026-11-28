@@ -55,7 +55,7 @@ test('Île unique : six biomes, un seul camp sûr, route continue et lieux acces
 });
 
 test('Sylvaëlle, la cité elfique : palissade sans trou, porte au niveau 60, Grand Arbre, bénédiction, armurerie, atelier, zone sûre',async()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  // Plus de massif ni de crête de roche : la palissade (37) ceint la cité et sépare toujours Plaines et Forêt enchantée.
  assert.equal(run('SOLID.includes(37)'),true);
@@ -209,7 +209,7 @@ test('Animations des monstres, eau peu profonde, arbres et thème RPG des menus'
 });
 
 test('Vie du monde : animaux de chaque biome qui se promènent et fuient, habitants qui parlent, marchand redessiné',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;game.world.monsters=[];CANAAN_LIFE.update()');
  const zoneOf=`(a=>ZONES.indexOf(regionAt(a.hx/TS,a.hy/TS)))`;
@@ -304,7 +304,7 @@ test('Vie du camp : ferme, enclos, champs, verger, Maison de la Guilde, fontaine
 });
 
 test('Les Tréfonds : monde souterrain sous l’île, quatre biomes, forteresse naine, entrées, créatures à ton niveau, donjons sans niveau requis, sauvegarde et réseau',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Carte : tout est accessible depuis la forteresse ; quatre biomes, six entrées, quatre donjons et quatre boss.
  assert.deepEqual(JSON.parse(run('JSON.stringify(CANAAN_UNDER.audit().unreachable)')),[]);
  assert.equal(run('CANAAN_UNDER.BIOMES.map(b=>b.name).join()'),'Galeries d’Argile,Cité Engloutie de Khaz-Ombral,Nécropole des Oubliés,Fangeval, le Marais Fongique');

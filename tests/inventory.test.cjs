@@ -109,7 +109,7 @@ test('Sans artisanat : ni forge ni touche K, objets tels que lâchés, anciennes
 });
 
 test('Garde-robe : apparences de sets en six qualités, butin, doublons revendus, port vérifié, sauvegarde et réseau',async()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);
  assert.equal(errors.length,0,errors.join('\n'));
  // Catalogue : des tenues complètes dans chaque qualité, les plus hautes avec ailes, aura ou particules.
  const skins=JSON.parse(run('JSON.stringify(SKINS)'));

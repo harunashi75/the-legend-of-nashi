@@ -328,7 +328,7 @@ test('Objectifs de terrain : course au chronomètre, fuyard qui court, escorte p
 });
 
 test('Aventure : grand troc, coquillages chantants, gardiens de l’Ombre et Cœurs d’Aurore', () => {
-  const { g, run, errors } = require('./helpers/canaan-runtime.cjs')(source);
+  const { run, errors } = require('./helpers/canaan-runtime.cjs')(source);
   assert.equal(errors.length, 0, errors.join('\n'));
   run(`started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__t=[];toast=m=>__t.push(m);game.view.notify=m=>__t.push(m);
  globalThis.Q=CANAAN_QUESTS;globalThis.HR=game.hero;globalThis.S=id=>Q.sites()[id];game.hero.level=30;

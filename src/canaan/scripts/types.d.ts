@@ -118,7 +118,6 @@ interface CanaanGame {
   [key: string]: any;
 }
 
-
 // Champs ajoutés par le jeu à des objets du navigateur.
 interface HTMLCanvasElement {
   /** Grain des décors déjà appliqué (canaanPolish) : la toile n'est pas repeinte deux fois. */

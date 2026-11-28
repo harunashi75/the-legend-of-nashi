@@ -18,7 +18,7 @@ Prérequis : Node.js seulement (assemblage avec esbuild, tests avec `node:test`)
 
 ```sh
 npm install        # une seule fois : esbuild, Electron, electron-builder, ESLint, Prettier (versions épinglées)
-npm run build      # assemble src/canaan/ en CANAAN_ONLINE_V<version>.html
+npm run build      # assemble src/canaan/ en CANAAN_ONLINE_V<version>.html (et retire ceux des versions précédentes)
 npm start          # assemble puis ouvre l’application de bureau
 npm run relay      # relais du coopératif (port 8787)
 ```
@@ -28,11 +28,12 @@ Les sources sont dans `src/canaan/` : scripts par système dans `scripts/`, règ
 ### Vérifier
 
 ```sh
-npm run lint           # ESLint
-npm run typecheck      # types de shared/ (TypeScript sur le JavaScript annoté en JSDoc, mode strict)
+npm run lint           # ESLint, aucun avertissement toléré
+npm run typecheck      # types de shared/, client/ et scripts/ (TypeScript sur le JavaScript annoté en JSDoc)
 npm run format:check   # mise en forme Prettier (npm run format pour corriger)
 npm test               # régressions, en parallèle, sur le HTML assemblé (une vingtaine de secondes)
-npm run check          # tout : ESLint, types de shared/, HTML à jour par rapport aux sources, régressions
+npm run check          # tout : ESLint, types, HTML à jour par rapport aux sources, régressions
+npm run clean          # supprime dist/, release/, out/ et les HTML des versions précédentes
 ```
 
 Les tests sont rangés par système dans `tests/*.test.cjs` (combat, classes, sauvegardes, butin, réseau, maison, quêtes…) et `node --test` lance les fichiers en parallèle. Un seul fichier : `node --test tests/combat.test.cjs` ; un seul test : `node --test --test-name-pattern="Roulade" "tests/*.test.cjs"`. Le contexte commun (HTML assemblé, extraits de scripts, doubles de test) est dans `tests/helpers/context.cjs`, le démarrage complet du jeu dans `tests/helpers/canaan-runtime.cjs`. La variable `CANAAN_HTML` fait tester un autre HTML que celui de la version courante.

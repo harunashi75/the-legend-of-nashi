@@ -588,7 +588,7 @@
       }
     }
     function doorAt(c, L, mid, bot) {
-      const [b0, b1] = L.beam,
+      const [, b1] = L.beam,
         top = bot - 52;
       R(c, mid - 21, top - 6, 42, 58, OUT);
       R(c, mid - 19, top - 4, 38, 56, b1);
@@ -784,7 +784,7 @@
       R(c, x0 + 2, top, 3, bot - top, '#ffffff30');
     }
     function paintForm(c, b, L, g) {
-      const { X, Wd, bot, mid, seed, base } = g;
+      const { X, Wd, bot, mid, seed } = g;
       let top = bot - 66,
         roofTop = b.y * TS - 34;
       const form = b.form || 'house';

@@ -987,7 +987,6 @@
     for (let y = y0; y < y1; y++)
       for (let x = x0; x < x1; x++) {
         const t = tiles[y][x],
-          d = deco[y][x],
           X = x * TS,
           Y = y * TS;
         if (under) drawCoastLive(c, x, y, 2);

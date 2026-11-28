@@ -7,7 +7,8 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const steps = [
-  ['node_modules/eslint/bin/eslint.js', '.'],
+  // Aucun avertissement toléré : un lint à zéro le reste.
+  ['node_modules/eslint/bin/eslint.js', '.', '--max-warnings', '0'],
   ['node_modules/typescript/bin/tsc', '-p', 'src/canaan/shared/jsconfig.json'],
   ['node_modules/typescript/bin/tsc', '-p', 'src/canaan/client/jsconfig.json'],
   ['node_modules/typescript/bin/tsc', '-p', 'src/canaan/scripts/jsconfig.json'],

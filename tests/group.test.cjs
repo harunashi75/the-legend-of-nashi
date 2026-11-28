@@ -5,7 +5,7 @@ const {
 } = require('./helpers/context.cjs');
 
 test('Plusieurs héros : chacun suit son intention, les monstres ciblent le plus proche, chaque allié encaisse selon son équipement',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;P.mhp=1e6;P.hp=1e6;game.world.instance=null;game.view={notify:m=>(globalThis.__msgs||(globalThis.__msgs=[])).push(m),chat:()=>{}}');
  // Un terrain dégagé loin du camp ; l'hôte reste à l'écart.
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-1;a<=12&&ok;a++)for(let b=-1;b<=10&&ok;b++)ok=canWalk((x+a+0.5)*TS,(y+b+0.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}globalThis.base={x:(s.x+0.5)*TS,y:(s.y+0.5)*TS}}');
@@ -31,7 +31,7 @@ test('Plusieurs héros : chacun suit son intention, les monstres ciblent le plus
 });
 
 test('Attaques des alliés : épée, lance et arc frappent selon leur intention, avec leurs statistiques ; victimes au bon héros',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // On mesure les statistiques : la règle « chaque héros à son niveau » (testée à part) est neutralisée.
  run('started=true;paused=false;P.dead=false;P.mhp=1e6;P.hp=1e6;game.world.instance=null;game.view={notify:()=>{},chat:()=>{}};canaanRegenRates=()=>({mana:0,health:0})');
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-1;a<=14&&ok;a++)for(let b=-1;b<=12&&ok;b++)ok=canWalk((x+a+0.5)*TS,(y+b+0.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}globalThis.base={x:(s.x+0.5)*TS,y:(s.y+0.5)*TS}}');
@@ -118,7 +118,7 @@ test('Groupe enregistré : les invités sont sauvegardés dans heros.invites et 
 });
 
 test('Compagnon local : suit l’hôte, combat près de lui, se relève après dix secondes',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;P.mhp=1e6;P.hp=1e6;game.world.instance=null;game.view={notify:()=>{},chat:()=>{}}');
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-4;a<=12&&ok;a++)for(let b=-4;b<=4&&ok;b++)ok=canWalk((x+a+0.5)*TS,(y+b+0.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}P.x=(s.x+0.5)*TS;P.y=(s.y+0.5)*TS}');
  run('game.world.monsters=[];globalThis.mate=CANAAN_GROUP.create("Mia");CANAAN_GROUP.join(mate.id)');
@@ -140,7 +140,7 @@ test('Compagnon local : suit l’hôte, combat près de lui, se relève après d
 });
 
 test('Compétences pour tous les héros : les compétences d’un allié de chaque classe, sa ressource, ses recharges, ses postures et ses effets différés',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;game.view={notify:()=>{},chat:()=>{}}');
  run('{let s=null;for(let y=40;y<360&&!s;y++)for(let x=40;x<360;x++){let ok=Math.hypot(x-CANAAN_CAMP.x,y-CANAAN_CAMP.y)>30;for(let a=-6;a<=6&&ok;a++)for(let b=-6;b<=6&&ok;b++)ok=canWalk((x+a+0.5)*TS,(y+b+0.5)*TS)&&!isSafe(x+a,y+b);if(ok){s={x,y};break}}globalThis.spot={x:(s.x+0.5)*TS,y:(s.y+0.5)*TS}}');
  run('P.x=spot.x-20*TS;P.y=spot.y;globalThis.hostCooldowns=JSON.stringify(weaponCooldowns)');
@@ -184,7 +184,7 @@ test('Compétences pour tous les héros : les compétences d’un allié de chaq
 });
 
 test('Classes et artéfacts pour tous les héros : chaque allié a sa classe, ses talents, ses artéfacts, ses soins de soutien et l’état de leurs effets',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;P.dead=false;game.world.instance=null;game.world.monsters=[];globalThis.__chat=[];globalThis.__toasts=[];game.view.chat=(w,m)=>__chat.push(w+": "+m);toast=m=>__toasts.push(m);canaanRegenRates=()=>({mana:0,health:0})');
  run('globalThis.ally=canaanCreateHero({name:"Lina",x:P.x+40,y:P.y,equipment:{armor:{id:"a1",name:"Tunique",slot:"armor",ilvl:100,rarity:"Rare"}}});game.heroes.push(ally);ally.level=60');
  run('globalThis.hostSpeed0=characterStats().speed||0;globalThis.hostHp0=characterStats().maxHp');

@@ -200,7 +200,7 @@ test('Qualité Unique et types d’armure absents du jeu et du butin',()=>{
 
 test('Catalogues uniques : valeurs, butins et prix identiques à la référence 13e',()=>{
  const reference=require('./fixtures/catalogs-13e.json');
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  // Les énigmes des ailes et les mécaniques des boss (refonte des donjons) ne sont pas des catalogues : hors référence.
  const data=JSON.parse(run('JSON.stringify({instances:instances.map(({wings,mechanics,secretMechanics,...d})=>d),rarities:GEAR_RARITIES,weapons:WEAPON_TYPES,craft:CRAFT_WEAPONS,spells:WEAPON_SPELLS})'));
  // La référence protège les valeurs de base. Le nouveau Sceau de lumière est testé dans classes.test.cjs.
@@ -235,7 +235,7 @@ test('Catalogues uniques : valeurs, butins et prix identiques à la référence 
 });
 
 test('Butin individuel : objets et or de chaque victime vont au héros qui l’a obtenue',()=>{
- const {g,run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
+ const {run,errors}=require('./helpers/canaan-runtime.cjs')(source);assert.equal(errors.length,0,errors.join('\n'));
  run('started=true;paused=false;game.world.instance=null;globalThis.__notes=[];globalThis.__chat=[];game.view={notify:m=>__notes.push(m),chat:(w,m)=>__chat.push(w+": "+m)}');
  run('globalThis.ally=canaanCreateHero({name:"Lina",x:P.x+400,y:P.y});game.heroes.push(ally)');
  const host=JSON.parse(run('JSON.stringify({inv:game.hero.inventory.length,gold:P.gold})'));

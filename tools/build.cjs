@@ -117,5 +117,11 @@ if (require.main === module) {
         Buffer.byteLength(html) +
         ' octets)'
     );
+    // Les HTML des versions précédentes ne restent pas à la racine : seul celui de la version courante est gardé.
+    for (const old of fs.readdirSync(ROOT))
+      if (/^CANAAN_ONLINE_V[\d_]+[a-z]?\.html$/.test(old) && old !== path.basename(OUTPUT)) {
+        fs.unlinkSync(path.join(ROOT, old));
+        console.log('Ancien HTML supprimé : ' + old);
+      }
   }
 }

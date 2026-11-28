@@ -29,7 +29,6 @@
     [B.START]: 'escape'
   };
   const ATTACKS = { [B.RT]: 0, [B.LT]: 2 }; // bouton de souris équivalent : gauche rapide, droit lourde
-  const MOVE_KEYS = ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'];
   const AIM_RANGE = 160,
     AUTO_AIM_RANGE = 420,
     AIM_MEMORY_MS = 800;

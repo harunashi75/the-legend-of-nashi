@@ -11,7 +11,7 @@
     "build:dev": "node tools/build.cjs --extensions",
     "check": "node tools/check.cjs",
     "test": "node --test --test-timeout=120000 \"tests/*.test.cjs\"",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -p src/canaan/shared/jsconfig.json && tsc -p src/canaan/client/jsconfig.json && tsc -p src/canaan/scripts/jsconfig.json",
     "format": "prettier --write \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"online/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
     "format:check": "prettier --check \"src/canaan/**/*.{js,css}\" \"app/**/*.js\" \"online/**/*.cjs\" \"tools/**/*.cjs\" eslint.config.mjs",
@@ -19,7 +19,8 @@
     "app": "node tools/run_app.cjs",
     "dist:linux": "node tools/build.cjs && electron-builder --linux",
     "dist:win": "node tools/build.cjs && electron-builder --win",
-    "relay": "node online/relay.cjs"
+    "relay": "node online/relay.cjs",
+    "clean": "node tools/clean.cjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
