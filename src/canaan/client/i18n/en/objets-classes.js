@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « objets-classes » :
 // Armes et compétences, classes et talents, noms des objets.
 export default {

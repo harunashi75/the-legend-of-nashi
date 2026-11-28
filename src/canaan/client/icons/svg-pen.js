@@ -1,3 +1,4 @@
+// @ts-check
 // Plume SVG commune aux icônes (objets, émojis, compétences) : formes cernées d'encre sombre (contour), aplats sans
 // contour (ombres), traits clairs semi-transparents (reflets), groupes et étoiles. Une même facture pour toutes les
 // icônes ; seules l'épaisseur du contour et la taille de la grille changent d'un jeu d'icônes à l'autre.

@@ -1,5 +1,5 @@
 // @ts-check
-// Montures du jeu de base. Chaque monture : espèce (species : sa silhouette, scripts/mount-art.js), qualité, couleurs
+// Montures du jeu de base. Chaque monture : espèce (species : sa silhouette, client/art/mount-art.js), qualité, couleurs
 // et, selon d'où elle vient :
 //   shop + price : vendue par un marchand de montures, une fois par personnage, contre de l'or ;
 //   drop : { sources, chance } : trouvée (mêmes sources que la garde-robe), jamais deux fois.

@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « monde » :
 // Monde, donjons, raids et Arène, apparence du héros, meubles et énigmes, métiers (catalogues), lieux et régions.
 export default {

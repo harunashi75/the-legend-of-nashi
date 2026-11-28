@@ -1,5 +1,5 @@
 // Dessin des bâtiments où l'on entre : intérieurs, abords et finitions des façades ; le dessin des meubles est dans
-// scripts/house/furniture.js, les façades et leurs architectures dans scripts/house/facades.js. Aucune règle ici : la place des meubles est dans shared/rules/house.js, les bâtiments et les portes dans
+// client/art/house-furniture.js, les façades et leurs architectures dans scripts/house/facades.js. Aucune règle ici : la place des meubles est dans shared/rules/house.js, les bâtiments et les portes dans
 // scripts/house/house.js.
 // house.js appelle CANAAN_HOUSE_RENDER.create(scène) une fois : la scène lui donne ses pièces, ses portes et ses
 // meubles (lus à chaque image, jamais modifiés ici).
@@ -37,15 +37,16 @@
         MAT.m.fillRect(rx, ry, rw, rh);
       }
     };
-    // État relu par les modules (scripts/house/furniture.js, scripts/house/facades.js) : variables réassignées ou posées plus tard.
+    // État relu par les modules (client/art/house-furniture.js, scripts/house/facades.js) : variables réassignées ou posées plus tard.
     const LIVE = {
       get FX() {
         return FX;
       }
     };
-    // Dessin des meubles (scripts/house/furniture.js).
+    // Dessin des meubles (client/art/house-furniture.js).
     const { FURNITURE_ART } = CANAAN_HOUSE_FURNITURE.create({
-      R
+      R,
+      now: () => time
     });
     // Catalogue complet : métadonnées partagées et dessin (le dessin d'un meuble peut appeler this.draw).
     const CATALOG = Object.fromEntries(
@@ -541,9 +542,10 @@
     }
     // ---------------------------------------------------------------- Meubles : rendus comme les objets des donjons
     // Chaque meuble est peint à part : lumière à gauche, ombre à droite, contour sombre et ombre au sol.
-    // Les meubles animés (feu, vapeur, horloge, fenêtres, plantes…) sont repeints toutes les deux images.
+    // Les meubles animés (feu, vapeur, horloge, fenêtres, plantes…) sont repeints toutes les deux images : ceux dont le
+    // dessin lit l'image en cours (now(), client/art/house-furniture.js) ou peint un feu ou une vue.
     const ANIM = new Set(
-      Object.keys(CATALOG).filter(k => /time|fire\(|view\(/.test(String(CATALOG[k].draw)))
+      Object.keys(CATALOG).filter(k => /now\(\)|fire\(|view\(/.test(String(CATALOG[k].draw)))
     );
     const SPRITES = new Map(),
       PADX = 24,

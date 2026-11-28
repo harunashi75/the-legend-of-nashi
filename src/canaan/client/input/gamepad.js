@@ -1,3 +1,4 @@
+// @ts-check
 // Manette : règles pures de lecture (disposition standard du navigateur : Xbox, PlayStation, Steam Deck, Switch Pro…),
 // zone morte des sticks, direction en 8 secteurs, boutons tout juste appuyés ou relâchés, répétition dans les menus,
 // choix de l'élément voisin pour naviguer dans l'interface, et noms des boutons affichés à la place des touches.

@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « trefonds-histoire » :
 // Tréfonds et forteresse de Durgrim, mécaniques des boss, histoire « Les Échos de l’Aurore » (chapitres,
 // quêtes, objectifs de terrain).

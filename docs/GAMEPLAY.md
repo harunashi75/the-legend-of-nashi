@@ -150,7 +150,7 @@ Au cœur de l’île, à la place de l’ancien massif de roche : une grande cit
 
 ## Montures (touche H, Collections touche V)
 
-Montures du jeu de base : `shared/data/mounts.js` (`BASE_MOUNTS`, marchands `MOUNT_SHOPS`) ; règles, boutique et dessin du cavalier : `scripts/mounts.js` (`CANAAN_MOUNTS`) ; pixel art : `scripts/mount-art.js` (`CANAAN_MOUNT_ART`). Une extension ajoute les siennes (`mounts`, `mountShops`).
+Montures du jeu de base : `shared/data/mounts.js` (`BASE_MOUNTS`, marchands `MOUNT_SHOPS`) ; règles, boutique et dessin du cavalier : `scripts/mounts.js` (`CANAAN_MOUNTS`) ; pixel art : `client/art/mount-art.js` (`CANAAN_MOUNT_ART`). Une extension ajoute les siennes (`mounts`, `mountShops`).
 
 - **Appeler ou renvoyer** la monture choisie : touche H (Paramètres → Clavier), dans le monde ouvert seulement (ni donjon, raid, Arène, Tréfonds ou maison) et hors combat. Attaquer, rouler, être touché, pêcher, récolter ou entrer dans un lieu fermé fait descendre de selle.
 - **Vitesse** : la même pour toutes les montures, selon la selle équipée (`MOUNT_SADDLE_SPEED`) : +40 % sans selle, Peu commun +50 %, Rare +60 %, Épique +70 %, Légendaire +80 %, Mythique +100 %. Seule la vitesse change, jamais le combat.

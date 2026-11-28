@@ -1,0 +1,18 @@
+{
+  // Vérification des types de client/ (modules ES du navigateur, JavaScript annoté en JSDoc) : npm run typecheck.
+  // Mode strict sauf noImplicitAny : null, appels, opérations et propriétés sont vérifiés ; un paramètre sans JSDoc
+  // reste permis (à resserrer fichier par fichier, comme shared/, qui est en strict complet).
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["./**/*.js"]
+}

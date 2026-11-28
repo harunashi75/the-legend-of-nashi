@@ -2,7 +2,7 @@
 // (client/art/pixel-kit.js : même pinceau, même contour d'encre, même modelé et même grille de gros pixels de 2 que les
 // bâtiments, les portails et les créatures du jeu). Rien n'est dessiné ici à chaque image : chaque sprite est peint une
 // fois, gardé, puis posé par vallee.js et valerion.js.
-// - Montures de la vallée : licorne, pégase, lion, griffon, bélier, coq et aigle, avec les outils de mount-art.js.
+// - Montures de la vallée : licorne, pégase, lion, griffon, bélier, coq et aigle, avec les outils de client/art/mount-art.js.
 // - Statues des héros (huit poses), statue de l'Aurore (marbre et or), statues de l'arène de Valérion.
 // - Écurie des Héros, moulin (tour et ailes), clôtures, auge, bottes de foin, pont de pierre, dalles de l'arène.
 (() => {
@@ -34,7 +34,7 @@
   const P = s => s.split(',').map(p => p.trim().split(/\s+/).map(Number));
 
   // ---------------------------------------------------------------- Montures de la vallée
-  // Repère et outils : scripts/mount-art.js (profil tourné vers la droite, (0, 0) au sol sous la selle).
+  // Repère et outils : client/art/mount-art.js (profil tourné vers la droite, (0, 0) au sol sous la selle).
   const {
     define,
     horse,

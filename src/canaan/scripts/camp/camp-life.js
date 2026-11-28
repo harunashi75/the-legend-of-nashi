@@ -8,7 +8,7 @@
 // tomberait sur une maison, un lieu de quête ou un coffre n'est pas posé (audit()). Tout est décoratif et calculé chez
 // chaque joueur à partir de la même île : rien n'est sauvegardé ni envoyé sur le réseau.
 // Ce fichier pose le camp et garde ses collisions ; le plan est dans shared/data/camp.js, le dessin dans
-// scripts/camp/render.js (objets), ground.js (sol) et sprites.js (sprites des objets).
+// scripts/camp/render.js (objets), ground.js (sol) et client/art/camp-sprites.js (sprites des objets).
 (() => {
   'use strict';
   const T = TS;

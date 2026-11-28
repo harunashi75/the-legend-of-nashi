@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais : { 'texte français': 'English text' } (voir client/i18n/i18n.js).
 // {nom} : une valeur insérée (« Niveau {n} » → « Level {n} »). « contexte|texte » : un mot français à deux sens,
 // demandé dans le code par tt(texte, valeurs, contexte). Un texte absent reste en français.

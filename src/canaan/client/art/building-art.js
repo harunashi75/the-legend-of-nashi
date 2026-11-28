@@ -1,3 +1,4 @@
+// @ts-check
 // Bâtiments en pixel art « cosy » : chaque bâtiment est dessiné sur une grille de gros pixels (1 pixel d'art =
 // 2 pixels d'écran, comme les animaux et les décors), en aplats francs de 3 à 5 tons par matière, puis cerné d'un
 // contour sombre et agrandi sans flou. Grands toits à pignon en tuiles rangées, colombages, fenêtres rondes à
@@ -412,7 +413,7 @@ function mossBase(k, x, y, w) {
     k.px(xx + 1, y + 1, RAMP.stone[0]);
   }
   for (let xx = x; xx < x + w; xx += 3)
-    if (hashGrid(xx, y, 3) > 0.5) k.rect(xx, y - 1, 2, 2, hashGrid(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
+    if (hashGrid(xx, y) > 0.5) k.rect(xx, y - 1, 2, 2, hashGrid(xx, 1) > 0.5 ? '#5aa448' : '#3e7a36');
 }
 // Feuillage au pied (fougères et buissons).
 function ferns(k, x, bot, n, seed) {
@@ -906,10 +907,10 @@ const MODELS = {
         if (i % 2) k.px(fx, fy + 2, RAMP.leaf[3]);
       }
     }
-    for (const [jx, h, col] of [
+    for (const [jx, h, col] of /** @type {[number, number, string][]} */ ([
       [x + w + 3, 9, '#d07a40'],
       [x + w + 9, 7, '#a85a2c']
-    ]) {
+    ])) {
       k.rect(jx, bot - h, 6, h, col);
       k.rect(jx + 1, bot - h - 2, 4, 2, col);
       k.rect(jx + 1, bot - h + 1, 1, h - 2, '#ffd0a0');
@@ -972,10 +973,10 @@ const MODELS = {
     // Foyer.
     for (let i = 0; i < 5; i++) k.rect(8 + i * 3, bot - 1, 3, 2, i % 2 ? RAMP.stone[2] : RAMP.stone[1]);
     e.campfire(15, bot - 1);
-    for (const [jx, h, col] of [
+    for (const [jx, h, col] of /** @type {[number, number, string][]} */ ([
       [W - 12, 9, '#d07a40'],
       [W - 6, 7, '#a85a2c']
-    ]) {
+    ])) {
       k.rect(jx, bot - h, 5, h, col);
       k.rect(jx + 1, bot - h - 2, 3, 2, col);
     }
@@ -1276,10 +1277,10 @@ const MODELS = {
     k.rect(cx - 4, top - 27, 7, 9, '#f0c040');
     k.rect(cx - 4, top - 27, 7, 2, '#ffffff');
     k.rect(cx + 3, top - 25, 2, 5, '#f0c040');
-    for (const [sx, col] of [
+    for (const [sx, col] of /** @type {[number, string][]} */ ([
       [-2, '#3a6aa8'],
       [W - 6, '#8a2a3a']
-    ]) {
+    ])) {
       k.poly(
         [
           [sx, base - 2],
@@ -1717,12 +1718,12 @@ const MODELS = {
       k.px(fx + 1, fy + 1, '#ffe070');
     }
     // Cristaux et champignons au pied.
-    for (const [px, h, col] of [
+    for (const [px, h, col] of /** @type {[number, number, string][]} */ ([
       [x - 8, 14, '#9af0ff'],
       [x - 2, 9, '#c89aff'],
       [x + tw + 2, 16, '#9af0ff'],
       [x + tw + 8, 9, '#ffb0f0']
-    ]) {
+    ])) {
       k.poly(
         [
           [px - 2, bot],

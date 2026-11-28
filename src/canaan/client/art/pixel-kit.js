@@ -1,3 +1,4 @@
+// @ts-check
 // Kit de pixel art commun à tous les arts du jeu (bâtiments, nains, elfes, portails, héros, créatures) : toile et
 // pinceau sur la grille de pixels d'art, contour sombre, ombre et reflet (modelé), couleurs (teintes, mélanges,
 // transparence) et texture (bruits à graine, tramage). Un seul exemplaire de chaque outil : un même contour, une même
@@ -23,7 +24,7 @@ export function brush(w, h) {
   const cv = document.createElement('canvas');
   cv.width = w;
   cv.height = h;
-  const g = cv.getContext('2d');
+  const g = /** @type {CanvasRenderingContext2D} */ (cv.getContext('2d'));
   const k = {
     cv,
     g,
@@ -70,7 +71,7 @@ export function painter() {
     let out = null;
     if (typeof document !== 'undefined') {
       const k = brush(w, h);
-      if (k.g && k.g.getImageData) {
+      if (k.g && typeof k.g.getImageData === 'function') {
         fn(k, CANAAN_PIXEL_KIT);
         outline(k);
         out = k.cv;
@@ -109,7 +110,7 @@ export function outlineSprite(src, pad = 1, color = 'rgba(14,10,22,.85)') {
   const w = src.width + pad * 2,
     h = src.height + pad * 2,
     sil = makeCanvas(w, h),
-    sg = sil.getContext('2d');
+    sg = /** @type {CanvasRenderingContext2D} */ (sil.getContext('2d'));
   for (const [dx, dy] of [
     [0, pad],
     [pad * 2, pad],
@@ -120,7 +121,7 @@ export function outlineSprite(src, pad = 1, color = 'rgba(14,10,22,.85)') {
   sg.globalCompositeOperation = 'source-in';
   rect(sg, 0, 0, w, h, color);
   const out = makeCanvas(w, h),
-    o = out.getContext('2d');
+    o = /** @type {CanvasRenderingContext2D} */ (out.getContext('2d'));
   o.drawImage(sil, 0, 0);
   o.drawImage(src, pad, pad);
   return out;

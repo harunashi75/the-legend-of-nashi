@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « interface » :
 // Interface : chargement, barre du héros, menus, paramètres, touches, sauvegardes, création du héros, sac, combat, effets,
 // banque, équipement, artéfacts, garde-robe, boutique, carte, qualités.

@@ -1,3 +1,4 @@
+// @ts-check
 // Art de la Forteresse naine de Durgrim (Tréfonds), dans la facture des bâtiments de l'île (building-art.js) : gros
 // pixels (1 pixel d'art = 2 pixels d'écran), volumes éclairés de la gauche, contour sombre. Pierre taillée en blocs
 // modelés, toits d'ardoise en écailles, frises de runes dorées, portes ferrées, bannières rouge et or. Le grand hall
@@ -314,11 +315,11 @@ const MODELS = {
         k.rect(14 + i * 7, B - 32, 8, 4, GOLD[1]);
         k.rect(14 + i * 7, B - 32, 8, 1, GOLD[0]);
       }
-      for (const [x, col] of [
+      for (const [x, col] of /** @type {[number, string][]} */ ([
         [44, '#e04040'],
         [50, '#40c0e0'],
         [56, '#60e060']
-      ]) {
+      ])) {
         k.disc(x, B - 30, 2, col);
         k.px(x - 1, B - 31, '#ffffff');
       }
@@ -761,12 +762,12 @@ Object.assign(MODELS, {
       k.disc(cx + 14, 66, 6, stem[4]);
       k.disc(cx + 14, 66, 4, '#ffb0e8');
       k.rect(cx + 12, 64, 2, 2, '#ffffff');
-      for (const [x, h, col] of [
+      for (const [x, h, col] of /** @type {[number, number, string][]} */ ([
         [8, 8, '#7affe8'],
         [14, 5, '#ff8ae8'],
         [76, 7, '#fff08a'],
         [81, 10, '#7affe8']
-      ]) {
+      ])) {
         k.rect(x, B - h, 2, h, stem[1]);
         k.rect(x - 2, B - h - 3, 6, 3, col);
       }

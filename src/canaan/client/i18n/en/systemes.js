@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « systemes » :
 // Panneau des métiers, fouilles, groupe et coopératif, Arène des Épreuves, succès et bestiaire, PNJ et cité elfique.
 export default {

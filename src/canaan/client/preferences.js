@@ -1,3 +1,4 @@
+// @ts-check
 // Préférences propres à l'appareil : son et disposition des panneaux.
 // Elles restent distinctes de la sauvegarde de partie, gérée par canaan-persistence.
 // Un stockage indisponible ou une valeur illisible ne bloque jamais le jeu : la valeur par défaut est utilisée.
@@ -27,7 +28,7 @@ export const CANAAN_PREFERENCES = Object.freeze({
   read(name, fallback) {
     const key = keyOf(name);
     try {
-      const value = JSON.parse(localStorage.getItem(key));
+      const value = JSON.parse(localStorage.getItem(key) ?? 'null');
       return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
     } catch (_) {
       return fallback;

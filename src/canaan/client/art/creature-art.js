@@ -1,3 +1,4 @@
+// @ts-check
 // Art des créatures : une silhouette propre à chaque espèce (loup, sanglier, ours, rat, araignée, troll, spectre,
 // tréant…), peinte au pinceau du kit commun sur une grille de 32 × 40 pixels d'art, profil tourné vers la droite,
 // pieds au sol à la ligne 36. Les humanoïdes (bandits, chevaliers, prêtres, sorcières…) partagent un corps mais
@@ -32,7 +33,7 @@ export function creatureSprite(look, pal, opts = {}) {
   polish(k.cv, 2, look.length);
   const src = k.g.getImageData(0, 0, 32, 40).data,
     out = makeCanvas(34, 42),
-    og = out.getContext('2d'),
+    og = /** @type {CanvasRenderingContext2D} */ (out.getContext('2d')),
     img = og.getImageData(0, 0, 34, 42),
     d = img.data,
     alpha = (x, y) => (x < 0 || y < 0 || x >= 32 || y >= 40 ? 0 : src[(y * 32 + x) * 4 + 3]);

@@ -1,3 +1,4 @@
+// @ts-check
 // Art des créatures : bêtes, arthropodes, volants et formes molles (loup, sanglier, ours, araignée, chauve-souris,
 // slime…). Chaque espèce s'inscrit au registre de la famille (species) ; le rendu est dans client/art/creature-art.js.
 // Module ES (src/canaan/client/).

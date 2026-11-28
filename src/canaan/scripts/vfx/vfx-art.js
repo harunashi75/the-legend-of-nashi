@@ -6,7 +6,7 @@
 // simulé, rien n'est envoyé) : un invité qui reçoit l'effet en fait naître les siennes.
 // CANAAN_VFX.draw(ctx, e), start(e), tick(e, dt), step(dt), drawParticles(ctx, ground), isGround(shape), drawMark, drawShield,
 // aura, telegraph (annonces des boss), projectile (formes des projectiles).
-// Le dessin de chaque forme est dans scripts/vfx/effects.js, les effets des boss (annonces, sols, orbes) dans boss.js.
+// Le dessin de chaque forme est dans client/art/vfx-effects.js, les effets des boss (annonces, sols, orbes) dans boss.js.
 (() => {
   'use strict';
   const TAU = Math.PI * 2;
@@ -1190,7 +1190,7 @@
     }
   }
 
-  // ---------------------------------------------------------------- Effets : dessin (scripts/vfx/effects.js)
+  // ---------------------------------------------------------------- Effets : dessin (client/art/vfx-effects.js)
   const { draw } = CANAAN_VFX_EFFECTS.create({
     TAU,
     rgba,

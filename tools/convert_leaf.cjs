@@ -205,7 +205,9 @@ const importLines = [...imports]
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([from, names]) => 'import { ' + [...names].sort().join(', ') + " } from '" + from + "';")
   .join('\n');
+// En tête : // @ts-check (client/ est vérifié par TypeScript, client/jsconfig.json).
 const out =
+  '// @ts-check\n' +
   header.replace(/\n*$/, '\n') +
   '// Module ES (src/canaan/client/) : exposé aux scripts classiques par le pont (bridge.js).\n' +
   (importLines ? importLines + '\n\n' : '\n') +

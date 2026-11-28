@@ -1,5 +1,5 @@
 // Dessin du Camp de l'Aurore : objets posés (avec leur ombre et ce qui cache un héros passé derrière), clôtures,
-// lanternes, fontaine, quai et navire draconique, guirlandes et pétales. Les sprites sont dans scripts/camp/sprites.js,
+// lanternes, fontaine, quai et navire draconique, guirlandes et pétales. Les sprites sont dans client/art/camp-sprites.js,
 // le sol dans scripts/camp/ground.js. Aucune règle ici : le plan est dans shared/data/camp.js, la pose, les collisions
 // et les zones calmes dans scripts/camp/camp-life.js.
 // camp-life.js appelle CANAAN_CAMP_RENDER.create(scène) une fois, puis use(pose) après chaque pose : sol, objets et
@@ -14,7 +14,7 @@
       origin = { x: 0, y: 0 };
 
     // ---------------------------------------------------------------- Outils de dessin
-    // Sprites des objets (scripts/camp/sprites.js).
+    // Sprites des objets (client/art/camp-sprites.js).
     const {
       sprite,
       barnSprite,

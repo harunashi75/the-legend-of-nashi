@@ -1,3 +1,4 @@
+// @ts-check
 // Art des créatures : morts-vivants et esprits, créatures célestes, constructions et êtres de pierre, végétaux et
 // champignons, feu et horreurs. Le rendu est dans client/art/creature-art.js.
 // Module ES (src/canaan/client/).

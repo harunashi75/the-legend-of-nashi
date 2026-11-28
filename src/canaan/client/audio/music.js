@@ -1,3 +1,4 @@
+// @ts-check
 // Compositeur de la musique du jeu : modes, thèmes de chaque lieu (tonalité, tempo, accords, instruments,
 // percussions), forme des pièces, rythmes, et composition d'une pièce à partir d'une graine (la même pièce revient
 // toujours au même lieu). Aucun son ici : scripts/audio.js joue les événements avec Web Audio.

@@ -1,3 +1,4 @@
+// @ts-check
 // Outils communs de l'art des créatures (client/art/creature-art.js) : couleurs, formes (ellipses, tubes, membres,
 // yeux, couronnes, cicatrices…) et inscription des espèces : chaque famille tient son registre (registry).
 // Module ES (src/canaan/client/).

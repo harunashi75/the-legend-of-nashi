@@ -1,3 +1,4 @@
+// @ts-check
 // Icônes des compétences en SVG (à la place des émojis) : une par compétence des armes de classe (et des griffes
 // de la forme féline du Druide)
 // et par sort de classe (touche F). Dessinées en code, dans un même style : glyphe clair cerné de sombre, accent de couleur

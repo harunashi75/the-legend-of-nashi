@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « quetes » :
 // Interlude des Tréfonds, énigmes, actions, journal et suivi des quêtes, histoire principale et contrats.
 export default {

@@ -45,6 +45,13 @@ import * as buildingArt from './client/art/building-art.js';
 import * as dwarfArt from './client/art/dwarf-art.js';
 // Art des créatures : un seul nom global, comme le kit.
 import { CANAAN_CREATURE_ART } from './client/art/creature-art.js';
+// Arts convertis depuis les scripts classiques : un seul nom global chacun (leur API create() ou leurs dessins).
+import { CANAAN_MOUNT_ART } from './client/art/mount-art.js';
+import { CANAAN_CAMP_SPRITES } from './client/art/camp-sprites.js';
+import { CANAAN_VFX_EFFECTS } from './client/art/vfx-effects.js';
+import { CANAAN_HOUSE_FURNITURE } from './client/art/house-furniture.js';
+import { CANAAN_DUNGEON_TILES } from './client/art/dungeon-tiles.js';
+import { CANAAN_DUNGEON_DECOR } from './client/art/dungeon-decor.js';
 import * as preferences from './client/preferences.js';
 import * as music from './client/audio/music.js';
 import * as gamepad from './client/input/gamepad.js';
@@ -91,6 +98,12 @@ Object.assign(
   buildingArt,
   dwarfArt,
   { CANAAN_CREATURE_ART },
+  { CANAAN_MOUNT_ART },
+  { CANAAN_CAMP_SPRITES },
+  { CANAAN_VFX_EFFECTS },
+  { CANAAN_HOUSE_FURNITURE },
+  { CANAAN_DUNGEON_TILES },
+  { CANAAN_DUNGEON_DECOR },
   preferences,
   music,
   gamepad,

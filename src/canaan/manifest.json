@@ -89,16 +89,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-dungeons-tiles",
-      "file": "scripts/dungeons/tiles.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-dungeons-decor",
-      "file": "scripts/dungeons/decor.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-dungeons-render",
       "file": "scripts/dungeons/render.js"
     },
@@ -176,11 +166,6 @@
       "kind": "script",
       "id": "canaan-item-rules",
       "file": "scripts/item-rules.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-vfx-art-effects",
-      "file": "scripts/vfx/effects.js"
     },
     {
       "kind": "script",
@@ -344,11 +329,6 @@
     },
     {
       "kind": "script",
-      "id": "canaan-house-furniture",
-      "file": "scripts/house/furniture.js"
-    },
-    {
-      "kind": "script",
       "id": "canaan-house-facades",
       "file": "scripts/house/facades.js"
     },
@@ -391,11 +371,6 @@
       "kind": "script",
       "id": "canaan-guild",
       "file": "scripts/guild.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-camp-sprites",
-      "file": "scripts/camp/sprites.js"
     },
     {
       "kind": "script",
@@ -616,11 +591,6 @@
       "kind": "script",
       "id": "canaan-panel-dock",
       "file": "scripts/panel-dock.js"
-    },
-    {
-      "kind": "script",
-      "id": "canaan-mount-art",
-      "file": "scripts/mount-art.js"
     },
     {
       "kind": "script",

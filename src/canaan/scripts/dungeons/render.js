@@ -1,6 +1,6 @@
 // Dessin des donjons, des raids et de l'Arène : sol peint, objets de l'exploration (portes, leviers, braseros,
 // stèles…), portail de sortie, gradins de l'Arène, entrées sur l'île et ambiance ; les textures et cases en pixel art
-// sont dans scripts/dungeons/tiles.js, le décor dans scripts/dungeons/decor.js. Aucune
+// sont dans client/art/dungeon-tiles.js, le décor dans client/art/dungeon-decor.js. Aucune
 // règle ici : les plans, les énigmes et les boss sont dans scripts/dungeons/dungeons.js ; la structure, les créatures
 // et la palette de chaque instance (sols, murs, lumière, flammes, runes, bannières…) dans sa fiche de
 // shared/data/dungeons/.
@@ -323,7 +323,7 @@
       const near = exitNear(P);
       drawCanaanPrompt(c, near ? '[E] Sortir de l’instance' : '🌀 Portail de retour', x, y - 62);
     }
-    // Textures et cases en pixel art (scripts/dungeons/tiles.js).
+    // Textures et cases en pixel art (client/art/dungeon-tiles.js).
     const {
       canvas,
       rect,
@@ -337,7 +337,9 @@
       shadowTile,
       drawScrolled
     } = CANAAN_DUNGEON_TILES.create({
-      THEMES
+      THEMES,
+      hash,
+      field
     });
     // ---------------------------------------------------------------- Sol peint comme l'île et les Tréfonds
     // Même moteur que les Tréfonds (under-look.js) : sols continus en motifs sans couture, bords organiques, vraies
@@ -753,12 +755,16 @@
       if (up === WALL) c.drawImage(shadowTile(), X, Y);
     }
 
-    // Décor (scripts/dungeons/decor.js).
+    // Décor (client/art/dungeon-decor.js).
     const { R, flame, drawWallProp, drawFloorProp, drawCenterpiece, drawDecal, drawGate } =
       CANAAN_DUNGEON_DECOR.create({
         canvas,
         rect,
-        mixHex
+        mixHex,
+        TS,
+        now: () => time,
+        // world-look.js remplace canaanLight pendant certaines passes : relu à chaque appel.
+        canaanLight: (...args) => canaanLight(...args)
       });
     // ---------------------------------------------------------------- Objets de l'exploration
     // Dessinés en gros pixels de 3 px, aplats de 3 tons et contour sombre, comme les bâtiments de l'île.

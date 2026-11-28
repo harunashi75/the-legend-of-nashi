@@ -443,3 +443,40 @@ test('Compositeur (client/audio/music.js) : même pièce pour une même graine, 
  assert.ok(a.every((e,i)=>i===0||a[i-1].beat<=e.beat),'triés par temps');assert.ok(a.every(e=>e.beat>=0&&e.beat<32*4),'sur 32 mesures');
  assert.equal(M.midiFrequency(69),440);assert.equal(M.midiFrequency(81),880);
 });
+
+test('Migration en modules ES : plus aucun nouveau script classique, la liste restante ne fait que raccourcir', () => {
+  // Seuil de la migration (docs/ARCHITECTURE.md) : tout nouveau fichier du jeu est un module de client/ ou de
+  // shared/. tests/fixtures/classic-scripts.json liste les scripts classiques restants ; un script converti en est
+  // retiré, un script ajouté au manifeste sans y figurer fait échouer ce test.
+  const listed = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'classic-scripts.json'), 'utf8')).scripts;
+  const manifest = require('../src/canaan/manifest.json').modules;
+  const classic = manifest.filter(m => m.kind === 'script').map(m => m.file);
+  const extra = classic.filter(f => !listed.includes(f));
+  assert.deepEqual(extra, [], 'nouveaux scripts classiques (à écrire en module ES dans client/ ou shared/)');
+  const gone = listed.filter(f => !classic.includes(f));
+  assert.deepEqual(gone, [], 'scripts convertis ou supprimés : les retirer de tests/fixtures/classic-scripts.json');
+  // Un seul point d'entrée des modules ES dans le manifeste : le pont (bridge.js), regroupé par esbuild.
+  assert.deepEqual(manifest.filter(m => m.kind === 'module').map(m => m.file), ['bridge.js']);
+  // Aucun fichier de scripts/ hors du manifeste (un fichier oublié échapperait au compte).
+  const root = path.join(__dirname, '..', 'src', 'canaan');
+  const onDisk = fs
+    .readdirSync(path.join(root, 'scripts'), { recursive: true })
+    .filter(f => f.endsWith('.js'))
+    .map(f => 'scripts/' + f.split(path.sep).join('/'));
+  assert.deepEqual(onDisk.filter(f => !classic.includes(f)), [], 'fichiers de scripts/ absents du manifeste');
+});
+
+test('Modules ES vérifiés par TypeScript : // @ts-check en tête de chaque fichier de shared/ et de client/', () => {
+  const root = path.join(__dirname, '..', 'src', 'canaan');
+  for (const dir of ['shared', 'client'])
+    for (const f of fs.readdirSync(path.join(root, dir), { recursive: true }).filter(f => f.endsWith('.js'))) {
+      const first = fs.readFileSync(path.join(root, dir, f), 'utf8').split('\n')[0];
+      assert.equal(first, '// @ts-check', dir + '/' + f);
+    }
+  // Les deux projets TypeScript existent et sont lancés par npm run typecheck (et npm run check).
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  for (const dir of ['shared', 'client']) {
+    assert.ok(fs.existsSync(path.join(root, dir, 'jsconfig.json')), dir + '/jsconfig.json');
+    assert.match(pkg.scripts.typecheck, new RegExp('src/canaan/' + dir + '/jsconfig\\.json'));
+  }
+});

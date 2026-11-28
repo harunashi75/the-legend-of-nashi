@@ -1,5 +1,5 @@
 // @ts-check
-// Pièces intérieures : catalogue des meubles (sans leur dessin), meubles fixes et habitants de chaque pièce. Le dessin des meubles est dans scripts/house/furniture.js.
+// Pièces intérieures : catalogue des meubles (sans leur dessin), meubles fixes et habitants de chaque pièce. Le dessin des meubles est dans client/art/house-furniture.js.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 

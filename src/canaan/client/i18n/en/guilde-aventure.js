@@ -1,3 +1,4 @@
+// @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « guilde-aventure » :
 // Guilde des Aventuriers, compléments, gardiens et grand troc, extensions, artéfacts gagnés, montures, travail du
 // cuir, guide, armes de classe et nouveaux talents.

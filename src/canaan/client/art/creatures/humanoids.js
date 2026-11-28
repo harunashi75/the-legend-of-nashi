@@ -1,3 +1,4 @@
+// @ts-check
 // Art des créatures : humanoïdes (bandits, chevaliers, prêtres, sorcières…), un corps commun avec coiffe, visage,
 // tenue et arme propres à chacun, et leurs variantes d'élite. Le rendu est dans client/art/creature-art.js.
 // Module ES (src/canaan/client/).

@@ -1,3 +1,4 @@
+// @ts-check
 // Icônes du jeu en SVG, dessinées en code, à la place des émojis (même style que les icônes des compétences :
 // formes pleines cernées de sombre). Une table relie chaque émoji utilisé dans le jeu à son icône :
 // - l'interface (HTML) : chaque émoji affiché est remplacé à la volée par son icône (observateur du document) ;
@@ -1115,7 +1116,7 @@ const I = {
     c(13.3, 10.8, 1.4, '#e0a030') +
     l('M4 21.5 L20 21.5', '#d8b878', 1.6)
 };
-delete I.cat2;
+delete (/** @type {Record<string, unknown>} */ (I).cat2);
 // ---------------------------------------------------------------- Émojis du jeu → icônes
 const MAP = {
   // Quêtes de terrain.
@@ -1483,17 +1484,19 @@ function patchFont() {
   if (typeof CanvasRenderingContext2D === 'undefined') return;
   const proto = CanvasRenderingContext2D.prototype,
     desc = Object.getOwnPropertyDescriptor(proto, 'font');
-  if (!desc?.set) return;
+  if (!desc?.set || !desc.get) return;
+  const getFont = desc.get,
+    setFont = desc.set;
   Object.defineProperty(proto, 'font', {
     configurable: true,
     enumerable: desc.enumerable,
     get() {
-      return desc.get.call(this);
+      return getFont.call(this);
     },
     set(v) {
       if (textScale !== 1 && this.canvas?.id === 'game')
         v = String(v).replace(/(\d+(?:\.\d+)?)px/, (_, n) => Math.round(n * textScale * 10) / 10 + 'px');
-      desc.set.call(this, v);
+      setFont.call(this, v);
     }
   });
 }
@@ -1522,7 +1525,7 @@ function patchCanvas() {
     return (m ? Number(m[1]) : 10) * 1.15;
   };
   function draw(ctx, s, x, y, filled) {
-    const list = parts(s),
+    const list = /** @type {{ text?: string, icon?: string, w: number }[]} */ (parts(s)),
       size = sizeOf(ctx);
     for (const it of list) it.w = it.text !== undefined ? measure.call(ctx, it.text).width : size + 1;
     const total = list.reduce((a, it) => a + it.w, 0),

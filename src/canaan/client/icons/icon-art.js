@@ -1,3 +1,4 @@
+// @ts-check
 // Icônes illustrées du jeu (32 × 32), dessinées en code pour ce qu'elles représentent : emplacements d'équipement,
 // familles d'armes, statistiques, les 12 artéfacts de l'Arène, classes et éléments, difficultés, poissons, viandes,
 // métiers et boutons des menus. Les données y renvoient par un repère ⟦nom⟧

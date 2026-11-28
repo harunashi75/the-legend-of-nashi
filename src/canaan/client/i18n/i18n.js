@@ -1,3 +1,4 @@
+// @ts-check
 // Langue du jeu. Le français est la langue source : le texte français sert de clé, et chaque autre langue a son
 // dictionnaire (client/i18n/<langue>.js : { 'texte français': 'traduction' }). Un texte absent du dictionnaire reste
 // en français : rien ne casse quand une traduction manque.
@@ -127,9 +128,9 @@ function exact(text) {
 function single(text) {
   const whole = exact(text);
   if (whole !== null) return whole;
-  const lead = LEAD.exec(text)[0];
+  const lead = LEAD.exec(text)?.[0] ?? '';
   const rest = text.slice(lead.length);
-  const trail = TRAIL.exec(rest.slice(-40))[0];
+  const trail = TRAIL.exec(rest.slice(-40))?.[0] ?? '';
   const core = rest.slice(0, rest.length - trail.length);
   if (!core || (core === text && !lead && !trail)) return null;
   // Sans ce qui précède (émoji, puce) mais avec la ponctuation finale de l'entrée (« Partie sauvegardée ! »).
