@@ -147,7 +147,10 @@ test('Pixel art : un seul kit, aucun art ne redéfinit ses outils', () => {
   // Les arts (bâtiments, nains, elfes, portails, héros, créatures, icônes) prennent toile, bruit, contour et plume au
   // kit commun ; une copie locale divergerait sans bruit (autre contour, autre grain).
   const arts = [
-    ...fs.readdirSync(path.join(ROOT, 'client', 'art')).map(f => 'client/art/' + f),
+    ...fs
+      .readdirSync(path.join(ROOT, 'client', 'art'), { recursive: true })
+      .filter(f => f.endsWith('.js'))
+      .map(f => 'client/art/' + f),
     ...fs.readdirSync(path.join(ROOT, 'client', 'icons')).map(f => 'client/icons/' + f),
     'scripts/pixel-art.js',
     'scripts/elven-art.js',

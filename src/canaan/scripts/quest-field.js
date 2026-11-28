@@ -2,7 +2,8 @@
 // par les créatures (loot), objets du lieu à ramasser, allumer ou libérer (pick), défense par vagues (wave), escorte
 // (escort), fuyards à rattraper (chase), course chronométrée (race), champion nommé (hunt), parler à quelqu'un (talk),
 // métiers (work), donjon à terminer (clear), revoir le ciel (sky). Les étapes sont décrites dans shared/data/quests.js et
-// quests-interlude.js ; scripts/quests.js fournit les lieux, la progression et le dessin (kit) et appelle ce module.
+// quests-interlude.js ; scripts/quests/quests.js fournit les lieux, la progression et le dessin (kit de
+// scripts/quests/render.js) et appelle ce module.
 // - L'hôte décide de tout. Chacun garde sa progression ; un combat, une escorte ou une défense compte pour chaque héros
 //   debout à proximité qui en est à cette étape.
 // - Une épreuve en cours (vagues, escorte, fuyard, champion) est un « run », par quête et étape, jamais sauvegardé :

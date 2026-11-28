@@ -4,6 +4,11 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ## [Non publié]
 
+### Refactorisation
+- Les trois plus gros scripts sont découpés, données à part du dessin. `quests.js` (3 900 lignes) devient `scripts/quests/` : progression, gardiens et réseau (`quests.js`), lieux et énigmes (`sites.js`), dialogues et journal (`dialogs.js`), dessin (`render.js`). `camp-life.js` (3 470 lignes) devient `scripts/camp/` : pose et collisions (`camp-life.js`), objets (`render.js`), sol (`ground.js`), sprites (`sprites.js`), et son plan passe dans `shared/data/camp.js`. `underground.js` (2 830 lignes) devient `scripts/underground/` : génération, nains et règles (`underground.js`), dessin (`render.js`), et ses biomes, boss, nains et bâtiments passent dans `shared/data/underground.js`.
+- Les autres fichiers de plus de 2 000 lignes aussi : le dictionnaire anglais (6 150 lignes) est réparti en sept parties (`client/i18n/en/`) ; l’art des créatures en familles (`client/art/creatures/`) ; les quêtes de l’histoire en un fichier par chapitre (`shared/data/quests/`) ; le dessin des bâtiments en meubles (`furniture.js`), façades (`facades.js`) et intérieurs et finitions (`render.js`) ; celui des donjons en textures (`tiles.js`), décor (`decor.js`) et objets (`render.js`) ; la construction des instances passe dans `scripts/dungeons/build.js` ; les effets visuels dans `scripts/vfx/` (particules, dessin des effets, effets des boss). Plus aucun fichier source ne dépasse 2 000 lignes (les fichiers issus des découpages restent sous 1 600).
+- Rien ne change à l’écran ni dans les règles : chaque découpage a été comparé appel de dessin par appel de dessin (et HTML des dialogues et du journal) avec la version précédente ; les données déplacées (quêtes, dictionnaire) sont identiques, dans le même ordre.
+
 ## [0.12.3] — 2026-11-25
 
 ### Ajouté

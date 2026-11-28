@@ -89,8 +89,23 @@
     },
     {
       "kind": "script",
+      "id": "canaan-dungeons-tiles",
+      "file": "scripts/dungeons/tiles.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-dungeons-decor",
+      "file": "scripts/dungeons/decor.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-dungeons-render",
       "file": "scripts/dungeons/render.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-dungeons-build",
+      "file": "scripts/dungeons/build.js"
     },
     {
       "kind": "script",
@@ -164,8 +179,18 @@
     },
     {
       "kind": "script",
+      "id": "canaan-vfx-art-effects",
+      "file": "scripts/vfx/effects.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-vfx-art-boss",
+      "file": "scripts/vfx/boss.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-vfx-art",
-      "file": "scripts/vfx-art.js"
+      "file": "scripts/vfx/vfx-art.js"
     },
     {
       "kind": "script",
@@ -319,6 +344,16 @@
     },
     {
       "kind": "script",
+      "id": "canaan-house-furniture",
+      "file": "scripts/house/furniture.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-house-facades",
+      "file": "scripts/house/facades.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-house-render",
       "file": "scripts/house/render.js"
     },
@@ -334,8 +369,23 @@
     },
     {
       "kind": "script",
+      "id": "canaan-quest-sites",
+      "file": "scripts/quests/sites.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-quest-dialogs",
+      "file": "scripts/quests/dialogs.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-quest-render",
+      "file": "scripts/quests/render.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-quests",
-      "file": "scripts/quests.js"
+      "file": "scripts/quests/quests.js"
     },
     {
       "kind": "script",
@@ -344,8 +394,23 @@
     },
     {
       "kind": "script",
+      "id": "canaan-camp-sprites",
+      "file": "scripts/camp/sprites.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-camp-ground",
+      "file": "scripts/camp/ground.js"
+    },
+    {
+      "kind": "script",
+      "id": "canaan-camp-render",
+      "file": "scripts/camp/render.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-camp-life",
-      "file": "scripts/camp-life.js"
+      "file": "scripts/camp/camp-life.js"
     },
     {
       "kind": "script",
@@ -439,8 +504,13 @@
     },
     {
       "kind": "script",
+      "id": "canaan-under-render",
+      "file": "scripts/underground/render.js"
+    },
+    {
+      "kind": "script",
       "id": "canaan-underground",
-      "file": "scripts/underground.js"
+      "file": "scripts/underground/underground.js"
     },
     {
       "kind": "script",

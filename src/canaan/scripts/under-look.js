@@ -10,7 +10,7 @@
 //   son ombre sur le sol. Les gouffres s'ouvrent sur une paroi qui plonge dans le noir.
 // - Eaux animées (lacs, ruisseaux de boue, gouffres) peintes sous les blocs de sol, qui les laissent voir.
 // Sol par blocs de 16 × 16 cases gardés (préparés d'avance quand le navigateur a du temps libre) ; sans canevas
-// (tests sans écran), create() renvoie un rendu inactif et underground.js garde son dessin case par case.
+// (tests sans écran), create() renvoie un rendu inactif et scripts/underground/render.js garde son dessin case par case.
 (() => {
   'use strict';
   const S = 48,

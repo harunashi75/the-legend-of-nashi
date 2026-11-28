@@ -13,29 +13,32 @@ const placeholders = s =>
 
 test('Dictionnaires : aucune clé en double, mêmes valeurs insérées, aucune traduction qui serait retraduite', async () => {
   for (const lang of LANGS) {
-    const file = path.join(I18N, lang + '.js');
-    const ast = espree.parse(fs.readFileSync(file, 'utf8'), {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      loc: true
-    });
-    const object = ast.body.find(n => n.type === 'ExportDefaultDeclaration').declaration;
+    // Le dictionnaire est réparti en parties (client/i18n/<langue>/*.js) : une clé n'apparaît qu'une fois en tout,
+    // sinon la dernière partie masquerait la première sans rien dire.
+    const dir = path.join(I18N, lang);
+    const parts = fs.readdirSync(dir).filter(f => f.endsWith('.js'));
+    assert.ok(parts.length > 1, lang + ' : parties du dictionnaire');
+    const index = fs.readFileSync(path.join(I18N, lang + '.js'), 'utf8');
+    for (const f of parts) assert.ok(index.includes("'./" + lang + '/' + f + "'"), lang + '.js importe ' + f);
     const seen = new Map();
-    for (const prop of object.properties) {
-      assert.equal(prop.key.type, 'Literal', lang + ' : clé non textuelle ligne ' + prop.loc.start.line);
-      assert.ok(
-        !seen.has(prop.key.value),
-        lang +
-          ' : « ' +
-          prop.key.value +
-          ' » en double (lignes ' +
-          seen.get(prop.key.value) +
-          ' et ' +
-          prop.loc.start.line +
-          ')'
-      );
-      seen.set(prop.key.value, prop.loc.start.line);
+    for (const f of parts) {
+      const ast = espree.parse(fs.readFileSync(path.join(dir, f), 'utf8'), {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        loc: true
+      });
+      const object = ast.body.find(n => n.type === 'ExportDefaultDeclaration').declaration;
+      for (const prop of object.properties) {
+        const where = lang + '/' + f + ':' + prop.loc.start.line;
+        assert.equal(prop.key.type, 'Literal', 'clé non textuelle ' + where);
+        assert.ok(
+          !seen.has(prop.key.value),
+          '« ' + prop.key.value + ' » en double (' + seen.get(prop.key.value) + ' et ' + where + ')'
+        );
+        seen.set(prop.key.value, where);
+      }
     }
+    const file = path.join(I18N, lang + '.js');
     const dict = (await import(file)).default;
     for (const [fr, out] of Object.entries(dict)) {
       assert.equal(typeof out, 'string', fr);

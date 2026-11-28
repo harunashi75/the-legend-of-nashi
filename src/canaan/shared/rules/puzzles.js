@@ -2,7 +2,8 @@
 // Règles des énigmes des quêtes : état de départ et état résolu de chaque énigme, rochers du monde à l'envers, rayon des
 // miroirs et générateur aléatoire à graine (placement fixe des lieux).
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches. L'hôte
-// s'en sert pour vérifier les actions des invités ; scripts/quests.js garde les lieux, les objets et le dessin.
+// s'en sert pour vérifier les actions des invités ; scripts/quests/sites.js garde les lieux et les objets,
+// scripts/quests/render.js le dessin.
 import { PUZZLE_CONSTELLATION, PUZZLE_MIRROR_LEVERS } from '../data/puzzles.js';
 
 /** @typedef {[number, number]} Cell case relative au lieu de la quête */

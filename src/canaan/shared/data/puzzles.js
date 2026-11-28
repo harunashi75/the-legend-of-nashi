@@ -1,7 +1,7 @@
 // @ts-check
 // Énigmes des quêtes (« Les Échos de l’Aurore ») : constellation, leviers des miroirs et rayon des miroirs, en cases
-// relatives au lieu de la quête. Les règles sont dans shared/rules/puzzles.js ; les lieux, objets et dessins dans
-// scripts/quests.js.
+// relatives au lieu de la quête. Les règles sont dans shared/rules/puzzles.js ; les lieux et objets dans
+// scripts/quests/sites.js, leur dessin dans scripts/quests/render.js.
 // Module partagé pur (shared/data) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 import { deepFreeze } from '../freeze.js';
 

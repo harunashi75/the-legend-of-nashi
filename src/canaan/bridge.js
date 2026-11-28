@@ -28,6 +28,8 @@ import * as skins from './shared/data/skins.js';
 import * as mounts from './shared/data/mounts.js';
 import * as houseData from './shared/data/house.js';
 import * as houseRules from './shared/rules/house.js';
+import * as campData from './shared/data/camp.js';
+import * as undergroundData from './shared/data/underground.js';
 import * as dungeonData from './shared/data/dungeons.js';
 import * as professionData from './shared/data/professions.js';
 import * as professionRules from './shared/rules/professions.js';
@@ -75,6 +77,8 @@ Object.assign(
   mounts,
   houseData,
   houseRules,
+  campData,
+  undergroundData,
   dungeonData,
   professionData,
   professionRules,
