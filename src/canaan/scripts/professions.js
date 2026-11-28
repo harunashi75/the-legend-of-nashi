@@ -588,7 +588,8 @@
   }
   document.addEventListener(
     'toggle',
-    e => e.target.matches?.('.prof-more') && (ui.more = e.target.open),
+    e =>
+      /** @type {any} */ (e.target).matches?.('.prof-more') && (ui.more = /** @type {any} */ (e.target).open),
     true
   );
   // Où l'on en est (près de la forge, de la cuisinière…) : une ligne, verte si c'est bon, orange sinon.
@@ -891,6 +892,7 @@
   }
   // Liste des métiers, à gauche de la fenêtre (comme le livre des métiers des grands MMO) : la récolte, puis
   // l'artisanat ; chacun avec son niveau. La cuisine réunit la préparation des repas et le garde-manger.
+  /** @type {[string, string[][]][]} */
   const NAV = [
     [
       'Récolte',

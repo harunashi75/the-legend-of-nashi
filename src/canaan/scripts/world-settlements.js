@@ -54,10 +54,10 @@
     R(x, y, w, 2, '#9a7248');
     R(x, y + h - 3, w, 3, '#43301f');
     for (let k = 6; k < w - 6; k += 11) R(x + k, y + 3, 6, 1, '#563b28');
-    for (const [on, ex] of [
+    for (const [on, ex] of /** @type {[boolean, number][]} */ ([
       [endLeft, x - 2],
       [endRight, x + w - 6]
-    ])
+    ]))
       if (on) {
         R(ex, y, 8, h, '#c9a06c');
         R(ex + 1, y + 1, 6, h - 2, '#e0bc88');

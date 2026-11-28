@@ -221,6 +221,13 @@
 
     // ---------------------------------------------------------------- Ennemis
     // extra.quest : quête de l'épreuve (pour le niveau des ennemis) ; le reste est copié sur le monstre.
+    /**
+     * @param {any} site
+     * @param {string} name
+     * @param {number} x
+     * @param {number} y
+     * @param {Record<string, any>} [options]
+     */
     function spawnFoe(site, name, x, y, { quest, ...extra } = {}) {
       const type = canaanMobTypes().find(t => t.name === name) || MOB_TYPES[0],
         level = levelAt(site, quest),

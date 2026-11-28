@@ -308,10 +308,10 @@
       k.line(x, 26, x, 32, '#c8b08a');
       bone(k, x - 1, 33, x + 1, 37);
     }
-    for (const [x, c] of [
+    for (const [x, c] of /** @type {[number, string][]} */ ([
       [24, '#e8e0d0'],
       [40, '#b83a2a']
-    ])
+    ]))
       for (let i = 0; i < 7; i++) k.px(x + (i % 2), 27 + i, c);
     // Crâne cornu au sommet.
     skull(k, 32, 14, 2);

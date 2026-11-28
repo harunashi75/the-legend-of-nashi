@@ -1,7 +1,7 @@
 // @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « interface » :
-// Interface : chargement, barre du héros, menus, paramètres, touches, sauvegardes, création du héros, sac, combat, effets,
-// banque, équipement, artéfacts, garde-robe, boutique, carte, qualités.
+// Interface : chargement, barre du héros, menus, paramètres, touches, sauvegardes, création du héros, sac, combat,
+// effets, banque, équipement, statistiques, artéfacts, garde-robe, boutique, carte, qualités ; guide du joueur.
 export default {
   // ------------------------------------------------------------ Écran de chargement et accueil
   'Chargement de Canaan…': 'Loading Canaan…',
@@ -800,5 +800,85 @@ export default {
   'Épique': 'Epic',
   'Légendaire': 'Legendary',
   'Mythique': 'Mythic',
-  'Relique': 'Relic'
+  'Relique': 'Relic',
+
+  // Guide du joueur : conseils de Lumi, pastilles, repère du sac (guide.js)
+  'Astuce': 'Tip',
+  'Compétence {n} · {arme} · {genre}': 'Skill {n} · {arme} · {genre}',
+  'invocation': 'summon',
+  'offensive': 'offensive',
+  'utilitaire': 'utility',
+  '{n} dégâts par seconde': '{n} damage per second',
+  '{n} dégâts par coup': '{n} damage per hit',
+  '{n} dégâts par cible': '{n} damage per target',
+  '(avec {n} charge(s))': '(with {n} charge(s))',
+  '{n} % de ta Puissance ({m})': '{n}% of your Power ({m})',
+  '{n} % de ta Puissance magique ({m})': '{n}% of your magic Power ({m})',
+  'Recharge {n} s · {m} PV': 'Cooldown {n} s · {m} HP',
+  'Recharge {n} s · Mana {m}': 'Cooldown {n} s · Mana {m}',
+
+  // Textes relevés en jeu, en anglais, restés en français
+  'Marchand Lira': 'Merchant Lira',
+  'niveau {n} à {m}': 'level {n} to {m}',
+  'Arme 1 · active': 'Weapon 1 · active',
+  'Arme 2 · réserve': 'Weapon 2 · reserve',
+  'réserve': 'reserve',
+  'Bienvenue, voyageur !': 'Welcome, traveler!',
+  'ESQUIVE !': 'DODGE!',
+  '{nom} est à terre.': '{nom} is down.',
+  'Tu es à terre… Un allié peut te relever (3 s à côté de toi).':
+    'You are down… An ally can revive you (3 s next to you).',
+  'Tu es à terre… Tu te relèves dans 10 secondes près de l’hôte.':
+    'You are down… You get back up in 10 seconds near the host.',
+  'Tu sors.': 'You step out.',
+  'Tout le groupe est tombé… Résurrection au camp.': 'The whole group has fallen… Resurrection at camp.',
+  'Niveau {n} ! Niveau maximum atteint.': 'Level {n}! Maximum level reached.',
+  'Niveau {n} !': 'Level {n}!',
+  'Interface réinitialisée': 'Interface reset',
+  'Terminer placement': 'Finish placement',
+  'Collections (V)': 'Collections (V)',
+  'Tu n’as que {n} or.': 'You only have {n} gold.',
+  'Libère {n} place(s) dans ton sac : tes armes y seront rangées.':
+    'Free {n} slot(s) in your bag: your weapons will be stored there.',
+  'Le Grimoire retourne aux ombres. Il reviendra si tu redeviens Invocateur.':
+    'The Grimoire returns to the shadows. It will come back if you become a Summoner again.',
+  'Ton Grimoire grandit : {nom} !': 'Your Grimoire grows: {nom}!',
+  'Ta Grande hache grandit : {nom} !': 'Your Great axe grows: {nom}!',
+  '{nom} : ton arme liée, de qualité Relique. Elle grandira avec toi.':
+    '{nom}: your bound weapon, of Relic quality. It will grow with you.',
+  'ABOMINATION': 'ABOMINATION',
+  'Bonus prêt : {nom}': 'Bonus ready: {nom}',
+  'Aventure importée': 'Imported adventure',
+  'CONCENTRATION +40 %': 'FOCUS +40%',
+  'RIPOSTE !': 'RIPOSTE!',
+  'ÉLAN : VITESSE +30 %': 'MOMENTUM: SPEED +30%',
+  'COMBO !': 'COMBO!',
+  'BERSERKER +25 %': 'BERSERKER +25%',
+  'PROCHAIN COUP +60 %': 'NEXT HIT +60%',
+  'TIR PUISSANT RENFORCÉ': 'EMPOWERED POWER SHOT',
+  'SOL CONSACRÉ': 'CONSECRATED GROUND',
+  'SERMENT DU GARDIEN': 'GUARDIAN’S OATH',
+  'Suivant ▸': 'Next ▸',
+  'Compris': 'Got it',
+  'Fermer': 'Close',
+  '✨ Conseils de Lumi': '✨ Lumi’s tips',
+  'Mieux que ce que tu portes': 'Better than what you wear',
+  'Bienvenue à Canaan ! Déplace-toi avec {h} {g} {b} {d} (ou les flèches), attaque avec le clic gauche et parle aux habitants avec {e}.':
+    'Welcome to Canaan! Move with {h} {g} {b} {d} (or the arrow keys), attack with left click and talk to people with {e}.',
+  'L’encadré à droite, sous la mini-carte, te montre toujours où aller : suis sa flèche jusqu’au personnage marqué d’un « ! » doré.':
+    'The box on the right, under the minimap, always shows where to go: follow its arrow to the character marked with a golden “!”.',
+  'Quête acceptée ! Sa prochaine étape est dans l’encadré à droite. Le journal ({l}) raconte toutes tes quêtes et permet d’en suivre une autre.':
+    'Quest accepted! Its next step is in the box on the right. The journal ({l}) tells all your quests and lets you track another one.',
+  'Coucou, c’est Lumi ! Je reste avec toi : je vole toujours du côté où tu dois aller, et je te soufflerai des conseils en chemin.':
+    'Hi, I’m Lumi! I’m staying with you: I always fly towards where you need to go, and I’ll whisper tips along the way.',
+  'Tu as trouvé un équipement meilleur que le tien ! Ouvre ton sac ({i}) et clique dessus pour l’équiper : le ▲ vert marque ce qui est mieux que ce que tu portes.':
+    'You found gear better than yours! Open your bag ({i}) and click it to equip it: the green ▲ marks what beats what you wear.',
+  'Tu as un talent à choisir ! Ouvre Classe et talents ({t}) : le bouton garde un point doré tant qu’une case est libre.':
+    'You have a talent to choose! Open Class and talents ({t}): the button keeps a golden dot while a slot is free.',
+  'Ton sac se remplit ({n} / {max}) ! Lira rachète ton butin à l’Échoppe du Camp de l’Aurore (la bourse 💰 sur la carte, {m}). Tu peux aussi démanteler une pièce (clic droit).':
+    'Your bag is filling up ({n} / {max})! Lira buys your loot at her stall in Dawn Camp (the 💰 purse on the map, {m}). You can also salvage an item (right click).',
+  'Voici l’Échoppe de Lira, la marchande du camp : entre ({e}) pour vendre ton butin, acheter des potions et agrandir ton sac.':
+    'Here is Lira’s Stall, the camp merchant: go in ({e}) to sell your loot, buy potions and enlarge your bag.',
+  'Un donjon est à ta portée : {nom} (niveau {n}). Son portail est sur la carte ({m}). Le meilleur butin s’y trouve : emmène des compagnons ou des amis !':
+    'A dungeon is within reach: {nom} (level {n}). Its portal is on the map ({m}). The best loot is there: bring companions or friends!'
 };

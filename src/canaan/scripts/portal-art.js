@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Portails de l'île en pixel art « cosy », dans la même facture que les bâtiments (building-art.js) : grille de gros
 // pixels (1 pixel d'art = 2 pixels d'écran), aplats de 3 à 5 tons, contour sombre, agrandissement sans flou. Chaque
 // donjon, raid et l'Arène garde son thème (terrier, mine, temple, château, forge, fosse, bastion, anneau, sanctuaire,

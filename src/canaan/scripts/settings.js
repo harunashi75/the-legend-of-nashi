@@ -101,12 +101,16 @@
     if (!TABS.includes(name)) return;
     tab = name;
     CANAAN_KEYS.stopCapture();
-    for (const button of document.querySelectorAll('#settingsCard .settings-tab')) {
+    for (const button of /** @type {NodeListOf<HTMLElement>} */ (
+      document.querySelectorAll('#settingsCard .settings-tab')
+    )) {
       const on = button.dataset.tab === name;
       button.classList.toggle('active', on);
       button.setAttribute('aria-selected', on ? 'true' : 'false');
     }
-    for (const pane of document.querySelectorAll('#settingsCard .settings-pane'))
+    for (const pane of /** @type {NodeListOf<HTMLElement>} */ (
+      document.querySelectorAll('#settingsCard .settings-pane')
+    ))
       pane.hidden = pane.dataset.pane !== name;
     if (name === 'keyboard') CANAAN_KEYS.render();
   }
@@ -211,7 +215,11 @@
   addEventListener(
     'keydown',
     e => {
-      if (!isOpen() || e.target?.closest?.('input:not([type="range"]), textarea')) return;
+      if (
+        !isOpen() ||
+        /** @type {HTMLElement} */ (e.target)?.closest?.('input:not([type="range"]), textarea')
+      )
+        return;
       const k = e.key.toLowerCase();
       if (k === 'escape') closeSettings();
       else if ((k === 'q' || k === 'e') && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey)

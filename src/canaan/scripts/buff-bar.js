@@ -303,7 +303,7 @@
     tip.hidden = true;
     document.body.append(bar, tip);
     bar.addEventListener('pointerover', e => {
-      const el = e.target.closest('.buff');
+      const el = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('.buff'));
       hover = el ? el.dataset.id : null;
       showTip(el);
     });

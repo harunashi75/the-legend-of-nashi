@@ -1465,7 +1465,7 @@
     const el = document.getElementById('specialSkill');
     if (el) {
       const left = specialLeft(),
-        cd = el.querySelector('.cd'),
+        cd = /** @type {HTMLElement} */ (el.querySelector('.cd')),
         text = left > 0 ? String(Math.ceil(left)) : '';
       if (cd.textContent !== text) cd.textContent = text;
       cd.style.display = left > 0 ? 'flex' : 'none';
@@ -1853,12 +1853,14 @@
   // Touche du sort de classe (F par défaut, Paramètres → Clavier) et clic sur la case du sort spécial.
   addEventListener('keydown', e => {
     if (e.repeat || document.activeElement === chatInput || !CANAAN_KEYS.is(e, 'special')) return;
-    if (e.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+    if (/** @type {HTMLElement} */ (e.target)?.closest?.('input, textarea, select, [contenteditable="true"]'))
+      return;
     if (!started || paused) return;
     useSpecial();
   });
   addEventListener('click', e => {
-    if (e.target && e.target.closest && e.target.closest('#specialSkill')) useSpecial();
+    const target = /** @type {HTMLElement} */ (e.target);
+    if (target && target.closest && target.closest('#specialSkill')) useSpecial();
   });
   // Flèches ← → : page précédente ou suivante du choix des classes, quand il est ouvert.
   addEventListener('keydown', e => {

@@ -170,7 +170,8 @@
     reward,
     pts
   });
-  const W = (id, type, name, reward) =>
+  // Succès « 200 ennemis avec telle arme » (ne pas appeler W : la largeur de l'écran est lue plus bas).
+  const weaponFeat = (id, type, name, reward) =>
     A(
       'combat',
       id,
@@ -291,11 +292,11 @@
       { title: 'Maître d’armes', gear: 'Épique' },
       50
     ),
-    W('c14', 'bow', 'Tireur d’élite', { gear: 'Rare' }),
-    W('c15', 'dualdagger', 'Exécuteur silencieux', { gear: 'Rare' }),
-    W('c16', 'dualsword', 'Danse des lames', { gear: 'Rare' }),
-    W('c17', 'aegis', 'Rempart inébranlable', { gear: 'Rare' }),
-    W('c18', 'staff', 'Surcharge arcanique', { gear: 'Rare' }),
+    weaponFeat('c14', 'bow', 'Tireur d’élite', { gear: 'Rare' }),
+    weaponFeat('c15', 'dualdagger', 'Exécuteur silencieux', { gear: 'Rare' }),
+    weaponFeat('c16', 'dualsword', 'Danse des lames', { gear: 'Rare' }),
+    weaponFeat('c17', 'aegis', 'Rempart inébranlable', { gear: 'Rare' }),
+    weaponFeat('c18', 'staff', 'Surcharge arcanique', { gear: 'Rare' }),
     A(
       'combat',
       'c19',
@@ -1594,7 +1595,9 @@
     // Les succès presque finis d'abord, puis les autres ; les débloqués à la fin (sauf dans « Récents »).
     if (ui.cat !== 'recent')
       list = [...list].sort(
-        (x, y) => !!st.done[x.id] - !!st.done[y.id] || progress(h, y) / goalOf(y) - progress(h, x) / goalOf(x)
+        (x, y) =>
+          Number(!!st.done[x.id]) - Number(!!st.done[y.id]) ||
+          progress(h, y) / goalOf(y) - progress(h, x) / goalOf(x)
       );
     return (
       '<div class="ach-chips">' +

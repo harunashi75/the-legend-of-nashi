@@ -190,13 +190,13 @@
   }
   win.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
-    const grip = e.target?.closest?.('.dock-grip'),
+    const grip = /** @type {HTMLElement} */ (e.target)?.closest?.('.dock-grip'),
       r = win.getBoundingClientRect();
     if (grip) {
       e.preventDefault();
       drag = {
         mode: 'resize',
-        edge: grip.dataset.edge,
+        edge: /** @type {HTMLElement} */ (grip).dataset.edge,
         sx: e.clientX,
         sy: e.clientY,
         x: r.left,
@@ -253,7 +253,8 @@
   // Double-clic : sur une poignée, la taille d'origine ; sur l'en-tête, la place d'origine.
   win.addEventListener('dblclick', e => {
     if (!owner) return;
-    if (e.target?.closest?.('.dock-grip')) writeSaved(owner, { w: null, h: null });
+    if (/** @type {HTMLElement} */ (e.target)?.closest?.('.dock-grip'))
+      writeSaved(owner, { w: null, h: null });
     else if (handle(e)) writeSaved(owner, { x: null, y: null });
     else return;
     place();
@@ -262,7 +263,7 @@
   // re-cliquent pas. La navigation à la manette (focus) n'est pas concernée : seul un vrai clic de souris compte.
   win.addEventListener('click', e => {
     if (!e.detail) return;
-    const el = document.activeElement;
+    const el = /** @type {HTMLElement} */ (document.activeElement);
     if (el && el !== document.body && win.contains(el) && !el.matches('input, textarea, select')) el.blur();
   });
   // Réinitialiser l'interface (Paramètres) remet aussi les fenêtres à leur place d'origine.

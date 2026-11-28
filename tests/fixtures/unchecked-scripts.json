@@ -1,0 +1,20 @@
+{
+  "_": "Scripts classiques pas encore vérifiés par TypeScript (scripts/jsconfig.json) : chacun commence par // @ts-nocheck. Cette liste ne peut que raccourcir : corriger un script, retirer sa ligne // @ts-nocheck et son entrée ici.",
+  "scripts": [
+    "scripts/barber.js",
+    "scripts/camp/camp-life.js",
+    "scripts/camp/ground.js",
+    "scripts/elven-art.js",
+    "scripts/game-core.js",
+    "scripts/gathering.js",
+    "scripts/group.js",
+    "scripts/persistence.js",
+    "scripts/pixel-art.js",
+    "scripts/portal-art.js",
+    "scripts/slot-menu.js",
+    "scripts/ui.js",
+    "scripts/underground/render.js",
+    "scripts/underground/underground.js",
+    "scripts/world-map.js"
+  ]
+}

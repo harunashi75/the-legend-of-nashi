@@ -35,7 +35,8 @@
     window.CANAAN_CLASS_STATS(result, hero);
     CANAAN_ARTEFACTS.stats(result, hero);
     // Cœurs d'Aurore (gardiens vaincus, coquillages chantants) : PV max (shared/rules/quests.js).
-    if (hero.quetes?.flags) result.maxHp = Math.round(result.maxHp * (1 + heartBonus(hero.quetes)));
+    if (hero.quetes?.flags)
+      result.maxHp = Math.round(result.maxHp * (1 + heartBonus(/** @type {any} */ (hero.quetes))));
     return result;
   }
   // Coup d'un héros (l'hôte par défaut) : Puissance, écart de niveau, critique.

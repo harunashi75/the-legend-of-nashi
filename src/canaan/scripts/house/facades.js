@@ -197,12 +197,12 @@
       c.moveTo(x1, y);
       c.quadraticCurveTo((x1 + x2) / 2, y + 6, x2, y);
       c.stroke();
-      [
+      /** @type {[string, number, number][]} */ ([
         ['#e8e4dc', 12, 14],
         ['#c85a4a', 10, 12],
         ['#5a8ac0', 14, 10],
         ['#f0d070', 8, 12]
-      ].forEach(([col, w, h], k) => {
+      ]).forEach(([col, w, h], k) => {
         const cx = x1 + ((k + 1) * (x2 - x1)) / 5,
           sway = Math.sin(time * 0.08 + k * 1.3) * 2.5;
         c.save();

@@ -294,7 +294,7 @@
   });
   for (const name of ['pointerup', 'pointercancel', 'lostpointercapture'])
     touchRoot.addEventListener(name, event => {
-      touchDirections.delete(event.pointerId);
+      touchDirections.delete(/** @type {PointerEvent} */ (event).pointerId);
       syncTouchDirections();
     });
   addEventListener('blur', clearTouchControls);

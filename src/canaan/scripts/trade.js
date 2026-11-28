@@ -505,7 +505,12 @@
     },
     gold() {
       const mine = currentMine(),
-        value = Math.max(0, Math.floor(Number(document.getElementById('tradeGold')?.value) || 0));
+        value = Math.max(
+          0,
+          Math.floor(
+            Number(/** @type {HTMLInputElement} */ (document.getElementById('tradeGold'))?.value) || 0
+          )
+        );
       if (!mine) return false;
       ui.gold = null;
       if (value > Math.floor(P.gold)) {

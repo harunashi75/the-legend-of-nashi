@@ -2,6 +2,8 @@
 // Phase 2 de la conception du coopératif : l'état est un objet passé aux fonctions, plus des variables éparses.
 // game.hero est le héros de l'hôte. Les invités rejoindront game plus tard, chacun avec le même format de héros.
 // Métiers d'un héros neuf : profFresh (shared/rules/professions.js).
+// Types : CanaanGame, CanaanHero, CanaanWorld… (scripts/types.d.ts).
+/** @type {CanaanGame} */
 const game = {
   // solo, host (salon ouvert à des invités) ou guest (connecté au monde d'un hôte, sans simulation locale).
   mode: 'solo',
@@ -69,14 +71,22 @@ const game = {
     instance: null,
     returnPos: null,
     clock: 0
-  }
+  },
+  // Héros présents dans l'aventure : l'hôte d'abord (ci-dessous), puis les invités présents (3 au plus).
+  heroes: [],
+  // Invités enregistrés dans l'aventure (présents ou non), par identifiant : 6 au plus (canaan-group).
+  guests: {},
+  // Relais d'affichage : ce que la simulation veut montrer (messages, chat). Sans interface, rien n'est affiché
+  // et la simulation n'accède jamais à l'écran ; canaan-game-core y branche ses fonctions d'affichage.
+  view: { notify() {}, chat() {}, remote() {}, fx() {} }
 };
-// Héros présents dans l'aventure : l'hôte d'abord, puis les invités présents (3 au plus).
-game.heroes = [game.hero];
-// Invités enregistrés dans l'aventure (présents ou non), par identifiant : 6 au plus (canaan-group).
-game.guests = {};
+game.heroes.push(game.hero);
 // Crée un héros au format de game.hero : équipement vide, sac vide, aucun talent ni artéfact.
 // Ses PV maximum viennent de son équipement ; il n'est ajouté à game.heroes que par l'appelant.
+/**
+ * @param {{ name?: string, x?: number, y?: number, equipment?: Record<string, CanaanItem | null> }} [options]
+ * @returns {CanaanHero}
+ */
 function canaanCreateHero({ name = 'Allié', x, y, equipment = {} } = {}) {
   const hero = {
     name,
@@ -142,12 +152,14 @@ function canaanHere(o) {
   return (o?.layer === 'under') === (game.world.layer === 'under');
 }
 // Exploits pour les succès (achievements.js remplace ce relais vide une fois chargé).
-function canaanAchieve() {}
+/**
+ * @param {CanaanHero} hero
+ * @param {string} type
+ * @param {...any} details
+ */
+function canaanAchieve(hero, type, ...details) {}
 function canaanLootNotice(hero, message) {
   if (hero === game.hero) return game.view.notify(message);
   game.view.chat('Butin', hero.name + ' — ' + message);
   if (hero.peer) game.view.remote?.(hero, message);
 }
-// Relais d'affichage : ce que la simulation veut montrer (messages, chat). Sans interface, rien n'est affiché
-// et la simulation n'accède jamais à l'écran ; canaan-game-core y branche ses fonctions d'affichage.
-game.view = { notify() {}, chat() {}, remote() {}, fx() {} };

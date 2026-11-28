@@ -148,10 +148,10 @@
         const r = R0(id);
         return r ? { ...n, room: id, x: r.x + lx, y: r.y + ly } : null;
       };
-    for (const [kind, id, lx, ly] of [
+    for (const [kind, id, lx, ly] of /** @type {[string, string, number, number][]} */ ([
       ['armurier', 'sylv_armurerie', 6.5, 2.6],
       ['tisseuse', 'sylv_couture', 4.5, 4.4]
-    ]) {
+    ])) {
       const n = folk.find(v => v.kind === kind),
         r = R0(id);
       if (n && r) Object.assign(n, { room: id, x: r.x + lx, y: r.y + ly });
@@ -283,13 +283,13 @@
       }
       return { x: P0.center.x + 4, y: P0.center.y + 8 };
     };
-    for (const [kind, n, speed] of [
+    for (const [kind, n, speed] of /** @type {[string, number, number][]} */ ([
       ['stag', 2, 0.018],
       ['unicorn', 1, 0.022],
       ['rabbit', 4, 0.03],
       ['fox', 3, 0.028],
       ['peacock', 3, 0.012]
-    ])
+    ]))
       for (let i = 0; i < n; i++) {
         const s = spot(animals.length + 1);
         animals.push({

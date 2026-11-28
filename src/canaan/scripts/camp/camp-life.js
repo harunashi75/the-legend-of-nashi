@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Vie du Camp de l'Aurore : une ferme au sud (grange, silo, poulailler, enclos avec moutons, vaches et cochons, bottes
 // de foin, charrette, champs de blé, de légumes et de fruits), un verger de pommiers à l'ouest, un jardin fleuri au
 // nord, une fontaine sur une petite place pavée, des bûches, des fleurs et un ruisseau qui descend d'une source jusqu'à

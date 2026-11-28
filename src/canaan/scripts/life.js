@@ -695,6 +695,7 @@
     a.step += 2;
   }
   // Biomes (ordre des ZONES) : [espèce, nombre, variante, options] ; puis insectes volants.
+  /** @type {{ ground: any[][], fliers: any[][] }[]} */
   const FAUNA = [
     {
       ground: [

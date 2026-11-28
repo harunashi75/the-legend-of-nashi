@@ -233,7 +233,8 @@
   addEventListener(
     'mousedown',
     e => {
-      if (listening && !e.target?.closest?.('[data-action="keybindCapture"]')) stopCapture();
+      if (listening && !(/** @type {Element} */ (e.target)?.closest?.('[data-action="keybindCapture"]')))
+        stopCapture();
     },
     true
   );

@@ -1,6 +1,7 @@
 // @ts-check
 // Dictionnaire anglais (client/i18n/en.js), partie « systemes » :
-// Panneau des métiers, fouilles, groupe et coopératif, Arène des Épreuves, succès et bestiaire, PNJ et cité elfique.
+// Métiers (panneau, récolte, enchantement, travail du cuir), fouilles, groupe et coopératif, extensions absentes,
+// Arène des Épreuves et ses artéfacts, succès et bestiaire, PNJ et cité elfique.
 export default {
   // ------------------------------------------------------------ Panneau des métiers (P), récolte et enchantement
   'Pêche': 'Fishing',
@@ -949,5 +950,111 @@ export default {
   '[E] Armurerie': '[E] Armory',
   '[E] Demander à entrer (niveau {n})': '[E] Ask to enter (level {n})',
   '[E] Sortir de Sylvaëlle': '[E] Leave Sylvaëlle',
-  '[E] Parler à Ylvarë': '[E] Talk to Ylvarë'
+  '[E] Parler à Ylvarë': '[E] Talk to Ylvarë',
+
+  // ------------------------------------------------------------ Compléments : métiers
+  'métier|Enchantement': 'Enchanting',
+  'niv. {n}': 'lv. {n}',
+
+  // ------------------------------------------------------------ Travail du cuir et selles
+  'Travail du cuir': 'Leatherworking',
+  '⟦prof_leather⟧ Travail du cuir': '⟦prof_leather⟧ Leatherworking',
+  'Peau brute': 'Raw hide',
+  'Cuir tanné': 'Tanned leather',
+  'Cuir': 'Leather',
+  'Donnée par le gibier chassé. Le travail du cuir la tanne en cuir (panneau P).':
+    'Dropped by hunted game. Leatherworking tans it into leather (panel P).',
+  'Pour coudre les selles de monture, au travail du cuir (panneau P).':
+    'For stitching mount saddles, in leatherworking (panel P).',
+  '🧵 Le travail du cuir se fait à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore.':
+    '🧵 Leatherworking is done at Oriane’s workbench, in the Menagerie of the Dawn Camp.',
+  'Travail du cuir niveau {n} requis.': 'Leatherworking level {n} required.',
+  'Il faut {n} peaux brutes de cette qualité.': 'You need {n} raw hides of this quality.',
+  '🎒 Plus de place parmi les matériaux.': '🎒 No room left among your materials.',
+  '{n} cuir(s) tanné(s)': '{n} leather tanned',
+  '🧵 Tu as déjà cette selle.': '🧵 You already have this saddle.',
+  'Il faut {n} cuirs tannés de cette qualité ou meilleurs.':
+    'You need {n} tanned leathers of this quality or better.',
+  'Il faut {or} or.': 'You need {or} gold.',
+  'Selle {qualite} cousue : +{n} % de vitesse en selle (touche V).':
+    '{qualite} saddle stitched: +{n}% speed when riding (key V).',
+  '🧵 À l’établi d’Oriane : tu peux travailler.': '🧵 At Oriane’s workbench: you can work.',
+  '🏹 Gibier chassé → peau': '🏹 Hunted game → hide',
+  'peaux = 1 cuir': 'hides = 1 leather',
+  '🐾 Selles : vitesse des montures': '🐾 Saddles: mount speed',
+  'Chaque animal chassé donne une peau brute, de qualité selon ton niveau de travail du cuir. Tanne-les en cuir à l’établi d’Oriane, à la Ménagerie du Camp de l’Aurore, puis couds les selles de monture : une par qualité.':
+    'Every hunted animal gives a raw hide whose quality follows your leatherworking level. Tan them into leather at Oriane’s workbench, in the Menagerie of the Dawn Camp, then stitch mount saddles: one per quality.',
+  'Une selle s’équipe dans l’onglet Montures (touche V) et donne sa vitesse à toutes tes montures. Chaque qualité demande son niveau de métier. Tanner et coudre prennent quelques secondes : reste immobile.':
+    'A saddle is equipped in the Mounts tab (key V) and gives its speed to all your mounts. Each quality needs its profession level. Tanning and stitching take a few seconds: stay still.',
+  'Tanner les peaux': 'Tan hides',
+  'Tanner': 'Tan',
+  'Tout tanner': 'Tan all',
+  'Aucune peau pour l’instant : chasse le gibier de l’île.': 'No hides yet: hunt the island’s game.',
+  'Selles de monture': 'Mount saddles',
+  'Peaux : {p} · cuirs : {c}': 'Hides: {p} · leathers: {c}',
+  'Selle {qualite}': '{qualite} saddle',
+  '{c} / {n} cuirs ({qualite} ou mieux)': '{c} / {n} leathers ({qualite} or better)',
+  '✔ Dans ta sellerie': '✔ In your tack room',
+  'Coudre': 'Stitch',
+  'Selle': 'Saddle',
+  'Sans selle': 'No saddle',
+  'À coudre au travail du cuir (panneau P)': 'To stitch in leatherworking (panel P)',
+
+  // Terres des extensions absentes de ce build (fermées, sous la brume) et coopératif entre builds différents.
+  'Brumes impénétrables': 'Impenetrable Mists',
+  'Une brume épaisse recouvre ces terres. Nul ne sait ce qu’elle cache.':
+    'A thick mist covers these lands. No one knows what it hides.',
+  'Contenu différent : l’hôte et l’invité doivent avoir les mêmes extensions du jeu.':
+    'Different content: the host and the guest must have the same game extensions.',
+
+  // ------------------------------------------------------------ Arène : artéfacts gagnés (scripts/arena.js)
+  '{nom} (rang maximum) : +{n} or': '{nom} (maximum rank): +{n} gold',
+  'Artéfact obtenu : {nom} !': 'Artifact obtained: {nom}!',
+  '{nom} passe au rang {n} !': '{nom} reaches rank {n}!',
+  '{nom} est vaincu ! Son artéfact pour chaque héros de l’arène.':
+    '{nom} is defeated! Its artifact for every hero in the arena.',
+  'Tentative terminée : {n} vague(s) réussie(s), {m} artéfact(s) gagné(s).':
+    'Attempt over: {n} wave(s) cleared, {m} artifact(s) won.',
+  '[E] au portail de l’antichambre pour quitter avec tes artéfacts':
+    '[E] at the antechamber portal to leave with your artifacts',
+  'RANG MAXIMUM': 'MAXIMUM RANK',
+  '+{n} OR': '+{n} GOLD',
+  'ARTÉFACT OBTENU': 'ARTIFACT OBTAINED',
+  'ARTÉFACT': 'ARTIFACT',
+  'RANG {n} !': 'RANK {n}!',
+  'Rang {n} / {m}': 'Rank {n} / {m}',
+  'Artéfacts obtenus': 'Artifacts obtained',
+  'Chaque boss vaincu donne son artéfact ; un doublon le fait monter de rang (5 au plus).':
+    'Each boss defeated gives its artifact; a duplicate raises its rank (up to 5).',
+  'Équipement et artéfacts se préparent avant d’entrer.': 'Gear and artifacts are prepared before entering.',
+  'Abandon possible entre les vagues ; la mort met fin à la tentative. Les artéfacts gagnés sont conservés.':
+    'You can give up between waves; death ends the attempt. Artifacts won are kept.',
+  'Préparer mes artéfacts': 'Prepare my artifacts',
+  'Les artéfacts de l’Arène renferment une vieille magie.': 'The Arena’s artifacts hold an old magic.',
+  'Les objets portés et les artéfacts restent sur toi.': 'Worn items and artifacts stay on you.',
+  'Choisis une pièce d’équipement.': 'Choose a piece of gear.',
+  // Succès des artéfacts (scripts/achievements.js).
+  'Magie, artéfacts & progression': 'Magic, artifacts & progression',
+  'Résilience du Souverain': 'Sovereign’s resilience',
+  'Survivre à un coup fatal grâce à la Couronne du Souverain.':
+    'Survive a fatal blow thanks to the Sovereign’s Crown.',
+  'Premier artéfact': 'First artifact',
+  'Équiper ton premier artéfact de l’Arène.': 'Equip your first Arena artifact.',
+  'Collectionneur d’artéfacts': 'Artifact collector',
+  'Posséder 6 artéfacts différents.': 'Own 6 different artifacts.',
+  'Maître des artéfacts': 'Artifact master',
+  'Posséder les 12 artéfacts de l’Arène.': 'Own all 12 Arena artifacts.',
+  'Le Maître des artéfacts': 'The Artifact Master',
+  'Artéfact parfait': 'Perfect artifact',
+  'Faire monter un artéfact au rang 5.': 'Raise an artifact to rank 5.',
+  'Quatre reliques': 'Four relics',
+  'Remplir tes quatre emplacements d’artéfacts.': 'Fill your four artifact slots.',
+  'Arsenal du Souverain': 'Sovereign’s arsenal',
+  'Faire monter quatre artéfacts au rang 5.': 'Raise four artifacts to rank 5.',
+  'Immortalité du Souverain': 'Sovereign’s immortality',
+  'Être sauvé par la Couronne du Souverain en plein combat de boss.':
+    'Be saved by the Sovereign’s Crown in the middle of a boss fight.',
+  'Porter huit pièces enchantées.': 'Wear eight enchanted pieces.',
+  'Porter huit pièces Épiques ou mieux.': 'Wear eight Epic or better pieces.',
+  'Porter huit pièces Mythiques.': 'Wear eight Mythic pieces.'
 };

@@ -1012,7 +1012,11 @@
     try {
       st = internetStatus(await (kind === 'lan' ? desktop.startLan() : desktop.startTailscale()));
     } catch (error) {
-      st = internetStatus({ state: 'error', kind, message: String(error?.message || error) });
+      st = internetStatus({
+        state: 'error',
+        kind,
+        message: String(/** @type {any} */ (error)?.message || error)
+      });
     }
     net.internet = st;
     if (st.state !== 'online') {

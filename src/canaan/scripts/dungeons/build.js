@@ -229,6 +229,7 @@
           plan.props.push({ ...mp.target, kind: 'mtarget', lock: s });
           // Un miroir de trop, qui ne sert à rien : il faut comprendre le trajet, pas tout tourner au hasard.
           const decoy = spot(hall);
+          /** @type {any[]} */
           const all = [
             ...mp.mirrors,
             ...(decoy ? [{ ...decoy, good: rnd() < 0.5 ? 1 : 0, decoy: true }] : [])

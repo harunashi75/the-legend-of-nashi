@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Salon de coiffure du Camp de l'Aurore : Sélène, la coiffeuse, change l'apparence du héros (sexe, race, peau,
 // coiffure, couleurs des cheveux et des yeux), comme à la création. Le nom, la classe, la tenue de création et
 // l'apparence portée (garde-robe, V) ne changent pas. Purement visuel, pour 100 or (rien

@@ -37,8 +37,8 @@ function refreshWeaponBar() {
       // Touche choisie dans les Paramètres → Clavier.
       CANAAN_KEYS.labelOf('skill' + (i + 1)).replace(/[&<>]/g, c => '&#' + c.charCodeAt(0) + ';') +
       '</div><div class="skill-badge" hidden></div><div class="cd" style="display:none"></div>';
-    el.dataset.skill = i;
-    el.dataset.tooltipSkill = i;
+    // Le navigateur range ces valeurs en texte (« 0 » à « 3 »).
+    Object.assign(el.dataset, { skill: i, tooltipSkill: i });
     skEl.appendChild(el);
     skill.el = el;
   });

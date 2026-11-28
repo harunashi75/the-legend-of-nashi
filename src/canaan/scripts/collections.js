@@ -81,7 +81,7 @@ const CANAAN_COLLECTIONS = (() => {
   }, 500);
   return Object.freeze({ open, render, toggle, isOpen, current, tabs: () => tabs().map(t => t.id) });
 })();
-window.CANAAN_COLLECTIONS = CANAAN_COLLECTIONS;
+/** @type {any} */ (window).CANAAN_COLLECTIONS = CANAAN_COLLECTIONS;
 Object.assign(window, {
   toggleCollections: CANAAN_COLLECTIONS.toggle,
   canaanCollections: CANAAN_COLLECTIONS.open

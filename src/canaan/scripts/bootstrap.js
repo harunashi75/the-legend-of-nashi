@@ -428,7 +428,7 @@
         try {
           value = read();
         } catch (error) {
-          issues.push(module + ' : ' + path + ' inaccessible (' + error.message + ')');
+          issues.push(module + ' : ' + path + ' inaccessible (' + /** @type {Error} */ (error).message + ')');
           return;
         }
         const valid =
@@ -447,6 +447,7 @@
           );
       }
       function readExport(path) {
+        /** @type {any} */
         let value = window;
         for (const key of path.split('.')) {
           if (value === undefined || value === null) return undefined;
@@ -625,7 +626,7 @@
   } catch (error) {
     canaanBootLoader.done();
     window.CANAAN_READY = false;
-    window.CANAAN_BOOT_ERROR = error.message;
+    window.CANAAN_BOOT_ERROR = /** @type {Error} */ (error).message;
     started = false;
     paused = true;
     console.error('[CANAAN] Erreur au démarrage :', error);
@@ -635,7 +636,7 @@
       const p = title.querySelector('p');
       if (p) {
         p.style.whiteSpace = 'pre-line';
-        p.textContent = 'Erreur de chargement : ' + error.message;
+        p.textContent = 'Erreur de chargement : ' + /** @type {Error} */ (error).message;
       }
       // Aucun slot ne peut être ouvert tant que le jeu n'a pas démarré correctement.
       const menu = document.getElementById('slotMenu');

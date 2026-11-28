@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Interface du sac et du personnage : un rendu par panneau.
 (function () {
   'use strict';

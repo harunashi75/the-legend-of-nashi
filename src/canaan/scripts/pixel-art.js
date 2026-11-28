@@ -1,3 +1,4 @@
+// @ts-nocheck
 // CANAAN PIXEL ART — sprites mis en cache (aucun rendu procédural coûteux par case/frame).
 (() => {
   const PIXEL_TERRAIN = [],

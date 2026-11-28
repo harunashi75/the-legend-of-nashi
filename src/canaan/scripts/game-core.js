@@ -1,3 +1,4 @@
+// @ts-nocheck
 const cv = document.getElementById('game'),
   ctx = cv.getContext('2d');
 // CONTRAT DE CHARGEMENT (voir docs/INITIALIZATION.md) :
@@ -846,18 +847,22 @@ function canaanPortalBlocked(px, py) {
   return !game.world.instance && CANAAN_PORTAL_ART.blocked(px, py);
 }
 // Meubles des bâtiments et objets du camp qui bloquent le passage (remplacé par house.js).
+/** @type {(x: number, y: number) => boolean} */
 let canaanHouseBlocked = () => false;
 // Passage dans les lieux des quêtes : true (praticable), false (bloqué) ou null (règle normale) ; remplacé par quests.js.
+/** @type {(tx: number, ty: number) => boolean | null} */
 let canaanQuestWalk = () => null;
 // Lieux des quêtes reposés sur une île régénérée (remplacé par quests.js).
 let canaanQuestWorld = () => {};
 // Habitats des créatures sur une île régénérée : remplacé par mob-lairs.js, chargé après tous les autres lieux.
 let canaanLairsWorld = () => {};
 // Territoire d'une espèce à une case (sous-zone affichée en y entrant) : remplacé par mob-lairs.js.
+/** @type {(tx: number, ty: number) => any} */
 let canaanLairAt = () => null;
 // Vie du Camp de l'Aurore (ferme, enclos, champs, verger, jardin, fontaine, ruisseau) : remplacé par camp-life.js.
 // place : pose sur l'île ; blocked : objets qui bloquent ; farm : cases sans monstres ; animals / fliers : bêtes de la
 // ferme pour life.js ; drawGround : eau, pavés, champs et fleurs (sous tout le reste) ; draw : bâtiments et objets.
+/** @type {{ occluders(): any[], place(): void, blocked(x: number, y: number): boolean, farm(tx: number, ty: number): boolean, animals(): any[], fliers(): any[], drawGround(c: CanvasRenderingContext2D): void, draw(c: CanvasRenderingContext2D): void }} */
 let canaanCampLife = {
   occluders: () => [],
   place() {},

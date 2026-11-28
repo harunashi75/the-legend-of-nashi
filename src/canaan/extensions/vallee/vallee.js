@@ -347,6 +347,7 @@
 
   // ---------------------------------------------------------------- Collisions
   // Rectangles (en cases) : grange, pieds des statues et des moulins, clôture de l'enclos.
+  /** @type {any[] & { plan?: any }} */
   let solids = [];
   function solidsOf() {
     if (!plan) return [];

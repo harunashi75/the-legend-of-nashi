@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Dessin des Tréfonds de Canaan : nains (sprites, bulles), bâtiments des quatre biomes et de la forteresse, décor,
 // sols et liquides, entrées (sur l'île et dans les Tréfonds), repaires des boss. Aucune règle ici : les données sont
 // dans shared/data/underground.js, la génération, les nains et les règles dans scripts/underground/underground.js.

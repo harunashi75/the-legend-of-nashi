@@ -153,7 +153,7 @@
       h = box.offsetHeight || 120;
     box.style.left = Math.max(4, Math.min(x, innerWidth - w - 4)) + 'px';
     box.style.top = Math.max(4, Math.min(y, innerHeight - h - 4)) + 'px';
-    box.querySelector('.item-menu-entry')?.focus?.({ preventScroll: true });
+    /** @type {HTMLElement} */ (box.querySelector('.item-menu-entry'))?.focus?.({ preventScroll: true });
     return true;
   }
   function choose(i) {
@@ -169,7 +169,7 @@
   }
 
   const cellOf = event => {
-    let node = event.target;
+    let node = /** @type {any} */ (event.target);
     if (node && node.nodeType === 3) node = node.parentElement;
     return node && typeof node.closest === 'function' ? node.closest('[data-menu]') : null;
   };
@@ -190,7 +190,7 @@
   );
   document.addEventListener('click', event => {
     if (!box) return;
-    let node = event.target;
+    let node = /** @type {any} */ (event.target);
     if (node && node.nodeType === 3) node = node.parentElement;
     const button = node?.closest?.('[data-entry]');
     if (button && box.contains(button)) {

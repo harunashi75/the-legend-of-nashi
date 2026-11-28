@@ -1,3 +1,4 @@
+// @ts-nocheck
 // CANAAN CORE — sauvegarde par slot d'aventure (schéma 10 : monde, héros de l'hôte, héros invités).
 // Seul le schéma courant est lu ; toute autre sauvegarde est préservée et propose « Repartir à neuf ».
 // Schéma, validation et format des aventures : shared/save/schema.js.

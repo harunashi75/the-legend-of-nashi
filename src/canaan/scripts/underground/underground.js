@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Les Tréfonds de Canaan : un monde souterrain sous toute l'île, aux mêmes coordonnées (une case des Tréfonds est
 // juste sous la case de l'île). Quatre biomes en couronne autour de la Forteresse naine de Durgrim, creusée sous le
 // massif central : les Galeries d'Argile (terre, rivières de boue, vieilles mines), la Cité Engloutie de

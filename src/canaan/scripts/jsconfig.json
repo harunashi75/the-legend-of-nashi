@@ -1,0 +1,23 @@
+{
+  // Vérification des types des scripts classiques (scripts/ et extensions/) : npm run typecheck.
+  // Les scripts partagent un seul espace global : TypeScript voit d'un fichier à l'autre leurs déclarations de
+  // premier niveau ; globals.d.ts (généré par tools/script_types.cjs) déclare ce qui leur vient du pont et de window,
+  // types.d.ts l'état de la partie (CanaanGame, CanaanHero…).
+  // Mode strict sauf noImplicitAny et strictNullChecks : le DOM du jeu suppose les éléments de template.html et un
+  // canevas 2D ; client/ et shared/ vérifient null. Un script pas encore propre commence par // @ts-nocheck
+  // (liste dans tests/fixtures/unchecked-scripts.json, qui ne peut que raccourcir).
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["./**/*.js", "./*.d.ts", "../extensions/**/*.js"]
+}

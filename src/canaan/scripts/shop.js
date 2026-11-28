@@ -16,6 +16,7 @@
   const guest = () => game.mode === 'guest';
   // Un objet de la marchandise : emplacement (et famille d'arme) imposés.
   function make(offer, level, slot, weaponType = null) {
+    /** @type {CanaanItem} */
     let item;
     if (offer.source) {
       const raw = createRawGear(level, offer.source, offer.rarity, slot);

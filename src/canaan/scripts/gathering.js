@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Récolte et enchantement : trois métiers de plus, à côté de la pêche, de la chasse et de la cuisine (panneau P).
 // - Minage : des filons de minerai sur toute l'île, un minerai par biome (du cuivre des Plaines au mithril de la
 //   Forêt enchantée). Touche E près d'un filon.

@@ -73,7 +73,7 @@
   }
   document.addEventListener('pointerover', event => {
     if (event.pointerType && event.pointerType !== 'mouse') return;
-    const el = event.target?.closest?.('[data-tip]');
+    const el = /** @type {Element} */ (event.target)?.closest?.('[data-tip]');
     if (el === target) return;
     hide();
     if (!el || el.closest(RICH)) return;
@@ -142,7 +142,7 @@
   document.body.appendChild(box);
   const head = box.querySelector('h3'),
     body = box.querySelector('p'),
-    yesButton = box.querySelector('.ui-confirm-yes'),
+    yesButton = /** @type {HTMLElement} */ (box.querySelector('.ui-confirm-yes')),
     noButton = box.querySelector('.ui-confirm-no');
   let pending = null;
   function close(ok) {

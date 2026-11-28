@@ -53,9 +53,12 @@
 
   // ---------------------------------------------------------------- Meubles fixes
   // Chaque pièce garde ses meubles (shared/data/house.js), vérifiés par shared/rules/house.js.
-  const FIXED = houseFurnishRooms(HOUSE_FURNITURE, ROOM, HOUSE_ROOM_FURNITURE, 999);
+  // Catalogue et agencements de shared/data/house.js : leurs littéraux (couches, tuples) sont plus larges que les
+  // types des règles (Furniture, Room) ; les règles les vérifient à l'exécution.
+  const FURNITURE = /** @type {any} */ (HOUSE_FURNITURE);
+  const FIXED = houseFurnishRooms(FURNITURE, ROOM, /** @type {any} */ (HOUSE_ROOM_FURNITURE), 999);
   const itemsOf = room => (room ? FIXED[room.id] || [] : []);
-  const cover = (it, lx, ly) => houseCovers(HOUSE_FURNITURE, it, lx, ly);
+  const cover = (it, lx, ly) => houseCovers(FURNITURE, it, lx, ly);
   // Passage bloqué : meubles des pièces, et dehors les objets du camp (feu, souches, banc, torches).
   function blocked(wx, wy) {
     const room = roomAt(wx, wy);

@@ -29,6 +29,7 @@
   }
   // Collection propre, d'après des données non fiables (sauvegarde, invité).
   function clean(raw) {
+    /** @type {Record<string, number>} */
     const ranks = {};
     for (const a of LIST) {
       const r = artefactRank(raw?.ranks?.[a.id]);

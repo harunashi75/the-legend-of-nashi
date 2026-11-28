@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Art de Sylvaëlle, la cité elfique, dans la facture des bâtiments (building-art.js) : écailles de feuilles, branches
 // torsadées, mousse, cristaux, contour sombre, gros pixels (1 pixel d'art = 2 pixels d'écran). Le Grand Arbre Ylvarë
 // (tronc tressé, racines, visage sculpté dans l'écorce, couronne de feuilles), la fontaine-arbre de la place, les arbres

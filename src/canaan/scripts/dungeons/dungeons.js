@@ -19,6 +19,7 @@
 
   const WALKABLE = t => t === FLOOR || t === ACCENT;
   // Thèmes de la logique : structure et créatures de chaque instance (shared/data/dungeons/), sans leur apparence.
+  /** @type {any[] & { arena?: any }} */
   const THEMES = DUNGEON_LAYOUTS.map((layout, i) => ({ ...layout, ...DUNGEON_ACTORS[i] }));
   THEMES.arena = { ...DUNGEON_ARENA_LAYOUT, mobs: [], bosses: [] };
 

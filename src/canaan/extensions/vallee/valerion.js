@@ -116,6 +116,7 @@
     float(m.x, m.y - 96, '🛡️ ' + tt('Valérion retourne à sa garde.'), '#f6dc98');
   }
   // Chaque coup reçu : le combat commence, le héros compte comme participant ; étourdi, il prend 30 % de plus.
+  /** @this {any} */
   function onHurt(value, hero) {
     const m = this && this.fight ? this : boss();
     if (!m) return value;

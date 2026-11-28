@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Groupe : héros invités de l'aventure (phase 3 du coopératif).
 // Les invités sont enregistrés dans la sauvegarde de l'hôte (heros.invites), 6 au plus, 3 présents à la fois.
 // En attendant le réseau, un invité créé ici est un compagnon local, piloté par une petite IA : il suit l'hôte,

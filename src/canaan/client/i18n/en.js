@@ -9,16 +9,18 @@ import interfaceTexts from './en/interface.js';
 import objetsClasses from './en/objets-classes.js';
 import monde from './en/monde.js';
 import systemes from './en/systemes.js';
-import trefondsHistoire from './en/trefonds-histoire.js';
+import montures from './en/montures.js';
+import trefonds from './en/trefonds.js';
+import histoire from './en/histoire.js';
 import quetes from './en/quetes.js';
-import guildeAventure from './en/guilde-aventure.js';
 
 export default {
   ...interfaceTexts,
   ...objetsClasses,
   ...monde,
   ...systemes,
-  ...trefondsHistoire,
-  ...quetes,
-  ...guildeAventure
+  ...montures,
+  ...trefonds,
+  ...histoire,
+  ...quetes
 };

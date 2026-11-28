@@ -11,7 +11,7 @@
 // les effets de sorts, la roulade et les répliques des personnages (window.CANAAN_SOUND).
 (() => {
   'use strict';
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
   const toggle = document.getElementById('soundToggle');
   // Un curseur par famille de sons (Paramètres → Audio). fx garde son nom d'origine : c'est le volume du combat.
   // Les familles ajoutées après coup reprennent l'ancien volume des effets d'une sauvegarde qui ne les connaît pas.
@@ -1496,7 +1496,7 @@
   toggle.textContent = settings.on ? '🔊 Son' : '🔇 Son';
   // Curseurs de volume : la valeur s'affiche à côté (« 45 % ») et s'applique aussitôt.
   for (const [key, id] of Object.entries(SLIDERS)) {
-    const slider = document.getElementById(id);
+    const slider = /** @type {HTMLInputElement} */ (document.getElementById(id));
     if (!slider) continue;
     const label = slider.parentElement?.querySelector('.volume-value');
     const show = () => label && (label.textContent = slider.value + ' %');

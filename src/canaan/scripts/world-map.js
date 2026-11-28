@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Cartes : la grande carte (touche M), qu'on zoome à la molette ou aux boutons et qu'on fait glisser à la souris, et la
 // mini-carte ronde qui suit le héros de près (molette pour la zoomer). Sur l'île comme en donjon ou en raid.
 // Une image de fond est peinte une fois (4 pixels par case : relief, eaux, arbres, routes, ponts, bâtiments, ferme),

@@ -38,6 +38,7 @@
       hazard: { ...layout.hazard, ...palette.hazard },
       accent: { ...layout.accent, ...palette.accent }
     });
+    /** @type {any[] & { arena?: any }} */
     const THEMES = DUNGEON_LAYOUTS.map((layout, i) => theme(layout, DUNGEON_ACTORS[i], DUNGEON_PALETTES[i]));
     THEMES.arena = theme(DUNGEON_ARENA_LAYOUT, { mobs: [], bosses: [] }, DUNGEON_ARENA_PALETTE);
     // Gradins du colisée en gros pixels, comme le décor de l'île : chaque case est peinte une fois en petit (16 × 16),
@@ -988,11 +989,11 @@
       c.save();
       c.lineCap = 'round';
       c.lineJoin = 'round';
-      for (const [w, col, a] of [
+      for (const [w, col, a] of /** @type {[number, string, number][]} */ ([
         [14, lit ? '#fff2a0' : '#ffe08a', 0.25],
         [6, '#fff6c8', 0.8],
         [2, '#ffffff', 1]
-      ]) {
+      ])) {
         c.globalAlpha = a * (0.85 + 0.15 * Math.sin(time * 0.2));
         c.strokeStyle = col;
         c.lineWidth = w;

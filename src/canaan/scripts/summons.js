@@ -73,6 +73,7 @@
     const k = KINDS[kind],
       // Hors des murs : sinon sous les pieds du maître.
       ok = typeof canWalk !== 'function' || canWalk(x, y),
+      /** @type {CanaanEntity} */
       s = {
         id: ++serial,
         kind,

@@ -480,3 +480,29 @@ test('Modules ES vérifiés par TypeScript : // @ts-check en tête de chaque fic
     assert.match(pkg.scripts.typecheck, new RegExp('src/canaan/' + dir + '/jsconfig\\.json'));
   }
 });
+
+test('Scripts classiques vérifiés par TypeScript : les non vérifiés sont listés, la liste ne fait que raccourcir', () => {
+  // scripts/jsconfig.json vérifie tous les scripts classiques (scripts/ et extensions/) ; un script pas encore propre
+  // commence par // @ts-nocheck et figure dans tests/fixtures/unchecked-scripts.json.
+  const root = path.join(__dirname, '..', 'src', 'canaan');
+  const listed = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'unchecked-scripts.json'), 'utf8')).scripts;
+  const files = ['scripts', 'extensions'].flatMap(dir =>
+    fs
+      .readdirSync(path.join(root, dir), { recursive: true })
+      .filter(f => f.endsWith('.js'))
+      .map(f => dir + '/' + f.split(path.sep).join('/'))
+  );
+  const unchecked = files.filter(f => /^\/\/ @ts-nocheck$/m.test(fs.readFileSync(path.join(root, f), 'utf8').split('\n')[0]));
+  assert.deepEqual(unchecked.filter(f => !listed.includes(f)), [], '// @ts-nocheck sans entrée dans la liste');
+  assert.deepEqual(listed.filter(f => !unchecked.includes(f)), [], 'script vérifié : le retirer de la liste');
+  // Aucune exception ponctuelle : un script est vérifié en entier ou pas du tout.
+  for (const f of files) assert.doesNotMatch(fs.readFileSync(path.join(root, f), 'utf8'), /@ts-(?:ignore|expect-error)/, f);
+  // Le projet TypeScript des scripts est lancé par npm run typecheck, et ses déclarations globales sont à jour.
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  assert.match(pkg.scripts.typecheck, /src\/canaan\/scripts\/jsconfig\.json/);
+  const { spawnSync } = require('node:child_process');
+  const gen = spawnSync(process.execPath, [path.join(__dirname, '..', 'tools', 'script_types.cjs'), '--check'], {
+    encoding: 'utf8'
+  });
+  assert.equal(gen.status, 0, gen.stderr);
+});

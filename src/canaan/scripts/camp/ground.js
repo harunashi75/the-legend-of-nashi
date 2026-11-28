@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Sol du Camp de l'Aurore : ruisseau et mare, fleurs, place pavée, champs (blé, légumes, fruits) et jardin fleuri,
 // peints case par case puis gardés en images. Aucune règle ici : la pose est dans scripts/camp/camp-life.js.
 // render.js appelle CANAAN_CAMP_GROUND.create(outils) une fois, puis use(pose) après chaque pose.

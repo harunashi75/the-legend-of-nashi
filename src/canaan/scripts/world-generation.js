@@ -11,6 +11,7 @@
   }
   // Ordre de progression : chaque biome occupe un secteur de 60° centré sur son angle.
   // Les Plaines (départ) et la Forêt enchantée (fin) sont séparées par une crête rocheuse.
+  /** @type {{ name: string, x: number, y: number, angle: number, t: number, mobs: string[], description: string, lairs?: any[], locked?: boolean, [key: string]: any }[]} */
   const ZONES = [
     {
       name: 'Plaines verdoyantes',
@@ -915,7 +916,7 @@
       return true;
     };
     // Place le rectangle le plus près possible de l'angle et du rayon voulus, sans chevaucher.
-    const placeRect = (w, h, deg, r, m = 2, ok = () => true) => {
+    const placeRect = (w, h, deg, r, m = 2, ok = /** @param {any} rect */ rect => true) => {
       for (let k = 0; k <= 16; k++)
         for (const dd of k ? [deg + k * 5, deg - k * 5] : [deg])
           for (const rr of [r, r - 1, r + 1, r - 2, r - 3, r + 2]) {

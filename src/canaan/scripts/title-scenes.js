@@ -112,6 +112,7 @@
     g.putImageData(img, 0, 0);
   }
   // Peinture de montagnes : face éclairée ou à l'ombre selon la pente, neige au-dessus de snowLine, brume en bas.
+  /** @param {{ lit: any, shade: any, haze: any, light?: number, snow?: any, snowShade?: any, snowLine?: number, fade?: number, bands?: number }} options */
   function mountainPaint({
     lit,
     shade,
