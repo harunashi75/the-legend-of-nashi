@@ -4,6 +4,14 @@ Les changements notables de The Legend of Nashi. Format inspiré de [Keep a Chan
 
 ## [Non publié]
 
+### Sécurité du coopératif
+- **Audit du jeu en ligne** ([docs/SECURITE.md](docs/SECURITE.md)) et nouveaux tests de robustesse (`tests/network-security.test.cjs`) : messages malformés, relais saturé, invité tricheur, hôte malveillant, usurpation, déconnexions.
+- **Corrigé : un message trop gros arrêtait le relais**, et le salon de chacun avec. Seule la connexion fautive est fermée désormais.
+- **Corrigé : un invité pouvait reprendre le héros d’un autre** avec son identifiant, visible de tous. Chaque invité a maintenant une clé secrète, gardée chez lui et exigée par l’hôte (un héros enregistré avant reçoit celle de sa prochaine venue).
+- **Corrigé : un hôte pouvait faire planter la boutique et la banque d’un invité** avec un objet invalide, ou envoyer sa caméra en dehors de la carte. Tout ce que l’invité reçoit est vérifié.
+- Les clés `__proto__` sont retirées des messages dès leur lecture ; le relais limite les connexions (32), le temps pour se présenter (10 s) et les codes de salon faux (5 par connexion).
+- Politique de sécurité du contenu : seuls les scripts du jeu s’exécutent (empreinte de chacun, calculée à l’assemblage), rien n’est chargé du dehors.
+
 ### Outillage (suite)
 - **Lint à zéro** : les 26 avertissements (variables, import et dessin d’icône jamais utilisés, dans le jeu et les tests) sont corrigés, et `npm run lint` (CI comprise) comme `npm run check` échouent désormais au premier avertissement (`--max-warnings 0`).
 - **Dossier de travail allégé** : `npm run build` retire les HTML des versions précédentes à la racine, et `npm run clean` supprime les paquets d’electron-builder (`dist/`, `release/`, `out/`) et ces anciens HTML. Le dépôt git, jamais compacté, passe de 230 Mo à 7 Mo (`git gc`) ; son historique ne contient aucun binaire à purger (cinq anciens HTML de 2 Mo, du temps où il était versionné).

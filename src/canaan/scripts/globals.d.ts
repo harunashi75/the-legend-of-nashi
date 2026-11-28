@@ -117,6 +117,7 @@ declare global {
   var GHOST_CLUES: typeof import('../shared/data/quests.js').GHOST_CLUES;
   var GUARDIANS: typeof import('../shared/data/quests.js').GUARDIANS;
   var GUEST_ID: typeof import('../shared/net/messages.js').GUEST_ID;
+  var GUEST_KEY: typeof import('../shared/net/messages.js').GUEST_KEY;
   var GUEST_TYPES: typeof import('../shared/net/messages.js').GUEST_TYPES;
   var GUILD_BOARD_SIZE: typeof import('../shared/data/guild.js').GUILD_BOARD_SIZE;
   var GUILD_CONTRACTS: typeof import('../shared/data/guild.js').GUILD_CONTRACTS;
@@ -158,7 +159,9 @@ declare global {
   var interpolate: typeof import('../client/i18n/i18n.js').interpolate;
   var isBoundItem: typeof import('../shared/rules/items.js').isBoundItem;
   var isContract: typeof import('../shared/rules/quests.js').isContract;
+  var isGearItem: typeof import('../shared/rules/items.js').isGearItem;
   var isGuestId: typeof import('../shared/net/messages.js').isGuestId;
+  var isGuestKey: typeof import('../shared/net/messages.js').isGuestKey;
   var isOffensiveSkill: typeof import('../shared/rules/classes.js').isOffensiveSkill;
   var isValidSave: typeof import('../shared/save/schema.js').isValidSave;
   var isValidSlot: typeof import('../shared/save/schema.js').isValidSlot;
@@ -190,6 +193,7 @@ declare global {
   var MAGIC_WEAPONS: typeof import('../shared/data/equipment.js').MAGIC_WEAPONS;
   var makeBoundWeapon: typeof import('../shared/rules/items.js').makeBoundWeapon;
   var makeGuestId: typeof import('../shared/net/messages.js').makeGuestId;
+  var makeGuestKey: typeof import('../shared/net/messages.js').makeGuestKey;
   var makeInvitation: typeof import('../shared/net/messages.js').makeInvitation;
   var makeRoomCode: typeof import('../shared/net/messages.js').makeRoomCode;
   var MAX_ITEM_LEVEL: typeof import('../shared/data/stats.js').MAX_ITEM_LEVEL;

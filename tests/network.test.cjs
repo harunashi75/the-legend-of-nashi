@@ -250,7 +250,8 @@ test('Hébergement (application de bureau) : relais sur l’adresse Tailscale, T
  assert.equal(statuses.at(-1).state,'off');
  // Plus aucune trace de Pinggy ni de tunnel ssh dans l'application ni dans le jeu.
  for(const f of ['online/hosting.cjs','online/relay.cjs','online/transports/lan.cjs','online/transports/tailscale.cjs','app/main.js','app/preload.js'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'..',f),'utf8'),/pinggy|ssh/i,f);
- assert.doesNotMatch(source.replace(/Anciens réglages Pinggy[^\n]*\n[^\n]*/,''),/pinggy/i);
+ // Hors politique de sécurité du contenu, dont les empreintes (base64) contiennent n'importe quelles lettres.
+ assert.doesNotMatch(source.replace(/Anciens réglages Pinggy[\s\S]*?CANAAN_PREFERENCES\.write/,'').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/,''),/pinggy/i);
 });
 
 test('Connexion impossible : l’invité voit « Relais injoignable » et quoi vérifier ; l’hôte voit les commandes de son pare-feu',async()=>{

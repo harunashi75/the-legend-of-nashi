@@ -135,14 +135,8 @@
   }
 
   // ---------------------------------------------------------------- Sauvegarde (heros.invites)
-  const validItem = it =>
-    it &&
-    typeof it === 'object' &&
-    !Array.isArray(it) &&
-    Object.hasOwn(gearSlots, it.slot) &&
-    !SECOND_SLOT_OF[it.slot] &&
-    Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
-    Number(it.level ?? it.ilvl ?? 1) > 0;
+  // Équipement bien formé (shared/rules/items.js).
+  const validItem = isGearItem;
   const count = v => (Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0);
   function exportGuests(position) {
     const out = {};
@@ -152,6 +146,8 @@
       out[hero.id] = {
         pseudo: hero.name,
         local: !!hero.local,
+        // Clé secrète du joueur de ce héros (voir CANAAN_NET : seul lui peut le reprendre).
+        ...(hero.netKey ? { key: hero.netKey } : {}),
         color: hero.color,
         look: sanitizeLook(hero.look),
         skins: { owned: [...(hero.skins?.owned || [])] },
@@ -201,6 +197,7 @@
         });
       hero.id = id;
       hero.local = d.local !== false;
+      if (isGuestKey(d.key)) hero.netKey = d.key;
       hero.color = /^#[0-9a-f]{6}$/i.test(d.color)
         ? d.color
         : COLORS[Object.keys(game.guests).length % COLORS.length];

@@ -98,7 +98,7 @@ npm run app      # ouvre la fenêtre sans réassembler
 
 ## Jeu en ligne (online/)
 
-Le coopératif est **hébergé par un joueur** : son jeu simule le monde et garde la sauvegarde, ses amis envoient leurs intentions et affichent ce que l’hôte leur renvoie (`scripts/net.js`, protocole vérifié dans `shared/net/messages.js`). Tout ce qui sert à **se connecter** est rangé dans `online/`, chargé par l’application de bureau (processus principal) :
+Le coopératif est **hébergé par un joueur** : son jeu simule le monde et garde la sauvegarde, ses amis envoient leurs intentions et affichent ce que l’hôte leur renvoie (`scripts/net.js`, protocole vérifié dans `shared/net/messages.js`). Tout ce qui sert à **se connecter** est rangé dans `online/`, chargé par l’application de bureau (processus principal) : Les protections (validation, limites du relais, clé d'invité, politique de sécurité du contenu) et les risques restants sont décrits dans [SECURITE.md](SECURITE.md).
 
 - `online/relay.cjs` : le relais. Il met en relation l’hôte et ses invités par un code de salon et transmet les messages (taille et fréquence limitées), sans rien simuler ni stocker. `npm run relay` le lance seul (port 8787).
 - `online/hosting.cjs` : héberger depuis l’application. Il ouvre le relais chez l’hôte (port 8787, puis 8788 à 8791 si pris), le referme, et renvoie son état au jeu (`net:host-*` dans `app/main.js`). Toute erreur devient un état « error » avec un message pour l’hôte.

@@ -11,6 +11,7 @@
 // qu'avec --extensions. Le build par défaut, celui de la CI, de la release GitHub et de Steam, la retire entièrement
 // du HTML : rien de son contenu n'est livré, la région reste couverte de nuages et fermée.
 'use strict';
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const esbuild = require('esbuild');
@@ -43,6 +44,28 @@ function bundle(entry) {
     absWorkingDir: ROOT
   });
   return result.outputFiles[0].text;
+}
+
+// Politique de sécurité du contenu : seuls les scripts assemblés ici s'exécutent (empreinte SHA-256 de chacun) ; un
+// script glissé dans la page (texte d'un joueur inséré sans échappement, attribut onerror…) est bloqué par le
+// navigateur. Rien n'est chargé du dehors ; le réseau se limite aux WebSockets du coopératif.
+function contentSecurityPolicy(html) {
+  const hashes = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(
+    m => "'sha256-" + crypto.createHash('sha256').update(m[1], 'utf8').digest('base64') + "'"
+  );
+  const policy = [
+    "default-src 'none'",
+    'script-src ' + hashes.join(' '),
+    // Styles en ligne (balises <style> et attributs style des fenêtres) : sans effet sur le code.
+    "style-src 'unsafe-inline'",
+    'img-src data: blob:',
+    'font-src data:',
+    'media-src data: blob:',
+    'connect-src ws: wss:',
+    "base-uri 'none'",
+    "form-action 'none'"
+  ].join('; ');
+  return '<meta http-equiv="Content-Security-Policy" content="' + policy + '"/>';
 }
 
 // Entrées du manifeste, extensions comprises.
@@ -88,6 +111,7 @@ function render({ extensions = false } = {}) {
       () => '<' + tag + ' id="' + id + '"' + attrs + '>\n' + code + '\n</' + tag + '>'
     );
   }
+  html = html.replace('<!-- canaan:csp -->', () => contentSecurityPolicy(html));
   if (html.includes('<!-- canaan:')) throw new Error('Le template contient un module absent du manifeste');
   return html;
 }

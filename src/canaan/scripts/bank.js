@@ -100,14 +100,8 @@
   }
 
   // ---------------------------------------------------------------- Sauvegarde
-  const validItem = it =>
-    it &&
-    typeof it === 'object' &&
-    !Array.isArray(it) &&
-    Object.hasOwn(gearSlots, it.slot) &&
-    !SECOND_SLOT_OF[it.slot] &&
-    Number.isFinite(Number(it.level ?? 1)) &&
-    Number(it.level ?? 1) > 0;
+  // Équipement bien formé (shared/rules/items.js).
+  const validItem = isGearItem;
   // Banque valide : équipements reconnus, piles connues en quantités entières, 500 cases au plus.
   function sanitize(raw) {
     const out = { items: [], stacks: {} };
@@ -254,7 +248,10 @@
     showTooltip,
     remote: () => remote,
     applyRemote(v) {
-      remote = v && Array.isArray(v.items) && v.stacks && typeof v.stacks === 'object' ? v : null;
+      remote =
+        v && Array.isArray(v.items) && v.items.every(isGearItem) && v.stacks && typeof v.stacks === 'object'
+          ? v
+          : null;
       render();
     },
     depositRef: ref => act({ op: 'bank-deposit', ref }),

@@ -3,6 +3,7 @@
 // Module partagé pur (shared/rules) : aucune dépendance au navigateur, au réseau ni aux autres couches.
 // Chaque fonction reçoit ses données en paramètres ; aucune ne lit l'état d'une partie.
 import {
+  ACTIVE_GEAR_SLOTS,
   BOUND_RARITY,
   CLASS_WEAPON_FREE,
   CLASS_WEAPON_UPGRADES,
@@ -11,12 +12,33 @@ import {
   JEWEL_ICON,
   JEWEL_SLOTS,
   RARITY_WEIGHTS,
+  SECOND_SLOT_OF,
   WEAPON_TYPES
 } from '../data/equipment.js';
 import { GEAR_NAMES, RELIC_NAMES, WEAPON_NAMES } from '../data/item-names.js';
 import { MAX_LEVEL } from '../data/stats.js';
 import { clampItemLevel, clampLevel, secondaryRange } from './stats.js';
 /** @typedef {import('../types.js').Item} Item */
+
+// Objet d'équipement bien formé : lu d'une sauvegarde, de la banque ou de la sacoche, ou reçu de l'hôte en ligne.
+// Un objet (pas un tableau), d'un emplacement d'objet connu (la seconde bague porte un objet « ring »), de niveau fini
+// et positif (ou, pour les sauvegardes du schéma 9, d'iLvl). Les autres champs sont lus prudemment par l'affichage.
+/**
+ * @param {unknown} item
+ * @returns {item is Item}
+ */
+export function isGearItem(item) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+  const it = /** @type {Record<string, any>} */ (item),
+    level = Number(it.level ?? it.ilvl ?? 1);
+  return (
+    typeof it.slot === 'string' &&
+    ACTIVE_GEAR_SLOTS.includes(it.slot) &&
+    !SECOND_SLOT_OF[it.slot] &&
+    Number.isFinite(level) &&
+    level > 0
+  );
+}
 
 // Qualité d'un objet ; une qualité absente ou inconnue vaut Commun.
 /**

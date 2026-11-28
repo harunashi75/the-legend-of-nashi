@@ -57,11 +57,17 @@
     corrections: 0
   };
   // ---------------------------------------------------------------- Préférences : identité et relais
+  // Hasard sûr pour la clé d'invité (secrète) ; Math.random si le navigateur n'a pas crypto.
+  const secureRandom = () =>
+    globalThis.crypto?.getRandomValues
+      ? globalThis.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+      : Math.random();
   function settings() {
     const saved = CANAAN_PREFERENCES.read('network', {});
     const id = isGuestId(saved.id) ? saved.id : makeGuestId(Math.random);
     const value = {
       id,
+      key: isGuestKey(saved.key) ? saved.key : makeGuestKey(secureRandom),
       pseudo: cleanPseudo(saved.pseudo || ''),
       // Apparence de son héros quand on rejoint un ami (forme compacte, voir shared/data/looks.js).
       look: encodeLook(typeof saved.look === 'string' ? decodeLook(saved.look) : saved.look),
@@ -69,7 +75,13 @@
       code: normalizeRoomCode(saved.code) || ''
     };
     // Anciens réglages Pinggy : retirés au passage.
-    if (value.id !== saved.id || 'pinggyToken' in saved || 'pinggyHost' in saved || 'pinggyMode' in saved)
+    if (
+      value.id !== saved.id ||
+      value.key !== saved.key ||
+      'pinggyToken' in saved ||
+      'pinggyHost' in saved ||
+      'pinggyMode' in saved
+    )
       CANAAN_PREFERENCES.write('network', value);
     return value;
   }
@@ -235,13 +247,18 @@
     if (String(message.extensions || '') !== canaanExtensionIds().join(','))
       return refuse('Contenu différent : l’hôte et l’invité doivent avoir les mêmes extensions du jeu.');
     if (!isGuestId(message.id)) return refuse('Identifiant d’invité invalide.');
+    if (!isGuestKey(message.key)) return refuse('Clé d’invité invalide : mets le jeu à jour.');
+    let hero = game.guests[message.id];
+    // Un héros n'est repris qu'avec la clé de son joueur (l'identifiant, lui, est connu de tous les invités). Un héros
+    // enregistré avant les clés reçoit celle de sa prochaine venue. Vérifié avant d'éjecter l'ancienne connexion.
+    if (hero?.netKey && hero.netKey !== message.key)
+      return refuse('Ce héros appartient à un autre joueur : choisis-en un autre.');
     // Le même invité se reconnecte alors que l'ancienne connexion n'est pas encore fermée : la nouvelle la remplace.
     for (const [peer, other] of net.peers)
       if (other.id === message.id) {
         send({ t: 'kick', peer, reason: 'Nouvelle connexion de ce héros.' });
         net.peers.delete(peer);
       }
-    let hero = game.guests[message.id];
     const back = !!hero?.away && game.heroes.includes(hero);
     if (!hero) {
       hero = CANAAN_GROUP.createRemote(message.id, cleanPseudo(message.pseudo), {
@@ -257,6 +274,7 @@
     if (!game.heroes.includes(hero) && !CANAAN_GROUP.join(hero.id))
       return refuse('Trois invités sont déjà présents.');
     hero.local = false;
+    hero.netKey = message.key;
     hero.peer = message.peer;
     hero.netBag = null;
     hero.netTrade = null;
@@ -536,6 +554,7 @@
           t: 'join',
           code: room,
           id: me.id,
+          key: me.key,
           pseudo: name,
           look: me.look,
           version: window.CANAAN_VERSION,
@@ -661,7 +680,7 @@
     if (state.quests) CANAAN_QUESTS.applyRemote(state.quests);
     const seen = new Set();
     for (const h of state.heroes) {
-      if (!h || typeof h.id !== 'string') continue;
+      if (!h || typeof h.id !== 'string' || !Number.isFinite(h.x) || !Number.isFinite(h.y)) continue;
       const mine = h.id === net.heroId;
       let hero = mine ? game.hero : net.remote.get(h.id);
       if (!hero) {
@@ -737,27 +756,31 @@
     CANAAN_EXT.apply(state.ext, id => (id === net.heroId ? game.hero : net.remote.get(id) || null));
     // Monstres : même objet d'un instantané à l'autre (animations), créé ou retiré selon l'hôte.
     const old = new Map(game.world.monsters.map(m => [m.k, m]));
-    game.world.monsters = (Array.isArray(state.monsters) ? state.monsters : []).map(s => {
-      const m = old.get(s.k) || { x: s.x, y: s.y };
-      const { x, y, ...rest } = s;
-      // Les drapeaux ne sont envoyés que vrais : absents, ils sont retombés (boss de l'arène qui réapparaît après sa téléportation).
-      for (const key of [
-        'boss',
-        'worldBoss',
-        'elite',
-        'arenaBoss',
-        'hidden',
-        'bossStage',
-        'secretBoss',
-        'holySeal'
-      ])
-        if (!(key in rest)) delete m[key];
-      Object.assign(m, rest);
-      target(m, x, y);
-      return m;
-    });
-    game.world.drops = (state.drops || []).map(d => ({ x: d.x, y: d.y, t: 'or', v: 0, life: 99 }));
-    game.world.projectiles = (state.projectiles || []).map(p => ({
+    game.world.monsters = (Array.isArray(state.monsters) ? state.monsters : [])
+      .filter(s => s && typeof s === 'object' && Number.isFinite(s.x) && Number.isFinite(s.y))
+      .map(s => {
+        const m = old.get(s.k) || { x: s.x, y: s.y };
+        const { x, y, ...rest } = s;
+        // Les drapeaux ne sont envoyés que vrais : absents, ils sont retombés (boss de l'arène qui réapparaît après sa téléportation).
+        for (const key of [
+          'boss',
+          'worldBoss',
+          'elite',
+          'arenaBoss',
+          'hidden',
+          'bossStage',
+          'secretBoss',
+          'holySeal'
+        ])
+          if (!(key in rest)) delete m[key];
+        Object.assign(m, rest);
+        target(m, x, y);
+        return m;
+      });
+    const points = list =>
+      Array.isArray(list) ? list.filter(p => p && Number.isFinite(p.x) && Number.isFinite(p.y)) : [];
+    game.world.drops = points(state.drops).map(d => ({ x: d.x, y: d.y, t: 'or', v: 0, life: 99 }));
+    game.world.projectiles = points(state.projectiles).map(p => ({
       x: p.x,
       y: p.y,
       vx: 0,
@@ -822,8 +845,14 @@
     if (me.live && typeof me.live === 'object') CANAAN_PROF.applyRemote(me.live);
     const bag = me.bag;
     if (bag && Array.isArray(bag.inventory) && bag.equipment && typeof bag.equipment === 'object') {
-      game.hero.inventory = bag.inventory;
-      game.hero.equipment = bag.equipment;
+      // Seuls des objets bien formés entrent dans le sac et sur le héros (le reste ferait planter l'affichage).
+      game.hero.inventory = bag.inventory.filter(isGearItem).slice(0, 200);
+      game.hero.equipment = Object.fromEntries(
+        ACTIVE_GEAR_SLOTS.map(slot => {
+          const it = bag.equipment[slot];
+          return [slot, isGearItem(it) && it.slot === itemSlotOf(slot) ? it : null];
+        })
+      );
       game.hero.satchel = CANAAN_SALVAGE.sanitize(bag.satchel);
       if (Number.isInteger(bag.limit)) game.hero.bagLimit = Math.max(10, Math.min(100, bag.limit));
       if (Number.isInteger(bag.bagLevel)) game.hero.bagLevel = canaanBagLevel({ bagLevel: bag.bagLevel });

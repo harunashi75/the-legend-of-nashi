@@ -291,7 +291,7 @@
     showTooltip,
     applyRemote(v) {
       remote =
-        v && Array.isArray(v.items) && Array.isArray(v.prices) && SHOPS[v.kind]
+        v && Array.isArray(v.items) && Array.isArray(v.prices) && SHOPS[v.kind] && v.items.every(isGearItem)
           ? { kind: v.kind, items: v.items, prices: v.prices }
           : null;
       render();

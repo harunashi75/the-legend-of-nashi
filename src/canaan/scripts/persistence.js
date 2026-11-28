@@ -394,14 +394,8 @@ window.CANAAN_PERSISTENCE = {
     game.hero.succes = CANAAN_ACHIEVEMENTS.sanitize(h.succes);
     game.hero.quetes = sanitizeQuests(h.quetes);
     game.hero.ext = canaanSanitizeExt(h.ext);
-    const validItem = it =>
-      it &&
-      typeof it === 'object' &&
-      !Array.isArray(it) &&
-      Object.hasOwn(gearSlots, it.slot) &&
-      !SECOND_SLOT_OF[it.slot] &&
-      Number.isFinite(Number(it.level ?? it.ilvl ?? 1)) &&
-      Number(it.level ?? it.ilvl ?? 1) > 0;
+    // Équipement bien formé (shared/rules/items.js).
+    const validItem = isGearItem;
     game.hero.inventory = Array.isArray(h.inventory) ? h.inventory.filter(validItem) : [];
     // Ancienne arme de réserve : rangée dans le sac, où elle est rendue en or avec les autres armes (summons.js).
     if (validItem(h.equipment?.weapon2) && h.equipment.weapon2.slot === 'weapon')

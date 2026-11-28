@@ -99,6 +99,27 @@ export function makeGuestId(rng) {
   return id;
 }
 
+// Clé secrète d'un invité : créée une fois par son application et gardée chez lui, envoyée seulement à l'hôte en
+// rejoignant, jamais rediffusée. L'identifiant est public (il figure dans l'état envoyé à tous) ; la clé prouve que
+// celui qui rejoint est bien le joueur de ce héros.
+export const GUEST_KEY = /^[a-z0-9]{32}$/;
+/**
+ * @param {unknown} key
+ * @returns {boolean}
+ */
+export function isGuestKey(key) {
+  return typeof key === 'string' && GUEST_KEY.test(key);
+}
+/**
+ * @param {() => number} rng générateur sûr (crypto) côté jeu
+ * @returns {string}
+ */
+export function makeGuestKey(rng) {
+  let key = '';
+  for (let i = 0; i < 32; i++) key += '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(rng() * 36)];
+  return key;
+}
+
 // Lit un message reçu : JSON objet avec un type connu, taille limitée ; null sinon.
 const TYPES = new Set([
   'host',
@@ -127,7 +148,9 @@ export function parseMessage(text) {
   if (typeof text !== 'string' || text.length > MESSAGE_LIMIT) return null;
   let data;
   try {
-    data = JSON.parse(text);
+    // Une clé « __proto__ » (texte réseau) deviendrait le prototype de l'objet où un système la recopierait
+    // (Object.assign) : elle est retirée dès la lecture, à tous les niveaux.
+    data = JSON.parse(text, (key, value) => (key === '__proto__' ? undefined : value));
   } catch {
     return null;
   }

@@ -15,10 +15,23 @@ const {
 } = require('../src/canaan/shared/net/messages.js');
 
 // rate : messages par seconde permis à un invité ; l'hôte, qui écrit à tous ses invités, en a quatre fois plus.
-function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RATE_LIMIT } = {}) {
+// maxClients : connexions ouvertes en même temps (un relais de salon n'en sert que quelques-unes).
+// joinAttempts : codes de salon faux permis par connexion (on ne devine pas un code en essayant).
+// helloDelay : délai pour se présenter (host ou join) ; une connexion muette n'occupe pas une place indéfiniment.
+function createRelay({
+  port = 8787,
+  host = undefined,
+  log = () => {},
+  rate = RATE_LIMIT,
+  maxClients = 32,
+  joinAttempts = 5,
+  helloDelay = 10000
+} = {}) {
   const rooms = new Map();
   let peerCounter = 0;
   const wss = new WebSocketServer({ port, host, maxPayload: MESSAGE_LIMIT });
+  // Erreur du serveur après l'ouverture : notée, jamais fatale (celle de l'ouverture rejette ready).
+  wss.on('error', error => log('relais : ' + (error?.message || error)));
   const send = (socket, message) => {
     if (socket && socket.readyState === 1)
       socket.send(typeof message === 'string' ? message : JSON.stringify(message));
@@ -41,8 +54,19 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
     log('salon fermé ' + code);
   }
   wss.on('connection', socket => {
-    socket.meta = { role: null, code: null, peer: null, window: 0, count: 0, alive: true };
+    socket.meta = { role: null, code: null, peer: null, window: 0, count: 0, alive: true, failures: 0 };
+    if (wss.clients.size > maxClients) return socket.close(1013, 'relais complet');
+    const hello = setTimeout(() => {
+      if (!socket.meta.role) socket.close(1008, 'aucune présentation');
+    }, helloDelay);
+    hello.unref?.();
     socket.on('pong', () => (socket.meta.alive = true));
+    // Message démesuré ou trame invalide : ws signale une erreur sur la connexion. Sans écouteur, elle arrêterait tout
+    // le relais (et le salon de chacun) ; seule la connexion fautive est fermée.
+    socket.on('error', error => {
+      log('connexion fermée : ' + (error?.code || error?.message || error));
+      socket.terminate();
+    });
     socket.on('message', (buffer, isBinary) => {
       const meta = socket.meta,
         now = Date.now();
@@ -66,7 +90,11 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
         } else if (message.t === 'join') {
           const code = normalizeRoomCode(message.code),
             room = code && rooms.get(code);
-          if (!room) return send(socket, { t: 'error', reason: 'Salon introuvable : vérifie le code.' });
+          if (!room) {
+            send(socket, { t: 'error', reason: 'Salon introuvable : vérifie le code.' });
+            if (++meta.failures >= joinAttempts) socket.close(1008, 'trop de codes faux');
+            return;
+          }
           if (room.guests.size >= ROOM_GUESTS)
             return send(socket, { t: 'error', reason: 'Salon complet (trois invités).' });
           const peer = 'p' + ++peerCounter;
@@ -98,6 +126,7 @@ function createRelay({ port = 8787, host = undefined, log = () => {}, rate = RAT
       }
     });
     socket.on('close', () => {
+      clearTimeout(hello);
       const meta = socket.meta,
         room = rooms.get(meta.code);
       if (!room) return;
